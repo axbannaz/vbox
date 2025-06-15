@@ -45,7 +45,7 @@
 /** Invalid instruction decoder function. */
 FNIEMOP_DEF_1(iemDecodeA64_Invalid, uint32_t, uOpcode)
 {
-    Log(("Invalid instruction %%#x at %%x\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));
+    Log(("Invalid instruction %#x at %x\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64)); RT_NOREF(uOpcode);
     IEMOP_RAISE_INVALID_OPCODE_RET();
 }
 
