@@ -38,6 +38,7 @@
 #include "iprt/armv8.h"
 
 #include "IEMMc.h"
+#include "IEMInline-armv8.h"
 
 #include "IEMAllIntprA64Tables-armv8.h"
 #include "IEMAllInstrA64Impl.h"
