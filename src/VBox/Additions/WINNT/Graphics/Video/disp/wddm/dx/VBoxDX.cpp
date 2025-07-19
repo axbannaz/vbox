@@ -2787,6 +2787,7 @@ void vboxDXResourceUnmap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UIN
     if (SUCCEEDED(hr))
     {
         if (   pResource->DDIMap == D3D10_DDI_MAP_WRITE
+            || pResource->DDIMap == D3D10_DDI_MAP_READWRITE
             || pResource->DDIMap == D3D10_DDI_MAP_WRITE_DISCARD
             || pResource->DDIMap == D3D10_DDI_MAP_WRITE_NOOVERWRITE)
         {
