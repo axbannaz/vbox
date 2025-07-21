@@ -11,6 +11,10 @@
 #include <iostream>
 #include <utility>
 
+#ifdef VBOX
+# include <iprt/log.h>
+#endif
+
 #include "log.hpp"
 
 #include "../util_env.hpp"
@@ -24,29 +28,54 @@ Logger::Logger(const std::string &fileName)
 Logger::~Logger() {}
 
 void Logger::trace(const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(LogLevel::Trace, message);
+#else
+  Log(("%s\n", message.c_str()));
+#endif
 }
 
 void Logger::debug(const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(LogLevel::Debug, message);
+#else
+  Log(("%s\n", message.c_str()));
+#endif
 }
 
 void Logger::info(const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(LogLevel::Info, message);
+#else
+  LogRel(("%s\n", message.c_str()));
+#endif
 }
 
 void Logger::warn(const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(LogLevel::Warn, message);
+#else
+  LogRel(("%s\n", message.c_str()));
+#endif
 }
 
 void Logger::err(const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(LogLevel::Error, message);
+#else
+  LogRel(("%s\n", message.c_str()));
+#endif
 }
 
 void Logger::log(LogLevel level, const std::string &message) {
+#ifndef VBOX
   s_instance.emitMsg(level, message);
+#else
+    Log(("%s\n", message.c_str()));
+#endif
 }
 
+#ifndef VBOX
 void Logger::emitMsg(LogLevel level, const std::string &message) {
   if (level >= m_minLevel) {
     std::lock_guard<dxmt::mutex> lock(m_mutex);
@@ -91,8 +120,10 @@ void Logger::emitMsg(LogLevel level, const std::string &message) {
     }
   }
 }
+#endif
 
 std::string Logger::getFileName(const std::string &base) {
+#ifndef VBOX
   std::string path = env::getEnvVar("DXMT_LOG_PATH");
 
   if (path == "none")
@@ -108,9 +139,13 @@ std::string Logger::getFileName(const std::string &base) {
   std::string exeName = env::getExeBaseName();
   path += exeName + "_" + base;
   return path;
+#else
+  return "";
+#endif
 }
 
 LogLevel Logger::getMinLogLevel() {
+#ifndef VBOX
   const std::array<std::pair<const char *, LogLevel>, 6> logLevels = {{
       {"trace", LogLevel::Trace},
       {"debug", LogLevel::Debug},
@@ -126,6 +161,7 @@ LogLevel Logger::getMinLogLevel() {
     if (logLevelStr == pair.first)
       return pair.second;
   }
+#endif
 
   return LogLevel::Info;
 }

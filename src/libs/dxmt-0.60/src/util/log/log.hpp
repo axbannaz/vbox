@@ -48,7 +48,11 @@ public:
   static void err(const std::string &message);
   static void log(LogLevel level, const std::string &message);
 
+#ifndef VBOX
   static LogLevel logLevel() { return s_instance.m_minLevel; }
+#else
+  static LogLevel logLevel() { return LogLevel::Info; }
+#endif
 
 private:
   static Logger s_instance;
@@ -62,7 +66,9 @@ private:
   bool m_initialized = false;
   PFN_wineLogOutput m_wineLogOutput = nullptr;
 
+#ifndef VBOX
   void emitMsg(LogLevel level, const std::string &message);
+#endif
 
   std::string getFileName(const std::string &base);
 
