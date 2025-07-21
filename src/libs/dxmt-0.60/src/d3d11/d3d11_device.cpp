@@ -462,6 +462,28 @@ public:
               this, pQueryDesc));
       return S_OK;
     }
+#ifdef VBOX
+    case D3D11_QUERY_SO_STATISTICS:
+    case D3D11_QUERY_SO_STATISTICS_STREAM0:
+    case D3D11_QUERY_SO_STATISTICS_STREAM1:
+    case D3D11_QUERY_SO_STATISTICS_STREAM2:
+    case D3D11_QUERY_SO_STATISTICS_STREAM3: {
+      *ppQuery =
+          ref(new MTLD3D11DummyQuery<D3D11_QUERY_DATA_SO_STATISTICS>(
+              this, pQueryDesc));
+      return S_OK;
+    }
+    case D3D11_QUERY_SO_OVERFLOW_PREDICATE:
+    case D3D11_QUERY_SO_OVERFLOW_PREDICATE_STREAM0:
+    case D3D11_QUERY_SO_OVERFLOW_PREDICATE_STREAM1:
+    case D3D11_QUERY_SO_OVERFLOW_PREDICATE_STREAM2:
+    case D3D11_QUERY_SO_OVERFLOW_PREDICATE_STREAM3: {
+      *ppQuery =
+          ref(new MTLD3D11DummyQuery<BOOL>(
+              this, pQueryDesc));
+      return S_OK;
+    }
+#endif
     default:
       ERR("CreateQuery: query type not implemented: ", pQueryDesc->Query);
       return E_NOTIMPL;
