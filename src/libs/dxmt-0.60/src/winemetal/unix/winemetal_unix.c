@@ -2,7 +2,9 @@
 #import <Cocoa/Cocoa.h>
 #import <ColorSync/ColorSync.h>
 #import <Metal/Metal.h>
-#import <MetalFX/MetalFX.h>
+#ifndef VBOX
+# import <MetalFX/MetalFX.h>
+#endif
 #import <QuartzCore/QuartzCore.h>
 #include "objc/objc-runtime.h"
 #define WINEMETAL_API
@@ -1233,6 +1235,7 @@ static const int SIGNALS[] = {
 #endif
 };
 
+#ifndef VBOX
 static NTSTATUS
 _MTLDevice_newTemporalScaler(void *obj) {
   struct unixcall_mtldevice_newfxtemporalscaler *params = obj;
@@ -1323,6 +1326,31 @@ _MTLCommandBuffer_encodeSpatialScale(void *obj) {
   [scaler encodeToCommandBuffer:cmdbuf];
   return STATUS_SUCCESS;
 }
+#else
+static NTSTATUS
+_MTLDevice_newTemporalScaler(void *obj) {
+  struct unixcall_mtldevice_newfxspatialscaler *params = obj;
+  params->ret = 0;
+  return STATUS_SUCCESS;
+}
+
+static NTSTATUS
+_MTLDevice_newSpatialScaler(void *obj) {
+  struct unixcall_mtldevice_newfxspatialscaler *params = obj;
+  params->ret = 0;
+  return STATUS_SUCCESS;
+}
+
+static NTSTATUS
+_MTLCommandBuffer_encodeTemporalScale(void *obj) {
+  return STATUS_SUCCESS;
+}
+
+static NTSTATUS
+_MTLCommandBuffer_encodeSpatialScale(void *obj) {
+  return STATUS_SUCCESS;
+}
+#endif
 
 static NTSTATUS
 _NSString_string(void *obj) {
@@ -1388,14 +1416,22 @@ _MetalLayer_nextDrawable(void *obj) {
 static NTSTATUS
 _MTLDevice_supportsFXSpatialScaler(void *obj) {
   struct unixcall_generic_obj_uint64_ret *params = obj;
+#ifndef VBOX
   params->ret = [MTLFXSpatialScalerDescriptor supportsDevice:(id<MTLDevice>)params->handle];
+#else
+  params->ret = false;
+#endif
   return STATUS_SUCCESS;
 }
 
 static NTSTATUS
 _MTLDevice_supportsFXTemporalScaler(void *obj) {
   struct unixcall_generic_obj_uint64_ret *params = obj;
+#ifndef VBOX
   params->ret = [MTLFXTemporalScalerDescriptor supportsDevice:(id<MTLDevice>)params->handle];
+#else
+  params->ret = false;
+#endif
   return STATUS_SUCCESS;
 }
 
