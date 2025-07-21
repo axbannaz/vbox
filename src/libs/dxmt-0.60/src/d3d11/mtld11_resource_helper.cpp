@@ -573,6 +573,19 @@ GetLinearTextureLayout(
   }
   uint32_t w, h, d;
   GetMipmapSize(&Desc, level, &w, &h, &d);
+#ifdef VBOX
+  if (metal_format.Flag & MTL_DXGI_FORMAT_DEPTH_PLANER)
+  {
+    D3D11_ASSERT(w != 0 && h != 0);
+    auto w_phisical = align(w, 4);
+    auto h_phisical = align(h, 4);
+    auto aligned_bytes_per_row = metal_format.BytesPerTexel * w_phisical >> 2;
+    BytesPerRow = aligned_bytes_per_row; // 1 row of block is 4 row of pixel
+    BytesPerImage = aligned_bytes_per_row * h_phisical >> 2;
+    BytesPerSlice = aligned_bytes_per_row * h_phisical >> 2;
+    return S_OK;
+  }
+#endif
   auto bytes_per_row_unaligned = metal_format.BytesPerTexel * w;
   auto alignment = Aligned ? metal.minimumLinearTextureAlignmentForPixelFormat(metal_format.PixelFormat): 1;
   auto aligned_bytes_per_row = align(bytes_per_row_unaligned, alignment);
@@ -615,6 +628,16 @@ GetLinearTextureLayout(
     BytesPerSlice = aligned_bytes_per_row * h_phisical >> 2;
     return S_OK;
   }
+#ifdef VBOX
+  if (metal_format.Flag & MTL_DXGI_FORMAT_DEPTH_PLANER)
+  {
+    auto aligned_bytes_per_row = metal_format.BytesPerTexel * w;
+    BytesPerRow = aligned_bytes_per_row; // 1 row of block is 4 row of pixel
+    BytesPerImage = aligned_bytes_per_row * h;
+    BytesPerSlice = aligned_bytes_per_row * h;
+    return S_OK;
+  }
+#endif
   auto bytes_per_row_unaligned = metal_format.BytesPerTexel * w;
   auto alignment = Aligned ? metal.minimumLinearTextureAlignmentForPixelFormat(metal_format.PixelFormat): 1;
   auto aligned_bytes_per_row = align(bytes_per_row_unaligned, alignment);

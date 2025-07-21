@@ -868,6 +868,9 @@ MTLQueryDXGIFormat(WMT::Device device, uint32_t format, MTL_DXGI_FORMAT_DESC &de
     } else {
       description.Flag |= MTL_DXGI_FORMAT_EMULATED_D24;
       description.PixelFormat = WMTPixelFormatDepth32Float_Stencil8;
+#ifdef VBOX
+      description.BytesPerTexel = 5;
+#endif
     }
     description.Flag = MTL_DXGI_FORMAT_TYPELESS | MTL_DXGI_FORMAT_DEPTH_PLANER | MTL_DXGI_FORMAT_STENCIL_PLANER;
     break;
@@ -880,6 +883,9 @@ MTLQueryDXGIFormat(WMT::Device device, uint32_t format, MTL_DXGI_FORMAT_DESC &de
     } else {
       description.Flag |= MTL_DXGI_FORMAT_EMULATED_D24;
       description.PixelFormat = WMTPixelFormatDepth32Float_Stencil8;
+#ifdef VBOX
+      description.BytesPerTexel = 5;
+#endif
     }
     description.Flag = MTL_DXGI_FORMAT_DEPTH_PLANER | MTL_DXGI_FORMAT_STENCIL_PLANER;
     break;
@@ -892,6 +898,9 @@ MTLQueryDXGIFormat(WMT::Device device, uint32_t format, MTL_DXGI_FORMAT_DESC &de
     } else {
       description.Flag |= MTL_DXGI_FORMAT_EMULATED_D24;
       description.PixelFormat = WMTPixelFormatDepth32Float_Stencil8;
+#ifdef VBOX
+      description.BytesPerTexel = 5;
+#endif
     }
     description.Flag = MTL_DXGI_FORMAT_DEPTH_PLANER;
     break;
