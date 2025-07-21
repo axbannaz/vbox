@@ -23,6 +23,9 @@ uint8_t hash_64_to_6(uint64_t value, uint64_t seed) {
 }
 
 template <unsigned k>
+#ifdef VBOX
+typename
+#endif
 PartitionedBloomFilter64<k>::Key
 PartitionedBloomFilter64<k>::generateNewKey(uint64_t seq) {
   Key ret;
