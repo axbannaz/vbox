@@ -172,10 +172,6 @@
         <translation>%s: Bulut istemci nesnesi bulunamadı</translation>
     </message>
     <message>
-        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Export to Cloud isn&apos;t supported for more than one VM instance.</source>
         <translation>Bulut&apos;a aktarma, birden fazla VM örneği için desteklenmiyor.</translation>
     </message>
@@ -204,10 +200,6 @@
         <translation>Geçersiz ortam depolama biçimi</translation>
     </message>
     <message>
-        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Exporting to disk image &apos;%s&apos;</source>
         <translation>&apos;%s&apos; disk kalıbı dışa aktarılıyor</translation>
     </message>
@@ -234,18 +226,6 @@
     <message>
         <source>RTVfsFsStrmAdd failed for &apos;%s&apos; (%Rrc)</source>
         <translation>&apos;%s&apos; için RTVfsFsStrmAdd başarısız oldu (%Rrc)</translation>
-    </message>
-    <message>
-        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Cannot interpret appliance without reading it first (call read() before interpret())</source>
@@ -890,6 +870,26 @@
     <message>
         <source>RAM size missing</source>
         <translation>Bellek boyutu eksik</translation>
+    </message>
+    <message>
+        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3532,10 +3532,6 @@ Misafirin sunduğu: %s</translation>
         <translation>&quot;%s&quot; misafir dosyası bulunamadı</translation>
     </message>
     <message>
-        <source>Path to guest file &quot;%s&quot; not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Host name &quot;%s&quot;, not found</source>
         <translation>&quot;%s&quot; anamakine adı bulunamadı</translation>
     </message>
@@ -3632,6 +3628,10 @@ Misafirin sunduğu: %s</translation>
         <translation>
             <numerusform>&quot;%s&quot; dosyasına (%RU64 karşılığında) %zu bayt yazma başarısız oldu: %Rrc</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Path to guest file &quot;%s&quot; not found</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4416,12 +4416,6 @@ Misafirin sunduğu: %s</translation>
         </translation>
     </message>
     <message numerus="yes">
-        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
         <source>Writing %RU32 bytes to host file &quot;%s&quot; failed: %Rrc</source>
         <translation>
             <numerusform>&quot;%s&quot; anamakine dosyasına %RU32 bayt yazma başarısız oldu: %Rrc</numerusform>
@@ -4446,10 +4440,6 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>Host destination &quot;%s&quot; is a symbolic link</source>
         <translation>Anamakine hedefi &quot;%s&quot; sembolik bir bağlantıdır</translation>
-    </message>
-    <message>
-        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Copying to guest file &quot;%s&quot; failed (%RU64/%RU64 bytes transferred)</source>
@@ -4556,6 +4546,16 @@ Misafirin sunduğu: %s</translation>
 </source>
         <translation>&apos;%s&apos; görevi %Rrc ile başarısız oldu, ancak ilerleme hala beklemede. Lütfen bu hatayı bildirin!
 </translation>
+    </message>
+    <message numerus="yes">
+        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4827,10 +4827,6 @@ Misafirin sunduğu: %s</translation>
         <translation>&quot;%s&quot; güncelleme dosyasını misafir üzerinde çalıştırma %d çıkış koduyla başarısız oldu</translation>
     </message>
     <message>
-        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Files were installed, but user services were not reloaded automatically. Please consider rebooting the guest</source>
         <translation>Dosyalar yüklendi ancak kullanıcı hizmetleri otomatik olarak yeniden yüklenemedi. Lütfen misafiri yeniden başlatmayı düşünün</translation>
     </message>
@@ -4925,6 +4921,10 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>Installation has timed out</source>
         <translation type="vanished">Kurulum zaman aşımına uğradı</translation>
+    </message>
+    <message>
+        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6091,6 +6091,10 @@ Misafirin sunduğu: %s</translation>
         <source>Creating differencing hard disk for &apos;%s&apos;</source>
         <translation>&apos;%s&apos; için ayrımlama sabit diski oluşturuluyor</translation>
     </message>
+    <message>
+        <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Machine::ClientToken</name>
@@ -6397,6 +6401,42 @@ Misafirin sunduğu: %s</translation>
         <translation type="vanished">%d. boş işlemi atla...</translation>
     </message>
     <message>
+        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
+        <translation>Geri alma senaryosu: yeni hedef klasör silinemiyor.</translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; ...</source>
+        <translation>&apos;%ls&apos; ortamı taşınıyor ...</translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; back...</source>
+        <translation>&apos;%ls&apos; ortamı geri taşınıyor...</translation>
+    </message>
+    <message>
+        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
+        <translation>&apos;%s&apos; klasörü mevcut değil (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
+        <translation>&apos;%s&apos; klasörü açılamadı (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Deleting file %s...</source>
+        <translation>&apos;%s&apos; dosyası siliniyor...</translation>
+    </message>
+    <message>
+        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
+        <translation>&apos;%s&apos; dosyası silinemedi (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Could not get the size of file &apos;%s&apos;: %Rrc</source>
+        <translation type="vanished">&apos;%s&apos; dosyasının boyutu alınamadı: %Rrc</translation>
+    </message>
+    <message>
+        <source>Could not get file size of &apos;%s&apos;: %Rrc</source>
+        <translation type="vanished">&apos;%s&apos; dosya boyutu alınamadı: %Rrc</translation>
+    </message>
+    <message>
         <source>Unable to determine free space of target destination (&apos;%s&apos;): %Rrc</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6441,44 +6481,8 @@ Misafirin sunduğu: %s</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
-        <translation>Geri alma senaryosu: yeni hedef klasör silinemiyor.</translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; ...</source>
-        <translation>&apos;%ls&apos; ortamı taşınıyor ...</translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; back...</source>
-        <translation>&apos;%ls&apos; ortamı geri taşınıyor...</translation>
-    </message>
-    <message>
-        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
-        <translation>&apos;%s&apos; klasörü mevcut değil (%Rrc)</translation>
-    </message>
-    <message>
-        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
-        <translation>&apos;%s&apos; klasörü açılamadı (%Rrc)</translation>
-    </message>
-    <message>
-        <source>Deleting file %s...</source>
-        <translation>&apos;%s&apos; dosyası siliniyor...</translation>
-    </message>
-    <message>
-        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
-        <translation>&apos;%s&apos; dosyası silinemedi (%Rrc)</translation>
-    </message>
-    <message>
         <source>Could not get size of file &apos;%s&apos;: %Rrc</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not get the size of file &apos;%s&apos;: %Rrc</source>
-        <translation type="vanished">&apos;%s&apos; dosyasının boyutu alınamadı: %Rrc</translation>
-    </message>
-    <message>
-        <source>Could not get file size of &apos;%s&apos;: %Rrc</source>
-        <translation type="vanished">&apos;%s&apos; dosya boyutu alınamadı: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -6642,10 +6646,6 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>Medium &apos;%s&apos; is already in the correct location</source>
         <translation>&apos;%s&apos; ortamı zaten doğru konumda</translation>
-    </message>
-    <message>
-        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>At least the VM &apos;%s&apos; to whom this medium &apos;%s&apos; attached has currently an opened session. Stop all VMs before relocating this medium</source>
@@ -7137,6 +7137,10 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>Could not prepare disk images for encryption (%Rrc): %s</source>
         <translation>Disk kalıpları şifreleme için hazırlanamadı (%Rrc): %s</translation>
+    </message>
+    <message>
+        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -7959,10 +7963,6 @@ Misafirin sunduğu: %s</translation>
         <translation>&apos;%s&apos; adlı depolama denetleyicisi zaten var</translation>
     </message>
     <message>
-        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid controller type %d</source>
         <translation>Geçersiz denetleyici türü %d</translation>
     </message>
@@ -7973,6 +7973,10 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>The port and/or device parameter are out of range: port=%d (must be in range [0, %d]), device=%d (must be in range [0, %d])</source>
         <translation>Bağlantı noktası ve/veya aygıt parametresi aralığın dışında: bağlantı noktası=%d ([0, %d] aralığında olmak zorundadır), aygıt=%d ([0, %d] aralığında olmak zorundadır)</translation>
+    </message>
+    <message>
+        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8304,10 +8308,6 @@ Misafirin sunduğu: %s</translation>
         <translation>Kullandığımız &apos;makine&apos; - lütfen bunu yapmayın</translation>
     </message>
     <message>
-        <source>Product key is required for this kind of OS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not locate the installation ISO file &apos;%s&apos;</source>
         <translation>Kurulum ISO dosyası &apos;%s&apos; bulunamadı</translation>
     </message>
@@ -8426,6 +8426,10 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>Base path must be absolute</source>
         <translation>Temel yol kesin olmak zorundadır</translation>
+    </message>
+    <message>
+        <source>Product key is required for this kind of OS</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8861,10 +8865,6 @@ Misafirin sunduğu: %s</translation>
         <translation>Aygıt türü SabitDisk, DVD veya Disket %d olmak zorundadır</translation>
     </message>
     <message>
-        <source>Shared folder named &apos;%s&apos; already exists</source>
-        <translation type="unfinished">&apos;%s&apos; adlı paylaşılan klasör zaten var</translation>
-    </message>
-    <message>
         <source>Could not set extra data because someone refused the requested change of &apos;%s&apos; to &apos;%s&apos;%s%ls</source>
         <translation>Birisi istenen &apos;%s&apos; değişikliğini &apos;%s&apos;%s%ls olarak reddettiğinden fazladan veri ayarlanamadı</translation>
     </message>
@@ -9001,18 +9001,6 @@ Misafirin sunduğu: %s</translation>
         <translation>Verilen GUID&apos;ye sahip ilerleme nesnesi bulunamadı</translation>
     </message>
     <message>
-        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ńo extension pack providing a cryptographic support module could be found</source>
         <translation>Şifreleme destek modülü sağlayan genişletme paketi bulunamadı</translation>
     </message>
@@ -9039,6 +9027,22 @@ Misafirin sunduğu: %s</translation>
     <message>
         <source>The cryptographic support module is in use and can&apos;t be unloaded</source>
         <translation>Şifreleme destek modülü kullanımda ve kaldırılamaz</translation>
+    </message>
+    <message>
+        <source>Shared folder named &apos;%s&apos; already exists</source>
+        <translation type="unfinished">&apos;%s&apos; adlı paylaşılan klasör zaten var</translation>
+    </message>
+    <message>
+        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

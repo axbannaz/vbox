@@ -168,10 +168,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Export to Cloud isn&apos;t supported for more than one VM instance.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -200,10 +196,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Exporting to disk image &apos;%s&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -229,18 +221,6 @@
     </message>
     <message>
         <source>RTVfsFsStrmAdd failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -852,6 +832,26 @@
     </message>
     <message>
         <source>RAM size missing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -3381,10 +3381,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Path to guest file &quot;%s&quot; not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Host name &quot;%s&quot;, not found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3479,6 +3475,10 @@ Guest offers: %s</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Path to guest file &quot;%s&quot; not found</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4219,10 +4219,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Copying to guest file &quot;%s&quot; failed (%RU64/%RU64 bytes transferred)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4237,12 +4233,6 @@ Guest offers: %s</source>
     <message>
         <source>Guest file lookup failed</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message numerus="yes">
-        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
     </message>
     <message>
         <source>Guest file lookup for &quot;%s&quot; failed: %Rrc</source>
@@ -4311,6 +4301,16 @@ Guest offers: %s</source>
     <message>
         <source>Task &apos;%s&apos; failed with %Rrc, but progress is still pending. Please report this bug!
 </source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4527,10 +4527,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Files were installed, but user services were not reloaded automatically. Please consider rebooting the guest</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4604,6 +4600,10 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Error while copying file &quot;%s&quot; to &quot;%s&quot; on the guest: %Rrc</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5667,6 +5667,10 @@ Guest offers: %s</source>
         <source>Creating differencing hard disk for &apos;%s&apos;</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Machine::ClientToken</name>
@@ -5912,6 +5916,34 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; ...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; back...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Deleting file %s...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Unable to determine free space of target destination (&apos;%s&apos;): %Rrc</source>
         <translation type="unfinished"></translation>
     </message>
@@ -5953,34 +5985,6 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Skipping empty operation %d...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; ...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; back...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Deleting file %s...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6148,10 +6152,6 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Medium &apos;%s&apos; is already in the correct location</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -6640,6 +6640,10 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Could not prepare disk images for encryption (%Rrc): %s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7436,10 +7440,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid controller type %d</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7449,6 +7449,10 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>The port and/or device parameter are out of range: port=%d (must be in range [0, %d]), device=%d (must be in range [0, %d])</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7765,10 +7769,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Product key is required for this kind of OS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not locate the installation ISO file &apos;%s&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7878,6 +7878,10 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Base path must be absolute</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Product key is required for this kind of OS</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -8287,10 +8291,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Shared folder named &apos;%s&apos; already exists</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not set extra data because someone refused the requested change of &apos;%s&apos; to &apos;%s&apos;%s%ls</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8427,18 +8427,6 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ńo extension pack providing a cryptographic support module could be found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -8464,6 +8452,22 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>The cryptographic support module is in use and can&apos;t be unloaded</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Shared folder named &apos;%s&apos; already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

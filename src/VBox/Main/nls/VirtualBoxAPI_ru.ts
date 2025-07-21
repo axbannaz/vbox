@@ -172,10 +172,6 @@
         <translation>%s: Объект клиента облака не найден</translation>
     </message>
     <message>
-        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Export to Cloud isn&apos;t supported for more than one VM instance.</source>
         <translation>Экспорт в облако для более чем одного экземпляра ВМ не поддерживается.</translation>
     </message>
@@ -204,10 +200,6 @@
         <translation>Недопустимый формат образа носителя</translation>
     </message>
     <message>
-        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Exporting to disk image &apos;%s&apos;</source>
         <translation>Экспорт в образ диска &apos;%s&apos;</translation>
     </message>
@@ -234,18 +226,6 @@
     <message>
         <source>RTVfsFsStrmAdd failed for &apos;%s&apos; (%Rrc)</source>
         <translation>RTVfsFsStrmAdd завершился с ошибкой при добавлении &apos;%s&apos; (%Rrc)</translation>
-    </message>
-    <message>
-        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Cannot interpret appliance without reading it first (call read() before interpret())</source>
@@ -900,6 +880,26 @@
     <message>
         <source>RAM size missing</source>
         <translation>Отсутствует размер RAM</translation>
+    </message>
+    <message>
+        <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3548,10 +3548,6 @@ Guest offers: %s</source>
         <translation>Файл гостевой ОС &quot;%s&quot; не найден</translation>
     </message>
     <message>
-        <source>Path to guest file &quot;%s&quot; not found</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Host name &quot;%s&quot;, not found</source>
         <translation>Хост с именем &quot;%s&quot; не найден</translation>
     </message>
@@ -3654,6 +3650,10 @@ Guest offers: %s</source>
             <numerusform>Не удалось записать %zu байта в файл &quot;%s&quot; (с позиции %RU64): %Rrc</numerusform>
             <numerusform>Не удалось записать %zu байт в файл &quot;%s&quot; (с позиции %RU64): %Rrc</numerusform>
         </translation>
+    </message>
+    <message>
+        <source>Path to guest file &quot;%s&quot; not found</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4444,14 +4444,6 @@ Guest offers: %s</source>
         </translation>
     </message>
     <message numerus="yes">
-        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-        </translation>
-    </message>
-    <message numerus="yes">
         <source>Writing %RU32 bytes to host file &quot;%s&quot; failed: %Rrc</source>
         <translation>
             <numerusform>Не удалось записать %RU32 байт @ %RU64 в файл хоста &quot;%s&quot;: %Rrc</numerusform>
@@ -4478,10 +4470,6 @@ Guest offers: %s</source>
     <message>
         <source>Host destination &quot;%s&quot; is a symbolic link</source>
         <translation>Объект назначения в основной ОС &quot;%s&quot; является ссылкой</translation>
-    </message>
-    <message>
-        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Copying to guest file &quot;%s&quot; failed (%RU64/%RU64 bytes transferred)</source>
@@ -4588,6 +4576,18 @@ Guest offers: %s</source>
 </source>
         <translation>Задача &apos;%s&apos; провалена с ошибкой %Rrc, но прогресс всё ещё продолжается. Пожалуйста, сообщите об ошибке разработчикам!
 </translation>
+    </message>
+    <message numerus="yes">
+        <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -4851,10 +4851,6 @@ Guest offers: %s</source>
         <translation type="vanished">Ошибка во время запуска файла обновления &quot;%s&quot; в гостевой ОС: %Rrc</translation>
     </message>
     <message>
-        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Files were installed, but user services were not reloaded automatically. Please consider rebooting the guest</source>
         <translation>Файлы были установлены, но сервисы пользователя не были автоматически перезапущены. Пожалуйста, перезагрузите гостевую ОС</translation>
     </message>
@@ -4941,6 +4937,10 @@ Guest offers: %s</source>
     <message>
         <source>Installation was canceled</source>
         <translation type="vanished">Установка отменена</translation>
+    </message>
+    <message>
+        <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6113,6 +6113,10 @@ Guest offers: %s</source>
         <source>Creating differencing hard disk for &apos;%s&apos;</source>
         <translation>Создание разностного жесткого диска для &apos;%s&apos;</translation>
     </message>
+    <message>
+        <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>Machine::ClientToken</name>
@@ -6419,6 +6423,42 @@ Guest offers: %s</source>
         <translation type="vanished">Пропус пустой операции %d...</translation>
     </message>
     <message>
+        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
+        <translation>Сценарий отката: невозможно удалить новую папку назначения.</translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; ...</source>
+        <translation>Перемещение носителя &apos;%ls&apos;...</translation>
+    </message>
+    <message>
+        <source>Moving medium &apos;%ls&apos; back...</source>
+        <translation>Возвращение носителя &apos;%ls&apos;...</translation>
+    </message>
+    <message>
+        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
+        <translation>Папка &apos;%s&apos; не существует (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
+        <translation>Невозможно открыть папку &apos;%s&apos; (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Deleting file %s...</source>
+        <translation>Удаление файла %s...</translation>
+    </message>
+    <message>
+        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
+        <translation>Невозможно удалить файл &apos;%s&apos; (%Rrc)</translation>
+    </message>
+    <message>
+        <source>Could not get the size of file &apos;%s&apos;: %Rrc</source>
+        <translation type="vanished">Невозможно получить размер файла &apos;%s&apos;: %Rrc</translation>
+    </message>
+    <message>
+        <source>Could not get file size of &apos;%s&apos;: %Rrc</source>
+        <translation type="vanished">Невозможно получить размер &apos;%s&apos;: %Rrc</translation>
+    </message>
+    <message>
         <source>Unable to determine free space of target destination (&apos;%s&apos;): %Rrc</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6463,44 +6503,8 @@ Guest offers: %s</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Rollback scenario: can&apos;t delete new destination folder.</source>
-        <translation>Сценарий отката: невозможно удалить новую папку назначения.</translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; ...</source>
-        <translation>Перемещение носителя &apos;%ls&apos;...</translation>
-    </message>
-    <message>
-        <source>Moving medium &apos;%ls&apos; back...</source>
-        <translation>Возвращение носителя &apos;%ls&apos;...</translation>
-    </message>
-    <message>
-        <source>Folder &apos;%s&apos; doesn&apos;t exist (%Rrc)</source>
-        <translation>Папка &apos;%s&apos; не существует (%Rrc)</translation>
-    </message>
-    <message>
-        <source>Could not open folder &apos;%s&apos; (%Rrc)</source>
-        <translation>Невозможно открыть папку &apos;%s&apos; (%Rrc)</translation>
-    </message>
-    <message>
-        <source>Deleting file %s...</source>
-        <translation>Удаление файла %s...</translation>
-    </message>
-    <message>
-        <source>Could not delete file &apos;%s&apos; (%Rrc)</source>
-        <translation>Невозможно удалить файл &apos;%s&apos; (%Rrc)</translation>
-    </message>
-    <message>
         <source>Could not get size of file &apos;%s&apos;: %Rrc</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Could not get the size of file &apos;%s&apos;: %Rrc</source>
-        <translation type="vanished">Невозможно получить размер файла &apos;%s&apos;: %Rrc</translation>
-    </message>
-    <message>
-        <source>Could not get file size of &apos;%s&apos;: %Rrc</source>
-        <translation type="vanished">Невозможно получить размер &apos;%s&apos;: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -6668,10 +6672,6 @@ Guest offers: %s</source>
     <message>
         <source>Medium &apos;%s&apos; is already in the correct location</source>
         <translation>Носитель &apos;%s&apos; уже в правильном месте</translation>
-    </message>
-    <message>
-        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>At least the VM &apos;%s&apos; to whom this medium &apos;%s&apos; attached has currently an opened session. Stop all VMs before relocating this medium</source>
@@ -7176,6 +7176,10 @@ Guest offers: %s</source>
     <message>
         <source>Could not prepare disk images for encryption (%Rrc): %s</source>
         <translation>Невозможно подготовить дисковые образы для шифрования (%Rrc): %s</translation>
+    </message>
+    <message>
+        <source>Failed to get machine list &apos;%s&apos; is attached to</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8006,10 +8010,6 @@ Guest offers: %s</source>
         <translation>Контроллер с именем &apos;%s&apos; уже существует</translation>
     </message>
     <message>
-        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid controller type %d</source>
         <translation>Недопустимый тип контроллера %d</translation>
     </message>
@@ -8020,6 +8020,10 @@ Guest offers: %s</source>
     <message>
         <source>The port and/or device parameter are out of range: port=%d (must be in range [0, %d]), device=%d (must be in range [0, %d])</source>
         <translation>Параметр порта и/или устройства вышел за границы диапазона: порт=%d (должен быть в диапазоне [0, %d]), устройство=%d (должно быть в диапазоне [0, %d])</translation>
+    </message>
+    <message>
+        <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8355,10 +8359,6 @@ Guest offers: %s</source>
         <translation>Машина изменилась пока мы ее использовали - пожалуйста, не делайте так</translation>
     </message>
     <message>
-        <source>Product key is required for this kind of OS</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Could not locate the installation ISO file &apos;%s&apos;</source>
         <translation>Невозможно определить местоположение установочного ISO файла &apos;%s&apos;</translation>
     </message>
@@ -8477,6 +8477,10 @@ Guest offers: %s</source>
     <message>
         <source>Base path must be absolute</source>
         <translation>Базовый путь должен быть абсолютным</translation>
+    </message>
+    <message>
+        <source>Product key is required for this kind of OS</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -8916,10 +8920,6 @@ Guest offers: %s</source>
         <translation>Тип устройства должен быть Жёсткий, Оптический или Гибкий диск %d</translation>
     </message>
     <message>
-        <source>Shared folder named &apos;%s&apos; already exists</source>
-        <translation type="unfinished">Общая папка с именем &apos;%s&apos; уже существует</translation>
-    </message>
-    <message>
         <source>Could not set extra data because someone refused the requested change of &apos;%s&apos; to &apos;%s&apos;%s%ls</source>
         <translation>Невозможно установить экстра данные, потому что кто-то отклонил запрошенное изменение &apos;%s&apos; в &apos;%s&apos;%s%ls</translation>
     </message>
@@ -9056,18 +9056,6 @@ Guest offers: %s</source>
         <translation>Объект прогресса с данным GUID не найден</translation>
     </message>
     <message>
-        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Ńo extension pack providing a cryptographic support module could be found</source>
         <translation>Не обнаружен пакет расширения, предоставляющий модуль криптографической поддержки</translation>
     </message>
@@ -9094,6 +9082,22 @@ Guest offers: %s</source>
     <message>
         <source>The cryptographic support module is in use and can&apos;t be unloaded</source>
         <translation>Модуль криптографической поддержки используется и не может быть выгружен</translation>
+    </message>
+    <message>
+        <source>Shared folder named &apos;%s&apos; already exists</source>
+        <translation type="unfinished">Общая папка с именем &apos;%s&apos; уже существует</translation>
+    </message>
+    <message>
+        <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
