@@ -64,6 +64,16 @@ static const char *const g_apszGitsDiagDesc[] =
     GITSDIAG_DESC(CmdQueue_Basic_Unknown_Cmd),
     GITSDIAG_DESC(CmdQueue_Basic_Invalid_PhysAddr),
 
+    /* Command: DISCARD. */
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_CpuId_OutOfRange),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_DevId_OutOfRange),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_Dte_Rd_Failed),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_Dte_Unmapped),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_EventId_OutOfRange),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_Ite_Invalid),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_Ite_Rd_Failed),
+    GITSDIAG_DESC(CmdQueue_Cmd_Discard_Ite_Unmapped),
+
     /* Command: INVALL. */
     GITSDIAG_DESC(CmdQueue_Cmd_Invall_Cte_Unmapped),
     GITSDIAG_DESC(CmdQueue_Cmd_Invall_IcId_OutOfRange),
@@ -574,7 +584,7 @@ static bool gitstLpiCacheLookup(PGITSDEV pGitsDev, uint16_t uDevId, uint16_t uEv
      *
      * See ARM GIC spec. 5.2.10 "Restrictions for INTID mapping rules".
      */
-    uint64_t const uDevIdEventId = RT_MAKE_U64(uDevId, uEventId);
+    uint32_t const uDevIdEventId = RT_MAKE_U32(uDevId, uEventId);
     uint8_t const  cEntries      = pGitsDev->cLpiMap;
     Assert(cEntries < RT_ELEMENTS(pLpiMap->uDevIdEventId));
     for (uint8_t i = 0; i < cEntries; i++)
@@ -604,7 +614,7 @@ static bool gitstLpiCacheLookup(PGITSDEV pGitsDev, uint16_t uDevId, uint16_t uEv
  * @param   pGitsDev        The GIC ITS state.
  * @param   pLpiMapEntry    The LPI map entry to add.
  * @remarks The caller must ensure the fields in the entry are valid.
-*/
+ */
 static void gitsLpiCacheAdd(PGITSDEV pGitsDev, PGITSLPIMAPENTRY pLpiMapEntry)
 {
     PGITSLPIMAP     pLpiMap  = &pGitsDev->LpiMap;
@@ -620,8 +630,54 @@ static void gitsLpiCacheAdd(PGITSDEV pGitsDev, PGITSLPIMAPENTRY pLpiMapEntry)
     pGitsDev->idxLpiMap = (pGitsDev->idxLpiMap + 1) % cCapacity;
     if (pGitsDev->cLpiMap < cCapacity)
         ++pGitsDev->cLpiMap;
-
     STAM_COUNTER_INC(&pGitsDev->StatLpiCacheAdd);
+}
+
+
+/**
+ * Invalidates an entry that matches the device ID/event ID combination.
+ *
+ * @param   pGitsDev    The GIC ITS state.
+ * @param   uDevId      The device ID.
+ * @param   uEventId    The event ID.
+ * @remarks This does not invalidate multiple entries that may match the device
+ *          ID/event ID combination because our lookup always only returns the
+ *          first matching entry.
+ */
+static void gitsLpiCacheInvalidateOne(PGITSDEV pGitsDev, uint16_t uDevId, uint16_t uEventId)
+{
+    uint64_t const uDevIdEventId = RT_MAKE_U32(uDevId, uEventId);
+    uint8_t const  cEntries      = pGitsDev->cLpiMap;
+    PGITSLPIMAP    pLpiMap       = &pGitsDev->LpiMap;
+    for (uint8_t i = 0; i < cEntries; i++)
+    {
+        if (pLpiMap->uDevIdEventId[i].u == uDevIdEventId)
+        {
+            uint8_t const idxLast = pGitsDev->idxLpiMap;
+            if (idxLast == cEntries)
+            {
+                /* The cache is not full, swap the last entry with this one. */
+                pLpiMap->uDevIdEventId[i].u = pLpiMap->uDevIdEventId[idxLast].u;
+                pLpiMap->uIntId[i]          = pLpiMap->uIntId[idxLast];
+                pLpiMap->uIcId[i]           = pLpiMap->uIcId[idxLast];
+                pLpiMap->idCpu[i]           = pLpiMap->idCpu[idxLast];
+                --pGitsDev->idxLpiMap;
+            }
+            else
+            {
+                /* The cache is full, clear the current entry and mark it as the next-free index. */
+                Assert(idxLast < cEntries);
+                pLpiMap->uDevIdEventId[i].u = 0;
+                pLpiMap->uIntId[i]          = 0;
+                pLpiMap->uIcId[i]           = 0;
+                pLpiMap->idCpu[i]           = NIL_VMCPUID;
+                pGitsDev->idxLpiMap = i;
+            }
+            --pGitsDev->cLpiMap;
+            break;
+        }
+    }
+    STAM_COUNTER_INC(&pGitsDev->StatLpiCacheInvOne);
 }
 
 
@@ -632,9 +688,17 @@ static void gitsLpiCacheAdd(PGITSDEV pGitsDev, PGITSLPIMAPENTRY pLpiMapEntry)
  */
 DECLHIDDEN(void) gitsLpiCacheInvalidateAll(PGITSDEV pGitsDev)
 {
-    RT_ZERO(pGitsDev->LpiMap);
+    PGITSLPIMAP pLpiMap = &pGitsDev->LpiMap;
+    for (uint8_t i = 0; i < RT_ELEMENTS(pGitsDev->LpiMap.uDevIdEventId); i++)
+    {
+        pLpiMap->uDevIdEventId[i].u = 0;
+        pLpiMap->uIntId[i]          = 0;
+        pLpiMap->uIcId[i]           = 0;
+        pLpiMap->idCpu[i]           = NIL_VMCPUID;
+    }
     pGitsDev->idxLpiMap = 0;
     pGitsDev->cLpiMap   = 0;
+    STAM_COUNTER_INC(&pGitsDev->StatLpiCacheInvAll);
 }
 
 
@@ -961,7 +1025,7 @@ DECL_HIDDEN_CALLBACK(void) gitsR3DbgInfo(PCGITSDEV pGitsDev, PCDBGFINFOHLP pHlp)
 
 
 /**
- * MAPTI and MAPI command workers.
+ * MAPTI and MAPI command worker.
  *
  * @param   pDevIns     The device instance.
  * @param   pGitsDev    The GIC ITS state.
@@ -975,38 +1039,30 @@ DECL_HIDDEN_CALLBACK(void) gitsR3DbgInfo(PCGITSDEV pGitsDev, PCDBGFINFOHLP pHlp)
 static void gitsR3CmdMapIntr(PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId, uint16_t uIntId,
                              uint16_t uIcId, bool fMapti)
 {
-#define GITS_CMD_QUEUE_SET_ERR_RET(a_enmDiagSuffix) \
+#define GITS_CMD_QUEUE_SET_ERR(a_enmDiagSuffix) \
     do \
     { \
         gitsCmdQueueSetError(pDevIns, pGitsDev, \
                              fMapti ? kGitsDiag_CmdQueue_Cmd_ ## Mapti_ ## a_enmDiagSuffix \
                                     : kGitsDiag_CmdQueue_Cmd_ ## Mapi_  ## a_enmDiagSuffix, false /* fStall */); \
-        return; \
     } while (0)
 
-    /* Validate device ID. */
     if (uDevId <= (uint32_t)GITS_DEV_ID_LAST)
     {
-        /* Validate ICID. */
         if (uIcId < RT_ELEMENTS(pGitsDev->aCtes))
         {
-            /* Validate LPI INTID. */
             if (GIC_IS_INTR_LPI(uIntId))
             {
-                /* Read the device-table entry. */
                 GITSDTE uDte = 0;
                 int rc = gitsDteRead(pDevIns, pGitsDev, uDevId, &uDte);
                 if (RT_SUCCESS(rc))
                 {
-                    /* Check that the device ID mapping is valid. */
                     bool const fDteValid = RT_BF_GET(uDte, GITS_BF_DTE_VALID);
                     if (fDteValid)
                     {
-                        /* Check that the event ID (which is the index) is within range. */
                         uint32_t const cEntries = RT_BIT_32(RT_BF_GET(uDte, GITS_BF_DTE_ITT_RANGE) + 1);
                         if (uEventId < cEntries)
                         {
-                            /* Write the interrupt-translation entry mapping event ID with INTID and ICID. */
                             GITSITE const uIte = RT_BF_MAKE(GITS_BF_ITE_ICID,    uIcId)
                                                | RT_BF_MAKE(GITS_BF_ITE_INTID,   uIntId)
                                                | RT_BF_MAKE(GITS_BF_ITE_IS_PHYS, 1)
@@ -1015,26 +1071,108 @@ static void gitsR3CmdMapIntr(PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDe
                             rc = gitsIteWrite(pDevIns, uDte, uEventId, uIte);
                             if (RT_SUCCESS(rc))
                                 return;
-                            GITS_CMD_QUEUE_SET_ERR_RET(Ite_Wr_Failed);
+                            GITS_CMD_QUEUE_SET_ERR(Ite_Wr_Failed);
                         }
                         else
-                            GITS_CMD_QUEUE_SET_ERR_RET(EventId_OutOfRange);
+                            GITS_CMD_QUEUE_SET_ERR(EventId_OutOfRange);
                     }
                     else
-                        GITS_CMD_QUEUE_SET_ERR_RET(DevId_Unmapped);
+                        GITS_CMD_QUEUE_SET_ERR(DevId_Unmapped);
                 }
                 else
-                    GITS_CMD_QUEUE_SET_ERR_RET(Dte_Rd_Failed);
+                    GITS_CMD_QUEUE_SET_ERR(Dte_Rd_Failed);
             }
             else
-                GITS_CMD_QUEUE_SET_ERR_RET(PhysLpi_OutOfRange);
+                GITS_CMD_QUEUE_SET_ERR(PhysLpi_OutOfRange);
         }
         else
-            GITS_CMD_QUEUE_SET_ERR_RET(IcId_OutOfRange);
+            GITS_CMD_QUEUE_SET_ERR(IcId_OutOfRange);
     }
     else
-        GITS_CMD_QUEUE_SET_ERR_RET(DevId_OutOfRange);
-#undef GITS_CMD_QUEUE_SET_ERR_RET
+        GITS_CMD_QUEUE_SET_ERR(DevId_OutOfRange);
+
+#undef GITS_CMD_QUEUE_SET_ERR
+}
+
+
+/**
+ * DISCARD command worker.
+ *
+ * @param   pVM         The cross context VM state.
+ * @param   pDevIns     The device instance.
+ * @param   pGitsDev    The GIC ITS state.
+ * @param   uDevId      The device ID (full 32-bits as issued in the command).
+ * @param   uEventId    The event ID (full 32-bits as issued in the command).
+ */
+static void gitsR3CmdMapDiscard(PCVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId)
+{
+#define GITS_CMD_QUEUE_SET_ERR(a_enmDiag)           gitsCmdQueueSetError(pDevIns, pGitsDev, a_enmDiag, false /* fStall */)
+
+    if (uDevId <= (uint32_t)GITS_DEV_ID_LAST)
+    {
+        GITSDTE uDte = 0;
+        int rc = gitsDteRead(pDevIns, pGitsDev, uDevId, &uDte);
+        if (RT_SUCCESS(rc))
+        {
+            bool const fDteValid = RT_BF_GET(uDte, GITS_BF_DTE_VALID);
+            if (fDteValid)
+            {
+                uint32_t const cEntries = RT_BIT_32(RT_BF_GET(uDte, GITS_BF_DTE_ITT_RANGE) + 1);
+                if (uEventId < cEntries)
+                {
+                    GITSITE uIte = 0;
+                    rc = gitsIteRead(pDevIns, uDte, uEventId, &uIte);
+                    if (RT_SUCCESS(rc))
+                    {
+                        bool const fIteValid  = RT_BF_GET(uIte, GITS_BF_ITE_VALID);
+                        if (fIteValid)
+                        {
+                            uint16_t const uIntId = RT_BF_GET(uIte, GITS_BF_ITE_INTID);
+                            uint16_t const uIcId  = RT_BF_GET(uIte, GITS_BF_ITE_ICID);
+                            bool const fPhysIntr  = RT_BF_GET(uIte, GITS_BF_ITE_IS_PHYS);
+                            bool const fLpiValid  = GIC_IS_INTR_LPI(uIntId);
+                            if (   fLpiValid
+                                && fPhysIntr
+                                && uIcId < RT_ELEMENTS(pGitsDev->aCtes))
+                            {
+                                Assert(!RT_BF_GET(pGitsDev->uTypeReg.u, GITS_BF_CTRL_REG_TYPER_PTA));
+                                VMCPUID const idCpu = pGitsDev->aCtes[uIcId];
+                                if (idCpu < pVM->cCpus)
+                                {
+                                    PVMCPUCC pVCpu = pVM->CTX_SUFF(apCpus)[idCpu];
+                                    gitsLpiCacheInvalidateOne(pGitsDev, uDevId, uEventId);
+                                    gicReDistSetLpi(pDevIns, pVCpu, uIntId, false /* fAsserted */);
+
+                                    uIte = 0;
+                                    rc = gitsIteWrite(pDevIns, uDte, uEventId, uIte);
+                                    if (RT_SUCCESS(rc))
+                                        return;
+                                }
+                                else
+                                    GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_CpuId_OutOfRange);
+                            }
+                            else
+                                GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_Ite_Invalid);
+                        }
+                        else
+                            GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_Ite_Unmapped);
+                    }
+                    else
+                        GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_Ite_Rd_Failed);
+                }
+                else
+                    GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_EventId_OutOfRange);
+            }
+            else
+                GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_Dte_Unmapped);
+        }
+        else
+            GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_Dte_Rd_Failed);
+    }
+    else
+        GITS_CMD_QUEUE_SET_ERR(kGitsDiag_CmdQueue_Cmd_Discard_DevId_OutOfRange);
+
+#undef GITS_CMD_QUEUE_SET_ERR
 }
 
 
@@ -1271,12 +1409,8 @@ DECLHIDDEN(int) gitsR3CmdQueueProcess(PCVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV p
                         {
                             uint32_t const uDevId   = RT_BF_GET(pCmd->au64[0].u, GITS_BF_CMD_DISCARD_DW0_DEV_ID);
                             uint32_t const uEventId = RT_BF_GET(pCmd->au64[1].u, GITS_BF_CMD_DISCARD_DW1_EVENT_ID);
-
                             GIC_CRIT_SECT_ENTER(pDevIns);
-                            /** @todo Translate event specified by eventID and device-ID similar to what
-                             *        we've done in gitsLpiSet. */
-                            RT_NOREF(uDevId);
-                            RT_NOREF(uEventId);
+                            gitsR3CmdMapDiscard(pVM, pDevIns, pGitsDev, uDevId, uEventId);
                             GIC_CRIT_SECT_LEAVE(pDevIns);
                             STAM_COUNTER_INC(&pGitsDev->StatCmdDiscard);
                             break;
@@ -1387,12 +1521,12 @@ DECLHIDDEN(void) gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, ui
                     /* Check if the interrupt ID is within range. */
                     uint16_t const uIntId     = RT_BF_GET(uIte, GITS_BF_ITE_INTID);
                     uint16_t const uIcId      = RT_BF_GET(uIte, GITS_BF_ITE_ICID);
-                    bool     const fIsPhys    = RT_BF_GET(uIte, GITS_BF_ITE_IS_PHYS);
+                    bool     const fPhysIntr  = RT_BF_GET(uIte, GITS_BF_ITE_IS_PHYS);
                     bool     const fIteValid  = RT_BF_GET(uIte, GITS_BF_ITE_VALID);
-                    bool const     fIsLpi     = GIC_IS_INTR_LPI(uIntId);
+                    bool const     fLpiValid  = GIC_IS_INTR_LPI(uIntId);
                     if (   fIteValid
-                        && fIsLpi
-                        && fIsPhys)
+                        && fLpiValid
+                        && fPhysIntr)
                     {
                         /* Check if the interrupt collection ID is valid. */
                         if (uIcId < RT_ELEMENTS(pGitsDev->aCtes))
@@ -1422,8 +1556,8 @@ DECLHIDDEN(void) gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, ui
                             AssertMsgFailed(("ICID out-of-bounds (uIcId=%#RU16 uIte=%#RX64)\n", uIcId, uIte));
                     }
                     else
-                        AssertMsgFailed(("LPI invalid (uDte=%#RX64 uIte=%#RX64 uIntId=%RU16 fIsPhys=%RTbool IteValid=%RTbool)\n",
-                                         uDte, uIte, uIntId, fIsPhys, fIteValid));
+                        AssertMsgFailed(("LPI invalid (uDte=%#RX64 uIte=%#RX64 uIntId=%RU16 PhysIntr=%RTbool IteValid=%RTbool LpiValid=%RTbool)\n",
+                                         uDte, uIte, uIntId, fPhysIntr, fIteValid, fLpiValid));
                 }
                 else
                     AssertMsgFailed(("Failed to read the ITE (uDevId=%#RX32 uEventId=%#RX32 rc=%Rrc)\n", uDevId, uEventId, rc));

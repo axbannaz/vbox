@@ -127,6 +127,16 @@ typedef enum GITSDIAG
     kGitsDiag_CmdQueue_Basic_Unknown_Cmd,
     kGitsDiag_CmdQueue_Basic_Invalid_PhysAddr,
 
+    /* Command: DISCARD. */
+    kGitsDiag_CmdQueue_Cmd_Discard_CpuId_OutOfRange,
+    kGitsDiag_CmdQueue_Cmd_Discard_DevId_OutOfRange,
+    kGitsDiag_CmdQueue_Cmd_Discard_Dte_Rd_Failed,
+    kGitsDiag_CmdQueue_Cmd_Discard_Dte_Unmapped,
+    kGitsDiag_CmdQueue_Cmd_Discard_EventId_OutOfRange,
+    kGitsDiag_CmdQueue_Cmd_Discard_Ite_Invalid,
+    kGitsDiag_CmdQueue_Cmd_Discard_Ite_Rd_Failed,
+    kGitsDiag_CmdQueue_Cmd_Discard_Ite_Unmapped,
+
     /* Command: INVALL. */
     kGitsDiag_CmdQueue_Cmd_Invall_Cte_Unmapped,
     kGitsDiag_CmdQueue_Cmd_Invall_IcId_OutOfRange,
@@ -308,6 +318,8 @@ typedef struct GITSDEV
     STAMCOUNTER             StatLpiCacheHit;
     STAMCOUNTER             StatLpiCacheMiss;
     STAMCOUNTER             StatLpiCacheAdd;
+    STAMCOUNTER             StatLpiCacheInvOne;
+    STAMCOUNTER             StatLpiCacheInvAll;
     /** @} */
 #endif
 } GITSDEV;
