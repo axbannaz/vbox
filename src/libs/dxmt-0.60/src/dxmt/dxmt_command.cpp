@@ -203,10 +203,20 @@ ClearRenderTargetContext::begin(Rc<Texture> texture, TextureViewKey view) {
   setvp.type = WMTRenderCommandSetViewport;
   setvp.viewport = {0.0, 0.0, (double)width, (double)height, 0.0, 1.0};
 
+#ifdef VBOX
+  if (dsv_flag)
+  {
+    auto &setdsso = ctx_.encodeRenderCommand<wmtcmd_render_setdsso>();
+    setdsso.type = WMTRenderCommandSetDSSO;
+    setdsso.dsso = depth_write_state_.handle;
+    setdsso.stencil_ref = 0;
+  }
+#else
   auto &setdsso = ctx_.encodeRenderCommand<wmtcmd_render_setdsso>();
   setdsso.type = WMTRenderCommandSetDSSO;
   setdsso.dsso = dsv_flag ? depth_write_state_.handle : obj_handle_t{};
   setdsso.stencil_ref = 0;
+#endif
 
   clearing_texture_ = std::move(texture);
   clearing_texture_view_ = view;
