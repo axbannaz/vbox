@@ -65,6 +65,9 @@ void handle_signature_vs(
   };
 
   switch (Inst.m_OpCode) {
+#ifdef VBOX
+  case D3D10_SB_OPCODE_DCL_INPUT_SIV:
+#endif
   case D3D10_SB_OPCODE_DCL_INPUT_SGV: {
     unsigned reg = Inst.m_Operands[0].m_Index[0].m_RegIndex;
     auto mask = Inst.m_Operands[0].m_WriteMask >> 4;
@@ -374,6 +377,11 @@ void handle_signature_ps(
     case microsoft::D3D10_SB_NAME_PRIMITIVE_ID:
       assigned_index = func_signature.DefineInput(InputPrimitiveID{});
       break;
+#ifdef VBOX
+    case microsoft::D3D10_SB_NAME_POSITION:
+      assigned_index = func_signature.DefineInput(InputPosition{ .interpolation = interpolation});
+      break;
+#endif
     default:
       assert(0 && "Unexpected/unhandled input system value");
       break;
