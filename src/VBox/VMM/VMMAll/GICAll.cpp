@@ -62,12 +62,9 @@
 *********************************************************************************************************************************/
 #define LOG_GROUP LOG_GROUP_DEV_GIC
 #include "GICInternal.h"
-#include <VBox/vmm/pdmgic.h>
-#include <VBox/vmm/pdmdev.h>
-#include <VBox/vmm/pdmapi.h>
 #include <VBox/vmm/vmcc.h>
-#include <VBox/vmm/vmm.h>
 #include <VBox/vmm/vmcpuset.h>
+#include <VBox/vmm/pdmapi.h>        /* PDMR3HasLoadedState */
 
 
 /*********************************************************************************************************************************

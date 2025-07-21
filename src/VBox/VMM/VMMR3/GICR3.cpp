@@ -32,13 +32,7 @@
 #define LOG_GROUP LOG_GROUP_DEV_GIC
 #include <VBox/log.h>
 #include "GICInternal.h"
-#include <VBox/vmm/cpum.h>
-#include <VBox/vmm/hm.h>
-#include <VBox/vmm/mm.h>
-#include <VBox/vmm/ssm.h>
 #include <VBox/vmm/vm.h>
-
-#include <iprt/armv8.h>
 #include <iprt/mem.h>
 
 

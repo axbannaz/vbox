@@ -1409,6 +1409,7 @@ DECLHIDDEN(int) gitsR3CmdQueueProcess(PCVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV p
 
                         case GITS_CMD_ID_DISCARD:
                         {
+                            /* Clear the pending state for the LPI translated from the device ID and event ID. */
                             uint32_t const uDevId   = RT_BF_GET(pCmd->au64[0].u, GITS_BF_CMD_DISCARD_DW0_DEV_ID);
                             uint32_t const uEventId = RT_BF_GET(pCmd->au64[1].u, GITS_BF_CMD_DISCARD_DW1_EVENT_ID);
                             GIC_CRIT_SECT_ENTER(pDevIns);
