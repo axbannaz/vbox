@@ -3887,8 +3887,12 @@ static DECLCALLBACK(int) vmsvga3dBackQueryCaps(PVGASTATECC pThisCC, SVGA3dDevCap
         *pu32Val = VBSVGA3D_CAP_3D;
         if (pState->pBackend->dxDevice.pVideoDevice)
             *pu32Val |= VBSVGA3D_CAP_VIDEO;
+#if !defined(VBOX_WITH_DXVK)
+        /* D3D11_RASTERIZER_DESC1::ForcedSampleCount does not work with dxvk (at least up to 2.6.2).
+         * Therefore only 11.0 level can be supported in the guest. */
         if (FeatureLevel >= D3D_FEATURE_LEVEL_11_1)
             *pu32Val |= VBSVGA3D_CAP_RASTERIZER_STATE_V2;
+#endif
         break;
 
     case SVGA3D_DEVCAP_MAX_LIGHTS:
