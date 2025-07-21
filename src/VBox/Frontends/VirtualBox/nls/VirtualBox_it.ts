@@ -10151,12 +10151,12 @@
         <translation>Impossibile modificare il parametro della tastiera.</translation>
     </message>
     <message>
-        <source>Failed to change mouse parameter.</source>
-        <translation type="vanished">Impossibile modificare il parametro del mouse.</translation>
-    </message>
-    <message>
         <source>Failed to change VSD parameter.</source>
         <translation>Impossibile modificare il parametro VSD.</translation>
+    </message>
+    <message>
+        <source>Don&apos;t show again</source>
+        <translation>Non mostrare più</translation>
     </message>
     <message>
         <source>&lt;p&gt;Are you sure you want to discard the saved state of the following virtual machines?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;This operation is equivalent to resetting or powering off the machine without doing a proper shut down of the guest OS.&lt;/p&gt;</source>
@@ -10189,10 +10189,6 @@
     </message>
     <message>
         <source>Delete the virtual machine files.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Don&apos;t show again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -10437,14 +10433,6 @@
     <message>
         <source>Selects an ISO image to be attached to the virtual machine or used in unattended install.</source>
         <translation type="vanished">Seleziona un&apos;immagine ISO da collegare alla macchina virtuale o da utilizzare nell&apos;installazione automatica.</translation>
-    </message>
-    <message>
-        <source>Invalid guest machine name</source>
-        <translation type="vanished">Nome della macchina virtuale non valido</translation>
-    </message>
-    <message>
-        <source>Guest machine name is valid</source>
-        <translation type="vanished">Il nome della macchina guest è valido</translation>
     </message>
     <message>
         <source>&amp;Subtype:</source>
@@ -14214,10 +14202,6 @@
         <translation type="vanished">Prossimo controllo:</translation>
     </message>
     <message>
-        <source>Check for:</source>
-        <translation type="vanished">Controlla la presenza di:</translation>
-    </message>
-    <message>
         <source>&amp;Stable Release Versions</source>
         <translation>Ver&amp;sioni finali stabili</translation>
     </message>
@@ -16563,6 +16547,18 @@
     <message>
         <source>Lists chosen configuration of the guest system.</source>
         <translation>Elenca la configurazione scelta del sistema guest.</translation>
+    </message>
+    <message>
+        <source>Guest machine name cannot be empty</source>
+        <translation type="vanished">Il nome della macchina guest non può essere vuoto</translation>
+    </message>
+    <message>
+        <source>Guest machine name is valid</source>
+        <translation type="vanished">Il nome della macchina guest è valido</translation>
+    </message>
+    <message>
+        <source>Guest machine path is not unique</source>
+        <translation type="vanished">Il percorso della macchina guest non è univoco</translation>
     </message>
     <message>
         <source>&amp;Product Key</source>

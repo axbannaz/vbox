@@ -10160,12 +10160,12 @@
         <translation>Не удалось изменить параметр клавиатуры.</translation>
     </message>
     <message>
-        <source>Failed to change mouse parameter.</source>
-        <translation type="vanished">Не удалось изменить параметр мыши.</translation>
-    </message>
-    <message>
         <source>Failed to change VSD parameter.</source>
         <translation>Не удалось изменить параметр VSD.</translation>
+    </message>
+    <message>
+        <source>Don&apos;t show again</source>
+        <translation>Больше не показывать</translation>
     </message>
     <message>
         <source>&lt;p&gt;Are you sure you want to discard the saved state of the following virtual machines?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;This operation is equivalent to resetting or powering off the machine without doing a proper shut down of the guest OS.&lt;/p&gt;</source>
@@ -10198,10 +10198,6 @@
     </message>
     <message>
         <source>Delete the virtual machine files.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Don&apos;t show again</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -10446,14 +10442,6 @@
     <message>
         <source>Selects an ISO image to be attached to the virtual machine or used in unattended install.</source>
         <translation type="vanished">Определяет ISO образ, подключенный к виртуальной машине или используемый для автоматической установки.</translation>
-    </message>
-    <message>
-        <source>Invalid guest machine name</source>
-        <translation type="vanished">Неверное имя гостевой машины</translation>
-    </message>
-    <message>
-        <source>Guest machine name is valid</source>
-        <translation type="vanished">Имя гостевой машины корректно</translation>
     </message>
     <message>
         <source>&amp;Subtype:</source>
@@ -14236,10 +14224,6 @@
         <translation type="vanished">Следующая проверка:</translation>
     </message>
     <message>
-        <source>Check for:</source>
-        <translation type="vanished">Искать:</translation>
-    </message>
-    <message>
         <source>&amp;Stable Release Versions</source>
         <translation>&amp;Стабильные релизные версии</translation>
     </message>
@@ -16585,6 +16569,18 @@
     <message>
         <source>Lists chosen configuration of the guest system.</source>
         <translation>Содержит выбранную конфигурацию гостевой системы.</translation>
+    </message>
+    <message>
+        <source>Guest machine name cannot be empty</source>
+        <translation type="vanished">Имя гостевой машины не может быть пустым</translation>
+    </message>
+    <message>
+        <source>Guest machine name is valid</source>
+        <translation type="vanished">Имя гостевой машины корректно</translation>
+    </message>
+    <message>
+        <source>Guest machine path is not unique</source>
+        <translation type="vanished">Путь гостевой машины не уникален</translation>
     </message>
     <message>
         <source>&amp;Product Key</source>
