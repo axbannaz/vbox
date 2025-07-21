@@ -31,15 +31,7 @@
 *********************************************************************************************************************************/
 #define LOG_GROUP LOG_GROUP_DEV_GIC
 #include "GICInternal.h"
-
-#include <VBox/log.h>
-#include <VBox/gic.h>
-#include <VBox/vmm/pdmdev.h>
-#include <VBox/vmm/dbgf.h>
 #include <VBox/vmm/vm.h>        /* pVM->cCpus */
-#include <iprt/errcore.h>       /* VINF_SUCCESS */
-#include <iprt/string.h>        /* RT_ZERO */
-#include <iprt/mem.h>           /* RTMemAllocZ, RTMemFree */
 
 
 /*********************************************************************************************************************************
@@ -102,6 +94,16 @@ static const char *const g_apszGitsDiagDesc[] =
     GITSDIAG_DESC(CmdQueue_Cmd_Mapti_IcId_OutOfRange),
     GITSDIAG_DESC(CmdQueue_Cmd_Mapti_Ite_Wr_Failed),
     GITSDIAG_DESC(CmdQueue_Cmd_Mapti_PhysLpi_OutOfRange),
+
+    /* LPI Trigger. */
+    GITSDIAG_DESC(LpiTrigger_CpuId_OutOfRange),
+    GITSDIAG_DESC(LpiTrigger_Dte_Rd_Failed),
+    GITSDIAG_DESC(LpiTrigger_Dte_Unmapped),
+    GITSDIAG_DESC(LpiTrigger_EventId_OutOfRange),
+    GITSDIAG_DESC(LpiTrigger_IcId_OutOfRange),
+    GITSDIAG_DESC(LpiTrigger_Ite_Invalid),
+    GITSDIAG_DESC(LpiTrigger_Ite_Rd_Failed),
+    GITSDIAG_DESC(LpiTrigger_Ite_Unmapped),
 
     /* kGitsDiag_End */
 };
@@ -1442,7 +1444,23 @@ DECLHIDDEN(int) gitsR3CmdQueueProcess(PCVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV p
 
 
 /**
- * Translates and forwards the LPI to a redistributor.
+ * Records an error while translating and forwarding an LPI to a redistributor.
+ *
+ * @param   pDevIns         The device instance.
+ * @param   pGitsDev        The GIC ITS state.
+ * @param   enmDiag         The error diagnostic.
+ */
+DECL_FORCE_INLINE(void) gitsLpiSetError(PPDMDEVINS pDevIns, PGITSDEV pGitsDev, GITSDIAG enmDiag)
+{
+    Log4Func(("enmDiag=%#RX32 (%s)\n", enmDiag, gitsGetDiagDescription(enmDiag)));
+    Assert(GIC_CRIT_SECT_IS_OWNER(pDevIns)); NOREF(pDevIns);
+    pGitsDev->enmDiag = enmDiag;
+}
+
+
+/**
+ * Triggers an LPI by using the ITS to translate and route it to a specific
+ * redistributor and connected PE.
  *
  * @param   pVM         The cross context VM state.
  * @param   pDevIns     The device instance.
@@ -1451,7 +1469,8 @@ DECLHIDDEN(int) gitsR3CmdQueueProcess(PCVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV p
  * @param   uEventId    The event ID.
  * @param   fAsserted   Whether the LPI is asserted/de-asserted.
  */
-DECLHIDDEN(void) gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId, bool fAsserted)
+DECLHIDDEN(void) gitsLpiTrigger(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId,
+                                bool fAsserted)
 {
     Assert(GIC_CRIT_SECT_IS_OWNER(pDevIns));
 
@@ -1506,8 +1525,8 @@ DECLHIDDEN(void) gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, ui
     if (RT_SUCCESS(rc))
     {
         /* Check if the DTE is mapped (valid). */
-        bool const fValid = RT_BF_GET(uDte, GITS_BF_DTE_VALID);
-        if (fValid)
+        bool const fDteValid = RT_BF_GET(uDte, GITS_BF_DTE_VALID);
+        if (fDteValid)
         {
             /* Check if the event ID (which is the index) is within range. */
             uint32_t const cEntries = RT_BIT_32(RT_BF_GET(uDte, GITS_BF_DTE_ITT_RANGE) + 1);
@@ -1519,57 +1538,61 @@ DECLHIDDEN(void) gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, ui
                 if (RT_SUCCESS(rc))
                 {
                     /* Check if the interrupt ID is within range. */
-                    uint16_t const uIntId     = RT_BF_GET(uIte, GITS_BF_ITE_INTID);
-                    uint16_t const uIcId      = RT_BF_GET(uIte, GITS_BF_ITE_ICID);
-                    bool     const fPhysIntr  = RT_BF_GET(uIte, GITS_BF_ITE_IS_PHYS);
-                    bool     const fIteValid  = RT_BF_GET(uIte, GITS_BF_ITE_VALID);
-                    bool const     fLpiValid  = GIC_IS_INTR_LPI(uIntId);
-                    if (   fIteValid
-                        && fLpiValid
-                        && fPhysIntr)
+                    bool const fIteValid  = RT_BF_GET(uIte, GITS_BF_ITE_VALID);
+                    if (fIteValid)
                     {
-                        /* Check if the interrupt collection ID is valid. */
-                        if (uIcId < RT_ELEMENTS(pGitsDev->aCtes))
+                        /* Check if this is a valid physical interrupt and LPI. */
+                        uint16_t const uIntId     = RT_BF_GET(uIte, GITS_BF_ITE_INTID);
+                        bool     const fPhysIntr  = RT_BF_GET(uIte, GITS_BF_ITE_IS_PHYS);
+                        bool const     fLpiValid  = GIC_IS_INTR_LPI(uIntId);
+                        if (   fLpiValid
+                            && fPhysIntr)
                         {
-                            /* Check that the target CPU is valid. */
-                            Assert(!RT_BF_GET(pGitsDev->uTypeReg.u, GITS_BF_CTRL_REG_TYPER_PTA));
-                            VMCPUID const idCpu = pGitsDev->aCtes[uIcId];
-                            if (idCpu < pVM->cCpus)
+                            /* Check if the interrupt collection ID is valid. */
+                            uint16_t const uIcId = RT_BF_GET(uIte, GITS_BF_ITE_ICID);
+                            if (uIcId < RT_ELEMENTS(pGitsDev->aCtes))
                             {
-                                /* Set or clear the LPI pending state in the redistributor. */
-                                PVMCPUCC pVCpu = pVM->CTX_SUFF(apCpus)[idCpu];
-                                gicReDistSetLpi(pDevIns, pVCpu, uIntId, fAsserted);
+                                /* Check that the target CPU is valid. */
+                                Assert(!RT_BF_GET(pGitsDev->uTypeReg.u, GITS_BF_CTRL_REG_TYPER_PTA));
+                                VMCPUID const idCpu = pGitsDev->aCtes[uIcId];
+                                if (idCpu < pVM->cCpus)
+                                {
+                                    /* Set or clear the LPI pending state in the redistributor. */
+                                    PVMCPUCC pVCpu = pVM->CTX_SUFF(apCpus)[idCpu];
+                                    gicReDistSetLpi(pDevIns, pVCpu, uIntId, fAsserted);
 
-                                /* Add the LPI to the cache. */
-                                GITSLPIMAPENTRY LpiMapEntry;
-                                LpiMapEntry.uDevIdEventId.s.Lo = uDevId;
-                                LpiMapEntry.uDevIdEventId.s.Hi = uEventId;
-                                LpiMapEntry.uIntId             = uIntId;
-                                LpiMapEntry.uIcId              = uIcId;
-                                LpiMapEntry.idCpu              = idCpu;
-                                gitsLpiCacheAdd(pGitsDev, &LpiMapEntry);
+                                    /* Add the LPI to the cache. */
+                                    GITSLPIMAPENTRY LpiMapEntry;
+                                    LpiMapEntry.uDevIdEventId.s.Lo = uDevId;
+                                    LpiMapEntry.uDevIdEventId.s.Hi = uEventId;
+                                    LpiMapEntry.uIntId             = uIntId;
+                                    LpiMapEntry.uIcId              = uIcId;
+                                    LpiMapEntry.idCpu              = idCpu;
+                                    gitsLpiCacheAdd(pGitsDev, &LpiMapEntry);
+                                }
+                                else
+                                    gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_CpuId_OutOfRange);
                             }
                             else
-                                AssertMsgFailed(("CPU index out-of-bounds (idCpu=%RU32)\n", idCpu));
+                                gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_IcId_OutOfRange);
                         }
                         else
-                            AssertMsgFailed(("ICID out-of-bounds (uIcId=%#RU16 uIte=%#RX64)\n", uIcId, uIte));
+                            gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_Ite_Invalid);
                     }
                     else
-                        AssertMsgFailed(("LPI invalid (uDte=%#RX64 uIte=%#RX64 uIntId=%RU16 PhysIntr=%RTbool IteValid=%RTbool LpiValid=%RTbool)\n",
-                                         uDte, uIte, uIntId, fPhysIntr, fIteValid, fLpiValid));
+                        gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_Ite_Unmapped);
                 }
                 else
-                    AssertMsgFailed(("Failed to read the ITE (uDevId=%#RX32 uEventId=%#RX32 rc=%Rrc)\n", uDevId, uEventId, rc));
+                    gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_Ite_Rd_Failed);
             }
             else
-                AssertMsgFailed(("Event Id out-of-bounds %#RU32 (uDte=%#RX64)\n", cEntries, uDte));
+                gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_EventId_OutOfRange);
         }
         else
-            AssertMsgFailed(("DTE is not mapped (uDevId=%#RX32 uEventId=%#RX32)\n", uDevId, uEventId));
+            gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_Dte_Unmapped);
     }
     else
-        AssertMsgFailed(("Failed to read the DTE (uDevId=%#RX32 uEventId=%#RX32 rc=%Rrc)\n", uDevId, uEventId, rc));
+        gitsLpiSetError(pDevIns, pGitsDev, kGitsDiag_LpiTrigger_Dte_Rd_Failed);
 }
 
 #endif /* !VBOX_DEVICE_STRUCT_TESTCASE */

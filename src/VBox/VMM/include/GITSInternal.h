@@ -166,6 +166,16 @@ typedef enum GITSDIAG
     kGitsDiag_CmdQueue_Cmd_Mapti_Ite_Wr_Failed,
     kGitsDiag_CmdQueue_Cmd_Mapti_PhysLpi_OutOfRange,
 
+    /* LPI Trigger. */
+    kGitsDiag_LpiTrigger_CpuId_OutOfRange,
+    kGitsDiag_LpiTrigger_Dte_Rd_Failed,
+    kGitsDiag_LpiTrigger_Dte_Unmapped,
+    kGitsDiag_LpiTrigger_EventId_OutOfRange,
+    kGitsDiag_LpiTrigger_IcId_OutOfRange,
+    kGitsDiag_LpiTrigger_Ite_Invalid,
+    kGitsDiag_LpiTrigger_Ite_Rd_Failed,
+    kGitsDiag_LpiTrigger_Ite_Unmapped,
+
     kGitsDiag_End,
 } GITSDIAG;
 AssertCompileSize(GITSDIAG, 4);
@@ -347,8 +357,8 @@ DECLHIDDEN(void)         gitsMmioWriteCtrl(PPDMDEVINS pDevIns, PGITSDEV pGitsDev
 DECLHIDDEN(void)         gitsMmioWriteTranslate(PGITSDEV pGitsDev, uint16_t offReg, uint64_t uValue, unsigned cb);
 
 DECLHIDDEN(void)         gitsLpiCacheInvalidateAll(PGITSDEV pGitsDev);
-DECLHIDDEN(void)         gitsLpiSet(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId,
-                                    bool fAsserted);
+DECLHIDDEN(void)         gitsLpiTrigger(PVMCC pVM, PPDMDEVINS pDevIns, PGITSDEV pGitsDev, uint32_t uDevId, uint32_t uEventId,
+                                        bool fAsserted);
 
 #ifdef IN_RING3
 DECLHIDDEN(void)         gitsR3DbgInfo(PCGITSDEV pGitsDev, PCDBGFINFOHLP pHlp);

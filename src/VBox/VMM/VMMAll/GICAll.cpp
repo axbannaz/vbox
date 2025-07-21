@@ -3108,7 +3108,7 @@ DECL_HIDDEN_CALLBACK(int) gicSendMsi(PVMCC pVM, PCIBDF uBusDevFn, PCMSIMSG pMsi,
      */
     GIC_CRIT_SECT_ENTER(pDevIns);
     if (pGicDev->fEnableLpis)
-        gitsLpiSet(pVM, pDevIns, &pGicDev->Gits, uDevId, uEventId, true /* fAsserted */);
+        gitsLpiTrigger(pVM, pDevIns, &pGicDev->Gits, uDevId, uEventId, true /* fAsserted */);
     GIC_CRIT_SECT_LEAVE(pDevIns);
 
     return VINF_SUCCESS;
