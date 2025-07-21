@@ -662,8 +662,8 @@ ifdef VBOX_WITH_VMSVGA3D
   VBOX_WITH_DXVK = 1
  endif
  # Enable DXMT library for supporting VGPU10 DX on macOS
- if1of ($(KBUILD_TARGET), darwin)
-  VBOX_WITH_DXMT =
+ if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), darwin.arm64)
+  VBOX_WITH_DXMT = 1
  endif
 endif
 # Enable video decoding in DXVK library
