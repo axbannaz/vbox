@@ -2976,8 +2976,7 @@ DECLHIDDEN(void) gicReDistSetLpi(PPDMDEVINS pDevIns, PVMCPUCC pVCpu, uint16_t uI
     Log4Func(("[%u] uIntId=%RU32 fAsserted=%RTbool\n", pVCpu->idCpu, uIntId, fAsserted));
 
     bool const fUpdated = gicReDistUpdateLpiPending(pVCpu, uIntId, fAsserted);
-    if (   fUpdated
-        && fAsserted)
+    if (fUpdated)
         gicReDistUpdateIrqState(pVCpu);
 }
 
