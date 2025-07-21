@@ -2588,11 +2588,11 @@ void MainConfigFile::bumpSettingsVersionIfNeeded()
         if (   !llNATNetworks.empty())
             m->sv = SettingsVersion_v1_14;
     }
-    if (m->sv < SettingsVersion_v1_20)
+    if (m->sv < SettingsVersion_v1_21)
     {
-        // VirtualBox 7.1 adds global shared folders.
+        // VirtualBox 7.2 adds global shared folders.
         if (!llGlobalSharedFolders.empty())
-            m->sv = SettingsVersion_v1_20;
+            m->sv = SettingsVersion_v1_21;
     }
 
 }
