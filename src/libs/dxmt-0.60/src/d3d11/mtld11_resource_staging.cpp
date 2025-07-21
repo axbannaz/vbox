@@ -135,8 +135,24 @@ HRESULT CreateStagingTextureInternal(MTLD3D11Device *pDevice,
     D3D11_ASSERT(subresources.size() == sub.SubresourceId);
     auto buffer = new StagingResource(metal, buf_len, WMTResourceStorageModeShared, bpr, bpi);
     if (pInitialData) {
+#ifdef VBOX
+      if (bpr > pInitialData[sub.SubresourceId].SysMemPitch)
+      {
+              uint8_t *pbDst = (uint8_t *)buffer->mappedImmediateMemory();
+        const uint8_t *pbSrc = (const uint8_t *)pInitialData[sub.SubresourceId].pSysMem;
+        for (uint32_t i = 0; i < h; i++)
+        {
+          memcpy(pbDst, pbSrc, pInitialData[sub.SubresourceId].SysMemPitch);
+          pbDst += bpr;
+          pbSrc += pInitialData[sub.SubresourceId].SysMemPitch;
+        }
+      }
+      else
+        memcpy(buffer->mappedImmediateMemory(), pInitialData[sub.SubresourceId].pSysMem, buf_len);
+#else
       // FIXME: SysMemPitch and SysMemSlicePitch should be respected!
       memcpy(buffer->mappedImmediateMemory(), pInitialData[sub.SubresourceId].pSysMem, buf_len);
+#endif
     }
     subresources.push_back(buffer);
   }
