@@ -4617,16 +4617,6 @@ TTL:       %RU64 сек, сейчас %RU64 сек осталось
 </translation>
     </message>
     <message>
-        <source>Creating temporary %s from template &apos;%s&apos; in directory &apos;%s&apos; ...
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Creating temporary %s from template &apos;%s&apos; in default temporary directory ...
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Directory name: %ls
 </source>
         <translation>Имя директории: %ls
@@ -5043,6 +5033,16 @@ Total guest sessions: %zu
     <message>
         <source>Missing VM name and sub-command</source>
         <translation>Отсутствует имя ВМ и подкоманда</translation>
+    </message>
+    <message>
+        <source>Creating temporary %s from template &apos;%s&apos; in directory &apos;%s&apos; ...
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Creating temporary %s from template &apos;%s&apos; in default temporary directory ...
+</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6458,13 +6458,6 @@ Attached physical PCI devices:
 </translation>
     </message>
     <message>
-        <source>NIC %d Settings:
-	MTU: %d, Socket (send: %d, receive: %d), TCP Window (send:%d, receive: %d),
-	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%-28s I/O address: %#06x, IRQ: %d</source>
         <translation>%-28s I/O адрес: %#06x, IRQ: %d</translation>
     </message>
@@ -6687,6 +6680,13 @@ Attached physical PCI devices:
     <message>
         <source>Option --log is exclusive</source>
         <translation>Опция --log эксклюзивная</translation>
+    </message>
+    <message>
+        <source>NIC %d Settings:
+	MTU: %d, Socket (send: %d, receive: %d), TCP Window (send:%d, receive: %d),
+	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
+</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -9781,10 +9781,6 @@ UUID: %s
         <translation>RTAbsPath завершился с ошибкой на &apos;%s&apos;: %Rrc</translation>
     </message>
     <message>
-        <source>Invalid option: global and transient both specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Machine &apos;%s&apos; is not currently running.</source>
         <translation>Машина &apos;%s&apos; сейчас не запущена.</translation>
     </message>
@@ -10022,6 +10018,10 @@ to the VBoxManage command line.
         <translation>Провайдер %ls: профиль &apos;%ls&apos; удален.
 </translation>
     </message>
+    <message>
+        <source>Invalid option: global and transient both specified</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ModifyVM</name>
@@ -10074,11 +10074,6 @@ to the VBoxManage command line.
     <message>
         <source>Invalid --graphicscontroller argument &apos;%s&apos;</source>
         <translation>Недопустимый аргумент к --graphicscontroller &apos;%s&apos;</translation>
-    </message>
-    <message>
-        <source>Warning: &apos;--accelerate-2d-video&apos; is deprecated and will be removed in a future version
-</source>
-        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Invalid --biosbootmenu argument &apos;%s&apos;</source>
@@ -10189,10 +10184,6 @@ to the VBoxManage command line.
         <translation>Недопустимый аргумент к --guest-debug-io-provider &apos;%s&apos; (допустимые: none, tcp, udp, ipc)</translation>
     </message>
     <message>
-        <source>Invalid platform architecture returned for VM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid --audio argument &apos;%s&apos;</source>
         <translation type="vanished">Недопустимый аргумент к --audio &apos;%s&apos;</translation>
     </message>
@@ -10293,6 +10284,15 @@ to the VBoxManage command line.
     <message>
         <source>--testing-cfg-dword index %u is out of range: 0 thru 9</source>
         <translation>Индекс --testing-cfg-dword %u вне границ диапазона: 0 - 9</translation>
+    </message>
+    <message>
+        <source>Warning: &apos;--accelerate-2d-video&apos; is deprecated and will be removed in a future version
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid platform architecture returned for VM</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

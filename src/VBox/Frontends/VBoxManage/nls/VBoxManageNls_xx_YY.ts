@@ -3392,16 +3392,6 @@ TTL:         %RU64 sec, currently %RU64 sec left
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Creating temporary %s from template &apos;%s&apos; in directory &apos;%s&apos; ...
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Creating temporary %s from template &apos;%s&apos; in default temporary directory ...
-</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Unable to install console control handler, vrc=%Rrc
 </source>
         <translation type="unfinished"></translation>
@@ -3881,6 +3871,16 @@ Total guest sessions: %zu
     </message>
     <message>
         <source>Missing VM name and sub-command</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Creating temporary %s from template &apos;%s&apos; in directory &apos;%s&apos; ...
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Creating temporary %s from template &apos;%s&apos; in default temporary directory ...
+</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4539,13 +4539,6 @@ Total guest sessions: %zu
     </message>
     <message>
         <source>HPET:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>NIC %d Settings:
-	MTU: %d, Socket (send: %d, receive: %d), TCP Window (send:%d, receive: %d),
-	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -5369,6 +5362,13 @@ Attached physical PCI devices:
     </message>
     <message>
         <source>Option --log is exclusive</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>NIC %d Settings:
+	MTU: %d, Socket (send: %d, receive: %d), TCP Window (send:%d, receive: %d),
+	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
+</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7462,10 +7462,6 @@ Settings file: &apos;%ls&apos;
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Invalid option: global and transient both specified</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Machine &apos;%s&apos; is not currently running.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7672,6 +7668,10 @@ to the VBoxManage command line.
 </source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Invalid option: global and transient both specified</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ModifyVM</name>
@@ -7718,11 +7718,6 @@ to the VBoxManage command line.
     </message>
     <message>
         <source>Invalid --graphicscontroller argument &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Warning: &apos;--accelerate-2d-video&apos; is deprecated and will be removed in a future version
-</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7832,10 +7827,6 @@ to the VBoxManage command line.
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Invalid platform architecture returned for VM</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Invalid --clipboard-mode argument &apos;%s&apos;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -7926,6 +7917,15 @@ to the VBoxManage command line.
     </message>
     <message>
         <source>--testing-cfg-dword index %u is out of range: 0 thru 9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Warning: &apos;--accelerate-2d-video&apos; is deprecated and will be removed in a future version
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid platform architecture returned for VM</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
