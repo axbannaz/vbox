@@ -182,7 +182,7 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t g = paSrc[4 * i + 1];
                 uint8_t r = paSrc[4 * i + 2];
 
-                paDst[i++]    =          CALC_Y(r, g, b);
+                paDst[i++]    = (uint8_t)CALC_Y(r, g, b);
                 paDst[upos++] = (uint8_t)CALC_U(r, g, b);
                 paDst[vpos++] = (uint8_t)CALC_V(r, g, b);
 
@@ -190,7 +190,7 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 g = paSrc[4 * i + 1];
                 r = paSrc[4 * i + 2];
 
-                paDst[i++] = CALC_Y(r, g, b);
+                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
             }
         }
         else
@@ -201,7 +201,7 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t const g = paSrc[4 * i + 1];
                 uint8_t const r = paSrc[4 * i + 2];
 
-                paDst[i++] = CALC_Y(r, g, b);
+                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
             }
         }
     }
@@ -265,7 +265,7 @@ void RecordingUtilsConvBGRA32ToYUVI420Ex(uint8_t *paDst, uint32_t uDstX, uint32_
             size_t const offY  = uDstY * uDstWidth + uDstXCur;
             size_t const offUV = (uDstY / 2) * (uDstWidth / 2) + (uDstXCur / 2) + uDstWidth * uDstHeight;
 
-            paDst[offY]                               =          CALC_Y(r, g, b);
+            paDst[offY]                               = (uint8_t)CALC_Y(r, g, b);
             paDst[offUV]                              = (uint8_t)CALC_U(r, g, b);
             paDst[offUV + uDstWidth * uDstHeight / 4] = (uint8_t)CALC_V(r, g, b);
 
@@ -628,4 +628,3 @@ void RecordingUtilsDbgLogFrame(PRECORDINGFRAME pFrame)
     }
 }
 #endif /* DEBUG */
-
