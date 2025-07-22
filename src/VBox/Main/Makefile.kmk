@@ -1071,7 +1071,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
   	src-client/Recording.cpp \
   	src-client/RecordingInternals.cpp \
   	src-client/RecordingCodec.cpp \
-  	src-client/RecordingStream.cpp \
+  	src-client/RecordingStream.cpp
 
   ifdef VBOX_WITH_AUDIO_RECORDING
    VBoxC_DEFS += VBOX_WITH_AUDIO_RECORDING
