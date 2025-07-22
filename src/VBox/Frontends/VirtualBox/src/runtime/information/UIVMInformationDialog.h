@@ -79,7 +79,6 @@ private slots:
     /** Handles tab-widget page change. */
     void sltHandlePageChanged(int iIndex);
     void sltMachineStateChange(const QUuid &uMachineId, const KMachineState state);
-    void sltAdditionsStateChange();
 
 private:
 

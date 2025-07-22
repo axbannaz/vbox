@@ -149,17 +149,6 @@ void UIVMInformationDialog::sltMachineStateChange(const QUuid &uMachineId, const
     pWidget->setEnabled(state == KMachineState_Running);
 }
 
-void UIVMInformationDialog::sltAdditionsStateChange()
-{
-    if (!m_pTabWidget)
-        return;
-    UIVMActivityMonitorContainer *pVMActivityMonitorContainer =
-        qobject_cast<UIVMActivityMonitorContainer*>(m_pTabWidget->widget(Tabs_ActivityMonitor));
-    if (!pVMActivityMonitorContainer)
-        return;
-    pVMActivityMonitorContainer->guestAdditionsStateChange(uiCommon().managedVMUuid());
-}
-
 void UIVMInformationDialog::saveDialogGeometry()
 {
     const QRect geo = currentGeometry();
@@ -170,8 +159,6 @@ void UIVMInformationDialog::saveDialogGeometry()
 
 void UIVMInformationDialog::prepare()
 {
-    connect(gpMachine, &UIMachine::sigAdditionsStateChange,
-            this, &UIVMInformationDialog::sltAdditionsStateChange);
 #ifndef VBOX_WS_MAC
     /* Assign window icon: */
     setWindowIcon(UIIconPool::iconSetFull(":/session_info_32px.png", ":/session_info_16px.png"));
