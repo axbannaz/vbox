@@ -309,7 +309,7 @@ tstSafeArray_SOURCES  = tstSafeArray.cpp
 tstRecording_TEMPLATE = VBoxMainClientTstExe
 tstRecording_SOURCES  = \
 	tstRecording.cpp \
-	../src-client/RecordingUtils.cpp
+	../src-all/RecordingUtils.cpp
 tstRecording_INCS     = \
 	../include
 

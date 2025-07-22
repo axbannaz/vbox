@@ -65,8 +65,6 @@
 #include <map>
 #include <vector>
 
-#include "Recording.h" /* For RecordingFeatureMap. */
-
 /**
  * Maximum depth of a medium tree, to prevent stack overflows.
  * XPCOM has a relatively low stack size for its workers, and we have
@@ -713,7 +711,8 @@ struct RecordingScreen
     /** Destination to record to. */
     RecordingDestination_T enmDest;
     /** Which features are enable or not. */
-    RecordingFeatureMap    featureMap; // requires settings version 1.19 (VirtualBox 7.0)
+    std::map<RecordingFeature_T, bool>
+                           featureMap; // requires settings version 1.19 (VirtualBox 7.0)
     /** Maximum time (in s) to record. If set to 0, no time limit is set. */
     uint32_t               ulMaxTimeS; // requires settings version 1.14 (VirtualBox 4.3)
     /** Options string for hidden / advanced / experimental features.
