@@ -25,6 +25,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#include <iprt/ldr.h>
+#include <iprt/process.h>
 #include <iprt/system.h>
 
 #include "AudioUtils.h"
