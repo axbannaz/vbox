@@ -84,16 +84,16 @@ inline bool recordingUtilsColorConvWriteYUV420p(uint8_t *aDstBuf, unsigned aDstW
                 uint8_t g = aSrcBuf[4 * i + 1];
                 uint8_t r = aSrcBuf[4 * i + 2];
 
-                aDstBuf[i++] = CALC_Y(r, g, b);
+                aDstBuf[i++] = (uint8_t)CALC_Y(r, g, b);
 
-                aDstBuf[upos++] = CALC_U(r, g, b);
-                aDstBuf[vpos++] = CALC_V(r, g, b);
+                aDstBuf[upos++] = (uint8_t)CALC_U(r, g, b);
+                aDstBuf[vpos++] = (uint8_t)CALC_V(r, g, b);
 
                 b = aSrcBuf[4 * i];
                 g = aSrcBuf[4 * i + 1];
                 r = aSrcBuf[4 * i + 2];
 
-                aDstBuf[i++] = CALC_Y(r, g, b);
+                aDstBuf[i++] = (uint8_t)CALC_Y(r, g, b);
             }
         }
         else
@@ -183,16 +183,16 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t g = paSrc[4 * i + 1];
                 uint8_t r = paSrc[4 * i + 2];
 
-                paDst[i++] = CALC_Y(r, g, b);
+                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
 
-                paDst[upos++] = CALC_U(r, g, b);
-                paDst[vpos++] = CALC_V(r, g, b);
+                paDst[upos++] = (uint8_t)CALC_U(r, g, b);
+                paDst[vpos++] = (uint8_t)CALC_V(r, g, b);
 
                 b = paSrc[4 * i];
                 g = paSrc[4 * i + 1];
                 r = paSrc[4 * i + 2];
 
-                paDst[i++] = CALC_Y(r, g, b);
+                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
             }
         }
         else
@@ -203,7 +203,7 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t const g = paSrc[4 * i + 1];
                 uint8_t const r = paSrc[4 * i + 2];
 
-                paDst[i++] = CALC_Y(r, g, b);
+                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
             }
         }
     }
@@ -267,9 +267,9 @@ void RecordingUtilsConvBGRA32ToYUVI420Ex(uint8_t *paDst, uint32_t uDstX, uint32_
             size_t const offY  = uDstY * uDstWidth + uDstXCur;
             size_t const offUV = (uDstY / 2) * (uDstWidth / 2) + (uDstXCur / 2) + uDstWidth * uDstHeight;
 
-            paDst[offY]                               = CALC_Y(r, g, b);
-            paDst[offUV]                              = CALC_U(r, g, b);
-            paDst[offUV + uDstWidth * uDstHeight / 4] = CALC_V(r, g, b);
+            paDst[offY]                               = (uint8_t)CALC_Y(r, g, b);
+            paDst[offUV]                              = (uint8_t)CALC_U(r, g, b);
+            paDst[offUV + uDstWidth * uDstHeight / 4] = (uint8_t)CALC_V(r, g, b);
 
             uDstXCur++;
         }
@@ -340,13 +340,13 @@ int RecordingUtilsCoordsCropCenter(PRECORDINGCODECPARMS pCodecParms,
         *sw = (int32_t)pCodecParms->u.Video.uWidth;
 
     if (*sh > (int32_t)pCodecParms->u.Video.uHeight)
-        *sh = pCodecParms->u.Video.uHeight;
+        *sh = (int32_t)pCodecParms->u.Video.uHeight;
 
     if (*dx + *sw >= (int32_t)pCodecParms->u.Video.uWidth)
-        *sw = pCodecParms->u.Video.uWidth - *dx;
+        *sw = (int32_t)pCodecParms->u.Video.uWidth - *dx;
 
     if (*dy + *sh >= (int32_t)pCodecParms->u.Video.uHeight)
-        *sh = pCodecParms->u.Video.uHeight - *dy;
+        *sh = (int32_t)pCodecParms->u.Video.uHeight - *dy;
 
     if (   *dx + *sw < 1
         || *dy + *sh < 1
@@ -482,7 +482,7 @@ DECLINLINE(int) recordingUtilsDbgDumpImageData(const uint8_t *pu8RGBBuf, size_t 
     fileHdr.offBits    = (uint32_t)(sizeof(BMPFILEHDR) + sizeof(BMPWINV4INFOHDR));
 
     infoHdr.cbSize         = sizeof(BMPWINV4INFOHDR);
-    infoHdr.cx             = uWidth;
+    infoHdr.cx             = (int32_t)uWidth;
     infoHdr.cy             = -(int32_t)uHeight;
     infoHdr.cBits          = uBPP;
     infoHdr.cPlanes        = 1;

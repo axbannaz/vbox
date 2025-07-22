@@ -1166,7 +1166,6 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	src-all/PCIDeviceAttachmentImpl.cpp \
  	src-all/PlatformPropertiesImpl.cpp \
  	src-all/ProgressImpl.cpp \
- 	src-all/RecordingUtils.cpp \
  	src-all/SecretKeyStore.cpp \
  	src-all/AutoCaller.cpp \
  	src-all/ThreadTask.cpp \
