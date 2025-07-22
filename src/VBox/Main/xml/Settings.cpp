@@ -2986,7 +2986,7 @@ const char *RecordingScreen::getDefaultOptions(void)
  * @param   featureMap          Where to return the converted features on success.
  */
 /* static */
-int RecordingScreen::featuresFromString(const com::Utf8Str &strFeatures, RecordingFeatureMap &featureMap)
+int RecordingScreen::featuresFromString(const com::Utf8Str &strFeatures, std::map<RecordingFeature_T, bool> &featureMap)
 {
     featureMap.clear();
 
@@ -3010,11 +3010,11 @@ int RecordingScreen::featuresFromString(const com::Utf8Str &strFeatures, Recordi
  * @param   strFeatures         Where to return the features converted as a string.
  */
 /* static */
-void RecordingScreen::featuresToString(const RecordingFeatureMap &featureMap, com::Utf8Str &strFeatures)
+void RecordingScreen::featuresToString(const std::map<RecordingFeature_T, bool> &featureMap, com::Utf8Str &strFeatures)
 {
     strFeatures = "";
 
-    RecordingFeatureMap::const_iterator itFeature = featureMap.begin();
+    std::map<RecordingFeature_T, bool>::const_iterator itFeature = featureMap.begin();
     while (itFeature != featureMap.end())
     {
         if (itFeature->first == RecordingFeature_Video && itFeature->second)
@@ -3235,7 +3235,7 @@ bool RecordingScreen::areDefaultSettings(void) const
  */
 bool RecordingScreen::isFeatureEnabled(RecordingFeature_T enmFeature) const
 {
-    RecordingFeatureMap::const_iterator itFeature = featureMap.find(enmFeature);
+    std::map<RecordingFeature_T, bool>::const_iterator itFeature = featureMap.find(enmFeature);
     if (itFeature != featureMap.end())
         return itFeature->second;
 

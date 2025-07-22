@@ -693,9 +693,9 @@ struct RecordingScreen
 
     static const char *getDefaultOptions(void);
 
-    static int featuresFromString(const com::Utf8Str &strFeatures, RecordingFeatureMap &featureMap);
+    static int featuresFromString(const com::Utf8Str &strFeatures, std::map<RecordingFeature_T, bool> &featureMap);
 
-    static void featuresToString(const RecordingFeatureMap &featureMap, com::Utf8Str &strFeatures);
+    static void featuresToString(const std::map<RecordingFeature_T, bool> &featureMap, com::Utf8Str &strFeatures);
 
     static int audioCodecFromString(const com::Utf8Str &strCodec, RecordingAudioCodec_T &enmCodec);
 
