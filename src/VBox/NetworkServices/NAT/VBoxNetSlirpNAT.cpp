@@ -2084,10 +2084,10 @@ VBoxNetSlirpNAT::pollThread(RTTHREAD hThreadSelf, void *pvUser)
         pThis->timersRunExpired();
     }
 
-// #if 0
+#if 0
     LogRel(("pollThread: Exiting\n"));
     return VERR_INVALID_STATE;
-// #endif
+#endif
 }
 
 
