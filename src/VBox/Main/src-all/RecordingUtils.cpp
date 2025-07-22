@@ -25,7 +25,6 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#include "Recording.h"
 #include "RecordingUtils.h"
 
 #include <iprt/asm.h>
@@ -41,6 +40,7 @@
 #include <iprt/formats/bmp.h>
 #endif
 
+#include <VBox/err.h>
 #define LOG_GROUP LOG_GROUP_RECORDING
 #include <VBox/log.h>
 
@@ -383,6 +383,59 @@ const char *RecordingUtilsRecordingFrameTypeToStr(RECORDINGFRAME_TYPE enmType)
         default: break;
     }
     AssertFailedReturn("Unknown");
+}
+
+/**
+ * Converts an audio codec to a serializable string.
+ *
+ * @returns Recording audio codec as a string.
+ * @param   enmCodec            Codec to convert to a string.
+ *
+ * @note    Warning! Do not change these values unless you know what you're doing.
+ *                   Those values are being used for serializing the settings.
+ */
+const char *RecordingUtilsAudioCodecToStr(RecordingAudioCodec_T enmCodec)
+{
+    switch (enmCodec)
+    {
+        case RecordingAudioCodec_None:      return "none";
+        case RecordingAudioCodec_WavPCM:    return "wav";
+        case RecordingAudioCodec_MP3:       return "mp3";
+        case RecordingAudioCodec_Opus:      return "opus";
+        case RecordingAudioCodec_OggVorbis: return "vorbis";
+        default:                            break;
+    }
+
+    AssertFailedReturn("<invalid>");
+}
+
+/**
+ * Converts a video codec to a serializable string.
+ *
+ * @returns Recording video codec as a string.
+ * @param   enmCodec            Codec to convert to a string.
+ *
+ * @note    Warning! Do not change these values unless you know what you're doing.
+ *                   Those values are being used for serializing the settings.
+ */
+const char *RecordingUtilsVideoCodecToStr(RecordingVideoCodec_T enmCodec)
+{
+    switch (enmCodec)
+    {
+        case RecordingVideoCodec_None:  return "none";
+        case RecordingVideoCodec_MJPEG: return "MJPEG";
+        case RecordingVideoCodec_H262:  return "H262";
+        case RecordingVideoCodec_H264:  return "H264";
+        case RecordingVideoCodec_H265:  return "H265";
+        case RecordingVideoCodec_H266:  return "H266";
+        case RecordingVideoCodec_VP8:   return "VP8";
+        case RecordingVideoCodec_VP9:   return "VP9";
+        case RecordingVideoCodec_AV1:   return "AV1";
+        case RecordingVideoCodec_Other: return "other";
+        default:                        break;
+    }
+
+    AssertFailedReturn("<invalid>");
 }
 
 #ifdef DEBUG

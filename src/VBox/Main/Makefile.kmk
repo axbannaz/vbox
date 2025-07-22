@@ -616,6 +616,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  VBoxSVC_SOURCES = \
  	$(VBOX_SVC_CERTS_FILE) \
  	$(VBoxAPIWrap_0_OUTDIR)/VBoxAPI.d \
+ 	src-all/AudioUtils.cpp \
  	src-all/AuthLibrary.cpp \
  	src-all/CryptoUtils.cpp \
  	src-all/DisplayPNGUtil.cpp \
@@ -631,6 +632,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	src-all/PCIDeviceAttachmentImpl.cpp \
  	src-all/PlatformPropertiesImpl.cpp \
  	src-all/ProgressImpl.cpp \
+ 	src-all/RecordingUtils.cpp \
  	src-all/SecretKeyStore.cpp \
  	src-all/SharedFolderImpl.cpp \
  	src-all/AutoCaller.cpp \
@@ -1063,13 +1065,13 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
    VBoxC_DEFS += VBOX_WITH_LIBVPX
   endif
   VBoxC_SOURCES += \
+  	src-all/RecordingUtils.cpp \
   	src-client/EBMLWriter.cpp \
   	src-client/WebMWriter.cpp \
   	src-client/Recording.cpp \
   	src-client/RecordingInternals.cpp \
   	src-client/RecordingCodec.cpp \
   	src-client/RecordingStream.cpp \
-  	src-client/RecordingUtils.cpp
 
   ifdef VBOX_WITH_AUDIO_RECORDING
    VBoxC_DEFS += VBOX_WITH_AUDIO_RECORDING
@@ -1149,6 +1151,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
 
  VBoxC_SOURCES += \
  	$(VBoxAPIWrap_0_OUTDIR)/VBoxAPI.d \
+ 	src-all/AudioUtils.cpp \
  	src-all/CryptoUtils.cpp \
  	src-all/ConsoleSharedFolderImpl.cpp \
  	src-all/DisplayPNGUtil.cpp \
@@ -1163,6 +1166,7 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	src-all/PCIDeviceAttachmentImpl.cpp \
  	src-all/PlatformPropertiesImpl.cpp \
  	src-all/ProgressImpl.cpp \
+ 	src-all/RecordingUtils.cpp \
  	src-all/SecretKeyStore.cpp \
  	src-all/AutoCaller.cpp \
  	src-all/ThreadTask.cpp \
@@ -1199,7 +1203,6 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	src-client/VBoxDriversRegister.cpp \
  	src-client/VirtualBoxClientImpl.cpp \
  	src-client/VMMDevInterface.cpp \
- 	xml/Settings.cpp \
  	$(VBOX_AUTOGEN_EVENT_CPP) \
  	$(VBOX_AUTOGEN_STRINGIFY_ENUMS_CPP) \
  	$(VBOX_XML_SCHEMADEFS_CPP)

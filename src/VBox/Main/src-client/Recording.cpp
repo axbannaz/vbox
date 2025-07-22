@@ -245,37 +245,47 @@ bool RecordingContext::progressIsCompleted(void) const
  *
  * @returns VBox status code.
  * @param   Settings            Recording settings to use for creation.
- * @param   pProgress           Where to return the created progress object on success.
+ * @param   Progress            Where to return the created progress object on success.
  */
-int RecordingContext::progressCreate(const settings::Recording &Settings, ComObjPtr<Progress> &pProgress)
+int RecordingContext::progressCreate(const ComPtr<IRecordingSettings> &Settings, ComObjPtr<Progress> &Progress)
 {
     /* Determine the number of operations the recording progress has.
      * We use the maximum time (in s) of each screen as the overall progress indicator.
      * If one screen is configured to be recorded indefinitely (until manually stopped),
      * the operation count gets reset to 1. */
     ULONG cOperations = 1; /* Always start at 1. */
-    settings::RecordingScreenSettingsMap::const_iterator itScreen = Settings.mapScreens.begin();
-    while (itScreen != Settings.mapScreens.end())
+
+    SafeIfaceArray<IRecordingScreenSettings> RecScreens;
+    HRESULT hrc = Settings->COMGETTER(Screens)(ComSafeArrayAsOutParam(RecScreens));
+    AssertComRCReturn(hrc, VERR_RECORDING_INIT_FAILED);
+
+    for (size_t i = 0; i < RecScreens.size(); i++)
     {
-        settings::RecordingScreen const &screenSettings = itScreen->second;
-        if (screenSettings.ulMaxTimeS == 0)
+        ComPtr<IRecordingScreenSettings> ScreenSettings = RecScreens[i];
+
+        ULONG ulMaxTime;
+        hrc = ScreenSettings->COMGETTER(MaxTime)(&ulMaxTime);
+        AssertComRCBreak(hrc, VERR_RECORDING_INIT_FAILED);
+        if (ulMaxTime == 0)
         {
             cOperations = 1; /* Screen will be recorded indefinitely, reset operation count and bail out.  */
             break;
         }
         else
-            cOperations = RT_MAX(cOperations, screenSettings.ulMaxTimeS);
-        ++itScreen;
+            cOperations = RT_MAX(cOperations, ulMaxTime);
     }
 
-    HRESULT hrc = pProgress.createObject();
+    if (FAILED(hrc))
+        return VERR_RECORDING_INIT_FAILED;
+
+    hrc = Progress.createObject();
     if (SUCCEEDED(hrc))
     {
-        hrc = pProgress->init(static_cast<IConsole *>(m_pConsole), Utf8Str("Recording"),
-                              TRUE /* aCancelable */, cOperations, cOperations /* ulTotalOperationsWeight */,
-                              Utf8Str("Starting"), 1 /* ulFirstOperationWeight */);
+        hrc = Progress->init(static_cast<IConsole *>(m_pConsole), Utf8Str("Recording"),
+                             TRUE /* aCancelable */, cOperations, cOperations /* ulTotalOperationsWeight */,
+                             Utf8Str("Starting"), 1 /* ulFirstOperationWeight */);
         if (SUCCEEDED(hrc))
-            pProgress->i_setCancelCallback(RecordingContext::s_progressCancelCallback, this /* pvUser */);
+            Progress->i_setCancelCallback(RecordingContext::s_progressCancelCallback, this /* pvUser */);
     }
 
     return SUCCEEDED(hrc) ? VINF_SUCCESS : VERR_COM_UNEXPECTED;
@@ -687,11 +697,13 @@ DECLCALLBACK(int) RecordingContext::s_audioCodecWriteDataCallback(PRECORDINGCODE
  * Initializes the audio codec for a (multiplexing) recording context.
  *
  * @returns VBox status code.
- * @param   screenSettings      Reference to recording screen settings to use for initialization.
+ * @param   ScreenSettings      Reference to recording screen settings to use for initialization.
  */
-int RecordingContext::audioInit(const settings::RecordingScreen &screenSettings)
+int RecordingContext::audioInit(const ComPtr<IRecordingScreenSettings> &ScreenSettings)
 {
-    RecordingAudioCodec_T const enmCodec = screenSettings.Audio.enmCodec;
+    RecordingAudioCodec_T enmCodec;
+    HRESULT const hrc = ScreenSettings->COMGETTER(AudioCodec)(&enmCodec);
+    AssertComRCReturn(hrc, VERR_RECORDING_INIT_FAILED);
 
     if (enmCodec == RecordingAudioCodec_None)
     {
@@ -705,7 +717,7 @@ int RecordingContext::audioInit(const settings::RecordingScreen &screenSettings)
 
     int vrc = recordingCodecCreateAudio(&m_CodecAudio, enmCodec);
     if (RT_SUCCESS(vrc))
-        vrc = recordingCodecInit(&m_CodecAudio, &Callbacks, screenSettings);
+        vrc = recordingCodecInit(&m_CodecAudio, &Callbacks, ScreenSettings);
 
     return vrc;
 }
@@ -769,44 +781,47 @@ DECLCALLBACK(void) RecordingContext::s_recordingStateChangedCallback(RecordingCo
  *
  * @returns VBox status code.
  * @param   pConsole             Pointer to console object this context is bound to (weak pointer).
- * @param   Settings            Reference to recording settings to use for creation.
- * @param   pProgress           Progress object returned on success.
+ * @param   pProgress            Progress object returned on success.
  */
-int RecordingContext::createInternal(Console *pConsole, const settings::Recording &Settings,
-                                     ComPtr<IProgress> &pProgress)
+int RecordingContext::createInternal(Console *pConsole, ComPtr<IProgress> &pProgress)
 {
     int vrc = VINF_SUCCESS;
 
     /* Reset context. */
     reset();
 
-    /* Copy the settings to our context. */
-    m_Settings = Settings;
+    m_pConsole = pConsole;
+
+    RT_ZERO(m_Callbacks);
+
+    HRESULT hrc = pConsole->i_machine()->COMGETTER(RecordingSettings)(m_Settings.asOutParam());
+    AssertComRCReturn(hrc, VERR_RECORDING_INIT_FAILED);
+
+    SafeIfaceArray<IRecordingScreenSettings> RecScreens;
+    hrc = m_Settings->COMGETTER(Screens)(ComSafeArrayAsOutParam(RecScreens));
+    AssertComRCReturn(hrc, VERR_RECORDING_INIT_FAILED);
 
 #ifdef VBOX_WITH_AUDIO_RECORDING
-    settings::RecordingScreenSettingsMap::const_iterator itScreen0 = m_Settings.mapScreens.begin();
-    AssertReturn(itScreen0 != m_Settings.mapScreens.end(), VERR_WRONG_ORDER);
-
     /* We always use the audio settings from screen 0, as we multiplex the audio data anyway. */
-    settings::RecordingScreen const &screen0Settings = itScreen0->second;
-
-    vrc = this->audioInit(screen0Settings);
+    vrc = this->audioInit(RecScreens[0]);
     if (RT_FAILURE(vrc))
         return vrc;
 #endif
 
-    m_pConsole = pConsole;
-    RT_ZERO(m_Callbacks);
-
-    settings::RecordingScreenSettingsMap::const_iterator itScreen = m_Settings.mapScreens.begin();
-    while (itScreen != m_Settings.mapScreens.end())
+    for (size_t i = 0; i < RecScreens.size(); i++)
     {
+        ComPtr<IRecordingScreenSettings> ScreenSettings = RecScreens[i];
+        Assert(ScreenSettings.isNotNull());
+
         RecordingStream *pStream = NULL;
         try
         {
-            if (itScreen->second.fEnabled)
+            BOOL fEnabled;
+            hrc = ScreenSettings->COMGETTER(Enabled)(&fEnabled);
+            AssertComRCReturn(hrc, VERR_RECORDING_INIT_FAILED);
+            if (fEnabled)
             {
-                pStream = new RecordingStream(pConsole, this, itScreen->first /* Screen ID */, itScreen->second);
+                pStream = new RecordingStream(pConsole, this, (uint32_t)i /* Screen ID */, ScreenSettings);
                 m_vecStreams.push_back(pStream);
                 m_cStreamsEnabled++;
                 LogFlowFunc(("pStream=%p\n", pStream));
@@ -822,8 +837,6 @@ int RecordingContext::createInternal(Console *pConsole, const settings::Recordin
             vrc = vrc_thrown;
             break;
         }
-
-        ++itScreen;
     }
 
     ComObjPtr<Progress> pThisProgress;
@@ -1095,7 +1108,7 @@ void RecordingContext::destroyInternal(void)
  *
  * @returns The recording context's current settings.
  */
-const settings::Recording &RecordingContext::GetConfig(void) const
+const ComPtr<IRecordingSettings> &RecordingContext::GetSettings(void) const
 {
     return m_Settings;
 }
@@ -1172,14 +1185,13 @@ size_t RecordingContext::GetStreamCount(void) const
  *
  * @returns VBox status code.
  * @param   ptrConsole          Pointer to console object this context is bound to (weak pointer).
- * @param   Settings            Reference to recording settings to use for creation.
- * @param   pProgress           Progress object returned on success.
+ * @param   Progress            Progress object returned on success.
  *
  * @note    This does not actually start the recording -- use Start() for this.
  */
-int RecordingContext::Create(Console *ptrConsole, const settings::Recording &Settings, ComPtr<IProgress> &pProgress)
+int RecordingContext::Create(Console *ptrConsole, ComPtr<IProgress> &Progress)
 {
-    return createInternal(ptrConsole, Settings, pProgress);
+    return createInternal(ptrConsole, Progress);
 }
 
 /**
@@ -1233,7 +1245,7 @@ bool RecordingContext::IsFeatureEnabled(RecordingFeature_T enmFeature)
     RecordingStreams::const_iterator itStream = m_vecStreams.begin();
     while (itStream != m_vecStreams.end())
     {
-        if ((*itStream)->GetConfig().isFeatureEnabled(enmFeature))
+        if ((*itStream)->IsFeatureEnabled(enmFeature))
         {
             unlock();
             return true;

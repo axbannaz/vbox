@@ -1228,8 +1228,8 @@ int main(int cArgs, char **papszArgs)
     g_hInstance = GetModuleHandleW(NULL);
 #endif
 
-    rc = VbglR3Init();
-    if (RT_SUCCESS(rc))
+rc = 0;
+if (RT_SUCCESS(rc))
     {
         rc = VBoxTrayLogCreate(szLogFile[0] ? szLogFile : NULL);
         if (!RT_SUCCESS(rc))
@@ -1238,6 +1238,8 @@ int main(int cArgs, char **papszArgs)
         rc = vboxTrayCreateToolWindow();
         if (RT_SUCCESS(rc))
             rc = vboxTrayCreateTrayIcon();
+
+        /* ignore rc, not fatal */ VBoxTrayLogWindowCreate();
 
         VBoxTrayHlpReportStatus(VBoxGuestFacilityStatus_PreInit);
 
@@ -1297,6 +1299,8 @@ int main(int cArgs, char **papszArgs)
 
             VBoxCapsTerm();
         }
+
+        VBoxTrayLogWindowDestroy();
 
         vboxTrayRemoveTrayIcon();
         vboxTrayDestroyToolWindow();
@@ -1406,7 +1410,12 @@ static LRESULT CALLBACK vboxToolWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPA
             switch (LOWORD(lParam))
             {
                 case WM_LBUTTONDBLCLK:
+                {
+                    ShowWindow(g_LogWnd.hWndLogMain, SW_SHOW);
+                    UpdateWindow(g_LogWnd.hWndLogMain);
                     break;
+                }
+
                 case WM_RBUTTONDOWN:
                 {
                     if (!g_cVerbosity) /* Don't show menu when running in non-verbose mode. */

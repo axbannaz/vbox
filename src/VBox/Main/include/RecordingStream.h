@@ -38,132 +38,17 @@
 #include <iprt/req.h>
 #include <iprt/semaphore.h>
 
+#ifdef LOG_GROUP
+# undef LOG_GROUP
+#endif
+#define LOG_GROUP LOG_GROUP_RECORDING
+#include "LoggingNew.h"
+
 #include "RecordingInternals.h"
 
 class Console;
 class WebMWriter;
 class RecordingContext;
-
-/** Structure for queuing all blocks bound to a single timecode.
- *  This can happen if multiple tracks are being involved. */
-struct RecordingBlocks
-{
-    virtual ~RecordingBlocks()
-    {
-        Clear();
-    }
-
-    /**
-     * Resets a recording block list by removing (destroying)
-     * all current elements.
-     */
-    void Clear()
-    {
-        while (!List.empty())
-        {
-            RecordingBlock *pBlock = List.front();
-            if (pBlock->GetRefs() == 0)
-            {
-                List.pop_front();
-                delete pBlock;
-            }
-        }
-
-        Assert(List.size() == 0);
-    }
-
-    /** The actual block list for this timecode. */
-    RecordingBlockList List;
-};
-
-/** A block map containing all currently queued blocks.
- *  The key specifies a unique timecode, whereas the value
- *  is a list of blocks which all correlate to the same key (timecode). */
-typedef std::map<uint64_t, RecordingBlocks *> RecordingBlockMap;
-
-/**
- * Structure for holding a set of recording (data) blocks.
- */
-struct RecordingBlockSet
-{
-    /**
-     * Constructor.
-     *
-     * Will throw rc on failure.
-     */
-    RecordingBlockSet()
-        : tsLastProcessedMs(0)
-    {
-        int const vrc = RTCritSectInit(&CritSect);
-        if (RT_FAILURE(vrc))
-            throw vrc;
-    }
-
-    virtual ~RecordingBlockSet()
-    {
-        Clear();
-
-        RTCritSectDelete(&CritSect);
-    }
-
-    /**
-     * Inserts a block list within the given PTS.
-     *
-     * @param  uPTS             Timestamp (PTS) to insert block list to.
-     * @param  pBlocks          Block list to insert.
-     *                          This class will take ownership of the data.
-     */
-    int Insert(uint64_t uPTS, RecordingBlocks *pBlocks)
-    {
-        int vrc = RTCritSectEnter(&CritSect);
-        if (RT_SUCCESS(vrc))
-        {
-            try
-            {
-                Map.insert(std::make_pair(uPTS, pBlocks));
-            }
-            catch (std::bad_alloc &)
-            {
-                vrc = VERR_NO_MEMORY;
-            }
-            RTCritSectLeave(&CritSect);
-        }
-
-        return vrc;
-    }
-
-    /**
-     * Resets a recording block set by removing (destroying)
-     * all current elements.
-     */
-    void Clear(void)
-    {
-        int vrc = RTCritSectEnter(&CritSect);
-        if (RT_SUCCESS(vrc))
-        {
-            RecordingBlockMap::iterator it = Map.begin();
-            while (it != Map.end())
-            {
-                it->second->Clear();
-                delete it->second;
-                Map.erase(it);
-                it = Map.begin();
-            }
-
-            Assert(Map.size() == 0);
-
-            RTCritSectLeave(&CritSect);
-        }
-    }
-
-    /** Critical section for protecting the set. */
-    RTCRITSECT        CritSect;
-    /** Timestamp (in ms) when this set was last processed.
-     *  Set to 0 if not processed yet. */
-    uint64_t          tsLastProcessedMs;
-    /** All blocks related to this block set. */
-    RecordingBlockMap Map;
-};
 
 /**
  * Virtual block worker base class.
@@ -330,13 +215,13 @@ class RecordingStream
 {
 public:
 
-    RecordingStream(Console *pConsole, RecordingContext *pCtx, uint32_t uScreen, const settings::RecordingScreen &Settings);
+    RecordingStream(Console *pConsole, RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
 
     virtual ~RecordingStream(void);
 
 public:
 
-    int Init(RecordingContext *pCtx, uint32_t uScreen, const settings::RecordingScreen &Settings);
+    int Init(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
     int Uninit(void);
 
     int ThreadMain(int rcWait, uint64_t msTimestamp, RecordingBlockMap &commonBlocks);
@@ -349,7 +234,7 @@ public:
     int Start(void);
     int Stop(void);
 
-    const settings::RecordingScreen &GetConfig(void) const;
+    const ComPtr<IRecordingScreenSettings> &GetSettings(void) const;
     uint16_t GetID(void) const { return this->m_uScreenID; };
 #ifdef VBOX_WITH_AUDIO_RECORDING
     PRECORDINGCODEC GetAudioCodec(void) { return this->m_pCodecAudio; };
@@ -366,13 +251,13 @@ public:
 
 protected:
 
-    int open(const settings::RecordingScreen &screenSettings);
+    int open(const ComPtr<IRecordingScreenSettings> &ScreenSettings);
     int close(void);
 
-    int initInternal(RecordingContext *pCtx, uint32_t uScreen, const settings::RecordingScreen &screenSettings);
+    int initInternal(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
     int uninitInternal(void);
 
-    int initVideo(const settings::RecordingScreen &screenSettings);
+    int initVideo(const ComPtr<IRecordingScreenSettings> &ScreenSettings);
     int unitVideo(void);
 
     void housekeepingWorker(void);
@@ -469,8 +354,8 @@ protected:
     /** Video codec instance data to use. */
     RECORDINGCODEC      m_CodecVideo;
     /** Screen settings to use. */
-    settings::RecordingScreen
-                        m_ScreenSettings;
+    ComPtr<IRecordingScreenSettings>
+                        m_Settings;
     /** Video-specific runtime data. */
     struct
     {
@@ -478,6 +363,16 @@ protected:
          *  Can be changed by a SendScreenChange() call. */
         RECORDINGSURFACEINFO ScreenInfo;
     } m_Video;
+    /** Cached (const) settings from IRecordingScreen. Same naming (minus notation).
+     *  Kept around for speed reasons during runtime. */
+    struct
+    {
+        BOOL                   fEnabled;
+        RecordingFeatureMap    mapFeatures;
+        RecordingDestination_T enmDestination;
+        ULONG                  uMaxTime;
+        ULONG                  uMaxFileSize;
+    } m_SettingsCache;
     /** Set of unprocessed recording (data) blocks for this stream. */
     RecordingBlockSet   m_BlockSet;
     /** Housekeeping block worker. */

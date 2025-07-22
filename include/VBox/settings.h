@@ -65,6 +65,8 @@
 #include <map>
 #include <vector>
 
+#include "Recording.h" /* For RecordingFeatureMap. */
+
 /**
  * Maximum depth of a medium tree, to prevent stack overflows.
  * XPCOM has a relatively low stack size for its workers, and we have
@@ -380,7 +382,13 @@ struct SystemProperties
 
 struct PlatformProperties
 {
-    PlatformProperties();
+    PlatformProperties()
+        : fExclusiveHwVirt(true)
+    {
+#if defined(RT_OS_DARWIN) || defined(RT_OS_WINDOWS) || defined(RT_OS_SOLARIS)
+        fExclusiveHwVirt = false; /** @todo BUGBUG Does this apply to MacOS on ARM as well? */
+#endif
+    }
 
     bool                    fExclusiveHwVirt;
 };
@@ -662,9 +670,6 @@ struct NvramSettings
     com::Utf8Str    strKeyStore;
 };
 
-/** List for keeping a recording feature list. */
-typedef std::map<RecordingFeature_T, bool> RecordingFeatureMap;
-
 /**
  * Recording settings for a single screen (e.g. virtual monitor).
  *
@@ -696,11 +701,7 @@ struct RecordingScreen
 
     static int audioCodecFromString(const com::Utf8Str &strCodec, RecordingAudioCodec_T &enmCodec);
 
-    static void audioCodecToString(const RecordingAudioCodec_T &enmCodec, com::Utf8Str &strCodec);
-
     static int videoCodecFromString(const com::Utf8Str &strCodec, RecordingVideoCodec_T &enmCodec);
-
-    static void videoCodecToString(const RecordingVideoCodec_T &enmCodec, com::Utf8Str &strCodec);
 
     bool operator==(const RecordingScreen &d) const;
 

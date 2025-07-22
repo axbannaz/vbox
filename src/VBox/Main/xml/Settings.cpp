@@ -109,8 +109,10 @@
 // generated header
 #include "SchemaDefs.h"
 
+#include "AudioUtils.h" /* For VBoxAudioGetDefaultDriver(). */
 #include "HashedPw.h"
 #include "LoggingNew.h"
+#include "RecordingUtils.h"
 
 using namespace com;
 using namespace settings;
@@ -1695,14 +1697,6 @@ bool SharedFolder::operator==(const SharedFolder &g) const
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-PlatformProperties::PlatformProperties()
-    : fExclusiveHwVirt(true)
-{
-#if defined(RT_OS_DARWIN) || defined(RT_OS_WINDOWS) || defined(RT_OS_SOLARIS)
-    fExclusiveHwVirt = false; /** BUGBUG Does this apply to MacOS on ARM as well? */
-#endif
-}
-
 /**
  * Constructor. Needs to set sane defaults which stand the test of time.
  */
@@ -3076,26 +3070,6 @@ int RecordingScreen::audioCodecFromString(const com::Utf8Str &strCodec, Recordin
 }
 
 /**
- * Converts an audio codec to a serializable string.
- *
- * @param   enmCodec            Codec to convert to a string.
- * @param   strCodec            Where to return the audio codec converted as a string.
- */
-/* static */
-void RecordingScreen::audioCodecToString(const RecordingAudioCodec_T &enmCodec, com::Utf8Str &strCodec)
-{
-    switch (enmCodec)
-    {
-        case RecordingAudioCodec_None:      strCodec = "none";   return;
-        case RecordingAudioCodec_WavPCM:    strCodec = "wav";    return;
-        case RecordingAudioCodec_MP3:       strCodec = "mp3";    return;
-        case RecordingAudioCodec_Opus:      strCodec = "opus";   return;
-        case RecordingAudioCodec_OggVorbis: strCodec = "vorbis"; return;
-        default:                            AssertFailedReturnVoid();
-    }
-}
-
-/**
  * Returns a recording settings video codec from a given string.
  *
  * @returns VBox status code.
@@ -3161,31 +3135,6 @@ int RecordingScreen::videoCodecFromString(const com::Utf8Str &strCodec, Recordin
     }
 
     AssertFailedReturn(VERR_NOT_SUPPORTED);
-}
-
-/**
- * Converts a video codec to a serializable string.
- *
- * @param   enmCodec            Codec to convert to a string.
- * @param   strCodec            Where to return the video codec converted as a string.
- */
-/* static */
-void RecordingScreen::videoCodecToString(const RecordingVideoCodec_T &enmCodec, com::Utf8Str &strCodec)
-{
-    switch (enmCodec)
-    {
-        case RecordingVideoCodec_None:  strCodec = "none";  return;
-        case RecordingVideoCodec_MJPEG: strCodec = "MJPEG"; return;
-        case RecordingVideoCodec_H262:  strCodec = "H262";  return;
-        case RecordingVideoCodec_H264:  strCodec = "H264";  return;
-        case RecordingVideoCodec_H265:  strCodec = "H265";  return;
-        case RecordingVideoCodec_H266:  strCodec = "H266";  return;
-        case RecordingVideoCodec_VP8:   strCodec = "VP8";   return;
-        case RecordingVideoCodec_VP9:   strCodec = "VP9";   return;
-        case RecordingVideoCodec_AV1:   strCodec = "AV1";   return;
-        case RecordingVideoCodec_Other: strCodec = "other"; return;
-        default:                        AssertFailedReturnVoid();
-    }
 }
 
 /**
@@ -5255,7 +5204,7 @@ void MachineConfigFile::readAudioAdapter(const xml::ElementNode &elmAudioAdapter
         // people might be opening a file created on a Windows host, and that
         // VM should still start on a Linux host
         if (!isAudioDriverAllowedOnThisHost(aa.driverType))
-            aa.driverType = getHostDefaultAudioDriver();
+            aa.driverType = VBoxAudioGetDefaultDriver();
     }
 }
 
@@ -8456,7 +8405,7 @@ void MachineConfigFile::buildHardwareXML(xml::ElementNode &elmParent,
 
             /* Make sure to set the actual driver type to the OS' default driver type.
              * This is required for VBox < 7.0. */
-            driverType = getHostDefaultAudioDriver();
+            driverType = VBoxAudioGetDefaultDriver();
         }
 
         const char *pcszDriver = NULL;
@@ -9150,8 +9099,8 @@ void MachineConfigFile::buildRecordingXML(xml::ElementNode &elmParent, const Rec
                 if (itScreen->second.File.ulMaxSizeMB)
                     pelmScreen->setAttribute("maxSizeMB",       itScreen->second.File.ulMaxSizeMB);
 
-                RecordingScreen::videoCodecToString(itScreen->second.Video.enmCodec, strTemp);
-                pelmScreen->setAttribute("videoCodec",          strTemp);
+                pelmScreen->setAttribute("videoCodec",
+                                         RecordingUtilsVideoCodecToStr(itScreen->second.Video.enmCodec));
                 if (itScreen->second.Video.enmDeadline != RecordingCodecDeadline_Default)
                     pelmScreen->setAttribute("videoDeadline",   itScreen->second.Video.enmDeadline);
                 if (itScreen->second.Video.enmRateCtlMode != RecordingRateControlMode_VBR) /* Is default. */
@@ -9169,8 +9118,8 @@ void MachineConfigFile::buildRecordingXML(xml::ElementNode &elmParent, const Rec
                 if (itScreen->second.Video.ulFPS)
                     pelmScreen->setAttribute("fps",             itScreen->second.Video.ulFPS);
 
-                RecordingScreen::audioCodecToString(itScreen->second.Audio.enmCodec, strTemp);
-                pelmScreen->setAttribute("audioCodec",          strTemp);
+                pelmScreen->setAttribute("audioCodec",
+                                         RecordingUtilsAudioCodecToStr(itScreen->second.Audio.enmCodec));
                 if (itScreen->second.Audio.enmDeadline != RecordingCodecDeadline_Default)
                     pelmScreen->setAttribute("audioDeadline",   itScreen->second.Audio.enmDeadline);
                 if (itScreen->second.Audio.enmRateCtlMode != RecordingRateControlMode_VBR) /* Is default. */
@@ -9665,76 +9614,6 @@ bool MachineConfigFile::isAudioDriverAllowedOnThisHost(AudioDriverType_T enmDrvT
     }
 
     return false;
-}
-
-/**
- * Returns the AudioDriverType_* which should be used by default on this
- * host platform. On Linux, this will check at runtime whether PulseAudio
- * or ALSA are actually supported on the first call.
- *
- * When more than one supported audio stack is available, choose the most suited
- * (probably newest in most cases) one.
- *
- * @return Default audio driver type for this host platform.
- */
-/*static*/
-AudioDriverType_T MachineConfigFile::getHostDefaultAudioDriver()
-{
-#if defined(RT_OS_WINDOWS)
-    if (RTSystemGetNtVersion() >= RTSYSTEM_MAKE_NT_VERSION(6,1,0))
-        return AudioDriverType_WAS;
-    return AudioDriverType_DirectSound;
-
-#elif defined(RT_OS_LINUX)
-    /* On Linux, we need to check at runtime what's actually supported.
-     * Descending precedence. */
-    static RTCLockMtx s_mtx;
-    static AudioDriverType_T s_enmLinuxDriver = AudioDriverType_Null;
-    RTCLock lock(s_mtx);
-    if (s_enmLinuxDriver == AudioDriverType_Null) /* Already determined from a former run? */
-    {
-# ifdef VBOX_WITH_AUDIO_PULSE
-        /* Check for the pulse library & that the PulseAudio daemon is running. */
-        if (   (   RTProcIsRunningByName("pulseaudio")
-                /* We also use the PulseAudio backend when we find pipewire-pulse running, which
-                 * acts as a PulseAudio-compatible daemon for Pipewire-enabled applications. See @ticketref{21575} */
-                || RTProcIsRunningByName("pipewire-pulse"))
-            && RTLdrIsLoadable("libpulse.so.0"))
-        {
-            s_enmLinuxDriver = AudioDriverType_Pulse;
-        }
-#endif /* VBOX_WITH_AUDIO_PULSE */
-
-# ifdef VBOX_WITH_AUDIO_ALSA
-        if (s_enmLinuxDriver == AudioDriverType_Null)
-        {
-            /* Check if we can load the ALSA library */
-            if (RTLdrIsLoadable("libasound.so.2"))
-                s_enmLinuxDriver = AudioDriverType_ALSA;
-        }
-# endif /* VBOX_WITH_AUDIO_ALSA */
-
-# ifdef VBOX_WITH_AUDIO_OSS
-        if (s_enmLinuxDriver == AudioDriverType_Null)
-            s_enmLinuxDriver = AudioDriverType_OSS;
-# endif /* VBOX_WITH_AUDIO_OSS */
-    }
-    return s_enmLinuxDriver;
-
-#elif defined(RT_OS_DARWIN)
-    return AudioDriverType_CoreAudio;
-
-#elif defined(RT_OS_OS2)
-    return AudioDriverType_MMPM;
-
-#else /* All other platforms. */
-# ifdef VBOX_WITH_AUDIO_OSS
-    return AudioDriverType_OSS;
-# else
-    /* Return NULL driver as a fallback if nothing of the above is available. */
-    return AudioDriverType_Null;
-# endif
-#endif
 }
 
 /**

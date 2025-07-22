@@ -105,6 +105,8 @@ DWORD EnableAndResizeDispDev(DEVMODE *paDeviceModes, DISPLAY_DEVICE *paDisplayDe
 
 int                      VBoxTrayLogCreate(const char *pszLogFile);
 void                     VBoxTrayLogDestroy(void);
+int                      VBoxTrayLogWindowCreate(void);
+void                     VBoxTrayLogWindowDestroy(void);
 
 void                     VBoxTrayInfo(const char *pszFormat, ...);
 RTEXITCODE               VBoxTrayError(const char *pszFormat, ...) RT_IPRT_FORMAT_ATTR(1, 2);

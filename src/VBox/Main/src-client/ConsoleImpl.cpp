@@ -6237,7 +6237,7 @@ int Console::i_recordingEnable(BOOL fEnable, util::AutoWriteLock *pAutoLock, Com
                 if (   mRecording.mCtx.IsFeatureEnabled(RecordingFeature_Audio)
                     && mRecording.mAudioRec)
                 {
-                    vrc = mRecording.mAudioRec->applyConfiguration(mRecording.mCtx.GetConfig());
+                    vrc = mRecording.mAudioRec->applyConfiguration(mRecording.mCtx.GetSettings());
                     if (RT_SUCCESS(vrc))
                         vrc = mRecording.mAudioRec->doAttachDriverViaEmt(ptrVM.rawUVM(), ptrVM.vtable(), pAutoLock);
 
@@ -7661,94 +7661,6 @@ HRESULT Console::i_recordingSendAudio(const void *pvData, size_t cbData, uint64_
 #endif /* VBOX_WITH_AUDIO_RECORDING */
 
 #ifdef VBOX_WITH_RECORDING
-
-int Console::i_recordingGetSettings(settings::Recording &Settings)
-{
-    Assert(mMachine.isNotNull());
-
-    Settings.applyDefaults();
-
-    ComPtr<IRecordingSettings> pRecordSettings;
-    HRESULT hrc = mMachine->COMGETTER(RecordingSettings)(pRecordSettings.asOutParam());
-    AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-
-    BOOL fTemp;
-    hrc = pRecordSettings->COMGETTER(Enabled)(&fTemp);
-    AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-    Settings.common.fEnabled = RT_BOOL(fTemp);
-
-    SafeIfaceArray<IRecordingScreenSettings> paRecScreens;
-    hrc = pRecordSettings->COMGETTER(Screens)(ComSafeArrayAsOutParam(paRecScreens));
-    AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-
-    for (unsigned long i = 0; i < (unsigned long)paRecScreens.size(); ++i)
-    {
-        settings::RecordingScreen recScreenSettings;
-        ComPtr<IRecordingScreenSettings> pRecScreenSettings = paRecScreens[i];
-
-        hrc = pRecScreenSettings->COMGETTER(Enabled)(&fTemp);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        recScreenSettings.fEnabled = RT_BOOL(fTemp);
-        com::SafeArray<RecordingFeature_T> vecFeatures;
-        hrc = pRecScreenSettings->COMGETTER(Features)(ComSafeArrayAsOutParam(vecFeatures));
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        /* Make sure to clear map first, as we want to (re-)set enabled features. */
-        recScreenSettings.featureMap.clear();
-        for (size_t f = 0; f < vecFeatures.size(); ++f)
-        {
-            if (vecFeatures[f] == RecordingFeature_Audio)
-                recScreenSettings.featureMap[RecordingFeature_Audio] = true;
-            else if (vecFeatures[f] == RecordingFeature_Video)
-                recScreenSettings.featureMap[RecordingFeature_Video] = true;
-        }
-        hrc = pRecScreenSettings->COMGETTER(MaxTime)((ULONG *)&recScreenSettings.ulMaxTimeS);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(MaxFileSize)((ULONG *)&recScreenSettings.File.ulMaxSizeMB);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        Bstr bstrTemp;
-        hrc = pRecScreenSettings->COMGETTER(Filename)(bstrTemp.asOutParam());
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        recScreenSettings.File.strName = bstrTemp;
-        hrc = pRecScreenSettings->COMGETTER(Options)(bstrTemp.asOutParam());
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        recScreenSettings.strOptions = bstrTemp;
-        hrc = pRecScreenSettings->COMGETTER(AudioCodec)(&recScreenSettings.Audio.enmCodec);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(AudioDeadline)(&recScreenSettings.Audio.enmDeadline);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(AudioRateControlMode)(&recScreenSettings.Audio.enmRateCtlMode);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(AudioHz)((ULONG *)&recScreenSettings.Audio.uHz);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(AudioBits)((ULONG *)&recScreenSettings.Audio.cBits);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(AudioChannels)((ULONG *)&recScreenSettings.Audio.cChannels);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoCodec)(&recScreenSettings.Video.enmCodec);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoWidth)((ULONG *)&recScreenSettings.Video.ulWidth);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoHeight)((ULONG *)&recScreenSettings.Video.ulHeight);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoDeadline)(&recScreenSettings.Video.enmDeadline);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoRateControlMode)(&recScreenSettings.Video.enmRateCtlMode);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoScalingMode)(&recScreenSettings.Video.enmScalingMode);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoRate)((ULONG *)&recScreenSettings.Video.ulRate);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-        hrc = pRecScreenSettings->COMGETTER(VideoFPS)((ULONG *)&recScreenSettings.Video.ulFPS);
-        AssertComRCReturn(hrc, VERR_INVALID_PARAMETER);
-
-        Settings.mapScreens[i] = recScreenSettings;
-    }
-
-    Assert(Settings.mapScreens.size() == paRecScreens.size());
-
-    return VINF_SUCCESS;
-}
-
 /**
  * Creates the recording context.
  *
@@ -7756,11 +7668,7 @@ int Console::i_recordingGetSettings(settings::Recording &Settings)
  */
 int Console::i_recordingCreate(ComPtr<IProgress> &pProgress)
 {
-    settings::Recording Settings;
-    int vrc = i_recordingGetSettings(Settings);
-    if (RT_SUCCESS(vrc))
-        vrc = mRecording.mCtx.Create(this, Settings, pProgress);
-
+    int vrc = mRecording.mCtx.Create(this, pProgress);
     if (RT_FAILURE(vrc))
         setErrorBoth(VBOX_E_RECORDING_ERROR, vrc, tr("Recording initialization failed (%Rrc) -- please consult log file for details"), vrc);
 

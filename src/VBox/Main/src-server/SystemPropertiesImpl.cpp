@@ -32,8 +32,9 @@
 #ifdef VBOX_WITH_EXTPACK
 # include "ExtPackManagerImpl.h"
 #endif
-#include "CPUProfileImpl.h"
+#include "AudioUtils.h" /* For VBoxAudioGetDefaultDriver(). */
 #include "AutoCaller.h"
+#include "CPUProfileImpl.h"
 #include "Global.h"
 #include "LoggingNew.h"
 #include "AutostartDb.h"
@@ -852,7 +853,7 @@ HRESULT SystemProperties::getDefaultAudioDriver(AudioDriverType_T *aAudioDriver)
 {
     AutoReadLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    *aAudioDriver = settings::MachineConfigFile::getHostDefaultAudioDriver();
+    *aAudioDriver = VBoxAudioGetDefaultDriver();
 
     return S_OK;
 }

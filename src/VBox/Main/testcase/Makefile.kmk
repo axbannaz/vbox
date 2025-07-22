@@ -328,7 +328,9 @@ tstSettings_INCS     = \
 	$(dir $(VBOX_XML_SCHEMADEFS_H))
 tstSettings_SOURCES  = \
 	tstSettings.cpp \
+	../src-all/AudioUtils.cpp \
 	../src-all/HashedPw.cpp \
+	../src-all/RecordingUtils.cpp \
 	../xml/Settings.cpp
 
 #
