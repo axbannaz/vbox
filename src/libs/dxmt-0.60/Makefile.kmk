@@ -47,13 +47,13 @@ VBOX_LLVM_PATH ?= $(lastword $(sort $(wildcard $(KBUILD_DEVTOOLS_TRG)/llvm/v*)))
 
 # The metal shader compiler
 # @todo This needs to be integrated better
-VBOX_METAL_PATH ?= $(lastword $(sort $(wildcard $(KBUILD_DEVTOOLS_TRG)/metal/v*)))
+VBOX_METAL_PATH ?= $(lastword $(sort $(wildcard $(KBUILD_DEVTOOLS)/darwin/metal/v*)))
 ifeq ($(VBOX_METAL_PATH),)
  VBOX_METAL    ?= xcrun -sdk macosx metal
  VBOX_METALLIB ?= xcrun -sdk macosx metallib
 else
- VBOX_METAL    ?= $(VBOX_METAL_PATH)/metal
- VBOX_METALLIB ?= $(VBOX_METAL_PATH)/metallib
+ VBOX_METAL    ?= $(VBOX_METAL_PATH)/bin/metal
+ VBOX_METALLIB ?= $(VBOX_METAL_PATH)/bin/metallib
 endif
 
 #
@@ -367,7 +367,6 @@ VBoxDxMt_LIBS    = \
 VBoxDxMt_LDFLAGS += \
 	-weak_framework CoreFoundation \
 	-weak_framework Metal \
-	-framework MetalFX \
 	-weak_framework Foundation \
 	-weak_framework CoreGraphics \
 	-weak_framework QuartzCore \
