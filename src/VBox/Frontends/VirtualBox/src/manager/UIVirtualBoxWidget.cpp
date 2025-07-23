@@ -46,14 +46,10 @@
 #include "UIVirtualBoxManager.h"
 #include "UIVirtualBoxWidget.h"
 #include "UIVirtualMachineItem.h"
-#if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
-# include "UIGlobalSession.h"
-#endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
+#include "UIGlobalSession.h"
 
 /* COM includes: */
-#if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
-# include "CSystemProperties.h"
-#endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
+#include "CSystemProperties.h"
 
 
 UIVirtualBoxWidget::UIVirtualBoxWidget(UIVirtualBoxManager *pParent)
@@ -374,15 +370,20 @@ void UIVirtualBoxWidget::prepareWidgets()
 
             /* Check whether we should show Dev Preview tag: */
             bool fShowDevPreviewTag = false;
-#if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
             const CVirtualBox comVBox = gpGlobalSession->virtualBox();
             if (comVBox.isNotNull())
             {
+#if defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32)
+                const KPlatformArchitecture enmArch = KPlatformArchitecture_x86;
+#elif defined (RT_ARCH_X86) || defined (RT_ARCH_AMD64)
+                const KPlatformArchitecture enmArch = KPlatformArchitecture_ARM;
+#else
+                const KPlatformArchitecture enmArch = KPlatformArchitecture_None;
+#endif
                 const CSystemProperties comSystemProps = comVBox.GetSystemProperties();
                 if (comVBox.isOk() && comSystemProps.isNotNull())
-                    fShowDevPreviewTag = comSystemProps.GetSupportedPlatformArchitectures().contains(KPlatformArchitecture_x86);
+                    fShowDevPreviewTag = comSystemProps.GetSupportedPlatformArchitectures().contains(enmArch);
             }
-#endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
             /* Enable Dev Preview tag: */
             if (fShowDevPreviewTag)
             {
