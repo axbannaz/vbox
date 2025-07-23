@@ -569,13 +569,15 @@ if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), darwin.amd64 darwin.arm64 linux.a
 endif
 # Enables the new breakpoint handling code, see @bugref{8650}
 VBOX_WITH_DBGF_FLOW_TRACING = 1
-# Enables ARMv8 virtualization, see @bugref{10383}
-if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), darwin.arm64 linux.arm64 win.arm64)
- VBOX_WITH_VIRT_ARMV8 = 1
-endif
+# Enables ARMv8 API support and if possible virtualization, see @bugref{10383}
+VBOX_WITH_VIRT_ARMV8 = 1
 # Makes x86 emulation on ARM hosts available in the GUI.
 if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), empty-set)
  VBOX_WITH_X86_ON_ARM_ENABLED = 1
+endif
+# Makes ARM emulation on x86 hosts available in the GUI.
+if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), empty-set)
+ VBOX_WITH_ARM_ON_X86_ENABLED = 1
 endif
 
 if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), linux.amd64)
