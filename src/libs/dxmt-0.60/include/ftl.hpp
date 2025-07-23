@@ -24,16 +24,26 @@ template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>>
 constexpr T operator|(T lhs, T rhs) 
 {
   return static_cast<T>(
+#ifndef VBOX
     static_cast<std::underlying_type<T>::type>(lhs) | 
     static_cast<std::underlying_type<T>::type>(rhs));
+#else
+    static_cast<typename std::underlying_type<T>::type>(lhs) | 
+    static_cast<typename std::underlying_type<T>::type>(rhs));
+#endif
 }
 
 template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> = 0>
 constexpr T operator&(T lhs, T rhs) 
 {
   return static_cast<T>(
+#ifndef VBOX
     static_cast<std::underlying_type<T>::type>(lhs) &
     static_cast<std::underlying_type<T>::type>(rhs));
+#else
+    static_cast<typename std::underlying_type<T>::type>(lhs) &
+    static_cast<typename std::underlying_type<T>::type>(rhs));
+#endif
 }
 
 template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> = 0>
@@ -52,7 +62,12 @@ template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>>
 constexpr T& operator|=(T& lhs, T rhs)
 {
   lhs = static_cast<T>(
+#ifndef VBOX
     static_cast<std::underlying_type<T>::type>(lhs) | 
     static_cast<std::underlying_type<T>::type>(rhs));
+#else
+    static_cast<typename std::underlying_type<T>::type>(lhs) | 
+    static_cast<typename std::underlying_type<T>::type>(rhs));
+#endif
   return lhs;
 }

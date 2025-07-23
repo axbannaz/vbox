@@ -31,7 +31,11 @@ private:
     size_t allocated_size;
     size_t total_size;
     uint64_t last_used_seq_id;
+#ifndef VBOX
     Allocator::Block block;
+#else
+    typename Allocator::Block block;
+#endif
   };
 
   Allocation &allocate_or_reuse_block(uint64_t seq_id, uint64_t coherent_id, size_t block_size);
@@ -197,7 +201,11 @@ RingBumpState<Allocator, BlockSize, mutex>::free_blocks(uint64_t coherent_id) {
 };
 
 template <typename Allocator, size_t BlockSize, class mutex>
+#ifndef VBOX
 RingBumpState<Allocator, BlockSize, mutex>::Allocation &
+#else
+typename RingBumpState<Allocator, BlockSize, mutex>::Allocation &
+#endif
 RingBumpState<Allocator, BlockSize, mutex>::allocate_or_reuse_block(
     uint64_t seq_id, uint64_t coherent_id, size_t block_size
 ) {

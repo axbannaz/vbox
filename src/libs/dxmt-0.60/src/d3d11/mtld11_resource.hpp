@@ -154,12 +154,20 @@ GetTexture(ID3D11Resource *pResource) {
 template <typename tag, typename... Base>
 class TResourceBase : public MTLD3D11DeviceChild<D3D11ResourceCommon, Base...> {
 public:
+#ifndef VBOX
   TResourceBase(const tag::DESC1 &desc, MTLD3D11Device *device)
+#else
+  TResourceBase(const typename tag::DESC1 &desc, MTLD3D11Device *device)
+#endif
       : MTLD3D11DeviceChild<D3D11ResourceCommon, Base...>(
             device),
         desc(desc),
         dxgi_resource(new MTLDXGIResource<TResourceBase<tag, Base...>>(this)),
+#ifndef VBOX
         d3d10(reinterpret_cast<tag::COM *>(this), device->GetImmediateContextPrivate()) {}
+#else
+        d3d10(reinterpret_cast<typename tag::COM *>(this), device->GetImmediateContextPrivate()) {}
+#endif
 
   template <std::size_t n> HRESULT ResolveBase(REFIID riid, void **ppvObject) {
     return E_NOINTERFACE;
@@ -264,9 +272,17 @@ public:
   };
 
 protected:
+#ifndef VBOX
   tag::DESC1 desc;
+#else
+  typename tag::DESC1 desc;
+#endif
   std::unique_ptr<IDXGIResource1> dxgi_resource;
+#ifndef VBOX
   tag::D3D10_IMPL d3d10;
+#else
+  typename tag::D3D10_IMPL d3d10;
+#endif
 };
 
 template <typename RESOURCE_IMPL_ = ID3D11Resource,
@@ -338,7 +354,11 @@ template <typename tag, typename... Base>
 class TResourceViewBase
     : public MTLD3D11DeviceChild<typename tag::COM_IMPL, Base...> {
 public:
+#ifndef VBOX
   TResourceViewBase(const tag::DESC1 *pDesc, tag::RESOURCE_IMPL *pResource,
+#else
+  TResourceViewBase(const typename tag::DESC1 *pDesc, tag::RESOURCE_IMPL *pResource,
+#endif
                     MTLD3D11Device *device)
       : MTLD3D11DeviceChild<typename tag::COM_IMPL, Base...>(device),
         d3d10(static_cast<typename tag::COM_IMPL *>(this)), resource(pResource) {
@@ -394,13 +414,25 @@ public:
     return E_NOINTERFACE;
   }
 
+#ifndef VBOX
   void STDMETHODCALLTYPE GetDesc(tag::DESC *pDesc) final {
+#else
+  void STDMETHODCALLTYPE GetDesc(typename tag::DESC *pDesc) final {
+#endif
     DowngradeViewDescription(desc, pDesc);
   }
 
+#ifndef VBOX
   void STDMETHODCALLTYPE GetDesc1(tag::DESC1 *pDesc) /* override / final */ { *pDesc = desc; }
+#else
+  void STDMETHODCALLTYPE GetDesc1(typename tag::DESC1 *pDesc) /* override / final */ { *pDesc = desc; }
+#endif
 
+#ifndef VBOX
   void STDMETHODCALLTYPE GetResource(tag::RESOURCE **ppResource) final {
+#else
+  void STDMETHODCALLTYPE GetResource(typename tag::RESOURCE **ppResource) final {
+#endif
     resource->QueryInterface(IID_PPV_ARGS(ppResource));
   }
 
