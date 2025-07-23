@@ -355,7 +355,10 @@ HRESULT Session::assignMachine(const ComPtr<IMachine> &aMachine,
         AssertComRCReturn(hrc, hrc);
 
         hrc = mConsole->initWithMachine(aMachine, mControl, aLockType);
-        AssertComRCReturn(hrc, hrc);
+        if (hrc != VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED)
+            AssertComRCReturn(hrc, hrc);
+        else
+            return hrc;
     }
     else
         mRemoteMachine = aMachine;
