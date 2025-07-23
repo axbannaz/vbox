@@ -2124,6 +2124,7 @@ static uint16_t gicAckHighestPriorityPendingIntr(PVMCPUCC pVCpu, uint32_t fIntrG
         /* LPIs are always edge-triggered, mark the interrupt as no longer pending. */
         gicReDistUpdateLpiPending(pVCpu, uIntId, false /* fAsserted */);
         gicReDistSetActiveIntrPriority(pGicCpu, uIntId, bIntrPriority, fIntrGroupMask);
+        gicReDistUpdateIrqState(pVCpu);
         STAM_COUNTER_INC(&pVCpu->gic.s.StatIntrAck);
     }
     else
