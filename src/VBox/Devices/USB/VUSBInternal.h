@@ -494,7 +494,6 @@ int  vusbUrbSubmit(PVUSBURB pUrb);
 void vusbUrbDoReapAsync(PRTLISTANCHOR pUrbLst, RTMSINTERVAL cMillies);
 void vusbUrbDoReapAsyncDev(PVUSBDEV pDev, RTMSINTERVAL cMillies);
 void vusbUrbCancel(PVUSBURB pUrb, CANCELMODE mode);
-void vusbUrbCancelAsync(PVUSBURB pUrb, CANCELMODE mode);
 void vusbUrbRipe(PVUSBURB pUrb);
 void vusbUrbCompletionRhEx(PVUSBROOTHUB pRh, PVUSBURB pUrb);
 int vusbUrbSubmitHardError(PVUSBURB pUrb);
