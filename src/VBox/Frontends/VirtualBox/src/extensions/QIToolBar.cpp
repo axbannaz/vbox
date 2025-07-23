@@ -31,9 +31,6 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QResizeEvent>
-#ifdef VBOX_WS_MAC
-# include <QApplication>
-#endif
 
 /* GUI includes: */
 #include "QIToolBar.h"
@@ -153,19 +150,6 @@ void QIToolBar::paintEvent(QPaintEvent *pEvent)
 
         /* Acquire full rectangle: */
         const QRect rectangle = rect();
-
-#if defined (VBOX_WS_MAC)
-        /* Prepare gradient: */
-        const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
-        QLinearGradient gradient(rectangle.topLeft(), rectangle.bottomLeft());
-        gradient.setColorAt(0, backgroundColor.lighter(105));
-        gradient.setColorAt(1, backgroundColor.darker(105));
-
-        /* Fill background: */
-        painter.fillRect(rectangle, gradient);
-#else
-        // it seems like we don't need background at all ..
-#endif
 
         /* Do we have branding stuff and a place for it? */
         if (   !m_icnBranding.isNull()
