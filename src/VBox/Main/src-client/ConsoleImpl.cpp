@@ -601,11 +601,32 @@ HRESULT Console::initWithMachine(IMachine *aMachine, IInternalMachineControl *aC
                 break;
 #ifdef VBOX_WITH_VIRT_ARMV8
             case PlatformArchitecture_ARM:
+#if !defined(RT_ARCH_ARM64) && !defined(VBOX_WITH_ARM_ON_X86_ENABLED)
+                {
+                    ComPtr<IVirtualBox> pVirtualBox;
+                    hrc = mMachine->COMGETTER(Parent)(pVirtualBox.asOutParam());
+                    if (SUCCEEDED(hrc))
+                    {
+                        Bstr bstrEnableArmOnX86;
+                        hrc = pVirtualBox->GetExtraData(Bstr("VBoxInternal2/EnableArmOnX86").raw(), bstrEnableArmOnX86.asOutParam());
+                        if (FAILED(hrc) || !bstrEnableArmOnX86.equals("1"))
+                        {
+                            hrc = setError(VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED,
+                                           tr("Cannot run the machine because its platform architecture %s is not supported on %s"),
+                                           Global::stringifyPlatformArchitecture(platformArch),
+                                           Global::stringifyPlatformArchitecture(PlatformArchitecture_x86));
+                            break;
+                        }
+                    }
+                }
+#endif
                 pszVMM = "VBoxVMMArm";
                 break;
 #endif
             default:
-                hrc = VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED;
+                hrc = setError(VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED,
+                               tr("Cannot run the machine because its platform architecture %s is not supported"),
+                               Global::stringifyPlatformArchitecture(platformArch));
                 break;
         }
 
