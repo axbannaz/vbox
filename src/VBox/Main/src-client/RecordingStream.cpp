@@ -462,7 +462,9 @@ int RecordingBlockWorker::Run(void)
     while (m_fShutdown || msTimeout > 0)
     {
         vrc = Worker(msTimeout, m_fShutdown, m_pvUser);
-        if (m_fShutdown || RT_FAILURE(vrc))
+        if (   vrc == VINF_CALLBACK_RETURN
+            || m_fShutdown
+            || RT_FAILURE(vrc))
             break;
 
         if (m_msWait)
@@ -471,6 +473,9 @@ int RecordingBlockWorker::Run(void)
             if (   RT_FAILURE(vrc)
                 && vrc != VERR_TIMEOUT)
                 break;
+
+            timeoutReset();
+            vrc = VINF_SUCCESS;
         }
 
         msTimeout = timeoutRemaining();
