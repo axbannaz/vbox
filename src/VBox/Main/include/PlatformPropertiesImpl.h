@@ -132,10 +132,11 @@ private:
     /** Flag set to \c true if this instance handles platform properties
      *  for the host, or set to \c false for guests. */
     bool const             mfIsHost;
-
-    // Data
-
-    settings::PlatformProperties *m;
+    /** Configurable data. */
+    struct
+    {
+        bool               fExclusiveHwVirt;
+    } mData;
 };
 
 #endif /* !MAIN_INCLUDED_PlatformPropertiesImpl_h */
