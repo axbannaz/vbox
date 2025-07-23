@@ -63,7 +63,7 @@ endif
 ## Internal.
 ## @param 1 full path to shader source.
 define def_VBoxDxMtCompileShader
- $(1)/shaders/$(basename $(notdir $(2))).h: $(2) | $$$$(dir $$$$@)
+ $(1)/shaders/$(basename $(notdir $(2))).h: $(2) $$$$(VBOX_BIN2C) | $$$$(dir $$$$@)
 	$(VBOX_METAL) -o "$$@.air" -c "$$<"
 	$(VBOX_METALLIB) -o "$$@.metallib" "$$@.air"
 	$(VBOX_BIN2C) "$$(basename $(notdir $(2)))_metallib" "$$@.metallib" "$$@"
