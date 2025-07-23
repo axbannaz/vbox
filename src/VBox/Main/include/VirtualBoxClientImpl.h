@@ -118,7 +118,6 @@ private:
         }
 
         ComPtr<IVirtualBox> m_pVirtualBox;
-        ComPtr<IToken> m_pToken;
         const ComObjPtr<EventSource> m_pEventSource;
         ComPtr<IEventSource> m_pVBoxEventSource;
         ComPtr<IEventListener> m_pVBoxEventListener;
