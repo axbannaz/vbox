@@ -10,7 +10,9 @@ since it is for internal use only
 #include "d3d11_annotation.hpp"
 #include "d3d11_context.hpp"
 #include "d3d11_device_child.hpp"
+#ifndef VBOX
 #include "d3d11_enumerable.hpp"
+#endif
 #include "d3d11_interfaces.hpp"
 #include "d3d11_private.h"
 #include "d3d11_context_state.hpp"
@@ -995,6 +997,7 @@ public:
       CopyBuffer((ID3D11Buffer *)pDstResource, 0, 0, 0, 0, (ID3D11Buffer *)pSrcResource, 0, nullptr);
       break;
     }
+#ifndef VBOX /* The called code includes some tl/generator.hpp header which does not compile with our older toolchain (and is way too abstract anyway)... */
     case D3D11_RESOURCE_DIMENSION_TEXTURE1D: {
       D3D11_TEXTURE1D_DESC desc;
       ((ID3D11Texture1D *)pSrcResource)->GetDesc(&desc);
@@ -1019,6 +1022,39 @@ public:
       }
       break;
     }
+#else
+    case D3D11_RESOURCE_DIMENSION_TEXTURE1D: {
+      D3D11_TEXTURE1D_DESC desc;
+      ((ID3D11Texture1D *)pSrcResource)->GetDesc(&desc);
+      for (uint32_t slice = 0; slice < desc.ArraySize; slice++) {
+        for (uint32_t level = 0; level < desc.MipLevels; level++) {
+              uint32_t subresourceId = D3D11CalcSubresource(level, slice, desc.MipLevels);
+              CopyTexture(TextureCopyCommand(Dst, subresourceId, 0, 0, 0, Src, subresourceId, nullptr));
+        }
+      }
+      break;
+    }
+    case D3D11_RESOURCE_DIMENSION_TEXTURE2D: {
+      D3D11_TEXTURE2D_DESC1 desc;
+      ((ID3D11Texture2D1 *)pSrcResource)->GetDesc1(&desc);
+      for (uint32_t slice = 0; slice < desc.ArraySize; slice++) {
+        for (uint32_t level = 0; level < desc.MipLevels; level++) {
+          uint32_t subresourceId = D3D11CalcSubresource(level, slice, desc.MipLevels);
+          CopyTexture(TextureCopyCommand(Dst, subresourceId, 0, 0, 0, Src, subresourceId, nullptr));
+        }
+      }
+      break;
+    }
+    case D3D11_RESOURCE_DIMENSION_TEXTURE3D: {
+      D3D11_TEXTURE3D_DESC1 desc;
+      ((ID3D11Texture3D1 *)pSrcResource)->GetDesc1(&desc);
+      for (uint32_t level = 0; level < desc.MipLevels; level++) {
+        uint32_t subresourceId = D3D11CalcSubresource(level, 0, desc.MipLevels);
+        CopyTexture(TextureCopyCommand(Dst, subresourceId, 0, 0, 0, Src, subresourceId, nullptr));
+      }
+      break;
+    }
+#endif
     }
   }
 

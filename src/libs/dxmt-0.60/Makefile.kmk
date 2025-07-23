@@ -287,7 +287,6 @@ VBox-DxMtNativeD3D11_SOURCES        = \
 	src/d3d11/d3d11_context_imm.cpp \
 	src/d3d11/d3d11_context_impl.cpp \
 	src/d3d11/d3d11_device.cpp \
-	src/d3d11/d3d11_enumerable.cpp \
 	src/d3d11/d3d11_fence.cpp \
 	src/d3d11/d3d11_input_layout.cpp \
 	src/d3d11/d3d11_inspection.cpp \
