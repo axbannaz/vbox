@@ -1005,9 +1005,6 @@ typedef struct VUSBIROOTHUBCONNECTOR
      */
     DECLR3CALLBACKMEMBER(VUSBSPEED, pfnDevGetSpeed,(PVUSBIROOTHUBCONNECTOR pInterface, uint32_t uPort));
 
-    /** Alignment dummy. */
-    RTR3PTR Alignment;
-
 } VUSBIROOTHUBCONNECTOR;
 AssertCompileSizeAlignment(VUSBIROOTHUBCONNECTOR, 8);
 /** VUSBIROOTHUBCONNECTOR interface ID. */
