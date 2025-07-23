@@ -1075,7 +1075,7 @@ HRESULT SystemProperties::getSupportedPlatformArchitectures(std::vector<Platform
     {
         Assert(aSupportedPlatformArchitectures[1] == PlatformArchitecture_ARM);
         if (aSupportedPlatformArchitectures[1] == PlatformArchitecture_ARM)
-            aSupportedPlatformArchitectures.erase(aSupportedPlatformArchitectures.begin());
+            aSupportedPlatformArchitectures.erase(std::next(aSupportedPlatformArchitectures.begin()));
     }
 #endif
     return S_OK;
