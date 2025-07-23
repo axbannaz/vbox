@@ -3090,6 +3090,56 @@ HRESULT Machine::launchVMProcess(const ComPtr<ISession> &aSession,
         if (FAILED(hrc))
             return hrc;
 
+        ComPtr<IPlatform> pPlatform;
+        hrc = COMGETTER(Platform)(pPlatform.asOutParam());
+        AssertComRCReturnRC(hrc);
+
+        PlatformArchitecture_T platformArch;
+        hrc = pPlatform->COMGETTER(Architecture)(&platformArch);
+        AssertComRCReturnRC(hrc);
+
+        switch (platformArch)
+        {
+            case PlatformArchitecture_x86:
+#if !defined(RT_ARCH_AMD64)
+# if !defined(VBOX_WITH_X86_ON_ARM_ENABLED)
+                {
+                    Bstr bstrEnableX86OnArm;
+                    hrc = mParent->GetExtraData(Bstr("VBoxInternal2/EnableX86OnArm").raw(), bstrEnableX86OnArm.asOutParam());
+                    if (SUCCEEDED(hrc) && bstrEnableX86OnArm.equals("1"))
+                        break;
+                }
+                return setError(VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED,
+                                tr("Cannot run the machine because its platform architecture %s is not supported on %s"),
+                                Global::stringifyPlatformArchitecture(platformArch),
+                                Global::stringifyPlatformArchitecture(PlatformArchitecture_ARM));
+# endif
+#endif
+                break;
+
+            case PlatformArchitecture_ARM:
+#if !defined(RT_ARCH_ARM64)
+# if !defined(VBOX_WITH_ARM_ON_X86_ENABLED)
+                {
+                    Bstr bstrEnableArmOnX86;
+                    hrc = mParent->GetExtraData(Bstr("VBoxInternal2/EnableArmOnX86").raw(), bstrEnableArmOnX86.asOutParam());
+                    if (SUCCEEDED(hrc) && bstrEnableArmOnX86.equals("1"))
+                        break;
+                }
+                return setError(VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED,
+                                tr("Cannot run the machine because its platform architecture %s is not supported on %s"),
+                                Global::stringifyPlatformArchitecture(platformArch),
+                                Global::stringifyPlatformArchitecture(PlatformArchitecture_x86));
+# endif
+#endif
+                break;
+
+            default:
+                return setError(VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED,
+                                tr("Cannot run the machine because its platform architecture %s is not supported"),
+                                Global::stringifyPlatformArchitecture(platformArch));
+        }
+
         /* create a progress object */
         ComObjPtr<ProgressProxy> progress;
         progress.createObject();
