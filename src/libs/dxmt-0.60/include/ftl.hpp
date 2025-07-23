@@ -49,13 +49,21 @@ constexpr T operator&(T lhs, T rhs)
 template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> = 0>
 constexpr T operator~(T lhs) 
 {
+#ifndef VBOX
   return static_cast<T>(~static_cast<std::underlying_type<T>::type>(lhs));
+#else
+  return static_cast<T>(~static_cast<typename std::underlying_type<T>::type>(lhs));
+#endif
 }
 
 template<class T, std::enable_if_t<std::is_enum_v<T>, int> = 0>
 constexpr bool any_bit_set(T lhs) 
 {
+#ifndef VBOX
   return static_cast<std::underlying_type<T>::type>(lhs) != 0;
+#else
+  return static_cast<typename std::underlying_type<T>::type>(lhs) != 0;
+#endif
 }
 
 template<class T, std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>> = 0>
