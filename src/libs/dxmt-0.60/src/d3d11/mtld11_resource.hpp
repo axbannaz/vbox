@@ -357,7 +357,7 @@ public:
 #ifndef VBOX
   TResourceViewBase(const tag::DESC1 *pDesc, tag::RESOURCE_IMPL *pResource,
 #else
-  TResourceViewBase(const typename tag::DESC1 *pDesc, tag::RESOURCE_IMPL *pResource,
+  TResourceViewBase(const typename tag::DESC1 *pDesc, typename tag::RESOURCE_IMPL *pResource,
 #endif
                     MTLD3D11Device *device)
       : MTLD3D11DeviceChild<typename tag::COM_IMPL, Base...>(device),
@@ -441,8 +441,13 @@ public:
   virtual dxmt::ResourceSubset GetViewRange() { return ResourceSubset(desc); };
 
 protected:
+#ifndef VBOX
   tag::DESC1 desc;
   tag::D3D10_IMPL d3d10;
+#else
+  typename tag::DESC1 desc;
+  typename tag::D3D10_IMPL d3d10;
+#endif
   /**
   strong ref to resource
   */
