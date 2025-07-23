@@ -37,8 +37,9 @@
 #include "UIChooser.h"
 #include "UICommon.h"
 #include "UIExtraDataManager.h"
-#include "UIIconPool.h"
+#include "UIGlobalSession.h"
 #include "UIGlobalToolsWidget.h"
+#include "UIIconPool.h"
 #include "UIMachineToolsWidget.h"
 #include "UINotificationCenter.h"
 #include "UIToolPane.h"
@@ -46,7 +47,6 @@
 #include "UIVirtualBoxManager.h"
 #include "UIVirtualBoxWidget.h"
 #include "UIVirtualMachineItem.h"
-#include "UIGlobalSession.h"
 
 /* COM includes: */
 #include "CSystemProperties.h"
@@ -375,7 +375,7 @@ void UIVirtualBoxWidget::prepareWidgets()
             {
 #if defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32)
                 const KPlatformArchitecture enmArch = KPlatformArchitecture_x86;
-#elif defined (RT_ARCH_X86) || defined (RT_ARCH_AMD64)
+#elif defined(RT_ARCH_X86) || defined(RT_ARCH_AMD64)
                 const KPlatformArchitecture enmArch = KPlatformArchitecture_ARM;
 #else
                 const KPlatformArchitecture enmArch = KPlatformArchitecture_None;
