@@ -2854,13 +2854,22 @@ HRESULT Machine::lockMachine(const ComPtr<ISession> &aSession,
 #endif /* VBOX_WITH_GENERIC_SESSION_WATCHER */
             LogFlowThisFunc(("AssignMachine() returned %08X\n", hrc));
 
-            /* The failure may occur w/o any error info (from RPC), so provide one */
+            /* The failure may occur w/o any error info (from RPC), so provide a message if there is none. */
             if (FAILED(hrc))
-                setError(VBOX_E_VM_ERROR, tr("Failed to assign the machine to the session (%Rhrc)"), hrc);
+            {
+                ErrorInfoKeeper eik;
+                eik.restore();
+                if (!eik.isBasicAvailable())
+                {
+                    eik.forget();
+                    setError(VBOX_E_VM_ERROR, tr("Failed to assign the machine to the session (%Rhrc)"), hrc);
+                }
+            }
 
             // get session name, either to remember or to compare against
             // the already known session name.
             {
+                ErrorInfoKeeper eik; // do not lose relevant error info from above in API call below
                 Bstr bstrSessionName;
                 HRESULT hrc2 = aSession->COMGETTER(Name)(bstrSessionName.asOutParam());
                 if (SUCCEEDED(hrc2))
@@ -2929,7 +2938,8 @@ HRESULT Machine::lockMachine(const ComPtr<ISession> &aSession,
                  * and reset session state to Closed (@note keep the code in sync
                  * with the relevant part in checkForSpawnFailure()). */
 
-                Assert(mData->mSession.mRemoteControls.size() == 1);
+                if (hrc != VBOX_E_PLATFORM_ARCH_NOT_SUPPORTED)
+                    Assert(mData->mSession.mRemoteControls.size() == 1);
                 if (mData->mSession.mRemoteControls.size() == 1)
                 {
                     ErrorInfoKeeper eik;
@@ -12883,6 +12893,7 @@ void SessionMachine::uninit(Uninit::Reason aReason)
 
     /* remove the association between the peer machine and this session machine */
     Assert(   (SessionMachine*)mData->mSession.mMachine == this
+            || aReason == Uninit::Abnormal
             || aReason == Uninit::Unexpected);
 
     /* reset the rest of session data */
