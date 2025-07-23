@@ -1706,6 +1706,14 @@ SystemProperties::SystemProperties()
 {
 }
 
+PlatformProperties::PlatformProperties()
+    : fExclusiveHwVirt(true)
+{
+#if defined(RT_OS_DARWIN) || defined(RT_OS_WINDOWS) || defined(RT_OS_SOLARIS)
+    fExclusiveHwVirt = false; /** @todo BUGBUG Does this apply to MacOS on ARM as well? */
+#endif
+}
+
 #ifdef VBOX_WITH_UPDATE_AGENT
 UpdateAgent::UpdateAgent()
    : fEnabled(false)
@@ -2959,11 +2967,6 @@ RecordingScreen::RecordingScreen(uint32_t a_idScreen /* = UINT32_MAX */)
     : idScreen(a_idScreen)
 {
     applyDefaults();
-}
-
-RecordingScreen::~RecordingScreen()
-{
-
 }
 
 /**

@@ -380,13 +380,7 @@ struct SystemProperties
 
 struct PlatformProperties
 {
-    PlatformProperties()
-        : fExclusiveHwVirt(true)
-    {
-#if defined(RT_OS_DARWIN) || defined(RT_OS_WINDOWS) || defined(RT_OS_SOLARIS)
-        fExclusiveHwVirt = false; /** @todo BUGBUG Does this apply to MacOS on ARM as well? */
-#endif
-    }
+    PlatformProperties();
 
     bool                    fExclusiveHwVirt;
 };
@@ -678,7 +672,6 @@ struct NvramSettings
 struct RecordingScreen
 {
     RecordingScreen(uint32_t idScreen = UINT32_MAX);
-    virtual ~RecordingScreen();
 
 #if RT_CPLUSPLUS_PREREQ(201100) /* VC2022: Excplit default copy constructor and copy assignment operator to avoid warnings. */
     RecordingScreen(RecordingScreen const &) = default;
