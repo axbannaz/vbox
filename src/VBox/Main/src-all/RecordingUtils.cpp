@@ -45,6 +45,7 @@
 #include <VBox/log.h>
 
 
+#ifndef IN_VBOXSVC /* Code only used in VBoxC. */
 /**
  * Convert an image to YUV420p format.
  *
@@ -84,9 +85,9 @@ inline bool recordingUtilsColorConvWriteYUV420p(uint8_t *aDstBuf, unsigned aDstW
                 uint8_t g = aSrcBuf[4 * i + 1];
                 uint8_t r = aSrcBuf[4 * i + 2];
 
-                aDstBuf[i++]    =          CALC_Y(r, g, b);
-                aDstBuf[upos++] = (uint8_t)CALC_U(r, g, b);
-                aDstBuf[vpos++] = (uint8_t)CALC_V(r, g, b);
+                aDstBuf[i++]    = CALC_Y(r, g, b);
+                aDstBuf[upos++] = CALC_U(r, g, b);
+                aDstBuf[vpos++] = CALC_V(r, g, b);
 
                 b = aSrcBuf[4 * i];
                 g = aSrcBuf[4 * i + 1];
@@ -182,15 +183,15 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t g = paSrc[4 * i + 1];
                 uint8_t r = paSrc[4 * i + 2];
 
-                paDst[i++]    = (uint8_t)CALC_Y(r, g, b);
-                paDst[upos++] = (uint8_t)CALC_U(r, g, b);
-                paDst[vpos++] = (uint8_t)CALC_V(r, g, b);
+                paDst[i++]    = CALC_Y(r, g, b);
+                paDst[upos++] = CALC_U(r, g, b);
+                paDst[vpos++] = CALC_V(r, g, b);
 
                 b = paSrc[4 * i];
                 g = paSrc[4 * i + 1];
                 r = paSrc[4 * i + 2];
 
-                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
+                paDst[i++] = CALC_Y(r, g, b);
             }
         }
         else
@@ -201,7 +202,7 @@ void RecordingUtilsConvBGRA32ToYUVI420(uint8_t *paDst, uint32_t uDstWidth, uint3
                 uint8_t const g = paSrc[4 * i + 1];
                 uint8_t const r = paSrc[4 * i + 2];
 
-                paDst[i++] = (uint8_t)CALC_Y(r, g, b);
+                paDst[i++] = CALC_Y(r, g, b);
             }
         }
     }
@@ -265,9 +266,9 @@ void RecordingUtilsConvBGRA32ToYUVI420Ex(uint8_t *paDst, uint32_t uDstX, uint32_
             size_t const offY  = uDstY * uDstWidth + uDstXCur;
             size_t const offUV = (uDstY / 2) * (uDstWidth / 2) + (uDstXCur / 2) + uDstWidth * uDstHeight;
 
-            paDst[offY]                               = (uint8_t)CALC_Y(r, g, b);
-            paDst[offUV]                              = (uint8_t)CALC_U(r, g, b);
-            paDst[offUV + uDstWidth * uDstHeight / 4] = (uint8_t)CALC_V(r, g, b);
+            paDst[offY]                               = CALC_Y(r, g, b);
+            paDst[offUV]                              = CALC_U(r, g, b);
+            paDst[offUV + uDstWidth * uDstHeight / 4] = CALC_V(r, g, b);
 
             uDstXCur++;
         }
@@ -383,60 +384,7 @@ const char *RecordingUtilsRecordingFrameTypeToStr(RECORDINGFRAME_TYPE enmType)
     AssertFailedReturn("Unknown");
 }
 
-/**
- * Converts an audio codec to a serializable string.
- *
- * @returns Recording audio codec as a string.
- * @param   enmCodec            Codec to convert to a string.
- *
- * @note    Warning! Do not change these values unless you know what you're doing.
- *                   Those values are being used for serializing the settings.
- */
-const char *RecordingUtilsAudioCodecToStr(RecordingAudioCodec_T enmCodec)
-{
-    switch (enmCodec)
-    {
-        case RecordingAudioCodec_None:      return "none";
-        case RecordingAudioCodec_WavPCM:    return "wav";
-        case RecordingAudioCodec_MP3:       return "mp3";
-        case RecordingAudioCodec_Opus:      return "opus";
-        case RecordingAudioCodec_OggVorbis: return "vorbis";
-        default:                            break;
-    }
-
-    AssertFailedReturn("<invalid>");
-}
-
-/**
- * Converts a video codec to a serializable string.
- *
- * @returns Recording video codec as a string.
- * @param   enmCodec            Codec to convert to a string.
- *
- * @note    Warning! Do not change these values unless you know what you're doing.
- *                   Those values are being used for serializing the settings.
- */
-const char *RecordingUtilsVideoCodecToStr(RecordingVideoCodec_T enmCodec)
-{
-    switch (enmCodec)
-    {
-        case RecordingVideoCodec_None:  return "none";
-        case RecordingVideoCodec_MJPEG: return "MJPEG";
-        case RecordingVideoCodec_H262:  return "H262";
-        case RecordingVideoCodec_H264:  return "H264";
-        case RecordingVideoCodec_H265:  return "H265";
-        case RecordingVideoCodec_H266:  return "H266";
-        case RecordingVideoCodec_VP8:   return "VP8";
-        case RecordingVideoCodec_VP9:   return "VP9";
-        case RecordingVideoCodec_AV1:   return "AV1";
-        case RecordingVideoCodec_Other: return "other";
-        default:                        break;
-    }
-
-    AssertFailedReturn("<invalid>");
-}
-
-#ifdef DEBUG
+# ifdef DEBUG
 /**
  * Dumps image data to a bitmap (BMP) file, inline version.
  *
@@ -627,4 +575,59 @@ void RecordingUtilsDbgLogFrame(PRECORDINGFRAME pFrame)
             break;
     }
 }
-#endif /* DEBUG */
+# endif /* DEBUG */
+#endif  /* !IN_VBOXSVC */
+
+/**
+ * Converts an audio codec to a serializable string.
+ *
+ * @returns Recording audio codec as a string.
+ * @param   enmCodec            Codec to convert to a string.
+ *
+ * @note    Warning! Do not change these values unless you know what you're doing.
+ *                   Those values are being used for serializing the settings.
+ */
+const char *RecordingUtilsAudioCodecToStr(RecordingAudioCodec_T enmCodec)
+{
+    switch (enmCodec)
+    {
+        case RecordingAudioCodec_None:      return "none";
+        case RecordingAudioCodec_WavPCM:    return "wav";
+        case RecordingAudioCodec_MP3:       return "mp3";
+        case RecordingAudioCodec_Opus:      return "opus";
+        case RecordingAudioCodec_OggVorbis: return "vorbis";
+        default:                            break;
+    }
+
+    AssertFailedReturn("<invalid>");
+}
+
+/**
+ * Converts a video codec to a serializable string.
+ *
+ * @returns Recording video codec as a string.
+ * @param   enmCodec            Codec to convert to a string.
+ *
+ * @note    Warning! Do not change these values unless you know what you're doing.
+ *                   Those values are being used for serializing the settings.
+ */
+const char *RecordingUtilsVideoCodecToStr(RecordingVideoCodec_T enmCodec)
+{
+    switch (enmCodec)
+    {
+        case RecordingVideoCodec_None:  return "none";
+        case RecordingVideoCodec_MJPEG: return "MJPEG";
+        case RecordingVideoCodec_H262:  return "H262";
+        case RecordingVideoCodec_H264:  return "H264";
+        case RecordingVideoCodec_H265:  return "H265";
+        case RecordingVideoCodec_H266:  return "H266";
+        case RecordingVideoCodec_VP8:   return "VP8";
+        case RecordingVideoCodec_VP9:   return "VP9";
+        case RecordingVideoCodec_AV1:   return "AV1";
+        case RecordingVideoCodec_Other: return "other";
+        default:                        break;
+    }
+
+    AssertFailedReturn("<invalid>");
+}
+
