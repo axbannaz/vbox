@@ -853,82 +853,82 @@ static uint16_t gicDistGetHighestPriorityPendingIntr(PCGICDEV pGicDev, PCVMCPUCC
 
 
 /**
- * Gets whether the redistributor has pending interrupts with sufficient priority to
- * be signalled to the PE.
+ * Updates the internal IRQ state of the redistributor and sets or clears the
+ * appropriate force action flags.
  *
+ * @returns Strict VBox status code.
  * @param   pVCpu       The cross context virtual CPU structure.
- * @param   pGicCpu     The GIC redistributor and CPU interface state.
- * @param   pfIrq       Where to store whether IRQs can be signalled.
- * @param   pfFiq       Where to store whether FIQs can be signalled.
  */
-static void gicReDistHasIrqPending(PCVMCPUCC pVCpu, PCGICCPU pGicCpu, bool *pfIrq, bool *pfFiq)
+static VBOXSTRICTRC gicReDistUpdateIrqState(PVMCPUCC pVCpu)
 {
-    uint32_t const fIntrGroupMask = pGicCpu->fIntrGroupMask;
-    LogFlowFunc(("fIntrGroupMask=%#RX32\n", fIntrGroupMask));
+    LogFlowFunc(("\n"));
+    PCGICCPU   pGicCpu = VMCPU_TO_GICCPU(pVCpu);
+    PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
+    PCGICDEV   pGicDev = PDMDEVINS_2_DATA(pDevIns, PCGICDEV);
 
-    /* Only proceed if one or more interrupts groups are enabled in the redistributor. */
-    if (fIntrGroupMask)
+    /* Redistributor. */
+    bool fIrq = false;
+    bool fFiq = false;
     {
-        /* Get the highest pending priority interrupt from the redistributor. */
-        GICINTR Intr;
-        gicReDistGetHighestPriorityPendingIntr(pVCpu, fIntrGroupMask, &Intr);
-        if (Intr.uIntId != GIC_INTID_RANGE_SPECIAL_NO_INTERRUPT)
+        uint32_t const fIntrGroupMask = pGicCpu->fIntrGroupMask;
+        if (   fIntrGroupMask
+            && pGicCpu->bIntrPriorityMask
+            && pGicCpu->abRunningPriorities[pGicCpu->idxRunningPriority])
         {
-            /* Check if it has sufficient priority to be signalled to the PE. */
-            bool const fGroup0 = RT_BOOL(fIntrGroupMask & GIC_INTR_GROUP_0);
-            bool const fSufficientPriority = gicReDistIsSufficientPriority(pGicCpu, Intr.bPriority, fGroup0);
-            if (fSufficientPriority)
+            GICINTR Intr;
+            gicReDistGetHighestPriorityPendingIntr(pVCpu, fIntrGroupMask, &Intr);
+            if (Intr.uIntId != GIC_INTID_RANGE_SPECIAL_NO_INTERRUPT)
             {
-                *pfFiq = RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & GIC_INTR_GROUP_0);
-                *pfIrq = RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & (GIC_INTR_GROUP_1S | GIC_INTR_GROUP_1NS));
-                return;
+                bool const fGroup0 = RT_BOOL(fIntrGroupMask & GIC_INTR_GROUP_0);
+                bool const fSufficientPriority = gicReDistIsSufficientPriority(pGicCpu, Intr.bPriority, fGroup0);
+                if (fSufficientPriority)
+                {
+                    fFiq |= RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & GIC_INTR_GROUP_0);
+                    fIrq |= RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & (GIC_INTR_GROUP_1S | GIC_INTR_GROUP_1NS));
+                }
             }
         }
     }
 
-    *pfIrq = false;
-    *pfFiq = false;
+    /* Distributor. */
+    {
+        uint32_t const fIntrGroupMask = pGicDev->fIntrGroupMask;
+        if (fIntrGroupMask)
+        {
+            GICINTR Intr;
+            gicDistGetHighestPriorityPendingIntr(pGicDev, pVCpu, fIntrGroupMask, &Intr);
+            if (Intr.uIntId != GIC_INTID_RANGE_SPECIAL_NO_INTERRUPT)
+            {
+                bool const fGroup0 = RT_BOOL(fIntrGroupMask & GIC_INTR_GROUP_0);
+                bool const fSufficientPriority = gicReDistIsSufficientPriority(pGicCpu, Intr.bPriority, fGroup0);
+                if (fSufficientPriority)
+                {
+                    fFiq |= RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & GIC_INTR_GROUP_0);
+                    fIrq |= RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & (GIC_INTR_GROUP_1S | GIC_INTR_GROUP_1NS));
+                }
+            }
+        }
+    }
+
+    gicUpdateInterruptFF(pVCpu, fIrq, fFiq);
+    return VINF_SUCCESS;
 }
 
 
 /**
- * Gets whether the distributor has pending interrupts with sufficient priority to
- * be signalled to the PE.
+ * Updates the internal IRQ state of the distributor and sets or clears the
+ * appropriate force action flags.
  *
- * @param   pVCpu       The cross context virtual CPU structure.
- * @param   pGicCpu     The GIC redistributor and CPU interface state.
- * @param   pfIrq       Where to store whether there are IRQs can be signalled.
- * @param   pfFiq       Where to store whether there are FIQs can be signalled.
+ * @returns Strict VBox status code.
+ * @param   pVM     The cross context VM state.
  */
-static void gicDistHasIrqPendingForVCpu(PCVMCPUCC pVCpu, PCGICCPU pGicCpu, bool *pfIrq, bool *pfFiq)
+static VBOXSTRICTRC gicDistUpdateIrqState(PCVMCC pVM)
 {
-    PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
-    PCGICDEV   pGicDev = PDMDEVINS_2_DATA(pDevIns, PCGICDEV);
-    uint32_t const fIntrGroupMask = pGicDev->fIntrGroupMask;
-    LogFlowFunc(("fIntrGroupMask=%#RX32\n", fIntrGroupMask));
-
-    /* Only proceed if one or more interrupts groups are enabled in the redistributor. */
-    if (fIntrGroupMask)
-    {
-        /* Get the highest pending priority interrupt from the distributor. */
-        GICINTR Intr;
-        gicDistGetHighestPriorityPendingIntr(pGicDev, pVCpu, fIntrGroupMask, &Intr);
-        if (Intr.uIntId != GIC_INTID_RANGE_SPECIAL_NO_INTERRUPT)
-        {
-            /* Check if it has sufficient priority to be signalled to the PE. */
-            bool const fGroup0 = RT_BOOL(fIntrGroupMask & GIC_INTR_GROUP_0);
-            bool const fSufficientPriority = gicReDistIsSufficientPriority(pGicCpu, Intr.bPriority, fGroup0);
-            if (fSufficientPriority)
-            {
-                *pfFiq = RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & GIC_INTR_GROUP_0);
-                *pfIrq = RT_BOOL(fIntrGroupMask & Intr.fIntrGroupMask & (GIC_INTR_GROUP_1S | GIC_INTR_GROUP_1NS));
-                return;
-            }
-        }
-    }
-
-    *pfIrq = false;
-    *pfFiq = false;
+    LogFlowFunc(("\n"));
+    VMCC_FOR_EACH_VMCPU(pVM)
+        gicReDistUpdateIrqState(pVCpu);
+    VMCC_FOR_EACH_VMCPU_END(pVM);
+    return VINF_SUCCESS;
 }
 
 
@@ -1001,71 +1001,6 @@ static void gicReDistReadLpiPendingTableFromMem(PPDMDEVINS pDevIns, PVMCPU pVCpu
     /* If the guest indicates the table is zero'ed OR if we failed to read the table for whatever reason,
        clear our LPI pending cache. */
     RT_ZERO(pGicCpu->LpiPending);
-}
-
-
-/**
- * Updates the internal IRQ state of the redistributor and sets or clears the
- * appropriate force action flags.
- *
- * @returns Strict VBox status code.
- * @param   pVCpu       The cross context virtual CPU structure.
- */
-static VBOXSTRICTRC gicReDistUpdateIrqState(PVMCPUCC pVCpu)
-{
-    LogFlowFunc(("\n"));
-
-    /* Quick bailout if all interrupts are masked of the active interrupt is at the highest priority. */
-    PCGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
-    if (   pGicCpu->bIntrPriorityMask
-        && pGicCpu->abRunningPriorities[pGicCpu->idxRunningPriority])
-    {
-        bool fIrq, fFiq;
-        gicReDistHasIrqPending(pVCpu, pGicCpu, &fIrq, &fFiq);
-
-        bool fIrqDist, fFiqDist;
-        gicDistHasIrqPendingForVCpu(pVCpu, pGicCpu, &fIrqDist, &fFiqDist);
-
-        fIrq |= fIrqDist;
-        fFiq |= fFiqDist;
-        gicUpdateInterruptFF(pVCpu, fIrq, fFiq);
-    }
-    return VINF_SUCCESS;
-}
-
-
-/**
- * Updates the internal IRQ state of the distributor and sets or clears the
- * appropriate force action flags.
- *
- * @returns Strict VBox status code.
- * @param   pVM     The cross context VM state.
- */
-static VBOXSTRICTRC gicDistUpdateIrqState(PCVMCC pVM)
-{
-    LogFlowFunc(("\n"));
-
-    VMCC_FOR_EACH_VMCPU(pVM)
-    {
-        /* Quick bailout if all interrupts are masked of the active interrupt is at the highest priority. */
-        PCGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
-        if (   pGicCpu->bIntrPriorityMask
-            && pGicCpu->abRunningPriorities[pGicCpu->idxRunningPriority])
-        {
-            bool fIrq, fFiq;
-            gicReDistHasIrqPending(pVCpu, pGicCpu, &fIrq, &fFiq);
-
-            bool fIrqDist, fFiqDist;
-            gicDistHasIrqPendingForVCpu(pVCpu, pGicCpu, &fIrqDist, &fFiqDist);
-            fIrq |= fIrqDist;
-            fFiq |= fFiqDist;
-
-            gicUpdateInterruptFF(pVCpu, fIrq, fFiq);
-        }
-    }
-    VMCC_FOR_EACH_VMCPU_END(pVM);
-
-    return VINF_SUCCESS;
 }
 
 
@@ -2008,7 +1943,6 @@ static uint16_t gicGetHighestPriorityPendingIntr(PCVMCPUCC pVCpu, uint32_t fIntr
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
 
-    /* Quick bailout if all interrupts are fully masked or if the active interrupt is at the highest priority. */
     uint16_t uIntId;
     if (   pGicCpu->bIntrPriorityMask
         && pGicCpu->abRunningPriorities[pGicCpu->idxRunningPriority])
