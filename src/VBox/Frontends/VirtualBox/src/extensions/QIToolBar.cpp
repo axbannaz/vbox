@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2024 Oracle and/or its affiliates.
+ * Copyright (C) 2006-2025 Oracle and/or its affiliates.
  *
  * This file is part of VirtualBox base platform packages, as
  * available from https://www.virtualbox.org.
@@ -28,11 +28,11 @@
 /* Qt includes: */
 #include <QLayout>
 #include <QMainWindow>
+#include <QPainter>
+#include <QPainterPath>
 #include <QResizeEvent>
 #ifdef VBOX_WS_MAC
 # include <QApplication>
-# include <QPainter>
-# include <QPainterPath>
 #endif
 
 /* GUI includes: */
@@ -45,11 +45,9 @@
 QIToolBar::QIToolBar(QWidget *pParent /* = 0 */)
     : QToolBar(pParent)
     , m_pMainWindow(qobject_cast<QMainWindow*>(pParent))
-#ifdef VBOX_WS_MAC
     , m_fEmulateUnifiedToolbar(false)
     , m_iOverallContentsWidth(0)
     , m_iBrandingWidth(0)
-#endif
 {
     prepare();
 }
@@ -83,15 +81,16 @@ void QIToolBar::enableMacToolbar()
         m_pMainWindow->setUnifiedTitleAndToolBarOnMac(true);
 }
 
-void QIToolBar::emulateMacToolbar()
-{
-    /* Remember request, to be used in paintEvent: */
-    m_fEmulateUnifiedToolbar = true;
-}
-
 void QIToolBar::setShowToolBarButton(bool fShow)
 {
     ::darwinSetShowsToolbarButton(this, fShow);
+}
+#endif /* VBOX_WS_MAC */
+
+void QIToolBar::emulateUnifiedToolbar()
+{
+    /* Remember request, to be used in paintEvent: */
+    m_fEmulateUnifiedToolbar = true;
 }
 
 void QIToolBar::enableBranding(const QIcon &icnBranding,
@@ -105,7 +104,6 @@ void QIToolBar::enableBranding(const QIcon &icnBranding,
     m_iBrandingWidth = iBrandingWidth;
     update();
 }
-#endif /* VBOX_WS_MAC */
 
 bool QIToolBar::event(QEvent *pEvent)
 {
@@ -116,7 +114,6 @@ bool QIToolBar::event(QEvent *pEvent)
     /* Handle required event types: */
     switch (pEvent->type())
     {
-#ifdef VBOX_WS_MAC
         case QEvent::LayoutRequest:
         {
             /* Recalculate overall contents width on layout
@@ -125,7 +122,6 @@ bool QIToolBar::event(QEvent *pEvent)
                 recalculateOverallContentsWidth();
             break;
         }
-#endif /* VBOX_WS_MAC */
         default:
             break;
     }
@@ -143,7 +139,6 @@ void QIToolBar::resizeEvent(QResizeEvent *pEvent)
     emit sigResized(pEvent->size());
 }
 
-#ifdef VBOX_WS_MAC
 void QIToolBar::paintEvent(QPaintEvent *pEvent)
 {
     /* Call to base-class: */
@@ -159,19 +154,18 @@ void QIToolBar::paintEvent(QPaintEvent *pEvent)
         /* Acquire full rectangle: */
         const QRect rectangle = rect();
 
+#if defined (VBOX_WS_MAC)
         /* Prepare gradient: */
         const QColor backgroundColor = QApplication::palette().color(QPalette::Active, QPalette::Window);
         QLinearGradient gradient(rectangle.topLeft(), rectangle.bottomLeft());
-#if defined (VBOX_WS_MAC)
         gradient.setColorAt(0, backgroundColor.lighter(105));
         gradient.setColorAt(1, backgroundColor.darker(105));
-#else
-        gradient.setColorAt(0, backgroundColor.darker(105));
-        gradient.setColorAt(1, backgroundColor.darker(115));
-#endif
 
         /* Fill background: */
         painter.fillRect(rectangle, gradient);
+#else
+        // it seems like we don't need background at all ..
+#endif
 
         /* Do we have branding stuff and a place for it? */
         if (   !m_icnBranding.isNull()
@@ -225,7 +219,6 @@ void QIToolBar::paintEvent(QPaintEvent *pEvent)
         }
     }
 }
-#endif /* VBOX_WS_MAC */
 
 void QIToolBar::prepare()
 {
@@ -245,7 +238,6 @@ void QIToolBar::prepare()
     setContextMenuPolicy(Qt::PreventContextMenu);
 }
 
-#ifdef VBOX_WS_MAC
 void QIToolBar::recalculateOverallContentsWidth()
 {
     /* Reset contents width: */
@@ -273,4 +265,3 @@ void QIToolBar::recalculateOverallContentsWidth()
     /* Update result: */
     m_iOverallContentsWidth = qMax(m_iOverallContentsWidth, iResult);
 }
-#endif /* VBOX_WS_MAC */

@@ -4,7 +4,7 @@
  */
 
 /*
- * Copyright (C) 2006-2024 Oracle and/or its affiliates.
+ * Copyright (C) 2006-2025 Oracle and/or its affiliates.
  *
  * This file is part of VirtualBox base platform packages, as
  * available from https://www.virtualbox.org.
@@ -37,6 +37,7 @@
 #include "UIChooser.h"
 #include "UICommon.h"
 #include "UIExtraDataManager.h"
+#include "UIIconPool.h"
 #include "UIGlobalToolsWidget.h"
 #include "UIMachineToolsWidget.h"
 #include "UINotificationCenter.h"
@@ -47,8 +48,6 @@
 #include "UIVirtualMachineItem.h"
 #if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
 # include "UIGlobalSession.h"
-# include "UIIconPool.h"
-# include "UIVersion.h"
 #endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
 
 /* COM includes: */
@@ -373,27 +372,26 @@ void UIVirtualBoxWidget::prepareWidgets()
             m_pToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
             m_pToolBar->setUseTextLabels(true);
 
-#if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
             /* Check whether we should show Dev Preview tag: */
-            bool fShowDevPreviewTag = false;
+            bool fShowDevPreviewTag = true;
+#if defined(VBOX_WS_MAC) && (defined(RT_ARCH_ARM64) || defined(RT_ARCH_ARM32))
             const CVirtualBox comVBox = gpGlobalSession->virtualBox();
             if (comVBox.isNotNull())
             {
                 const CSystemProperties comSystemProps = comVBox.GetSystemProperties();
                 if (comVBox.isOk() && comSystemProps.isNotNull())
-                    fShowDevPreviewTag =
-                        comSystemProps.GetSupportedPlatformArchitectures().contains(KPlatformArchitecture_x86);
+                    fShowDevPreviewTag = comSystemProps.GetSupportedPlatformArchitectures().contains(KPlatformArchitecture_x86);
             }
+#endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
             /* Enable Dev Preview tag: */
             if (fShowDevPreviewTag)
             {
-                m_pToolBar->emulateMacToolbar();
+                m_pToolBar->emulateUnifiedToolbar();
                 m_pToolBar->enableBranding(UIIconPool::iconSet(":/explosion_hazard_32px.png"),
                                            "Dev Preview", // do we need to make it NLS?
                                            QColor(246, 179, 0),
                                            74 /* width of BETA label */);
             }
-#endif /* VBOX_WS_MAC && (RT_ARCH_ARM64 || RT_ARCH_ARM32) */
 
             /* Add toolbar into layout: */
             m_pGlobalToolsWidget->addToolBar(m_pToolBar);
