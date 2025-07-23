@@ -82,7 +82,7 @@ EXPORTEDNAME g_cbEfiFirmwareArm64
         dd  end_arm64_firmware - NAME(g_abEfiFirmwareArm64)
 
  %ifdef ASM_FORMAT_ELF
-size g_abEfiFirmwareArm32 end_arm_firmware - NAME(g_abEfiFirmwareArm32)
+size g_abEfiFirmwareArm32 end_arm32_firmware - NAME(g_abEfiFirmwareArm32)
 type g_abEfiFirmwareArm32 object
 size g_cbEfiFirmwareArm32 4
 type g_cbEfiFirmwareArm32 object
