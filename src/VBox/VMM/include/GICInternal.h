@@ -206,8 +206,6 @@ typedef struct GICDEV
     uint32_t                    au32IntrRouting[2048];
     /** Mask of enabled interrupt groups (see GIC_INTR_GROUP_XXX). */
     uint32_t                    fIntrGroupMask;
-    /** Flag whether affinity routing is enabled. */
-    bool                        fAffRouting;
     /** @} */
 
     /** @name Configurables.
@@ -232,6 +230,8 @@ typedef struct GICDEV
     bool                        fNmi;
     /** Whether message-based interrupts are supported (GICD_TYPER.MBIS). */
     bool                        fMbi;
+    /** Flag whether affinity routing is enabled. */
+    bool                        fAffRouting;
     /** Whether non-zero affinity 3 levels are supported (GICD_TYPER.A3V) and
      *  (ICC_CTLR.A3V). */
     bool                        fAff3Levels;
@@ -246,15 +246,15 @@ typedef struct GICDEV
     /** Whether LPIs are enabled (GICR_CTLR.EnableLpis of all redistributors). */
     bool                        fEnableLpis;
     /** Padding. */
-    bool                        afPadding0;
-    /** ITS device state. */
-    GITSDEV                     Gits;
+    bool                        afPadding0[5];
     /** LPI config table. */
     uint8_t                     abLpiConfig[8192];
     /** LPI config table base register (GICR_PROPBASER). */
     RTUINT64U                   uLpiConfigBaseReg;
     /** LPI pending table base register (GICR_PENDBASER). */
     RTUINT64U                   uLpiPendingBaseReg;
+    /** ITS device state. */
+    GITSDEV                     Gits;
     /** @} */
 
     /** @name MMIO data.
@@ -285,10 +285,11 @@ typedef struct GICDEV
 typedef GICDEV *PGICDEV;
 /** Pointer to a const GIC device. */
 typedef GICDEV const *PCGICDEV;
-AssertCompileMemberAlignment(GICDEV, au32IntrRouting, 4);
-AssertCompileMemberAlignment(GICDEV, abIntrPriority,  4);
-AssertCompileMemberAlignment(GICDEV, Gits,            8);
+AssertCompileMemberAlignment(GICDEV, abIntrPriority,  8);
+AssertCompileMemberAlignment(GICDEV, au32IntrRouting, 8);
+AssertCompileMemberAlignment(GICDEV, fIntrGroupMask,  8);
 AssertCompileMemberAlignment(GICDEV, abLpiConfig,     8);
+AssertCompileMemberAlignment(GICDEV, Gits,            8);
 AssertCompileMemberAlignment(GICDEV, hMmioDist,       8);
 
 /**

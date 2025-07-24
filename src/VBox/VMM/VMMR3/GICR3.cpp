@@ -43,7 +43,10 @@
 *   Defined Constants And Macros                                                                                                 *
 *********************************************************************************************************************************/
 /** GIC saved state version. */
-#define GIC_SAVED_STATE_VERSION                     15
+#define GIC_SAVED_STATE_VERSION                     16
+/** GIC saved state marker. */
+#define GIC_SAVED_STATE_MARKER                      UINT64_C(0x61c57a7e5afe10ad)
+
 
 # define GIC_SYSREGRANGE(a_uFirst, a_uLast, a_szName) \
     { (a_uFirst), (a_uLast), kCpumSysRegRdFn_GicIcc, kCpumSysRegWrFn_GicIcc, 0, 0, 0, 0, 0, 0, a_szName, { 0 }, { 0 }, { 0 }, { 0 } }
@@ -489,6 +492,39 @@ static DECLCALLBACK(int) gicItsR3CmdQueueThreadWakeUp(PPDMDEVINS pDevIns, PPDMTH
 
 
 /**
+ * Logs the GIC and GITS basic configuration parameters to the release log.
+ *
+ * @param   pGicDev     The GIC distributor state.
+ */
+static void gicR3LogConfig(PCGICDEV pGicDev)
+{
+    uint8_t const uArchRev      = pGicDev->uArchRev;
+    uint8_t const uArchRevMinor = pGicDev->uArchRevMinor;
+    uint8_t const uMaxSpi       = pGicDev->uMaxSpi;
+    bool const    fExtSpi       = pGicDev->fExtSpi;
+    uint8_t const uMaxExtSpi    = pGicDev->uMaxExtSpi;
+    bool const    fExtPpi       = pGicDev->fExtPpi;
+    uint8_t const uMaxExtPpi    = pGicDev->uMaxExtPpi;
+    bool const fRangeSel        = pGicDev->fRangeSel;
+    bool const fNmi             = pGicDev->fNmi;
+    bool const fMbi             = pGicDev->fMbi;
+    bool const fAff3Levels      = pGicDev->fAff3Levels;
+    bool const fLpi             = pGicDev->fLpi;
+    uint32_t const uMaxLpi      = pGicDev->uMaxLpi;
+    uint16_t const uExtPpiLast  = uMaxExtPpi == GIC_REDIST_REG_TYPER_PPI_NUM_MAX_1087 ? 1087 : GIC_INTID_RANGE_EXT_PPI_LAST;
+    LogRel(("GIC: ArchRev=%u.%u RangeSel=%RTbool Nmi=%RTbool Mbi=%RTbool Aff3Levels=%RTbool\n",
+            uArchRev, uArchRevMinor, fRangeSel, fNmi, fMbi, fAff3Levels));
+    LogRel(("GIC: SPIs=true (%u:32..%u) ExtSPIs=%RTbool (%u:4095..%u) ExtPPIs=%RTbool (%u:1056..%u)\n",
+            uMaxSpi, 32 * (uMaxSpi + 1),
+            fExtSpi, uMaxExtSpi, GIC_INTID_RANGE_EXT_SPI_START - 1 + 32 * (uMaxExtSpi + 1),
+            fExtPpi, uMaxExtPpi, uExtPpiLast));
+    LogRel(("GIC: ITS=%s LPIs=%s (%u:%u..%u)\n",
+            pGicDev->hMmioGits != NIL_IOMMMIOHANDLE ? "enabled" : "disabled", fLpi ? "enabled" : "disabled",
+            uMaxLpi, GIC_INTID_RANGE_LPI_START, GIC_INTID_RANGE_LPI_START - 1 + (UINT32_C(2) << uMaxLpi)));
+}
+
+
+/**
  * @copydoc FNSSMDEVSAVEEXEC
  */
 static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
@@ -513,12 +549,13 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
     pHlp->pfnSSMPutBool(pSSM, pGicDev->fRangeSel);
     pHlp->pfnSSMPutBool(pSSM, pGicDev->fNmi);
     pHlp->pfnSSMPutBool(pSSM, pGicDev->fMbi);
+    pHlp->pfnSSMPutBool(pSSM, pGicDev->fAffRouting);
     pHlp->pfnSSMPutBool(pSSM, pGicDev->fAff3Levels);
     pHlp->pfnSSMPutBool(pSSM, pGicDev->fLpi);
+    pHlp->pfnSSMPutU8(pSSM,   pGicDev->uMaxLpi);
 
     /* Distributor state. */
     pHlp->pfnSSMPutU32(pSSM,  pGicDev->fIntrGroupMask);
-    pHlp->pfnSSMPutBool(pSSM, pGicDev->fAffRouting);
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrGroup,          sizeof(pGicDev->IntrGroup));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrConfig,         sizeof(pGicDev->IntrConfig));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrEnabled,        sizeof(pGicDev->IntrEnabled));
@@ -526,17 +563,17 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrActive,         sizeof(pGicDev->IntrActive));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrLevel,          sizeof(pGicDev->IntrLevel));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->abIntrPriority[0],  sizeof(pGicDev->abIntrPriority));
-    pHlp->pfnSSMPutMem(pSSM,  &pGicDev->au32IntrRouting[0], sizeof(pGicDev->au32IntrRouting));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrRoutingMode,    sizeof(pGicDev->IntrRoutingMode));
+    pHlp->pfnSSMPutMem(pSSM,  &pGicDev->au32IntrRouting[0], sizeof(pGicDev->au32IntrRouting));
 
     /* LPI state. */
-    /* We store the size followed by the data (per-VCPU) because we don't support the full LPI range. */
+    pHlp->pfnSSMPutBool(pSSM, pGicDev->fEnableLpis);
+    /* We store the size followed later by per-VCPU data because we don't support the full LPI range. */
     pHlp->pfnSSMPutU32(pSSM,  RT_SIZEOFMEMB(GICCPU, LpiPending));
     pHlp->pfnSSMPutU32(pSSM,  sizeof(pGicDev->abLpiConfig));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->abLpiConfig[0], sizeof(pGicDev->abLpiConfig));
     pHlp->pfnSSMPutU64(pSSM,  pGicDev->uLpiConfigBaseReg.u);
     pHlp->pfnSSMPutU64(pSSM,  pGicDev->uLpiPendingBaseReg.u);
-    pHlp->pfnSSMPutBool(pSSM, pGicDev->fEnableLpis);
 
     /* GITS. */
     {
@@ -549,8 +586,8 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
         pHlp->pfnSSMPutU32(pSSM, pGitsDev->uCmdReadReg);
         pHlp->pfnSSMPutU32(pSSM, pGitsDev->uCmdWriteReg);
 
-        /* We store the count followed by the data because we support only a fixed number of hardware-internal CTEs. */
-        pHlp->pfnSSMPutU32(pSSM, RT_ELEMENTS(pGitsDev->aCtes));
+        /* We store the size followed by the data because we support only a fixed number of hardware-internal CTEs. */
+        pHlp->pfnSSMPutU32(pSSM, sizeof(pGitsDev->aCtes));
         for (unsigned i = 0; i < RT_ELEMENTS(pGitsDev->aCtes); i++)
             pHlp->pfnSSMPutU32(pSSM, pGitsDev->aCtes[i]);
         pHlp->pfnSSMPutU8(pSSM, pGitsDev->uArchRev);
@@ -589,7 +626,7 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
     }
 
     /* Marker. */
-    return pHlp->pfnSSMPutU32(pSSM, UINT32_MAX);
+    return pHlp->pfnSSMPutU64(pSSM, GIC_SAVED_STATE_MARKER);
 }
 
 
@@ -598,8 +635,9 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
  */
 static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint32_t uVersion, uint32_t uPass)
 {
-    PVM           pVM  = PDMDevHlpGetVM(pDevIns);
-    PCPDMDEVHLPR3 pHlp = pDevIns->pHlpR3;
+    PVM           pVM     = PDMDevHlpGetVM(pDevIns);
+    PGICDEV       pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
+    PCPDMDEVHLPR3 pHlp    = pDevIns->pHlpR3;
 
     AssertPtrReturn(pVM, VERR_INVALID_VM_HANDLE);
     AssertReturn(uPass == SSM_PASS_FINAL, VERR_WRONG_ORDER);
@@ -616,10 +654,6 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
      */
     uint32_t cCpus;
     pHlp->pfnSSMGetU32(pSSM,  &cCpus);
-    if (cCpus != pVM->cCpus)
-        return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: cCpus: got=%u expected=%u"), cCpus, pVM->cCpus);
-
-    PGICDEV pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
     pHlp->pfnSSMGetU8(pSSM,   &pGicDev->uArchRev);
     pHlp->pfnSSMGetU8(pSSM,   &pGicDev->uArchRevMinor);
     pHlp->pfnSSMGetU8(pSSM,   &pGicDev->uMaxSpi);
@@ -630,12 +664,16 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     pHlp->pfnSSMGetBool(pSSM, &pGicDev->fRangeSel);
     pHlp->pfnSSMGetBool(pSSM, &pGicDev->fNmi);
     pHlp->pfnSSMGetBool(pSSM, &pGicDev->fMbi);
+    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fAffRouting);
     pHlp->pfnSSMGetBool(pSSM, &pGicDev->fAff3Levels);
     pHlp->pfnSSMGetBool(pSSM, &pGicDev->fLpi);
+    pHlp->pfnSSMGetU8(pSSM,   &pGicDev->uMaxLpi);
+
+    if (cCpus != pVM->cCpus)
+        return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: cCpus: got=%u expected=%u"), cCpus, pVM->cCpus);
 
     /* Distributor state. */
     pHlp->pfnSSMGetU32(pSSM,  &pGicDev->fIntrGroupMask);
-    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fAffRouting);
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrGroup,          sizeof(pGicDev->IntrGroup));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrConfig,         sizeof(pGicDev->IntrConfig));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrEnabled,        sizeof(pGicDev->IntrEnabled));
@@ -643,10 +681,11 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrActive,         sizeof(pGicDev->IntrActive));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrLevel,          sizeof(pGicDev->IntrLevel));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->abIntrPriority[0],  sizeof(pGicDev->abIntrPriority));
-    pHlp->pfnSSMGetMem(pSSM,  &pGicDev->au32IntrRouting[0], sizeof(pGicDev->au32IntrRouting));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrRoutingMode,    sizeof(pGicDev->IntrRoutingMode));
+    pHlp->pfnSSMGetMem(pSSM,  &pGicDev->au32IntrRouting[0], sizeof(pGicDev->au32IntrRouting));
 
     /* LPI state. */
+    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fEnableLpis);
     /* LPI pending bitmap size. */
     {
         uint32_t cbData = 0;
@@ -668,7 +707,6 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     }
     pHlp->pfnSSMGetU64(pSSM,  &pGicDev->uLpiConfigBaseReg.u);
     pHlp->pfnSSMGetU64(pSSM,  &pGicDev->uLpiPendingBaseReg.u);
-    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fEnableLpis);
 
     /* GITS. */
     PGITSDEV pGitsDev = &pGicDev->Gits;
@@ -681,12 +719,12 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
         pHlp->pfnSSMGetU32(pSSM, &pGitsDev->uCmdReadReg);
         pHlp->pfnSSMGetU32(pSSM, &pGitsDev->uCmdWriteReg);
 
-        /* Verify the count followed before loading the data. */
-        uint32_t cCtes = 0;
-        pHlp->pfnSSMGetU32(pSSM, &cCtes);
-        if (cCtes != RT_ELEMENTS(pGitsDev->aCtes))
-            return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: CTE table count: got=%u expected=%u"),
-                                           cCtes, RT_ELEMENTS(pGitsDev->aCtes));
+        /* Verify the size before loading the data. */
+        uint32_t cbCtes = 0;
+        pHlp->pfnSSMGetU32(pSSM, &cbCtes);
+        if (cbCtes != sizeof(pGitsDev->aCtes))
+            return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: CTE size: got=%u expected=%u"),
+                                           cbCtes, sizeof(pGitsDev->aCtes));
         for (unsigned i = 0; i < RT_ELEMENTS(pGitsDev->aCtes); i++)
             pHlp->pfnSSMGetU32(pSSM, &pGitsDev->aCtes[i]);
         pHlp->pfnSSMGetU8(pSSM, &pGitsDev->uArchRev);
@@ -731,13 +769,14 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     AssertRCReturn(rc, rc);
 
     /* Marker. */
-    uint32_t uMarker = 0;
-    rc = pHlp->pfnSSMGetU32(pSSM, &uMarker);
+    uint64_t uMarker = 0;
+    rc = pHlp->pfnSSMGetU64(pSSM, &uMarker);
     AssertRCReturn(rc, rc);
-    if (uMarker == UINT32_MAX)
+    if (uMarker == GIC_SAVED_STATE_MARKER)
     { /* likely */ }
     else
-        return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: Marker: got=%u expected=%u"), uMarker, UINT32_MAX);
+        return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: Marker: got=%#RX64 expected=%#RX64"),
+                                       uMarker, GIC_SAVED_STATE_MARKER);
 
     /*
      * Finally, perform sanity checks.
@@ -789,6 +828,7 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     else
         return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: Affinity routing must be enabled"));
 
+    gicR3LogConfig(pGicDev);
     return rc;
 }
 
@@ -1209,33 +1249,7 @@ DECLCALLBACK(int) gicR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE pC
 #endif  /* VBOX_WITH_STATISTICS */
 
     gicR3Reset(pDevIns);
-
-    /*
-     * Log some of the features exposed to software.
-     */
-    uint8_t const uArchRev      = pGicDev->uArchRev;
-    uint8_t const uArchRevMinor = pGicDev->uArchRevMinor;
-    uint8_t const uMaxSpi       = pGicDev->uMaxSpi;
-    bool const    fExtSpi       = pGicDev->fExtSpi;
-    uint8_t const uMaxExtSpi    = pGicDev->uMaxExtSpi;
-    bool const    fExtPpi       = pGicDev->fExtPpi;
-    uint8_t const uMaxExtPpi    = pGicDev->uMaxExtPpi;
-    bool const fRangeSel        = pGicDev->fRangeSel;
-    bool const fNmi             = pGicDev->fNmi;
-    bool const fMbi             = pGicDev->fMbi;
-    bool const fAff3Levels      = pGicDev->fAff3Levels;
-    bool const fLpi             = pGicDev->fLpi;
-    uint32_t const uMaxLpi      = pGicDev->uMaxLpi;
-    uint16_t const uExtPpiLast  = uMaxExtPpi == GIC_REDIST_REG_TYPER_PPI_NUM_MAX_1087 ? 1087 : GIC_INTID_RANGE_EXT_PPI_LAST;
-    LogRel(("GIC: ArchRev=%u.%u RangeSel=%RTbool Nmi=%RTbool Mbi=%RTbool Aff3Levels=%RTbool\n",
-            uArchRev, uArchRevMinor, fRangeSel, fNmi, fMbi, fAff3Levels));
-    LogRel(("GIC: SPIs=true (%u:32..%u) ExtSPIs=%RTbool (%u:4095..%u) ExtPPIs=%RTbool (%u:1056..%u)\n",
-            uMaxSpi, 32 * (uMaxSpi + 1),
-            fExtSpi, uMaxExtSpi, GIC_INTID_RANGE_EXT_SPI_START - 1 + 32 * (uMaxExtSpi + 1),
-            fExtPpi, uMaxExtPpi, uExtPpiLast));
-    LogRel(("GIC: ITS=%s LPIs=%s (%u:%u..%u)\n",
-            pGicDev->hMmioGits != NIL_IOMMMIOHANDLE ? "enabled" : "disabled", fLpi ? "enabled" : "disabled",
-            uMaxLpi, GIC_INTID_RANGE_LPI_START, GIC_INTID_RANGE_LPI_START - 1 + (UINT32_C(2) << uMaxLpi)));
+    gicR3LogConfig(pGicDev);
     return VINF_SUCCESS;
 }
 
