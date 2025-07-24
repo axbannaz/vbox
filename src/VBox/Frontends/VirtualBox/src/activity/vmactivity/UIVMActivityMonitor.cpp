@@ -1355,8 +1355,6 @@ void UIVMActivityMonitorLocal::openSession()
 
     m_comMachineDebugger = m_comConsole.GetDebugger();
 
-
-
     QVector<KVBoxEventType> eventTypes;
     eventTypes << KVBoxEventType_OnAdditionsStateChanged;
 
@@ -1374,7 +1372,6 @@ void UIVMActivityMonitorLocal::openSession()
 
     connect(m_pQtConsoleListener->getWrapped(), &UIMainEventListener::sigAdditionsChange,
             this, &UIVMActivityMonitorLocal::sltGuestAdditionsStateChange);
-
 
 }
 
@@ -1465,7 +1462,7 @@ void UIVMActivityMonitorLocal::sltGuestAdditionsStateChange()
 
 void UIVMActivityMonitorLocal::sltClearCOMData()
 {
-    if (m_comConsole.isOk() && m_comConsole.GetEventSource().isOk())
+    if (m_comConsole.isNull() && m_comConsole.isOk() && m_comConsole.GetEventSource().isOk())
     {
         if (!m_pQtConsoleListener.isNull())
         {
@@ -1486,6 +1483,7 @@ void UIVMActivityMonitorLocal::sltClearCOMData()
 void UIVMActivityMonitorLocal::reset()
 {
     m_fGuestAdditionsAvailable = false;
+    m_fCOMPerformanceCollectorConfigured = false;
     setEnabled(false);
 
     if (m_pTimer)
@@ -2145,7 +2143,6 @@ void UIVMActivityMonitorCloud::reset()
     resetDiskIOReadInfoLabel();
 
     update();
-    //sltClearCOMData();
 }
 
 void UIVMActivityMonitorCloud::start()
