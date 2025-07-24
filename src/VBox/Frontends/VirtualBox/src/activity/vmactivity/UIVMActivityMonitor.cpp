@@ -1462,7 +1462,7 @@ void UIVMActivityMonitorLocal::sltGuestAdditionsStateChange()
 
 void UIVMActivityMonitorLocal::sltClearCOMData()
 {
-    if (m_comConsole.isNull() && m_comConsole.isOk() && m_comConsole.GetEventSource().isOk())
+    if (!m_comConsole.isNull() && m_comConsole.isOk() && m_comConsole.GetEventSource().isOk())
     {
         if (!m_pQtConsoleListener.isNull())
         {
@@ -1478,6 +1478,8 @@ void UIVMActivityMonitorLocal::sltClearCOMData()
         m_comSession.UnlockMachine();
         m_comSession.detach();
     }
+    if (!m_comConsole.isNull())
+        m_comConsole.detach();
 }
 
 void UIVMActivityMonitorLocal::reset()
