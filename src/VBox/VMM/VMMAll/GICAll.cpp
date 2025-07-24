@@ -473,7 +473,7 @@ static uint16_t gicReDistGetIndexFromIntId(uint16_t uIntId)
  * @param   fIrq    Flag whether to set the IRQ flag.
  * @param   fFiq    Flag whether to set the FIQ flag.
  */
-static void gicUpdateInterruptFF(PVMCPUCC pVCpu, bool fIrq, bool fFiq)
+DECLINLINE(void) gicUpdateInterruptFF(PVMCPUCC pVCpu, bool fIrq, bool fFiq)
 {
     LogFlowFunc(("pVCpu=%p{.idCpu=%u} fIrq=%RTbool fFiq=%RTbool\n", pVCpu, pVCpu->idCpu, fIrq, fFiq));
     /** @todo Could be faster if the caller directly supplied set and clear masks. */
@@ -511,11 +511,10 @@ static void gicUpdateInterruptFF(PVMCPUCC pVCpu, bool fIrq, bool fFiq)
 #if defined(IN_RING0)
 # error "Implement me!"
 #elif defined(IN_RING3)
-        /** @todo We could just use RTThreadNativeSelf() here, couldn't we? */
         /* IRQ state should be loaded as-is by "LoadExec". Changes can be made from LoadDone. */
         Assert(pVCpu->pVMR3->enmVMState != VMSTATE_LOADING || PDMR3HasLoadedState(pVCpu->pVMR3));
-        PVMCC   pVM   = pVCpu->CTX_SUFF(pVM);
-        VMCPUID idCpu = pVCpu->idCpu;
+        PVMCC pVM = pVCpu->CTX_SUFF(pVM);
+        VMCPUID const idCpu = pVCpu->idCpu;
         if (VMMGetCpuId(pVM) != idCpu)
         {
             Log7Func(("idCpu=%u enmState=%d\n", idCpu, pVCpu->enmState));
@@ -560,7 +559,7 @@ DECLINLINE(bool) gicReDistIsSufficientPriority(PCGICCPU pGicCpu, uint8_t bIntrPr
 
         /*
          * The group priority of the pending interrupt must be higher than that of the running priority.
-         * The number of bits for the group priority depends on the the binary point registers.
+         * The number of bits for the group priority depends on the binary point registers.
          * We mask the sub-priority bits and only compare the group priority.
          *
          * When the binary point registers indicates no preemption, we must allow interrupts that have
@@ -3496,7 +3495,7 @@ static void gicInit(PPDMDEVINS pDevIns)
 
 
 /**
- * Initialies the GIC redistributor and CPU interface state.
+ * Initializes the GIC redistributor and CPU interface state.
  *
  * @param   pDevIns     The device instance.
  * @param   pVCpu       The cross context virtual CPU structure.

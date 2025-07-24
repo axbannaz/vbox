@@ -47,7 +47,7 @@
 /** GIC saved state marker. */
 #define GIC_SAVED_STATE_MARKER                      UINT64_C(0x61c57a7e5afe10ad)
 
-
+/** GIC system register range initializer. */
 # define GIC_SYSREGRANGE(a_uFirst, a_uLast, a_szName) \
     { (a_uFirst), (a_uLast), kCpumSysRegRdFn_GicIcc, kCpumSysRegWrFn_GicIcc, 0, 0, 0, 0, 0, 0, a_szName, { 0 }, { 0 }, { 0 }, { 0 } }
 
@@ -291,12 +291,12 @@ static DECLCALLBACK(void) gicR3DbgInfoReDist(PVM pVM, PCDBGFINFOHLP pHlp, const 
         for (uint32_t i = 0; i < cPriorities; i += 16)
             pHlp->pfnPrintf(pHlp, "    [%3u..%-3u] = %5u %5u %5u %5u %5u %5u %5u %5u"
                                   "    [%3u..%-3u] = %5u %5u %5u %5u %5u %5u %5u %5u\n",
-                                  i,                                    i + 7,
+                                  i,                               i + 7,
                                   pGicCpu->abRunningIntId[i],      pGicCpu->abRunningIntId[i + 1],
                                   pGicCpu->abRunningIntId[i + 2],  pGicCpu->abRunningIntId[i + 3],
                                   pGicCpu->abRunningIntId[i + 4],  pGicCpu->abRunningIntId[i + 5],
                                   pGicCpu->abRunningIntId[i + 6],  pGicCpu->abRunningIntId[i + 7],
-                                  i + 8,                                i + 15,
+                                  i + 8,                           i + 15,
                                   pGicCpu->abRunningIntId[i + 8],  pGicCpu->abRunningIntId[i + 9],
                                   pGicCpu->abRunningIntId[i + 10], pGicCpu->abRunningIntId[i + 11],
                                   pGicCpu->abRunningIntId[i + 12], pGicCpu->abRunningIntId[i + 13],
@@ -409,7 +409,7 @@ static DECLCALLBACK(void) gicR3DbgInfoLpi(PVM pVM, PCDBGFINFOHLP pHlp, const cha
     for (uint32_t i = 0; i < RT_ELEMENTS(pGicCpu->LpiPending.au64); i += sizeof(pGicCpu->LpiPending.au64[0]))
     {
         pHlp->pfnPrintf(pHlp, "    [%3u..%-3u] = %08RX64 %08RX64 %08RX64 %08RX64 %08RX64 %08RX64 %08RX64 %08RX64\n",
-                              i,                                  i + 7,
+                              i,                                i + 7,
                               pGicCpu->LpiPending.au64[i],      pGicCpu->LpiPending.au64[i + 1],
                               pGicCpu->LpiPending.au64[i + 2],  pGicCpu->LpiPending.au64[i + 3],
                               pGicCpu->LpiPending.au64[i + 4],  pGicCpu->LpiPending.au64[i + 5],
@@ -1178,11 +1178,11 @@ DECLCALLBACK(int) gicR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE pC
      * dumped in an automated fashion while collecting crash diagnostics and
      * not just used during live debugging via the VM debugger.
      */
-    DBGFR3InfoRegisterInternalEx(pVM, "gic",       "Dumps GIC basic information.",         gicR3DbgInfo,       DBGFINFO_FLAGS_ALL_EMTS);
-    DBGFR3InfoRegisterInternalEx(pVM, "gicdist",   "Dumps GIC distributor information.",   gicR3DbgInfoDist,   DBGFINFO_FLAGS_ALL_EMTS);
-    DBGFR3InfoRegisterInternalEx(pVM, "gicredist", "Dumps GIC redistributor information.", gicR3DbgInfoReDist, DBGFINFO_FLAGS_ALL_EMTS);
-    DBGFR3InfoRegisterInternalEx(pVM, "gicits",    "Dumps GIC ITS information.",           gicR3DbgInfoIts,    DBGFINFO_FLAGS_ALL_EMTS);
-    DBGFR3InfoRegisterInternalEx(pVM, "giclpi",    "Dumps GIC LPI information.",           gicR3DbgInfoLpi,    DBGFINFO_FLAGS_ALL_EMTS);
+    DBGFR3InfoRegisterInternalEx(pVM, "gic",       "Dumps GIC basic info.",         gicR3DbgInfo,       DBGFINFO_FLAGS_ALL_EMTS);
+    DBGFR3InfoRegisterInternalEx(pVM, "gicdist",   "Dumps GIC distributor info.",   gicR3DbgInfoDist,   DBGFINFO_FLAGS_ALL_EMTS);
+    DBGFR3InfoRegisterInternalEx(pVM, "gicredist", "Dumps GIC redistributor info.", gicR3DbgInfoReDist, DBGFINFO_FLAGS_ALL_EMTS);
+    DBGFR3InfoRegisterInternalEx(pVM, "gicits",    "Dumps GIC ITS info.",           gicR3DbgInfoIts,    DBGFINFO_FLAGS_ALL_EMTS);
+    DBGFR3InfoRegisterInternalEx(pVM, "giclpi",    "Dumps GIC LPI info.",           gicR3DbgInfoLpi,    DBGFINFO_FLAGS_ALL_EMTS);
 
     /*
      * Statistics.
