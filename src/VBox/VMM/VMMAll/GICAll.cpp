@@ -1015,7 +1015,7 @@ static void gicReDistReadLpiPendingTableFromMem(PPDMDEVINS pDevIns, PVMCPU pVCpu
 static VBOXSTRICTRC gicDistReadIntrRoutingReg(PCGICDEV pGicDev, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is disabled, reads return 0. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 
     /* Hardware does not map the first 32 registers (corresponding to SGIs and PPIs). */
     idxReg += GIC_INTID_RANGE_SPI_START;
@@ -1049,7 +1049,7 @@ static VBOXSTRICTRC gicDistReadIntrRoutingReg(PCGICDEV pGicDev, uint16_t idxReg,
 static VBOXSTRICTRC gicDistWriteIntrRoutingReg(PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is disabled, writes are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 
     AssertMsgReturn(idxReg < RT_ELEMENTS(pGicDev->au32IntrRouting), ("idxReg=%u\n", idxReg), VERR_BUFFER_OVERFLOW);
     Assert(idxReg < sizeof(pGicDev->IntrRoutingMode) * 8);
@@ -1107,7 +1107,7 @@ static VBOXSTRICTRC gicDistReadIntrEnableReg(PGICDEV pGicDev, uint16_t idxReg, u
 static VBOXSTRICTRC gicDistWriteIntrSetEnableReg(PVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrEnabled.au32));
@@ -1132,7 +1132,7 @@ static VBOXSTRICTRC gicDistWriteIntrSetEnableReg(PVM pVM, PGICDEV pGicDev, uint1
 static VBOXSTRICTRC gicDistWriteIntrClearEnableReg(PVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrEnabled.au32));
@@ -1176,7 +1176,7 @@ static VBOXSTRICTRC gicDistReadIntrActiveReg(PGICDEV pGicDev, uint16_t idxReg, u
 static VBOXSTRICTRC gicDistWriteIntrSetActiveReg(PVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrActive.au32));
@@ -1201,7 +1201,7 @@ static VBOXSTRICTRC gicDistWriteIntrSetActiveReg(PVM pVM, PGICDEV pGicDev, uint1
 static VBOXSTRICTRC gicDistWriteIntrClearActiveReg(PVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrActive.au32));
@@ -1225,7 +1225,7 @@ static VBOXSTRICTRC gicDistWriteIntrClearActiveReg(PVM pVM, PGICDEV pGicDev, uin
 static VBOXSTRICTRC gicDistReadIntrPriorityReg(PGICDEV pGicDev, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is enabled, reads to registers 0..7 (pertaining to SGIs and PPIs) return 0. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     Assert(idxReg < RT_ELEMENTS(pGicDev->abIntrPriority) / sizeof(uint32_t));
     Assert(idxReg != 255);
     if (idxReg > 7)
@@ -1257,7 +1257,7 @@ static VBOXSTRICTRC gicDistReadIntrPriorityReg(PGICDEV pGicDev, uint16_t idxReg,
 static VBOXSTRICTRC gicDistWriteIntrPriorityReg(PVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to registers 0..7 are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     Assert(idxReg < RT_ELEMENTS(pGicDev->abIntrPriority) / sizeof(uint32_t));
     Assert(idxReg != 255);
     if (idxReg > 7)
@@ -1327,7 +1327,7 @@ static VBOXSTRICTRC gicDistWriteIntrPriorityReg(PVM pVM, PGICDEV pGicDev, uint16
 static VBOXSTRICTRC gicDistReadIntrPendingReg(PGICDEV pGicDev, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is enabled, reads for SGIs and PPIs return 0. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrPending.au32));
@@ -1355,7 +1355,7 @@ static VBOXSTRICTRC gicDistReadIntrPendingReg(PGICDEV pGicDev, uint16_t idxReg, 
 static VBOXSTRICTRC gicDistWriteIntrSetPendingReg(PVMCC pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrPending.au32));
@@ -1380,7 +1380,7 @@ static VBOXSTRICTRC gicDistWriteIntrSetPendingReg(PVMCC pVM, PGICDEV pGicDev, ui
 static VBOXSTRICTRC gicDistWriteIntrClearPendingReg(PVMCC pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrPending.au32));
@@ -1404,7 +1404,7 @@ static VBOXSTRICTRC gicDistWriteIntrClearPendingReg(PVMCC pVM, PGICDEV pGicDev, 
 static VBOXSTRICTRC gicDistReadIntrConfigReg(PCGICDEV pGicDev, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is enabled SGIs and PPIs, reads to SGIs and PPIs return 0. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg >= 2)
     {
         Assert(idxReg / 2 < RT_ELEMENTS(pGicDev->IntrConfig.au32));
@@ -1429,7 +1429,7 @@ static VBOXSTRICTRC gicDistReadIntrConfigReg(PCGICDEV pGicDev, uint16_t idxReg, 
 static VBOXSTRICTRC gicDistWriteIntrConfigReg(PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled SGIs and PPIs, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg >= 2)
     {
         /* Only the lower or higher 16-bits of the 32-bits should be updated, retaining other bits. */
@@ -1458,7 +1458,7 @@ static VBOXSTRICTRC gicDistWriteIntrConfigReg(PGICDEV pGicDev, uint16_t idxReg, 
 static VBOXSTRICTRC gicDistReadIntrGroupReg(PGICDEV pGicDev, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is enabled, reads to SGIs and PPIs return 0. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         Assert(idxReg < RT_ELEMENTS(pGicDev->IntrGroup.au32));
@@ -1483,7 +1483,7 @@ static VBOXSTRICTRC gicDistReadIntrGroupReg(PGICDEV pGicDev, uint16_t idxReg, ui
 static VBOXSTRICTRC gicDistWriteIntrGroupReg(PCVM pVM, PGICDEV pGicDev, uint16_t idxReg, uint32_t uValue)
 {
     /* When affinity routing is enabled, writes to SGIs and PPIs are ignored. */
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
     if (idxReg > 0)
     {
         pGicDev->IntrGroup.au32[idxReg] = uValue;
@@ -1507,7 +1507,7 @@ static VBOXSTRICTRC gicDistWriteIntrGroupReg(PCVM pVM, PGICDEV pGicDev, uint16_t
 static VBOXSTRICTRC gicReDistReadIntrPriorityReg(PCGICDEV pGicDev, PGICCPU pGicCpu, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is disabled, reads return 0. */
-    Assert(pGicDev->fAffRoutingEnabled); RT_NOREF(pGicDev);
+    Assert(pGicDev->fAffRouting); RT_NOREF(pGicDev);
 
     uint16_t const idxPriority = idxReg * sizeof(uint32_t);
     AssertReturn(idxPriority <= RT_ELEMENTS(pGicCpu->abIntrPriority) - sizeof(uint32_t), VERR_BUFFER_OVERFLOW);
@@ -1531,7 +1531,7 @@ static VBOXSTRICTRC gicReDistWriteIntrPriorityReg(PVMCPUCC pVCpu, uint16_t idxRe
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PCGICDEV   pGicDev = PDMDEVINS_2_DATA(pDevIns, PCGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     uint16_t const idxPriority = idxReg * sizeof(uint32_t);
@@ -1568,7 +1568,7 @@ static VBOXSTRICTRC gicReDistWriteIntrPriorityReg(PVMCPUCC pVCpu, uint16_t idxRe
 static VBOXSTRICTRC gicReDistReadIntrPendingReg(PCGICDEV pGicDev, PGICCPU pGicCpu, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is disabled, reads return 0. */
-    Assert(pGicDev->fAffRoutingEnabled); RT_NOREF(pGicDev);
+    Assert(pGicDev->fAffRouting); RT_NOREF(pGicDev);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrPending));
     *puValue = gicReDistGetPendingIntrAt(pGicCpu, idxReg);
     LogFlowFunc(("idxReg=%#x read %#x\n", idxReg, pGicCpu->bmIntrPending[idxReg]));
@@ -1590,7 +1590,7 @@ static VBOXSTRICTRC gicReDistWriteIntrSetPendingReg(PVMCPUCC pVCpu, uint16_t idx
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrPending));
@@ -1614,7 +1614,7 @@ static VBOXSTRICTRC gicReDistWriteIntrClearPendingReg(PVMCPUCC pVCpu, uint16_t i
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrPending));
@@ -1637,7 +1637,7 @@ static VBOXSTRICTRC gicReDistWriteIntrClearPendingReg(PVMCPUCC pVCpu, uint16_t i
  */
 static VBOXSTRICTRC gicReDistReadIntrEnableReg(PCGICDEV pGicDev, PGICCPU pGicCpu, uint16_t idxReg, uint32_t *puValue)
 {
-    Assert(pGicDev->fAffRoutingEnabled); RT_NOREF(pGicDev);
+    Assert(pGicDev->fAffRouting); RT_NOREF(pGicDev);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrEnabled));
     *puValue = pGicCpu->bmIntrEnabled[idxReg];
     LogFlowFunc(("idxReg=%#x read %#x\n", idxReg, pGicCpu->bmIntrEnabled[idxReg]));
@@ -1659,7 +1659,7 @@ static VBOXSTRICTRC gicReDistWriteIntrSetEnableReg(PVMCPUCC pVCpu, uint16_t idxR
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrEnabled));
@@ -1683,7 +1683,7 @@ static VBOXSTRICTRC gicReDistWriteIntrClearEnableReg(PVMCPUCC pVCpu, uint16_t id
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrEnabled));
@@ -1726,7 +1726,7 @@ static VBOXSTRICTRC gicReDistWriteIntrSetActiveReg(PVMCPUCC pVCpu, uint16_t idxR
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrActive));
@@ -1750,7 +1750,7 @@ static VBOXSTRICTRC gicReDistWriteIntrClearActiveReg(PVMCPUCC pVCpu, uint16_t id
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrActive));
@@ -1772,7 +1772,7 @@ static VBOXSTRICTRC gicReDistWriteIntrClearActiveReg(PVMCPUCC pVCpu, uint16_t id
 static VBOXSTRICTRC gicReDistReadIntrConfigReg(PCGICDEV pGicDev, PGICCPU pGicCpu, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is disabled, reads return 0. */
-    Assert(pGicDev->fAffRoutingEnabled); RT_NOREF(pGicDev);
+    Assert(pGicDev->fAffRouting); RT_NOREF(pGicDev);
     Assert(idxReg / 2 < RT_ELEMENTS(pGicCpu->bmIntrConfig));
     uint64_t const bmIntrConfig = gicUnpackAltBits(pGicCpu->bmIntrConfig[idxReg / 2]);
     *puValue = bmIntrConfig >> (32 * (idxReg % 2));
@@ -1798,7 +1798,7 @@ static VBOXSTRICTRC gicReDistWriteIntrConfigReg(PVMCPUCC pVCpu, uint16_t idxReg,
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     if (idxReg > 0)
@@ -1834,7 +1834,7 @@ static VBOXSTRICTRC gicReDistWriteIntrConfigReg(PVMCPUCC pVCpu, uint16_t idxReg,
 static VBOXSTRICTRC gicReDistReadIntrGroupReg(PCGICDEV pGicDev, PGICCPU pGicCpu, uint16_t idxReg, uint32_t *puValue)
 {
     /* When affinity routing is disabled, reads return 0. */
-    Assert(pGicDev->fAffRoutingEnabled); RT_NOREF(pGicDev);
+    Assert(pGicDev->fAffRouting); RT_NOREF(pGicDev);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrGroup));
     *puValue = pGicCpu->bmIntrGroup[idxReg];
     LogFlowFunc(("idxReg=%#x read %#x\n", idxReg, pGicCpu->bmIntrGroup[idxReg]));
@@ -1856,7 +1856,7 @@ static VBOXSTRICTRC gicReDistWriteIntrGroupReg(PVMCPUCC pVCpu, uint16_t idxReg, 
     /* When affinity routing is disabled, writes are ignored. */
     PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     PGICDEV    pGicDev = PDMDEVINS_2_DATA(pDevIns, PGICDEV);
-    Assert(pGicDev->fAffRoutingEnabled);
+    Assert(pGicDev->fAffRouting);
 #endif
     PGICCPU pGicCpu = VMCPU_TO_GICCPU(pVCpu);
     Assert(idxReg < RT_ELEMENTS(pGicCpu->bmIntrGroup));
@@ -2308,7 +2308,7 @@ DECLINLINE(VBOXSTRICTRC) gicDistReadRegister(PPDMDEVINS pDevIns, PVMCPUCC pVCpu,
     switch (offReg)
     {
         case GIC_DIST_REG_CTLR_OFF:
-            Assert(pGicDev->fAffRoutingEnabled);
+            Assert(pGicDev->fAffRouting);
             *puValue = ((pGicDev->fIntrGroupMask & GIC_INTR_GROUP_0)   ? GIC_DIST_REG_CTRL_ENABLE_GRP0    : 0)
                      | ((pGicDev->fIntrGroupMask & GIC_INTR_GROUP_1NS) ? GIC_DIST_REG_CTRL_ENABLE_GRP1_NS : 0)
                      | GIC_DIST_REG_CTRL_DS         /* We don't support dual security states. */
@@ -2318,7 +2318,7 @@ DECLINLINE(VBOXSTRICTRC) gicDistReadRegister(PPDMDEVINS pDevIns, PVMCPUCC pVCpu,
         case GIC_DIST_REG_TYPER_OFF:
         {
             Assert(pGicDev->uMaxSpi > 0 && pGicDev->uMaxSpi <= GIC_DIST_REG_TYPER_NUM_ITLINES);
-            Assert(pGicDev->fAffRoutingEnabled);
+            Assert(pGicDev->fAffRouting);
             *puValue = GIC_DIST_REG_TYPER_NUM_ITLINES_SET(pGicDev->uMaxSpi)
                      | GIC_DIST_REG_TYPER_NUM_PES_SET(0)             /* Affinity routing is always enabled, hence this MBZ. */
                      /*| GIC_DIST_REG_TYPER_NMI*/                    /** @todo Support non-maskable interrupts */
@@ -3332,7 +3332,7 @@ static DECLCALLBACK(VBOXSTRICTRC) gicWriteSysReg(PVMCPUCC pVCpu, uint32_t u32Reg
             {
                 /* SGIs and PPIs. */
                 AssertCompile(GIC_INTID_RANGE_PPI_LAST < 8 * sizeof(pGicCpu->bmIntrActive[0]));
-                Assert(pGicDev->fAffRoutingEnabled);
+                Assert(pGicDev->fAffRouting);
                 pGicCpu->bmIntrActive[0] &= ~RT_BIT_32(uIntId);
             }
             else if (uIntId <= GIC_INTID_RANGE_SPI_LAST)
@@ -3481,7 +3481,7 @@ static void gicInit(PPDMDEVINS pDevIns)
     RT_ZERO(pGicDev->au32IntrRouting);
     RT_ZERO(pGicDev->abIntrPriority);
     pGicDev->fIntrGroupMask = 0;
-    pGicDev->fAffRoutingEnabled = true; /* GICv2 backwards compatibility is not implemented, so this is RA1/WI. */
+    pGicDev->fAffRouting = true; /* GICv2 backwards compatibility is not implemented, so this is RA1/WI. */
 
     /* LPIs. */
     pGicDev->fEnableLpis = false;

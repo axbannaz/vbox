@@ -518,7 +518,7 @@ static DECLCALLBACK(int) gicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
 
     /* Distributor state. */
     pHlp->pfnSSMPutU32(pSSM,  pGicDev->fIntrGroupMask);
-    pHlp->pfnSSMPutBool(pSSM, pGicDev->fAffRoutingEnabled);
+    pHlp->pfnSSMPutBool(pSSM, pGicDev->fAffRouting);
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrGroup,          sizeof(pGicDev->IntrGroup));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrConfig,         sizeof(pGicDev->IntrConfig));
     pHlp->pfnSSMPutMem(pSSM,  &pGicDev->IntrEnabled,        sizeof(pGicDev->IntrEnabled));
@@ -635,7 +635,7 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
 
     /* Distributor state. */
     pHlp->pfnSSMGetU32(pSSM,  &pGicDev->fIntrGroupMask);
-    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fAffRoutingEnabled);
+    pHlp->pfnSSMGetBool(pSSM, &pGicDev->fAffRouting);
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrGroup,          sizeof(pGicDev->IntrGroup));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrConfig,         sizeof(pGicDev->IntrConfig));
     pHlp->pfnSSMGetMem(pSSM,  &pGicDev->IntrEnabled,        sizeof(pGicDev->IntrEnabled));
@@ -784,7 +784,7 @@ static DECLCALLBACK(int) gicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
         return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: LPIs are %s when ITS is %s"),
                                        fIsGitsEnabled ? "enabled" : "disabled", pGicDev->fLpi ? "enabled" : "disabled");
 
-    if (pGicDev->fAffRoutingEnabled)
+    if (pGicDev->fAffRouting)
     { /* likely */ }
     else
         return pHlp->pfnSSMSetCfgError(pSSM, RT_SRC_POS, N_("Config mismatch: Affinity routing must be enabled"));

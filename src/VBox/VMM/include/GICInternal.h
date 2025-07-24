@@ -207,7 +207,7 @@ typedef struct GICDEV
     /** Mask of enabled interrupt groups (see GIC_INTR_GROUP_XXX). */
     uint32_t                    fIntrGroupMask;
     /** Flag whether affinity routing is enabled. */
-    bool                        fAffRoutingEnabled;
+    bool                        fAffRouting;
     /** @} */
 
     /** @name Configurables.
