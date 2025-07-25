@@ -3037,7 +3037,7 @@ void RecordingScreen::featuresToString(const std::map<RecordingFeature_T, bool> 
  * @param   strCodec            String that contains the codec name.
  * @param   enmCodec            Where to return the audio codec on success.
  *
- * @note    An empty string will return "none" (no codec).
+ * @note    An empty string will return RecordingAudioCodec_None.
  */
 /* static */
 int RecordingScreen::audioCodecFromString(const com::Utf8Str &strCodec, RecordingAudioCodec_T &enmCodec)
@@ -3080,7 +3080,7 @@ int RecordingScreen::audioCodecFromString(const com::Utf8Str &strCodec, Recordin
  * @param   strCodec            String that contains the codec name.
  * @param   enmCodec            Where to return the video codec on success.
  *
- * @note    An empty string will return "none" (no codec).
+ * @note    An empty string will return RecordingVideoCodec_None.
  */
 /* static */
 int RecordingScreen::videoCodecFromString(const com::Utf8Str &strCodec, RecordingVideoCodec_T &enmCodec)
@@ -9101,9 +9101,9 @@ void MachineConfigFile::buildRecordingXML(xml::ElementNode &elmParent, const Rec
                     pelmScreen->setAttributePath("file",        itScreen->second.File.strName);
                 if (itScreen->second.File.ulMaxSizeMB)
                     pelmScreen->setAttribute("maxSizeMB",       itScreen->second.File.ulMaxSizeMB);
-
-                pelmScreen->setAttribute("videoCodec",
-                                         RecordingUtilsVideoCodecToStr(itScreen->second.Video.enmCodec));
+                if (itScreen->second.Video.enmCodec != RecordingVideoCodec_VP8)
+                    pelmScreen->setAttribute("videoCodec",
+                                             RecordingUtilsVideoCodecToStr(itScreen->second.Video.enmCodec));
                 if (itScreen->second.Video.enmDeadline != RecordingCodecDeadline_Default)
                     pelmScreen->setAttribute("videoDeadline",   itScreen->second.Video.enmDeadline);
                 if (itScreen->second.Video.enmRateCtlMode != RecordingRateControlMode_VBR) /* Is default. */
@@ -9120,9 +9120,9 @@ void MachineConfigFile::buildRecordingXML(xml::ElementNode &elmParent, const Rec
                     pelmScreen->setAttribute("rateKbps",        itScreen->second.Video.ulRate);
                 if (itScreen->second.Video.ulFPS)
                     pelmScreen->setAttribute("fps",             itScreen->second.Video.ulFPS);
-
-                pelmScreen->setAttribute("audioCodec",
-                                         RecordingUtilsAudioCodecToStr(itScreen->second.Audio.enmCodec));
+                if (itScreen->second.Audio.enmCodec != RecordingAudioCodec_OggVorbis)
+                    pelmScreen->setAttribute("audioCodec",
+                                             RecordingUtilsAudioCodecToStr(itScreen->second.Audio.enmCodec));
                 if (itScreen->second.Audio.enmDeadline != RecordingCodecDeadline_Default)
                     pelmScreen->setAttribute("audioDeadline",   itScreen->second.Audio.enmDeadline);
                 if (itScreen->second.Audio.enmRateCtlMode != RecordingRateControlMode_VBR) /* Is default. */
