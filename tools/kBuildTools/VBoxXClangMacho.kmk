@@ -145,7 +145,7 @@ TOOL_VBoxXClangMacho_DEBUG_BUNDLE_FN = \
 # @remarks  The Info.plist has some reference to the original name, but gdb
 #           does not care and only check for a symbol file in the DWARF
 #           directory with the same name as the debugged module.
-TOOL_VBoxXClangMacho_DEBUG_INSTALL_FN= \
+TOOL_VBoxXClangMacho_DEBUG_INSTALL_FN = \
 	$(3).dSYM/ \
 	$(3).dSYM/Contents/ \
 	$(3).dSYM/Contents/Resources/ \
