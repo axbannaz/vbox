@@ -34,6 +34,8 @@ include $(KBUILD_PATH)/subheader.kmk
 LIBRARIES += VBox-DxMtNativeUtil VBox-DxMtNativeMetal VBox-DxMtNativeDxbcParser VBox-DxMtNativeDxMt VBox-DxMtNativeD3D10 VBox-DxMtNativeD3D11
 DLLS      += VBoxDxMt
 
+include $(KBUILD_TOOL_PATHS)/VBoxXClangMacho.kmk
+
 #
 # Globals.
 #
@@ -55,6 +57,30 @@ else
  VBOX_METAL    ?= $(VBOX_METAL_PATH)/bin/metal
  VBOX_METALLIB ?= $(VBOX_METAL_PATH)/bin/metallib
 endif
+
+
+#
+# The common template for all libraries
+#
+TEMPLATE_VBoxDxMtBase         = VBox DXMT library template
+TEMPLATE_VBoxDxMtBase_EXTENDS = VBoxR3DllNonPedantic
+TEMPLATE_VBoxDxMtBase_TOOL    = VBoxXClangMacho
+TEMPLATE_VBoxDxMtBase_CXXFLAGS.darwin += \
+    -std=c++20
+TEMPLATE_VBoxDxMtBase_DEFS    = \
+    IN_RING3 \
+    DXMT_NATIVE \
+    DXMT_PAGE_SIZE=4096 \
+    NOMINMAX \
+    _WIN32_WINNT=0xa00
+TEMPLATE_VBoxDxMtBase_INCS    = \
+    $(VBOX_PATH_DXMT) \
+    $(VBOX_PATH_DXMT)/include/ \
+    $(VBOX_PATH_DXMT)/src/util/ \
+    $(VBOX_PATH_DXMT)/include/native/ \
+    $(VBOX_PATH_DXMT)/include/native/windows \
+    $(VBOX_PATH_DXMT)/include/native/directx
+
 
 #
 # Some stuff for compiling shaders into header files and making the target depend on these.
@@ -83,21 +109,7 @@ endef
 #
 # DXMT utilities static library
 #
-VBox-DxMtNativeUtil_TEMPLATE       = VBoxR3DllNonPedantic
-VBox-DxMtNativeUtil_DEFS           = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBox-DxMtNativeUtil_CXXFLAGS.darwin += \
-	-std=c++20
-VBox-DxMtNativeUtil_INCS           = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
-	$(VBOX_PATH_DXMT)/src/util/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx
+VBox-DxMtNativeUtil_TEMPLATE       = VBoxDxMtBase
 VBox-DxMtNativeUtil_SOURCES        = \
 	src/util/util_env.cpp \
 	src/util/util_string.cpp \
@@ -117,20 +129,10 @@ VBox-DxMtNativeUtil_SOURCES        = \
 #
 # DXMT Metal bridge static library
 #
-VBox-DxMtNativeMetal_TEMPLATE       = VBoxR3DllNonPedantic
-VBox-DxMtNativeMetal_DEFS           = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBox-DxMtNativeMetal_CXXFLAGS.darwin += \
-	-std=c++20
-VBox-DxMtNativeMetal_INCS           = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
+VBox-DxMtNativeMetal_TEMPLATE       = VBoxDxMtBase
+VBox-DxMtNativeMetal_INCS           += \
 	$(VBOX_PATH_DXMT)/src/airconv/ \
-	$(VBOX_PATH_DXMT)/src/nativemetal/ \
-	$(VBOX_PATH_DXMT)/src/util/
+	$(VBOX_PATH_DXMT)/src/nativemetal/
 VBox-DxMtNativeMetal_SOURCES        = \
 	src/winemetal/unix_thunks.c \
 	src/winemetal/winemetal_thunks.c \
@@ -142,21 +144,7 @@ src/winemetal/unix/winemetal_unix.c_CFLAGS += -ObjC
 #
 # DXMT DXBC parser static library
 #
-VBox-DxMtNativeDxbcParser_TEMPLATE       = VBoxR3DllNonPedantic
-VBox-DxMtNativeDxbcParser_DEFS           = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBox-DxMtNativeDxbcParser_CXXFLAGS.darwin += \
-	-std=c++20
-VBox-DxMtNativeDxbcParser_INCS           = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
-	$(VBOX_PATH_DXMT)/src/util/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx
+VBox-DxMtNativeDxbcParser_TEMPLATE       = VBoxDxMtBase
 VBox-DxMtNativeDxbcParser_SOURCES        = \
 	libs/DXBCParser/BlobContainer.cpp \
 	libs/DXBCParser/DXBCUtils.cpp \
@@ -166,25 +154,15 @@ VBox-DxMtNativeDxbcParser_SOURCES        = \
 #
 # Core DXMT library.
 #
-VBox-DxMtNativeDxMt_TEMPLATE       = VBoxR3DllNonPedantic
-VBox-DxMtNativeDxMt_DEFS           = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
+VBox-DxMtNativeDxMt_TEMPLATE       = VBoxDxMtBase
 VBox-DxMtNativeDxMt_CXXFLAGS.darwin += \
-	-std=c++20 -fno-rtti
-VBox-DxMtNativeDxMt_INCS           = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
+	-fno-rtti
+VBox-DxMtNativeDxMt_INCS           += \
 	$(VBOX_PATH_DXMT)/libs/ \
 	$(VBOX_PATH_DXMT)/src/airconv/ \
 	$(VBOX_PATH_DXMT)/src/dxmt/ \
 	$(VBOX_PATH_DXMT)/src/util/ \
 	$(VBOX_PATH_DXMT)/src/winemetal/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx \
 	$(VBOX_LLVM_PATH)/include
 VBox-DxMtNativeDxMt_SOURCES        = \
 	src/airconv/air_operations.cpp \
@@ -227,26 +205,13 @@ $(evalcall2 def_VBoxDxMtCompilerShaders,VBox-DxMtNativeDxMt)
 #
 # DXVK D3D10 interface library
 #
-VBox-DxMtNativeD3D10_TEMPLATE        = VBoxR3DllNonPedantic
-VBox-DxMtNativeD3D10_DEFS            = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBox-DxMtNativeD3D10_CXXFLAGS.darwin += \
-	-std=c++20
-VBox-DxMtNativeD3D10_INCS            = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
+VBox-DxMtNativeD3D10_TEMPLATE        = VBoxDxMtBase
+VBox-DxMtNativeD3D10_INCS            += \
 	$(VBOX_PATH_DXMT)/libs/ \
 	$(VBOX_PATH_DXMT)/src/airconv/ \
 	$(VBOX_PATH_DXMT)/src/dxgi/ \
 	$(VBOX_PATH_DXMT)/src/dxmt/ \
-	$(VBOX_PATH_DXMT)/src/util/ \
-	$(VBOX_PATH_DXMT)/src/winemetal/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx
+	$(VBOX_PATH_DXMT)/src/winemetal/
 VBox-DxMtNativeD3D10_SOURCES        = \
 	src/d3d10/d3d10_buffer.cpp \
 	src/d3d10/d3d10_device.cpp \
@@ -259,26 +224,13 @@ VBox-DxMtNativeD3D10_SOURCES        = \
 #
 # DXVK D3D11 interface library
 #
-VBox-DxMtNativeD3D11_TEMPLATE        = VBoxR3DllNonPedantic
-VBox-DxMtNativeD3D11_DEFS            = \
-	DXMT_NATIVE \
-	DXMT_PAGE_SIZE=4096 \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBox-DxMtNativeD3D11_CXXFLAGS.darwin += \
-	-std=c++20
-VBox-DxMtNativeD3D11_INCS            = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
+VBox-DxMtNativeD3D11_TEMPLATE        = VBoxDxMtBase
+VBox-DxMtNativeD3D11_INCS            += \
 	$(VBOX_PATH_DXMT)/libs/ \
 	$(VBOX_PATH_DXMT)/src/airconv/ \
 	$(VBOX_PATH_DXMT)/src/dxgi/ \
 	$(VBOX_PATH_DXMT)/src/dxmt/ \
-	$(VBOX_PATH_DXMT)/src/util/ \
-	$(VBOX_PATH_DXMT)/src/winemetal/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx
+	$(VBOX_PATH_DXMT)/src/winemetal/
 VBox-DxMtNativeD3D11_SOURCES        = \
 	src/d3d11/d3d11.cpp \
 	src/d3d11/d3d11_buffer.cpp \
@@ -310,19 +262,7 @@ VBox-DxMtNativeD3D11_SOURCES        = \
 #
 # VBoxDxMt - Shared Object / DLL version.
 #
-VBoxDxMt_TEMPLATE = VBoxR3DllNonPedantic
-VBoxDxMt_DEFS     = \
-	$(VBOX_DXVK_COMMON_DEFINES) \
-	DXMT_NATIVE \
-	NOMINMAX \
-	_WIN32_WINNT=0xa00
-VBoxDxMt_INCS     = \
-	$(VBOX_PATH_DXMT) \
-	$(VBOX_PATH_DXMT)/include/ \
-	$(VBOX_PATH_DXMT)/src/util/ \
-	$(VBOX_PATH_DXMT)/include/native/ \
-	$(VBOX_PATH_DXMT)/include/native/windows \
-	$(VBOX_PATH_DXMT)/include/native/directx
+VBoxDxMt_TEMPLATE = VBoxDxMtBase
 VBoxDxMt_SOURCES = \
 	VBoxDxMtDeps.cpp
 VBoxDxMt_LIBS    = \
