@@ -135,7 +135,7 @@ under the Genivia commercial-use licenses.
 The Ohloh site by Black Duck includes an analysis of the gSOAP GPLv2 open
 source repository:
 
-	https://www.ohloh.net/p/gsoap
+        https://www.ohloh.net/p/gsoap
 
 Please note that &#34;Black Duck Scans&#34; will detect the use of GPL gSOAP software
 in your project builds when you are using the gSOAP source code. The
@@ -153,11 +153,11 @@ GPL), which includes support for VxWorks and Apache and IIS modules for gSOAP.
 
 For commercial-use licensing please visit:
 
-	http://www.genivia.com/Products/gsoap/contract.html
+        http://www.genivia.com/Products/gsoap/contract.html
 
 or contact us at Genivia Inc:
 
-	contact@genivia.com
+        contact@genivia.com
 
 GPL and OpenSSL
 

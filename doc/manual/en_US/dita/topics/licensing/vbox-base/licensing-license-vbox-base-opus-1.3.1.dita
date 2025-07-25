@@ -8,10 +8,10 @@
   <pre xml:space="preserve">Opus licensing
 Opus has a freely available specification, a BSD-licensed, high-quality reference encoder and decoder, and protective, royalty-free licenses for the required patents. The copyright and patent licenses for Opus are automatically granted to everyone and do not require application or approval. The Opus FAQ has more information on why Opus is freely licensed.
 In brief:  (see below for details)
-	You can encode or decode Opus-compatible streams for any purpose at no cost.
-✔	You can integrate the reference Opus encoder and decoder in any application, program, or product, even commercially, at no cost.
-✔	You can create your own compatible implementations of the Opus specification and give them away or sell them.
-	You may not do these things if you engage in Opus-related patent litigation against any user of Opus.
+        You can encode or decode Opus-compatible streams for any purpose at no cost.
+✔     You can integrate the reference Opus encoder and decoder in any application, program, or product, even commercially, at no cost.
+✔     You can create your own compatible implementations of the Opus specification and give them away or sell them.
+        You may not do these things if you engage in Opus-related patent litigation against any user of Opus.
 Licensing details
 Copyright
 Specification

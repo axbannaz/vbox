@@ -5,14 +5,14 @@
   <body>
   
   <p>Required notices for open source or other separately licensed software products or components distributed in <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/> are identified in the following table, along with the applicable licensing information. Additional notices and/or licenses may be found in the included documentation or readme files of the individual third party software.</p>
-  	
+        
         <table id="table-oss-vbox-base">
-		
+                
           <title>Open Source or Other Separately Licensed Software Included With <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/></title>
          <desc>
            <ph>This table shows the additional licensing information for the software packages and container images used for <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/></ph>
       </desc>
-		
+                
         <tgroup cols="3">
           <colspec/>
           <colspec/>
