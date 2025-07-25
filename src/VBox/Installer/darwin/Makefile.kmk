@@ -584,6 +584,11 @@ ifdef VBOX_WITH_EFIFW_PACKING
  VBOX_DI_VBAPP_MISC_FILES += \
  	MacOS/VBoxEFI-x86.fd \
  	MacOS/VBoxEFI-amd64.fd
+ ifdef VBOX_WITH_VIRT_ARMV8
+  VBOX_DI_VBAPP_MISC_FILES += \
+  	MacOS/VBoxEFI-arm32.fd \
+  	MacOS/VBoxEFI-arm64.fd
+ endif
 endif
 VBOX_DI_VBAPP_SYMLINKS =
 ifdef VBOX_WITH_QTGUI

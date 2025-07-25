@@ -50,6 +50,7 @@ DEFAULT_FILE_NAMES=" \
     VBoxSVCM.so \
     VBoxDDU.so \
     VBoxVMM.so \
+    VBoxVMMArm.so \
     VBoxXPCOM.so \
     VBoxXPCOMC.so \
     VBoxXPCOMIPCD \
@@ -91,6 +92,7 @@ DEFAULT_FILE_NAMES=" \
     components/VBoxDDU.so \
     components/VBoxRT.so \
     components/VBoxVMM.so \
+    components/VBoxVMMArm.so \
     components/VBoxXPCOM.so \
     components/VBoxXPCOMBase.xpt \
     components/VBoxXPCOMIPCC.so \
