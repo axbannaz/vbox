@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE topic PUBLIC "-//OASIS//DTD DITA Topic//EN" "topic.dtd">
-<topic xml:lang="en-us" id="license-nasm-2.16.01">
+<topic xml:lang="en-us" id="license-nasm-2.16.03">
   
- <title>NASM 2.16.01</title>
+ <title>NASM</title>
   
  <body>
   <pre xml:space="preserve">NASM is now licensed under the 2-clause BSD license, also known as the
@@ -33,7 +33,6 @@ simplified BSD license.
       HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
       CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
       OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-      EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-</pre>
+      EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</pre>
   </body>
  </topic>
