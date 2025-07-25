@@ -102,8 +102,8 @@ TOOL_VBoxXClangMacho_PCHDEFS          ?= $(TOOL_VBoxXClangMacho_CXXDEFS)
 TOOL_VBoxXClangMacho_OBJCOBJSUFF      ?= .o
 TOOL_VBoxXClangMacho_OBJCFLAGS        ?=
 TOOL_VBoxXClangMacho_OBJCFLAGS.debug  ?= -g
-TOOL_VBoxXClangMacho_OBJCFLAGS.profile?= -O2 #-g -pg
-TOOL_VBoxXClangMacho_OBJCFLAGS.release?= -O2
+TOOL_VBoxXClangMacho_OBJCFLAGS.profile ?= -O2 #-g -pg
+TOOL_VBoxXClangMacho_OBJCFLAGS.release ?= -O2
 TOOL_VBoxXClangMacho_OBJCINCS         ?=
 TOOL_VBoxXClangMacho_OBJCDEFS         ?=
 
@@ -134,8 +134,8 @@ TOOL_VBoxXClangMacho_LDFLAGS.profile  ?= -g
 # @param    1  The whole output filename.
 # @param    2  The output filename sans suffix.
 TOOL_VBoxXClangMacho_DEBUG_BUNDLE_FN = \
-    $(1).dSYM/Contents/Info.plist \
-    $(1).dSYM/Contents/Resources/DWARF/$(notdir $(1))
+	$(1).dSYM/Contents/Info.plist \
+	$(1).dSYM/Contents/Resources/DWARF/$(notdir $(1))
 
 ##
 # Calculate the files in the debug bundle.
@@ -146,12 +146,12 @@ TOOL_VBoxXClangMacho_DEBUG_BUNDLE_FN = \
 #           does not care and only check for a symbol file in the DWARF
 #           directory with the same name as the debugged module.
 TOOL_VBoxXClangMacho_DEBUG_INSTALL_FN= \
-    $(3).dSYM/ \
-    $(3).dSYM/Contents/ \
-    $(3).dSYM/Contents/Resources/ \
-    $(3).dSYM/Contents/Resources/DWARF/ \
-    $(1).dSYM/Contents/Info.plist=>$(3).dSYM/Contents/Info.plist \
-    $(1).dSYM/Contents/Resources/DWARF/$(notdir $(1))=>$(3).dSYM/Contents/Resources/DWARF/$(notdir $(3))
+	$(3).dSYM/ \
+	$(3).dSYM/Contents/ \
+	$(3).dSYM/Contents/Resources/ \
+	$(3).dSYM/Contents/Resources/DWARF/ \
+	$(1).dSYM/Contents/Info.plist=>$(3).dSYM/Contents/Info.plist \
+	$(1).dSYM/Contents/Resources/DWARF/$(notdir $(1))=>$(3).dSYM/Contents/Resources/DWARF/$(notdir $(3))
 
 
 ## Compile C source.
@@ -172,7 +172,7 @@ TOOL_VBoxXClangMacho_COMPILE_C_DEPORD =
 TOOL_VBoxXClangMacho_COMPILE_C_OUTPUT         = $(if-expr "$(use_objcache)" != "",$(outbase).i,)
 TOOL_VBoxXClangMacho_COMPILE_C_USES_KOBJCACHE = $(if-expr "$(use_objcache)" != "",1,)
 define TOOL_VBoxXClangMacho_COMPILE_C_CMDS
-if "$(use_objcache)" != ""
+ if "$(use_objcache)" != ""
 	$(QUIET)$(KOBJCACHE) -f $(outbase).koc -d $(PATH_OBJCACHE) -t $(bld_trg).$(bld_trg_arch) -p\
 		--kObjCache-cpp $(outbase).i\
 		$(TOOL_VBoxXClangMacho_CC) -E -o -\
@@ -184,13 +184,13 @@ if "$(use_objcache)" != ""
 		$(flags) -fpreprocessed -x c\
 		-o $(obj)\
 		-
-else
+ else
 	$(QUIET)$(TOOL_VBoxXClangMacho_CC) -c\
 		$(flags) $(qaddprefix sh,-I, $(incs)) $(qaddprefix sh,-D, $(defs))\
 		-Wp,-MD,$(dep) -Wp,-MT,$(obj) -Wp,-MP\
 		-o $(obj)\
 		$(abspath $(source))
-endif
+ endif
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
 endef
 
@@ -212,7 +212,7 @@ TOOL_VBoxXClangMacho_COMPILE_CXX_DEPEND         = $($(target)_1_GCC_PCH_FILE)
 TOOL_VBoxXClangMacho_COMPILE_CXX_DEPORD         =
 TOOL_VBoxXClangMacho_COMPILE_CXX_USES_KOBJCACHE = $(if-expr "$(use_objcache)" != "",1,)
 define TOOL_VBoxXClangMacho_COMPILE_CXX_CMDS
-if "$(use_objcache)" != ""
+ if "$(use_objcache)" != ""
 	$(QUIET)$(KOBJCACHE) -f $(outbase).koc -d $(PATH_OBJCACHE) -t $(bld_trg).$(bld_trg_arch) -p\
 		--kObjCache-cpp $(outbase).ii\
 		$(TOOL_VBoxXClangMacho_CXX) -E -o - $(if-expr defined($(target)_PCH_HDR)\
@@ -225,14 +225,14 @@ if "$(use_objcache)" != ""
 		$(flags) -fpreprocessed $(if-expr defined($(target)_PCH_HDR),-fpch-preprocess,) -x c++\
 		-o $(obj)\
 		-
-else
+ else
 	$(QUIET)$(TOOL_VBoxXClangMacho_CXX) -c\
 		$(flags) $(qaddprefix sh,-I, $($(target)_1_GCC_PCH_DIR) $(incs)) $(qaddprefix sh,-D, $(defs))\
 		-Wp,-MD,$(dep) -Wp,-MT,$(obj) -Wp,-MP\
 		-o $(obj) $(if-expr defined($(target)_PCH_HDR) \
 		,-Winvalid-pch -include $(basename $($(target)_1_GCC_PCH_FILE)),) \
 		$(abspath $(source))
-endif
+ endif
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
 endef
 
@@ -278,9 +278,9 @@ endef
 TOOL_VBoxXClangMacho_COMPILE_OBJC_DEPEND =
 TOOL_VBoxXClangMacho_COMPILE_OBJC_DEPORD =
 ifdef KBUILD_USE_KOBJCACHE
-TOOL_VBoxXClangMacho_COMPILE_OBJC_USES_KOBJCACHE = 1
-TOOL_VBoxXClangMacho_COMPILE_OBJC_OUTPUT = $(outbase).mi
-define TOOL_VBoxXClangMacho_COMPILE_OBJC_CMDS
+ TOOL_VBoxXClangMacho_COMPILE_OBJC_USES_KOBJCACHE = 1
+ TOOL_VBoxXClangMacho_COMPILE_OBJC_OUTPUT = $(outbase).mi
+ define TOOL_VBoxXClangMacho_COMPILE_OBJC_CMDS
 	$(QUIET)$(KOBJCACHE) -f $(outbase).koc -d $(PATH_OBJCACHE) -t $(bld_trg).$(bld_trg_arch) -p\
 		--kObjCache-cpp $(outbase).ii\
 		$(TOOL_VBoxXClangMacho_OBJC) -E -o -\
@@ -293,17 +293,17 @@ define TOOL_VBoxXClangMacho_COMPILE_OBJC_CMDS
 		-o $(obj)\
 		-
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
-endef
+ endef
 else  # !KBUILD_USE_KOBJCACHE
-TOOL_VBoxXClangMacho_COMPILE_OBJC_OUTPUT =
-define TOOL_VBoxXClangMacho_COMPILE_OBJC_CMDS
+ TOOL_VBoxXClangMacho_COMPILE_OBJC_OUTPUT =
+ define TOOL_VBoxXClangMacho_COMPILE_OBJC_CMDS
 	$(QUIET)$(TOOL_VBoxXClangMacho_OBJC) -c\
 		$(flags) $(qaddprefix sh,-I, $(incs)) $(qaddprefix sh,-D, $(defs))\
 		-Wp,-MD,$(dep) -Wp,-MT,$(obj) -Wp,-MP\
 		-o $(obj)\
 		$(abspath $(source))
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
-endef
+ endef
 endif # !KBUILD_USE_KOBJCACHE
 
 
@@ -322,9 +322,9 @@ endif # !KBUILD_USE_KOBJCACHE
 TOOL_VBoxXClangMacho_COMPILE_OBJCXX_DEPEND =
 TOOL_VBoxXClangMacho_COMPILE_OBJCXX_DEPORD =
 ifdef KBUILD_USE_KOBJCACHE
-TOOL_VBoxXClangMacho_COMPILE_OBJCXX_USES_KOBJCACHE = 1
-TOOL_VBoxXClangMacho_COMPILE_OBJCXX_OUTPUT = $(outbase).mii
-define TOOL_VBoxXClangMacho_COMPILE_OBJCXX_CMDS
+ TOOL_VBoxXClangMacho_COMPILE_OBJCXX_USES_KOBJCACHE = 1
+ TOOL_VBoxXClangMacho_COMPILE_OBJCXX_OUTPUT = $(outbase).mii
+ define TOOL_VBoxXClangMacho_COMPILE_OBJCXX_CMDS
 	$(QUIET)$(KOBJCACHE) -f $(outbase).koc -d $(PATH_OBJCACHE) -t $(bld_trg).$(bld_trg_arch) -p\
 		--kObjCache-cpp $(outbase).mii\
 		$(TOOL_VBoxXClangMacho_OBJCXX) -E -o -\
@@ -337,17 +337,17 @@ define TOOL_VBoxXClangMacho_COMPILE_OBJCXX_CMDS
 		-o $(obj)\
 		-
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
-endef
+ endef
 else  # !KBUILD_USE_KOBJCACHE
-TOOL_VBoxXClangMacho_COMPILE_OBJCXX_OUTPUT =
-define TOOL_VBoxXClangMacho_COMPILE_OBJCXX_CMDS
+ TOOL_VBoxXClangMacho_COMPILE_OBJCXX_OUTPUT =
+ define TOOL_VBoxXClangMacho_COMPILE_OBJCXX_CMDS
 	$(QUIET)$(TOOL_VBoxXClangMacho_OBJCXX) -c\
 		$(flags) $(qaddprefix sh,-I, $(incs)) $(qaddprefix sh,-D, $(defs))\
 		-Wp,-MD,$(dep) -Wp,-MT,$(obj) -Wp,-MP\
 		-o $(obj)\
 		$(abspath $(source))
 	$(QUIET)$(APPEND) -n "$(dep)" "" "$(source):" ""
-endef
+ endef
 endif # !KBUILD_USE_KOBJCACHE
 
 
