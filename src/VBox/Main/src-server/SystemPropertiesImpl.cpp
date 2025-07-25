@@ -1040,7 +1040,7 @@ HRESULT SystemProperties::getSupportedPlatformArchitectures(std::vector<Platform
     static const PlatformArchitecture_T s_aPlatformArchitectures[] =
     {
 #if   defined(RT_ARCH_X86)   || defined(RT_ARCH_AMD64)
-        /* Currently x86 can run x86 VMs only and if enabled ARM VMs with much limitations. */
+        /* Currently, x86 can only run x86 VMs and, if enabled, pretend to run ARM VMs. */
         PlatformArchitecture_x86
 # ifdef VBOX_WITH_VIRT_ARMV8
         , PlatformArchitecture_ARM
