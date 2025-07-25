@@ -409,9 +409,14 @@ HRESULT RecordingSettings::start(ComPtr<IProgress> &aProgress)
     if (RT_FAILURE(vrc))
     {
         /* Make the progress' error info available to the caller on failure. */
-        ComObjPtr<IVirtualBoxErrorInfo> pErrorInfo;
-        m->mProgress->COMGETTER(ErrorInfo)(pErrorInfo.asOutParam());
-        return setError(pErrorInfo);
+        if (m->mProgress.isNotNull()) /* Progress object available (yet)? */
+        {
+            ComObjPtr<IVirtualBoxErrorInfo> pErrorInfo;
+            m->mProgress->COMGETTER(ErrorInfo)(pErrorInfo.asOutParam());
+            return setError(pErrorInfo);
+        }
+
+        return setErrorBoth(VBOX_E_RECORDING_ERROR, vrc, "Starting recording failed with %Rrc", vrc);
     }
 
     return m->mProgress.queryInterfaceTo(aProgress.asOutParam());
