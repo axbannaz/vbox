@@ -15170,19 +15170,19 @@
     </message>
     <message>
         <source>Video &amp;Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Grafikspeicher</translation>
     </message>
     <message>
         <source>Amount of video memory the virtual machine has</source>
-        <translation type="unfinished"></translation>
+        <translation>Größe des Videospeichers, die der virtuellen Maschine zur Verfügung gestellt wird</translation>
     </message>
     <message>
         <source>Minimum video memory size</source>
-        <translation type="unfinished"></translation>
+        <translation>Minimal mögliche Größe des Videospeichers</translation>
     </message>
     <message>
         <source>Maximum video memory size</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximal mögliche Größe des Videospeichers</translation>
     </message>
 </context>
 <context>
@@ -15239,19 +15239,19 @@
     </message>
     <message>
         <source>&amp;Number of CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Anzahl der CPUs</translation>
     </message>
     <message>
         <source>Number of virtual CPUs in this VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Anzahl der virtuellen CPUs in dieser VM</translation>
     </message>
     <message>
         <source>Minimum number of virtual CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>Mindestanzahl virtueller CPUs</translation>
     </message>
     <message>
         <source>Maximum number of virtual CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>Maximale Anzahl virtueller CPUs</translation>
     </message>
 </context>
 <context>
@@ -15407,11 +15407,11 @@
     </message>
     <message>
         <source>&amp;Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Aussehen</translation>
     </message>
     <message>
         <source>Virtual machine visual appearance. If machine is running it will be applied as soon as possible, otherwise desired one will be defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>Optisches Erscheinungsbild der virtuellen Maschine. Wenn die Maschine läuft, wird es so schnell wie möglich angewendet, andernfalls wird das gewünschte Erscheinungsbild definiert.</translation>
     </message>
 </context>
 <context>
@@ -15595,7 +15595,7 @@
         <translation>MAC-Adressen-&amp;Richtlinie:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for cloning:</source>
+        <source>Determines MAC address policy for clonning:</source>
         <translation type="vanished">Legt die MAC-Adressen-Richtlinie für das Klonen fest:</translation>
     </message>
     <message>
@@ -15675,16 +15675,16 @@
         <translation type="vanished">Zusätzliche Optionen</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for cloning.</source>
-        <translation type="unfinished"></translation>
+        <source>Determines MAC address policy for clonning.</source>
+        <translation>Legt die MAC-Adressen-Richtlinie für das Klonen fest.</translation>
     </message>
     <message>
         <source>OS Installation Options:</source>
-        <translation type="unfinished"></translation>
+        <translation>Optionen für die Betriebssysteminstallation:</translation>
     </message>
     <message>
         <source>OS Installation Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Optionen für die Betriebssysteminstallation</translation>
     </message>
 </context>
 <context>
@@ -16062,7 +16062,7 @@
     </message>
     <message>
         <source>&amp;Import Hard Drives as VDI</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Festplatten als VDI importieren</translation>
     </message>
 </context>
 <context>
@@ -16141,11 +16141,11 @@
     </message>
     <message>
         <source>&amp;Settings:</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Einstellungen:</translation>
     </message>
     <message>
         <source>Cloud virtual machine settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Einstellungen Cloud-VM</translation>
     </message>
 </context>
 <context>
@@ -16200,7 +16200,7 @@
     </message>
     <message>
         <source>Hard Disk File &amp;Type and Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei&amp;typ und Variante der Festplatte</translation>
     </message>
 </context>
 <context>
@@ -16531,215 +16531,215 @@
     </message>
     <message>
         <source>&amp;Product Key</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Produktschlüssel</translation>
     </message>
     <message>
         <source>The product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Produktschlüssel</translation>
     </message>
     <message>
         <source>Start the virtual machine without a GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Die virtuelle Maschine ohne GUI starten</translation>
     </message>
     <message>
         <source>User Name and Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Benutzername und Passwort</translation>
     </message>
     <message>
         <source>The ISO file to install the VirtualBox Guest Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>Installationsmedium (ISO-Datei) für die Installation der Gasterweiterungen</translation>
     </message>
     <message>
         <source>Guest &amp;Additions ISO Image:</source>
-        <translation type="unfinished"></translation>
+        <translation>Gast&amp;erweiterungen ISO:</translation>
     </message>
     <message>
         <source>Install Gu&amp;est Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Gasterweiterungen installieren</translation>
     </message>
     <message>
         <source>Install the VirtualBox Guest Additions on the guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>VirtualBox Gasterweiterungen auf dem Gastbetriebssystem installieren</translation>
     </message>
     <message>
         <source>OS Installation Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Optionen für die Betriebssysteminstallation</translation>
     </message>
     <message>
         <source>&amp;Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>EFI &amp;verwenden</translation>
     </message>
     <message>
         <source>Use Extended Firmware Interface (EFI). This is required to boot some OSs.</source>
-        <translation type="unfinished"></translation>
+        <translation>Extended Firmware Interface (EFI) verwenden. Dies ist erforderlich, um bestimmte Betriebssysteme zu starten.</translation>
     </message>
     <message>
         <source>New Virtual Machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Neue virtuelle Maschine</translation>
     </message>
     <message>
         <source>Virtual machine name and operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Name und Betriebssystem der virtuellen Maschine</translation>
     </message>
     <message>
         <source>The ISO image is used to install the operating system on the VM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Das ISO-Image wird verwendet, um das Betriebssystem in der VM zu installieren.</translation>
     </message>
     <message>
         <source>&amp;Proceed with Unattended Installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Mit &amp;unbeaufsichtigter Installation fortfahren</translation>
     </message>
     <message>
         <source>The ISO is attached to the VM, so you can install the OS manually</source>
-        <translation type="unfinished"></translation>
+        <translation>Die ISO-Datei ist an die VM angehängt, sodass Sie das Betriebssystem manuell installieren können</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Betriebssystemtyp kann nicht anhand des ausgewählten ISO bestimmt werden, das Gastbetriebssystem muss manuell installiert werden.</translation>
     </message>
     <message>
         <source>This OS can&apos;t be installed using Unattended Installation. The installation needs to be done manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dieser Betriebssystemtyp kann nicht unbeaufsichtigt installiert werden. Die Installation muss manuell durchgeführt werden.</translation>
     </message>
     <message>
         <source>VirtualBox will install the OS using an unattended installation when the VM is created. Supply the required information in the following steps.</source>
-        <translation type="unfinished"></translation>
+        <translation>VirtualBox installiert das Betriebssystem bei der Erstellung der VM im Rahmen einer unbeaufsichtigten Installation. Geben Sie die erforderlichen Informationen in den folgenden Schritten an.</translation>
     </message>
     <message>
         <source>Virtual machine name cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Name der virtuellen Maschine darf nicht leer sein</translation>
     </message>
     <message>
         <source>Virtual machine name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Name der virtuellen Maschine ist gültig</translation>
     </message>
     <message>
         <source>Virtual machine path is not unique</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Pfad der virtuellen Maschine ist nicht eindeutig</translation>
     </message>
     <message>
         <source>Set up unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Einrichtung der unbeaufsichtigten Installation des Gastbetriebssystems</translation>
     </message>
     <message>
         <source>Enter the information that will be required when the OS is installed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Informationen eingeben, die bei der Installation des Betriebssystems erforderlich sind.</translation>
     </message>
     <message>
         <source>Specify virtual hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Virtuelle Hardware angeben</translation>
     </message>
     <message>
         <source>Specify the VM&apos;s hardware. Resources allocated to the VM will not be available to the host when the VM is running.</source>
-        <translation type="unfinished"></translation>
+        <translation>Die Hardware der VM angeben. Die der VM zugewiesenen Ressourcen stehen dem Host nicht zur Verfügung, wenn die VM ausgeführt wird.</translation>
     </message>
     <message>
         <source>Virtual machine name and &amp;operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Name und &amp;Betriebssystem der virtuellen Maschine</translation>
     </message>
     <message>
         <source>Set up &amp;unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Einrichtung der &amp;unbeaufsichtigten Installation des Gastbetriebssystems</translation>
     </message>
     <message>
         <source>Specify virtual hard dis&amp;k</source>
-        <translation type="unfinished"></translation>
+        <translation>Virtuelle &amp;Festplatte angeben</translation>
     </message>
     <message>
         <source>Specify virtual h&amp;ardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Virtuelle H&amp;ardware angeben</translation>
     </message>
     <message>
         <source>C&amp;reate Virtual Machine Without a Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Vi&amp;rtuelle Maschine ohne virtuelle Festplatte erstellen</translation>
     </message>
     <message>
         <source>&amp;Create a New Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Eine neue virtuelle Festplatte &amp;erstellen</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File...</source>
-        <translation type="unfinished"></translation>
+        <translation>Wählt eine virtuelle Festplattendatei...</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File</source>
-        <translation type="unfinished"></translation>
+        <translation>Eine virtuelle Festplattendatei wählen</translation>
     </message>
     <message>
         <source>Hard Disk File &amp;Type and Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Datei&amp;typ und Variante der Festplatte</translation>
     </message>
     <message>
         <source>Invalid user name and/or password</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültiger Benutzername und/oder Passwort</translation>
     </message>
     <message>
         <source>Invalid host name or domain name</source>
-        <translation type="unfinished"></translation>
+        <translation>Ungültiger Host- oder Domänenname</translation>
     </message>
     <message>
         <source>Invalid product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Produktschlüssel ist ungültig</translation>
     </message>
     <message>
         <source>Virtual machine name is invalid (possibly empty)</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Name der virtuellen Maschine ist ungültig (evtl. leer)</translation>
     </message>
     <message>
-        <source>Virtual` machine path is not unique</source>
-        <translation type="unfinished"></translation>
+        <source>Virtual machine path is not unique</source>
+        <translation>Der Pfad der virtuellen Maschine ist nicht eindeutig</translation>
     </message>
     <message>
         <source>Virtual Machine Name and Operating System</source>
-        <translation type="unfinished"></translation>
+        <translation>Name und Betriebssystem der virtuellen Maschine</translation>
     </message>
     <message>
         <source>VM Name</source>
-        <translation type="unfinished"></translation>
+        <translation>VM-Name</translation>
     </message>
     <message>
         <source>VM Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>VM-Ordner</translation>
     </message>
     <message>
         <source>Proceed with Unattended Install</source>
-        <translation type="unfinished"></translation>
+        <translation>Mit unbeaufsichtigter Installation fortfahren</translation>
     </message>
     <message>
         <source>Unattended Installation of Guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Unbeaufsichtigte Installation des Gastbetriebssystems</translation>
     </message>
     <message>
         <source>User Name</source>
-        <translation type="unfinished">Benutzername</translation>
+        <translation>Benutzername</translation>
     </message>
     <message>
         <source>Host Name/Domain Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Hostname/Domänenname</translation>
     </message>
     <message>
         <source>Guest Additions ISO Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Gasterweiterungen ISO</translation>
     </message>
     <message>
         <source>Virtual Hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Virtuelle Hardware</translation>
     </message>
     <message>
         <source>Processors</source>
-        <translation type="unfinished">Prozessoren</translation>
+        <translation>Prozessoren</translation>
     </message>
     <message>
         <source>Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>EFI verwenden</translation>
     </message>
     <message>
         <source>Hard Disk Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Festplattengröße</translation>
     </message>
     <message>
         <source>A new VM will be created with the following configuration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Eine neue VM wird mit der folgenden Konfiguration erstellt.</translation>
     </message>
 </context>
 <context>
