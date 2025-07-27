@@ -270,22 +270,6 @@ static unsigned iemMemMapFindFree(PVMCPUCC pVCpu)
 }
 
 
-#ifdef IEM_WITH_DATA_TLB
-/**
- * Helper for iemMemMap, iemMemMapJmp and iemMemBounceBufferMapCrossPage.
- * @todo duplicated
- */
-DECL_FORCE_INLINE(uint32_t)
-iemMemCheckDataBreakpoint(PVMCC pVM, PVMCPUCC pVCpu, RTGCPTR GCPtrMem, size_t cbMem, uint32_t fAccess)
-{
-    bool const  fSysAccess = (fAccess & IEM_ACCESS_WHAT_MASK) == IEM_ACCESS_WHAT_SYS;
-    if (fAccess & IEM_ACCESS_TYPE_WRITE)
-        return DBGFBpCheckDataWrite(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
-    return DBGFBpCheckDataRead(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
-}
-#endif
-
-
 /**
  * Maps the specified guest memory for the given kind of access.
  *

@@ -148,15 +148,18 @@ IEM_RAISE_PROTOS(iemRaiseUndefined, PVMCPUCC pVCpu);
 IEM_RAISE_PROTOS(iemRaiseDataAbortFromWalk,
                  PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t cbMem, uint32_t fAccess, int rc, PCPGMPTWALKFAST pWalkFast);
 
+IEM_RAISE_PROTOS(iemRaiseDataAbortFromAlignmentCheck,
+                 PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t cbMem, uint32_t fAccess);
+
 IEM_RAISE_PROTOS(iemRaiseDebugDataAccessOrInvokeDbgf,
                  PVMCPUCC pVCpu, uint32_t fDataBps, RTGCPTR GCPtrMem, size_t cbMem, uint32_t fAccess);
-
 
 IEM_RAISE_PROTOS(iemRaiseInstructionAbortFromWalk,
                  PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint8_t cbMem, uint32_t fAccess, int rc, PCPGMPTWALKFAST pWalkFast);
 
 IEM_RAISE_PROTOS(iemRaiseInstructionAbortTlbPermision,
                  PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint8_t cbMem, PCIEMTLBENTRY pTlbe);
+
 
 
 /** Creates an instruction essence value for MRS, MSR and similar.   */
@@ -211,6 +214,26 @@ VBOXSTRICTRC    iemMemMap(PVMCPUCC pVCpu, void **ppvMem, uint8_t *pbUnmapInfo, s
 uint32_t        iemOpcodeGetU32SlowJmp(PVMCPUCC pVCpu) IEM_NOEXCEPT_MAY_LONGJMP;
 uint16_t        iemOpcodeGetU16SlowJmp(PVMCPUCC pVCpu) IEM_NOEXCEPT_MAY_LONGJMP;
 
+uint8_t         iemMemFetchDataU8SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+uint16_t        iemMemFetchDataU16SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+uint32_t        iemMemFetchDataU32SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+uint64_t        iemMemFetchDataU64SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemFetchDataU128SafeJmp(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemFetchDataU256SafeJmp(PVMCPUCC pVCpu, PRTUINT256U pu256Dst, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
+uint32_t        iemMemFetchDataPairU32SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t *pu32Val2) IEM_NOEXCEPT_MAY_LONGJMP;
+uint64_t        iemMemFetchDataPairU64SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint64_t *pu64Val2) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemFetchDataPairU128SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, PRTUINT128U pu128Val1, PRTUINT128U pu128Val2) IEM_NOEXCEPT_MAY_LONGJMP;
+
+void            iemMemStoreDataU8SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint8_t u8Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataU16SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint16_t u16Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataU32SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t u32Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataU64SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint64_t u64Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataU128SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, PCRTUINT128U u128Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataU256SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, PCRTUINT256U pu256Value) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataPairU32SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t u32Value1, uint32_t u32Value2) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataPairU64SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint64_t u64Value1, uint64_t u64Value2) IEM_NOEXCEPT_MAY_LONGJMP;
+void            iemMemStoreDataPairU128SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, PCRTUINT128U pu128Value1, PCRTUINT128U pu128Value2) IEM_NOEXCEPT_MAY_LONGJMP;
+
 #if 0 /* rework this later */
 VBOXSTRICTRC    iemMemFetchDataU8(PVMCPUCC pVCpu, uint8_t *pu8Dst, RTGCPTR GCPtrMem) RT_NOEXCEPT;
 VBOXSTRICTRC    iemMemFetchDataU16(PVMCPUCC pVCpu, uint16_t *pu16Dst, RTGCPTR GCPtrMem) RT_NOEXCEPT;
@@ -224,17 +247,12 @@ VBOXSTRICTRC    iemMemFetchDataR80(PVMCPUCC pVCpu, PRTFLOAT80U pr80Dst, RTGCPTR 
 VBOXSTRICTRC    iemMemFetchDataD80(PVMCPUCC pVCpu, PRTPBCD80U pd80Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) RT_NOEXCEPT;
 VBOXSTRICTRC    iemMemFetchDataU128(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) RT_NOEXCEPT;
 VBOXSTRICTRC    iemMemFetchDataU128NoAc(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) RT_NOEXCEPT;
-uint8_t         iemMemFetchDataU8SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
-uint16_t        iemMemFetchDataU16SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
-uint32_t        iemMemFetchDataU32SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 uint32_t        iemMemFetchDataU32NoAcSafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 uint32_t        iemMemFlatFetchDataU32SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
-uint64_t        iemMemFetchDataU64SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 uint64_t        iemMemFetchDataU64NoAcSafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 uint64_t        iemMemFetchDataU64AlignedU128SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemFetchDataR80SafeJmp(PVMCPUCC pVCpu, PRTFLOAT80U pr80Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemFetchDataD80SafeJmp(PVMCPUCC pVCpu, PRTPBCD80U pd80Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
-void            iemMemFetchDataU128SafeJmp(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemFetchDataU128NoAcSafeJmp(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemFetchDataU128AlignedSseSafeJmp(PVMCPUCC pVCpu, PRTUINT128U pu128Dst, uint8_t iSegReg, RTGCPTR GCPtrMem) IEM_NOEXCEPT_MAY_LONGJMP;
 
@@ -255,11 +273,6 @@ VBOXSTRICTRC    iemMemStoreDataU256(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCP
 VBOXSTRICTRC    iemMemStoreDataU256NoAc(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT256U pu256Value) RT_NOEXCEPT;
 VBOXSTRICTRC    iemMemStoreDataU256AlignedAvx(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT256U pu256Value) RT_NOEXCEPT;
 VBOXSTRICTRC    iemMemStoreDataXdtr(PVMCPUCC pVCpu, uint16_t cbLimit, RTGCPTR GCPtrBase, uint8_t iSegReg, RTGCPTR GCPtrMem) RT_NOEXCEPT;
-void            iemMemStoreDataU8SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, uint8_t u8Value) IEM_NOEXCEPT_MAY_LONGJMP;
-void            iemMemStoreDataU16SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, uint16_t u16Value) IEM_NOEXCEPT_MAY_LONGJMP;
-void            iemMemStoreDataU32SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, uint32_t u32Value) IEM_NOEXCEPT_MAY_LONGJMP;
-void            iemMemStoreDataU64SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, uint64_t u64Value) IEM_NOEXCEPT_MAY_LONGJMP;
-void            iemMemStoreDataU128SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT128U u128Value) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemStoreDataU128NoAcSafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT128U pu128Value) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemStoreDataU128AlignedSseSafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT128U pu128Value) IEM_NOEXCEPT_MAY_LONGJMP;
 void            iemMemStoreDataU256SafeJmp(PVMCPUCC pVCpu, uint8_t iSegReg, RTGCPTR GCPtrMem, PCRTUINT256U pu256Value) IEM_NOEXCEPT_MAY_LONGJMP;

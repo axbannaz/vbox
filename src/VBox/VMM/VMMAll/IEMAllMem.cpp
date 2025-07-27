@@ -285,20 +285,6 @@ static VBOXSTRICTRC iemMemBounceBufferCommitAndUnmap(PVMCPUCC pVCpu, unsigned iM
 
 
 /**
- * Helper for iemMemMap, iemMemMapJmp and iemMemBounceBufferMapCrossPage.
- * @todo duplicated
- */
-DECL_FORCE_INLINE(uint32_t)
-iemMemCheckDataBreakpoint(PVMCC pVM, PVMCPUCC pVCpu, RTGCPTR GCPtrMem, size_t cbMem, uint32_t fAccess)
-{
-    bool const  fSysAccess = (fAccess & IEM_ACCESS_WHAT_MASK) == IEM_ACCESS_WHAT_SYS;
-    if (fAccess & IEM_ACCESS_TYPE_WRITE)
-        return DBGFBpCheckDataWrite(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
-    return DBGFBpCheckDataRead(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
-}
-
-
-/**
  * iemMemMap worker that deals with a request crossing pages.
  */
 VBOXSTRICTRC iemMemBounceBufferMapCrossPage(PVMCPUCC pVCpu, int iMemMap, void **ppvMem, uint8_t *pbUnmapInfo,

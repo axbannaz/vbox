@@ -29,6 +29,7 @@
  */
 
 
+#include "IEMInlineMem-armv8.h"
 
 
 /*
@@ -7108,7 +7109,19 @@
 
 
 /* STP  <Xt1>, <Xt2>, [<Xn|SP>], #<imm> (ffc00000/a8800000) */
-//#define IEM_INSTR_IMPL_A64__STP_64_ldstpair_post(Rt, Rn, Rt2, imm7)
+#define IEM_INSTR_IMPL_A64__STP_64_ldstpair_post(Rt, Rn, Rt2, imm7) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uVal1); \
+    IEM_MC_FETCH_GREG_U64( uVal1, Rt); \
+    IEM_MC_LOCAL(uint64_t, uVal2); \
+    IEM_MC_FETCH_GREG_U64( uVal2, Rt2); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_U64(uAddr, Rn); \
+    IEM_MC_STORE_MEM_FLAT_U64_PAIR(uAddr, uVal1, uVal2);  /** @todo tagchecked=true */ \
+    IEM_MC_ADD_CONST_U32_TO_ADDR(uAddr, imm7 * 8U); \
+    IEM_MC_STORE_GREG_SP_U64(Rn, uAddr); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDP  <Xt1>, <Xt2>, [<Xn|SP>], #<imm> (ffc00000/a8c00000) */

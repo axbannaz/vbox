@@ -73,6 +73,23 @@ iemRaiseDataAbortFromWalkJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t cbMem, u
 
 
 VBOXSTRICTRC
+iemRaiseDataAbortFromAlignmentCheck(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t cbMem, uint32_t fAccess) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, GCPtrMem, cbMem, fAccess);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECL_NO_RETURN(void)
+iemRaiseDataAbortFromAlignmentCheckJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint32_t cbMem,
+                                       uint32_t fAccess) IEM_NOEXCEPT_MAY_LONGJMP
+{
+    VBOXSTRICTRC const rcStrict = iemRaiseDataAbortFromAlignmentCheck(pVCpu, GCPtrMem, cbMem, fAccess);
+    IEM_DO_LONGJMP(pVCpu, VBOXSTRICTRC_VAL(rcStrict));
+}
+
+
+VBOXSTRICTRC
 iemRaiseDebugDataAccessOrInvokeDbgf(PVMCPUCC pVCpu, uint32_t fDataBps, RTGCPTR GCPtrMem, size_t cbMem,
                                     uint32_t fAccess) RT_NOEXCEPT
 {

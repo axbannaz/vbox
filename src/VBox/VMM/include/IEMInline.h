@@ -282,6 +282,7 @@ DECL_INLINE_THROW(void) iemMemCommitAndUnmapRoJmp(PVMCPUCC pVCpu, uint8_t bMapIn
     iemMemCommitAndUnmapRoSafeJmp(pVCpu, bMapInfo);
 }
 
+
 DECLINLINE(void) iemMemRollbackAndUnmapWo(PVMCPUCC pVCpu, uint8_t bMapInfo) RT_NOEXCEPT
 {
 #if defined(IEM_WITH_DATA_TLB) && defined(IN_RING3)
@@ -290,6 +291,22 @@ DECLINLINE(void) iemMemRollbackAndUnmapWo(PVMCPUCC pVCpu, uint8_t bMapInfo) RT_N
 #endif
     iemMemRollbackAndUnmapWoSafe(pVCpu, bMapInfo);
 }
+
+
+#ifdef IEM_WITH_DATA_TLB
+/**
+ * Helper for iemMemMap, iemMemMapJmp and iemMemBounceBufferMapCrossPage.
+ * @todo duplicated
+ */
+DECL_FORCE_INLINE(uint32_t)
+iemMemCheckDataBreakpoint(PVMCC pVM, PVMCPUCC pVCpu, RTGCPTR GCPtrMem, size_t cbMem, uint32_t fAccess)
+{
+    bool const  fSysAccess = (fAccess & IEM_ACCESS_WHAT_MASK) == IEM_ACCESS_WHAT_SYS;
+    if (fAccess & IEM_ACCESS_TYPE_WRITE)
+        return DBGFBpCheckDataWrite(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
+    return DBGFBpCheckDataRead(pVM, pVCpu, GCPtrMem, (uint32_t)cbMem, fSysAccess);
+}
+#endif
 
 /** @} */
 

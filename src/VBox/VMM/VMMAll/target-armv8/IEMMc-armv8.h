@@ -46,9 +46,9 @@
 #define IEM_MC_STORE_GREG_SP_U32(a_iGReg, a_u32Value)   iemGRegStoreU32(pVCpu, (a_iGReg), (a_u32Value), true /*fSp*/)
 #define IEM_MC_STORE_GREG_SP_U64(a_iGReg, a_u64Value)   iemGRegStoreU64(pVCpu, (a_iGReg), (a_u64Value), true /*fSp*/)
 
+
 #define IEM_MC_A64_SUBS_U64(a_uDifference, a_uMinuend, a_uSubtrahend) \
     (a_uDifference) = iemMcA64SubsU64(a_uMinuend, a_uSubtrahend, &pVCpu->cpum.GstCtx.fPState)
-
 
 /** Helper that implements IEM_MC_A64_SUBS_U64. */
 DECLINLINE(uint64_t) iemMcA64SubsU64(uint64_t uMinuend, uint64_t uSubtrahend, uint64_t *pfPState)
@@ -61,6 +61,19 @@ DECLINLINE(uint64_t) iemMcA64SubsU64(uint64_t uMinuend, uint64_t uSubtrahend, ui
     *pfPState = (*pfPState & ~ARMV8_SPSR_EL2_AARCH64_NZCV) | fNewFlags;
     return uDiff;
 }
+
+
+#define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
+    iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
+
+/** Adds a constant to an address (64-bit), applying checked
+ *  pointer arithmetic at the current EL. */
+#define IEM_MC_ADD_CONST_U32_TO_ADDR(a_EffAddr, a_u32Const) do { \
+        /*uint64_t const OldEffAddr = (a_EffAddr);*/ \
+        (a_EffAddr) += (uint32_t)(a_u32Const); \
+        AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
+    } while (0)
+
 
 /** @}  */
 

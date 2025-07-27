@@ -947,7 +947,7 @@ AssertCompile(IEMTLBE_F_PHYS_REV == ~(IEMTLB_PHYS_REV_INCR - 1U));
  * @todo ARM: Support 52-bit and 56-bit address space size (FEAT_LVA,
  *       FEAT_LVA3) when we see hardware supporting such.  */
 #ifdef VBOX_VMM_TARGET_ARMV8
-#if 0 /** @todo ARMv8: page size and TLB */
+# if 0 /** @todo ARMv8: page size and TLB */
 # define IEMTLB_CALC_TAG_NO_REV(a_pVCpu, a_GCPtr)   ( (((a_GCPtr) << 16) >> (IEM_F_ARM_GET_TLB_PAGE_SHIFT(pVCpu->iem.s.fExec) + 16)) )
 # else
 # define IEMTLB_CALC_TAG_NO_REV(a_pVCpu, a_GCPtr)   ( (((a_GCPtr) << 16) >> (GUEST_MIN_PAGE_SHIFT + 16)) )
@@ -1271,6 +1271,8 @@ typedef IEMTLBTRACEENTRY const *PCIEMTLBTRACEENTRY;
 #define IEM_CIMPL_F_XCPT \
     (IEM_CIMPL_F_BRANCH_INDIRECT | IEM_CIMPL_F_BRANCH_FAR | IEM_CIMPL_F_BRANCH_STACK_FAR \
      | IEM_CIMPL_F_MODE | IEM_CIMPL_F_RFLAGS | IEM_CIMPL_F_VMEXIT)
+/** Convenience: Memory access (arm). */
+#define IEM_CIMPL_F_MEM                 IEM_CIMPL_F_XCPT
 
 /** The block calls a C-implementation instruction function with two implicit arguments.
  * Mutually exclusive with IEM_CIMPL_F_CALLS_AIMPL and
@@ -3112,7 +3114,8 @@ typedef struct IEM
 #define IEM_ACCESS_NOT_LOCKED           UINT32_C(0x00001000)
 /** Atomic access.
  * This enables special alignment checks and the VINF_EM_EMULATE_SPLIT_LOCK
- * fallback for misaligned stuff. See @bugref{10547}. */
+ * fallback for misaligned stuff. See @bugref{10547}.
+ * @arm This means FEAT_LSA2 alignment checks according to SCTLR_ELx.nAA. */
 #define IEM_ACCESS_ATOMIC               UINT32_C(0x00002000)
 /** Valid bit mask. */
 #define IEM_ACCESS_VALID_MASK           UINT32_C(0x00003fff)
