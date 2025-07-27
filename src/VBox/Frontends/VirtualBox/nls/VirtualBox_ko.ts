@@ -20803,7 +20803,7 @@
         <translation>MAC 주소 정책(&amp;O):</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">복제 시 MAC 주소 정책을 지정합니다:</translation>
     </message>
     <message>
@@ -20883,7 +20883,7 @@
         <translation type="obsolete">추가 옵션</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

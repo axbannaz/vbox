@@ -27757,7 +27757,7 @@
         <translation>MAC 地址设定(&amp;O):</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">确定复制的MAC 地址设定:</translation>
     </message>
     <message>
@@ -27837,7 +27837,7 @@
         <translation type="obsolete">其它选项</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

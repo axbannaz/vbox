@@ -15591,7 +15591,7 @@
         <translation>P&amp;olicy för hårdvaruadresser:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Fastställer policyn för hårdvaruadresser vid kloning:</translation>
     </message>
     <message>
@@ -15703,7 +15703,7 @@
         <translation type="vanished">Ytterligare alternativ</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

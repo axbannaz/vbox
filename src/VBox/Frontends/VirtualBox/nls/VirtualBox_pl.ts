@@ -27308,7 +27308,7 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
         <translation>&amp;Polityka adresów MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Określa postępowanie z adresami MAC podczas klonowania:</translation>
     </message>
     <message>
@@ -27388,7 +27388,7 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
         <translation type="vanished">Dodatkowe opcje</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

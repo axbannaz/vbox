@@ -15603,7 +15603,7 @@
         <translation>&amp;Kebijakan Alamat MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Menentukan kebijakan alamat MAC untuk pembuatan klon:</translation>
     </message>
     <message>
@@ -15683,7 +15683,7 @@
         <translation type="vanished">Opsi Tambahan</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

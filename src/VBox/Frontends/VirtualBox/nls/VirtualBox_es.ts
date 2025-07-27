@@ -30680,7 +30680,7 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <translation>&amp;Política de dirección MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Determina la política de dirección MAC para el clonado:</translation>
     </message>
     <message>
@@ -30760,7 +30760,7 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <translation type="obsolete">Opciones adicionales</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

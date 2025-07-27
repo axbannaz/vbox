@@ -18362,7 +18362,7 @@
         <translation>Πολιτική Διευθύνσεων MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Προσδιορίζει την πολιτική διευθύνσεων MAC για κλωνοποίηση:</translation>
     </message>
     <message>
@@ -18450,7 +18450,7 @@
         <translation type="obsolete">Πρόσθετες Επιλογές</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

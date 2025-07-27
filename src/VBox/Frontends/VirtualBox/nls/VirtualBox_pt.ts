@@ -24065,7 +24065,7 @@ diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <translation type="vanished">Opções Adicionais</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

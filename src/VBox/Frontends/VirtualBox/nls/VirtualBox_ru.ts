@@ -15640,7 +15640,7 @@
         <translation>Политика MAC-&amp;адреса:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Определяет политику MAC адреса при клонировании:</translation>
     </message>
     <message>
@@ -15720,7 +15720,7 @@
         <translation type="vanished">Дополнительные опции</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

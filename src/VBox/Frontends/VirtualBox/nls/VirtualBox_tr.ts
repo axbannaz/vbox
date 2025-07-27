@@ -15603,7 +15603,7 @@
         <translation>MAC Adresi İ&amp;lkesi:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Çoğaltma için MAC adresi ilkesini belirler:</translation>
     </message>
     <message>
@@ -15683,7 +15683,7 @@
         <translation type="vanished">İlave Seçenekler</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

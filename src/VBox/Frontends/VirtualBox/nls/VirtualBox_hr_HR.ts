@@ -16916,7 +16916,7 @@
         <translation>P&amp;olitika MAC Adresa:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Utvrđuje politiku MAC adresa za kloniranje:</translation>
     </message>
     <message>
@@ -17056,7 +17056,7 @@
         <translation type="obsolete">Dodatne Opcije</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

@@ -16846,7 +16846,7 @@
         <translation>MAC 位址原則(&amp;O):</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">確定再製的 MAC 位址原則:</translation>
     </message>
     <message>
@@ -16986,7 +16986,7 @@
         <translation type="obsolete">額外選項</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

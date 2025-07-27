@@ -15634,7 +15634,7 @@
         <translation>MAC Address P&amp;olicy:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Bepaalt de MAC-adrespolicy bij klonen:</translation>
     </message>
     <message>
@@ -15722,7 +15722,7 @@
         <translation type="vanished">Additionele opties</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

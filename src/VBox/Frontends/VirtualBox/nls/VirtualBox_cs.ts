@@ -26893,7 +26893,7 @@ krok a připojit pevné disky později použitím dialogu Nastavení VM.&lt;/p&g
         <translation type="obsolete">Další možnosti nastavení</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

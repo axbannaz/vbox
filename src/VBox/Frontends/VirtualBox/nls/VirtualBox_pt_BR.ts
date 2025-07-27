@@ -30818,7 +30818,7 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <translation>P&amp;olítica de Endereço MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">Determina a política de clonagem para endereços MAC:</translation>
     </message>
     <message>
@@ -30898,7 +30898,7 @@ utilizando o diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <translation type="obsolete">Opções Adicionais</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

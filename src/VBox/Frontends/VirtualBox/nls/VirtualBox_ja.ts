@@ -30451,7 +30451,7 @@ step and attach hard disks later using the VM Settings dialog.&lt;/p&gt;</source
         <translation>MACアドレスのポリシー(&amp;O):</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning:</source>
+        <source>Determines MAC address policy for cloning:</source>
         <translation type="vanished">クローンの際に使用するMACアドレスのポリシーを決定:</translation>
     </message>
     <message>
@@ -30531,7 +30531,7 @@ step and attach hard disks later using the VM Settings dialog.&lt;/p&gt;</source
         <translation type="obsolete">追加オプション</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

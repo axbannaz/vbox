@@ -21346,7 +21346,7 @@ din listă apăsând butonul &lt;b&gt;Existent&lt;/b&gt; (pentru a invoca dialog
         <translation type="obsolete">Opțiuni suplimentare</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
