@@ -16739,7 +16739,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Virtual` machine path is not unique</source>
+        <source>Virtual machine path is not unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

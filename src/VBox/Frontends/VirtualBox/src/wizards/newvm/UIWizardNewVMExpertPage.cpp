@@ -672,7 +672,7 @@ bool UIWizardNewVMExpertPage::isComplete() const
         {
             m_pToolBox->setPageTitleIcon(ExpertToolboxItems_NameAndOSType,
                                          UIIconPool::iconSet(":/status_error_16px.png"),
-                                         UIWizardNewVM::tr("Virtual` machine path is not unique"));
+                                         UIWizardNewVM::tr("Virtual machine path is not unique"));
             fIsComplete = false;
         }
         if (!UIWizardNewVMNameOSTypeCommon::checkISOFile(m_pNameAndSystemEditor->ISOImagePath()))

@@ -22195,7 +22195,7 @@ din listă apăsând butonul &lt;b&gt;Existent&lt;/b&gt; (pentru a invoca dialog
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Virtual` machine path is not unique</source>
+        <source>Virtual machine path is not unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

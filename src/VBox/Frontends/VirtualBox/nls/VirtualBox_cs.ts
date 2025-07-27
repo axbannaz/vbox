@@ -28097,7 +28097,7 @@ krok a připojit pevné disky později použitím dialogu Nastavení VM.&lt;/p&g
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Virtual` machine path is not unique</source>
+        <source>Virtual machine path is not unique</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
