@@ -1089,7 +1089,7 @@ VBoxNetSlirpNAT::run()
     /* spawn intnet input pump */
     rc = RTThreadCreate(&m_hThrRecv,
                         VBoxNetSlirpNAT::receiveThread, this,
-                        1024, /* :cbStack */
+                        0, /* :cbStack */
                         RTTHREADTYPE_IO, RTTHREADFLAGS_WAITABLE,
                         "RECV");
     AssertRCReturn(rc, rc);
