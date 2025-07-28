@@ -1004,7 +1004,7 @@ int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
 #ifdef VBOX_WITH_AUDIO_RECORDING
     m_pCodecAudio    = pCodecAudio;
 #else
-    m_pCodecAudio    = NULL;
+    RT_NOREF(pCodecAudio);
 #endif
     m_Settings = ScreenSettings;
 

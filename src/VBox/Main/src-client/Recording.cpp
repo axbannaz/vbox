@@ -1820,7 +1820,7 @@ int RecordingContext::SendScreenChange(uint32_t uScreen, uint32_t uWidth, uint32
     Info.uHeight       = uHeight;
     /* We always operate with BRGA32 internally. */
     Info.uBPP          = 32;
-    Info.uBytesPerLine = uWidth * 4 /* Bytes */;
+    Info.uBytesPerLine = uBytesPerLine;
     Info.enmPixelFmt   = enmPixelFmt;
 
     int const vrc = pStream->SendScreenChange(&Info, msTimestamp);
