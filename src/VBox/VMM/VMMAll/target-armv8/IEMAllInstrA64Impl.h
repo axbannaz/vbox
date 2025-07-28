@@ -6470,8 +6470,16 @@
 
 
 /* LDR  <Xt>, [<Xn|SP>{, #<pimm>}] (ffc00000/f9400000) */
-//#define IEM_INSTR_IMPL_A64__LDR_64_ldst_pos(Rt, Rn, imm12)
-
+#define IEM_INSTR_IMPL_A64__LDR_64_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U32_TO_ADDR(uAddr, imm12 << 3); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_FETCH_MEM_FLAT_U32(uValue, uAddr);  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_SP_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 /* PRFM  {<prfop> | #<imm5>}, [<Xn|SP>{, #<pimm>}] (ffc00000/f9800000) */
 //#define IEM_INSTR_IMPL_A64__PRFM_P_ldst_pos(Rt, Rn, imm12)
