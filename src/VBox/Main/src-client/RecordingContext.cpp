@@ -1661,12 +1661,19 @@ int RecordingContext::SendAudioFrame(const void *pvData, size_t cbData, uint64_t
 /**
  * Sends a video frame to the recording thread.
  *
- * @thread  EMT
- *
  * @returns VBox status code.
  * @param   uScreen             Screen number to send video frame to.
- * @param   pFrame              Video frame to send.
+ * @param   uWidth              With (in pixels) of the video frame.
+ * @param   uHeight             Height (in pixels) of the video frame.
+ * @param   enmPixelFmt         Pixel format of the video frame.
+ * @param   uBytesPerLine       Bytes per line of the video frame.
+ * @param   pvData              Pointer to video frame data.
+ * @param   cbData              Size (in bytes) of \a pvData.
+ * @param   uPosX               Absolute X position (in pixel) where to render the frame data.
+ * @param   uPosY               Absolute y position (in pixel) where to render the frame data.
  * @param   msTimestamp         Timestamp (PTS, in ms).
+ *
+ * @thread  EMT
  */
 int RecordingContext::SendVideoFrame(uint32_t uScreen, uint32_t uWidth, uint32_t uHeight, RECORDINGPIXELFMT enmPixelFmt,
                                      uint32_t uBytesPerLine, const void *pvData, size_t cbData, uint32_t uPosX, uint32_t uPosY,
