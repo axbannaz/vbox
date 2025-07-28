@@ -106,7 +106,19 @@
 
 
 /* SUBS  <Xd>, <Xn|SP>, <R><m>{, <extend>{ #<amount>}} (ffe00000/eb200000) */
-//#define IEM_INSTR_IMPL_A64__SUBS_64S_addsub_ext(Rd, Rn, imm3, option, Rm)
+#define IEM_INSTR_IMPL_A64__SUBS_64S_addsub_ext(Rd, Rn, imm3, option, Rm) \
+    RT_BREAKPOINT();  /** @todo untested */ \
+    if (imm3 > 4) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_STATUS_FLAGS); \
+    IEM_MC_LOCAL(uint64_t, uMinuend); \
+    IEM_MC_FETCH_GREG_SP_U64(uMinuend, Rn); \
+    IEM_MC_LOCAL(uint64_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_EXTEND_GREG_U64(uSubtrahend, Rm, option, imm3); \
+    IEM_MC_LOCAL(uint64_t, uDifference); \
+    IEM_MC_A64_SUBS_U64(uDifference, uMinuend, uSubtrahend); \
+    IEM_MC_STORE_GREG_U64(Rd, uDifference); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 
@@ -177,8 +189,8 @@
     IEM_MC_BEGIN(0, IEM_CIMPL_F_STATUS_FLAGS); \
     IEM_MC_LOCAL(uint64_t, uMinuend); \
     IEM_MC_FETCH_GREG_SP_U64(uMinuend, Rn); \
-    IEM_MC_LOCAL(uint64_t, uDifference); \
     IEM_MC_LOCAL_CONST(uint64_t, uSubtrahend, !sh ? imm12 : imm12 << 12); \
+    IEM_MC_LOCAL(uint64_t, uDifference); \
     IEM_MC_A64_SUBS_U64(uDifference, uMinuend, uSubtrahend); \
     IEM_MC_STORE_GREG_U64(Rd, uDifference); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
@@ -223,7 +235,17 @@
  */
 
 /* ADD  <Wd>, <Wn>, <Wm>{, <shift> #<amount>} (ff200000/0b000000) */
-//#define IEM_INSTR_IMPL_A64__ADD_32_addsub_shift(Rd, Rn, imm6, Rm, shift)
+#define IEM_INSTR_IMPL_A64__ADD_32_addsub_shift(Rd, Rn, imm6, Rm, shift) \
+    if (shift == 3 /*ROR*/ || imm6 >= 32) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_SP_U32(uTmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_SHIFT_GREG_U32(uSubtrahend, Rm, shift, imm6); \
+    IEM_MC_ADD_2LOCS_U32(uTmp, uSubtrahend); \
+    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ADDS  <Wd>, <Wn>, <Wm>{, <shift> #<amount>} (ff200000/2b000000) */
@@ -231,7 +253,17 @@
 
 
 /* SUB  <Wd>, <Wn>, <Wm>{, <shift> #<amount>} (ff200000/4b000000) */
-//#define IEM_INSTR_IMPL_A64__SUB_32_addsub_shift(Rd, Rn, imm6, Rm, shift)
+#define IEM_INSTR_IMPL_A64__SUB_32_addsub_shift(Rd, Rn, imm6, Rm, shift) \
+    if (shift == 3 /*ROR*/ || imm6 >= 32) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_SP_U32(uTmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_SHIFT_GREG_U32(uSubtrahend, Rm, shift, imm6); \
+    IEM_MC_SUB_2LOCS_U32(uTmp, uSubtrahend); \
+    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SUBS  <Wd>, <Wn>, <Wm>{, <shift> #<amount>} (ff200000/6b000000) */
@@ -239,7 +271,17 @@
 
 
 /* ADD  <Xd>, <Xn>, <Xm>{, <shift> #<amount>} (ff200000/8b000000) */
-//#define IEM_INSTR_IMPL_A64__ADD_64_addsub_shift(Rd, Rn, imm6, Rm, shift)
+#define IEM_INSTR_IMPL_A64__ADD_64_addsub_shift(Rd, Rn, imm6, Rm, shift) \
+    if (shift == 3 /*ROR*/) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_SP_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_SHIFT_GREG_U64(uSubtrahend, Rm, shift, imm6); \
+    IEM_MC_ADD_2LOCS_U64(uTmp, uSubtrahend); \
+    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ADDS  <Xd>, <Xn>, <Xm>{, <shift> #<amount>} (ff200000/ab000000) */
@@ -247,11 +289,32 @@
 
 
 /* SUB  <Xd>, <Xn>, <Xm>{, <shift> #<amount>} (ff200000/cb000000) */
-//#define IEM_INSTR_IMPL_A64__SUB_64_addsub_shift(Rd, Rn, imm6, Rm, shift)
+#define IEM_INSTR_IMPL_A64__SUB_64_addsub_shift(Rd, Rn, imm6, Rm, shift) \
+    if (shift == 3 /*ROR*/) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_SP_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_SHIFT_GREG_U64(uSubtrahend, Rm, shift, imm6); \
+    IEM_MC_SUB_2LOCS_U64(uTmp, uSubtrahend); \
+    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SUBS  <Xd>, <Xn>, <Xm>{, <shift> #<amount>} (ff200000/eb000000) */
-//#define IEM_INSTR_IMPL_A64__SUBS_64_addsub_shift(Rd, Rn, imm6, Rm, shift)
+#define IEM_INSTR_IMPL_A64__SUBS_64_addsub_shift(Rd, Rn, imm6, Rm, shift) \
+    if (shift == 3 /*ROR*/) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_STATUS_FLAGS); \
+    IEM_MC_LOCAL(uint64_t, uMinuend); \
+    IEM_MC_FETCH_GREG_SP_U64(uMinuend, Rn); \
+    IEM_MC_LOCAL(uint64_t, uSubtrahend); \
+    IEM_MC_FETCH_AND_SHIFT_GREG_U64(uSubtrahend, Rm, shift, imm6); \
+    IEM_MC_LOCAL(uint64_t, uDifference); \
+    IEM_MC_A64_SUBS_U64(uDifference, uMinuend, uSubtrahend); \
+    IEM_MC_STORE_GREG_U64(Rd, uDifference); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 

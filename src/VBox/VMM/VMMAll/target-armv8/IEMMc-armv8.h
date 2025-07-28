@@ -46,6 +46,81 @@
 #define IEM_MC_STORE_GREG_SP_U32(a_iGReg, a_u32Value)   iemGRegStoreU32(pVCpu, (a_iGReg), (a_u32Value), true /*fSp*/)
 #define IEM_MC_STORE_GREG_SP_U64(a_iGReg, a_u64Value)   iemGRegStoreU64(pVCpu, (a_iGReg), (a_u64Value), true /*fSp*/)
 
+/** Fetches and extends the register value according to the extended SUB/ADD
+ *  option and shift values. */
+#define IEM_MC_FETCH_AND_SHIFT_GREG_U32(a_u32Dst, a_iGReg, a_u2Shift, a_cShiftCount) do { \
+        (a_u32Dst) = iemGRegFetchU32(pVCpu, (a_iGReg), false /*fSp*/); \
+        switch (a_u2Shift) \
+        { \
+            case 0: (a_u32Dst) <<= (a_cShiftCount);                              break; /* LSL */ \
+            case 1: (a_u32Dst) >>= (a_cShiftCount);                              break; /* LSR */ \
+            case 2: (a_u32Dst) = (int32_t)(a_u32Dst) >> (a_cShiftCount);         break; /* ASR */ \
+            case 3: (a_u32Dst) = ASMRotateRightU32((a_u32Dst), (a_cShiftCount)); break; /* ROR */ \
+        } \
+    } while (0)
+
+/** Fetches and extends the register value according to the extended SUB/ADD
+ *  option and shift values. */
+#define IEM_MC_FETCH_AND_SHIFT_GREG_U64(a_u64Dst, a_iGReg, a_u2Shift, a_cShiftCount) do { \
+        (a_u64Dst) = iemGRegFetchU64(pVCpu, (a_iGReg), false /*fSp*/); \
+        switch (a_u2Shift) \
+        { \
+            case 0: (a_u64Dst) <<= (a_cShiftCount);                              break; /* LSL */ \
+            case 1: (a_u64Dst) >>= (a_cShiftCount);                              break; /* LSR */ \
+            case 2: (a_u64Dst) = (int64_t)(a_u64Dst) >> (a_cShiftCount);         break; /* ASR */ \
+            case 3: (a_u64Dst) = ASMRotateRightU64((a_u64Dst), (a_cShiftCount)); break; /* ROR */ \
+        } \
+    } while (0)
+
+/** Fetches and extends the register value according to the extended SUB/ADD
+ *  option and shift values. */
+#define IEM_MC_FETCH_AND_EXTEND_GREG_U32(a_u32Dst, a_iGReg, a_u3ExtendOption, a_cShiftLeft) do { \
+        (a_u32Dst) = iemGRegFetchU32(pVCpu, (a_iGReg), false /*fSp*/); \
+        switch (a_u3ExtendOption) \
+        { \
+            case 2: /* nothing to do */                         break; /* UXTW/LSL */ \
+            case 0: (a_u32Dst) = (uint8_t)(a_u32Dst);           break; /* UXTB */ \
+            case 1: (a_u32Dst) = (uint16_t)(a_u32Dst);          break; /* UXTH */ \
+            case 3: /* nothing to do */                         break; /* UXTX */ \
+            case 4: (a_u32Dst) = (int32_t)(int8_t)(a_u32Dst);   break; /* SXTB */ \
+            case 5: (a_u32Dst) = (int32_t)(int16_t)(a_u32Dst);  break; /* SXTH */ \
+            case 6: /* nothing to do */                         break; /* SXTW */ \
+            case 7: /* nothing to do */                         break; /* SXTX */ \
+        } \
+        (a_u32Dst) <<= (a_cShiftLeft); \
+    } while (0)
+
+/** Fetches and extends the register value according to the extended SUB/ADD
+ *  option and shift values. */
+#define IEM_MC_FETCH_AND_EXTEND_GREG_U64(a_u64Dst, a_iGReg, a_u3ExtendOption, a_cShiftLeft) do { \
+        (a_u64Dst) = iemGRegFetchU64(pVCpu, (a_iGReg), false /*fSp*/); \
+        switch (a_u3ExtendOption) \
+        { \
+            case 3: /* nothing to do */                         break; /* UXTX/LSL */ \
+            case 0: (a_u64Dst) = (uint8_t)(a_u64Dst);           break; /* UXTB */ \
+            case 1: (a_u64Dst) = (uint16_t)(a_u64Dst);          break; /* UXTH */ \
+            case 2: (a_u64Dst) = (uint32_t)(a_u64Dst);          break; /* UXTW */ \
+            case 4: (a_u64Dst) = (int64_t)(int8_t)(a_u64Dst);   break; /* SXTB */ \
+            case 5: (a_u64Dst) = (int64_t)(int16_t)(a_u64Dst);  break; /* SXTH */ \
+            case 6: (a_u64Dst) = (int64_t)(int32_t)(a_u64Dst);  break; /* SXTW */ \
+            case 7: /* nothing to do */                         break; /* SXTX */ \
+        } \
+        (a_u64Dst) <<= (a_cShiftLeft); \
+    } while (0)
+
+
+#define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
+    iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
+
+/** Adds a constant to an address (64-bit), applying checked
+ *  pointer arithmetic at the current EL. */
+#define IEM_MC_ADD_CONST_U32_TO_ADDR(a_EffAddr, a_u32Const) do { \
+        /*uint64_t const OldEffAddr = (a_EffAddr);*/ \
+        (a_EffAddr) += (uint32_t)(a_u32Const); \
+        AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
+    } while (0)
+
+
 
 #define IEM_MC_A64_SUBS_U64(a_uDifference, a_uMinuend, a_uSubtrahend) \
     (a_uDifference) = iemMcA64SubsU64(a_uMinuend, a_uSubtrahend, &pVCpu->cpum.GstCtx.fPState)
@@ -62,17 +137,6 @@ DECLINLINE(uint64_t) iemMcA64SubsU64(uint64_t uMinuend, uint64_t uSubtrahend, ui
     return uDiff;
 }
 
-
-#define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
-    iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
-
-/** Adds a constant to an address (64-bit), applying checked
- *  pointer arithmetic at the current EL. */
-#define IEM_MC_ADD_CONST_U32_TO_ADDR(a_EffAddr, a_u32Const) do { \
-        /*uint64_t const OldEffAddr = (a_EffAddr);*/ \
-        (a_EffAddr) += (uint32_t)(a_u32Const); \
-        AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
-    } while (0)
 
 
 /** @}  */
