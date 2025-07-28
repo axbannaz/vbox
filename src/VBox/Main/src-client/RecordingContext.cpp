@@ -244,6 +244,8 @@ protected:
     int processCommonData(RecordingBlockMap &mapCommon, RTMSINTERVAL msTimeout);
     int writeCommonData(RecordingBlockMap &mapCommon, PRECORDINGCODEC pCodec, const void *pvData, size_t cbData, uint64_t msTimestamp, uint32_t uFlags);
 
+    void updateInternal(void);
+
 protected:
 
     bool progressIsCanceled(void) const;
@@ -830,6 +832,16 @@ int RecordingContextImpl::writeCommonData(RecordingBlockMap &mapCommon, PRECORDI
     return vrc;
 }
 
+/**
+ * Internal update function which takes care of the internal state.
+ */
+void RecordingContextImpl::updateInternal(void)
+{
+    /* Initialize the start PTS if not set yet. */
+    if (m_tsStartMs == 0)
+        m_tsStartMs = RTTimeMilliTS();
+}
+
 #ifdef VBOX_WITH_AUDIO_RECORDING
 /**
  * Callback function for writing encoded audio data into the common encoded block map.
@@ -1067,7 +1079,10 @@ int RecordingContextImpl::startInternal(void)
 
     LogRel2(("Recording: Starting ...\n"));
 
-    m_tsStartMs = RTTimeMilliTS();
+    /* Note: m_startMS gets set as soon as the first recording frame is being submitted.
+             This avoids unnecessary black screens and/or empty areas at the beginning of the
+             output if some lengthly operation between starting the recording (this) and submitting
+             the first frame (sometime later). */
 
     m_ulCurOp = 0;
     if (m_pProgress.isNotNull())
@@ -1369,10 +1384,16 @@ int RecordingContext::Stop(void)
 /**
  * Returns the current PTS (presentation time stamp) for a recording context.
  *
+ * @retval  0 if the recording hasn't received a valid first frame yet.
  * @returns Current PTS.
  */
 uint64_t RecordingContext::GetCurrentPTS(void) const
 {
+    /* If not start PTS has been set yet, bail out and return 0 as the current PTS.
+     * That way we get a consistent PTS. */
+    if (!m->m_tsStartMs)
+        return 0;
+
     return RTTimeMilliTS() - m->m_tsStartMs;
 }
 
@@ -1625,6 +1646,8 @@ int RecordingContext::SendAudioFrame(const void *pvData, size_t cbData, uint64_t
 #ifdef VBOX_WITH_AUDIO_RECORDING
     m->lock();
 
+    m->updateInternal();
+
     int const vrc = m->writeCommonData(m->m_mapBlocksRaw, &m->m_CodecAudio,
                                        pvData, cbData, msTimestamp, RECORDINGCODEC_ENC_F_BLOCK_IS_KEY);
     m->unlock();
@@ -1672,6 +1695,8 @@ int RecordingContext::SendVideoFrame(uint32_t uScreen, uint32_t uWidth, uint32_t
         m->unlock();
         return VINF_SUCCESS;
     }
+
+    m->updateInternal();
 
     m->unlock();
 
@@ -1723,6 +1748,8 @@ int RecordingContext::SendCursorPositionChange(uint32_t uScreen, int32_t x, int3
             return VINF_SUCCESS;
         }
 
+        m->updateInternal();
+
         m->unlock();
 
         vrc = pStream->SendCursorPos(0 /* idCursor */, &m->m_Cursor.m_Shape.Pos, msTimestamp);
@@ -1771,6 +1798,8 @@ int RecordingContext::SendCursorShapeChange(bool fVisible, bool fAlpha, uint32_t
     {
         RecordingStream *pStream = (*it);
 
+    	m->updateInternal();
+
         int vrc2 = pStream->SendCursorShape(0 /* idCursor */, &m->m_Cursor.m_Shape, msTimestamp);
         if (RT_SUCCESS(vrc))
             vrc = vrc2;
@@ -1812,6 +1841,8 @@ int RecordingContext::SendScreenChange(uint32_t uScreen, uint32_t uWidth, uint32
         m->unlock();
         return VINF_SUCCESS;
     }
+
+    m->updateInternal();
 
     m->unlock();
 
