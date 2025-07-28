@@ -33,7 +33,7 @@
 # pragma once
 #endif
 
-#include "Recording.h"
+#include "RecordingContext.h"
 #include "RecordingScreenSettingsWrap.h"
 
 class RecordingSettings;

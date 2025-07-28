@@ -56,11 +56,7 @@
 #include <VBox/com/array.h>
 
 #ifdef VBOX_WITH_RECORDING
-# include <iprt/path.h>
-# include "Recording.h"
-
-# include <VBox/vmm/pdmapi.h>
-# include <VBox/vmm/pdmaudioifs.h>
+# include "RecordingContext.h"
 #endif
 
 /**

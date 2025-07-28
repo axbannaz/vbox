@@ -37,7 +37,7 @@
 #include <VBox/vmm/pdmifs.h>
 
 #include "AudioDriver.h"
-#include "Recording.h"
+#include "RecordingContext.h"
 
 using namespace com;
 

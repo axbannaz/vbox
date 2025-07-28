@@ -44,7 +44,7 @@
 #include "GuestScreenInfoWrap.h"
 
 #ifdef VBOX_WITH_RECORDING
-# include "Recording.h"
+# include "RecordingContext.h"
 #endif
 
 class Console;

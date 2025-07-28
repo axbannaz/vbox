@@ -101,7 +101,7 @@
 #include "ThreadTask.h"
 
 #ifdef VBOX_WITH_RECORDING
-# include "Recording.h"
+# include "RecordingContext.h"
 #endif
 
 #include "CryptoUtils.h"

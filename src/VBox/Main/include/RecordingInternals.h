@@ -57,7 +57,7 @@
 # include "vorbis/vorbisenc.h"
 #endif
 
-#include "Recording.h" /* For RECORDINGPIXELFMT. */
+#include "RecordingContext.h" /* For RECORDINGPIXELFMT. */
 
 
 /*********************************************************************************************************************************

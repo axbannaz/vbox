@@ -39,7 +39,7 @@
 #include "SecretKeyStore.h"
 #include "ConsoleWrap.h"
 #ifdef VBOX_WITH_RECORDING
-# include "Recording.h"
+# include "RecordingContext.h"
 #endif
 #ifdef VBOX_WITH_CLOUD_NET
 #include "CloudGateway.h"
