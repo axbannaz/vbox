@@ -28,8 +28,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef MAIN_INCLUDED_Recording_h
-#define MAIN_INCLUDED_Recording_h
+#ifndef MAIN_INCLUDED_RecordingContext_h
+#define MAIN_INCLUDED_RecordingContext_h
 #ifndef RT_WITHOUT_PRAGMA_ONCE
 # pragma once
 #endif
@@ -167,5 +167,5 @@ protected:
     friend RecordingContextImpl;
     RecordingContextImpl *m;
 };
-#endif /* !MAIN_INCLUDED_Recording_h */
+#endif /* !MAIN_INCLUDED_RecordingContext_h */
 
