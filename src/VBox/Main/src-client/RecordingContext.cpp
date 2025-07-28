@@ -951,7 +951,6 @@ DECLCALLBACK(void) RecordingContextImpl::stateChangedCallback(RECORDINGSTS enmSt
  * Creates a recording context.
  *
  * @returns VBox status code.
- * @param   pConsole             Pointer to console object this context is bound to (weak pointer).
  * @param   ProgressOut          Progress object returned on success.
  */
 int RecordingContextImpl::createInternal(ComPtr<IProgress> &ProgressOut)
@@ -1344,7 +1343,7 @@ size_t RecordingContext::GetStreamCount(void) const
  *
  * @returns VBox status code.
  * @param   pConsole            Pointer to console object this context is bound to (weak pointer).
- * @param   Progress            Progress object returned on success.
+ * @param   ProgressOut         Progress object returned on success.
  *
  * @note    This does not actually start the recording -- use Start() for this.
  */
@@ -1798,7 +1797,7 @@ int RecordingContext::SendCursorShapeChange(bool fVisible, bool fAlpha, uint32_t
     {
         RecordingStream *pStream = (*it);
 
-    	m->updateInternal();
+        m->updateInternal();
 
         int vrc2 = pStream->SendCursorShape(0 /* idCursor */, &m->m_Cursor.m_Shape, msTimestamp);
         if (RT_SUCCESS(vrc))
@@ -1824,7 +1823,10 @@ int RecordingContext::SendCursorShapeChange(bool fVisible, bool fAlpha, uint32_t
  *
  * @returns VBox status code.
  * @param   uScreen             Screen number.
- * @param   pInfo               Recording screen info to use.
+ * @param   uWidth              Screen width (in pixels).
+ * @param   uHeight             Screen height (in pixels).
+ * @param   enmPixelFmt         Screen pixel format.
+ * @param   uBytesPerLine       Screen bytes per line (stride).
  * @param   msTimestamp         Timestamp (PTS, in ms).
  */
 int RecordingContext::SendScreenChange(uint32_t uScreen, uint32_t uWidth, uint32_t uHeight, RECORDINGPIXELFMT enmPixelFmt,
