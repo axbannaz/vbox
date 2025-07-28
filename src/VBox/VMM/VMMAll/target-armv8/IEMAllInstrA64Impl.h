@@ -3396,7 +3396,16 @@
 
 
 /* BLR  <Xn> (fffffc1f/d63f0000) */
-//#define IEM_INSTR_IMPL_A64__BLR_64_branch_reg(Rn)
+#define IEM_INSTR_IMPL_A64__BLR_64_branch_reg(Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_INDIRECT); \
+    IEM_MC_LOCAL(uint64_t, uCallAddr); /* In case Rn == LR, get target first. */ \
+    IEM_MC_FETCH_GREG_U64(uCallAddr, Rn); \
+    IEM_MC_LOCAL(uint64_t, uRetAddr); /* LR = PC + 4 */ \
+    IEM_MC_FETCH_PC_U64(uRetAddr); \
+    IEM_MC_ADD_LOCAL_U64(uRetAddr, 4); \
+    IEM_MC_STORE_GREG_U64(30, uRetAddr); \
+    IEM_MC_BRANCH_TO_WITH_BTYPE_AND_FINISH(uCallAddr, 2 /*BType*/); \
+    IEM_MC_END()
 
 
 /* BLRAAZ  <Xn> (fffffc1f/d63f081f) */
