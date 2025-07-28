@@ -6482,7 +6482,11 @@
     IEM_MC_END()
 
 /* PRFM  {<prfop> | #<imm5>}, [<Xn|SP>{, #<pimm>}] (ffc00000/f9800000) */
-//#define IEM_INSTR_IMPL_A64__PRFM_P_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__PRFM_P_ldst_pos(Rt, Rn, imm12) \
+    RT_NOREF(Rt, Rn, imm12); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STR  <Dt>, [<Xn|SP>{, #<pimm>}] (ffc00000/fd000000) */
@@ -6609,11 +6613,19 @@
 
 
 /* PRFM  {<prfop> | #<imm5>}, [<Xn|SP>, {<Wm> | <Xm>}{, <extend>{ <amount>}}] (ffe00c00/f8a00800) */
-//#define IEM_INSTR_IMPL_A64__PRFM_P_ldst_regoff(Rt, Rn, S, option, Rm)
+#define IEM_INSTR_IMPL_A64__PRFM_P_ldst_regoff(Rt, Rn, S, option, Rm) \
+    RT_NOREF(Rt, Rn, S, option, Rm); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* RPRFM  {<rprfop> | #<imm6>}, <Xm>, [<Xn|SP>] (ffe00c00/f8a00800) */
-//#define IEM_INSTR_IMPL_A64__RPRFM_R_ldst_regoff(Rt, Rn, S, option, Rm)
+#define IEM_INSTR_IMPL_A64__RPRFM_R_ldst_regoff(Rt, Rn, S, option, Rm) \
+    RT_NOREF(Rt, Rn, S, option, Rm); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STR  <Dt>, [<Xn|SP>, {<Wm> | <Xm>}{, <extend>{ <amount>}}] (ffe00c00/fc200800) */
@@ -6775,7 +6787,11 @@
 
 
 /* PRFUM  {<prfop> | #<imm5>}, [<Xn|SP>{, #<simm>}] (ffe00c00/f8800000) */
-//#define IEM_INSTR_IMPL_A64__PRFUM_P_ldst_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__PRFUM_P_ldst_unscaled(Rt, Rn, imm9) \
+    RT_NOREF(Rt, Rn, imm9); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STUR  <Dt>, [<Xn|SP>{, #<simm>}] (ffe00c00/fc000000) */
@@ -7424,7 +7440,11 @@
 
 
 /* PRFM  {<prfop> | #<imm5>}, <label> (ff000000/d8000000) */
-//#define IEM_INSTR_IMPL_A64__PRFM_P_loadlit(Rt, imm19)
+#define IEM_INSTR_IMPL_A64__PRFM_P_loadlit(Rt, imm19) \
+    RT_NOREF(Rt, imm19); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 
