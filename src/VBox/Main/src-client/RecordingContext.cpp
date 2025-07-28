@@ -59,7 +59,7 @@
 
 #include "ConsoleImpl.h"
 #include "ProgressImpl.h"
-#include "Recording.h"
+#include "RecordingContext.h"
 #include "RecordingInternals.h"
 #include "RecordingStream.h"
 #include "RecordingUtils.h"
