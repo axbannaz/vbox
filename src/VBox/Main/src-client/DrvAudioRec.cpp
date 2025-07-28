@@ -46,6 +46,7 @@
 
 #include "DrvAudioRec.h"
 #include "ConsoleImpl.h"
+#include "RecordingStream.h"
 
 #include "WebMWriter.h"
 

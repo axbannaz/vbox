@@ -58,7 +58,6 @@
 #ifdef VBOX_WITH_RECORDING
 # include <iprt/path.h>
 # include "Recording.h"
-# include "RecordingUtils.h"
 
 # include <VBox/vmm/pdmapi.h>
 # include <VBox/vmm/pdmaudioifs.h>
@@ -2191,17 +2190,10 @@ int Display::i_recordingScreenChanged(unsigned uScreenId, const DISPLAYFBINFO *p
 
     i_updateDeviceCursorCapabilities();
 
-    RECORDINGSURFACEINFO ScreenInfo;
-    ScreenInfo.uWidth        = pFBInfo->w;
-    ScreenInfo.uHeight       = pFBInfo->h;
-    /* We always operate with BRGA32 internally. */
-    ScreenInfo.uBPP          = 32;
-    ScreenInfo.uBytesPerLine = pFBInfo->w * 4 /* Bytes */;
-    ScreenInfo.enmPixelFmt   = RECORDINGPIXELFMT_BRGA32;
-
     uint64_t const tsNowMs = pCtx->GetCurrentPTS();
 
-    int vrc = pCtx->SendScreenChange(uScreenId, &ScreenInfo, tsNowMs);
+    int vrc = pCtx->SendScreenChange(uScreenId, pFBInfo->w, pFBInfo->h, RECORDINGPIXELFMT_BRGA32, pFBInfo->w * 4 /* Bytes */,
+                                     tsNowMs);
     if (RT_SUCCESS(vrc))
     {
         /* Make sure that we get the latest mouse pointer shape required for recording. */
@@ -2261,23 +2253,12 @@ int Display::i_recordingScreenUpdate(unsigned uScreenId, uint8_t *pauFramebuffer
 
     STAM_PROFILE_START(&Stats.Monitor[uScreenId].Recording.profileRecording, a);
 
-    uint8_t const uBytesPerPixel = 4;
+    uint8_t const uBytesPerPixel = 4 /* 32 BPP */;
     size_t  const offFrame = (y * uBytesPerLine) + (x * uBytesPerPixel);
     size_t  const cbFrame  = w * h * uBytesPerPixel;
 
-    RECORDINGVIDEOFRAME Frame =
-    {
-        { w, h, 32 /* BPP */, RECORDINGPIXELFMT_BRGA32, uBytesPerLine },
-        pauFramebuffer + offFrame, cbFrame,
-        { x, y }
-    };
-
-#if 0
-    RecordingUtilsDbgDumpImageData(pauFramebuffer + offFrame, cbFramebuffer,
-                                   "/tmp/recording", "display-screen-update", w, h, uBytesPerLine, 32 /* BPP */);
-#endif
-
-    int const vrc = pCtx->SendVideoFrame(uScreenId, &Frame, tsNowMs);
+    int const vrc = pCtx->SendVideoFrame(uScreenId, w, h, RECORDINGPIXELFMT_BRGA32, uBytesPerLine,
+                                         pauFramebuffer + offFrame, cbFrame, x, y, tsNowMs);
 
     STAM_PROFILE_STOP(&Stats.Monitor[uScreenId].Recording.profileRecording, a);
 

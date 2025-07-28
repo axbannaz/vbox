@@ -31,6 +31,10 @@
 # pragma once
 #endif
 
+#ifdef IN_VBOXSVC
+# error "Using RecordingStream.h is prohibited in VBoxSVC!"
+#endif
+
 #include <map>
 #include <vector>
 
@@ -215,13 +219,13 @@ class RecordingStream
 {
 public:
 
-    RecordingStream(Console *pConsole, RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
+    RecordingStream(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings, PRECORDINGCODEC pCodecAudio);
 
     virtual ~RecordingStream(void);
 
 public:
 
-    int Init(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
+    int Init(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings, PRECORDINGCODEC pCodecAudio);
     int Uninit(void);
 
     int ThreadMain(int rcWait, uint64_t msTimestamp, RecordingBlockMap &commonBlocks);
@@ -254,7 +258,7 @@ protected:
     int open(const ComPtr<IRecordingScreenSettings> &ScreenSettings);
     int close(void);
 
-    int initInternal(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings);
+    int initInternal(RecordingContext *pCtx, uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings, PRECORDINGCODEC pCodecAudio);
     int uninitInternal(void);
 
     int initVideo(const ComPtr<IRecordingScreenSettings> &ScreenSettings);

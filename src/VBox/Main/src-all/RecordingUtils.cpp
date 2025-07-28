@@ -25,6 +25,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#include <VBox/com/VirtualBox.h>
+
 #include "RecordingUtils.h"
 
 #include <iprt/asm.h>

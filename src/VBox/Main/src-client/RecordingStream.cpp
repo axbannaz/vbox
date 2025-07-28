@@ -33,6 +33,7 @@
 
 #include <iprt/path.h>
 #include <iprt/semaphore.h>
+#include <iprt/cpp/utils.h> /* For unconst() */
 
 #ifdef VBOX_RECORDING_DUMP
 # include <iprt/formats/bmp.h>
@@ -53,12 +54,12 @@
 #include "WebMWriter.h"
 
 
-RecordingStream::RecordingStream(Console *pConsole, RecordingContext *a_pCtx,
-                                 uint32_t uScreen, const ComPtr<IRecordingScreenSettings> &ScreenSettings)
-    : m_pConsole(pConsole)
+RecordingStream::RecordingStream(RecordingContext *a_pCtx, uint32_t uScreen,
+                                 const ComPtr<IRecordingScreenSettings> &ScreenSettings, PRECORDINGCODEC pCodecAudio)
+    : m_pConsole(NULL)
     , m_enmState(RECORDINGSTREAMSTATE_UNINITIALIZED)
 {
-    int vrc2 = initInternal(a_pCtx, uScreen, ScreenSettings);
+    int vrc2 = initInternal(a_pCtx, uScreen, ScreenSettings, pCodecAudio);
     if (RT_FAILURE(vrc2))
         throw vrc2;
 }
@@ -224,7 +225,7 @@ int RecordingStream::iterateInternal(uint64_t msTimestamp)
         {
             m_enmState = RECORDINGSTREAMSTATE_STOPPED;
 
-            int vrc2 = m_pCtx->onLimitReached(m_uScreenID, VINF_SUCCESS /* vrc */);
+            int vrc2 = m_pCtx->OnLimitReached(m_uScreenID, VINF_SUCCESS /* vrc */);
             AssertRC(vrc2);
             break;
         }
@@ -965,14 +966,16 @@ int RecordingStream::Stop(void)
  * @param   pCtx                        Pointer to recording context.
  * @param   uScreen                     Screen number to use for this recording stream.
  * @param   ScreenSettings              Recording screen settings to use for initialization.
+ * @param   pCodecAudio                 Pointer to audio codec instance to use.
+ *                                      Might be NULL if no audio should be recorded for this stream.
  *
  * @note    This does not start the stream. Use Start() for this.
  * @thread  EMT
  */
 int RecordingStream::Init(RecordingContext *pCtx, uint32_t uScreen,
-                          const ComPtr<IRecordingScreenSettings> &ScreenSettings)
+                          const ComPtr<IRecordingScreenSettings> &ScreenSettings, PRECORDINGCODEC pCodecAudio)
 {
-    return initInternal(pCtx, uScreen, ScreenSettings);
+    return initInternal(pCtx, uScreen, ScreenSettings, pCodecAudio);
 }
 
 /**
@@ -982,11 +985,16 @@ int RecordingStream::Init(RecordingContext *pCtx, uint32_t uScreen,
  * @param   pCtx                        Pointer to recording context.
  * @param   uScreen                     Screen number to use for this recording stream.
  * @param   ScreenSettings              Recording screen settings to use for initialization.
+ * @param   pCodecAudio                 Pointer to audio codec instance to use.
+ *                                      Might be NULL if no audio should be recorded for this stream.
  */
 int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
-                                  const ComPtr<IRecordingScreenSettings> &ScreenSettings)
+                                  const ComPtr<IRecordingScreenSettings> &ScreenSettings,
+                                  PRECORDINGCODEC pCodecAudio)
 {
     AssertReturn(m_enmState == RECORDINGSTREAMSTATE_UNINITIALIZED, VERR_WRONG_ORDER);
+
+    unconst(m_pConsole) = pCtx->GetConsole();
 
     m_pCtx           = pCtx;
     m_uTrackAudio    = UINT8_MAX;
@@ -994,8 +1002,9 @@ int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
     m_tsStartMs      = 0;
     m_uScreenID      = uScreen;
 #ifdef VBOX_WITH_AUDIO_RECORDING
-    /* We use the codec from the recording context, as this stream only receives multiplexed data (same audio for all streams). */
-    m_pCodecAudio    = m_pCtx->GetCodecAudio();
+    m_pCodecAudio    = pCodecAudio;
+#else
+    m_pCodecAudio    = NULL;
 #endif
     m_Settings = ScreenSettings;
 
@@ -1155,7 +1164,7 @@ int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
     }
 
 #ifdef VBOX_WITH_STATISTICS
-    Console::SafeVMPtrQuiet ptrVM(m_pCtx->m_pConsole);
+    Console::SafeVMPtrQuiet ptrVM(m_pCtx->GetConsole());
     if (ptrVM.isOk())
     {
          ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cVideoFramesAdded,
@@ -1329,7 +1338,7 @@ int RecordingStream::uninitInternal(void)
         RTCritSectDelete(&m_CritSect);
 
 #ifdef VBOX_WITH_STATISTICS
-        Console::SafeVMPtrQuiet ptrVM(m_pCtx->m_pConsole);
+        Console::SafeVMPtrQuiet ptrVM(m_pCtx->GetConsole());
         if (ptrVM.isOk())
         {
             ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/VideoFramesAdded", m_uScreenID);

@@ -31,6 +31,10 @@
 # pragma once
 #endif
 
+#ifdef IN_VBOXSVC
+# error "Using RecordingInternals.h is prohibited in VBoxSVC!"
+#endif
+
 #include <list>
 #include <map>
 
@@ -53,6 +57,8 @@
 # include "vorbis/vorbisenc.h"
 #endif
 
+#include "Recording.h" /* For RECORDINGPIXELFMT. */
+
 
 /*********************************************************************************************************************************
 *   Defines                                                                                                                      *
@@ -74,22 +80,6 @@ typedef RECORDINGFRAME *PRECORDINGFRAME;
 /*********************************************************************************************************************************
 *   Internal structures, defines and APIs                                                                                        *
 *********************************************************************************************************************************/
-
-/** List for keeping a recording feature list. */
-typedef std::map<RecordingFeature_T, bool> RecordingFeatureMap;
-
-/**
- * Enumeration for supported pixel formats.
- */
-enum RECORDINGPIXELFMT
-{
-    /** Unknown pixel format. */
-    RECORDINGPIXELFMT_UNKNOWN    = 0,
-    /** BRGA 32. */
-    RECORDINGPIXELFMT_BRGA32     = 1,
-    /** The usual 32-bit hack. */
-    RECORDINGPIXELFMT_32BIT_HACK = 0x7fffffff
-};
 
 /**
  * Structure for keeping recording surface information.
