@@ -7373,7 +7373,16 @@
  */
 
 /* LDR  <Wt>, <label> (ff000000/18000000) */
-//#define IEM_INSTR_IMPL_A64__LDR_32_loadlit(Rt, imm19)
+#define IEM_INSTR_IMPL_A64__LDR_32_loadlit(Rt, imm19) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_PC_U64(uAddr); \
+    IEM_MC_ADD_CONST_U32_TO_ADDR(uAddr, (int32_t)imm19 << (32 - 19) >> (32 - 19 - 2)); \
+    IEM_MC_LOCAL(uint32_t, uValue); \
+    IEM_MC_FETCH_MEM_FLAT_U32(uValue, uAddr);  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U32(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <St>, <label> (ff000000/1c000000) */
@@ -7381,7 +7390,16 @@
 
 
 /* LDR  <Xt>, <label> (ff000000/58000000) */
-//#define IEM_INSTR_IMPL_A64__LDR_64_loadlit(Rt, imm19)
+#define IEM_INSTR_IMPL_A64__LDR_64_loadlit(Rt, imm19) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_PC_U64(uAddr); \
+    IEM_MC_ADD_CONST_U32_TO_ADDR(uAddr, (int32_t)imm19 << (32 - 19) >> (32 - 19 - 2)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_FETCH_MEM_FLAT_U64(uValue, uAddr);  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Dt>, <label> (ff000000/5c000000) */
@@ -7389,7 +7407,16 @@
 
 
 /* LDRSW  <Xt>, <label> (ff000000/98000000) */
-//#define IEM_INSTR_IMPL_A64__LDRSW_64_loadlit(Rt, imm19)
+#define IEM_INSTR_IMPL_A64__LDRSW_64_loadlit(Rt, imm19) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_PC_U64(uAddr); \
+    IEM_MC_ADD_CONST_U32_TO_ADDR(uAddr, (int32_t)imm19 << (32 - 19) >> (32 - 19 - 2)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_FETCH_MEM_FLAT_U32_SX_U64(uValue, uAddr);  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Qt>, <label> (ff000000/9c000000) */

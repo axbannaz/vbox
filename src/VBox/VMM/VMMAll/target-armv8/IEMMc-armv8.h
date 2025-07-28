@@ -112,6 +112,9 @@
 #define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
     iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
 
+/** Fetched PC (for PC relative addressing). */
+#define IEM_MC_FETCH_PC_U64(a_GCPtrMem)  (a_GCPtrMem) = pVCpu->cpum.GstCtx.Pc.u64
+
 /** Adds a constant to an address (64-bit), applying checked
  *  pointer arithmetic at the current EL. */
 #define IEM_MC_ADD_CONST_U32_TO_ADDR(a_EffAddr, a_u32Const) do { \
