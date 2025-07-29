@@ -16686,10 +16686,6 @@
         <translation>Der Name der virtuellen Maschine ist ungültig (evtl. leer)</translation>
     </message>
     <message>
-        <source>Virtual machine path is not unique</source>
-        <translation>Der Pfad der virtuellen Maschine ist nicht eindeutig</translation>
-    </message>
-    <message>
         <source>Virtual Machine Name and Operating System</source>
         <translation>Name und Betriebssystem der virtuellen Maschine</translation>
     </message>

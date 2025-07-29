@@ -28781,10 +28781,6 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Virtual machine path is not unique</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Virtual Machine Name and Operating System</source>
         <translation type="unfinished"></translation>
     </message>

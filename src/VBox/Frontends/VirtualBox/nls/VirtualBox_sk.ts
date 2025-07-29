@@ -22896,10 +22896,6 @@ preskočiť a pripojiť pevné disky neskôr pomocou dialógu Nastavenia virtuá
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Virtual machine path is not unique</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Virtual Machine Name and Operating System</source>
         <translation type="unfinished"></translation>
     </message>
