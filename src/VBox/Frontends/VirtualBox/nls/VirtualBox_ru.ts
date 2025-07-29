@@ -2275,143 +2275,143 @@
     </message>
     <message>
         <source>No Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Вне группы</translation>
     </message>
     <message>
         <source>&amp;Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Изменить...</translation>
     </message>
     <message>
         <source>Edit existing disk image file</source>
-        <translation type="unfinished"></translation>
+        <translation>Изменить существующий образ диска</translation>
     </message>
     <message>
         <source>Edit Disk Image File</source>
-        <translation type="unfinished"></translation>
+        <translation>Изменить файл образа диска</translation>
     </message>
     <message>
         <source>&amp;Resource Use</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ресурсы машины</translation>
     </message>
     <message>
         <source>&amp;Resources...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ресурсы...</translation>
     </message>
     <message>
         <source>Navigate to the global resources view</source>
-        <translation type="unfinished"></translation>
+        <translation>Перейти к глобальному монитору ресурсов</translation>
     </message>
     <message>
         <source>Navigate to the Global Resources View</source>
-        <translation type="unfinished"></translation>
+        <translation>Перейти к глобальному монитору ресурсов</translation>
     </message>
     <message>
         <source>&amp;Home</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Главная</translation>
     </message>
     <message>
         <source>Open the Home Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть главную страницу</translation>
     </message>
     <message>
         <source>&amp;Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Машины</translation>
     </message>
     <message>
         <source>Open the Machine Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть менеджер машин</translation>
     </message>
     <message>
         <source>&amp;Extensions</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Плагины</translation>
     </message>
     <message>
         <source>&amp;Media</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Носители</translation>
     </message>
     <message>
         <source>&amp;Open</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Открыть</translation>
     </message>
     <message>
         <source>&amp;Open Machine...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Открыть машину...</translation>
     </message>
     <message>
         <source>Open existing virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Открыть существующую виртуальную машину</translation>
     </message>
     <message>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Открыть...</translation>
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Новая группа</translation>
     </message>
     <message>
         <source>Create new group based on selected virtual machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать новую группу на основе выбранных виртуальных машин</translation>
     </message>
     <message>
         <source>Start with &amp;GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить &amp;с граф. оболочкой</translation>
     </message>
     <message>
         <source>Start selected virtual machines with GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить выбранные машины с графической оболочкой</translation>
     </message>
     <message>
         <source>Start with&amp;out GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить &amp;без граф. оболочки</translation>
     </message>
     <message>
         <source>Start with &amp;detachable GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить с &amp;отдельной граф. оболочкой</translation>
     </message>
     <message>
         <source>Start selected virtual machines with option of continuing in the background</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить выбранные машины с возможностью продолжить работу в фоновом режиме</translation>
     </message>
     <message>
         <source>Sh&amp;ut Down</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Завершить работу</translation>
     </message>
     <message>
         <source>Send ACPI shutdown signal to selected virtual machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Послать выбранным виртуальным машинам ACPI сигнал завершения работы</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation type="unfinished">&amp;Изменить</translation>
+        <translation>&amp;Изменить</translation>
     </message>
     <message>
         <source>Edit selected media</source>
-        <translation type="unfinished"></translation>
+        <translation>Изменить выбранный носитель</translation>
     </message>
     <message>
         <source>Edit Media</source>
-        <translation type="unfinished"></translation>
+        <translation>Изменить носитель</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation type="unfinished"></translation>
+        <translation>Ресурсы машины</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation type="unfinished"></translation>
+        <translation>Ресурсы</translation>
     </message>
     <message>
         <source>View resource use of the selected virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключиться на ресурсы выбранной виртуальной машины</translation>
     </message>
     <message>
         <source>View Resource Use of the Selected Virtual Machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Переключиться на ресурсы выбранной виртуальной машины</translation>
     </message>
     <message>
         <source>Send the ACPI shutdown signal to the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Послать виртуальной машине сигнал завершения работы</translation>
     </message>
 </context>
 <context>
@@ -2911,7 +2911,7 @@
     </message>
     <message>
         <source>Base &amp;Memory</source>
-        <translation>&amp;Основная память</translation>
+        <translation>О&amp;сновная память</translation>
     </message>
     <message>
         <source>VM&apos;s installed RAM</source>
@@ -5433,7 +5433,7 @@
     </message>
     <message>
         <source>&amp;Split Disk Into 2 GB Parts</source>
-        <translation>&amp;Разделить на куски размером до 2х ГБ</translation>
+        <translation>Ра&amp;зделить на куски размером до 2х ГБ</translation>
     </message>
     <message>
         <source>The virtual hard disk file is split into 2 GB parts</source>
@@ -6726,7 +6726,7 @@
     </message>
     <message>
         <source>Domain name should be at least 2 character long. Allowed characters are alphanumerics, &quot;-&quot; and &quot;.&quot;</source>
-        <translation>Доменное имя должно быть длиной не менее 2х символов. Разрешены буквы, цифры, а также символы &quot;-&quot; и &quot;.&quot;</translation>
+        <translation>Имя домена должно быть длиной не менее 2х символов. Разрешены буквы, цифры, а также символы &quot;-&quot; и &quot;.&quot;</translation>
     </message>
     <message>
         <source>Hostna&amp;me:</source>
@@ -6750,7 +6750,7 @@
     </message>
     <message>
         <source>Domain name is valid</source>
-        <translation>Доменное имя корректно</translation>
+        <translation>Имя домена корректно</translation>
     </message>
     <message>
         <source>Host name should be at least 2 character long. Allowed characters are alphanumerics, &quot;-&quot; and &quot;.&quot;</source>
@@ -6778,11 +6778,11 @@
     </message>
     <message>
         <source>&amp;Domain Name</source>
-        <translation>&amp;Доменное имя</translation>
+        <translation>Имя &amp;домена</translation>
     </message>
     <message>
         <source>Doamin name to be assigned to the virtual machine</source>
-        <translation>Доменное имя виртуальной машины</translation>
+        <translation>Имя домена, назначаемое виртуальной машине</translation>
     </message>
 </context>
 <context>
@@ -10173,56 +10173,56 @@
     </message>
     <message>
         <source>&lt;p&gt;Shut down these VMs by sending the ACPI shutdown signal?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Завершить работу этих машин, послав им ACPI сигнал?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Shut Down</source>
         <comment>machine</comment>
-        <translation type="unfinished"></translation>
+        <translation>Завершить работу</translation>
     </message>
     <message>
         <source>&lt;p&gt;Close these VMs with no shutdown procedure?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Unsaved data in applications running on the VM will be lost.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Закрыть эти машины без корректного завершения работы?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Несохранённые данные в приложениях, запущенных в машине, будут утеряны.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machine items from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Удалить эти экземпляры виртуальных машин из списка машин?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machines from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Удалить эти виртуальные машины из списка машин?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Delete the virtual machine files and virtual hard disks.</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить виртуальную машину и виртуальные жёсткие диски.</translation>
     </message>
     <message>
         <source>Delete the virtual machine files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить файлы виртуальной машины.</translation>
     </message>
     <message>
         <source>Can&apos;t send shutdown signal ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось послать сигнал завершения работы ...</translation>
     </message>
     <message>
         <source>You are trying to shut down the guest with the ACPI power button. This is currently not possible because the guest does not support software shut down.</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы пытаетесь завершить работу гостевой ОС, используя виртуальную кнопку питания ACPI. В данный момент это не возможно, поскольку гостевая ОС не поддерживает програмное завершение работы.</translation>
     </message>
     <message>
         <source>Failed to change storage controller parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось изменить параметр контроллера.</translation>
     </message>
     <message>
         <source>Can&apos;t shut down machine ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось завершить работу машины ...</translation>
     </message>
     <message>
         <source>Failed to send the ACPI power button press event to the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось послать сигнал нажатия кнопки ACPI виртуальной машине &lt;b&gt;%1&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>Can&apos;t drop data to guest ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось перенести данные в гостевую ОС ...</translation>
     </message>
 </context>
 <context>
@@ -10473,7 +10473,7 @@
     </message>
     <message>
         <source>&amp;ISO Image</source>
-        <translation>&amp;Образ ISO</translation>
+        <translation>О&amp;браз ISO</translation>
     </message>
     <message>
         <source>OS &amp;Edition</source>
@@ -10481,7 +10481,7 @@
     </message>
     <message>
         <source>&amp;OS</source>
-        <translation>&amp;ОС</translation>
+        <translation>О&amp;С</translation>
     </message>
     <message>
         <source>OS &amp;Distribution</source>
@@ -14336,11 +14336,11 @@
     </message>
     <message>
         <source>&amp;Confirm Password</source>
-        <translation>П&amp;одтвердите пароль</translation>
+        <translation>Под&amp;твердите пароль</translation>
     </message>
     <message>
         <source>U&amp;ser Name</source>
-        <translation>&amp;Имя пользователя</translation>
+        <translation>И&amp;мя пользователя</translation>
     </message>
     <message>
         <source>User name for the guest operating system</source>
@@ -16344,7 +16344,7 @@
     </message>
     <message>
         <source>U&amp;se an Existing Virtual Hard Disk File</source>
-        <translation>&amp;Использовать существующий виртуальный жёсткий диск</translation>
+        <translation>Испо&amp;льзовать существующий виртуальный жёсткий диск</translation>
     </message>
     <message>
         <source>Chooses a Virtual Hard Fisk File...</source>
@@ -16584,63 +16584,63 @@
     </message>
     <message>
         <source>&amp;Product Key</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Ключ продукта</translation>
     </message>
     <message>
         <source>The product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Ключ продукта</translation>
     </message>
     <message>
         <source>Start the virtual machine without a GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Запустить виртуальную машину без граф. оболочки</translation>
     </message>
     <message>
         <source>User Name and Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя пользователя и пароль</translation>
     </message>
     <message>
         <source>The ISO file to install the VirtualBox Guest Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>Файл образа ISO для установки Дополнений гостевой ОС</translation>
     </message>
     <message>
         <source>Guest &amp;Additions ISO Image:</source>
-        <translation type="unfinished"></translation>
+        <translation>О&amp;браз Дополнений Гостевой ОС:</translation>
     </message>
     <message>
         <source>Install Gu&amp;est Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Установить Дополнения гостевой ОС</translation>
     </message>
     <message>
         <source>Install the VirtualBox Guest Additions on the guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить дополнения VirtualBox в гостевую ОС</translation>
     </message>
     <message>
         <source>OS Installation Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Опции установки ОС</translation>
     </message>
     <message>
         <source>&amp;Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>Ис&amp;пользовать EFI</translation>
     </message>
     <message>
         <source>Use Extended Firmware Interface (EFI). This is required to boot some OSs.</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать расширяемый интерфейс встроенного ПО (EFI). Это необходимо для загрузки некоторых ОС.</translation>
     </message>
     <message>
         <source>New Virtual Machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать новую виртуальную машину</translation>
     </message>
     <message>
         <source>Virtual machine name and operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя и операционная системы виртуальной машины</translation>
     </message>
     <message>
         <source>The ISO image is used to install the operating system on the VM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Образ ISO используется для установки операционной системы в ВМ.</translation>
     </message>
     <message>
         <source>&amp;Proceed with Unattended Installation</source>
-        <translation type="unfinished"></translation>
+        <translation>П&amp;родолжить автоматическую установку</translation>
     </message>
     <message>
         <source>The ISO is attached to the VM, so you can install the OS manually</source>
@@ -16648,147 +16648,147 @@
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>VirtualBox не может установить ОС с выбранного ISO. Не удалось опознать ОС, необходимо установить гостевую ОС вручную.</translation>
     </message>
     <message>
         <source>This OS can&apos;t be installed using Unattended Installation. The installation needs to be done manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Эта ОС не может быть установлена автоматически. Установка должна быть запущена вручную.</translation>
     </message>
     <message>
         <source>VirtualBox will install the OS using an unattended installation when the VM is created. Supply the required information in the following steps.</source>
-        <translation type="unfinished"></translation>
+        <translation>В момент создания ВМ VirtualBox установит ОС в автоматическом режиме. Предоставьте необходимую информацию далее.</translation>
     </message>
     <message>
         <source>Virtual machine name cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя виртуальной машины не может быть пустым</translation>
     </message>
     <message>
         <source>Virtual machine name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя виртуальной машины корректно</translation>
     </message>
     <message>
         <source>Virtual machine path is not unique</source>
-        <translation type="unfinished"></translation>
+        <translation>Путь виртуальной машины не уникален</translation>
     </message>
     <message>
         <source>Set up unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Настроить автоматическую установку гостевой ОС</translation>
     </message>
     <message>
         <source>Enter the information that will be required when the OS is installed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Введите информацию, необходимую после установки ОС.</translation>
     </message>
     <message>
         <source>Specify virtual hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите виртуальное оборудование</translation>
     </message>
     <message>
         <source>Specify the VM&apos;s hardware. Resources allocated to the VM will not be available to the host when the VM is running.</source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите оборудование ВМ. Ресурсы, выделенные ВМ, не будут доступны основному ПК в момент работы ВМ.</translation>
     </message>
     <message>
         <source>Virtual machine name and &amp;operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Имя и операционная система виртуальной машины</translation>
     </message>
     <message>
         <source>Set up &amp;unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Настроить &amp;автоматическую установку гостевой ОС</translation>
     </message>
     <message>
         <source>Specify virtual hard dis&amp;k</source>
-        <translation type="unfinished"></translation>
+        <translation>Укажите виртуальный &amp;жёсткий диск</translation>
     </message>
     <message>
         <source>Specify virtual h&amp;ardware</source>
-        <translation type="unfinished"></translation>
+        <translation>У&amp;кажите виртуальное оборудование</translation>
     </message>
     <message>
         <source>C&amp;reate Virtual Machine Without a Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Создать &amp;виртуальную машину без виртуального жёсткого диска</translation>
     </message>
     <message>
         <source>&amp;Create a New Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Создать новый виртуальный жёсткий диск</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File...</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать файл виртуального жёсткого диска...</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать файл виртуального жёсткого диска</translation>
     </message>
     <message>
         <source>Hard Disk File &amp;Type and Format</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Тип и формат файла жёсткого диска</translation>
     </message>
     <message>
         <source>Invalid user name and/or password</source>
-        <translation type="unfinished"></translation>
+        <translation>Некорректное имя пользователя и/или пароль</translation>
     </message>
     <message>
         <source>Invalid host name or domain name</source>
-        <translation type="unfinished"></translation>
+        <translation>Некорректное имя хоста или домена</translation>
     </message>
     <message>
         <source>Invalid product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Некорректный ключ продукта</translation>
     </message>
     <message>
         <source>Virtual machine name is invalid (possibly empty)</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя виртуальной машины некорректно (или отсутствует)</translation>
     </message>
     <message>
         <source>Virtual Machine Name and Operating System</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя и операционная системы виртуальной машины</translation>
     </message>
     <message>
         <source>VM Name</source>
-        <translation type="unfinished">Имя ВМ</translation>
+        <translation>Имя ВМ</translation>
     </message>
     <message>
         <source>VM Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Папка ВМ</translation>
     </message>
     <message>
         <source>Proceed with Unattended Install</source>
-        <translation type="unfinished"></translation>
+        <translation>Продолжить автоматическую установку</translation>
     </message>
     <message>
         <source>Unattended Installation of Guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Автоматическая установка гостевой ОС</translation>
     </message>
     <message>
         <source>User Name</source>
-        <translation type="unfinished">Имя пользователя</translation>
+        <translation>Имя пользователя</translation>
     </message>
     <message>
         <source>Host Name/Domain Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя хоста / домена</translation>
     </message>
     <message>
         <source>Guest Additions ISO Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Образ Дополнений Гостевой ОС</translation>
     </message>
     <message>
         <source>Virtual Hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Виртуальное оборудование</translation>
     </message>
     <message>
         <source>Processors</source>
-        <translation type="unfinished">Процессоры</translation>
+        <translation>Процессоры</translation>
     </message>
     <message>
         <source>Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>Использовать EFI</translation>
     </message>
     <message>
         <source>Hard Disk Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Размер жёстких дисков</translation>
     </message>
     <message>
         <source>A new VM will be created with the following configuration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Новая ВМ будет создана в следующей конфигурации.</translation>
     </message>
 </context>
 <context>
