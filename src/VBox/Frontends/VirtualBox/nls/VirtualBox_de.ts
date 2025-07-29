@@ -6763,7 +6763,7 @@
         <translation>&amp;Domain-Name</translation>
     </message>
     <message>
-        <source>Doamin name to be assigned to the virtual machine</source>
+        <source>Domain name to be assigned to the virtual machine</source>
         <translation>Der der virtuellen Maschine zuzuweisende Domänenname</translation>
     </message>
 </context>

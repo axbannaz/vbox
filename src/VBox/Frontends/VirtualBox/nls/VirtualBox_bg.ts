@@ -11351,7 +11351,7 @@ p, li { white-space: pre-wrap; &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Doamin name to be assigned to the virtual machine</source>
+        <source>Domain name to be assigned to the virtual machine</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

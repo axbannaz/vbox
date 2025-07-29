@@ -6391,7 +6391,7 @@
         <translation>&amp;Etki Alanı Adı</translation>
     </message>
     <message>
-        <source>Doamin name to be assigned to the virtual machine</source>
+        <source>Domain name to be assigned to the virtual machine</source>
         <translation>Sanal makineye atanacak etki alanı adı</translation>
     </message>
 </context>

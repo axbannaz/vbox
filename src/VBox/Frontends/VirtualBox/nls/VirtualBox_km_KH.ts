@@ -9078,7 +9078,7 @@ creating/removing host-only network</comment>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Doamin name to be assigned to the virtual machine</source>
+        <source>Domain name to be assigned to the virtual machine</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
