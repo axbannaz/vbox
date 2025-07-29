@@ -15675,7 +15675,7 @@
         <translation type="vanished">Zusätzliche Optionen</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for clonning.</source>
+        <source>Determines MAC address policy for cloning.</source>
         <translation>Legt die MAC-Adressen-Richtlinie für das Klonen fest.</translation>
     </message>
     <message>
