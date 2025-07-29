@@ -873,23 +873,23 @@
     </message>
     <message>
         <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; NVRAM dosyasının boyutunu sorgulama başarısız</translation>
     </message>
     <message>
         <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
-        <translation type="unfinished"></translation>
+        <translation>Haritada &apos;%s&apos; NVRAM dosyasını bulma başarısız</translation>
     </message>
     <message>
         <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; için RTVfsChainOpenIoStream() başarısız oldu (%Rrc)</translation>
     </message>
     <message>
         <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; için RTVfsFsStrmPushFile() başarısız oldu (%Rrc)</translation>
     </message>
     <message>
         <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; için RTVfsUtilPumpIoStreams() başarısız oldu (%Rrc)</translation>
     </message>
 </context>
 <context>
@@ -1710,6 +1710,10 @@
         <source>%s failed: vrc=%Rrc, pcszName=%s</source>
         <translation>%s başarısız oldu: vrc=%Rrc, pcszName=%s</translation>
     </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ConsoleSharedFolder</name>
@@ -2034,6 +2038,10 @@
     <message>
         <source>QuerySourceBitmap: Invalid screen %d (total %d)</source>
         <translation>QuerySourceBitmap: Geçersiz ekran %d (toplam %d)</translation>
+    </message>
+    <message>
+        <source>Unsupported resolution for screen shot: %ux%u (screen %u)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3631,7 +3639,7 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Path to guest file &quot;%s&quot; not found</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;%s&quot; misafir dosyasına giden yol bulunamadı</translation>
     </message>
 </context>
 <context>
@@ -4549,13 +4557,13 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message numerus="yes">
         <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>&quot;%s&quot; misafir dosyasından %RU64 bayt @ %RU64 okuma başarısız oldu: %Rrc</numerusform>
         </translation>
     </message>
     <message>
         <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>&quot;%s&quot; anamakine dosyasının %RU64 (%#x) karşılığını arama başarısız oldu: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -4924,7 +4932,7 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Misafirde &quot;%s&quot; güncelleme komutu çalışırken hata oldu: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -6093,6 +6101,14 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
+        <translation>Sıfır veya geçersiz bir UUID&apos;ye sahip bir &apos;%s&apos; VM yapılandırması açılmaya çalışılıyor</translation>
+    </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported on %s</source>
+        <translation type="unfinished">Makinenin platform mimarisi %s, %s üzerinde desteklenmediğinden makine çalıştırılamıyor</translation>
+    </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -6438,51 +6454,51 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Unable to determine free space of target destination (&apos;%s&apos;): %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Hedef noktanın (&quot;%s&quot;) boş alanı belirlenemiyor: %Rrc</translation>
     </message>
     <message>
         <source>Can&apos;t create file &apos;test.txt&apos; in folder &apos;%s&apos;. Check the access rights of the destination folder.</source>
-        <translation type="unfinished"></translation>
+        <translation>%s klasöründe &apos;test.txt&apos; dosyası oluşturulamıyor. Hedef klasörün erişim haklarını gözden geçirin.</translation>
     </message>
     <message>
         <source>Failed to get file size of &apos;%s&apos;: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; dosya boyutunu alıma başarısız: %Rrc</translation>
     </message>
     <message>
         <source>Failed to setup the progress object for the moving VM operation</source>
-        <translation type="unfinished"></translation>
+        <translation>VM&apos;yi taşıma işlemi için ilerleme nesnesini ayarlama başarısız</translation>
     </message>
     <message>
         <source>Copying the save state file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; kaydetme durumu dosyası kopyalanıyor ...</translation>
     </message>
     <message>
         <source>Copying the NVRAM file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; NVRAM dosyası kopyalanıyor ...</translation>
     </message>
     <message>
         <source>Copying Machine settings file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; Makine ayarları dosyası kopyalanıyor ...</translation>
     </message>
     <message>
         <source>Could not create home machine folder &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; ana makine klasörü oluşturulamadı (%Rrc)</translation>
     </message>
     <message>
         <source>Copying log file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; günlük dosyası kopyalanıyor ...</translation>
     </message>
     <message>
         <source>Could not copy log file &apos;%s&apos; to &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; günlük dosyası &apos;%s&apos; konumuna kopyalanamadı (%Rrc)</translation>
     </message>
     <message>
         <source>Skipping empty operation %d...</source>
-        <translation type="unfinished"></translation>
+        <translation>%d. boş işlemi atlanıyor...</translation>
     </message>
     <message>
         <source>Could not get size of file &apos;%s&apos;: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; dosyasının boyutu alınamadı: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -7140,7 +7156,7 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Failed to get machine list &apos;%s&apos; is attached to</source>
-        <translation type="unfinished"></translation>
+        <translation>Takılı olan &apos;%s&apos; makine listesini alama başarısız</translation>
     </message>
 </context>
 <context>
@@ -7315,11 +7331,11 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Failed to enable DHCP server for network &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; ağı için DHCP sunucusunu etkinleştirme başarısız</translation>
     </message>
     <message>
         <source>Failed to set DHCP server configuration for network &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; ağı için DHCP sunucusu yapılandırmasını ayarlama başarısız</translation>
     </message>
 </context>
 <context>
@@ -7976,7 +7992,7 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; adlı depolama denetleyicisinin eklemelerini sorgulama başarısız oldu</translation>
     </message>
 </context>
 <context>
@@ -8429,7 +8445,7 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Product key is required for this kind of OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Bu tür İS için ürün anahtarı gerekir</translation>
     </message>
 </context>
 <context>
@@ -9030,19 +9046,19 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Shared folder named &apos;%s&apos; already exists</source>
-        <translation type="unfinished">&apos;%s&apos; adlı paylaşılan klasör zaten var</translation>
+        <translation>&apos;%s&apos; adlı paylaşılan klasör zaten var</translation>
     </message>
     <message>
         <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; geçen arayüz adı için hiçbir nesne bulunamadı.</translation>
     </message>
     <message>
         <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
-        <translation type="unfinished"></translation>
+        <translation>&apos;%s&apos; geçen arayüzünün nesneleri şu an izlenemedi.</translation>
     </message>
     <message>
         <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
-        <translation type="unfinished"></translation>
+        <translation>VirtualBox::getTrackedObjectIds() içinde bilinmeyen istisna.</translation>
     </message>
 </context>
 <context>
