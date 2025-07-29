@@ -6022,6 +6022,7 @@ static int vmsvgaR3LoadGbo(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, VMSVGAGBO *pGbo)
     pHlp->pfnSSMGetU32(pSSM, &pGbo->fGboFlags);
     pHlp->pfnSSMGetU32(pSSM, &pGbo->cTotalPages);
     pHlp->pfnSSMGetU32(pSSM, &pGbo->cbTotal);
+#ifndef VMSVGA_WITH_PGM_LOCKING
     rc = pHlp->pfnSSMGetU32(pSSM, &pGbo->cDescriptors);
     AssertRCReturn(rc, rc);
 
@@ -6037,6 +6038,41 @@ static int vmsvgaR3LoadGbo(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, VMSVGAGBO *pGbo)
         pHlp->pfnSSMGetGCPhys(pSSM, &pDesc->GCPhys);
         rc = pHlp->pfnSSMGetU64(pSSM, &pDesc->cPages);
     }
+#else
+    rc = vmsvgaR3GboAllocDescriptors(pGbo);
+    AssertRCReturn(rc, rc);
+
+    uint32_t cDescriptors;
+    rc = pHlp->pfnSSMGetU32(pSSM, &cDescriptors);
+    AssertRCReturnStmt(rc, vmsvgaR3GboFreeDescriptors(pGbo), rc);
+
+    uint32_t iGCPhysPage = 0;
+    for (uint32_t iDesc = 0; iDesc < cDescriptors; ++iDesc)
+    {
+        RTGCPHYS GCPhys;
+        uint64_t cPages;
+        pHlp->pfnSSMGetGCPhys(pSSM, &GCPhys);
+        rc = pHlp->pfnSSMGetU64(pSSM, &cPages);
+        AssertRCReturnStmt(rc, vmsvgaR3GboFreeDescriptors(pGbo), rc);
+
+        /* pGbo->paGCPhysPages stores addresses of every page, even though
+         * contiguous pages may be stored as a single descriptor in a saved state.
+         */
+        for (uint32_t i = 0; i < cPages; ++i, GCPhys += X86_PAGE_SIZE)
+        {
+            if (iGCPhysPage < pGbo->cTotalPages)
+               pGbo->paGCPhysPages[iGCPhysPage] = GCPhys;
+            ++iGCPhysPage;
+        }
+    }
+
+    AssertLogRelMsgReturnStmt(iGCPhysPage == pGbo->cTotalPages,
+                              ("iGCPhysPage=%#x, cTotalPages=%#x\n", iGCPhysPage, pGbo->cTotalPages),
+                              vmsvgaR3GboFreeDescriptors(pGbo), VERR_SSM_DATA_UNIT_FORMAT_CHANGED);
+
+    rc = vmsvgaR3GboMapPages(pDevIns, pGbo);
+    AssertRCReturnStmt(rc, vmsvgaR3GboFreeDescriptors(pGbo), rc);
+#endif
 
     if (pGbo->fGboFlags & VMSVGAGBO_F_HOST_BACKED)
     {
@@ -6400,6 +6436,7 @@ static int vmsvgaR3SaveGbo(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, VMSVGAGBO *pGbo)
     pHlp->pfnSSMPutU32(pSSM, pGbo->fGboFlags);
     pHlp->pfnSSMPutU32(pSSM, pGbo->cTotalPages);
     pHlp->pfnSSMPutU32(pSSM, pGbo->cbTotal);
+#ifndef VMSVGA_WITH_PGM_LOCKING
     rc =  pHlp->pfnSSMPutU32(pSSM, pGbo->cDescriptors);
     for (uint32_t iDesc = 0; iDesc < pGbo->cDescriptors; ++iDesc)
     {
@@ -6407,6 +6444,14 @@ static int vmsvgaR3SaveGbo(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, VMSVGAGBO *pGbo)
         pHlp->pfnSSMPutGCPhys(pSSM, pDesc->GCPhys);
         rc = pHlp->pfnSSMPutU64(pSSM, pDesc->cPages);
     }
+#else
+    rc = pHlp->pfnSSMPutU32(pSSM, pGbo->cTotalPages);
+    for (uint32_t iPage = 0; iPage < pGbo->cTotalPages; ++iPage)
+    {
+        pHlp->pfnSSMPutGCPhys(pSSM, pGbo->paGCPhysPages[iPage]);
+        rc = pHlp->pfnSSMPutU64(pSSM, 1);
+    }
+#endif
     if (pGbo->fGboFlags & VMSVGAGBO_F_HOST_BACKED)
         rc = pHlp->pfnSSMPutMem(pSSM, pGbo->pvHost, pGbo->cbTotal);
     return rc;
