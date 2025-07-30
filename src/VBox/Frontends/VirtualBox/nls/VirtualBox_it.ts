@@ -1747,7 +1747,7 @@
     </message>
     <message>
         <source>Create a new disk image file</source>
-        <translation type="unfinished"></translation>
+        <translation>Crea un nuovo file di immagine disco</translation>
     </message>
     <message>
         <source>Create Disk Image File</source>
@@ -2243,7 +2243,7 @@
     </message>
     <message>
         <source>Create new group based on selected virtual machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Crea un nuovo gruppo basato sulle macchine virtuali selezionate</translation>
     </message>
     <message>
         <source>Start with &amp;GUI</source>
@@ -6005,7 +6005,7 @@
     </message>
     <message>
         <source>Session Name/Process Command</source>
-        <translation type="unfinished"></translation>
+        <translation>Nome sessione/Comando processo</translation>
     </message>
     <message>
         <source>Session/Process Status</source>
@@ -6247,7 +6247,7 @@
     </message>
     <message>
         <source>&lt;div&gt;&lt;p&gt;&lt;h3&gt;Not found.&lt;/h3&gt;The page &lt;b&gt;%1&lt;/b&gt; could not be found.&lt;/p&gt;&lt;/div&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;div&gt;&lt;p&gt;&lt;h3&gt;Non trovato.&lt;/h3&gt;La pagina &lt;b&gt;%1&lt;/b&gt; non è stata trovata.&lt;/p&gt;&lt;/div&gt;</translation>
     </message>
     <message>
         <source>Not Found</source>
@@ -6273,7 +6273,7 @@
     <name>UIHomePane</name>
     <message>
         <source>&lt;h3&gt;Get started with VirtualBox&lt;/h3&gt;&lt;p&gt;&lt;a href=#configure#&gt;Configure VirtualBox Manager to work with your computer&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#create#&gt;Create a new virtual machine (VM)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#open#&gt;Open a saved VirtualBox VM&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#import#&gt;Import a VM from open virtualization or cloud formats&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Refer to the &lt;a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html&gt;VirtualBox documentation&lt;/a&gt; or press %1 for help.&lt;/p&gt;&lt;p&gt;Visit &lt;a href=https://www.virtualbox.org&gt;virtualbox.org&lt;/a&gt; to download test builds, access the source code, and more.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;h3&gt;Inizia a usare VirtualBox&lt;/h3&gt;&lt;p&gt;&lt;a href=#configure#&gt;Configura VirtualBox Manager per funzionare con il tuo computer&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#create#&gt;Crea una nuova macchina virtuale (VM)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#open#&gt;Apri una VM VirtualBox salvata&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#import#&gt;Importa una VM da formati di virtualizzazione aperti o cloud&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Fai riferimento alla &lt;a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html&gt;documentazione di VirtualBox&lt;/a&gt; o premi %1 per assistenza.&lt;/p&gt;&lt;p&gt;Visita &lt;a href=https://www.virtualbox.org&gt;virtualbox.org&lt;/a&gt; per scaricare build di prova, accedere al codice sorgente e altro ancora.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;h3&gt;Please choose Experience Mode!&lt;/h3&gt;By default, the VirtualBox GUI is hiding some options, tools and wizards. &lt;p&gt;The &lt;b&gt;Basic Mode&lt;/b&gt; is intended for those users who are not interested in advanced functionality and prefer a simpler, cleaner interface.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Expert Mode&lt;/b&gt; is intended for experienced users who wish to utilize all VirtualBox functionality.&lt;/p&gt;&lt;p&gt;You can choose whether you are a beginner or experienced user by selecting required option at the right. This choice can always be changed in Global Preferences or Machine Settings windows.&lt;/p&gt;</source>
@@ -9684,7 +9684,7 @@
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machine items from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Rimuovi questi elementi delle macchine virtuali dall&apos;elenco delle macchine?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machines from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
