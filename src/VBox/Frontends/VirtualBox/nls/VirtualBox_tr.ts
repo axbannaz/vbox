@@ -14830,8 +14830,8 @@
         <translation>Katılımsız Kurulumla &amp;Devam Et</translation>
     </message>
     <message>
-        <source>The ISO is attached to the VM, so you can install the OS manually</source>
-        <translation>ISO, VM&apos;ye takılır, böylece İS&apos;yi el ile yükleyebilirsiniz</translation>
+        <source>The ISO is attached to the VM, so you can install the OS automatically</source>
+        <translation type="unfinished">ISO, VM&apos;ye takılır, böylece İS&apos;yi otomatik yükleyebilirsiniz</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
@@ -14938,7 +14938,7 @@
         <translation>VM Klasörü</translation>
     </message>
     <message>
-        <source>Proceed with Unattended Install</source>
+        <source>Proceed with Unattended Installation</source>
         <translation>Katılımsız Kurulumla Devam Et</translation>
     </message>
     <message>

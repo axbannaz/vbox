@@ -14849,8 +14849,8 @@
         <translation>&amp;Procedi con l&apos;installazione non presidiata</translation>
     </message>
     <message>
-        <source>The ISO is attached to the VM, so you can install the OS manually</source>
-        <translation>L&apos;ISO è collegata alla MV, quindi puoi installare il sistema operativo manualmente</translation>
+        <source>The ISO is attached to the VM, so you can install the OS automatically</source>
+        <translation type="unfinished">L&apos;ISO è collegata alla MV, quindi puoi installare il sistema operativo automaticamente</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
@@ -14957,7 +14957,7 @@
         <translation>Cartella MV</translation>
     </message>
     <message>
-        <source>Proceed with Unattended Install</source>
+        <source>Proceed with Unattended Installation</source>
         <translation>Procedi con l&apos;installazione non supervisionata</translation>
     </message>
     <message>

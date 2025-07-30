@@ -14847,8 +14847,8 @@
         <translation>Mit &amp;unbeaufsichtigter Installation fortfahren</translation>
     </message>
     <message>
-        <source>The ISO is attached to the VM, so you can install the OS manually</source>
-        <translation>Die ISO-Datei ist an die VM angehängt, sodass Sie das Betriebssystem manuell installieren können</translation>
+        <source>The ISO is attached to the VM, so you can install the OS automatically</source>
+        <translation type="unfinished">Die ISO-Datei ist an die VM angehängt, sodass Sie das Betriebssystem automatisch installieren können</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
@@ -14955,7 +14955,7 @@
         <translation>VM-Ordner</translation>
     </message>
     <message>
-        <source>Proceed with Unattended Install</source>
+        <source>Proceed with Unattended Installation</source>
         <translation>Mit unbeaufsichtigter Installation fortfahren</translation>
     </message>
     <message>

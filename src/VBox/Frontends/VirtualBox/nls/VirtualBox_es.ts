@@ -32296,10 +32296,6 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>The ISO is attached to the VM, so you can install the OS manually</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
         <translation type="unfinished"></translation>
     </message>
@@ -32404,10 +32400,6 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Proceed with Unattended Install</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>Unattended Installation of Guest OS</source>
         <translation type="unfinished"></translation>
     </message>
@@ -32441,6 +32433,14 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
     </message>
     <message>
         <source>A new VM will be created with the following configuration.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The ISO is attached to the VM, so you can install the OS automatically</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Proceed with Unattended Installation</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
