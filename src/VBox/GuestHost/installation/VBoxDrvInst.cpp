@@ -499,8 +499,7 @@ static DECLCALLBACK(RTEXITCODE) vboxDrvInstCmdListMain(PRTGETOPTSTATE pGetState)
     VBoxWinDrvStoreDestroy(pStore);
     pStore = NULL;
 
-    vboxDrvInstLog("\nUse DOS-style wildcards to adjust results.\n");
-    vboxDrvInstLog("Use \"--help\" to print syntax help.\n");
+    vboxDrvInstLog("\nHint: Use DOS-style wildcards to adjust results.\n");
 
     return RTEXITCODE_SUCCESS;
 }
@@ -1548,11 +1547,14 @@ int main(int argc, char **argv)
         }
     }
 
-    /* List all Windows driver store entries if no command is given. */
+    /* Print the VirtualBox driver / service statuses if no command is given. */
     rc = vboxDrvInstInit();
     if (RT_FAILURE(rc))
         return RTEXITCODE_FAILURE;
-    RTEXITCODE rcExit = vboxDrvInstCmdListMain(&GetState);
+    RTEXITCODE rcExit = vboxDrvInstCmdStatusMain(&GetState);
+
+    RTStrmPrintf(g_pStdOut, "Note: Specify '--help' for more information / examples.\n");
+
     vboxDrvInstDestroy();
     return rcExit;
 }
