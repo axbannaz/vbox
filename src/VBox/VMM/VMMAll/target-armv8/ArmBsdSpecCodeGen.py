@@ -1290,6 +1290,22 @@ class SysRegGeneratorBase(object):
 
     kdELxToNum = { 'EL0': 0, 'EL1': 1, 'EL2': 2, 'EL3': 3, }
 
+    ## Register names that requires post modification state updates.
+    kdRegsRequiringRecalcs = {
+        'SCR_EL1':   'iemCImplHlpRecalcFlags',
+        'SCR_EL2':   'iemCImplHlpRecalcFlags',
+        'SCR_EL3':   'iemCImplHlpRecalcFlags',
+        'SCTLR_EL1': 'iemCImplHlpRecalcFlagsAndPgmModeEl1',
+        'SCTLR_EL2': 'iemCImplHlpRecalcFlagsAndPgmModeEl2',
+        'SCTLR_EL3': 'iemCImplHlpRecalcFlagsAndPgmModeEl3',
+        'HCR_EL2':   'iemCImplHlpRecalcFlags',
+        'HCRX_EL2':  'iemCImplHlpRecalcFlags',
+        'TCR_EL1':   'iemCImplHlpRecalcFlagsAndPgmModeEl1',
+        'TCR_EL2':   'iemCImplHlpRecalcFlagsAndPgmModeEl2',
+        'TCR_EL3':   'iemCImplHlpRecalcFlagsAndPgmModeEl3',
+        'MDSCR_EL1': 'iemCImplHlpRecalcFlags',
+    };
+
     def __init__(self, sInstr, sFuncPrefix):
         self.sInstr         = sInstr;
         self.sFuncPrefix    = sFuncPrefix;
@@ -2905,7 +2921,7 @@ class SysRegGeneratorA64MsrReg(SysRegGeneratorBase):
             ' * @param   uValue      The value to write.',
             ' */',
             'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_msr_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGprSrc,',
-            '                                                 uint64_t uValue)'
+            '                                                 uint64_t uValue)',
             '{',
             '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysReg, idxGprSrc, 1, 0xf);',
             '    switch (idSysReg)',
@@ -2913,9 +2929,15 @@ class SysRegGeneratorA64MsrReg(SysRegGeneratorBase):
         ];
         for oInfo in self.aoInfo:
             if oInfo.sEnc[0] == 'A':
-                asLines.append('        case %s: %sreturn iemCImplA64_msr_%s(pVCpu, uValue%s);'
-                               % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.oAccessor.oEncoding.sAsmValue,
-                                  ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
+                    asLines.append('        case %s: %sreturn %s(pVCpu, iemCImplA64_msr_%s(pVCpu, uValue%s));'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
+                                      oInfo.oAccessor.oEncoding.sAsmValue,
+                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                else:
+                    asLines.append('        case %s: %sreturn iemCImplA64_msr_%s(pVCpu, uValue%s);'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.oAccessor.oEncoding.sAsmValue,
+                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
         asLines += [
             '    }',
             '    /* Fall back on handcoded handler. */',

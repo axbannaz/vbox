@@ -41,6 +41,8 @@
 #include <iprt/assert.h>
 #include <iprt/armv8.h>
 
+#include "IEMInline-armv8.h"
+
 
 /*********************************************************************************************************************************
 *   System Register Access Fallbacks and Helpers                                                                                 *
@@ -76,6 +78,58 @@ iemCImplA64_msr_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint64_t uValue, uint3
 {
     RT_NOREF(pVCpu, idSysReg, uValue, idxGprSrc);
     AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+/**
+ * Recalculates fExec after updating a (relevant) system register.
+ */
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlags(PVMCPU pVCpu, VBOXSTRICTRC rcStrict)
+{
+    uint32_t const fExecOld = pVCpu->iem.s.fExec;
+    uint32_t const fExecNew = iemCalcExecFlags(pVCpu) | (fExecOld & IEM_F_USER_OPTS);
+    if (fExecNew != fExecOld)
+        Log(("IEM: sysreg: fExec %#x -> %#x (changed %#x)\\n", fExecOld, fExecNew, pVCpu->iem.s.fExec ^ fExecNew));
+    pVCpu->iem.s.fExec = fExecNew;
+    return rcStrict;
+}
+
+
+/**
+ * Recalculates fExec and EL1 PGM mode after updating a (relevant) system register.
+ */
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl1(PVMCPU pVCpu, VBOXSTRICTRC rcStrict)
+{
+    int rc = PGMChangeMode(pVCpu, 1, pVCpu->cpum.GstCtx.Sctlr.u64, pVCpu->cpum.GstCtx.Tcr.u64);
+    AssertRCReturn(rc, rc);
+    return iemCImplHlpRecalcFlags(pVCpu, rcStrict);
+}
+
+
+/**
+ * Recalculates fExec and EL2 PGM mode after updating a (relevant) system register.
+ */
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl2(PVMCPU pVCpu, VBOXSTRICTRC rcStrict)
+{
+    /** @todo does this influence EL1?   */
+    int rc = PGMChangeMode(pVCpu, 2, pVCpu->cpum.GstCtx.SctlrEl2.u64, pVCpu->cpum.GstCtx.TcrEl2.u64);
+    AssertRCReturn(rc, rc);
+    return iemCImplHlpRecalcFlags(pVCpu, rcStrict);
+}
+
+
+/**
+ * Recalculates fExec and EL3 PGM mode after updating a (relevant) system register.
+ */
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl3(PVMCPU pVCpu, VBOXSTRICTRC rcStrict)
+{
+#if 0 /** @todo EL3 */
+    int rc = PGMChangeMode(pVCpu, 3, pVCpu->cpum.GstCtx.SctlrEl3.u64, pVCpu->cpum.GstCtx.TcrEl3.u64);
+    AssertRCReturn(rc, rc);
+#else
+    AssertFailed();
+#endif
+    return iemCImplHlpRecalcFlags(pVCpu, rcStrict);
 }
 
 
