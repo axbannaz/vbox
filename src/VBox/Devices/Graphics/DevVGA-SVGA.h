@@ -36,7 +36,7 @@
 
 #define VMSVGA_USE_EMT_HALT_CODE
 
-//#define VMSVGA_WITH_PGM_LOCKING
+#define VMSVGA_WITH_PGM_LOCKING
 
 #include <VBox/pci.h>
 #include <VBox/vmm/pdmifs.h>
