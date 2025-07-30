@@ -1022,7 +1022,8 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
              *                   Also, Hyper-V seems to return the whole state for all extensions like AVX512 etc. (there is no way to instruct Hyper-V to disable certain
              *                   components). So we strip everything we don't support right now to be on the safe side wrt. IEM.
              */
-            pVCpu->cpum.GstCtx.XState.Hdr.bmXComp &= (XSAVE_C_X87 | XSAVE_C_SSE | XSAVE_C_YMM);
+            pVCpu->cpum.GstCtx.XState.Hdr.bmXComp  &= (XSAVE_C_X87 | XSAVE_C_SSE | XSAVE_C_YMM);
+            pVCpu->cpum.GstCtx.XState.Hdr.bmXState &= (XSAVE_C_X87 | XSAVE_C_SSE | XSAVE_C_YMM);
         }
     }
 
