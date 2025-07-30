@@ -111,6 +111,7 @@ typedef struct VMSVGACB
     RTLISTNODE           nodeQueue;                /* For a queue where the buffer is currently resides. */
     VMSVGACBTYPE         enmType;                  /* Type of the buffer. */
     uint32_t             idDXContext;              /* DX context of the buffer or SVGA3D_INVALID_ID. */
+    uint32_t             idFence;                  /* SubmissionFenceId. */
     uint32_t             cbBuffer;                 /* Total size. */
     uint32_t             cbCommand;                /* Size of commands. */
     uint32_t             cbReservedCmdHeader;      /* Reserved for the command header. */
