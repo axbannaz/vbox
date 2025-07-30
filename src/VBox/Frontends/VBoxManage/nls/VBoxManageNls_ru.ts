@@ -4353,7 +4353,7 @@ TTL:       %RU64 сек, сейчас %RU64 сек осталось
     <message>
         <source>Creating %RU32 directories...
 </source>
-        <translation type="unfinished">Создание %RU32 директории...
+        <translation>Создание %RU32 директорий...
 </translation>
     </message>
     <message>
@@ -4381,13 +4381,13 @@ TTL:       %RU64 сек, сейчас %RU64 сек осталось
     <message>
         <source>Removing %RU32 directory tree(s)...
 </source>
-        <translation type="unfinished">Удаление %RU32 дерева директорий...
+        <translation>Удаление %RU32 дерева(-ьев) директорий...
 </translation>
     </message>
     <message>
         <source>Removing %RU32 directorie(s)...
 </source>
-        <translation type="unfinished">Удаление %RU32 директории...
+        <translation>Удаление %RU32 директории(-й)...
 </translation>
     </message>
     <message>
@@ -4425,7 +4425,7 @@ TTL:       %RU64 сек, сейчас %RU64 сек осталось
     <message>
         <source>Removing %RU32 file(s)...
 </source>
-        <translation type="unfinished">Удаление %RU32 файла...
+        <translation>Удаление %RU32 файла(-ов)...
 </translation>
     </message>
     <message>
@@ -5037,12 +5037,14 @@ Total guest sessions: %zu
     <message>
         <source>Creating temporary %s from template &apos;%s&apos; in directory &apos;%s&apos; ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Создание временного %s из шаблона &apos;%s&apos; в директории &apos;%s&apos; ...
+</translation>
     </message>
     <message>
         <source>Creating temporary %s from template &apos;%s&apos; in default temporary directory ...
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Создание временного %s из шаблона &apos;%s&apos; во временной директории по умолчанию ...
+</translation>
     </message>
 </context>
 <context>
@@ -6304,7 +6306,7 @@ Syntax error: %N
     <message>
         <source>%-28s enabled (Address %ls, Ports %ls, MultiConn: %s, ReuseSingleConn: %s, Authentication type: %s)
 </source>
-        <translation>%-28s включен (Адрес %ls, Порты %ls, Много Соединений: %s, Одно Соединение : %s, Тип Аутентификации: %s)
+        <translation>%-28s включен (Адрес %ls, Порты %ls, Много Соединений: %s, Одно Соединение: %s, Тип Аутентификации: %s)
 </translation>
     </message>
     <message>
@@ -6686,7 +6688,10 @@ Attached physical PCI devices:
 	MTU: %d, Socket (send: %d, receive: %d), TCP Window (send:%d, receive: %d),
 	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
 </source>
-        <translation type="unfinished"></translation>
+        <translation>NIC %d Настройки:
+	MTU: %d, Сокет (отправлено: %d, принято: %d), Окно TCP  (отправлено:%d, принято: %d),
+	LocalhostReachable: %d, ForwardBroadcast: %d, EnableTFTP: %d
+</translation>
     </message>
 </context>
 <context>
@@ -10020,7 +10025,7 @@ to the VBoxManage command line.
     </message>
     <message>
         <source>Invalid option: global and transient both specified</source>
-        <translation type="unfinished"></translation>
+        <translation>Недопустимое сочетание опций: указаны global и transient одновременно</translation>
     </message>
 </context>
 <context>
@@ -10288,11 +10293,12 @@ to the VBoxManage command line.
     <message>
         <source>Warning: &apos;--accelerate-2d-video&apos; is deprecated and will be removed in a future version
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение: &apos;--accelerate-2d-video&apos; устарел и будет удалён в будущей версии
+</translation>
     </message>
     <message>
         <source>Invalid platform architecture returned for VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Текущее значение архитектуры платформы ВМ недопустимо</translation>
     </message>
 </context>
 <context>
