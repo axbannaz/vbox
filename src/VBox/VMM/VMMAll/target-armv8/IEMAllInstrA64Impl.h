@@ -3301,15 +3301,63 @@
 
 
 /* DSB  {<option> | #<imm>} (fffff0ff/d503309f) */
-//#define IEM_INSTR_IMPL_A64__DSB_BO_barriers(CRm)
-
+#define IEM_INSTR_IMPL_A64__DSB_BO_barriers(CRm) \
+    /* Simplification: effective domain = outer sharable. */ \
+    switch (CRm & 3) \
+    { \
+        case 1: /* reads */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DSB_READS(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+        case 2: /* writes */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DSB_WRITES(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+        default: /* all */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DSB_ALL(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+    } ((void)0)
 
 /* DMB  {<option> | #<imm>} (fffff0ff/d50330bf) */
-//#define IEM_INSTR_IMPL_A64__DMB_BO_barriers(CRm)
+#define IEM_INSTR_IMPL_A64__DMB_BO_barriers(CRm) \
+    /* Simplification: effective domain = outer sharable. */ \
+    switch (CRm & 3) \
+    { \
+        case 1: /* reads */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DMB_READS(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+        case 2: /* writes */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DMB_WRITES(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+        default: /* all */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_A64_DMB_ALL(); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+            break; \
+    } ((void)0)
 
 
 /* ISB{  <option> |   #<imm>} (fffff0ff/d50330df) */
-//#define IEM_INSTR_IMPL_A64__ISB_BI_barriers(CRm)
+#define IEM_INSTR_IMPL_A64__ISB_BI_barriers(CRm) \
+    RT_NOREF(CRm); \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_ISB(); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SB (ffffffff/d50330ff) */

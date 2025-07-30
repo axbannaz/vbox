@@ -160,6 +160,41 @@ DECL_FORCE_INLINE(a_Type) iemMcA64Ands(a_Type uValue, a_Type fMask, uint64_t *pf
 }
 
 
+/*
+ * Synchronizing primitives and memory barriers.
+ * Treat these as all being in the outer domain for now.
+ */
+#if defined(RT_ARCH_ARM64)
+# if defined(_MSC_VER)
+#  define IEM_MC_A64_DSB_READS()    __dsb(_ARM64_BARRIER_OSHLD)
+#  define IEM_MC_A64_DSB_WRITES()   __dsb(_ARM64_BARRIER_OSHST)
+#  define IEM_MC_A64_DSB_ALL()      __dsb(_ARM64_BARRIER_OSH)
+
+#  define IEM_MC_A64_DMB_READS()    __dmb(_ARM64_BARRIER_OSHLD)
+#  define IEM_MC_A64_DMB_WRITES()   __dmb(_ARM64_BARRIER_OSHST)
+#  define IEM_MC_A64_DMB_ALL()      __dmb(_ARM64_BARRIER_OSH)
+# else
+#  define IEM_MC_A64_DSB_READS()    __asm__ __volatile__("dsb oshld")
+#  define IEM_MC_A64_DSB_WRITES()   __asm__ __volatile__("dsb oshst")
+#  define IEM_MC_A64_DSB_ALL()      __asm__ __volatile__("dsb osh")
+
+#  define IEM_MC_A64_DMB_READS()    __asm__ __volatile__("dmb oshld")
+#  define IEM_MC_A64_DMB_WRITES()   __asm__ __volatile__("dmb oshst")
+#  define IEM_MC_A64_DMB_ALL()      __asm__ __volatile__("dmb osh")
+# endif
+#else
+# define IEM_MC_A64_DSB_READS()     ASMReadFence()
+# define IEM_MC_A64_DSB_WRITES()    ASMWriteFence()
+# define IEM_MC_A64_DSB_ALL()       ASMMemoryFence()
+
+# define IEM_MC_A64_DMB_READS()     ASMReadFence()
+# define IEM_MC_A64_DMB_WRITES()    ASMWriteFence()
+# define IEM_MC_A64_DMB_ALL()       ASMMemoryFence()
+#endif
+
+/** Instruction boundrary is a NOP in the interpreter for now. */
+#define IEM_MC_A64_ISB()            ((void)0)
+
 
 /** @}  */
 
