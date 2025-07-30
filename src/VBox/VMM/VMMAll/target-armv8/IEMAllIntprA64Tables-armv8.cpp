@@ -31,11 +31,12 @@
 
 #define LOG_GROUP LOG_GROUP_IEM
 #define VMCPU_INCL_CPUM_GST_CTX
+#include <iprt/asm.h> /* needed for Armv8A64ConvertImmRImmS2Mask32 and friends in iprt/armv8.h */
 #include "IEMInternal.h"
 #include <VBox/vmm/vm.h>
 #include "VBox/err.h"
 
-#include "iprt/armv8.h"
+#include <iprt/armv8.h>
 
 #include "IEMMc.h"
 #include "IEMInline-armv8.h"

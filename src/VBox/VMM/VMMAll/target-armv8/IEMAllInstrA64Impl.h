@@ -7496,35 +7496,98 @@
  */
 
 /* AND  <Wd|WSP>, <Wn>, #<imm> (ffc00000/12000000) */
-//#define IEM_INSTR_IMPL_A64__AND_32_log_imm(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__AND_32_log_imm(Rd, Rn, imms, immr) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint32_t, fMask, Armv8A64ConvertImmRImmS2Mask32(imms, immr)); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_AND_2LOCS_U32(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ORR  <Wd|WSP>, <Wn>, #<imm> (ffc00000/32000000) */
-//#define IEM_INSTR_IMPL_A64__ORR_32_log_imm(Rd, Rn, imms, immr)
-
+#define IEM_INSTR_IMPL_A64__ORR_32_log_imm(Rd, Rn, imms, immr) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint32_t, fMask, Armv8A64ConvertImmRImmS2Mask32(imms, immr)); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_OR_2LOCS_U32(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 /* EOR  <Wd|WSP>, <Wn>, #<imm> (ffc00000/52000000) */
-//#define IEM_INSTR_IMPL_A64__EOR_32_log_imm(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__EOR_32_log_imm(Rd, Rn, imms, immr) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint32_t, fMask, Armv8A64ConvertImmRImmS2Mask32(imms, immr)); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_XOR_2LOCS_U32(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ANDS  <Wd>, <Wn>, #<imm> (ffc00000/72000000) */
-//#define IEM_INSTR_IMPL_A64__ANDS_32S_log_imm(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__ANDS_32S_log_imm(Rd, Rn, imms, immr) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint32_t, fMask, Armv8A64ConvertImmRImmS2Mask32(imms, immr)); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_A64_ANDS_U32(uTmp, fMask); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* AND  <Xd|SP>, <Xn>, #<imm> (ff800000/92000000) */
-//#define IEM_INSTR_IMPL_A64__AND_64_log_imm(Rd, Rn, imms, immr, N)
+#define IEM_INSTR_IMPL_A64__AND_64_log_imm(Rd, Rn, imms, immr, N) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint64_t, fMask, Armv8A64ConvertImmRImmS2Mask64(N, imms, immr)); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_AND_2LOCS_U64(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ORR  <Xd|SP>, <Xn>, #<imm> (ff800000/b2000000) */
-//#define IEM_INSTR_IMPL_A64__ORR_64_log_imm(Rd, Rn, imms, immr, N)
+#define IEM_INSTR_IMPL_A64__ORR_64_log_imm(Rd, Rn, imms, immr, N) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint64_t, fMask, Armv8A64ConvertImmRImmS2Mask64(N, imms, immr)); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_OR_2LOCS_U64(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* EOR  <Xd|SP>, <Xn>, #<imm> (ff800000/d2000000) */
-//#define IEM_INSTR_IMPL_A64__EOR_64_log_imm(Rd, Rn, imms, immr, N)
+#define IEM_INSTR_IMPL_A64__EOR_64_log_imm(Rd, Rn, imms, immr, N) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint64_t, fMask, Armv8A64ConvertImmRImmS2Mask64(N, imms, immr)); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_XOR_2LOCS_U64(uTmp, fMask); \
+    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ANDS  <Xd>, <Xn>, #<imm> (ff800000/f2000000) */
-//#define IEM_INSTR_IMPL_A64__ANDS_64S_log_imm(Rd, Rn, imms, immr, N)
+#define IEM_INSTR_IMPL_A64__ANDS_64S_log_imm(Rd, Rn, imms, immr, N) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL_CONST(uint64_t, fMask, Armv8A64ConvertImmRImmS2Mask64(N, imms, immr)); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_ANDS_U64(uTmp, fMask); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 

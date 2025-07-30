@@ -227,9 +227,13 @@
 #define IEM_MC_SUB_2LOCS_U64(a_u64Value, a_u64Subtrahend) do { (a_u64Value) -= a_u64Subtrahend; } while (0)
 
 #define IEM_MC_AND_2LOCS_U32(a_u32Local, a_u32Mask)     do { (a_u32Local) &= (a_u32Mask); } while (0)
+#define IEM_MC_AND_2LOCS_U64(a_u64Local, a_u64Mask)     do { (a_u64Local) &= (a_u64Mask); } while (0)
 
 #define IEM_MC_OR_2LOCS_U32(a_u32Local, a_u32Mask)      do { (a_u32Local) |= (a_u32Mask); } while (0)
 #define IEM_MC_OR_2LOCS_U64(a_u64Local, a_u64Mask)      do { (a_u64Local) |= (a_u64Mask); } while (0)
+
+#define IEM_MC_XOR_2LOCS_U32(a_u32Local, a_u32Mask)     do { (a_u32Local) ^= (a_u32Mask); } while (0)
+#define IEM_MC_XOR_2LOCS_U64(a_u64Local, a_u64Mask)     do { (a_u64Local) ^= (a_u64Mask); } while (0)
 
 
 #define IEM_MC_AND_GREG_U32(a_iGReg, a_u32Value) \
