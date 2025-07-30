@@ -138,9 +138,12 @@ DECL_FORCE_INLINE(uint32_t) iemCalcExecAcFlag(PVMCPUCC pVCpu, uint32_t fExecMode
     /** @todo armv8: EL3 */
     AssertCompile(ARMV8_SCTLR_EL1_A   == ARMV8_SCTLR_EL2_A);
     AssertCompile(ARMV8_SCTLR_EL1_NAA == ARMV8_SCTLR_EL2_NAA);
+    AssertCompile(ARMV8_SCTLR_EL1_SA  == ARMV8_SCTLR_EL2_SA);
+    AssertCompile(ARMV8_SCTLR_EL1_SA0 == ARMV8_SCTLR_EL2_SA0);
 
     return ((fSctlr & ARMV8_SCTLR_EL1_A)   ? IEM_F_ARM_A : 0)
-         | ((fSctlr & ARMV8_SCTLR_EL1_NAA) ? 0 : IEM_F_ARM_AA);
+         | ((fSctlr & ARMV8_SCTLR_EL1_NAA) ? 0 : IEM_F_ARM_AA)
+         | ((fSctlr & (IEM_F_MODE_ARM_GET_EL(fExecMode) == 0 ? ARMV8_SCTLR_EL1_SA0 : ARMV8_SCTLR_EL1_SA)) ? IEM_F_ARM_SA : 0);
 }
 
 
@@ -397,6 +400,32 @@ DECL_FORCE_INLINE(uint64_t) iemGRegFetchU64(PVMCPUCC pVCpu, uint8_t iReg, bool f
     return iReg < 31 ? pVCpu->cpum.GstCtx.aGRegs[iReg].x
           : fSp      ? pVCpu->cpum.GstCtx.aSpReg[IEM_F_ARM_GET_SP_IDX(pVCpu->iem.s.fExec)].u64
           : UINT64_C(0);
+}
+
+
+/**
+ * Fetches the value of a 64-bit general purpose register, with SP alignment
+ * checking.
+ *
+ * @returns The register value.
+ * @param   pVCpu   The cross context virtual CPU structure of the calling thread.
+ * @param   iReg    The register.
+ */
+DECL_FORCE_INLINE_THROW(uint64_t) iemGRegFetchU64WithSpAlignCheck(PVMCPUCC pVCpu, uint8_t iReg)
+{
+    Assert(iReg < 32);
+    uint64_t uRet;
+    if (iReg < 31)
+        uRet = pVCpu->cpum.GstCtx.aGRegs[iReg].x;
+    else
+    {
+        uRet = pVCpu->cpum.GstCtx.aSpReg[IEM_F_ARM_GET_SP_IDX(pVCpu->iem.s.fExec)].u64;
+        if (RT_LIKELY(!(uRet & 15) || !(pVCpu->iem.s.fExec & IEM_F_ARM_SA)))
+        { /* likely */ }
+        else
+            iemRaiseSpAlignmentCheck(pVCpu);
+    }
+    return uRet;
 }
 
 

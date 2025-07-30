@@ -141,6 +141,38 @@ iemRaiseDebugDataAccessOrInvokeDbgfJmp(PVMCPUCC pVCpu, uint32_t fDataBps, RTGCPT
 }
 
 
+VBOXSTRICTRC
+iemRaisePcAlignmentCheck(PVMCPUCC pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECL_NO_RETURN(void)
+iemRaisePcAlignmentCheckJmp(PVMCPUCC pVCpu) IEM_NOEXCEPT_MAY_LONGJMP
+{
+    VBOXSTRICTRC const rcStrict = iemRaisePcAlignmentCheck(pVCpu);
+    IEM_DO_LONGJMP(pVCpu, VBOXSTRICTRC_VAL(rcStrict));
+}
+
+
+VBOXSTRICTRC
+iemRaiseSpAlignmentCheck(PVMCPUCC pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECL_NO_RETURN(void)
+iemRaiseSpAlignmentCheckJmp(PVMCPUCC pVCpu) IEM_NOEXCEPT_MAY_LONGJMP
+{
+    VBOXSTRICTRC const rcStrict = iemRaiseSpAlignmentCheck(pVCpu);
+    IEM_DO_LONGJMP(pVCpu, VBOXSTRICTRC_VAL(rcStrict));
+}
+
+
 VBOXSTRICTRC iemRaiseSystemAccessTrap(PVMCPU pVCpu, uint32_t uEl, uint32_t uInstrEssence) RT_NOEXCEPT
 {
     RT_NOREF(pVCpu, uEl, uInstrEssence);

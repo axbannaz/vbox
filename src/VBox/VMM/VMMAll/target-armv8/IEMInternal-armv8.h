@@ -160,6 +160,8 @@ IEM_RAISE_PROTOS(iemRaiseInstructionAbortFromWalk,
 IEM_RAISE_PROTOS(iemRaiseInstructionAbortTlbPermision,
                  PVMCPUCC pVCpu, RTGCPTR GCPtrMem, uint8_t cbMem, PCIEMTLBENTRY pTlbe);
 
+IEM_RAISE_PROTOS(iemRaisePcAlignmentCheck, PVMCPUCC pVCpu);
+IEM_RAISE_PROTOS(iemRaiseSpAlignmentCheck, PVMCPUCC pVCpu);
 
 
 /** Creates an instruction essence value for MRS, MSR and similar.   */
