@@ -1010,7 +1010,7 @@ static int nemR3WinInitCheckCapabilities(PVM pVM, PRTERRINFO pErrInfo)
     return VINF_SUCCESS;
 }
 
-#ifdef LOG_ENABLED
+#if 0 /* def LOG_ENABLED */ /** r=aeichner: Causes assertions with newer hosts and isn't of much use anymore anyway. */
 
 /**
  * Used to fill in g_IoCtlGetHvPartitionId.
@@ -1208,7 +1208,7 @@ static int nemR3WinInitDiscoverIoControlProperties(PVM pVM, PRTERRINFO pErrInfo)
      * them directly from ring-0 and better log them.
      *
      */
-#ifdef LOG_ENABLED
+#if 0 /* def LOG_ENABLED */ /** r=aeichner: Causes assertions with newer hosts and isn't of much use anymore anyway. */
     decltype(NtDeviceIoControlFile) * const pfnOrg = *g_ppfnVidNtDeviceIoControlFile;
 
     /* VidGetHvPartitionId - must work due to our memory management. */
