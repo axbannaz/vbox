@@ -14864,7 +14864,7 @@
     </message>
     <message>
         <source>&amp;Proceed with Unattended Installation</source>
-        <translation>П&amp;родолжить автоматическую установку</translation>
+        <translation>Ос&amp;уществить установку автоматически</translation>
     </message>
     <message>
         <source>The ISO is attached to the VM, so you can install the OS manually</source>
@@ -14976,7 +14976,7 @@
     </message>
     <message>
         <source>Proceed with Unattended Install</source>
-        <translation>Продолжить автоматическую установку</translation>
+        <translation>Осуществить установку автоматически</translation>
     </message>
     <message>
         <source>Unattended Installation of Guest OS</source>
