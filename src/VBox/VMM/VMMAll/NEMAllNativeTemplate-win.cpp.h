@@ -928,8 +928,18 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
         iReg++;
     }
 
+    bool fUpdateXcr0 = false;
+    uint64_t u64Xcr0 = 0;
     if (fWhat & CPUMCTX_EXTRN_XCRx)
-        GET_REG64(pVCpu->cpum.GstCtx.aXcr[0], WHvX64RegisterXCr0);
+    {
+        Assert(aenmNames[iReg] == WHvX64RegisterXCr0);
+        if (pVCpu->cpum.GstCtx.aXcr[0] != aValues[iReg].Reg64)
+        {
+            u64Xcr0 = aValues[iReg].Reg64;
+            fUpdateXcr0 = true;
+        }
+        iReg++;
+    }
 
     if (!pVM->nem.s.fXsaveSupported)
     {
@@ -1123,6 +1133,12 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
     pVCpu->cpum.GstCtx.fExtrn &= ~fWhat;
     if (!(pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_ALL | (CPUMCTX_EXTRN_NEM_WIN_MASK & ~CPUMCTX_EXTRN_NEM_WIN_EVENT_INJECT))))
         pVCpu->cpum.GstCtx.fExtrn = 0;
+
+    if (fUpdateXcr0)
+    {
+        int rc = CPUMSetGuestXcr0(pVCpu, u64Xcr0);
+        AssertMsgReturn(rc == VINF_SUCCESS, ("rc=%Rrc\n", rc), RT_FAILURE_NP(rc) ? rc : VERR_NEM_IPE_3);
+    }
 
     /* Typical. */
     if (!fMaybeChangedMode && !fUpdateCr3)
