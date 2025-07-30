@@ -437,8 +437,7 @@ NTSTATUS APIENTRY DxgkDdiDXDescribeAllocation(
 
 static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pRender, void *pvDmaBuffer, uint32_t cbDmaBuffer)
 {
-    /** @todo Verify that patch is within the DMA buffer. */
-    RT_NOREF(pContext, cbDmaBuffer);
+    RT_NOREF(pContext);
     NTSTATUS Status = STATUS_SUCCESS;
     uint32_t cOut = 0;
     for (unsigned i = 0; i < pRender->PatchLocationListInSize; ++i)
@@ -454,6 +453,9 @@ static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pR
         }
 
         D3DDDI_PATCHLOCATIONLIST const *pIn = &pRender->pPatchLocationListIn[i];
+        if (pIn->PatchOffset >= cbDmaBuffer)
+            break; /* Filled all patches which describe locations in the processed commands. */
+
         void * const pPatchAddress = (uint8_t *)pvDmaBuffer + pIn->PatchOffset;
         VBOXDXALLOCATIONTYPE const enmAllocationType = (VBOXDXALLOCATIONTYPE)pIn->DriverId;
 
