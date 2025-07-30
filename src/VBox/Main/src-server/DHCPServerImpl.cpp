@@ -569,14 +569,13 @@ HRESULT DHCPServer::setConfiguration(const com::Utf8Str &aIPAddress,
     /*
      * Input is valid, effect the changes.
      */
-    HRESULT hrc;
     {
         AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
         m->IPAddress  = aIPAddress;
         m->lowerIP    = aLowerIP;
         m->upperIP    = aUpperIP;
-        hrc = m->globalConfig->i_setNetworkMask(aNetworkMask);
     }
+    HRESULT hrc = m->globalConfig->i_setNetworkMask(aNetworkMask);
     if (SUCCEEDED(hrc))
         hrc = i_doSaveSettings();
     return hrc;
