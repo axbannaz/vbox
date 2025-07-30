@@ -367,7 +367,7 @@ void UIWizardNewVMSummaryModel::populateData(UIWizardNewVM *pWizard)
 
     const QString &ISOPath = pWizard->ISOFilePath();
     if (!ISOPath.isNull() && !ISOPath.isEmpty())
-        pNameRoot->addChild(UIWizardNewVM::tr("Proceed with Unattended Install"), !pWizard->skipUnattendedInstall());
+        pNameRoot->addChild(UIWizardNewVM::tr("Proceed with Unattended Installation"), !pWizard->skipUnattendedInstall());
 
     /* Unattended install related info: */
     if (pWizard->isUnattendedEnabled())
