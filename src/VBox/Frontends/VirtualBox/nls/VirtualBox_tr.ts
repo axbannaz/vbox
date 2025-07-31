@@ -10222,7 +10222,7 @@
     </message>
     <message>
         <source>Configure Adapter &amp;Manually</source>
-        <translation>Bağdaştırıcıyı &amp;Elle Yapılandır</translation>
+        <translation>Bağdaştırıcıyı &amp;El İle Yapılandır</translation>
     </message>
     <message>
         <source>&amp;IPv4 Address:</source>
@@ -14683,11 +14683,11 @@
     </message>
     <message>
         <source>No ISO image is selected, the guest OS will need to be installed manually.</source>
-        <translation>Seçilen ISO kalıbı yok, misafir İS&apos;nin el ile yüklenmesi gerekecek.</translation>
+        <translation>Seçilen ISO kalıbı yok, misafir İS&apos;nin el ile yüklenmesi gerekecektir.</translation>
     </message>
     <message>
         <source>You have selected to skip unattended guest OS install, the guest OS will need to be installed manually.</source>
-        <translation>Katılımsız misafir İS yükemesini atlamayı seçtiniz, misafir İS&apos;nin el ile yüklenmesi gerekecek.</translation>
+        <translation>Katılımsız misafir İS yükemesini atlamayı seçtiniz, misafir İS&apos;nin el ile yüklenmesi gerekecektir.</translation>
     </message>
     <message>
         <source>Invalid file path or unreadable file</source>
@@ -14831,7 +14831,7 @@
     </message>
     <message>
         <source>The ISO is attached to the VM, so you can install the OS automatically</source>
-        <translation type="unfinished">ISO, VM&apos;ye takılır, böylece İS&apos;yi otomatik yükleyebilirsiniz</translation>
+        <translation>ISO, VM&apos;ye takıldı, böylece İS&apos;yi otomatik olarak yükleyebilirsiniz</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
