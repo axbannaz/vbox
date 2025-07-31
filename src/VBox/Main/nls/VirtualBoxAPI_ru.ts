@@ -883,23 +883,23 @@
     </message>
     <message>
         <source>Failed to query size of NVRAM file &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось запросить размер файла NVRAM &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Failed to find NVRAM file &apos;%s&apos; in map</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось найти файл NVRAM &apos;%s&apos; в мапе</translation>
     </message>
     <message>
         <source>RTVfsChainOpenIoStream() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>RTVfsChainOpenIoStream() завершился с ошибкой для &apos;%s&apos; (%Rrc)</translation>
     </message>
     <message>
         <source>RTVfsFsStrmPushFile() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>RTVfsFsStrmPushFile() завершился с ошибкой для &apos;%s&apos; (%Rrc)</translation>
     </message>
     <message>
         <source>RTVfsUtilPumpIoStreams() failed for &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>RTVfsUtilPumpIoStreams() завершился с ошибкой для &apos;%s&apos; (%Rrc)</translation>
     </message>
 </context>
 <context>
@@ -1704,7 +1704,7 @@
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно запустить машину поскольку архитектура её платформы %s не поддерживается</translation>
     </message>
 </context>
 <context>
@@ -2039,7 +2039,7 @@
     </message>
     <message>
         <source>Unsupported resolution for screen shot: %ux%u (screen %u)</source>
-        <translation type="unfinished"></translation>
+        <translation>Неподдерживаемое разрешение снимка экрана: %ux%u (экран %u)</translation>
     </message>
 </context>
 <context>
@@ -3661,7 +3661,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Path to guest file &quot;%s&quot; not found</source>
-        <translation type="unfinished"></translation>
+        <translation>Путь к гостевому файлу &quot;%s&quot; не найден</translation>
     </message>
 </context>
 <context>
@@ -4441,7 +4441,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Seeking to offset %RU64 of guest file &quot;%s&quot; failed: %Rrc</source>
-        <translation>Не удалось изменить указатель в позицию %RI64 для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
+        <translation>Не удалось изменить указатель в позицию %RU64 для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
     </message>
     <message numerus="yes">
         <source>Reading %RU32 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
@@ -4565,11 +4565,11 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Guest error while determining object data for guest file &quot;%s&quot;: %Rrc</source>
-        <translation>Ошибка гостевой ОС во времы определения данных объекта для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
+        <translation>Ошибка гостевой ОС во время определения данных объекта для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
     </message>
     <message>
         <source>Host error while determining object data for guest file &quot;%s&quot;: %Rrc</source>
-        <translation>Ошибка хоста во времы определения данных объекта для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
+        <translation>Ошибка хоста во время определения данных объекта для файла гостевой ОС &quot;%s&quot;: %Rrc</translation>
     </message>
     <message>
         <source>Host source file lookup for &quot;%s&quot; failed: %Rrc</source>
@@ -4587,15 +4587,15 @@ Guest offers: %s</source>
     </message>
     <message numerus="yes">
         <source>Reading %RU64 bytes @ %RU64 from guest &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-            <numerusform></numerusform>
-            <numerusform></numerusform>
+        <translation>
+            <numerusform>Не удалось прочитать %RU64 байт @ %RU64 с гостевой ОС &quot;%s&quot;: %Rrc</numerusform>
+            <numerusform>Не удалось прочитать %RU64 байта @ %RU64 с гостевой ОС &quot;%s&quot;: %Rrc</numerusform>
+            <numerusform>Не удалось прочитать %RU64 байт @ %RU64 с гостевой ОС &quot;%s&quot;: %Rrc</numerusform>
         </translation>
     </message>
     <message>
         <source>Seeking to offset %RU64 (%#x) of host file &quot;%s&quot; failed: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось изменить указатель в позицию %RU64 (%#x) для файла хоста &quot;%s&quot;: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -4940,7 +4940,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Error while copying file &quot;%s&quot; to &quot;%s&quot; on the guest: %Rrc</source>
-        <translation>Ошибка во время копирования файла &quot;%s&quot; в &quot;%s&quot; в гостевой ОС: %Rrc</translation>
+        <translation>Ошибка копирования файла &quot;%s&quot; в &quot;%s&quot; в гостевой ОС: %Rrc</translation>
     </message>
     <message>
         <source>Installation was canceled</source>
@@ -4948,7 +4948,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Error while running update command &quot;%s&quot; on guest: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка запуска команды обновления &quot;%s&quot; в гостевой ОС: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -5273,7 +5273,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Trying to open a VM config &apos;%s&apos; which has the same UUID as an existing virtual machine</source>
-        <translation>Попытка открыть конфигурацию ВМ &apos;%s&apos; у которой тот же UUID что и у существующей виртуальной машины</translation>
+        <translation>Попытка открыть конфигурацию ВМ &apos;%s&apos;, имеющую тот же UUID, что и существующая виртуальная машина</translation>
     </message>
     <message>
         <source>Invalid machine settings file name &apos;%s&apos; (%Rrc)</source>
@@ -6123,15 +6123,15 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
-        <translation type="unfinished"></translation>
+        <translation>Попытка открыть конфигурацию ВМ &apos;%s&apos;, имеющую нулевой или некорректный UUID</translation>
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported on %s</source>
-        <translation type="unfinished">Невозможно запустить машину поскольку архитектура её платформы %s не поддерживается на %s</translation>
+        <translation>Невозможно запустить машину поскольку архитектура её платформы %s не поддерживается на %s</translation>
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно запустить машину поскольку архитектура её платформы %s не поддерживается</translation>
     </message>
 </context>
 <context>
@@ -6476,51 +6476,51 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Unable to determine free space of target destination (&apos;%s&apos;): %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно определить свободное место в месте назначения (&apos;%s&apos;): %Rrc</translation>
     </message>
     <message>
         <source>Can&apos;t create file &apos;test.txt&apos; in folder &apos;%s&apos;. Check the access rights of the destination folder.</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно создать тестовый файл &apos;test.txt&apos; в папке %s. Проверьте права доступа папки назначения.</translation>
     </message>
     <message>
         <source>Failed to get file size of &apos;%s&apos;: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось получить размер файла &apos;%s&apos;: %Rrc</translation>
     </message>
     <message>
         <source>Failed to setup the progress object for the moving VM operation</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось настроить объект прогресса операции перемещения ВМ</translation>
     </message>
     <message>
         <source>Copying the save state file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование файла сохраненного состояния &apos;%s&apos; ...</translation>
     </message>
     <message>
         <source>Copying the NVRAM file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование NVRAM файла &apos;%s&apos; ...</translation>
     </message>
     <message>
         <source>Copying Machine settings file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование файла настроек машины &apos;%s&apos; ...</translation>
     </message>
     <message>
         <source>Could not create home machine folder &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно создать домашнюю папку машины &apos;%s&apos; (%Rrc)</translation>
     </message>
     <message>
         <source>Copying log file &apos;%s&apos; ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Копирование файла журнала &apos;%s&apos; ...</translation>
     </message>
     <message>
         <source>Could not copy log file &apos;%s&apos; to &apos;%s&apos; (%Rrc)</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно скопировать файл журнала &apos;%s&apos; в &apos;%s&apos; (%Rrc)</translation>
     </message>
     <message>
         <source>Skipping empty operation %d...</source>
-        <translation type="unfinished"></translation>
+        <translation>Пропуск пустой операции %d...</translation>
     </message>
     <message>
         <source>Could not get size of file &apos;%s&apos;: %Rrc</source>
-        <translation type="unfinished"></translation>
+        <translation>Невозможно получить размер файла &apos;%s&apos;: %Rrc</translation>
     </message>
 </context>
 <context>
@@ -7195,7 +7195,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Failed to get machine list &apos;%s&apos; is attached to</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось получить список машин, к которым подключен &apos;%s&apos;</translation>
     </message>
 </context>
 <context>
@@ -7374,11 +7374,11 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Failed to enable DHCP server for network &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось включить DHCP сервер для сети &apos;%s&apos;</translation>
     </message>
     <message>
         <source>Failed to set DHCP server configuration for network &apos;%s&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось задать конфигурацию DHCP сервера для сети &apos;%s&apos;</translation>
     </message>
 </context>
 <context>
@@ -8039,7 +8039,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Querying attachments of storage controller named &apos;%s&apos; failed</source>
-        <translation type="unfinished"></translation>
+        <translation>Не удалось запросить подключенные устройства контроллера хранения &apos;%s&apos;</translation>
     </message>
 </context>
 <context>
@@ -8496,7 +8496,7 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Product key is required for this kind of OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Данному типу ОС необходим ключ продукта</translation>
     </message>
 </context>
 <context>
@@ -9101,19 +9101,19 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Shared folder named &apos;%s&apos; already exists</source>
-        <translation type="unfinished">Общая папка с именем &apos;%s&apos; уже существует</translation>
+        <translation>Общая папка с именем &apos;%s&apos; уже существует</translation>
     </message>
     <message>
         <source>No objects were found for the passed interface name &apos;%s&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Для переданного имени интерфейса &apos;%s&apos; не было найдено объектов.</translation>
     </message>
     <message>
         <source>The objects of the passed interface &apos;%s&apos; are not tracked at moment.</source>
-        <translation type="unfinished"></translation>
+        <translation>Объекты переданного интерфейса &apos;%s&apos; в данный момент не отслеживаются.</translation>
     </message>
     <message>
         <source>The unknown exception in the VirtualBox::getTrackedObjectIds().</source>
-        <translation type="unfinished"></translation>
+        <translation>Неизвестное исключение в VirtualBox::getTrackedObjectIds().</translation>
     </message>
 </context>
 <context>
