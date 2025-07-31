@@ -6306,14 +6306,14 @@ int Console::i_recordingEnable(BOOL fEnable, util::AutoWriteLock *pAutoLock, Com
 /**
  * Called by IInternalSessionControl::OnRecordingStateChange().
  */
-HRESULT Console::i_onRecordingStateChange(BOOL aEnable, ComPtr<IProgress> &aProgress)
+HRESULT Console::i_onRecordingStateChange(RecordingState_T aState, ComPtr<IProgress> &aProgress)
 {
 #ifdef VBOX_WITH_RECORDING
     HRESULT hrc = S_OK;
 
     AutoWriteLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    LogRel2(("Recording: State changed (%s)\n", aEnable ? "enabled" : "disabled"));
+    LogRel2(("Recording: State changed (%s)\n", aState == RecordingState_Started ? "enabled" : "disabled"));
 
     /* Don't trigger recording changes if the VM isn't running. */
     SafeVMPtrQuiet ptrVM(this);
@@ -6321,7 +6321,7 @@ HRESULT Console::i_onRecordingStateChange(BOOL aEnable, ComPtr<IProgress> &aProg
     {
         ComPtr<IVirtualBoxErrorInfo> pErrorInfo;
 
-        int vrc = i_recordingEnable(aEnable, &alock, aProgress);
+        int vrc = i_recordingEnable(aState, &alock, aProgress);
         if (RT_FAILURE(vrc))
         {
             /* If available, get the error information from the progress object and fire it via the event below. */
@@ -6335,7 +6335,7 @@ HRESULT Console::i_onRecordingStateChange(BOOL aEnable, ComPtr<IProgress> &aProg
         alock.release(); /* Release lock before firing event. */
 
         if (vrc != VINF_NO_CHANGE)
-            ::FireRecordingStateChangedEvent(mEventSource, aEnable, pErrorInfo);
+            ::FireRecordingStateChangedEvent(mEventSource, aState, pErrorInfo);
 
         if (RT_FAILURE(vrc))
             hrc = VBOX_E_RECORDING_ERROR;
@@ -6353,9 +6353,9 @@ HRESULT Console::i_onRecordingStateChange(BOOL aEnable, ComPtr<IProgress> &aProg
 /**
  * Called by IInternalSessionControl::OnRecordingScreenStateChange().
  */
-HRESULT Console::i_onRecordingScreenStateChange(BOOL aEnable, ULONG aScreen)
+HRESULT Console::i_onRecordingScreenStateChange(RecordingState_T aState, ULONG aScreen)
 {
-    RT_NOREF(aEnable, aScreen);
+    RT_NOREF(aState, aScreen);
     ReturnComNotImplemented();
 }
 

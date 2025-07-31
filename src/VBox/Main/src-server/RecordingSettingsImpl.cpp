@@ -274,6 +274,18 @@ HRESULT RecordingSettings::setEnabled(BOOL enable)
     return hrc;
 }
 
+HRESULT RecordingSettings::getPaused(BOOL *paused)
+{
+    RT_NOREF(paused);
+    ReturnComNotImplemented();
+}
+
+HRESULT RecordingSettings::setPaused(BOOL paused)
+{
+    RT_NOREF(paused);
+    ReturnComNotImplemented();
+}
+
 HRESULT RecordingSettings::getScreens(std::vector<ComPtr<IRecordingScreenSettings> > &aRecordScreenSettings)
 {
     LogFlowThisFuncEnter();
@@ -364,6 +376,11 @@ HRESULT RecordingSettings::getScreenSettings(ULONG uScreenId, ComPtr<IRecordingS
     }
 
     return VBOX_E_OBJECT_NOT_FOUND;
+}
+
+HRESULT RecordingSettings::resume(void)
+{
+    ReturnComNotImplemented();
 }
 
 HRESULT RecordingSettings::start(ComPtr<IProgress> &aProgress)
@@ -877,7 +894,7 @@ int RecordingSettings::i_start(void)
 {
     AssertReturn(m->mProgress.isNull(), VERR_WRONG_ORDER);
 
-    HRESULT hrc = m->pMachine->i_onRecordingStateChange(TRUE /* Enable recording */, m->mProgress.asOutParam());
+    HRESULT hrc = m->pMachine->i_onRecordingStateChange(RecordingState_Started, m->mProgress.asOutParam());
     if (FAILED(hrc))
         return VERR_RECORDING_INIT_FAILED;
 
@@ -895,7 +912,7 @@ int RecordingSettings::i_stop(void)
         return VINF_SUCCESS;
 
     /* Note: Returned progress object is just a dummy / not needed for disabling recording. */
-    HRESULT hrc = m->pMachine->i_onRecordingStateChange(FALSE /* Disable recording */, m->mProgress.asOutParam());
+    HRESULT hrc = m->pMachine->i_onRecordingStateChange(RecordingState_Stopped, m->mProgress.asOutParam());
     if (SUCCEEDED(hrc))
         m->mProgress.setNull();
 

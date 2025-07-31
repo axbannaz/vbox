@@ -244,8 +244,8 @@ public:
     HRESULT i_onClipboardFileTransferModeChange(bool aEnabled);
     HRESULT i_onDnDModeChange(DnDMode_T aDnDMode);
     HRESULT i_onVRDEServerChange(BOOL aRestart);
-    HRESULT i_onRecordingStateChange(BOOL aEnable, ComPtr<IProgress> &aProgress);
-    HRESULT i_onRecordingScreenStateChange(BOOL aEnable, ULONG aScreen);
+    HRESULT i_onRecordingStateChange(RecordingState_T aState, ComPtr<IProgress> &aProgress);
+    HRESULT i_onRecordingScreenStateChange(RecordingState_T aState, ULONG aScreen);
     HRESULT i_onUSBControllerChange();
     HRESULT i_onSharedFolderChange(BOOL aGlobal);
     HRESULT i_onUSBDeviceAttach(IUSBDevice *aDevice, IVirtualBoxErrorInfo *aError, ULONG aMaskedIfs,
