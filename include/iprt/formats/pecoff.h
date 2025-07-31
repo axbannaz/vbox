@@ -56,7 +56,7 @@
 /**
  * PE & COFF file header.
  *
- * This starts COFF files, while in PE files it's preceeded by the PE signature
+ * This starts COFF files, while in PE files it's preceded by the PE signature
  * (see IMAGE_NT_HEADERS32, IMAGE_NT_HEADERS64).
  */
 typedef struct _IMAGE_FILE_HEADER

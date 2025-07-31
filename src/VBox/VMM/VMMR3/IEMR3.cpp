@@ -1611,7 +1611,7 @@ static void iemR3InfoTlbCommon(PVM pVM, PCDBGFINFOHLP pHlp, int cArgs, char **pa
                                 "    Only show valid TLB entries (TAG, not phys)\n"
                                 "\n"
                                 "Non-options are interpreted according to the last -a, -r or -s option,\n"
-                                "defaulting to addresses if not preceeded by any of those options.\n"
+                                "defaulting to addresses if not preceded by any of those options.\n"
                                 , fITlb ? 'i' : 'd');
                 return;
 

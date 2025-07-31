@@ -422,7 +422,7 @@ static void     vboxDtPOps_Provide(void *pvProv, const dtrace_probedesc_t *pDtPr
          size_t      cch;
          if (psz)
          {
-             /* skip blanks preceeding the parameter parenthesis. */
+             /* skip blanks preceding the parameter parenthesis. */
              while (   (uintptr_t)psz > (uintptr_t)pProbeLocRO->pszFunction
                     && RT_C_IS_BLANK(psz[-1]))
                  psz--;

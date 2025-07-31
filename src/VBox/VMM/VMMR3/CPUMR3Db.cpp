@@ -311,7 +311,7 @@ static size_t cpumSkipCpuNameBlahBlah(size_t off, const char *psz)
     for (size_t i = 0; i < RT_ELEMENTS(s_aWords); i++)
         if (RTStrNICmp(&psz[off], s_aWords[i].psz, s_aWords[i].cch) == 0)
         {
-            /* If what we're skipping was preceeded by whitespace, skip whitespace after it
+            /* If what we're skipping was preceded by whitespace, skip whitespace after it
                so we'll correctly match a string that doesn't include this blah-blah word. */
             char chPrev = off > 0 ? psz[off - 1] : '\0';
             off += s_aWords[i].cch;

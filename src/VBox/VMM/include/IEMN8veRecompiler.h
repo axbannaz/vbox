@@ -1054,7 +1054,7 @@ AssertCompile(IEMLIVENESS_STATE_UNUSED == 1 && IEMLIVENESS_STATE_XCPT_OR_CALL ==
 
 #if 0 /* unused */
 /** Initializing the outgoing state with an unconditional call state as well as
- *  an potential call/exception preceeding it.
+ *  an potential call/exception preceding it.
  * This should only really be used alone. */
 #ifndef IEMLIVENESS_EXTENDED_LAYOUT
 # define IEM_LIVENESS_RAW_INIT_WITH_CALL_AND_POTENTIAL_CALL(a_pOutgoing, a_pIncoming) \

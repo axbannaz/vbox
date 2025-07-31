@@ -936,7 +936,7 @@ int ShClConvUtf16LFToCRLF(PCRTUTF16 pcwszSrc, size_t cwcSrc, PRTUTF16 pu16Dst, s
         if (pcwszSrc[offSrc] == 0)
             break;
 
-        /* Check for newlines not preceeded by carriage return: "\n" -> "\r\n";  but not "\r\n" to "\r\r\n"! */
+        /* Check for newlines not preceded by carriage return: "\n" -> "\r\n";  but not "\r\n" to "\r\r\n"! */
         if (   pcwszSrc[offSrc] == VBOX_SHCL_LINEFEED
             && (offSrc == 0 || pcwszSrc[offSrc - 1] != VBOX_SHCL_CARRIAGERETURN))
         {

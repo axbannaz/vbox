@@ -3769,7 +3769,7 @@ static int rtFsFatChain_GrowDirectory(PRTFSFATDIRSHRD pThis, uint32_t cMinNewEnt
 
 
 /**
- * Inserts a directory with zero of more long name slots preceeding it.
+ * Inserts a directory with zero of more long name slots preceding it.
  *
  * @returns IPRT status code.
  * @param   pThis           The directory.

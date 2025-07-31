@@ -72,7 +72,7 @@
  * @tparam  a_fTlbLoad          Set if this a TLB load that and should just set
  *                              pbInstrBuf, cbInstrBuf and friends before
  *                              returning zero.
- * @tparam  a_cbPrevInstrHalf   Number of instruction bytes preceeding the
+ * @tparam  a_cbPrevInstrHalf   Number of instruction bytes preceding the
  *                              fetch.  This is non-zero when fetching the 2nd
  *                              16-bit word in a 32-bit T32 instruction.
  *                              Otherwise it will always be zero.

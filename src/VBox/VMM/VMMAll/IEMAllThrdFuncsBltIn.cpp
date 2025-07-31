@@ -386,7 +386,7 @@ IEM_DECL_IEMTHREADEDFUNC_DEF(iemThreadedFunc_BltIn_CheckHwInstrBps)
             if (GCPhysRangePageWithOffset == pVCpu->iem.s.GCPhysInstrBuf + off) \
             { /* we're good */ } \
             /** @todo r=bird: Not sure if we need the TB obsolete complication here. \
-             * If we're preceeded by an indirect jump, there is no reason why the TB \
+             * If we're preceded by an indirect jump, there is no reason why the TB \
              * would be 'obsolete' just because this time around the indirect jump ends \
              * up at the same offset in a different page.  This would be real bad for \
              * indirect trampolines/validators. */ \
