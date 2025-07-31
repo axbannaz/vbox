@@ -697,6 +697,10 @@ int RecordingStream::SendAudioFrame(const void *pvData, size_t cbData, uint64_t 
     unlock();
 #endif
 
+#ifdef VBOX_WITH_AUDIO_RECORDING
+    STAM_COUNTER_INC(&m_STAM.cAudioFramesAdded);
+#endif
+
     /* As audio data is common across all streams, re-route this to the recording context, where
      * the data is being encoded and stored in the common blocks queue. */
     return m_pCtx->SendAudioFrame(pvData, cbData, msTimestamp);
@@ -1179,6 +1183,7 @@ int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
          ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cVideoFramesHousekeeping,
                                              STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
                                              "Current video frames in housekeeping queue.", "/Main/Recording/Stream%RU32/VideoFramesHousekeeping", uScreen);
+
          ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.profileFnProcessTotal,
                                              STAMTYPE_PROFILE, STAMVISIBILITY_ALWAYS, STAMUNIT_NS_PER_CALL,
                                              "Profiling the processing function (audio + video).", "/Main/Recording/Stream%RU32/ProfileFnProcessTotal", uScreen);
@@ -1186,6 +1191,19 @@ int RecordingStream::initInternal(RecordingContext *pCtx, uint32_t uScreen,
                                              STAMTYPE_PROFILE, STAMVISIBILITY_ALWAYS, STAMUNIT_NS_PER_CALL,
                                              "Profiling the processing function (video).", "/Main/Recording/Stream%RU32/ProfileFnProcessVideo", uScreen);
 # ifdef VBOX_WITH_AUDIO_RECORDING
+         ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cAudioFramesAdded,
+                                              STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                              "Total audio frames added.", "/Main/Recording/Stream%RU32/AudioFramesAdded", uScreen);
+         ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cAudioFramesToEncode,
+                                              STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                              "Current audio frames (pending) to encode.", "/Main/Recording/Stream%RU32/AudioFramesToEncode", uScreen);
+         ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cAudioFramesEncoded,
+                                              STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                              "Total audio frames encoded.", "/Main/Recording/Stream%RU32/AudioFramesEncoded", uScreen);
+         ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cAudioFramesHousekeeping,
+                                             STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                             "Current audio frames in housekeeping queue.", "/Main/Recording/Stream%RU32/AudioFramesHousekeeping", uScreen);
+
          ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.profileFnProcessAudio,
                                              STAMTYPE_PROFILE, STAMVISIBILITY_ALWAYS, STAMUNIT_NS_PER_CALL,
                                              "Profiling the processing function (audio).", "/Main/Recording/Stream%RU32/ProfileFnProcessAudio", uScreen);
@@ -1347,11 +1365,17 @@ int RecordingStream::uninitInternal(void)
 
             ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/VideoFramesHousekeeping", m_uScreenID);
 
-            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/ProfileFnProcessTotal", m_uScreenID);
             ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/ProfileFnProcessVideo", m_uScreenID);
 # ifdef VBOX_WITH_AUDIO_RECORDING
+            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/AudioFramesAdded", m_uScreenID);
+            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/AudioFramesToEncode", m_uScreenID);
+            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/AudioFramesEncoded", m_uScreenID);
+
+            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/AudioFramesHousekeeping", m_uScreenID);
+
             ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/ProfileFnProcessAudio", m_uScreenID);
 # endif
+            ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/Stream%RU32/ProfileFnProcessTotal", m_uScreenID);
         }
 #endif
 

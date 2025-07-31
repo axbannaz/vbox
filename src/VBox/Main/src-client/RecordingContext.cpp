@@ -319,6 +319,9 @@ protected:
     {
         STAMPROFILE              profileDataCommon;
         STAMPROFILE              profileDataStreams;
+        STAMCOUNTER              cCommonFramesAdded;
+        STAMCOUNTER              cCommonFramesToEncode;
+        STAMCOUNTER              cCommonFramesEncoded;
     } m_STAM;
 #endif /* VBOX_WITH_STATISTICS */
     /** Block map of raw common data blocks which need to get encoded first. */
@@ -690,6 +693,13 @@ int RecordingContextImpl::processCommonData(RecordingBlockMap &mapCommon, RTMSIN
                 case RECORDINGFRAME_TYPE_AUDIO:
                 {
                     vrc = recordingCodecEncodeFrame(&m_CodecAudio, pFrame, pFrame->msTimestamp, NULL /* pvUser */);
+# ifdef VBOX_WITH_STATISTICS
+                    if (RT_SUCCESS(vrc))
+                    {
+                        STAM_COUNTER_INC(&m_STAM.cCommonFramesEncoded);
+                        STAM_COUNTER_DEC(&m_STAM.cCommonFramesToEncode);
+                    }
+# endif
                     break;
                 }
 #endif /* VBOX_WITH_AUDIO_RECORDING */
@@ -808,6 +818,9 @@ int RecordingContextImpl::writeCommonData(RecordingBlockMap &mapCommon, PRECORDI
         }
         else
             itBlocks->second->List.push_back(pBlock);
+
+        STAM_COUNTER_INC(&m_STAM.cCommonFramesAdded);
+        STAM_COUNTER_INC(&m_STAM.cCommonFramesToEncode);
 
         vrc = VINF_SUCCESS;
     }
@@ -1036,6 +1049,15 @@ int RecordingContextImpl::createInternal(ComPtr<IProgress> &ProgressOut)
             ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.profileDataStreams,
                                                 STAMTYPE_PROFILE, STAMVISIBILITY_ALWAYS, STAMUNIT_NS_PER_CALL,
                                                 "Profiling processing per-stream data.", "/Main/Recording/ProfileDataStreams");
+            ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cCommonFramesAdded,
+                                                 STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                                 "Total common frames added.", "/Main/Recording/CommonFramesAdded");
+            ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cCommonFramesToEncode,
+                                                STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                                "Current common frames (pending) to encode.", "/Main/Recording/CommonFramesToEncode");
+            ptrVM.vtable()->pfnSTAMR3RegisterFU(ptrVM.rawUVM(), &m_STAM.cCommonFramesEncoded,
+                                                STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_COUNT,
+                                                "Total common frames encoded.", "/Main/Recording/CommonFramesEncoded");
         }
 #endif
     }
@@ -1246,6 +1268,10 @@ void RecordingContextImpl::destroyInternal(void)
     {
         ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/ProfileDataCommon");
         ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/ProfileDataStreams");
+
+        ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/CommonFramesAdded");
+        ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/CommonFramesToEncode");
+        ptrVM.vtable()->pfnSTAMR3DeregisterF(ptrVM.rawUVM(), "/Main/Recording/CommonFramesEncoded");
     }
 #endif
 
