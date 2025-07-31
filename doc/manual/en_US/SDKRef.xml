@@ -4819,6 +4819,11 @@ AuthResult AUTHCALL AuthEntry(
 
         <listitem><para>The attribute GraphicsFeature::Acceleration2DVideo has been removed.</para></listitem>
         <listitem><para>The attribute GuestOSType::recommended2DVideoAcceleration has been removed.</para></listitem>
+        <listitem><para>The <link linkend="RecordingState">RecordingState</link> enumeration
+          has been added and is being used for the
+          <link linkend="IRecordingStateChangedEvent">IRecordingStateChanged</link> and
+          <link linkend="IRecordingScreenStateChangedEvent">IRecordingScreenStateChanged</link> events.</para>
+        </listitem>
 
       </itemizedlist>
     </sect1>
