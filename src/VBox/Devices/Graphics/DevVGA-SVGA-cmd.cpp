@@ -401,8 +401,6 @@ const char *vmsvgaR3FifoCmdToString(uint32_t u32Cmd)
  *
  */
 
-#ifdef VBOX_WITH_VMSVGA3D
-
 #ifdef VMSVGA_WITH_PGM_LOCKING
 int vmsvgaR3GboAllocDescriptors(PVMSVGAGBO pGbo)
 {
@@ -472,6 +470,7 @@ int vmsvgaR3GboMapPages(PPDMDEVINS pDevIns, PVMSVGAGBO pGbo)
 }
 #endif
 
+#ifdef VBOX_WITH_VMSVGA3D
 static int vmsvgaR3GboCreate(PVMSVGAR3STATE pSvgaR3State, SVGAMobFormat ptDepth, PPN64 baseAddress, uint32_t sizeInBytes, PVMSVGAGBO pGbo)
 {
     ASSERT_GUEST_RETURN(sizeInBytes <= _128M, VERR_INVALID_PARAMETER); /** @todo Less than SVGA_REG_MOB_MAX_SIZE */
