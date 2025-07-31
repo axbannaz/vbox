@@ -1837,7 +1837,7 @@ check_libvorbis()
     if [ $? -eq 0 ]; then
       FLGVRB=`pkg-config vorbis --cflags`
       INCVRB=`strip_I "$FLGVRB"`
-      LIBVRB=`pkg-config vorbis --libs`
+      LIBVRB=`pkg-config vorbis vorbisenc --libs`
     fi
     cat > $ODIR.tmp_src.cc << EOF
 #include <cstdio>
@@ -1846,8 +1846,18 @@ extern "C" int main(void)
 {
   vorbis_info v;
   vorbis_info_init(&v);
-  printf("found, OK.\n");
-  return 0;
+  int vorbis_rc = vorbis_encode_init_vbr(&v, 2 /* channels */, 44100 /* hz */, (float).4 /* quality */);
+  if (vorbis_rc == 0)
+  {
+    vorbis_rc = vorbis_encode_setup_init(&v);
+    if (vorbis_rc)
+      printf("vorbis_encode_setup_init() failed (%d)\n", vorbis_rc);
+  }
+  else
+    printf("vorbis_encode_init_vbr() failed (%d)\n", vorbis_rc);
+  if (vorbis_rc == 0)
+    printf("Vorbis found, OK.\n");
+  return vorbis_rc;
 }
 EOF
     [ -n "$INCVRB" ] && I_INCVRB=`prefix_I "$INCVRB"`
