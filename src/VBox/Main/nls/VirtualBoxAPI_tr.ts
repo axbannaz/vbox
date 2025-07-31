@@ -1712,7 +1712,7 @@
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation>Makinenin platform mimarisi %s desteklenmediğinden makine çalıştırılamıyor</translation>
     </message>
 </context>
 <context>
@@ -2041,7 +2041,7 @@
     </message>
     <message>
         <source>Unsupported resolution for screen shot: %ux%u (screen %u)</source>
-        <translation type="unfinished"></translation>
+        <translation>Ekran görüntüsü için desteklenmeyen çözünürlük: %ux%u (ekran %u)</translation>
     </message>
 </context>
 <context>
@@ -6105,11 +6105,11 @@ Misafirin sunduğu: %s</translation>
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported on %s</source>
-        <translation type="unfinished">Makinenin platform mimarisi %s, %s üzerinde desteklenmediğinden makine çalıştırılamıyor</translation>
+        <translation>Makinenin platform mimarisi %s, %s üzerinde desteklenmediğinden makine çalıştırılamıyor</translation>
     </message>
     <message>
         <source>Cannot run the machine because its platform architecture %s is not supported</source>
-        <translation type="unfinished"></translation>
+        <translation>Makinenin platform mimarisi %s desteklenmediğinden makine çalıştırılamıyor</translation>
     </message>
 </context>
 <context>
