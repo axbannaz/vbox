@@ -1628,6 +1628,10 @@
         <source>Teleporting VM</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>ConsoleSharedFolder</name>
@@ -1943,6 +1947,10 @@
     </message>
     <message>
         <source>QuerySourceBitmap: Invalid screen %d (total %d)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unsupported resolution for screen shot: %ux%u (screen %u)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -5669,6 +5677,14 @@ Guest offers: %s</source>
     </message>
     <message>
         <source>Trying to open a VM config &apos;%s&apos; which has a zero or invalid UUID</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported on %s</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot run the machine because its platform architecture %s is not supported</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
