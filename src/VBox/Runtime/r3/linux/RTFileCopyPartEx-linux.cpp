@@ -164,7 +164,8 @@ RTDECL(int) RTFileCopyPartEx(RTFILE hFileSrc, RTFOFF offSrc, RTFILE hFileDst, RT
             rc = errno;
             Assert(rc != 0);
             rc = rc != 0 ? RTErrConvertFromErrno(rc) : VERR_READ_ERROR;
-            if (rc != VERR_NOT_SAME_DEVICE || cbCopied != 0)
+            /* eCryptfs returns EINVAL for copy_file_range(2) */
+            if ((rc != VERR_NOT_SAME_DEVICE && rc != VERR_INVALID_PARAMETER) || cbCopied != 0)
                 break;
 
             /* Fall back to generic implementation if the syscall refuses to handle the case. */
