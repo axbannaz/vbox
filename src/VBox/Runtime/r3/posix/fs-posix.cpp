@@ -281,6 +281,8 @@ RTR3DECL(int) RTFsQueryType(const char *pszFsPath, PRTFSTYPE penmType)
                                      || !strncmp("fuse.", mntEnt.mnt_type, 5)
                                      || !strcmp("fuseblk", mntEnt.mnt_type))
                                 *penmType = RTFSTYPE_FUSE;
+                            else if (!strcmp("ecryptfs", mntEnt.mnt_type))
+                                *penmType = RTFSTYPE_ECRYPTFS;
                             else
                             {
                                 /* sometimes there are more than one entry for the same partition */
