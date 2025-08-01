@@ -1656,7 +1656,7 @@ bool UIVMActivityMonitorLocal::guestAdditionsAvailable(const char *pszMinimumVer
 
 void UIVMActivityMonitorLocal::enableDisableGuestAdditionDependedWidgets(bool fEnable)
 {
-    /* Configure performace monitor: */
+    /* Configure performance monitor: */
     if (fEnable)
         configureCOMPerformanceCollector();
     for (QMap<Metric_Type, UIMetric>::const_iterator iterator =  m_metrics.begin();
