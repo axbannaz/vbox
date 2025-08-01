@@ -283,6 +283,8 @@ RTR3DECL(int) RTFsQueryType(const char *pszFsPath, PRTFSTYPE penmType)
                                 *penmType = RTFSTYPE_FUSE;
                             else if (!strcmp("ecryptfs", mntEnt.mnt_type))
                                 *penmType = RTFSTYPE_ECRYPTFS;
+                            else if (!strcmp("zfs", mntEnt.mnt_type))
+                                *penmType = RTFSTYPE_ZFS;
                             else
                             {
                                 /* sometimes there are more than one entry for the same partition */
