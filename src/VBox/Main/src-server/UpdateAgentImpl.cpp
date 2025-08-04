@@ -1147,7 +1147,7 @@ DECLCALLBACK(HRESULT) HostUpdateAgent::i_checkForUpdateTask(UpdateAgentTask *pTa
     Utf8StrFmt strUserAgent("VirtualBox %ls <", version.raw());
     i_appendPlatformInfo(strUserAgent);
     strUserAgent.append('>');
-    Log2Rel(("Update agent (%s): Using user agent '%s'\n",  mData.m_strName.c_str(), strUserAgent.c_str()));
+    LogRel2(("Update agent (%s): Using user agent '%s'\n",  mData.m_strName.c_str(), strUserAgent.c_str()));
 
     /*
      * Create the HTTP client instance and pass it to a inner worker method to
