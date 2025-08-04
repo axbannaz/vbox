@@ -10,7 +10,7 @@
       <publisherinformation>
          <published>
             <completed>
-          <month>April</month>
+          <month>August</month>
           <year>2025</year>
         </completed>
       </published>
@@ -110,13 +110,15 @@
       <topicref href="topics/vm-status-bar.dita"/>
       <topicref href="topics/keyb_mouse_normal.dita"/>
       <topicref href="topics/specialcharacters.dita"/>
+      <topicref href="topics/soft-keyb.dita">
+        <topicref href="topics/soft-keyb-using.dita"/>
+        <topicref href="topics/soft-keyb-custom.dita"/>
+      </topicref>
       <topicref href="topics/intro-removable-media-changing.dita"/>
       <topicref href="topics/intro-resize-window.dita"/>
+      <topicref href="topics/pausing-a-virtual-machine.dita"/>
+      <topicref href="topics/resetting-a-vm.dita"/>
       <topicref href="topics/intro-save-machine-state.dita"/>
-    </topicref>
-    <topicref href="topics/soft-keyb.dita">
-      <topicref href="topics/soft-keyb-using.dita"/>
-      <topicref href="topics/soft-keyb-custom.dita"/>
     </topicref>
     <topicref href="topics/add-vm.dita"/>
     <topicref href="topics/ovf.dita">
@@ -217,6 +219,7 @@
             <topicref href="topics/additions-linux.dita">
                <topicref href="topics/additions-linux-install.dita"/>
         <topicref href="topics/linux-guest-manual-setup.dita"/>
+        <topicref href="topics/vboxdrmclient.dita"/>
                <topicref href="topics/additions-linux-updating.dita"/>
                <topicref href="topics/additions-linux-uninstall.dita"/>
             </topicref>
@@ -227,9 +230,6 @@
             </topicref>
             <topicref href="topics/additions-os2.dita"/>
          </topicref>
-    <topicref href="topics/additions-linux-graphics-mouse.dita">
-      <topicref href="topics/vboxdrmclient.dita"/>
-    </topicref>
          <topicref href="topics/sharedfolders.dita">
             <topicref href="topics/sf_mount_manual.dita"/>
             <topicref href="topics/sf_mount_auto.dita"/>
@@ -458,6 +458,7 @@
          <topicref href="topics/ts_guest-core-format.dita"/>
     </topicref>
     <topicref href="topics/ts_legacy-os.dita">
+      <topicref href="topics/additions-linux-graphics-mouse.dita"/>
       <topicref href="topics/ts_boot-issues-ide.dita"/>
       <topicref href="topics/ts_win2k-guest-install.dita"/>
       <topicref href="topics/ts_win31-ram-limitations.dita"/>
@@ -496,6 +497,7 @@
         <topicref href="topics/ts_rebuild-modules-guest.dita"/>
         <topicref href="topics/guestadd-resizing-linux-limitations.dita"/>
       </topicref>
+      <topicref href="topics/ts_se_linux_prevents_guest_control.dita"/>
       <topicref href="topics/ts_arm-guests.dita">
         <topicref href="topics/ts_saved-states.dita"/>
       </topicref>
@@ -626,6 +628,7 @@
   </chapter>
   <chapter href="topics/reference.dita" chunk="to-content">
     <topicref href="topics/ExperimentalFeatures.dita">
+      <topicref href="topics/windows-arm-hosts-exp.dita"/>
       <topicref href="topics/macosxguests.dita"/>
       <topicref href="topics/cd-passthrough.dita"/>
       <topicref href="topics/pcspeaker_passthrough.dita"/>

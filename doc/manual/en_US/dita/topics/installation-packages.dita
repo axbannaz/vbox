@@ -10,7 +10,7 @@
           <b outputclass="bold">Windows hosts</b>:</p>
         <ul>
           <li>
-            <p>Windows 11 with Arm processors</p>
+            <p>Windows 11 with Arm processors (Experimental Feature, see <xref href="ExperimentalFeatures.dita"/>)</p>
           </li>
           <li>
             <p>Windows 11 with x86_64 processors</p>
