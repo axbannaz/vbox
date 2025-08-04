@@ -166,9 +166,14 @@ typedef struct S2GSVNREV
     /** The sync-xref-src-repo-rev. */
     const char      *pszSvnXref;
 
-    /** The Git author's E-Mail. */
+    /** The Git comitters's E-Mail. */
+    const char      *pszGitComitterEmail;
+    /** The Git comitters's name. */
+    const char      *pszGitComitter;
+
+    /** The Git authors's E-Mail (can be NULL, used for merging pull requests to credit people). */
     const char      *pszGitAuthorEmail;
-    /** The Git author's name. */
+    /** The Git authors's name (can be NULL, used for merging pull requests to credit people). */
     const char      *pszGitAuthor;
 
     /* The branch this revision operates on. */
@@ -1171,7 +1176,7 @@ static RTEXITCODE s2gSvnDumpBlob(PS2GCTX pThis, PS2GSVNREV pRev, svn_fs_root_t *
                         pSvnErr = svn_subst_build_keywords3(&pHashKeywords, pSvnStrKeywords->data,
                                                             aszRev, aszUrl,
                                                             "https://localhost/vbox/svn", pRev->AprTime,
-                                                            pRev->pszGitAuthorEmail, pPool);
+                                                            pRev->pszGitComitterEmail, pPool);
                     }
 
                     if (!pSvnErr)
@@ -2082,10 +2087,12 @@ static RTEXITCODE s2gSvnInitRevision(PS2GCTX pThis, uint32_t idRev, PS2GSVNREV p
 
     /* Open revision and fetch properties. */
     RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
-    pRev->idRev             = idRev;
-    pRev->pszGitAuthor      = NULL;
-    pRev->pszGitAuthorEmail = NULL;
-    pRev->pBranch           = NULL;
+    pRev->idRev               = idRev;
+    pRev->pszGitComitter      = NULL;
+    pRev->pszGitComitterEmail = NULL;
+    pRev->pszGitAuthor        = NULL;
+    pRev->pszGitAuthorEmail   = NULL;
+    pRev->pBranch             = NULL;
     svn_error_t *pSvnErr = svn_fs_revision_root(&pRev->pSvnFsRoot, pThis->pSvnFs, idRev, pRev->pPoolRev);
     if (!pSvnErr)
     {
@@ -2123,8 +2130,8 @@ static RTEXITCODE s2gSvnInitRevision(PS2GCTX pThis, uint32_t idRev, PS2GSVNREV p
                     PCS2GAUTHOR pAuthor = (PCS2GAUTHOR)RTStrSpaceGet(&pThis->StrSpaceAuthors, pRev->pszSvnAuthor);
                     if (pAuthor)
                     {
-                        pRev->pszGitAuthor      = pAuthor->pszGitAuthor;
-                        pRev->pszGitAuthorEmail = pAuthor->pszGitEmail;
+                        pRev->pszGitComitter      = pAuthor->pszGitAuthor;
+                        pRev->pszGitComitterEmail = pAuthor->pszGitEmail;
 
                         RTTIMESPEC Tm;
                         RTTimeSpecFromString(&Tm, pSvnDate->data);
@@ -2175,10 +2182,12 @@ static RTEXITCODE s2gSvnExportRevision(PS2GCTX pThis, uint32_t idRev)
 
     /* Open revision and fetch properties. */
     RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
-    Rev.idRev             = idRev;
-    Rev.pszGitAuthor      = NULL;
-    Rev.pszGitAuthorEmail = NULL;
-    Rev.pBranch           = NULL;
+    Rev.idRev               = idRev;
+    Rev.pszGitComitter      = NULL;
+    Rev.pszGitComitterEmail = NULL;
+    Rev.pszGitAuthor        = NULL;
+    Rev.pszGitAuthorEmail   = NULL;
+    Rev.pBranch             = NULL;
     svn_error_t *pSvnErr = svn_fs_revision_root(&Rev.pSvnFsRoot, pThis->pSvnFs, idRev, Rev.pPoolRev);
     if (!pSvnErr)
     {
@@ -2216,8 +2225,8 @@ static RTEXITCODE s2gSvnExportRevision(PS2GCTX pThis, uint32_t idRev)
                     PCS2GAUTHOR pAuthor = (PCS2GAUTHOR)RTStrSpaceGet(&pThis->StrSpaceAuthors, Rev.pszSvnAuthor);
                     if (pAuthor)
                     {
-                        Rev.pszGitAuthor      = pAuthor->pszGitAuthor;
-                        Rev.pszGitAuthorEmail = pAuthor->pszGitEmail;
+                        Rev.pszGitComitter      = pAuthor->pszGitAuthor;
+                        Rev.pszGitComitterEmail = pAuthor->pszGitEmail;
 
                         RTTIMESPEC Tm;
                         RTTimeSpecFromString(&Tm, pSvnDate->data);
@@ -2225,29 +2234,62 @@ static RTEXITCODE s2gSvnExportRevision(PS2GCTX pThis, uint32_t idRev)
                         if (g_cVerbosity)
                             RTMsgInfo("    %s %s %s\n", Rev.pszSvnAuthor, pSvnDate->data, Rev.pszSvnXref ? Rev.pszSvnXref : "");
 
-                        int rc = s2gGitTransactionStart(pThis->hGitRepo);
-                        if (RT_SUCCESS(rc))
+                        /* Check whether the log indicates that this is a github merge. */
+                        char achAuthorInfo[_4K]; /* Temporary storage for the author information. */
+                        const char *pszGithubMerge = RTStrStr(Rev.pszSvnLog, "github-merge-author: ");
+                        if (pszGithubMerge)
                         {
-                            rcExit = s2gSvnRevisionExportPaths(pThis, &Rev);
-                            if (   rcExit == RTEXITCODE_SUCCESS
-                                && Rev.pBranch)
-                            {
-                                size_t cchRevLog = strlen(Rev.pszSvnLog);
+                            uint32_t cchAuthorInfo = 0;
 
-                                s2gScratchBufReset(&pThis->BufScratch);
-                                rc = s2gScratchBufPrintf(&pThis->BufScratch, "%s%s\nsvn:sync-xref-src-repo-rev: r%s\n",
-                                                         Rev.pszSvnLog, Rev.pszSvnLog[cchRevLog] == '\n' ? "" : "\n",
-                                                         Rev.pszSvnXref);
-                                if (RT_SUCCESS(rc))
-                                    rc = s2gGitTransactionCommit(pThis->hGitRepo, Rev.pszGitAuthor, Rev.pszGitAuthorEmail,
-                                                                 pThis->BufScratch.pbBuf, Rev.cEpochSecs, Rev.pBranch->pszGitBranch,
-                                                                 Rev.idRev);
-                                if (RT_FAILURE(rc))
-                                    rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to commit git transaction with: %Rrc", rc);
-                            }
+                            pszGithubMerge += sizeof("github-merge-author: ") - 1;
+                            /* Parse the name up until the first < is encountered. */
+                            while (*pszGithubMerge != '<')
+                                achAuthorInfo[cchAuthorInfo++] = *pszGithubMerge++;
+                            achAuthorInfo[cchAuthorInfo++] = '\0';
+                            Rev.pszGitAuthor      = &achAuthorInfo[0];
+
+                            /* Now the E-Mail. */
+                            Rev.pszGitAuthorEmail = &achAuthorInfo[cchAuthorInfo];
+                            while (*pszGithubMerge != '>')
+                                achAuthorInfo[cchAuthorInfo++] = *pszGithubMerge++;
+                            achAuthorInfo[cchAuthorInfo++] = '\0';
+
+                            Rev.pszGitAuthor      = RTStrStrip((char *)Rev.pszGitAuthor);
+                            Rev.pszGitAuthorEmail = RTStrStrip((char *)Rev.pszGitAuthorEmail);
+                            /* Some basic author info sanity checks. */
+                            if (   strlen(Rev.pszGitAuthor) == 0
+                                || strlen(Rev.pszGitAuthorEmail) == 0
+                                || !RTStrStr(Rev.pszGitAuthorEmail, "@"))
+                                rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "r%u has a malformed github-merge-author tag set", idRev);
                         }
-                        else
-                            rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to start new git transaction with: %Rrc", rc);
+
+                        if (rcExit == RTEXITCODE_SUCCESS)
+                        {
+                            int rc = s2gGitTransactionStart(pThis->hGitRepo);
+                            if (RT_SUCCESS(rc))
+                            {
+                                rcExit = s2gSvnRevisionExportPaths(pThis, &Rev);
+                                if (   rcExit == RTEXITCODE_SUCCESS
+                                    && Rev.pBranch)
+                                {
+                                    size_t cchRevLog = strlen(Rev.pszSvnLog);
+
+                                    s2gScratchBufReset(&pThis->BufScratch);
+                                    rc = s2gScratchBufPrintf(&pThis->BufScratch, "%s%s\nsvn:sync-xref-src-repo-rev: r%s\n",
+                                                             Rev.pszSvnLog, Rev.pszSvnLog[cchRevLog] == '\n' ? "" : "\n",
+                                                             Rev.pszSvnXref);
+                                    if (RT_SUCCESS(rc))
+                                        rc = s2gGitTransactionCommit(pThis->hGitRepo, Rev.pszGitComitter, Rev.pszGitComitterEmail,
+                                                                     Rev.pszGitAuthor, Rev.pszGitAuthorEmail,
+                                                                     pThis->BufScratch.pbBuf, Rev.cEpochSecs, Rev.pBranch->pszGitBranch,
+                                                                     Rev.idRev);
+                                    if (RT_FAILURE(rc))
+                                        rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to commit git transaction with: %Rrc", rc);
+                                }
+                            }
+                            else
+                                rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to start new git transaction with: %Rrc", rc);
+                        }
                     }
                     else
                         rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "Author '%s' is not known", Rev.pszSvnAuthor);

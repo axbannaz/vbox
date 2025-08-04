@@ -775,10 +775,13 @@ DECLHIDDEN(int) s2gGitTransactionStart(S2GREPOSITORYGIT hGitRepo)
 }
 
 
-DECLHIDDEN(int) s2gGitTransactionCommit(S2GREPOSITORYGIT hGitRepo, const char *pszAuthor, const char *pszAuthorEmail,
+DECLHIDDEN(int) s2gGitTransactionCommit(S2GREPOSITORYGIT hGitRepo, const char *pszCommitter, const char *pszCommitterEmail,
+                                        const char *pszAuthor, const char *pszAuthorEmail,
                                         const char *pszLog, int64_t cEpochSecs, const char *pszBranch, uint32_t idSvnRev)
 {
     PS2GREPOSITORYGITINT pThis = hGitRepo;
+
+    AssertReturn(pszCommitter && pszCommitterEmail, VERR_INVALID_PARAMETER);
 
     PS2GBRANCH pBranch = s2gGitGetBranch(pThis, pszBranch);
     if (!pBranch)
@@ -790,11 +793,18 @@ DECLHIDDEN(int) s2gGitTransactionCommit(S2GREPOSITORYGIT hGitRepo, const char *p
     int rc = s2gScratchBufPrintf(&pThis->BufScratch,
                                  "commit refs/heads/%s\n"
                                  "mark :%RU64\n"
-                                 "committer %s <%s> %RI64 +0000\n"
+                                 "committer %s <%s> %RI64 +0000\n",
+                                 pszBranch, idMark,
+                                 pszCommitter, pszCommitterEmail, cEpochSecs);
+    if (RT_SUCCESS(rc) && pszAuthor && pszAuthorEmail)
+        rc = s2gScratchBufPrintf(&pThis->BufScratch,
+                                 "author %s <%s> %RI64 +0000\n",
+                                 pszBranch, idMark,
+                                 pszAuthor, pszAuthorEmail, cEpochSecs);
+    if (RT_SUCCESS(rc))
+        rc = s2gScratchBufPrintf(&pThis->BufScratch,
                                  "data %zu\n"
                                  "%s\n",
-                                 pszBranch, idMark,
-                                 pszAuthor, pszAuthorEmail, cEpochSecs,
                                  cchLog, pszLog);
     if (RT_SUCCESS(rc) && pBranch->idGitMarkMerge != UINT64_MAX)
     {
