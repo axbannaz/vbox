@@ -176,7 +176,8 @@ static int vboxWinDrvInfQueryContext(HINF hInf, LPCWSTR pwszSection, LPCWSTR pws
  * @returns VBox status code.
  * @param   pCtx                INF context to use.
  * @param   iValue              Index to query.
- * @param   ppwszValue          Where to return the value on success.
+ * @param   ppwszValue          Where to return the allocated value on success.
+ *                              Must be free'd using RTUtf16Free().
  * @param   pcwcValue           Where to return the number of characters in the
  *                              string returned via \a ppwszValue, including the
  *                              zero terminator. Optional and can be NULL.
@@ -195,12 +196,12 @@ int VBoxWinDrvInfQueryKeyValue(PINFCONTEXT pCtx, DWORD iValue, PRTUTF16 *ppwszVa
             return VBoxWinDrvInstErrorFromWin32(dwErr);
     }
 
-    LPWSTR pwszValue = (LPWSTR)RTMemAlloc(cwcValue * sizeof(pwszValue[0]));
+    LPWSTR pwszValue = (LPWSTR)RTUtf16Alloc(cwcValue * sizeof(pwszValue[0]));
     AssertPtrReturn(pwszValue, VERR_NO_MEMORY);
 
     if (!SetupGetStringFieldW(pCtx, iValue, pwszValue, cwcValue, &cwcValue))
     {
-        RTMemFree(pwszValue);
+        RTUtf16Free(pwszValue);
         return VBoxWinDrvInstErrorFromWin32(GetLastError());
     }
 
@@ -265,8 +266,6 @@ int VBoxWinDrvInfQueryModelEx(HINF hInf, PCRTUTF16 pwszSection, unsigned uIndex,
                     rc = RTUtf16Cat(wszSection, RT_ELEMENTS(wszSection), pwszPlatform);
                     if (RT_SUCCESS(rc))
                     {
-                        /** @todo r=bird: Mixing RTMemAlloc and RTUtf16Dup/RTUtf16Alloc is not
-                         *        allowed because of RTMEM_WRAP_TO_EF_APIS and other reasons!  */
                         PRTUTF16 pwszResult = RTUtf16Dup(wszSection);
                         if (pwszResult)
                         {
@@ -344,9 +343,11 @@ int VBoxWinDrvInfQuerySectionVerEx(HINF hInf, UINT uIndex, PVBOXWINDRVINFSECVERS
                                                    NULL, 0, &dwSize);
             if (fRc)
             {
-                PRTUTF16 pwszzInfo = (PRTUTF16)RTMemAllocZ(dwSize * sizeof(RTUTF16));
+                size_t   const cbInfo    = dwSize * sizeof(RTUTF16);
+                PRTUTF16       pwszzInfo = RTUtf16Alloc(cbInfo);
                 if (pwszzInfo)
                 {
+                    RT_BZERO(pwszzInfo, cbInfo);
                     fRc = SetupQueryInfVersionInformationW(pInfo, uIndex, NULL /* Key, NULL means all */,
                                                            pwszzInfo, dwSize, NULL);
                     if (fRc)
@@ -384,7 +385,8 @@ int VBoxWinDrvInfQuerySectionVerEx(HINF hInf, UINT uIndex, PVBOXWINDRVINFSECVERS
                     }
                     else
                         rc = VBoxWinDrvInstErrorFromWin32(GetLastError());
-                    RTMemFree(pwszzInfo);
+                    RTUtf16Free(pwszzInfo);
+                    pwszzInfo = NULL;
                 }
                 else
                     rc = VERR_NO_MEMORY;
