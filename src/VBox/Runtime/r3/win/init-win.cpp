@@ -296,7 +296,8 @@ static RTWINOSTYPE rtR3InitWinSimplifiedVersion(OSVERSIONINFOEXW const *pOSInfoE
                 if (bProductType == VER_NT_WORKSTATION)
                     enmVer = dwBuildNumber >= 22000 ? kRTWinOSType_11 : kRTWinOSType_10;
                 else
-                    enmVer = dwBuildNumber >= 20348 ? kRTWinOSType_2022
+                    enmVer = dwBuildNumber >= 26100 ? kRTWinOSType_2025
+                           : dwBuildNumber >= 20348 ? kRTWinOSType_2022
                            : dwBuildNumber >= 17763 ? kRTWinOSType_2019 : kRTWinOSType_2016;
             }
             else

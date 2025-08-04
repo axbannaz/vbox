@@ -88,6 +88,7 @@ typedef enum RTWINOSTYPE
     kRTWinOSType_2019,                      /* 10.0 1809, server */
     kRTWinOSType_2022,                      /* 10.0 21H2, server */
     kRTWinOSType_11,                        /* 11.0, workstation */
+    kRTWinOSType_2025,                      /* 11.0 24H2, server */
     kRTWinOSType_NT_UNKNOWN = 199,
     kRTWinOSType_NT_LAST    = kRTWinOSType_UNKNOWN
 } RTWINOSTYPE;
