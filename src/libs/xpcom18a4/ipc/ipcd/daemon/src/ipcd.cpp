@@ -72,7 +72,7 @@
 // upper limit on the number of active connections
 // XXX may want to make this more dynamic
 //
-#define IPC_MAX_CLIENTS 100
+#define IPC_MAX_CLIENTS 10000
 
 /** How many messages should stay in the message cache. */
 #define IPC_MAX_MSGS_IN_CACHE 5
