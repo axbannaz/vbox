@@ -1404,7 +1404,6 @@ NTSTATUS APIENTRY GaDxgkDdiSubmitCommand(const HANDLE hAdapter, const DXGKARG_SU
          */
         Assert(cbPrivateData == 0);
         Assert(pSubmitCommand->Flags.Paging);
-        LogRelMax(16, ("WDDM: empty buffer: cbPrivateData %d, flags 0x%x\n", cbPrivateData, pSubmitCommand->Flags.Value));
     }
 
     GARENDERDATA const *pRenderData = (GARENDERDATA *)pvPrivateData;
