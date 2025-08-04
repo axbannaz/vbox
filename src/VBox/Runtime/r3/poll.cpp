@@ -80,10 +80,12 @@
 /*********************************************************************************************************************************
 *   Defined Constants And Macros                                                                                                 *
 *********************************************************************************************************************************/
-/** The maximum poll set size.
- * @remarks To help portability, we set this to the Windows limit. We can lift
- *          this restriction later if it becomes necessary. */
-#define RTPOLL_SET_MAX     64
+/** The maximum poll set size. */
+#ifdef RT_OS_WINDOWS
+# define RTPOLL_SET_MAX     64
+#else
+# define RTPOLL_SET_MAX     _16K
+#endif
 
 
 
