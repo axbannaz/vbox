@@ -130,7 +130,7 @@ static PS2GBRANCH s2gGitBranchCreateWorker(const char *pachName, size_t cchName)
     if (pBranch)
     {
         memcpy(&pBranch->szName[0], pachName, cchName * sizeof(char));
-        pBranch->szName[cchName];
+        pBranch->szName[cchName]        = '\0';
         pBranch->paSvnRev2Mark          = 0;
         pBranch->cSvnRev2MarkEntries    = 0;
         pBranch->cSvnRev2MarkEntriesMax = 0;

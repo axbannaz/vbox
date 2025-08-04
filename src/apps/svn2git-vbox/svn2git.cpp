@@ -1305,7 +1305,7 @@ static RTEXITCODE s2gSvnProcessExternals(PS2GCTX pThis, PS2GSVNREV pRev, const c
                     /* We need a revision parameter, otherwise we can't map it to a commit hash. */
                     while (   *pszExternal == ' '
                            || *pszExternal == '\t')
-                        *pszExternal++;
+                        pszExternal++;
 
                     if (strncmp(pszExternal, "-r", 2) == 0)
                     {
@@ -1313,7 +1313,7 @@ static RTEXITCODE s2gSvnProcessExternals(PS2GCTX pThis, PS2GSVNREV pRev, const c
 
                         while (   *pszExternal == ' '
                                || *pszExternal == '\t')
-                            *pszExternal++;
+                            pszExternal++;
 
                         /* Try to convert to a revision number. */
                         uint32_t idExternalRev = 0;
