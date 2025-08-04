@@ -135,6 +135,17 @@ typedef struct VBOXDXALLOCATIONDESC
         UINT                    DecoderBufferType;          /* D3D11_1DDI_VIDEO_DECODER_BUFFER_TYPE */
     } resourceInfo;
 } VBOXDXALLOCATIONDESC, *PVBOXDXALLOCATIONDESC;
+
+/// @todo Development define, remove. Support for requests to rename an allocation.
+#define DX_RENAME_ALLOCATION
+
+/* D3DDDI_PATCHLOCATIONLIST::DriverId */
+#define VBOXDXPATCHID_NULL        0
+#define VBOXDXPATCHID_SURFACE     ((UINT)VBOXDXALLOCATIONTYPE_SURFACE)
+#define VBOXDXPATCHID_SHADERS     ((UINT)VBOXDXALLOCATIONTYPE_SHADERS)
+#define VBOXDXPATCHID_CO          ((UINT)VBOXDXALLOCATIONTYPE_CO)
+#define VBOXDXPATCHID_INSTANCEMOB 1000
+
 #endif /* defined(VBOX_WITH_VMSVGA3D_DX) || defined(VBOXWDDMDISP) || defined(VBOX_WDDM_MINIPORT) || defined(VBOXGL) */
 
 /* create allocation func */

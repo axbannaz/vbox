@@ -168,6 +168,21 @@ typedef struct VBOXWDDM_TARGET
     bool fDisabled;
 } VBOXWDDM_TARGET, *PVBOXWDDM_TARGET;
 
+#ifdef VBOX_WITH_VMSVGA3D_DX
+# ifdef DX_RENAME_ALLOCATION
+/** @todo Implement unlimited renaming list: an AVL tree instead of aInstances array. */
+#  define DX_MAX_RENAMING_LIST_LENGTH 16
+
+struct DX_ALLOCATION_INSTANCE
+{
+    uint32_t            mobid;                      /* For surfaces and shaders. */
+    SIZE_T              OffsetInPages;              /* Address of the allocation within segment.
+                                                     * DXGK believes that the allocation is here. */
+    struct VMSVGAGBO   *pGbo;                       /* Guest memory for this allocation. */
+};
+# endif /* DX_RENAME_ALLOCATION */
+#endif /* VBOX_WITH_VMSVGA3D_DX */
+
 /* allocation */
 //#define VBOXWDDM_ALLOCATIONINDEX_VOID (~0U)
 typedef struct VBOXWDDM_ALLOCATION
@@ -203,9 +218,15 @@ typedef struct VBOXWDDM_ALLOCATION
     {
         VBOXDXALLOCATIONDESC    desc;
         uint32_t                sid;                        /* For surfaces. */
+#ifndef DX_RENAME_ALLOCATION
         uint32_t                mobid;                      /* For surfaces and shaders. */
         uint32_t                SegmentId;                  /* Segment of the allocation. */
         struct VMSVGAGBO       *pGbo;                       /* Guest memory for this allocation. */
+#else
+        uint32_t                SegmentId;                  /* Segment of the allocation. */
+        int32_t                 idxLastCreatedInstance;     /* Index of last created instance in aInstances. */
+        DX_ALLOCATION_INSTANCE  aInstances[DX_MAX_RENAMING_LIST_LENGTH];
+#endif
     } dx;
 #endif /* VBOX_WITH_VMSVGA3D_DX */
 } VBOXWDDM_ALLOCATION, *PVBOXWDDM_ALLOCATION;

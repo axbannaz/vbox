@@ -656,7 +656,7 @@ void *vboxDXCommandBufferReserve(PVBOXDX_DEVICE pDevice, SVGAFifo3dCmdId enmCmd,
 void vboxDXCommandBufferCommit(PVBOXDX_DEVICE pDevice);
 
 void vboxDXStorePatchLocation(PVBOXDX_DEVICE pDevice, void *pvPatch, PVBOXDXKMRESOURCE pKMResource,
-                              uint32_t offAllocation, bool fWriteOperation);
+                              uint32_t offAllocation, bool fWriteOperation, uint32_t DriverId = 0);
 
 typedef void FNVBOXDXINITALLOCATIONDESC(VBOXDXALLOCATIONDESC *pDesc, void const *pvInitData);
 typedef FNVBOXDXINITALLOCATIONDESC *PFNVBOXDXINITALLOCATIONDESC;

@@ -101,7 +101,12 @@ static NTSTATUS svgaCreateSurfaceForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOX
                 {
                     SVGA3dCmdBindGBSurface *pCmd = (SVGA3dCmdBindGBSurface *)pvCmd;
                     pCmd->sid = pAllocation->dx.sid;
+#ifndef DX_RENAME_ALLOCATION
                     pCmd->mobid = pAllocation->dx.mobid;
+#else
+                    /* Such allocations have one instance. */
+                    pCmd->mobid = pAllocation->dx.aInstances[0].mobid;
+#endif
                     SvgaCmdBufCommit(pSvga, sizeof(SVGA3dCmdBindGBSurface));
                 }
                 else
@@ -119,6 +124,7 @@ static NTSTATUS svgaCreateSurfaceForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOX
 
 static void svgaDestroyMobForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWDDM_ALLOCATION pAllocation)
 {
+#ifndef DX_RENAME_ALLOCATION
     if (pAllocation->dx.mobid != SVGA3D_INVALID_ID)
     {
         uint32_t cbRequired = 0;
@@ -132,6 +138,25 @@ static void svgaDestroyMobForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWDDM_AL
 
         pAllocation->dx.mobid = SVGA3D_INVALID_ID;
     }
+#else
+    for (uint32_t i = 0; i < RT_ELEMENTS(pAllocation->dx.aInstances); ++i)
+    {
+       DX_ALLOCATION_INSTANCE *p = &pAllocation->dx.aInstances[i];
+       if (p->mobid != SVGA3D_INVALID_ID)
+       {
+           uint32_t cbRequired = 0;
+           SvgaMobDestroy(pSvga, SVGA3D_INVALID_ID, NULL, 0, &cbRequired);
+           void *pvCmd = SvgaCmdBufReserve(pSvga, cbRequired, SVGA3D_INVALID_ID);
+           if (pvCmd)
+           {
+               SvgaMobDestroy(pSvga, p->mobid, pvCmd, cbRequired, &cbRequired);
+               SvgaCmdBufCommit(pSvga, cbRequired);
+           }
+
+           p->mobid = SVGA3D_INVALID_ID;
+       }
+    }
+#endif
 }
 
 
@@ -139,6 +164,7 @@ static NTSTATUS svgaDefineMobForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWDDM
 {
     AssertReturn(pAllocation->dx.SegmentId == 3 || pAllocation->dx.desc.fPrimary, STATUS_INVALID_PARAMETER);
 
+#ifndef DX_RENAME_ALLOCATION
     /* Allocate a mobid. */
     NTSTATUS Status = SvgaMobAlloc(pSvga, &pAllocation->dx.mobid, pAllocation->dx.pGbo);
     if (NT_SUCCESS(Status))
@@ -158,6 +184,27 @@ static NTSTATUS svgaDefineMobForAllocation(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWDDM
         /* Deallocate mobid. */
         SvgaMobFree(pSvga, &pAllocation->dx.mobid);
     }
+#else /* DX_RENAME_ALLOCATION */
+    /* Such allocations have one instance. Allocate a mobid. */
+    NTSTATUS Status = SvgaMobAlloc(pSvga, &pAllocation->dx.aInstances[0].mobid, pAllocation->dx.aInstances[0].pGbo);
+    if (NT_SUCCESS(Status))
+    {
+        /* Inform the host about the mob. */
+        uint32_t cbCmd = 0;
+        SvgaMobDefine(pSvga, SVGA3D_INVALID_ID, NULL, 0, &cbCmd);
+        void *pvCmd = SvgaCmdBufReserve(pSvga, cbCmd, SVGA3D_INVALID_ID);
+        if (pvCmd)
+        {
+            SvgaMobDefine(pSvga, pAllocation->dx.aInstances[0].mobid, pvCmd, cbCmd, &cbCmd);
+            SvgaCmdBufCommit(pSvga, cbCmd);
+            return STATUS_SUCCESS;
+        }
+
+        AssertFailedStmt(Status = STATUS_INSUFFICIENT_RESOURCES);
+        /* Deallocate mobid. */
+        SvgaMobFree(pSvga, &pAllocation->dx.aInstances[0].mobid);
+    }
+#endif /* DX_RENAME_ALLOCATION */
 
     return Status;
 }
@@ -222,7 +269,13 @@ static NTSTATUS svgaCreateAllocationSurface(PVBOXMP_DEVEXT pDevExt, PVBOXWDDM_AL
         AssertFailedReturn(STATUS_INVALID_PARAMETER);
 
     pAllocationInfo->EvictionSegmentSet              = 0;
+#ifndef DX_RENAME_ALLOCATION
     pAllocationInfo->MaximumRenamingListLength       = 1;
+#else
+    pAllocationInfo->MaximumRenamingListLength       = pAllocation->dx.SegmentId == 2
+                                                     ? DX_MAX_RENAMING_LIST_LENGTH
+                                                     : 1;
+#endif
     pAllocationInfo->hAllocation                     = pAllocation;
     pAllocationInfo->pAllocationUsageHint            = NULL;
     pAllocationInfo->AllocationPriority              = D3DDDI_ALLOCATIONPRIORITY_NORMAL;
@@ -233,6 +286,7 @@ static NTSTATUS svgaCreateAllocationSurface(PVBOXMP_DEVEXT pDevExt, PVBOXWDDM_AL
     {
         uint32_t const cbGB = RT_ALIGN_32(pAllocation->dx.desc.cbAllocation, PAGE_SIZE);
 
+#ifndef DX_RENAME_ALLOCATION
         Status = SvgaGboCreate(pSvga, &pAllocation->dx.pGbo, cbGB, "VMSVGAGB");
         if (NT_SUCCESS(Status))
         {
@@ -247,6 +301,22 @@ static NTSTATUS svgaCreateAllocationSurface(PVBOXMP_DEVEXT pDevExt, PVBOXWDDM_AL
             if (!NT_SUCCESS(Status))
                 SvgaGboUnreference(pSvga, &pAllocation->dx.pGbo);
         }
+#else /* DX_RENAME_ALLOCATION */
+        Status = SvgaGboCreate(pSvga, &pAllocation->dx.aInstances[0].pGbo, cbGB, "VMSVGAGB");
+        if (NT_SUCCESS(Status))
+        {
+            Status = svgaDefineMobForAllocation(pSvga, pAllocation);
+            if (NT_SUCCESS(Status))
+            {
+                Status = svgaCreateSurfaceForAllocation(pSvga, pAllocation);
+                if (!NT_SUCCESS(Status))
+                    svgaDestroyMobForAllocation(pSvga, pAllocation);
+            }
+
+            if (!NT_SUCCESS(Status))
+                SvgaGboUnreference(pSvga, &pAllocation->dx.aInstances[0].pGbo);
+        }
+#endif /* DX_RENAME_ALLOCATION */
     }
     else
         Status = svgaCreateSurfaceForAllocation(pSvga, pAllocation);
@@ -268,7 +338,11 @@ static NTSTATUS svgaCreateAllocationShaders(PVBOXWDDM_ALLOCATION pAllocation, DX
     pAllocationInfo->SupportedReadSegmentSet         = 2; /* Aperture */
     pAllocationInfo->SupportedWriteSegmentSet        = 2; /* Aperture */
     pAllocationInfo->EvictionSegmentSet              = 0;
+#ifndef DX_RENAME_ALLOCATION
     pAllocationInfo->MaximumRenamingListLength       = 0;
+#else
+    pAllocationInfo->MaximumRenamingListLength       = 1;
+#endif
     pAllocationInfo->hAllocation                     = pAllocation;
     pAllocationInfo->pAllocationUsageHint            = NULL;
     pAllocationInfo->AllocationPriority              = D3DDDI_ALLOCATIONPRIORITY_MAXIMUM;
@@ -282,6 +356,7 @@ static NTSTATUS svgaDestroyAllocationSurface(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWD
     if (pAllocation->dx.sid != SVGA3D_INVALID_ID)
     {
         void *pvCmd;
+#ifndef DX_RENAME_ALLOCATION
         if (pAllocation->dx.mobid != SVGA3D_INVALID_ID)
         {
             /* Unbind mob */
@@ -296,6 +371,23 @@ static NTSTATUS svgaDestroyAllocationSurface(VBOXWDDM_EXT_VMSVGA *pSvga, PVBOXWD
                 SvgaCmdBufCommit(pSvga, sizeof(SVGA3dCmdBindGBSurface));
             }
         }
+#else /* DX_RENAME_ALLOCATION */
+        if (pAllocation->dx.SegmentId == 3 || pAllocation->dx.desc.fPrimary)
+        {
+            if (pAllocation->dx.aInstances[0].mobid != SVGA3D_INVALID_ID)
+            {
+                /* Unbind mob */
+                pvCmd = SvgaCmdBuf3dCmdReserve(pSvga, SVGA_3D_CMD_BIND_GB_SURFACE, sizeof(SVGA3dCmdBindGBSurface), SVGA3D_INVALID_ID);
+                if (pvCmd)
+                {
+                    SVGA3dCmdBindGBSurface *pCmd = (SVGA3dCmdBindGBSurface *)pvCmd;
+                    pCmd->sid = pAllocation->dx.sid;
+                    pCmd->mobid = SVGA3D_INVALID_ID;
+                    SvgaCmdBufCommit(pSvga, sizeof(SVGA3dCmdBindGBSurface));
+                }
+            }
+        }
+#endif /* DX_RENAME_ALLOCATION */
 
         pvCmd = SvgaCmdBuf3dCmdReserve(pSvga, SVGA_3D_CMD_DESTROY_GB_SURFACE, sizeof(SVGA3dCmdDestroyGBSurface), SVGA3D_INVALID_ID);
         if (pvCmd)
@@ -341,9 +433,21 @@ NTSTATUS APIENTRY DxgkDdiDXCreateAllocation(
     pAllocation->enmType = VBOXWDDM_ALLOC_TYPE_D3D;
     pAllocation->dx.desc = *(PVBOXDXALLOCATIONDESC)pAllocationInfo->pPrivateDriverData;
     pAllocation->dx.sid = SVGA3D_INVALID_ID;
+#ifndef DX_RENAME_ALLOCATION
     pAllocation->dx.mobid = SVGA3D_INVALID_ID;
     //pAllocation->dx.SegmentId = 0;
     //pAllocation->dx.pGbo = 0;
+#else
+    //pAllocation->dx.SegmentId = 0;
+    //pAllocation->dx.idxLastCreatedInstance = 0;
+    for (uint32_t i = 0; i < RT_ELEMENTS(pAllocation->dx.aInstances); ++i)
+    {
+       DX_ALLOCATION_INSTANCE *p = &pAllocation->dx.aInstances[i];
+       p->mobid = SVGA3D_INVALID_ID;
+       //p->pGbo = NULL;
+       p->OffsetInPages = ~0U;
+    }
+#endif
 
     KeInitializeSpinLock(&pAllocation->OpenLock);
     InitializeListHead(&pAllocation->OpenList);
@@ -392,7 +496,15 @@ NTSTATUS APIENTRY DxgkDdiDXDestroyAllocation(
     else
         AssertFailedReturn(STATUS_INVALID_PARAMETER);
 
+#ifndef DX_RENAME_ALLOCATION
     SvgaGboUnreference(pDevExt->pGa->hw.pSvga, &pAllocation->dx.pGbo);
+#else
+    for (uint32_t i = 0; i < RT_ELEMENTS(pAllocation->dx.aInstances); ++i)
+    {
+       DX_ALLOCATION_INSTANCE *p = &pAllocation->dx.aInstances[i];
+       SvgaGboUnreference(pDevExt->pGa->hw.pSvga, &p->pGbo);
+    }
+#endif
 
     RT_ZERO(*pAllocation);
     GaMemFree(pAllocation);
@@ -435,6 +547,34 @@ NTSTATUS APIENTRY DxgkDdiDXDescribeAllocation(
 }
 
 
+#ifdef DX_RENAME_ALLOCATION
+static int32_t svgaAllocationInstanceIndexFromOffset(PVBOXWDDM_ALLOCATION pAllocation, uint32_t OffsetInPages)
+{
+    int32_t idxInstance = pAllocation->dx.idxLastCreatedInstance;
+    for (uint32_t i = 0; i < RT_ELEMENTS(pAllocation->dx.aInstances); ++i)
+    {
+       DX_ALLOCATION_INSTANCE *p = &pAllocation->dx.aInstances[idxInstance];
+       if (p->OffsetInPages == OffsetInPages)
+           return idxInstance;
+
+       --idxInstance;
+       if (idxInstance < 0)
+           idxInstance += RT_ELEMENTS(pAllocation->dx.aInstances);
+    }
+    return -1;
+}
+
+
+static uint32_t svgaAllocationInstanceMobFromOffset(PVBOXWDDM_ALLOCATION pAllocation, uint32_t OffsetInPages)
+{
+    int32_t const idxInstance = svgaAllocationInstanceIndexFromOffset(pAllocation, OffsetInPages);
+    AssertReturn(idxInstance >= 0, SVGA3D_INVALID_ID);
+
+    return pAllocation->dx.aInstances[idxInstance].mobid;
+}
+#endif /* DX_RENAME_ALLOCATION */
+
+
 static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pRender, void *pvDmaBuffer, uint32_t cbDmaBuffer)
 {
     RT_NOREF(pContext);
@@ -457,7 +597,9 @@ static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pR
             break; /* Filled all patches which describe locations in the processed commands. */
 
         void * const pPatchAddress = (uint8_t *)pvDmaBuffer + pIn->PatchOffset;
+#ifndef DX_RENAME_ALLOCATION
         VBOXDXALLOCATIONTYPE const enmAllocationType = (VBOXDXALLOCATIONTYPE)pIn->DriverId;
+#endif
 
         /* "Even though the driver's DxgkDdiRender function pre-patches the DMA buffer, the driver
          *  must still insert all of the references to allocations into the output patch-location list
@@ -470,6 +612,7 @@ static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pR
         if (pOA)
         {
             PVBOXWDDM_ALLOCATION pAllocation = pOA->pAllocation;
+#ifndef DX_RENAME_ALLOCATION
             /* Allocation type determines what the patch is about. */
             Assert(pAllocation->dx.desc.enmAllocationType == enmAllocationType);
             if (enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE)
@@ -484,13 +627,59 @@ static NTSTATUS svgaRenderPatches(PVBOXWDDM_CONTEXT pContext, DXGKARG_RENDER *pR
                 if (pAllocation->dx.mobid != SVGA3D_INVALID_ID)
                     *(uint32_t *)pPatchAddress = pAllocation->dx.mobid;
             }
+#else /* DX_RENAME_ALLOCATION */
+            /* DriverId determines what the patch is about. */
+            if (pIn->DriverId == VBOXDXPATCHID_SURFACE)
+            {
+                Assert(pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE);
+                if (pAllocation->dx.sid != SVGA3D_INVALID_ID)
+                    *(uint32_t *)pPatchAddress = pAllocation->dx.sid;
+
+            }
+            else if (   pIn->DriverId == VBOXDXPATCHID_SHADERS
+                     || pIn->DriverId == VBOXDXPATCHID_CO)
+            {
+                Assert(   pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SHADERS
+                       || pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_CO);
+                Assert(*(uint32_t *)pPatchAddress == SVGA3D_INVALID_ID);
+
+                if (pAllocationListEntry->SegmentId)
+                {
+                    /* Allocation already paged in. */
+                    AssertContinue(pAllocationListEntry->SegmentId == 2);
+
+                    /* Such allocations have one instance. Still use generic code to get mobid from address. */
+                    uint32_t const OffsetInPages = pAllocationListEntry->PhysicalAddress.LowPart >> PAGE_SHIFT;
+                    *(uint32_t *)pPatchAddress = svgaAllocationInstanceMobFromOffset(pAllocation, OffsetInPages);
+                }
+            }
+            else if (pIn->DriverId == VBOXDXPATCHID_INSTANCEMOB)
+            {
+                Assert(*(uint32_t *)pPatchAddress == SVGA3D_INVALID_ID);
+
+                if (pAllocationListEntry->SegmentId)
+                {
+                     AssertContinue(pAllocationListEntry->SegmentId == 2);
+
+                     uint32_t const OffsetInPages = pAllocationListEntry->PhysicalAddress.LowPart >> PAGE_SHIFT;
+                     *(uint32_t *)pPatchAddress = svgaAllocationInstanceMobFromOffset(pAllocation, OffsetInPages);
+                }
+            }
+#endif /* DX_RENAME_ALLOCATION */
         }
         else
         {
+#ifndef DX_RENAME_ALLOCATION
             if (   enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE
                 || enmAllocationType == VBOXDXALLOCATIONTYPE_SHADERS
                 || enmAllocationType == VBOXDXALLOCATIONTYPE_CO)
                 *(uint32_t *)pPatchAddress = SVGA3D_INVALID_ID;
+#else /* DX_RENAME_ALLOCATION */
+            if (   pIn->DriverId == VBOXDXPATCHID_SURFACE
+                || pIn->DriverId == VBOXDXPATCHID_SHADERS
+                || pIn->DriverId == VBOXDXPATCHID_CO)
+                *(uint32_t *)pPatchAddress = SVGA3D_INVALID_ID;
+#endif /* DX_RENAME_ALLOCATION */
         }
 
         ++cOut;
@@ -759,6 +948,7 @@ static NTSTATUS svgaPagingFill(PVBOXMP_DEVEXT pDevExt, DXGKARG_BUILDPAGINGBUFFER
                 break;
 
             void *pvDst;
+#ifndef DX_RENAME_ALLOCATION
             if (pBuildPagingBuffer->Fill.Destination.SegmentId == 3 || pAllocation->dx.desc.fPrimary)
             {
                 AssertReturn(pAllocation->dx.pGbo->hMemObj != NIL_RTR0MEMOBJ, STATUS_INVALID_PARAMETER);
@@ -771,6 +961,20 @@ static NTSTATUS svgaPagingFill(PVBOXMP_DEVEXT pDevExt, DXGKARG_BUILDPAGINGBUFFER
                 pvDst = MmGetSystemAddressForMdlSafe(pAllocation->dx.pGbo->pMdl, NormalPagePriority);
                 AssertReturn(pvDst, STATUS_INSUFFICIENT_RESOURCES);
             }
+#else
+            if (pBuildPagingBuffer->Fill.Destination.SegmentId == 3 || pAllocation->dx.desc.fPrimary)
+            {
+                /* Such allocations have one instance. */
+                AssertReturn(pAllocation->dx.aInstances[0].pGbo->hMemObj != NIL_RTR0MEMOBJ, STATUS_INVALID_PARAMETER);
+                pvDst = RTR0MemObjAddress(pAllocation->dx.aInstances[0].pGbo->hMemObj);
+            }
+            else
+            {
+                /* This driver does not expect to get Fill requests for other types of allocations. */
+                DEBUG_BREAKPOINT_TEST();
+                break;
+            }
+#endif
 
             /* Fill the guest backing pages. */
             uint32_t const cbFill = RT_MIN(pBuildPagingBuffer->Fill.FillSize, cbAllocation);
@@ -860,6 +1064,7 @@ static NTSTATUS svgaPagingMapApertureSegment(PVBOXMP_DEVEXT pDevExt, DXGKARG_BUI
     /** @todo Mobs require locked pages. Could DX provide a Mdl without locked pages? */
     Assert(pBuildPagingBuffer->MapApertureSegment.pMdl->MdlFlags & MDL_PAGES_LOCKED);
 
+#ifndef DX_RENAME_ALLOCATION
     if (pAllocation->dx.mobid != SVGA3D_INVALID_ID)
     {
         DEBUG_BREAKPOINT_TEST();
@@ -925,8 +1130,75 @@ static NTSTATUS svgaPagingMapApertureSegment(PVBOXMP_DEVEXT pDevExt, DXGKARG_BUI
         pu8Cmd += sizeof(*pCmd);
         }
     }
+#else /* DX_RENAME_ALLOCATION */
+    uint32_t cbRequired = 0;
+    SvgaMobDefine(pSvga, SVGA3D_INVALID_ID, NULL, 0, &cbRequired);
+    if (pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE)
+        cbRequired += sizeof(SVGA3dCmdHeader) + sizeof(SVGA3dCmdBindGBSurface);
+
+    if (pBuildPagingBuffer->DmaSize < cbRequired)
+        return STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER;
+
+    /* Find a free slot for the new instance. */
+    if (pAllocation->dx.aInstances[pAllocation->dx.idxLastCreatedInstance].mobid != SVGA3D_INVALID_ID)
+    {
+        int32_t idxInstance = pAllocation->dx.idxLastCreatedInstance;
+
+        for (uint32_t i = 0; i < RT_ELEMENTS(pAllocation->dx.aInstances) - 1; ++i)
+        {
+            idxInstance = (idxInstance + 1) % RT_ELEMENTS(pAllocation->dx.aInstances);
+            if (pAllocation->dx.aInstances[idxInstance].mobid == SVGA3D_INVALID_ID)
+                break;
+        }
+
+        /* DXGK must not allow that because the number of instances is limited by MaximumRenamingListLength. */
+        AssertReturn(pAllocation->dx.aInstances[idxInstance].mobid == SVGA3D_INVALID_ID, STATUS_INSUFFICIENT_RESOURCES);
+
+        pAllocation->dx.idxLastCreatedInstance = idxInstance;
+    }
+
+    DX_ALLOCATION_INSTANCE *pInstance = &pAllocation->dx.aInstances[pAllocation->dx.idxLastCreatedInstance];
+    Assert(pInstance->pGbo == NULL && pInstance->mobid == SVGA3D_INVALID_ID);
+
+    NTSTATUS Status = SvgaGboCreateForMdl(pSvga, &pInstance->pGbo,
+                                          pBuildPagingBuffer->MapApertureSegment.NumberOfPages,
+                                          pBuildPagingBuffer->MapApertureSegment.pMdl,
+                                          pBuildPagingBuffer->MapApertureSegment.MdlOffset);
+    AssertReturn(NT_SUCCESS(Status), Status);
+
+    Status = SvgaMobAlloc(pSvga, &pInstance->mobid, pInstance->pGbo);
+    AssertReturnStmt(NT_SUCCESS(Status), SvgaGboUnreference(pSvga, &pInstance->pGbo), Status);
+
+    pInstance->OffsetInPages = pBuildPagingBuffer->MapApertureSegment.OffsetInPages;
+
+    uint8_t *pu8Cmd = (uint8_t *)pBuildPagingBuffer->pDmaBuffer;
+    SVGA3dCmdHeader *pHdr;
+
+    uint32_t cbCmd = 0;
+    SvgaMobDefine(pSvga, pInstance->mobid, pu8Cmd,
+                  cbRequired - ((uintptr_t)pu8Cmd - (uintptr_t)pBuildPagingBuffer->pDmaBuffer),
+                  &cbCmd);
+    pu8Cmd += cbCmd;
+
+    if (pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE)
+    {
+        /* Bind. */
+        pHdr = (SVGA3dCmdHeader *)pu8Cmd;
+        pHdr->id   = SVGA_3D_CMD_BIND_GB_SURFACE;
+        pHdr->size = sizeof(SVGA3dCmdBindGBSurface);
+        pu8Cmd += sizeof(*pHdr);
+
+        {
+        SVGA3dCmdBindGBSurface *pCmd = (SVGA3dCmdBindGBSurface *)pu8Cmd;
+        pCmd->sid         = pAllocation->dx.sid;
+        pCmd->mobid       = pInstance->mobid;
+        pu8Cmd += sizeof(*pCmd);
+        }
+    }
+#endif /* DX_RENAME_ALLOCATION */
 
     *pcbCommands = (uintptr_t)pu8Cmd - (uintptr_t)pBuildPagingBuffer->pDmaBuffer;
+    Assert(*pcbCommands == cbRequired);
 
     return STATUS_SUCCESS;
 }
@@ -941,6 +1213,7 @@ static NTSTATUS svgaPagingUnmapApertureSegment(PVBOXMP_DEVEXT pDevExt, DXGKARG_B
     AssertReturn(pAllocation, STATUS_INVALID_PARAMETER);
     AssertReturn(pBuildPagingBuffer->UnmapApertureSegment.SegmentId == 2, STATUS_INVALID_PARAMETER);
 
+#ifndef DX_RENAME_ALLOCATION
     if (pAllocation->dx.mobid == SVGA3D_INVALID_ID)
     {
         DEBUG_BREAKPOINT_TEST();
@@ -983,8 +1256,36 @@ static NTSTATUS svgaPagingUnmapApertureSegment(PVBOXMP_DEVEXT pDevExt, DXGKARG_B
 
     pAllocation->dx.mobid = SVGA3D_INVALID_ID;
     SvgaGboUnreference(pSvga, &pAllocation->dx.pGbo);
+#else /* DX_RENAME_ALLOCATION */
+    uint32_t cbRequired = 0;
+    SvgaMobDestroy(pSvga, SVGA3D_INVALID_ID, NULL, 0, &cbRequired);
+
+    if (pBuildPagingBuffer->DmaSize < cbRequired)
+        return STATUS_GRAPHICS_INSUFFICIENT_DMA_BUFFER;
+
+    int32_t const idxAllocation = svgaAllocationInstanceIndexFromOffset(pAllocation,
+        pBuildPagingBuffer->UnmapApertureSegment.OffsetInPages);
+    AssertReturn(idxAllocation >= 0, STATUS_INVALID_PARAMETER);
+
+    DX_ALLOCATION_INSTANCE *pInstance = &pAllocation->dx.aInstances[idxAllocation];
+
+    uint8_t *pu8Cmd = (uint8_t *)pBuildPagingBuffer->pDmaBuffer;
+
+    uint32_t cbCmd = 0;
+    NTSTATUS Status = SvgaMobDestroy(pSvga, pInstance->mobid, pu8Cmd,
+                                     cbRequired - ((uintptr_t)pu8Cmd - (uintptr_t)pBuildPagingBuffer->pDmaBuffer),
+                                     &cbCmd);
+    AssertReturn(NT_SUCCESS(Status), Status);
+    pu8Cmd += cbCmd;
+
+    pInstance->mobid = SVGA3D_INVALID_ID;
+    SvgaGboUnreference(pSvga, &pInstance->pGbo);
+    pInstance->OffsetInPages = ~0U;
+#endif /* DX_RENAME_ALLOCATION */
 
     *pcbCommands = (uintptr_t)pu8Cmd - (uintptr_t)pBuildPagingBuffer->pDmaBuffer;
+    Assert(*pcbCommands == cbRequired);
+
     return STATUS_SUCCESS;
 }
 
@@ -1052,6 +1353,7 @@ NTSTATUS APIENTRY DxgkDdiDXPatch(PVBOXMP_DEVEXT pDevExt, const DXGKARG_PATCH *pP
 {
     //DEBUG_BREAKPOINT_TEST();
 
+#ifndef DX_RENAME_ALLOCATION
     for (UINT i = 0; i < pPatch->PatchLocationListSubmissionLength; ++i)
     {
         D3DDDI_PATCHLOCATIONLIST const *pPatchListEntry
@@ -1099,6 +1401,73 @@ NTSTATUS APIENTRY DxgkDdiDXPatch(PVBOXMP_DEVEXT pDevExt, const DXGKARG_PATCH *pP
         else
             AssertFailed(); /* Render should have already filtered out such patches. */
     }
+#else /* DX_RENAME_ALLOCATION */
+    for (UINT i = 0; i < pPatch->PatchLocationListSubmissionLength; ++i)
+    {
+        D3DDDI_PATCHLOCATIONLIST const *pPatchListEntry
+            = &pPatch->pPatchLocationList[pPatch->PatchLocationListSubmissionStart + i];
+
+        /* Ignore a dummy patch request. */
+        if (pPatchListEntry->PatchOffset == ~0UL)
+            continue;
+
+        AssertReturn(   pPatchListEntry->PatchOffset >= pPatch->DmaBufferSubmissionStartOffset
+                     && pPatchListEntry->PatchOffset < pPatch->DmaBufferSubmissionEndOffset, STATUS_INVALID_PARAMETER);
+        AssertReturn(pPatchListEntry->AllocationIndex < pPatch->AllocationListSize, STATUS_INVALID_PARAMETER);
+
+        void * const pPatchAddress = (uint8_t *)pPatch->pDmaBuffer + pPatchListEntry->PatchOffset;
+
+        DXGK_ALLOCATIONLIST const *pAllocationListEntry = &pPatch->pAllocationList[pPatchListEntry->AllocationIndex];
+        AssertContinue(pAllocationListEntry->SegmentId != 0);
+
+        PVBOXWDDM_OPENALLOCATION pOA = (PVBOXWDDM_OPENALLOCATION)pAllocationListEntry->hDeviceSpecificAllocation;
+        if (pOA)
+        {
+            PVBOXWDDM_ALLOCATION pAllocation = pOA->pAllocation;
+            /* DriverId determines what the patch is about. */
+            if (pPatchListEntry->DriverId == VBOXDXPATCHID_SURFACE)
+            {
+                Assert(pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SURFACE);
+                Assert(pAllocation->dx.sid != SVGA3D_INVALID_ID);
+                *(uint32_t *)pPatchAddress = pAllocation->dx.sid;
+            }
+            else if (   pPatchListEntry->DriverId == VBOXDXPATCHID_SHADERS
+                     || pPatchListEntry->DriverId == VBOXDXPATCHID_CO)
+            {
+                Assert(   pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_SHADERS
+                       || pAllocation->dx.desc.enmAllocationType == VBOXDXALLOCATIONTYPE_CO);
+                AssertContinue(pAllocationListEntry->SegmentId == 2);
+
+                if (*(uint32_t *)pPatchAddress == SVGA3D_INVALID_ID)
+                {
+                   /* Such allocations have one instance. Still use generic code to get mobid from address. */
+                   uint32_t const OffsetInPages = pAllocationListEntry->PhysicalAddress.LowPart >> PAGE_SHIFT;
+                   *(uint32_t *)pPatchAddress = svgaAllocationInstanceMobFromOffset(pAllocation, OffsetInPages);
+                }
+            }
+            else if (pPatchListEntry->DriverId == VBOXDXPATCHID_INSTANCEMOB)
+            {
+                AssertContinue(pAllocationListEntry->SegmentId == 2);
+
+                if (*(uint32_t *)pPatchAddress == SVGA3D_INVALID_ID)
+                {
+                    uint32_t const OffsetInPages = pAllocationListEntry->PhysicalAddress.LowPart >> PAGE_SHIFT;
+                    *(uint32_t *)pPatchAddress = svgaAllocationInstanceMobFromOffset(pAllocation, OffsetInPages);
+                }
+            }
+            else if (   pAllocation->enmType == VBOXWDDM_ALLOC_TYPE_STD_SHADOWSURFACE
+                     || pAllocation->enmType == VBOXWDDM_ALLOC_TYPE_STD_STAGINGSURFACE)
+            {
+                uint32_t *poffVRAM = (uint32_t *)pPatchAddress;
+                *poffVRAM = pAllocationListEntry->PhysicalAddress.LowPart + pPatchListEntry->AllocationOffset;
+            }
+            else
+                AssertFailed();
+        }
+        else
+            AssertFailed(); /* Render should have already filtered out such patches. */
+    }
+#endif /* DX_RENAME_ALLOCATION */
 
 #ifdef DEBUG
     if (!pPatch->Flags.Paging && !pPatch->Flags.Present)
@@ -1111,5 +1480,6 @@ NTSTATUS APIENTRY DxgkDdiDXPatch(PVBOXMP_DEVEXT pDevExt, const DXGKARG_PATCH *pP
 #else
     RT_NOREF(pDevExt);
 #endif
+
     return STATUS_SUCCESS;
 }

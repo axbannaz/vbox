@@ -236,7 +236,7 @@ void vboxDXCommandBufferCommit(PVBOXDX_DEVICE pDevice)
 
 
 void vboxDXStorePatchLocation(PVBOXDX_DEVICE pDevice, void *pvPatch, PVBOXDXKMRESOURCE pKMResource,
-                              uint32_t offAllocation, bool fWriteOperation)
+                              uint32_t offAllocation, bool fWriteOperation, uint32_t DriverId)
 {
     D3DKMT_HANDLE hAllocation = vboxDXGetAllocation(pKMResource);
     if (!hAllocation)
@@ -273,7 +273,9 @@ void vboxDXStorePatchLocation(PVBOXDX_DEVICE pDevice, void *pvPatch, PVBOXDXKMRE
     D3DDDI_PATCHLOCATIONLIST *pPatchLocation = &pDevice->pPatchLocationList[pDevice->cPatchLocations];
     pPatchLocation->AllocationIndex = idxAllocation;
     pPatchLocation->Value = 0;
-    pPatchLocation->DriverId = pKMResource->AllocationDesc.enmAllocationType;
+    pPatchLocation->DriverId = DriverId == 0
+                             ? pKMResource->AllocationDesc.enmAllocationType
+                             : DriverId;
     pPatchLocation->AllocationOffset = offAllocation;
     pPatchLocation->PatchOffset = (uintptr_t)pvPatch - (uintptr_t)pDevice->pCommandBuffer;
     pPatchLocation->SplitOffset = pDevice->cbCommandBuffer;
@@ -2708,7 +2710,11 @@ void vboxDXResourceMap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT 
     /** @todo Need to take into account various variants Dynamic/Staging/ Discard/NoOverwrite, etc. */
     Assert(pResource->uMap == 0); /* Must not be already mapped */
 
+#ifndef DX_RENAME_ALLOCATION
     if (dxIsAllocationInUse(pDevice, hAllocation))
+#else
+    if (dxIsAllocationInUse(pDevice, hAllocation) && DDIMap != D3D10_DDI_MAP_WRITE_NOOVERWRITE)
+#endif
     {
         vboxDXFlush(pDevice, true);
 
@@ -2738,7 +2744,16 @@ void vboxDXResourceMap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT 
                                 || DDIMap == D3D10_DDI_MAP_WRITE_DISCARD
                                 || DDIMap == D3D10_DDI_MAP_WRITE_NOOVERWRITE;
         ddiLock.Flags.DonotWait = RT_BOOL(Flags & D3D10_DDI_MAP_FLAG_DONOTWAIT);
+#ifndef DX_RENAME_ALLOCATION
         /// @todo ddiLock.Flags.Discard = DDIMap == D3D10_DDI_MAP_WRITE_DISCARD;
+#else
+        if (DDIMap == D3D10_DDI_MAP_WRITE_NOOVERWRITE)
+        {
+            ddiLock.Flags.IgnoreSync = 1;
+            ddiLock.Flags.DonotWait = 1;
+        }
+        ddiLock.Flags.Discard = DDIMap == D3D10_DDI_MAP_WRITE_DISCARD;
+#endif
         /** @todo Other flags? */
 
         hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
@@ -2759,8 +2774,17 @@ void vboxDXResourceMap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT 
         /* "If the Discard bit-field flag is set in the Flags member, the video memory manager creates
          * a new instance of the allocation and returns a new handle that represents the new instance."
          */
+#ifndef DX_RENAME_ALLOCATION
         if (DDIMap == D3D10_DDI_MAP_WRITE_DISCARD)
             pResource->pKMResource->hAllocation = ddiLock.hAllocation;
+#else
+        if (   DDIMap == D3D10_DDI_MAP_WRITE_DISCARD
+            && pResource->pKMResource->hAllocation != ddiLock.hAllocation)
+        {
+            pResource->pKMResource->hAllocation = ddiLock.hAllocation;
+            vgpu10BindGBSurface(pDevice, vboxDXGetKMResource(pResource));
+        }
+#endif
 
         VBOXDXALLOCATIONDESC const *pAllocationDesc = vboxDXGetAllocationDesc(pResource);
 

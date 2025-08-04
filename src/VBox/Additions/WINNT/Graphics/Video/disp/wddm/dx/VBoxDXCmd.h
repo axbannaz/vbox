@@ -518,5 +518,7 @@ int vgpu10ClearView(PVBOXDX_DEVICE pDevice,
                     const float color[4],
                     const D3D10_DDI_RECT *paRects,
                     uint32_t cRects);
+int vgpu10BindGBSurface(PVBOXDX_DEVICE pDevice,
+                        PVBOXDXKMRESOURCE pKMResource);
 
 #endif /* !GA_INCLUDED_SRC_WINNT_Graphics_Video_disp_wddm_dx_VBoxDXCmd_h */
