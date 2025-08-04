@@ -110,8 +110,19 @@ void UpdateAgentTask::handler(void)
 *   Update agent base class implementation                                                                                       *
 *********************************************************************************************************************************/
 
+/** Maximum user agent string length.
+ * The value here is dictated by the load balancing service and was
+ * determined by trying increasingly long strings with 'curl -A "str"' on
+ * the command line.  The actual value was 501 characters, but to be on the safe
+ * side we set it 5 bytes below that again, keeping the total line length under
+ * 512 bytes. */
+#define UA_MAX_LENGTH           496
+
+/** Characters we always purge from component values. */
+#define UA_DEFAULT_BAD_CHARS    "|[]<>\n\r"
+
 /** A i_appendPlatformInfo() helper that replaces bad characters with spaces. */
-static char *sanitizeUserAgentString(char *psz, const char *pszBadChars = "|[]:;<>")
+static char *sanitizeUserAgentString(char *psz, const char *pszBadChars = UA_DEFAULT_BAD_CHARS)
 {
     char * const pszRet = psz;
     RTStrPurgeEncoding(psz);
@@ -183,7 +194,7 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
         ((uint32_t *)szTmp)[1] = uEdx;
         ((uint32_t *)szTmp)[2] = uEcx;
         ((uint32_t *)szTmp)[3] = 0;
-        pszVendor = RTStrStrip(sanitizeUserAgentString(szTmp));
+        pszVendor = RTStrStrip(sanitizeUserAgentString(szTmp, UA_DEFAULT_BAD_CHARS ":;"));
     }
     ASMCpuIdExSlow(1, 0, 0, 0, &uEax, &uEbx, &uEcx, &uEdx);
     a_rStr.appendPrintf("%s:%#x", pszVendor, uEax);
@@ -191,7 +202,7 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
 #else
     vrc = RTMpGetDescription(NIL_RTCPUID, szTmp, RT_MIN(sizeof(szTmp), 64));
     if (RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW)
-        sanitizeUserAgentString(szTmp);
+        sanitizeUserAgentString(szTmp, UA_DEFAULT_BAD_CHARS ":;");
     else
         szTmp[0] = '\0';
     a_rStr.append(RTStrStrip(szTmp));
@@ -262,10 +273,10 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
 
             if (RT_SUCCESS(vrc))
             {
-                RTPROCSTATUS  ProcStatus;
-                size_t        cbStdOutBuf  = 0;
+                RTPROCSTATUS  ProcStatus   = { -1, RTPROCEXITREASON_ABEND };
                 size_t        offStdOutBuf = 0;
-                char         *pszStdOutBuf = NULL;
+                char          szStdOutBuf[UA_MAX_LENGTH];
+                szStdOutBuf[0] = '\0';
                 do
                 {
                     if (hPipeR != NIL_RTPIPE)
@@ -275,26 +286,13 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
                         vrc = RTPipeReadBlocking(hPipeR, achBuf, sizeof(achBuf), &cbRead);
                         if (RT_SUCCESS(vrc))
                         {
-                            /* grow the buffer? */
-                            size_t cbBufReq = offStdOutBuf + cbRead + 1;
-                            if (   cbBufReq > cbStdOutBuf
-                                && cbBufReq < _256K)  /// @todo r=bird: This is possibly way to high for load balancers and
-                            {                         /// web servers.  Should try keep it well under 4KB at least.
-                                size_t cbNew = RT_ALIGN_Z(cbBufReq, 16); // 1024
-                                void  *pvNew = RTMemRealloc(pszStdOutBuf, cbNew);
-                                if (pvNew)
-                                {
-                                    pszStdOutBuf = (char *)pvNew;
-                                    cbStdOutBuf  = cbNew;
-                                }
-                            }
-
                             /* append if we've got room. */
-                            if (cbBufReq <= cbStdOutBuf)
+                            if (offStdOutBuf + 1 < sizeof(szStdOutBuf))
                             {
-                                memcpy(&pszStdOutBuf[offStdOutBuf], achBuf, cbRead);
-                                offStdOutBuf = offStdOutBuf + cbRead;
-                                pszStdOutBuf[offStdOutBuf] = '\0';
+                                size_t const cbToCopy = RT_MIN(cbRead, sizeof(szStdOutBuf) - offStdOutBuf - 1);
+                                memcpy(&szStdOutBuf[offStdOutBuf], achBuf, cbToCopy);
+                                offStdOutBuf += cbToCopy;
+                                szStdOutBuf[offStdOutBuf] = '\0';
                             }
                         }
                         else
@@ -323,53 +321,48 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
                 } while (   hPipeR != NIL_RTPIPE
                          || hProc != NIL_RTPROCESS);
 
-                if (   ProcStatus.enmReason == RTPROCEXITREASON_NORMAL
+                if (   RT_SUCCESS(vrc)
+                    && ProcStatus.enmReason == RTPROCEXITREASON_NORMAL
                     && ProcStatus.iStatus == 0
-                    && RT_SUCCESS(vrc))
+                    && offStdOutBuf > 0)
                 {
-                    pszStdOutBuf[offStdOutBuf > 0 ? offStdOutBuf - 1 : 0] = '\0';  // remove trailing newline
-                    const char * const pszSanitized = RTStrStrip(sanitizeUserAgentString(pszStdOutBuf, "<>[]"));
+                    const char * const pszSanitized = RTStrStrip(sanitizeUserAgentString(szStdOutBuf, "<>[]"));
                     if (   strlen(pszSanitized) > sizeof("Distribution: ")
-                        && strchr(pszStdOutBuf, '\n') == NULL
-                        && strchr(pszStdOutBuf, '\r') == NULL)
+                        && strchr(pszSanitized, '\n') == NULL
+                        && strchr(pszSanitized, '\r') == NULL)
                     {
-                        a_rStr.appendPrintf(" | %s]", pszSanitized);
-                        // For testing, here is some sample output:
-                        //a_rStr.appendPrintf(" | Distribution: Redhat | Version: 7.6.1810 | Kernel: Linux version 3.10.0-952.27.2.el7.x86_64 (gcc version 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) ) #1 SMP Mon Jul 29 17:46:05 UTC 2019]");
+                        a_rStr.appendPrintf(" | %s", pszSanitized);
+                        a_rStr.truncate(UA_MAX_LENGTH - 2); /* -2 because caller adds '>' */
+                        a_rStr.append(']');
+                        return;
                     }
-                    else
-                        vrc = VERR_TRY_AGAIN; /* (take the fallback path) */
                 }
-                RTMemFree(pszStdOutBuf);
             }
-            else
-                vrc = VERR_TRY_AGAIN; /* (take the fallback path) */
         }
     }
-    if (RT_FAILURE(vrc))
 #endif /* RT_OS_LINUX */
-    {
-        /*
-         * Use RTSystemQueryOSInfo:
-         */
-        vrc = RTSystemQueryOSInfo(RTSYSOSINFO_PRODUCT, szTmp, sizeof(szTmp));
-        if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-            a_rStr.appendPrintf(" | Product: %s", szTmp);
 
-        vrc = RTSystemQueryOSInfo(RTSYSOSINFO_RELEASE, szTmp, sizeof(szTmp));
-        if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-            a_rStr.appendPrintf(" | Release: %s", szTmp);
+    /*
+     * Use RTSystemQueryOSInfo:
+     */
+    vrc = RTSystemQueryOSInfo(RTSYSOSINFO_PRODUCT, szTmp, sizeof(szTmp));
+    if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
+        a_rStr.appendPrintf(" | Product: %s", sanitizeUserAgentString(szTmp));
 
-        vrc = RTSystemQueryOSInfo(RTSYSOSINFO_VERSION, szTmp, sizeof(szTmp));
-        if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-            a_rStr.appendPrintf(" | Version: %s", szTmp);
+    vrc = RTSystemQueryOSInfo(RTSYSOSINFO_RELEASE, szTmp, sizeof(szTmp));
+    if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
+        a_rStr.appendPrintf(" | Release: %s", sanitizeUserAgentString(szTmp));
 
-        vrc = RTSystemQueryOSInfo(RTSYSOSINFO_SERVICE_PACK, szTmp, sizeof(szTmp));
-        if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-            a_rStr.appendPrintf(" | SP: %s", szTmp);
+    vrc = RTSystemQueryOSInfo(RTSYSOSINFO_VERSION, szTmp, sizeof(szTmp));
+    if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
+        a_rStr.appendPrintf(" | Version: %s", sanitizeUserAgentString(szTmp));
 
-        a_rStr.append(']');
-    }
+    vrc = RTSystemQueryOSInfo(RTSYSOSINFO_SERVICE_PACK, szTmp, sizeof(szTmp));
+    if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
+        a_rStr.appendPrintf(" | SP: %s", sanitizeUserAgentString(szTmp));
+
+    a_rStr.truncate(UA_MAX_LENGTH - 2); /* -2 because the caller adds '>'. (The load balancer imposes severe length limits.) */
+    a_rStr.append(']');
 }
 
 /**
@@ -1135,6 +1128,7 @@ DECLCALLBACK(HRESULT) HostUpdateAgent::i_checkForUpdateTask(UpdateAgentTask *pTa
     Utf8StrFmt strUserAgent("VirtualBox %ls <", version.raw());
     i_appendPlatformInfo(strUserAgent);
     strUserAgent.append('>');
+    Assert(strUserAgent.length() <= UA_MAX_LENGTH); /* Note! The load balancer imposes severe length limits. */
     LogRel2(("Update agent (%s): Using user agent '%s'\n", mData.m_strName.c_str(), strUserAgent.c_str())); // dont commit
 
     /*
