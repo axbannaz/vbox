@@ -706,16 +706,19 @@ static void ipcdTerm(PIPCDSTATE pThis)
 
 static DECLCALLBACK(int) ipcdThread(RTTHREAD hThreadSelf, void *pvUser)
 {
-    IPCDSTATE IpcdState;
+    PIPCDSTATE pIpcdState = (PIPCDSTATE)RTMemAllocZ(sizeof(*pIpcdState));
+    if (!pIpcdState)
+        return VERR_NO_MEMORY;
 
-    int vrc = ipcdInit(&IpcdState, NULL /*pszSocketPath*/);
+    int vrc = ipcdInit(pIpcdState, NULL /*pszSocketPath*/);
     *(int *)pvUser = vrc; /* Set the startup status code. */
     RTThreadUserSignal(hThreadSelf);
 
     if (RT_SUCCESS(vrc))
-        PollLoop(&IpcdState);
+        PollLoop(pIpcdState);
 
-    ipcdTerm(&IpcdState);
+    ipcdTerm(pIpcdState);
+    RTMemFree(pIpcdState);
     return VINF_SUCCESS;
 }
 
