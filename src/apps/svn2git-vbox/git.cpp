@@ -799,7 +799,6 @@ DECLHIDDEN(int) s2gGitTransactionCommit(S2GREPOSITORYGIT hGitRepo, const char *p
     if (RT_SUCCESS(rc) && pszAuthor && pszAuthorEmail)
         rc = s2gScratchBufPrintf(&pThis->BufScratch,
                                  "author %s <%s> %RI64 +0000\n",
-                                 pszBranch, idMark,
                                  pszAuthor, pszAuthorEmail, cEpochSecs);
     if (RT_SUCCESS(rc))
         rc = s2gScratchBufPrintf(&pThis->BufScratch,
