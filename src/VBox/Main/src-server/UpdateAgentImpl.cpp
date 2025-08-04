@@ -116,26 +116,36 @@ void UpdateAgentTask::handler(void)
 Utf8Str UpdateAgentBase::i_getPlatformInfo(void)
 {
     /* Prepare platform report: */
-    Utf8Str strPlatform;
 
-# if defined (RT_OS_WINDOWS)
-    strPlatform = "win";
-# elif defined (RT_OS_LINUX)
-    strPlatform = "linux";
-# elif defined (RT_OS_DARWIN)
-    strPlatform = "macosx";
-# elif defined (RT_OS_OS2)
-    strPlatform = "os2";
-# elif defined (RT_OS_FREEBSD)
-    strPlatform = "freebsd";
-# elif defined (RT_OS_SOLARIS)
-    strPlatform = "solaris";
-# else
-    strPlatform = "unknown";
-# endif
+    /* The format is <system>.<arch> (used to be <system>.<bitness>):  */
+#if   defined(RT_OS_WINDOWS)
+    const char * const pszSystem = "win";
+#elif defined(RT_OS_LINUX)
+    const char * const pszSystem = "linux";
+#elif defined(RT_OS_DARWIN)
+    const char * const pszSystem = "macosx";
+#elif defined(RT_OS_OS2)
+    const char * const pszSystem = "os2";
+#elif defined(RT_OS_FREEBSD)
+    const char * const pszSystem = "freebsd";
+#elif defined(RT_OS_SOLARIS)
+    const char * const pszSystem = "solaris";
+#else
+    const char * const pszSystem = "unknown";
+#endif
 
-    /* The format is <system>.<bitness>: */
-    strPlatform.appendPrintf(".%lu", ARCH_BITS);
+#if  defined(RT_ARCH_AMD64)
+    const char * const pszArch   = "amd64";
+#elif defined(RT_ARCH_ARM64)
+    const char * const pszArch   = "arm64";
+#elif defined(RT_ARCH_X86)
+    const char * const pszArch   = "x86";
+#else
+# error "Unexpected RT_ARCH_XXX"
+#endif
+    Utf8Str strPlatform(pszSystem);
+    strPlatform.append('.');
+    strPlatform.append(pszArch);
 
     /* Add more system information: */
     int vrc;
