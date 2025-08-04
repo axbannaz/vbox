@@ -224,7 +224,8 @@ enum
     VBOXDRVINST_UNINSTALL_OPT_PNPID,
     VBOXDRVINST_UNINSTALL_OPT_FORCE,
     VBOXDRVINST_UNINSTALL_OPT_NOT_SILENT,
-    VBOXDRVINST_UNINSTALL_OPT_IGNORE_REBOOT
+    VBOXDRVINST_UNINSTALL_OPT_IGNORE_REBOOT,
+    VBOXDRVINST_UNINSTALL_OPT_DEBUG_OS_VER
 };
 
 /**
@@ -243,7 +244,8 @@ static const RTGETOPTDEF g_aCmdUninstallOptions[] =
     { "--pnp-id",        VBOXDRVINST_UNINSTALL_OPT_PNPID,         RTGETOPT_REQ_STRING  },
     { "--force",         VBOXDRVINST_UNINSTALL_OPT_FORCE,         RTGETOPT_REQ_NOTHING },
     { "--not-silent",    VBOXDRVINST_UNINSTALL_OPT_NOT_SILENT,    RTGETOPT_REQ_NOTHING },
-    { "--ignore-reboot", VBOXDRVINST_UNINSTALL_OPT_IGNORE_REBOOT, RTGETOPT_REQ_NOTHING }
+    { "--ignore-reboot", VBOXDRVINST_UNINSTALL_OPT_IGNORE_REBOOT, RTGETOPT_REQ_NOTHING },
+    { "--debug-os-ver",  VBOXDRVINST_UNINSTALL_OPT_DEBUG_OS_VER,  RTGETOPT_REQ_UINT32_PAIR }
 };
 
 /**
@@ -720,6 +722,7 @@ static DECLCALLBACK(const char *) vboxDrvInstCmdUninstallHelp(PCRTGETOPTDEF pOpt
         case VBOXDRVINST_UNINSTALL_OPT_FORCE:         return "Forces uninstallation";
         case VBOXDRVINST_UNINSTALL_OPT_NOT_SILENT:    return "Runs uninstallation in non-silent mode";
         case VBOXDRVINST_UNINSTALL_OPT_IGNORE_REBOOT: return "Ignores reboot requirements";
+        case VBOXDRVINST_UNINSTALL_OPT_DEBUG_OS_VER:  return "Overwrites the detected OS version";
         default:
             break;
     }
@@ -813,6 +816,7 @@ static DECLCALLBACK(RTEXITCODE) vboxDrvInstCmdUninstallMain(PRTGETOPTSTATE pGetS
     char *pszModel = NULL;
     char *pszPnpId = NULL;
     char *pszInfSection = NULL;
+    uint64_t uOsVer = 0;
 
     /* By default we want a silent uninstallation (but not forcing it). */
     uint32_t fInstall = VBOX_WIN_DRIVERINSTALL_F_SILENT;
@@ -874,6 +878,11 @@ static DECLCALLBACK(RTEXITCODE) vboxDrvInstCmdUninstallMain(PRTGETOPTSTATE pGetS
                 fIgnoreReboot = true;
                 break;
 
+            case VBOXDRVINST_UNINSTALL_OPT_DEBUG_OS_VER:
+                uOsVer = RTSYSTEM_MAKE_NT_VERSION(ValueUnion.PairU32.uFirst, ValueUnion.PairU32.uSecond,
+                                                  0 /* Build Version */);
+                break;
+
             default:
                 return RTGetOptPrintError(ch, &ValueUnion);
         }
@@ -890,6 +899,9 @@ static DECLCALLBACK(RTEXITCODE) vboxDrvInstCmdUninstallMain(PRTGETOPTSTATE pGetS
     rc = VBoxWinDrvInstCreateEx(&hWinDrvInst, g_uVerbosity, &vboxDrvInstLogCallback, NULL /* pvUser */);
     if (RT_SUCCESS(rc))
     {
+        if (uOsVer)
+            VBoxWinDrvInstSetOsVersion(hWinDrvInst, uOsVer);
+
         if (g_fDryrun)
             fInstall |= VBOX_WIN_DRIVERINSTALL_F_DRYRUN;
 
