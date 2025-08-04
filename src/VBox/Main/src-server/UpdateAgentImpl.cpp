@@ -212,7 +212,7 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
         ptrHost->IsExecutionEngineSupported(CPUArchitecture_x86, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
         ptrHost->IsExecutionEngineSupported(CPUArchitecture_x86, VMExecutionEngine_HwVirt, &fIsHwVirtSupported);
 #  else
-        ptrHost->isExecutionEngineSupported(CPUArchitecture_ARMv8_64, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
+        ptrHost->IsExecutionEngineSupported(CPUArchitecture_ARMv8_64, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
 #  endif
     }
 # else
