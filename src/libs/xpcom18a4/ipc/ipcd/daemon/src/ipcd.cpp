@@ -284,11 +284,12 @@ static int AddClient(PIPCDSTATE pThis, RTSOCKET hSock)
             }
 
             ipcdClientDestroy(&pThis->ipcClientArray[i]);
-            break;
+            return -1;
         }
     }
 
     /* Failed to find or set up the IPC client state. */
+    RTSocketClose(hSock);
     return -1;
 }
 
@@ -339,10 +340,7 @@ static void PollLoop(PIPCDSTATE pThis)
                 RTSOCKET hSock;
                 vrc = RTSocketFromNative(&hSock, fdClient);
                 if (RT_SUCCESS(vrc))
-                {
-                    if (AddClient(pThis, hSock) != 0)
-                        RTSocketClose(hSock);
-                }
+                    AddClient(pThis, hSock);
                 else
                 {
                     LogFlowFunc(("RTSocketFromNative(, %d) -> %Rrc\n", fdClient, vrc));
