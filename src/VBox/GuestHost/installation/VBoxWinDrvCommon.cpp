@@ -589,6 +589,8 @@ const char *VBoxWinDrvSetupApiErrToStr(const DWORD dwErr)
         RT_CASE_RET_STR(ERROR_INVALID_COINSTALLER               );
         RT_CASE_RET_STR(ERROR_INVALID_DEVINST_NAME              );
         RT_CASE_RET_STR(ERROR_INVALID_FILTER_DRIVER             );
+        /* Note: To override translating to VERR_INVALID_PARAMETER from IPRT. */
+        RT_CASE_RET_STR(ERROR_INVALID_FLAGS                     ); /* Might happen on non-installable INF sections via SetupInstallFromInfSectionW(). */
         RT_CASE_RET_STR(ERROR_INVALID_HWPROFILE                 );
         RT_CASE_RET_STR(ERROR_INVALID_INF_LOGCONFIG             );
         RT_CASE_RET_STR(ERROR_INVALID_MACHINENAME               );
