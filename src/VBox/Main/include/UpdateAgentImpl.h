@@ -83,7 +83,7 @@ protected:
 
     /** @name Static helper methods.
      * @{ */
-    static Utf8Str i_getPlatformInfo(void);
+    void           i_appendPlatformInfo(Utf8Str &a_rStr);
     const char    *i_proxyModeToStr(ProxyMode_T enmMode);
     bool           i_urlSchemeIsSupported(const Utf8Str &strUrl) const;
     /** @} */
