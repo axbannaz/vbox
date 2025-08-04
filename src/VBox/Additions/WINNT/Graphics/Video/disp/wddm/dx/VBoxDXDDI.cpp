@@ -125,6 +125,131 @@ static HRESULT vboxDXAdapterInit(D3D10DDIARG_OPENADAPTER const* pOpenData, VBOXW
     return S_OK;
 }
 
+//#define DX_STATS
+
+#ifdef DX_STATS
+#include <iprt/avl.h>
+#include <iprt/time.h>
+
+struct DxDdiFnStats {
+    AVLU64NODECORE Core; /* Key is address of a static function name string. */
+    const char *pszFunctionName;
+
+    uint64_t u64NsBegin;
+    uint64_t au64NsDelayHistogram[6];
+};
+
+static struct {
+    uint64_t u64LastDump;
+
+    AVLU64TREE treeFnStats; /* DxDdiFnStats */
+} g_DxDdiStats;
+
+static int histogramIndex(uint64_t u64NsTimeDiff)
+{
+    uint64_t const u64MsTimeDiff = u64NsTimeDiff / 1000 / 1000;
+    if (u64MsTimeDiff <   5) return 0; //    5 millisecond
+    if (u64MsTimeDiff <  10) return 1; //   10 milliseconds
+    if (u64MsTimeDiff <  50) return 2; //   50 milliseconds
+    if (u64MsTimeDiff < 100) return 3; //  100 milliseconds
+    if (u64MsTimeDiff < 500) return 4; //  500 milliseconds
+    return 5;
+}
+
+static DECLCALLBACK(int) dxDdiCb(PAVLU64NODECORE pNode, void *pvUser)
+{
+    RT_NOREF(pvUser);
+    DxDdiFnStats *p = (DxDdiFnStats *)pNode;
+
+    LogRel(("[%52s] %6RU64 %6RU64 %6RU64 %6RU64 %6RU64 %6RU64\n",
+        p->pszFunctionName,
+        p->au64NsDelayHistogram[0],
+        p->au64NsDelayHistogram[1],
+        p->au64NsDelayHistogram[2],
+        p->au64NsDelayHistogram[3],
+        p->au64NsDelayHistogram[4],
+        p->au64NsDelayHistogram[5]
+        ));
+
+    p->u64NsBegin = 0;
+    RT_ZERO(p->au64NsDelayHistogram);
+    return 0;
+}
+
+static void dxDdiStatsLogRelAndReset(void)
+{
+    LogRel(("DxDdiStats begin\n"));
+
+    RTAvlU64DoWithAll(&g_DxDdiStats.treeFnStats, 0, dxDdiCb, NULL);
+
+    LogRel(("DxDdiStats end\n"));
+}
+
+static void dxDdiStatsBegin(const char *pszFunctionName)
+{
+    uint64_t Key = (uintptr_t)pszFunctionName;
+    DxDdiFnStats *p = (DxDdiFnStats *)RTAvlU64Get(&g_DxDdiStats.treeFnStats, Key);
+    if (!p)
+    {
+        /* Create and insert a new instance for this new function. */
+        p = (DxDdiFnStats *)RTMemAllocZ(sizeof(DxDdiFnStats));
+        AssertRelease(p);
+
+        p->Core.Key = Key;
+        p->pszFunctionName = pszFunctionName;
+
+        RTAvlU64Insert(&g_DxDdiStats.treeFnStats, &p->Core);
+    }
+
+    uint64_t const u64Now = RTTimeNanoTS();
+    p->u64NsBegin = u64Now;
+}
+
+static void dxDdiStatsEnd(const char *pszFunctionName)
+{
+    uint64_t Key = (uintptr_t)pszFunctionName;
+    DxDdiFnStats *p = (DxDdiFnStats *)RTAvlU64Get(&g_DxDdiStats.treeFnStats, Key);
+    AssertRelease(p);
+
+    uint64_t const u64Now = RTTimeNanoTS();
+    if (p->u64NsBegin)
+    {
+        uint64_t const u64Delta = u64Now - p->u64NsBegin;
+
+        p->au64NsDelayHistogram[histogramIndex(u64Delta)] += 1;
+    }
+
+    if ((u64Now - g_DxDdiStats.u64LastDump) / RT_NS_1MS_64 > 10000)
+    {
+        dxDdiStatsLogRelAndReset();
+        g_DxDdiStats.u64LastDump = u64Now;
+    }
+}
+
+class DxDdiStatsSample
+{
+    private:
+        const char *m_pszFunctionName;
+    public:
+        DxDdiStatsSample(const char *pszFunctionName)
+            :
+            m_pszFunctionName(pszFunctionName)
+        {
+            dxDdiStatsBegin(m_pszFunctionName);
+        }
+
+        ~DxDdiStatsSample()
+        {
+            dxDdiStatsEnd(m_pszFunctionName);
+        }
+};
+
+# define DX_DDI_ENTER \
+   DxDdiStatsSample sample(__FUNCTION__)
+#else
+# define DX_DDI_ENTER do { \
+} while(0)
+#endif
 
 /*
  * Device functions.
@@ -141,6 +266,7 @@ static void APIENTRY ddi11_1DefaultConstantBufferUpdateSubresourceUP(
     UINT CopyFlags                   // A bitwise OR of the values in the D3D11_1_DDI_COPY_FLAGS
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -160,6 +286,7 @@ static void APIENTRY ddi10DefaultConstantBufferUpdateSubresourceUP(
     UINT DepthPitch                  // The offset, in bytes, to move to the next depth slice of source data.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -178,6 +305,7 @@ static void APIENTRY ddi11_1VsSetConstantBuffers(
     const UINT* pNumConstants   // The number of constants in the buffer pointed to by StartBuffer.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -192,6 +320,7 @@ static void APIENTRY ddi10VsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -206,6 +335,7 @@ static void APIENTRY ddi10PsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews // An array of handles to the shader resource views
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -218,6 +348,7 @@ static void APIENTRY ddi10PsSetShader(
     D3D10DDI_HSHADER hShader  // A handle to the pixel shader code object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -233,6 +364,7 @@ static void APIENTRY ddi10PsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers // An array of handles to the samplers.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -256,6 +388,7 @@ static void APIENTRY ddi10VsSetShader(
     D3D10DDI_HSHADER hShader // A handle to the vertex shader code object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -272,6 +405,7 @@ static void APIENTRY ddi10DrawIndexed(
                            // to determine the actual index of the vertex elements in each vertex stream.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartIndexLocation = %u, BaseVertexLocation = %u, IndexCount = %u\n", pDevice, StartIndexLocation, BaseVertexLocation, IndexCount));
@@ -285,6 +419,7 @@ static void APIENTRY ddi10Draw(
     UINT StartVertexLocation // The first vertex in the vertex buffer to draw the primitives.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, VertexCount = %u, StartVertexLocation = %u\n", pDevice, VertexCount, StartVertexLocation));
@@ -301,6 +436,7 @@ static void APIENTRY ddi10DynamicIABufferMapNoOverwrite(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -315,6 +451,7 @@ static void APIENTRY ddi10DynamicIABufferUnmap(
     UINT Subresource              // An index that indicates the subresource to unmap.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -332,6 +469,7 @@ static void APIENTRY ddi10DynamicConstantBufferMapDiscard(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -349,6 +487,7 @@ static void APIENTRY ddi10DynamicIABufferMapDiscard(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -363,6 +502,7 @@ static void APIENTRY ddi10DynamicConstantBufferUnmap(
     UINT Subresource              // An index that indicates the subresource to unmap.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -380,6 +520,7 @@ static void APIENTRY ddi11_1PsSetConstantBuffers(
     const UINT* pNumConstants   // The number of constants in the buffer pointed to by StartBuffer.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -394,6 +535,7 @@ static void APIENTRY ddi10PsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -406,6 +548,7 @@ static void APIENTRY ddi10IaSetInputLayout(
     D3D10DDI_HELEMENTLAYOUT hInputLayout // A handle to the input layout object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXELEMENTLAYOUT pInputLayout = (PVBOXDXELEMENTLAYOUT)hInputLayout.pDrvPrivate;
@@ -423,6 +566,7 @@ static void APIENTRY ddi10IaSetVertexBuffers(
     const UINT* pOffsets  // An array of values that indicate the offsets, in bytes, into each vertex buffer.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -438,6 +582,7 @@ static void APIENTRY ddi10IaSetIndexBuffer(
     UINT Offset         // The offset, in bytes, into the index buffer.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, Format = %u, Offset = %u\n", pDevice, Format, Offset));
@@ -455,6 +600,7 @@ static void APIENTRY ddi10DrawIndexedInstanced(
     UINT StartInstanceLocation  // The first instance of the index buffer that indexes are read from to draw the primitives.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, IndexCountPerInstance = %u, InstanceCount = %u, StartIndexLocation = %u, BaseVertexLocation = %u, StartInstanceLocation = %u\n", pDevice, IndexCountPerInstance, InstanceCount, StartIndexLocation, BaseVertexLocation, StartInstanceLocation));
@@ -470,6 +616,7 @@ static void APIENTRY ddi10DrawInstanced(
     UINT StartInstanceLocation   // The first instance of the buffer that vertices are read from to draw the primitives.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, VertexCountPerInstance = %u, InstanceCount = %u, StartVertexLocation = %u, StartInstanceLocation = %u\n", pDevice, VertexCountPerInstance, InstanceCount, StartVertexLocation, StartInstanceLocation));
@@ -486,6 +633,7 @@ static void APIENTRY ddi10DynamicResourceMapDiscard(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -500,6 +648,7 @@ static void APIENTRY ddi10DynamicResourceUnmap(
     UINT Subresource              // An index that indicates the subresource to unmap.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -517,6 +666,7 @@ static void APIENTRY ddi11_1GsSetConstantBuffers(
     const UINT* pNumConstants   // The number of constants in the buffer pointed to by StartBuffer.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -531,6 +681,7 @@ static void APIENTRY ddi10GsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -543,6 +694,7 @@ static void APIENTRY ddi10GsSetShader(
     D3D10DDI_HSHADER hShader // A handle to the shader code object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -556,6 +708,7 @@ static void APIENTRY ddi10IaSetTopology(
     D3D10_DDI_PRIMITIVE_TOPOLOGY PrimitiveTopology // The primitive topology to set.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, PrimitiveTopology = %u\n", pDevice, PrimitiveTopology));
@@ -575,6 +728,7 @@ static void APIENTRY ddi10StagingResourceMap(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -589,6 +743,7 @@ static void APIENTRY ddi10StagingResourceUnmap(
     UINT Subresource              // An index that indicates the subresource to unmap.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -604,6 +759,7 @@ static void APIENTRY ddi10VsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews // An array of handles to the shader resource views
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -618,6 +774,7 @@ static void APIENTRY ddi10VsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers // An array of handles to the samplers.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -643,6 +800,7 @@ static void APIENTRY ddi10GsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews // An array of handles to the shader resource views
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -657,6 +815,7 @@ static void APIENTRY ddi10GsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers // An array of handles to the samplers.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -689,6 +848,7 @@ static void APIENTRY ddi11SetRenderTargets(
     UINT UAVRangeSize   // The number of UAVs in the set of all updated UAVs (which includes NULL bindings).
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice %p, NumRTVs %u, ClearSlots %u, UAVStartSlot %u, NumUAVs %u, UAVRangeStart %u, UAVRangeSize %u\n",
@@ -737,6 +897,7 @@ static void APIENTRY ddi10SetRenderTargets(
     D3D10DDI_HDEPTHSTENCILVIEW hDepthStencilView               // A handle to the depth-stencil buffer to set.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice %p, NumRTVs %u, ClearSlots %u\n",
@@ -757,6 +918,7 @@ static void APIENTRY ddi10ShaderResourceViewReadAfterWriteHazard(
     D3D10DDI_HRESOURCE hShaderResourceView  // A handle to the driver's private data for a shader resource view object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -770,6 +932,7 @@ static void APIENTRY ddi10ResourceReadAfterWriteHazard(
     D3D10DDI_HRESOURCE hResource // A handle to the resource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -784,6 +947,7 @@ static void APIENTRY ddi10SetBlendState(
     UINT SampleMask              // A sample format mask.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_BLENDSTATE pBlendState = (PVBOXDX_BLENDSTATE)hBlendState.pDrvPrivate;
@@ -818,6 +982,7 @@ static void APIENTRY ddi10SetDepthStencilState(
     UINT StencilRef                     // A stencil reference value to compare against.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_DEPTHSTENCIL_STATE pDepthStencilState = (PVBOXDX_DEPTHSTENCIL_STATE)hDepthStencilState.pDrvPrivate;
@@ -831,6 +996,7 @@ static void APIENTRY ddi10SetRasterizerState(
     D3D10DDI_HRASTERIZERSTATE hRasterizerState // A handle to the rasterizer state object.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RASTERIZER_STATE pRasterizerState = (PVBOXDX_RASTERIZER_STATE)hRasterizerState.pDrvPrivate;
@@ -844,6 +1010,7 @@ static void APIENTRY ddi10QueryEnd(
     D3D10DDI_HQUERY  hQuery   // A handle to the query object to end.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -857,6 +1024,7 @@ static void APIENTRY ddi10QueryBegin(
     D3D10DDI_HQUERY hQuery   // A handle to the query object to begin.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -879,6 +1047,7 @@ static void APIENTRY ddi11_1ResourceCopyRegion(
     UINT CopyFlags // A value that specifies characteristics of copy operation as a bitwise OR of the values in the D3D11_1_DDI_COPY_FLAGS enumeration type.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -902,6 +1071,7 @@ static void APIENTRY ddi10ResourceCopyRegion(
                                   // If pSrcBox is NULL, the driver should copy the entire source subresouce to the destination.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -923,6 +1093,7 @@ static void APIENTRY ddi11_1ResourceUpdateSubresourceUP(
     UINT CopyFlags                   // A bitwise OR of the values in the D3D11_1_DDI_COPY_FLAGS
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -942,6 +1113,7 @@ static void APIENTRY ddi10ResourceUpdateSubresourceUP(
     UINT DepthPitch                  // The offset, in bytes, to move to the next depth slice of source data.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -961,6 +1133,7 @@ static void APIENTRY ddi10SoSetTargets(
     const UINT* pOffsets // An array of offsets, in bytes, into the stream output target resources in the array that phResource specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, NumBuffers = %u, ClearTargets = %u\n", pDevice, NumBuffers, ClearTargets));
@@ -997,6 +1170,7 @@ static void APIENTRY ddi10SoSetTargets(
 
 static void APIENTRY ddi10DrawAuto(D3D10DDI_HDEVICE hDevice)
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p\n", pDevice));
@@ -1011,6 +1185,7 @@ static void APIENTRY ddi10SetViewports(
     const D3D10_DDI_VIEWPORT* pViewports // An array of D3D10_DDI_VIEWPORT structures for the viewports to set.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, NumViewports %u, ClearViewports %u\n", pDevice, NumViewports, ClearViewports));
@@ -1025,6 +1200,7 @@ static void APIENTRY ddi10SetScissorRects(
     const D3D10_DDI_RECT* pRects // An array of scissor rectangles.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, NumRects %u, ClearRects %u\n", pDevice, NumRects, ClearRects));
@@ -1038,6 +1214,7 @@ static void APIENTRY ddi10ClearRenderTargetView(
     FLOAT ColorRGBA[4] // A four-element array of single-precision float vectors that the driver uses to clear a render-target view.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXRENDERTARGETVIEW pRenderTargetView = (PVBOXDXRENDERTARGETVIEW)hRenderTargetView.pDrvPrivate;
@@ -1054,6 +1231,7 @@ static void APIENTRY ddi10ClearDepthStencilView(
     UINT8 Stencil  // An unsigned 8-bit integer value to set the stencil to.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXDEPTHSTENCILVIEW pDepthStencilView = (PVBOXDXDEPTHSTENCILVIEW)hDepthStencilView.pDrvPrivate;
@@ -1068,6 +1246,7 @@ static void APIENTRY ddi10SetPredication(
     BOOL PredicateValue     // A Boolean value to compare with query data.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -1084,6 +1263,7 @@ static void APIENTRY ddi10QueryGetData(
     UINT Flags     // Can be 0 or any combination of the flags enumerated by D3D11_ASYNC_GETDATA_FLAG.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -1098,6 +1278,7 @@ static BOOL APIENTRY ddi11_1Flush(
                     // the driver should continue to submit command buffers if there have been no new commands.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, Flags = 0x%x\n", pDevice, FlushFlags));
@@ -1110,6 +1291,7 @@ static VOID APIENTRY ddi10Flush(
     D3D10DDI_HDEVICE hDevice
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p\n", pDevice));
@@ -1122,6 +1304,7 @@ static void APIENTRY ddi10GenMips(
     D3D10DDI_HSHADERRESOURCEVIEW hShaderResourceView // A handle to the MIP-map texture surface.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADERRESOURCEVIEW pShaderResourceView = (PVBOXDXSHADERRESOURCEVIEW)hShaderResourceView.pDrvPrivate;
@@ -1136,6 +1319,7 @@ static void APIENTRY ddi10ResourceCopy(
     D3D10DDI_HRESOURCE hSrcResource  // A handle to the source resource to copy from.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -1155,6 +1339,7 @@ static void APIENTRY ddi10ResourceResolveSubresource(
     DXGI_FORMAT ResolveFormat        // A DXGI_FORMAT-typed value that indicates how to interpret the contents of the resolved resource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)hDstResource.pDrvPrivate;
@@ -1175,6 +1360,7 @@ static void APIENTRY ddi10ResourceMap(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource // A pointer to a D3D10DDI_MAPPED_SUBRESOURCE structure that receives the information about the mapped subresource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1189,6 +1375,7 @@ static void APIENTRY ddi10ResourceUnmap(
     UINT Subresource              // An index that indicates the subresource to unmap.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1202,6 +1389,7 @@ BOOL APIENTRY vboxDXResourceIsStagingBusy(
     D3D10DDI_HRESOURCE hResource
 )
 {
+    DX_DDI_ENTER;
     DEBUG_BREAKPOINT_TEST();
     RT_NOREF(hDevice, hResource);
     LogFlowFuncEnter();
@@ -1337,6 +1525,7 @@ static void APIENTRY ddi11CreateResource(
     D3D10DDI_HRTRESOURCE hRTResource // A handle to the resource to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1367,6 +1556,7 @@ static void APIENTRY ddi10CreateResource(
     D3D10DDI_HRTRESOURCE hRTResource // A handle to the resource to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1413,6 +1603,7 @@ static void APIENTRY ddi10OpenResource(
     D3D10DDI_HRTRESOURCE hRTResource // A handle to the resource to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1427,6 +1618,7 @@ static void APIENTRY ddi10DestroyResource(
     D3D10DDI_HRESOURCE hResource // A handle to the driver's private data for the resource.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -1469,6 +1661,7 @@ static void APIENTRY ddi11CreateShaderResourceView(
     D3D10DDI_HRTSHADERRESOURCEVIEW hRTShaderResourceView // A handle to the shader to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateShaderResourceView->hDrvResource.pDrvPrivate;
@@ -1514,6 +1707,7 @@ static void APIENTRY ddi10_1CreateShaderResourceView(
     D3D10DDI_HRTSHADERRESOURCEVIEW hRTShaderResourceView // A handle to the shader to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateShaderResourceView->hDrvResource.pDrvPrivate;
@@ -1556,6 +1750,7 @@ static void APIENTRY ddi10CreateShaderResourceView(
     D3D10DDI_HRTSHADERRESOURCEVIEW hRTShaderResourceView // A handle to the shader to use for calls back into the Direct3D runtime.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateShaderResourceView->hDrvResource.pDrvPrivate;
@@ -1599,6 +1794,7 @@ static void APIENTRY ddi10DestroyShaderResourceView(
     D3D10DDI_HSHADERRESOURCEVIEW hShaderResourceView // A handle to the driver's private data for the shader resource view object to destroy.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADERRESOURCEVIEW pShaderResourceView = (PVBOXDXSHADERRESOURCEVIEW)hShaderResourceView.pDrvPrivate;
@@ -1623,6 +1819,7 @@ static void APIENTRY ddi10CreateRenderTargetView(
     D3D10DDI_HRTRENDERTARGETVIEW hRTRenderTargetView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateRenderTargetView->hDrvResource.pDrvPrivate;
@@ -1663,6 +1860,7 @@ static void APIENTRY ddi10DestroyRenderTargetView(
     D3D10DDI_HRENDERTARGETVIEW hRenderTargetView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXRENDERTARGETVIEW pRenderTargetView = (PVBOXDXRENDERTARGETVIEW)hRenderTargetView.pDrvPrivate;
@@ -1698,6 +1896,7 @@ static void APIENTRY ddi11CreateDepthStencilView(
     D3D10DDI_HRTDEPTHSTENCILVIEW hRTDepthStencilView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateDepthStencilView->hDrvResource.pDrvPrivate;
@@ -1735,6 +1934,7 @@ static void APIENTRY ddi10CreateDepthStencilView(
     D3D10DDI_HRTDEPTHSTENCILVIEW hRTDepthStencilView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateDepthStencilView->hDrvResource.pDrvPrivate;
@@ -1769,6 +1969,7 @@ static void APIENTRY ddi10DestroyDepthStencilView(
     D3D10DDI_HDEPTHSTENCILVIEW hDepthStencilView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXDEPTHSTENCILVIEW pDepthStencilView = (PVBOXDXDEPTHSTENCILVIEW)hDepthStencilView.pDrvPrivate;
@@ -1795,6 +1996,7 @@ static void APIENTRY ddi10CreateElementLayout(
     D3D10DDI_HRTELEMENTLAYOUT hRTElementLayout
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXELEMENTLAYOUT pElementLayout = (PVBOXDXELEMENTLAYOUT)hElementLayout.pDrvPrivate;
@@ -1813,6 +2015,7 @@ static void APIENTRY ddi10DestroyElementLayout(
     D3D10DDI_HELEMENTLAYOUT hElementLayout
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXELEMENTLAYOUT pElementLayout = (PVBOXDXELEMENTLAYOUT)hElementLayout.pDrvPrivate;
@@ -1858,6 +2061,7 @@ static void APIENTRY ddi11_1CreateBlendState(
     D3D10DDI_HRTBLENDSTATE hRTBlendState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_BLENDSTATE pBlendState = (PVBOXDX_BLENDSTATE)hBlendState.pDrvPrivate;
@@ -1877,6 +2081,7 @@ static void APIENTRY ddi10_1CreateBlendState(
     D3D10DDI_HRTBLENDSTATE hRTBlendState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_BLENDSTATE pBlendState = (PVBOXDX_BLENDSTATE)hBlendState.pDrvPrivate;
@@ -1912,6 +2117,7 @@ static void APIENTRY ddi10CreateBlendState(
     D3D10DDI_HRTBLENDSTATE hRTBlendState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_BLENDSTATE pBlendState = (PVBOXDX_BLENDSTATE)hBlendState.pDrvPrivate;
@@ -1943,6 +2149,7 @@ static void APIENTRY ddi10DestroyBlendState(
     D3D10DDI_HBLENDSTATE hBlendState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_BLENDSTATE pBlendState = (PVBOXDX_BLENDSTATE)hBlendState.pDrvPrivate;
@@ -1968,6 +2175,7 @@ static void APIENTRY ddi10CreateDepthStencilState(
     D3D10DDI_HRTDEPTHSTENCILSTATE hRTDepthStencilState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_DEPTHSTENCIL_STATE pDepthStencilState = (PVBOXDX_DEPTHSTENCIL_STATE)hDepthStencilState.pDrvPrivate;
@@ -1984,6 +2192,7 @@ static void APIENTRY ddi10DestroyDepthStencilState(
     D3D10DDI_HDEPTHSTENCILSTATE hDepthStencilState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_DEPTHSTENCIL_STATE pDepthStencilState = (PVBOXDX_DEPTHSTENCIL_STATE)hDepthStencilState.pDrvPrivate;
@@ -2019,6 +2228,7 @@ static void APIENTRY ddi11_1CreateRasterizerState(
     D3D10DDI_HRTRASTERIZERSTATE hRTRasterizerState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RASTERIZER_STATE pRasterizerState = (PVBOXDX_RASTERIZER_STATE)hRasterizerState.pDrvPrivate;
@@ -2037,6 +2247,7 @@ static void APIENTRY ddi10CreateRasterizerState(
     D3D10DDI_HRTRASTERIZERSTATE hRTRasterizerState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RASTERIZER_STATE pRasterizerState = (PVBOXDX_RASTERIZER_STATE)hRasterizerState.pDrvPrivate;
@@ -2063,6 +2274,7 @@ static void APIENTRY ddi10DestroyRasterizerState(
     D3D10DDI_HRASTERIZERSTATE hRasterizerState
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RASTERIZER_STATE pRasterizerState = (PVBOXDX_RASTERIZER_STATE)hRasterizerState.pDrvPrivate;
@@ -2109,6 +2321,7 @@ static void APIENTRY ddi11_1CreateVertexShader(
     const D3D11_1DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2129,6 +2342,7 @@ static void APIENTRY ddi10CreateVertexShader(
     const D3D10DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2180,6 +2394,7 @@ static void APIENTRY ddi11_1CreateGeometryShader(
     const D3D11_1DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2200,6 +2415,7 @@ static void APIENTRY ddi10CreateGeometryShader(
     const D3D10DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2252,6 +2468,7 @@ static void APIENTRY ddi11_1CreatePixelShader(
     const D3D11_1DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2272,6 +2489,7 @@ static void APIENTRY ddi10CreatePixelShader(
     const D3D10DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2369,6 +2587,7 @@ static void APIENTRY ddi11_1CreateGeometryShaderWithStreamOutput(
     const D3D11_1DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2393,6 +2612,7 @@ static void APIENTRY ddi11CreateGeometryShaderWithStreamOutput(
     const D3D10DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2448,6 +2668,7 @@ static void APIENTRY ddi10CreateGeometryShaderWithStreamOutput(
     const D3D10DDIARG_STAGE_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2515,6 +2736,7 @@ static void APIENTRY ddi10DestroyShader(
     D3D10DDI_HSHADER hShader
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2540,6 +2762,7 @@ static void APIENTRY ddi10CreateSampler(
     D3D10DDI_HRTSAMPLER hRTSampler
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     VBOXDX_SAMPLER_STATE *pSamplerState = (PVBOXDX_SAMPLER_STATE)hSampler.pDrvPrivate;
@@ -2556,6 +2779,7 @@ static void APIENTRY ddi10DestroySampler(
     D3D10DDI_HSAMPLER hSampler
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     VBOXDX_SAMPLER_STATE *pSamplerState = (PVBOXDX_SAMPLER_STATE)hSampler.pDrvPrivate;
@@ -2580,6 +2804,7 @@ static void APIENTRY ddi10CreateQuery(
     D3D10DDI_HRTQUERY hRTQuery
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -2594,6 +2819,7 @@ static void APIENTRY ddi10DestroyQuery(
     D3D10DDI_HQUERY hQuery
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXQUERY pQuery = (PVBOXDXQUERY)hQuery.pDrvPrivate;
@@ -2757,6 +2983,7 @@ void APIENTRY vboxDXCheckFormatSupport(
     UINT* pFormatCaps
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXADAPTER pVBoxAdapter = pDevice->pAdapter;
@@ -2808,6 +3035,7 @@ void APIENTRY vboxDXCheckMultisampleQualityLevels(
     UINT* pNumQualityLevels
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     //LogFlowFunc(("pDevice 0x%p, Format %d, SampleCount %d", pDevice, Format, SampleCount));
@@ -2844,6 +3072,7 @@ static void APIENTRY ddi10CheckCounterInfo(
     D3D10DDI_COUNTER_INFO* pCounterInfo
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     RT_NOREF(pDevice);
@@ -2865,6 +3094,7 @@ static void APIENTRY ddi10CheckCounter(
     UINT* pDescriptionLength
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     RT_NOREF(hDevice, Query, pCounterType, pActiveCounters, pDescription, pNameLength, pName,
         pUnitsLength, pUnits, pDescriptionLength);
@@ -2877,6 +3107,7 @@ static void APIENTRY ddi10SetTextFilterSize(
     UINT Height
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     RT_NOREF(hDevice, Width, Height);
     LogFlowFunc(("%dx%d", Width, Height));
@@ -2935,6 +3166,7 @@ static void APIENTRY ddi11DrawIndexedInstancedIndirect(
     UINT AlignedByteOffsetForArgs
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hBufferForArgs.pDrvPrivate;
@@ -2949,6 +3181,7 @@ static void APIENTRY ddi11DrawInstancedIndirect(
     UINT AlignedByteOffsetForArgs
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hBufferForArgs.pDrvPrivate;
@@ -2964,6 +3197,7 @@ static void APIENTRY ddi10HsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -2976,6 +3210,7 @@ static void APIENTRY ddi10HsSetShader(
     D3D10DDI_HSHADER hShader
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -2991,6 +3226,7 @@ static void APIENTRY ddi10HsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -3018,6 +3254,7 @@ static void APIENTRY ddi11_1HsSetConstantBuffers(
     const UINT* pNumConstants
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3032,6 +3269,7 @@ static void APIENTRY ddi10HsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3046,6 +3284,7 @@ static void APIENTRY ddi10DsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -3058,6 +3297,7 @@ static void APIENTRY ddi10DsSetShader(
     D3D10DDI_HSHADER hShader
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3073,6 +3313,7 @@ static void APIENTRY ddi10DsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -3100,6 +3341,7 @@ static void APIENTRY ddi11_1DsSetConstantBuffers(
     const UINT* pNumConstants
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3114,6 +3356,7 @@ static void APIENTRY ddi10DsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3129,6 +3372,7 @@ static void APIENTRY ddi11_1CreateHullShader(
     const D3D11_1DDIARG_TESSELLATION_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3150,6 +3394,7 @@ static void APIENTRY ddi11CreateHullShader(
     const D3D11DDIARG_TESSELLATION_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3213,6 +3458,7 @@ static void APIENTRY ddi11_1CreateDomainShader(
     const D3D11_1DDIARG_TESSELLATION_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3234,6 +3480,7 @@ static void APIENTRY ddi11CreateDomainShader(
     const D3D11DDIARG_TESSELLATION_IO_SIGNATURES* pSignatures
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3404,6 +3651,7 @@ static void APIENTRY ddi11CreateComputeShader(
     D3D10DDI_HRTSHADER hRTShader
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3419,6 +3667,7 @@ static void APIENTRY ddi10CsSetShader(
     D3D10DDI_HSHADER hShader
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXSHADER pShader = (PVBOXDXSHADER)hShader.pDrvPrivate;
@@ -3434,6 +3683,7 @@ static void APIENTRY ddi10CsSetShaderResources(
     const D3D10DDI_HSHADERRESOURCEVIEW* phShaderResourceViews
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -3448,6 +3698,7 @@ static void APIENTRY ddi10CsSetSamplers(
     const D3D10DDI_HSAMPLER* phSamplers
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumSamplers = %u\n", pDevice, StartSlot, NumSamplers));
@@ -3475,6 +3726,7 @@ static void APIENTRY ddi11_1CsSetConstantBuffers(
     const UINT* pNumConstants
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3489,6 +3741,7 @@ static void APIENTRY ddi10CsSetConstantBuffers(
     const D3D10DDI_HRESOURCE* phBuffers // An array of handles to the constant buffers, beginning with the buffer that StartBuffer specifies.
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumBuffers = %u\n", pDevice, StartSlot, NumBuffers));
@@ -3512,6 +3765,7 @@ static void APIENTRY ddi11CreateUnorderedAccessView(
     D3D11DDI_HRTUNORDEREDACCESSVIEW hRTUnorderedAccessView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)pCreateUnorderedAccessView->hDrvResource.pDrvPrivate;
@@ -3549,6 +3803,7 @@ static void APIENTRY ddi11DestroyUnorderedAccessView(
     D3D11DDI_HUNORDEREDACCESSVIEW hUnorderedAccessView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXUNORDEREDACCESSVIEW pUnorderedAccessView = (PVBOXDXUNORDEREDACCESSVIEW)hUnorderedAccessView.pDrvPrivate;
@@ -3563,6 +3818,7 @@ static void APIENTRY ddi11ClearUnorderedAccessViewUint(
     const UINT Values[4]
 )
 {
+    DX_DDI_ENTER;
     DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXUNORDEREDACCESSVIEW pUnorderedAccessView = (PVBOXDXUNORDEREDACCESSVIEW)hUnorderedAccessView.pDrvPrivate;
@@ -3577,6 +3833,7 @@ static void APIENTRY ddi11ClearUnorderedAccessViewFloat(
     const FLOAT Values[4]
 )
 {
+    DX_DDI_ENTER;
     DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDXUNORDEREDACCESSVIEW pUnorderedAccessView = (PVBOXDXUNORDEREDACCESSVIEW)hUnorderedAccessView.pDrvPrivate;
@@ -3593,6 +3850,7 @@ static void APIENTRY ddi11CsSetUnorderedAccessViews(
     const UINT* pUAVInitialCounts
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, StartSlot = %u, NumViews = %u\n", pDevice, StartSlot, NumViews));
@@ -3620,6 +3878,7 @@ static void APIENTRY ddi11Dispatch(
     UINT ThreadGroupCountZ
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice = %p, ThreadGroupCountX %u, ThreadGroupCountY %u, ThreadGroupCountZ %u\n", pDevice, ThreadGroupCountX, ThreadGroupCountY, ThreadGroupCountZ));
@@ -3633,6 +3892,7 @@ static void APIENTRY ddi11DispatchIndirect(
     UINT AlignedByteOffsetForArgs
 )
 {
+    DX_DDI_ENTER;
     DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hBufferForArgs.pDrvPrivate;
@@ -3647,6 +3907,7 @@ void APIENTRY vboxDXSetResourceMinLOD(
     FLOAT MinLOD
 )
 {
+    DX_DDI_ENTER;
     DEBUG_BREAKPOINT_TEST();
     RT_NOREF(hDevice, hResource, MinLOD);
     LogFlowFuncEnter();
@@ -3659,6 +3920,7 @@ static void APIENTRY ddi11CopyStructureCount(
     D3D11DDI_HUNORDEREDACCESSVIEW hSrcView
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pDstBuffer = (PVBOXDX_RESOURCE)hDstBuffer.pDrvPrivate;
@@ -3676,6 +3938,7 @@ static void APIENTRY ddi11_1Discard(
     UINT NumRects
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice %p, HandleType %u, hResourceOrView %p, NumRect %u\n", pDevice, HandleType, hResourceOrView, NumRects));
@@ -3708,6 +3971,7 @@ static void APIENTRY ddi10DynamicConstantBufferMapNoOverwrite(
     D3D10DDI_MAPPED_SUBRESOURCE* pMappedSubResource
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -3724,6 +3988,7 @@ static void APIENTRY ddi11_1CheckDirectFlipSupport(
     BOOL* pSupported
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
@@ -3744,6 +4009,7 @@ static void APIENTRY ddi11_1ClearView(
     UINT NumRects
 )
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)hDevice.pDrvPrivate;
     LogFlowFunc(("pDevice 0x%p, ViewType %d, pView %p, pRect %p, NumRects %u", pDevice, ViewType, hView, pRect, NumRects));
@@ -3814,6 +4080,7 @@ static void APIENTRY ddi11_1ClearView(
 
 static HRESULT APIENTRY dxgiPresent(DXGI_DDI_ARG_PRESENT *pPresentArg)
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)pPresentArg->hDevice;
     PVBOXDX_RESOURCE pSrcResource = (PVBOXDX_RESOURCE)pPresentArg->hSurfaceToPresent;
@@ -3884,6 +4151,7 @@ HRESULT APIENTRY vboxDXGISetResourcePriority(DXGI_DDI_ARG_SETRESOURCEPRIORITY *)
 
 static HRESULT APIENTRY dxgiQueryResourceResidency(DXGI_DDI_ARG_QUERYRESOURCERESIDENCY *pQueryResourceResidency)
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)pQueryResourceResidency->hDevice;
     PVBOXDX_RESOURCE *papResources = (PVBOXDX_RESOURCE *)pQueryResourceResidency->pResources;
@@ -3948,6 +4216,7 @@ static HRESULT APIENTRY dxgiQueryResourceResidency(DXGI_DDI_ARG_QUERYRESOURCERES
 
 static HRESULT APIENTRY dxgiRotateResourceIdentities(DXGI_DDI_ARG_ROTATE_RESOURCE_IDENTITIES *pRotateResourceIdentities)
 {
+    DX_DDI_ENTER;
     // DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)pRotateResourceIdentities->hDevice;
     LogFlowFunc(("pDevice 0x%p, Resources %d", pDevice, pRotateResourceIdentities->Resources));
@@ -3960,6 +4229,7 @@ static HRESULT APIENTRY dxgiRotateResourceIdentities(DXGI_DDI_ARG_ROTATE_RESOURC
 
 static HRESULT APIENTRY dxgiBlt(DXGI_DDI_ARG_BLT *pBlt)
 {
+    DX_DDI_ENTER;
     //DEBUG_BREAKPOINT_TEST();
     PVBOXDX_DEVICE pDevice = (PVBOXDX_DEVICE)pBlt->hDevice;
     PVBOXDX_RESOURCE pDstResource = (PVBOXDX_RESOURCE)pBlt->hDstResource;
