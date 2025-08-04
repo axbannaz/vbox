@@ -110,7 +110,6 @@ void UpdateAgentTask::handler(void)
 *   Update agent base class implementation                                                                                       *
 *********************************************************************************************************************************/
 
-#if 1 || defined(RT_OS_LINUX)
 /** A i_appendPlatformInfo() helper that replaces bad characters with spaces. */
 static char *sanitizeUserAgentString(char *psz, const char *pszBadChars = "|[]:;<>")
 {
@@ -120,7 +119,6 @@ static char *sanitizeUserAgentString(char *psz, const char *pszBadChars = "|[]:;
         *psz++ = ' ';
     return pszRet;
 }
-#endif
 
 /**
  * Returns platform information as a string.
@@ -161,16 +159,15 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
 # error "Unexpected RT_ARCH_XXX"
 #endif
 
-#if 1
     /*
      * Get some very basic HW info.
-     * Do this before the linux stuff, as it may  dump too much info on us.
+     * Do this before the linux stuff, as it may dump too much info on us.
      */
     uint64_t cbRam = 0;
     RTSystemQueryTotalRam(&cbRam);
     a_rStr.appendPrintf(" [HW: ram=%RU64M;cpus=%u:", cbRam / _1M, RTMpGetOnlineCount());
 
-# if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
     /* Get the CPU vendor (shorten it if possible) and basic model info. */
     uint32_t uEax, uEbx, uEcx, uEdx;
     ASMCpuIdExSlow(0, 0, 0, 0, &uEax, &uEbx, &uEcx, &uEdx);
@@ -191,40 +188,35 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
     ASMCpuIdExSlow(1, 0, 0, 0, &uEax, &uEbx, &uEcx, &uEdx);
     a_rStr.appendPrintf("%s:%#x", pszVendor, uEax);
 
-# else
+#else
     vrc = RTMpGetDescription(NIL_RTCPUID, szTmp, RT_MIN(sizeof(szTmp), 64));
     if (RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW)
         sanitizeUserAgentString(szTmp);
     else
         szTmp[0] = '\0';
     a_rStr.append(RTStrStrip(szTmp));
-# endif
+#endif
 
     /* NEM & HM support for the host architecture: */
     BOOL fIsNativeApiSupported = FALSE;
     BOOL fIsHwVirtSupported = FALSE;
-# if defined(RT_ARCH_ARM64) || defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+#if defined(RT_ARCH_ARM64) || defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
     ComPtr<IHost> ptrHost;
     HRESULT hrc = m_VirtualBox->COMGETTER(Host)(ptrHost.asOutParam());
     if (SUCCEEDED(hrc))
     {
-#  if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+# if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
         ptrHost->IsExecutionEngineSupported(CPUArchitecture_x86, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
         ptrHost->IsExecutionEngineSupported(CPUArchitecture_x86, VMExecutionEngine_HwVirt, &fIsHwVirtSupported);
-#  else
-        ptrHost->IsExecutionEngineSupported(CPUArchitecture_ARMv8_64, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
-#  endif
-    }
 # else
-#  error "port me"
+        ptrHost->IsExecutionEngineSupported(CPUArchitecture_ARMv8_64, VMExecutionEngine_NativeApi, &fIsNativeApiSupported);
 # endif
+    }
+#else
+# error "port me"
+#endif
     a_rStr.append(fIsNativeApiSupported ? ";NEM" : ";no-NEM");
     a_rStr.append(fIsHwVirtSupported    ? ":HM"  : ":no-HM");
-
-    const char *pszPfx = "| ";
-#else
-    const char *pszPfx = "[";
-#endif
 
 #ifdef RT_OS_LINUX
     /*
@@ -341,9 +333,9 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
                         && strchr(pszStdOutBuf, '\n') == NULL
                         && strchr(pszStdOutBuf, '\r') == NULL)
                     {
-                        a_rStr.appendPrintf(" %s%s]", pszPfx, pszSanitized);
+                        a_rStr.appendPrintf(" | %s]", pszSanitized);
                         // For testing, here is some sample output:
-                        //a_rStr.appendPrintf(" %sDistribution: Redhat | Version: 7.6.1810 | Kernel: Linux version 3.10.0-952.27.2.el7.x86_64 (gcc version 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) ) #1 SMP Mon Jul 29 17:46:05 UTC 2019]", pszPfx);
+                        //a_rStr.appendPrintf(" | Distribution: Redhat | Version: 7.6.1810 | Kernel: Linux version 3.10.0-952.27.2.el7.x86_64 (gcc version 4.8.5 20150623 (Red Hat 4.8.5-36) (GCC) ) #1 SMP Mon Jul 29 17:46:05 UTC 2019]");
                     }
                     else
                         vrc = VERR_TRY_AGAIN; /* (take the fallback path) */
@@ -362,31 +354,19 @@ void UpdateAgentBase::i_appendPlatformInfo(Utf8Str &a_rStr)
          */
         vrc = RTSystemQueryOSInfo(RTSYSOSINFO_PRODUCT, szTmp, sizeof(szTmp));
         if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-        {
-            a_rStr.appendPrintf(" %sProduct: %s", pszPfx, szTmp);
-            pszPfx = "| ";
-        }
+            a_rStr.appendPrintf(" | Product: %s", szTmp);
 
         vrc = RTSystemQueryOSInfo(RTSYSOSINFO_RELEASE, szTmp, sizeof(szTmp));
         if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-        {
-            a_rStr.appendPrintf(" %sRelease: %s", pszPfx, szTmp);
-            pszPfx = "| ";
-        }
+            a_rStr.appendPrintf(" | Release: %s", szTmp);
 
         vrc = RTSystemQueryOSInfo(RTSYSOSINFO_VERSION, szTmp, sizeof(szTmp));
         if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-        {
-            a_rStr.appendPrintf(" %sVersion: %s", pszPfx, szTmp);
-            pszPfx = "| ";
-        }
+            a_rStr.appendPrintf(" | Version: %s", szTmp);
 
         vrc = RTSystemQueryOSInfo(RTSYSOSINFO_SERVICE_PACK, szTmp, sizeof(szTmp));
         if ((RT_SUCCESS(vrc) || vrc == VERR_BUFFER_OVERFLOW) && szTmp[0] != '\0')
-        {
-            a_rStr.appendPrintf(" %sSP: %s", pszPfx, szTmp);
-            pszPfx = "| ";
-        }
+            a_rStr.appendPrintf(" | SP: %s", szTmp);
 
         a_rStr.append(']');
     }
@@ -1155,7 +1135,7 @@ DECLCALLBACK(HRESULT) HostUpdateAgent::i_checkForUpdateTask(UpdateAgentTask *pTa
     Utf8StrFmt strUserAgent("VirtualBox %ls <", version.raw());
     i_appendPlatformInfo(strUserAgent);
     strUserAgent.append('>');
-    LogRel2(("Update agent (%s): Using user agent '%s'\n",  mData.m_strName.c_str(), strUserAgent.c_str()));
+    LogRel2(("Update agent (%s): Using user agent '%s'\n", mData.m_strName.c_str(), strUserAgent.c_str())); // dont commit
 
     /*
      * Create the HTTP client instance and pass it to a inner worker method to
