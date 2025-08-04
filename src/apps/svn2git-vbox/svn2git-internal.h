@@ -97,12 +97,12 @@ DECLINLINE(void *) s2gScratchBufEnsureSize(PS2GSCRATCHBUF pBuf, size_t cbFree)
 
 DECLINLINE(int) s2gScratchBufPrintf(PS2GSCRATCHBUF pBuf, const char *pszFmt, ...) RT_IPRT_FORMAT_ATTR(1, 2)
 {
-    va_list va;
-    va_start(va, pszFmt);
-
     /* Ensure we have at least 1 byte free to not make RTStrePrintf2V assert. */
     if (!s2gScratchBufEnsureSize(pBuf, 1))
         return VERR_NO_MEMORY;
+
+    va_list va;
+    va_start(va, pszFmt);
 
     int rc = VINF_SUCCESS;
     ssize_t cchReq = RTStrPrintf2V(pBuf->pbBuf + pBuf->offBuf, pBuf->cbBuf - pBuf->offBuf,
