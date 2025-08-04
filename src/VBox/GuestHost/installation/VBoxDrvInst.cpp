@@ -671,6 +671,9 @@ static DECLCALLBACK(RTEXITCODE) vboxDrvInstCmdInstallMain(PRTGETOPTSTATE pGetSta
     if (RT_FAILURE(rc))
         return RTEXITCODE_FAILURE;
 
+    if (!pszInfFile)
+        return RTMsgErrorExit(RTEXITCODE_SYNTAX, "No INF file specified!\n");
+
     RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
 
     VBOXWINDRVINST hWinDrvInst;
