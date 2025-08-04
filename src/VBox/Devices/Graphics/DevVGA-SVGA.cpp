@@ -3734,7 +3734,7 @@ static void vmsvgaR3UpdateFence(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t u
 
         if (pThis->svga.u32IrqMask & SVGA_IRQFLAG_ANY_FENCE)
         {
-            Log(("any fence irq\n"));
+            Log(("any fence irq (fence=%#x)\n", u32FenceId));
             *pu32IrqStatus |= SVGA_IRQFLAG_ANY_FENCE;
         }
         else if (pThis->svga.u32IrqMask & SVGA_IRQFLAG_FENCE_GOAL)
@@ -3754,7 +3754,7 @@ static void vmsvgaR3UpdateFence(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t u
 
             if (pThis->svga.u32IrqMask & SVGA_IRQFLAG_ANY_FENCE)
             {
-                Log(("any fence irq\n"));
+                Log(("any fence irq (fence=%#x)\n", u32FenceId));
                 *pu32IrqStatus |= SVGA_IRQFLAG_ANY_FENCE;
             }
             else if (    VMSVGA_IS_VALID_FIFO_REG(SVGA_FIFO_FENCE_GOAL, offFifoMin)
@@ -3769,6 +3769,151 @@ static void vmsvgaR3UpdateFence(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t u
             Log(("SVGA_CMD_FENCE is bogus when offFifoMin is %#x!\n", offFifoMin));
     }
 }
+
+
+#ifdef VMSVGA_CMD_STATS
+static struct
+{
+    uint64_t u64TsNsLastStatsDump;
+
+    uint64_t u64TsNsBufferStart;
+    uint64_t u64TsNsBufferEnd;
+
+    uint64_t u64NsBuffers;
+    uint64_t u64NsOutside;
+
+    uint64_t u64TsNsCmdStart;
+    uint32_t cmdId;
+
+    uint32_t au32SvgaCmdInvocations[SVGA_3D_CMD_MAX];
+    uint64_t au64SvgaCmdTotalTime[SVGA_3D_CMD_MAX];
+    uint32_t au32VBSvgaCmdInvocations[VBSVGA_3D_CMD_MAX - VBSVGA_3D_CMD_BASE];
+    uint64_t au64VBSvgaCmdTotalTime[VBSVGA_3D_CMD_MAX - VBSVGA_3D_CMD_BASE];
+} g_vmsvgaCmdStats;
+
+static void vmsvgaStatsLogRel(void)
+{
+    LogRel(("VMSVGA: command stats begin\n"));
+
+    uint64_t u64NsTotal = 0;
+
+    for (unsigned i = 0; i < RT_ELEMENTS(g_vmsvgaCmdStats.au32SvgaCmdInvocations); ++i)
+    {
+        if (g_vmsvgaCmdStats.au32SvgaCmdInvocations[i] == 0)
+            continue;
+
+        u64NsTotal += g_vmsvgaCmdStats.au64SvgaCmdTotalTime[i];
+    }
+
+    for (unsigned i = 0; i < RT_ELEMENTS(g_vmsvgaCmdStats.au32VBSvgaCmdInvocations); ++i)
+    {
+        if (g_vmsvgaCmdStats.au32VBSvgaCmdInvocations[i] == 0)
+            continue;
+
+        u64NsTotal += g_vmsvgaCmdStats.au64VBSvgaCmdTotalTime[i];
+    }
+
+    for (unsigned i = 0; i < RT_ELEMENTS(g_vmsvgaCmdStats.au32SvgaCmdInvocations); ++i)
+    {
+        if (g_vmsvgaCmdStats.au32SvgaCmdInvocations[i] == 0)
+            continue;
+
+        uint32_t const cmdId = i;
+        LogRel(("%-48s(%u): %8u times, %8RU64 ns/one, %12RU64 ns %RU64%% total\n",
+            vmsvgaR3FifoCmdToString(cmdId), cmdId,
+            g_vmsvgaCmdStats.au32SvgaCmdInvocations[i],
+            g_vmsvgaCmdStats.au64SvgaCmdTotalTime[i] / g_vmsvgaCmdStats.au32SvgaCmdInvocations[i],
+            g_vmsvgaCmdStats.au64SvgaCmdTotalTime[i],
+            (g_vmsvgaCmdStats.au64SvgaCmdTotalTime[i] * 100) / u64NsTotal));
+    }
+
+    for (unsigned i = 0; i < RT_ELEMENTS(g_vmsvgaCmdStats.au32VBSvgaCmdInvocations); ++i)
+    {
+        if (g_vmsvgaCmdStats.au32VBSvgaCmdInvocations[i] == 0)
+            continue;
+
+        uint32_t const cmdId = i + VBSVGA_3D_CMD_BASE;
+        LogRel(("%-48s(%u): %8u times, %8RU64 ns/one, %12RU64 ns %RU64%% total\n",
+            vmsvgaR3FifoCmdToString(cmdId), cmdId,
+            g_vmsvgaCmdStats.au32VBSvgaCmdInvocations[i],
+            g_vmsvgaCmdStats.au64VBSvgaCmdTotalTime[i] / g_vmsvgaCmdStats.au32VBSvgaCmdInvocations[i],
+            g_vmsvgaCmdStats.au64VBSvgaCmdTotalTime[i],
+            (g_vmsvgaCmdStats.au64VBSvgaCmdTotalTime[i] * 100) / u64NsTotal));
+    }
+
+    LogRel(("VMSVGA: total commands: %RU64 ns\n", u64NsTotal));
+    LogRel(("VMSVGA: total buffers:  %RU64 ns\n", g_vmsvgaCmdStats.u64NsBuffers));
+    LogRel(("VMSVGA: total outside:  %RU64 ns\n", g_vmsvgaCmdStats.u64NsOutside));
+    LogRel(("VMSVGA: command stats end\n"));
+}
+
+static void vmsvgaStatsCmdBegin(uint32_t cmdId)
+{
+    g_vmsvgaCmdStats.cmdId = cmdId;
+    g_vmsvgaCmdStats.u64TsNsCmdStart = RTTimeNanoTS();
+}
+
+static void vmsvgaStatsCmdEnd(uint32_t cmdId)
+{
+    AssertRelease(g_vmsvgaCmdStats.cmdId == cmdId);
+
+    uint64_t const u64NsNow = RTTimeNanoTS();
+    uint64_t const u64NsElapsed = u64NsNow - g_vmsvgaCmdStats.u64TsNsCmdStart;
+
+    uint32_t *pu32Invocations;
+    uint64_t *pu64TotalTime;
+    if (cmdId < SVGA_3D_CMD_MAX)
+    {
+        uint32_t const idxCmd = cmdId;
+        pu32Invocations = &g_vmsvgaCmdStats.au32SvgaCmdInvocations[idxCmd];
+        pu64TotalTime = &g_vmsvgaCmdStats.au64SvgaCmdTotalTime[idxCmd];
+    }
+    else if (VBSVGA_3D_CMD_BASE <= cmdId && cmdId < VBSVGA_3D_CMD_MAX)
+    {
+        uint32_t const idxCmd = cmdId - VBSVGA_3D_CMD_BASE;
+        pu32Invocations = &g_vmsvgaCmdStats.au32SvgaCmdInvocations[idxCmd];
+        pu64TotalTime = &g_vmsvgaCmdStats.au64SvgaCmdTotalTime[idxCmd];
+    }
+    else
+    {
+        AssertReleaseFailed();
+        return;
+    }
+
+    *pu32Invocations += 1;
+    *pu64TotalTime += u64NsElapsed;
+}
+
+static void vmsvgaStatsBufferBegin(void)
+{
+    uint64_t const u64NsNow = RTTimeNanoTS();
+
+    if (g_vmsvgaCmdStats.u64TsNsBufferEnd != 0)
+    {
+        uint64_t const u64Outside = u64NsNow - g_vmsvgaCmdStats.u64TsNsBufferEnd;
+        g_vmsvgaCmdStats.u64NsOutside += u64Outside;
+    }
+
+    g_vmsvgaCmdStats.u64TsNsBufferStart = u64NsNow;
+}
+
+static void vmsvgaStatsBufferEnd(void)
+{
+    uint64_t const u64NsNow = RTTimeNanoTS();
+
+    uint64_t const u64NsBuffer = u64NsNow - g_vmsvgaCmdStats.u64TsNsBufferStart;
+    g_vmsvgaCmdStats.u64NsBuffers += u64NsBuffer;
+
+    g_vmsvgaCmdStats.u64TsNsBufferEnd = u64NsNow;
+
+    if ((u64NsNow - g_vmsvgaCmdStats.u64TsNsLastStatsDump) / RT_NS_1MS_64 > 10000)
+    {
+        vmsvgaStatsLogRel();
+        RT_ZERO(g_vmsvgaCmdStats);
+        g_vmsvgaCmdStats.u64TsNsLastStatsDump = u64NsNow;
+    }
+}
+#endif /* VMSVGA_CMD_STATS */
 
 
 /** Processes a command buffer.
@@ -3807,6 +3952,10 @@ static SVGACBStatus vmsvgaR3CmdBufProcessCommands(PPDMDEVINS pDevIns, PVGASTATE 
 #  endif
 # endif
 
+#ifdef VMSVGA_CMD_STATS
+    vmsvgaStatsBufferBegin();
+#endif
+
     uint8_t const *pu8Cmd = (uint8_t *)pvCommands + (*poffNextCmd);
     uint32_t cbRemain = cbCommands - (*poffNextCmd);
     while (cbRemain)
@@ -3842,6 +3991,10 @@ static SVGACBStatus vmsvgaR3CmdBufProcessCommands(PPDMDEVINS pDevIns, PVGASTATE 
         }
 #  endif
 # endif
+
+#ifdef VMSVGA_CMD_STATS
+        vmsvgaStatsCmdBegin(cmdId);
+#endif
 
         /* At the end of the switch cbCmd is equal to the total length of the command including the cmdId.
          * I.e. pu8Cmd + cbCmd must point to the next command.
@@ -4156,6 +4309,10 @@ static SVGACBStatus vmsvgaR3CmdBufProcessCommands(PPDMDEVINS pDevIns, PVGASTATE 
             }
         }
 
+#ifdef VMSVGA_CMD_STATS
+        vmsvgaStatsCmdEnd(cmdId);
+#endif
+
         if (CBstatus != SVGA_CB_STATUS_COMPLETED)
             break;
 
@@ -4174,6 +4331,10 @@ static SVGACBStatus vmsvgaR3CmdBufProcessCommands(PPDMDEVINS pDevIns, PVGASTATE 
             *pu32IrqStatus = 0;
         }
     }
+
+#ifdef VMSVGA_CMD_STATS
+    vmsvgaStatsBufferEnd();
+#endif
 
     Assert(cbRemain <= cbCommands);
     *poffNextCmd = cbCommands - cbRemain;

@@ -38,6 +38,12 @@
 
 #define VMSVGA_WITH_PGM_LOCKING
 
+/* Debugging helpers. */
+/* Measure how much time each command takes. */
+//#define VMSVGA_CMD_STATS
+/* Write render targets, shader resources, etc to bitmaps. */
+//#define DUMP_BITMAPS
+
 #include <VBox/pci.h>
 #include <VBox/vmm/pdmifs.h>
 #include <VBox/vmm/pdmthread.h>

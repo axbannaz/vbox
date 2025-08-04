@@ -108,8 +108,6 @@ void vmsvga3dTerminate(PVGASTATECC pThisCC);
 
 int vmsvga3dInit(PPDMDEVINS pDevIns, PVGASTATE pThis, PVGASTATECC pThisCC);
 
-/* Write render targets to bitmaps. */
-//#define DUMP_BITMAPS
 void vmsvga3dMapWriteBmpFile(VMSVGA3D_MAPPED_SURFACE const *pMap, char const *pszPrefix);
 
 /* DevVGA-SVGA.cpp: */

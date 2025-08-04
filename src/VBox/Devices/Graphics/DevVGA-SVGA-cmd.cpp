@@ -50,7 +50,7 @@
 #include <iprt/formats/bmp.h>
 #include <stdio.h>
 
-#if defined(LOG_ENABLED) || defined(VBOX_STRICT)
+#if defined(LOG_ENABLED) || defined(VBOX_STRICT) || defined(VMSVGA_CMD_STATS)
 # define SVGA_CASE_ID2STR(idx) case idx: return #idx
 
 static const char *vmsvgaFifo3dCmdToString(SVGAFifo3dCmdId enmCmdId)
@@ -392,7 +392,7 @@ const char *vmsvgaR3FifoCmdToString(uint32_t u32Cmd)
     return "UNKNOWN";
 }
 # undef SVGA_CASE_ID2STR
-#endif /* LOG_ENABLED || VBOX_STRICT */
+#endif /* LOG_ENABLED || VBOX_STRICT || VMSVGA_CMD_STATS */
 
 
 /*

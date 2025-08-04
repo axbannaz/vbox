@@ -299,7 +299,7 @@ void vmsvgaR3CmdRemapGMR2(PVGASTATE pThis, PVGASTATECC pThisCC, SVGAFifoCmdRemap
 int vmsvgaR3Process3dCmd(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t idDXContext, SVGAFifo3dCmdId enmCmdId, uint32_t cbCmd, void const *pvCmd);
 #endif
 
-#if defined(LOG_ENABLED) || defined(VBOX_STRICT)
+#if defined(LOG_ENABLED) || defined(VBOX_STRICT) || defined(VMSVGA_CMD_STATS)
 const char *vmsvgaR3FifoCmdToString(uint32_t u32Cmd);
 #endif
 
