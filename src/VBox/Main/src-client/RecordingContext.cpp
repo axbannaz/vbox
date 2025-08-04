@@ -423,7 +423,7 @@ int RecordingContextImpl::progressCreate(const ComPtr<IRecordingSettings> &Setti
 
         ULONG ulMaxTime;
         hrc = ScreenSettings->COMGETTER(MaxTime)(&ulMaxTime);
-        AssertComRCBreak(hrc, VERR_RECORDING_INIT_FAILED);
+        AssertComRCBreak(hrc, RT_NOTHING);
         if (ulMaxTime == 0)
         {
             cOperations = 1; /* Screen will be recorded indefinitely, reset operation count and bail out.  */
