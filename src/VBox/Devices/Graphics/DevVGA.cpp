@@ -1875,7 +1875,13 @@ static int vgaR3DrawText(PPDMDEVINS pDevIns, PVGASTATE pThis, PVGASTATER3 pThisC
             return rc;
         AssertRCReturn(rc, rc);
     }
-    AssertReturn(scr_width == (int)pDrv->cx && scr_height == (int)pDrv->cy, VERR_INVALID_STATE);
+
+    if (   scr_width != (int)pDrv->cx
+        || scr_height != (int)pDrv->cy)
+    {
+        AssertReturn(pDrv->cx == 0 && pDrv->cy == 0, VERR_INVALID_STATE);
+        return VINF_SUCCESS;
+    }
 
     x_incr = cw * ((pDrv->cBits + 7) >> 3);
 
