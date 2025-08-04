@@ -413,6 +413,9 @@ typedef struct
                                                            SVGASignedRect srcRect, uint32_t cRects, SVGASignedRect *paRects));
     /* Various helpers. */
     DECLCALLBACKMEMBER(int,  pfnSurfaceUpdateHeapBuffers, (PVGASTATECC pThisCC, PVMSVGA3DSURFACE pSurface));
+
+    /* Optional flush method that is called before a screen update. */
+    DECLCALLBACKMEMBER(void, pfnFlush,                    (PVGASTATECC pThisCC));
 } VMSVGA3DBACKENDFUNCS3D;
 
 /* VGPU9 3D */

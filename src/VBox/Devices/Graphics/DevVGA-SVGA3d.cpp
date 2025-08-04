@@ -1091,6 +1091,9 @@ int vmsvga3dScreenUpdate(PVGASTATECC pThisCC, uint32_t idDstScreen, SVGASignedRe
                         && srcRect.bottom - srcRect.top == dstRect.bottom - dstRect.top,
                         VERR_INVALID_PARAMETER); /* Stretch is not supported. */
 
+    if (pSvgaR3State->pFuncs3D->pfnFlush)
+        pSvgaR3State->pFuncs3D->pfnFlush(pThisCC);
+
     /* Destination box should be within the screen rectangle. */
     SVGA3dBox dstBox;
     dstBox.x = dstRect.left;

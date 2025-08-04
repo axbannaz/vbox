@@ -4568,6 +4568,20 @@ static DECLCALLBACK(int) vmsvga3dBackSurfaceUpdateHeapBuffers(PVGASTATECC pThisC
 }
 
 
+static DECLCALLBACK(void) vmsvga3dBackFlush(PVGASTATECC pThisCC)
+{
+    DXDEVICE *pDXDevice = dxDeviceGet(pThisCC->svga.p3dState);
+    AssertReturnVoid(pDXDevice->pDevice);
+
+    /* It is necessary to call Flush periodically because objects are created/destroyed
+     * on behalf of the guest and "Microsoft Direct3D 11 defers the destruction of objects.
+     * Therefore, an application can't rely upon objects immediately being destroyed.
+     * By calling Flush, you destroy any objects whose destruction was deferred."
+     */
+    pDXDevice->pImmediateContext->Flush();
+}
+
+
 /*
  *
  * VGPU9 callbacks. Not implemented.
@@ -11702,6 +11716,7 @@ static DECLCALLBACK(int) vmsvga3dBackQueryInterface(PVGASTATECC pThisCC, char co
                 p->pfnDestroyScreen            = vmsvga3dBackDestroyScreen;
                 p->pfnSurfaceBlitToScreen      = vmsvga3dBackSurfaceBlitToScreen;
                 p->pfnSurfaceUpdateHeapBuffers = vmsvga3dBackSurfaceUpdateHeapBuffers;
+                p->pfnFlush                    = vmsvga3dBackFlush;
             }
         }
         else
