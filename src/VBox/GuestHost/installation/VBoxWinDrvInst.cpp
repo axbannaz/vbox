@@ -1347,65 +1347,71 @@ static int vboxWinDrvInstallPerform(PVBOXWINDRVINSTINTERNAL pCtx, PVBOXWINDRVINS
             DWORD dwInstallFlags = 0;
             if (pCtx->uOsVer >= RTSYSTEM_MAKE_NT_VERSION(6, 0, 0)) /* for Vista / 2008 Server and up. */
             {
-                if (pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_FORCE)
-                    dwInstallFlags |= DIIRFLAG_FORCE_INF;
-
-                vboxWinDrvInstLogVerbose(pCtx, 1, "Using g_pfnDiInstallDriverW(), dwInstallFlags=%#x", dwInstallFlags);
-
-                if (!(pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_DRYRUN))
-                    fRc = g_pfnDiInstallDriverW(NULL /* hWndParent */, pParms->pwszInfFile, dwInstallFlags, &fReboot);
-                else
-                    fRc = TRUE;
-                if (!fRc)
+                if (g_pfnDiInstallDriverW)
                 {
-                    DWORD const dwErr = GetLastError();
+                    if (pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_FORCE)
+                        dwInstallFlags |= DIIRFLAG_FORCE_INF;
 
-                    /*
-                     * Work around an error code wich only appears on old(er) Windows Server editions (e.g. 2012 R2 or 2016)
-                     * where SetupAPI tells "unable to mark devices that match new inf", which ultimately results in
-                     * ERROR_LINE_NOT_FOUND. This probably is because of primitive drivers which don't have a PnP ID set in
-                     * the INF file.
-                     *
-                     * pnputil.exe also gives the same error in the SetupAPI log when handling the very same INF file.
-                     *
-                     * So skip this error and pretend everything is fine. */
-                    if (dwErr == ERROR_LINE_NOT_FOUND)
-                        fRc = true;
+                    vboxWinDrvInstLogVerbose(pCtx, 1, "Using g_pfnDiInstallDriverW(), dwInstallFlags=%#x", dwInstallFlags);
 
-                    /*
-                     * Work around an error which occurs on Windows Vista, where DiInstallDriverW() can't handle
-                     * primitive drivers (i.e. [Manufacturer] section is missing). So try installing the detected
-                     * INF section in the next block below.
-                     */
-                    if (dwErr == ERROR_WRONG_INF_TYPE)
-                        fRc = true;
-
-                    /* For anything else we want to get notified that something isn't working. */
+                    if (!(pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_DRYRUN))
+                        fRc = g_pfnDiInstallDriverW(NULL /* hWndParent */, pParms->pwszInfFile, dwInstallFlags, &fReboot);
+                    else
+                        fRc = TRUE;
                     if (!fRc)
                     {
-                        switch (dwErr)
-                        {
-                            case ERROR_AUTHENTICODE_TRUST_NOT_ESTABLISHED:
-                            {
-                                /* For silent installs give a clue why this might have failed. */
-                                if (pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_SILENT)
-                                    vboxWinDrvInstLogWarn(pCtx, "Silent installation was selected, but required certificates "
-                                                                "were not pre-installed into the Windows drvier store, so "
-                                                                "the installation will be rejected automatically");
-                                RT_FALL_THROUGH();
-                            }
+                        DWORD const dwErr = GetLastError();
 
-                            default:
-                                rc = vboxWinDrvInstLogLastError(pCtx, "DiInstallDriverW() failed");
-                                break;
+                        /*
+                         * Work around an error code wich only appears on old(er) Windows Server editions (e.g. 2012 R2 or 2016)
+                         * where SetupAPI tells "unable to mark devices that match new inf", which ultimately results in
+                         * ERROR_LINE_NOT_FOUND. This probably is because of primitive drivers which don't have a PnP ID set in
+                         * the INF file.
+                         *
+                         * pnputil.exe also gives the same error in the SetupAPI log when handling the very same INF file.
+                         *
+                         * So skip this error and pretend everything is fine. */
+                        if (dwErr == ERROR_LINE_NOT_FOUND)
+                            fRc = true;
+
+                        /*
+                         * Work around an error which occurs on Windows Vista, where DiInstallDriverW() can't handle
+                         * primitive drivers (i.e. [Manufacturer] section is missing). So try installing the detected
+                         * INF section in the next block below.
+                         */
+                        if (dwErr == ERROR_WRONG_INF_TYPE)
+                            fRc = true;
+
+                        /* For anything else we want to get notified that something isn't working. */
+                        if (!fRc)
+                        {
+                            switch (dwErr)
+                            {
+                                case ERROR_AUTHENTICODE_TRUST_NOT_ESTABLISHED:
+                                {
+                                    /* For silent installs give a clue why this might have failed. */
+                                    if (pParms->fFlags & VBOX_WIN_DRIVERINSTALL_F_SILENT)
+                                        vboxWinDrvInstLogWarn(pCtx, "Silent installation was selected, but required certificates "
+                                                                    "were not pre-installed into the Windows drvier store, so "
+                                                                    "the installation will be rejected automatically");
+                                    RT_FALL_THROUGH();
+                                }
+
+                                default:
+                                    rc = vboxWinDrvInstLogLastError(pCtx, "DiInstallDriverW() failed");
+                                    break;
+                            }
                         }
                     }
-                }
 
-                if (fRc)
-                    rc = vboxWinDrvTryInfSection(pCtx,
-                                                 pParms->pwszInfFile, pParms->u.UnInstall.pwszSection,
-                                                 vboxWinDrvInstallTryInfSectionCallback);
+                    if (fRc)
+                        rc = vboxWinDrvTryInfSection(pCtx,
+                                                     pParms->pwszInfFile, pParms->u.UnInstall.pwszSection,
+                                                     vboxWinDrvInstallTryInfSectionCallback);
+                }
+                else
+                    vboxWinDrvInstLogError(pCtx, "DiInstallDriverW() not available on this platform");
+
             }
             else /* For Windows 2000 and below. */
             {
@@ -2052,6 +2058,8 @@ static int vboxWinDrvUninstallFromDriverStore(PVBOXWINDRVINSTINTERNAL pCtx,
                 vboxWinDrvInstLogVerbose(pCtx, 1, "DiUninstallDriverW() failed with %#x (%d)", dwErr, dwErr);
             }
         }
+        else
+            vboxWinDrvInstLogVerbose(pCtx, 1, "DiUninstallDriverW() not available on this platform");
 
         /* Not (yet) successful? Try harder using an older API. */
         if (   !fRc
