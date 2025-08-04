@@ -1139,6 +1139,14 @@ DECLCALLBACK(HRESULT) HostUpdateAgent::i_checkForUpdateTask(UpdateAgentTask *pTa
 
     /*
      * Compose the User-Agent header for the GET request.
+     *
+     * Some examples of what we produce below:
+     *      VirtualBox 7.2.0_RC1 <win.amd64 [HW: ram=262013M;cpus=128:AMD:0x830f10;NEM:HM | Product: Windows 11 | Release: 10.0.26100]>
+     *      VirtualBox 7.2.0_RC1 <linux.amd64 [HW: ram=262013M;cpus=64:AMD:0x830f10;no-NEM:HM | Distribution: Ubuntu | Version: 24.04 | Kernel: Linux version 4.4.0-26100-Microsoft (gcc version 5.4.0 (GCC) ) #1882-Microsoft Fri Jan 01 08:00:00 PST 2016]>
+     *
+     * Older code produced agent strings like these:
+     *      VirtualBox 7.2.0_RC1 <win.amd64 [Product: Windows 11 | Release: 10.0.26100]>
+     *      VirtualBox 7.2.0_RC1 <linux.amd64 [Distribution: Ubuntu | Version: 24.04 | Kernel: Linux version 4.4.0-26100-Microsoft (gcc version 5.4.0 (GCC) ) #1882-Microsoft Fri Jan 01 08:00:00 PST 2016]>
      */
     Bstr version;
     hrc = m_VirtualBox->COMGETTER(Version)(version.asOutParam()); // e.g. 6.1.0_RC1
