@@ -72,7 +72,7 @@
     The mapref implements phrases and links defined as conkeyref elements.
   -->
   <frontmatter>
-    <mapref href="../../conkeyrefs.ditamap" format="ditamap" toc="no" processing-role="resource-only"/>
+    <mapref href="../conkeyrefs.ditamap" format="ditamap" toc="no" processing-role="resource-only"/>
     <preface href="licensing-preface.dita" chunk="to-content">
       <topicref href="licensing-audience.dita"/>
       <topicref href="licensing-related-documents.dita"/>

@@ -646,8 +646,8 @@
    </chapter>
 
    <!-- Third Party Licenses-->
-   <chapter href="topics/licensing/licensing_chapter.dita" chunk="to-content">
-      <topicref format="ditamap" href="topics/licensing/licensing.ditamap"/>
+   <chapter href="licensing/licensing_chapter.dita" chunk="to-content">
+      <topicref format="ditamap" href="licensing/licensing.ditamap"/>
    </chapter>
 
 </bookmap>
