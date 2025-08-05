@@ -244,6 +244,10 @@ class SubTstDrvImportExportEFIVM1(base.SubTestDriverBase):
         # which only apply to certain item types.
         sNewVmName = self.sVmName + '-imported';
         aEnabled = [];
+        # pywin32 returns SAFEARRAY [out] arguments as tuples so we need to convert
+        # aVBoxValues to a list in order to modify it.
+        if utils.getHostOs() == 'win':
+            aVBoxValues = list(aVBoxValues);
         for (i, aType) in enumerate(aTypes):
             aEnabled.append(True);
             if aType == vboxcon.VirtualSystemDescriptionType_Name:
