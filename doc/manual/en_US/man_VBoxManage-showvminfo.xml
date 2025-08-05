@@ -170,9 +170,6 @@
       The following example shows typical output for this command:
     </para>
 <screen>$ VBoxManage showvminfo "Windows 10"
-VirtualBox Command Line Management Interface Version <replaceable>version-number</replaceable>
-Copyright (C) 2005-2024 Oracle and/or its affiliates
-
 Name:            Windows 10
 Groups:          /
 Guest OS:        Windows 10 (64-bit)
