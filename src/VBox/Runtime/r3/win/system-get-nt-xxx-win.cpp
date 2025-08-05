@@ -1,6 +1,6 @@
 /* $Id$ */
 /** @file
- * IPRT - RTSystemQueryOSInfo, generic stub.
+ * IPRT - RTSystemGetNtXxxx functions.
  */
 
 /*
@@ -69,6 +69,8 @@ RTDECL(uint8_t) RTSystemGetNtProductType(void)
 }
 
 
+/** @todo this is a bit out of place, since it's a query and it's about
+ *        windows feature according to the GUI. */
 RTDECL(int) RTSystemQueryNtFeatureEnabled(RTSYSNTFEATURE enmFeature, bool *pfEnabled)
 {
     AssertPtrReturn(pfEnabled, VERR_INVALID_POINTER);
