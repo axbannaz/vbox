@@ -931,10 +931,10 @@ static int vboxWinDrvInstallInfSectionEx(PVBOXWINDRVINSTINTERNAL pCtx, HINF hInf
          * This gives us more flexibility and control compared to the InstallHinfSectionW() fallback below. */
         struct
         {
-            UINT                uFlags;
-            UINT                uCopyFlags;
+            UINT  uFlags;
+            UINT  uCopyFlags;
             PVOID pCallback;
-            PVOID               pContext;
+            PVOID pContext;
         } s_aFromInfSectionInstall[] =
         {
             /* Install files. */
