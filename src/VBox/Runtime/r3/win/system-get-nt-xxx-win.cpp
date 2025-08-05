@@ -42,10 +42,10 @@
 #include <iprt/win/windows.h>
 
 #include "internal-r3-win.h"
-#include "internal-r3-registry-win.h"
 #include <iprt/system.h>
 #include <iprt/assert.h>
 #include <iprt/err.h>
+#include <iprt/win/reg.h>
 
 
 RTDECL(uint32_t) RTSystemGetNtBuildNo(void)
@@ -72,29 +72,28 @@ RTDECL(uint8_t) RTSystemGetNtProductType(void)
 RTDECL(int) RTSystemQueryNtFeatureEnabled(RTSYSNTFEATURE enmFeature, bool *pfEnabled)
 {
     AssertPtrReturn(pfEnabled, VERR_INVALID_POINTER);
-
-    int rc;
+    *pfEnabled = false;
 
     switch (enmFeature)
     {
         case RTSYSNTFEATURE_CORE_ISOLATION_MEMORY_INTEGRITY: /* aka Code Integrity */
         {
-            DWORD dwEnabled;
-            rc = RTSystemWinRegistryQueryDWORD(HKEY_LOCAL_MACHINE,
-                                    "SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity",
-                                    "Enabled", &dwEnabled);
+            uint32_t fEnabled = 0;
+            int rc = RTWinRegQueryValueU32(kRTWinRegRoot_LocalMachine,
+                                           L"SYSTEM\\CurrentControlSet\\Control\\DeviceGuard\\Scenarios\\HypervisorEnforcedCodeIntegrity",
+                                           L"Enabled",
+                                           &fEnabled);
             if (RT_SUCCESS(rc))
-                *pfEnabled = RT_BOOL(dwEnabled);
-            else if (rc == VERR_FILE_NOT_FOUND)
+                *pfEnabled = RT_BOOL(fEnabled);
+            else if (rc == VERR_FILE_NOT_FOUND || rc == VERR_PATH_NOT_FOUND || rc == VERR_NOT_FOUND)
                 rc = VERR_NOT_SUPPORTED;
-            break;
+            return rc;
         }
 
-        default:
-            rc = VERR_NOT_IMPLEMENTED;
+        case RTSYSNTFEATURE_INVALID:
+        case RTSYSNTFEATURE_32_BIT_HACK:
             break;
     }
-
-    return rc;
+    return VERR_INVALID_PARAMETER;
 }
 

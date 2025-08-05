@@ -87,7 +87,6 @@ RTDECL(int) RTSystemQueryFirmwareBoolean(RTSYSFWBOOL enmBoolean, bool *pfValue)
         default:
             AssertReturn(enmBoolean > RTSYSFWBOOL_INVALID && enmBoolean < RTSYSFWBOOL_END, VERR_INVALID_PARAMETER);
             return VERR_SYS_UNSUPPORTED_FIRMWARE_PROPERTY;
-
     }
 
     /*
@@ -106,7 +105,7 @@ RTDECL(int) RTSystemQueryFirmwareBoolean(RTSYSFWBOOL enmBoolean, bool *pfValue)
     }
     else if (rc == VERR_FILE_NOT_FOUND || rc == VERR_PATH_NOT_FOUND)
         rc = VINF_SUCCESS;
-    else if (rc == VERR_PERMISSION_DENIED)
+    else if (rc == VERR_PERMISSION_DENIED) /** @todo r=bird: WTF? How can a insufficient privileges translate to unsupported feature?*/
         rc = VERR_NOT_SUPPORTED;
 
     return rc;
