@@ -924,18 +924,23 @@ static int vboxWinDrvInstallInfSectionEx(PVBOXWINDRVINSTINTERNAL pCtx, HINF hInf
     CallbackCtx.pwszSection = pwszSection;
     CallbackCtx.pvSetupContext = SetupInitDefaultQueueCallback(NULL);
 
-    BOOL fRc = SetupInstallFromInfSectionW(NULL, // hWndOwner
-                                           hInf,
-                                           pwszSection,
-                                           SPINST_ALL, // Flags
-                                           NULL, // RelativeKeyRoot
-                                           NULL, // SourceRootPath
-                                             SP_COPY_NOSKIP
-                                           | SP_COPY_IN_USE_NEEDS_REBOOT,
-                                           vboxDrvInstExecuteInfFileCallback,
-                                           &CallbackCtx,
-                                           NULL,  // DeviceInfoSet
-                                           NULL); // DeviceInfoData
+    BOOL fRc;
+    if (!(pCtx->Parms.fFlags & VBOX_WIN_DRIVERINSTALL_F_DRYRUN))
+        fRc = SetupInstallFromInfSectionW(NULL, // hWndOwner
+                                          hInf,
+                                          pwszSection,
+                                          SPINST_ALL, // Flags
+                                          NULL, // RelativeKeyRoot
+                                          NULL, // SourceRootPath
+                                            SP_COPY_NOSKIP
+                                          | SP_COPY_IN_USE_NEEDS_REBOOT,
+                                          vboxDrvInstExecuteInfFileCallback,
+                                          &CallbackCtx,
+                                          NULL,  // DeviceInfoSet
+                                          NULL); // DeviceInfoData
+    else
+        fRc = TRUE;
+
     if (fRc)
     {
         vboxWinDrvInstLogInfo(pCtx, "Installing INF section \"%ls\" successful", pwszSection);
@@ -966,7 +971,10 @@ static int vboxWinDrvInstallInfSectionEx(PVBOXWINDRVINSTINTERNAL pCtx, HINF hInf
     {
         /* We always want to be the first service tag in the group order list (if any). */
         DWORD const fFlags = SPSVCINST_TAGTOFRONT;
-        fRc = SetupInstallServicesFromInfSectionW(hInf, wszSection, fFlags);
+        if (!(pCtx->Parms.fFlags & VBOX_WIN_DRIVERINSTALL_F_DRYRUN))
+            fRc = SetupInstallServicesFromInfSectionW(hInf, wszSection, fFlags);
+        else
+            fRc = TRUE;
         if (!fRc)
         {
             DWORD const dwErr = GetLastError();
@@ -2160,6 +2168,9 @@ static int vboxWinDrvInstMain(PVBOXWINDRVINSTINTERNAL pCtx, PVBOXWINDRVINSTPARMS
 {
     /* Note: Other parameters might be optional, depending on the mode. */
     AssertReturn(!(pParms->fFlags & ~VBOX_WIN_DRIVERINSTALL_F_VALID_MASK), VERR_INVALID_PARAMETER);
+
+    /* Make sure we start w/o any last errors set. */
+    SetLastError(0);
 
     bool const fInstall = pParms->enmMode == VBOXWINDRVINSTMODE_INSTALL
                        || pParms->enmMode == VBOXWINDRVINSTMODE_INSTALL_INFSECTION;
