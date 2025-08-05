@@ -407,6 +407,10 @@ static DECLCALLBACK(void) vboxDrvInstLogCallback(VBOXWINDRIVERLOGTYPE enmType, c
      */
     switch (enmType)
     {
+        case VBOXWINDRIVERLOGTYPE_WARN:
+            vboxDrvInstLog("Warning: %s\n", pszMsg);
+            break;
+
         case VBOXWINDRIVERLOGTYPE_ERROR:
             vboxDrvInstLogError("%s\n", pszMsg);
             break;
