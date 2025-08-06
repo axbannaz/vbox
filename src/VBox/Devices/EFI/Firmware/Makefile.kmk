@@ -309,8 +309,12 @@ VBOX_EFI_BUILD_CMD += \
 # Derive the number of parallel jobs (on windows) from KMK_OPTS_JOBS.
 #
 VBOX_EFI_MAX_THREADS := 1
-if defined(KMK_OPTS_JOBS) && "$(KBUILD_HOST)" == "win"
- VBOX_EFI_MAX_THREADS := $(if-expr $(KMK_OPTS_JOBS) > 0,$(expr $(KMK_OPTS_JOBS) / 2),$(NUMBER_OF_PROCESSORS))
+ifdef KMK_OPTS_JOBS
+ if "$(KBUILD_HOST)" == "win"
+  VBOX_EFI_MAX_THREADS := $(if-expr $(KMK_OPTS_JOBS) > 0,$(expr $(KMK_OPTS_JOBS) / 2),$(NUMBER_OF_PROCESSORS))
+ else if $(KMK_OPTS_JOBS) > 1
+  VBOX_EFI_MAX_THREADS := $(expr $(KMK_OPTS_JOBS) / 2)
+ endif
 endif
 
 #
