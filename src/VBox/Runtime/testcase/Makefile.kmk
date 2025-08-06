@@ -281,8 +281,48 @@ ifdef VBOX_WITH_TESTCASES # The whole file
  #
  # Target configs in almost alphabetical order.
  #
+
+ TST_RT_ACPI_FILE = $(tstRTAcpi_0_OUTDIR)/tstRTAcpi-tests.h
+ TST_RT_ACPI_SOURCES := \
+ 	01_empty=01-empty.asl \
+ 	02_method=02-method.asl
+
+ TST_RT_ACPI_PATH_SOURCES := $(PATH_SUB_CURRENT)/acpi
+
+ $$(TST_RT_ACPI_FILE): $(MAKEFILE_CURRENT) \
+ 		$(foreach source,$(TST_RT_ACPI_SOURCES),$(TST_RT_ACPI_PATH_SOURCES)/$(lastword $(subst =,$(SP),$(source)))) \
+ 		$(VBOX_BIN2C) \
+ 		| $$(dir $$@)
+	$(QUIET)$(RM) -f -- $@
+	$(foreach source,$(TST_RT_ACPI_SOURCES), $(NLTAB)$(VBOX_BIN2C) -ascii --append \
+		"$(firstword $(subst =,$(SP),$(source)))" \
+		"$(TST_RT_ACPI_PATH_SOURCES)/$(lastword $(subst =,$(SP),$(source)))" \
+		"$@")
+	$(QUIET)$(APPEND) -n "$@" \
+       	'' \
+       	'static struct' \
+       	'{' \
+       	'    const char          *pszName;' \
+       	'    const unsigned char *pchAsl;' \
+       	'    const unsigned int  *pcbAsl;' \
+       	'} const g_aTests[] =' \
+       	'{'
+	$(foreach source,$(TST_RT_ACPI_SOURCES), $(NLTAB)$(QUIET)$(APPEND) -n "$@" \
+		'    {' \
+		'        "$(firstword $(subst =,$(SP),$(source)))",' \
+		'        g_ab$(firstword $(subst =,$(SP),$(source))),' \
+		'        &g_cb$(firstword $(subst =,$(SP),$(source))),' \
+		'    },')
+	$(QUIET)$(APPEND) -n "$@" \
+       	'};' \
+       	''
+
+ OTHER_CLEAN += $(TST_RT_ACPI_FILE)
+
  tstRTAcpi_TEMPLATE = VBoxR3TstExe
- tstRTAcpi_SOURCES = tstRTAcpi.cpp
+ tstRTAcpi_INCS     = $(tstRTAcpi_0_OUTDIR)
+ tstRTAcpi_DEPS     = $(TST_RT_ACPI_FILE)
+ tstRTAcpi_SOURCES  = tstRTAcpi.cpp
 
  tstRTArmv8_TEMPLATE = VBoxR3TstExe
  tstRTArmv8_SOURCES = tstRTArmv8.cpp

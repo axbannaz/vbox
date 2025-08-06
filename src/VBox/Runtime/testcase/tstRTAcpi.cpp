@@ -47,6 +47,8 @@
 #include <iprt/test.h>
 #include <iprt/vfs.h>
 
+#include "tstRTAcpi-tests.h"
+
 
 /*********************************************************************************************************************************
 *   Global Variables                                                                                                             *
@@ -339,32 +341,12 @@ static void tstAcpiVerifySemantic(RTTEST hTest, RTVFSFILE hVfsFileAslSrc, RTVFSF
 static void tstBasic(RTTEST hTest)
 {
     RTTestSub(hTest, "Basic valid tests");
-    static struct
+    for (unsigned iTest = 0; iTest < RT_ELEMENTS(g_aTests); iTest++)
     {
-        const char *pszName;
-        const char *pszAsl;
-    } const aTests[] =
-    {
-        { "Empty",  "DefinitionBlock (\"\", \"SSDT\", 1, \"VBOX  \", \"VBOXTEST\", 2) {}\n" },
-#if 0 /** @todo r=aeichner Fails currently, needs fixing. */
-        { "Method", "DefinitionBlock (\"\", \"SSDT\", 1, \"VBOX  \", \"VBOXTEST\", 2)\n"
-                    "{\n"
-                    "Method(TEST, 1, NotSerialized, 0) {\n"
-                    "If (LEqual(Arg0, One)) {\n"
-                    "    Return (One)\n"
-                    "} Else {\n"
-                    "    Return (Zero)\n"
-                    "}\n"
-                    "}\n"
-                    "}\n" }
-#endif
-    };
-    for (unsigned iTest = 0; iTest < RT_ELEMENTS(aTests); iTest++)
-    {
-        RTTestISub(aTests[iTest].pszName);
+        RTTestISub(g_aTests[iTest].pszName);
 
         RTVFSFILE hVfsFileSrc = NIL_RTVFSFILE;
-        int rc = RTVfsFileFromBuffer(RTFILE_O_READ, aTests[iTest].pszAsl, strlen(aTests[iTest].pszAsl), &hVfsFileSrc);
+        int rc = RTVfsFileFromBuffer(RTFILE_O_READ, g_aTests[iTest].pchAsl, *g_aTests[iTest].pcbAsl, &hVfsFileSrc);
         RTTESTI_CHECK_RC(rc, VINF_SUCCESS);
 
         if (RT_SUCCESS(rc))
