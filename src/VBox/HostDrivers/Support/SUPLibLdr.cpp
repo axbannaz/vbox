@@ -777,15 +777,32 @@ static int supLoadModule(const char *pszFilename, const char *pszModule, const c
             OpenReq.u.Out.pvImageBase = 0xef423420;
         }
         *ppvImageBase = (void *)OpenReq.u.Out.pvImageBase;
-        if (rc != VERR_MODULE_NOT_FOUND)
+        if (RT_SUCCESS(rc))
         {
-            if (fIsVMMR0)
-                g_pvVMMR0 = OpenReq.u.Out.pvImageBase;
-            LogRel(("SUP: Opened %s (%s) at %#RKv%s.\n", pszModule, pszFilename, OpenReq.u.Out.pvImageBase,
-                    OpenReq.u.Out.fNativeLoader ? " loaded by the native ring-0 loader" : ""));
+            /*
+             * Check that is is fully loaded before returning, as some other process
+             * could be in the process of loading the r0 module now.  This may easily
+             * happen when launching a NAT network VM or internal networking w/ DHCP.
+             *
+             * If the module hasn't been completely loaded, treat it as missing and
+             * try load it properly ourselves.  supLoadModuleInner() should be able
+             * to handle competing processes (look for VERR_ALREADY_LOADED).
+             */
+            if (!OpenReq.u.Out.fNeedsLoading)
+            {
+                if (fIsVMMR0)
+                    g_pvVMMR0 = OpenReq.u.Out.pvImageBase;
+                LogRel(("SUP: Opened %s (%s) at %#RKv%s.\n", pszModule, pszFilename, OpenReq.u.Out.pvImageBase,
+                        OpenReq.u.Out.fNativeLoader ? " loaded by the native ring-0 loader" : ""));
 #ifdef RT_OS_WINDOWS
-            LogRel(("SUP: windbg> .reload /f %s=%#RKv\n", pszFilename, OpenReq.u.Out.pvImageBase));
+                LogRel(("SUP: windbg> .reload /f %s=%#RKv\n", pszFilename, OpenReq.u.Out.pvImageBase));
 #endif
+                return rc;
+            }
+        }
+        else if (rc != VERR_MODULE_NOT_FOUND)
+        {
+            LogRel(("SUP: Failed to open %s (%s): %Rrc\n", pszModule, pszFilename, rc));
             return rc;
         }
     }
