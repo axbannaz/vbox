@@ -236,7 +236,9 @@ def LaunchCommand(Command, WorkingDir,ModuleAuto = None):
     EndOfProcedure = None
     try:
         # launch the command
-        Proc = MakeSubProc(Command, stdout=PIPE, stderr=STDOUT, env=os.environ, cwd=WorkingDir, bufsize=-1, shell=True)
+        #Proc = MakeSubProc(Command, stdout=PIPE, stderr=STDOUT, env=os.environ, cwd=WorkingDir, bufsize=-1, shell=True) # vbox
+        Proc = MakeSubProc(Command, stdout=PIPE, stderr=STDOUT, env=os.environ, cwd=WorkingDir, bufsize=-1, shell=True,  # vbox
+                           close_fds = False) # vbox: don't close the job server FDs, or kmk can't do parallel building.
 
         # launch two threads to read the STDOUT and STDERR
         EndOfProcedure = Event()
