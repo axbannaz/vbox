@@ -53,25 +53,26 @@ def check_css_references(folder):
     html_files += glob.glob(os.path.join(folder, '**', '*.htm'), recursive=True)
     css_href_pattern = re.compile(r'href="([^"]+\.css)"', re.IGNORECASE)
     for file_name in html_files:
-        with open(file_name, encoding='utf-8') as file:
+        html_folder = os.path.dirname(file_name)
+        with open(file_name, encoding="utf-8", errors="replace") as file:
             content = file.read()
         updated = False
         matches = css_href_pattern.findall(content)
         for href in matches:
-            css_path = os.path.normpath(os.path.join(folder, href))
+            css_path = os.path.normpath(os.path.join(html_folder, href))
             if os.path.isfile(css_path):
                 continue
             # look for the css file in parent folder(s)
-            found_path = css_in_parent(os.path.basename(css_path), folder)
+            found_path = css_in_parent(os.path.basename(css_path), html_folder)
             if found_path != "":
-                new_css_path = os.path.relpath(found_path, folder)
+                new_css_path = os.path.relpath(found_path, html_folder)
                 new_href = f'href="{new_css_path}"'
                 old_href = f'href="{href}"'
                 content = content.replace(old_href, new_href)
                 logging.info(f'{old_href} is updated to {new_href} in {file_name}.')
                 updated = True
         if updated:
-            with open(file_name, 'w', encoding='utf-8') as f:
+            with open(file_name, 'w', encoding="utf-8", errors="replace") as f:
                 f.write(content)
 
 def usage(iExitCode):
@@ -91,7 +92,6 @@ def main(argv):
             return usage(0)
         if opt == "-d":
             helphtmlfolder = arg
-            print(helphtmlfolder)
     # check supplied helphtml folder argument
     if not helphtmlfolder:
         logging.error('No helphtml folder is provided. Exiting')
@@ -101,7 +101,7 @@ def main(argv):
         return usage(2)
     helphtmlfolder = os.path.normpath(helphtmlfolder)
     check_css_references(helphtmlfolder)
-
     return 0
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

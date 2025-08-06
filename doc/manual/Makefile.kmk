@@ -1104,11 +1104,15 @@ if defined(VBOX_WITH_DOCS) && (!defined(VBOX_ONLY_BUILD) || defined(VBOX_ONLY_DO
    ditamap-to-htmlhelp: $(2)/UserManual.hhp
 
    # 2. Generate a Qt Help Project file (QHP) using htmlhelp-qthelp.py.
+   # HACK ALERT! htmlhelp-postprocess.py replaces wrong css references
+   # caused by dita-ot-4.0.2. After dita-ot update we can remove this
+   # hack.
    $(2)/UserManual.qhp: \
    		$(2)/UserManual.hhp \
    		$$(VBOX_PATH_MANUAL_SRC)/htmlhelp-qthelp.py
 	$$(call MSG_L1,htmlhelp-qthelp.py $$<,=> $$@)
 	$$(QUIET)$$(RM) -f -- "$$@"
+	$$(QUIET)$$(VBOX_BLD_PYTHON) $$(VBOX_PATH_MANUAL_SRC)/htmlhelp-postprocess.py -d "$$(<D)"
 	$$(QUIET)$$(VBOX_BLD_PYTHON) $$(VBOX_PATH_MANUAL_SRC)/htmlhelp-qthelp.py \
 		-d "$$(<D)" -o "$$@" -f UserManual.hhp -t UserManual.hhc
 
