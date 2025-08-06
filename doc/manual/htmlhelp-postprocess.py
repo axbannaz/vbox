@@ -54,7 +54,7 @@ def check_css_references(folder):
     css_href_pattern = re.compile(r'href="([^"]+\.css)"', re.IGNORECASE)
     for file_name in html_files:
         html_folder = os.path.dirname(file_name)
-        with open(file_name, encoding="utf-8", errors="replace") as file:
+        with open(file_name, encoding="iso-8859-1", errors="replace") as file:
             content = file.read()
         updated = False
         matches = css_href_pattern.findall(content)
@@ -72,7 +72,7 @@ def check_css_references(folder):
                 logging.info(f'{old_href} is updated to {new_href} in {file_name}.')
                 updated = True
         if updated:
-            with open(file_name, 'w', encoding="utf-8", errors="replace") as f:
+            with open(file_name, 'w', encoding="iso-8859-1", errors="replace") as f:
                 f.write(content)
 
 def usage(iExitCode):
