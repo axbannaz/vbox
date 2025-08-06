@@ -532,6 +532,8 @@ class BuildTask:
             EdkLogger.SetLevel(EdkLogger.ERROR)
             BuildTask._ErrorFlag.set()
             BuildTask._ErrorMessage = "build thread scheduler error\n\t%s" % str(X)
+            # VBox: Just output the error message immmediately, in case the above trickery hides the message to well.
+            sys.stderr.write('error! Exception caught! %s\n%s' % (BuildTask._ErrorMessage, traceback.format_exc(),)); # VBox
 
         BuildTask._PendingQueue.clear()
         BuildTask._ReadyQueue.clear()
@@ -672,6 +674,8 @@ class BuildTask:
             BuildTask._ErrorFlag.set()
             BuildTask._ErrorMessage = "%s broken\n    %s [%s]" % \
                                       (threading.current_thread().name, Command, WorkingDir)
+            # VBox: Just output the error message immmediately, since I don't see the above error msg.
+            sys.stderr.write('error! Exception caught! %s\n%s' % (BuildTask._ErrorMessage, traceback.format_exc(),)); # VBox
 
         # indicate there's a thread is available for another build task
         BuildTask._RunningQueueLock.acquire()
