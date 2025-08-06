@@ -1570,6 +1570,13 @@ static int vboxWinDrvInstallPerform(PVBOXWINDRVINSTINTERNAL pCtx, PVBOXWINDRVINS
                             DWORD const dwErr = GetLastError();
                             switch (dwErr)
                             {
+                                /* Will happen on Windows Vista (for VBoxMouse).
+                                 * Harmless and can be skipped. */
+                                case ERROR_WRONG_INF_TYPE:
+                                    vboxWinDrvInstLogWarn(pCtx, "Copying OEM INF file not possible, reported wrong "
+                                                                "INF type. Ignoring.");
+                                    break;
+
                                 case CERT_E_UNTRUSTEDROOT:
                                     vboxWinDrvInstLogError(pCtx, "Not able to copy OEM INF into the system, as the "
                                                                  "certificate chain terminated in an untrusted root "
