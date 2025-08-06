@@ -1963,7 +1963,7 @@ HRESULT Display::takeScreenShotWorker(ULONG aScreenId,
 
     Console::SafeVMPtr ptrVM(mParent);
     HRESULT hrc = ptrVM.hrc();
-    if (!FAILED(hrc))
+    if (FAILED(hrc))
         return hrc;
 
     int vrc = i_displayTakeScreenshot(ptrVM.rawUVM(), ptrVM.vtable(), this, mpDrv, aScreenId, aAddress, aWidth, aHeight);
