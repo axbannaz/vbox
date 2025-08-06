@@ -73,8 +73,13 @@
    MSFT:RELEASE_DDK3790_IA32_CC_FLAGS     == /nologo /c /WX /Gy /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF
    MSFT:DEBUG_DDK3790xASL_IA32_CC_FLAGS   == /nologo /c /WX /Gy /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF /Zi /Gm
    MSFT:RELEASE_DDK3790xASL_IA32_CC_FLAGS == /nologo /c /WX /Gy /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF
-   MSFT:DEBUG_*_IA32_CC_FLAGS             == /nologo /c /WX /GS- /W4 /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF /Gy /Zi /Gm
-   MSFT:RELEASE_*_IA32_CC_FLAGS           == /nologo /c /WX /GS- /W4 /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF
-   MSFT:DEBUG_*_X64_CC_FLAGS              == /nologo /c /WX /GS- /X /W4 /Gs32768 /D UNICODE /O1b2s /Gy /FIAutoGen.h /EHs-c- /GR- /GF /Zi /Gm
-   MSFT:RELEASE_*_X64_CC_FLAGS            == /nologo /c /WX /GS- /X /W4 /Gs32768 /D UNICODE /O1b2s /Gy /FIAutoGen.h /EHs-c- /GR- /GF
+   # vbox: disable this bruteforce approach and instead just disable two offending options by adding '-' to each.
+   #MSFT:DEBUG_*_IA32_CC_FLAGS             == /nologo /c /WX /GS- /W4 /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF /Gy /Zi /Gm
+   #MSFT:RELEASE_*_IA32_CC_FLAGS           == /nologo /c /WX /GS- /W4 /Gs32768 /D UNICODE /O1b2 /FIAutoGen.h /EHs-c- /GR- /GF
+   #MSFT:DEBUG_*_X64_CC_FLAGS              == /nologo /c /WX /GS- /X /W4 /Gs32768 /D UNICODE /O1b2s /Gy /FIAutoGen.h /EHs-c- /GR- /GF /Zi /Gm
+   #MSFT:RELEASE_*_X64_CC_FLAGS            == /nologo /c /WX /GS- /X /W4 /Gs32768 /D UNICODE /O1b2s /Gy /FIAutoGen.h /EHs-c- /GR- /GF
+   # vbox: like this.
+   MSFT:*_*_IA32_CC_FLAGS                 = /GL- /Oi-
+   # vbox end
   INTEL:*_*_*_CC_FLAGS                    =  /Oi-
+
