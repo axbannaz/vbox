@@ -181,6 +181,12 @@ INTNETR3DECL(int) SUPR0MemFree(PSUPDRVSESSION pSession, RTHCUINTPTR uPtr)
     return VINF_SUCCESS;
 }
 
+INTNETR3DECL(int) SUPR0Printf(const char *pszFormat, ...)
+{
+    RT_NOREF(pszFormat);
+    return 0;
+}
+
 /* Fake non-existing ring-0 APIs. */
 #define RTThreadIsInInterrupt(hThread)      false
 #define RTThreadPreemptIsEnabled(hThread)   true
