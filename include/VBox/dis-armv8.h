@@ -117,14 +117,18 @@ typedef struct
     uint8_t                         enmType;
     /** Any extension applied (DISARMV8OPPARMEXTEND). */
     uint8_t                         enmExtend;
+    /** Parameter size. */
+    uint8_t                         cb;
     /** The operand. */
     union
     {
         /** General register index (DISGREG_XXX), applicable if DISUSE_REG_GEN32
          * or DISUSE_REG_GEN64 is set in fUse. */
         DISOPPARAMARMV8REG          Reg;
-        /** IPRT System register encoding. */
+        /** IPRT System register ID. */
         uint16_t                    idSysReg;
+        /** IPRT System instruction ID. */
+        uint32_t                    idSysIns;
         /** Conditional parameter - DISARMV8INSTRCOND */
         uint8_t                     enmCond;
         /** PState field (for MSR) - DISARMV8INSTRPSTATE. */
@@ -132,8 +136,6 @@ typedef struct
     } Op;
     /** Register holding the offset. Applicable if DISUSE_INDEX is set in fUse. */
     DISOPPARAMARMV8REG              GprIndex;
-    /** Parameter size. */
-    uint8_t                         cb;
     union
     {
         /** Offset from the base register. */

@@ -593,6 +593,7 @@ enum OPCODESARMV8
     OP_ARMV8_A64_SXTW,
     OP_ARMV8_A64_SYS,
     OP_ARMV8_A64_SYSL,
+    OP_ARMV8_A64_SYSP,
     OP_ARMV8_A64_TBNZ,
     OP_ARMV8_A64_TBZ,
     OP_ARMV8_A64_TCANCEL,
@@ -714,6 +715,8 @@ typedef enum DISARMV8OPPARM
     kDisArmv8OpParmImmRel,
     /** Register. */
     kDisArmv8OpParmReg,
+    /** System instruction. */
+    kDisArmv8OpParmSysIns,
     /** System register. */
     kDisArmv8OpParmSysReg,
     /** Accessing memory from address in base register + potential offset. */
