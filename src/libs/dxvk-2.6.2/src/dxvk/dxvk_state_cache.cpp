@@ -262,6 +262,7 @@ namespace dxvk {
   : m_device      (device),
     m_pipeManager (pipeManager),
     m_pipeWorkers (pipeWorkers) {
+#ifndef VBOX /* Don't want cache files cluttering the users directories. */
     std::string useStateCache = env::getEnvVar("DXVK_STATE_CACHE");
     m_enable = useStateCache != "0" && useStateCache != "disable" &&
       device->config().enableStateCache;
@@ -279,6 +280,9 @@ namespace dxvk {
       for (auto& e : m_entries)
         writeCacheEntry(file, e);
     }
+#else
+    m_enable = false;
+#endif
   }
   
 
