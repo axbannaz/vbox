@@ -3043,6 +3043,111 @@ typedef const ARMV8SPSREL2 *PCXARMV8SPSREL2;
 /** @} */
 
 
+
+/** @name System instruction encoding (SYS, SYSL, SYSP, WFET++).
+ * @{
+ */
+/** Mask for the SYS/SYSL vs SYSP indicator of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_P_MASK                 RT_BIT_32(ARMV8_AARCH64_SYSINS_P_SHIFT)
+/** Shift for the SYS/SYSL vs SYSP indicator of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_P_SHIFT                22
+/** Returns the P part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_P_GET(a_uSysIns)       (((a_uSysIns) & ARMV8_AARCH64_SYSREG_P_MASK) >> ARMV8_AARCH64_SYSREG_P_SHIFT)
+/** Mask for the L part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_L_MASK                 RT_BIT_32(ARMV8_AARCH64_SYSINS_L_SHIFT)
+/** Shift for the L part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_L_SHIFT                21
+/** Returns the L part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_L_GET(a_uSysIns)       (((a_uSysIns) & ARMV8_AARCH64_SYSREG_L_MASK) >> ARMV8_AARCH64_SYSREG_L_SHIFT)
+/** Mask for the op0 part of an SYS/SYSL/SYSP instruction
+ * This is always '01' (SYS/SYSL/SYSP) or '00' (WFET++), never '1x'.  */
+#define ARMV8_AARCH64_SYSINS_OP0_MASK               (RT_BIT_32(19) | RT_BIT_32(20))
+/** Shift for the op0 part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_OP0_SHIFT              19
+/** Returns the op0 part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_OP0_GET(a_uSysIns)     (((a_uSysIns) & ARMV8_AARCH64_SYSREG_OP0_MASK) >> ARMV8_AARCH64_SYSREG_OP0_SHIFT)
+/** Mask for the op1 part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_OP1_MASK               (RT_BIT_32(16) | RT_BIT_32(17) | RT_BIT_32(18))
+/** Shift for the op1 part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_OP1_SHIFT              16
+/** Returns the op1 part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_OP1_GET(a_uSysIns)  (((a_uSysIns) & ARMV8_AARCH64_SYSINS_OP1_MASK) >> ARMV8_AARCH64_SYSINS_OP1_SHIFT)
+/** Mask for the CRn part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_CRN_MASK               (RT_BIT_32(12) | RT_BIT_32(13) | RT_BIT_32(14) | RT_BIT_32(15))
+/** Shift for the CRn part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_CRN_SHIFT              12
+/** Returns the CRn part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_CRN_GET(a_uSysIns)     (((a_uSysIns) & ARMV8_AARCH64_SYSINS_CRN_MASK) >> ARMV8_AARCH64_SYSINS_CRN_SHIFT)
+/** Mask for the CRm part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_CRM_MASK               (RT_BIT_32(8) | RT_BIT_32(9) | RT_BIT_32(10) | RT_BIT_32(11))
+/** Shift for the CRm part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_CRM_SHIFT              8
+/** Returns the CRn part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_CRM_GET(a_uSysIns)     (((a_uSysIns) & ARMV8_AARCH64_SYSINS_CRM_MASK) >> ARMV8_AARCH64_SYSINS_CRM_SHIFT)
+/** Mask for the op2 part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_OP2_MASK               (RT_BIT_32(5) | RT_BIT_32(6) | RT_BIT_32(7))
+/** Shift for the op2 part of an SYS/SYSL/SYSP instruction */
+#define ARMV8_AARCH64_SYSINS_OP2_SHIFT              5
+/** Returns the op2 part of the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSINS_OP2_GET(a_uSysIns)    (((a_uSysIns) & ARMV8_AARCH64_SYSINS_OP2_MASK) >> ARMV8_AARCH64_SYSINS_OP2_SHIFT)
+/* Mask for all system instruction encoding relevant fields in SYS/SYSL/SYSP/WFET/WFIT instructions */
+#define ARMV8_AARCH64_SYSINS_MASK                   (  ARMV8_AARCH64_SYSINS_P_MASK   | ARMV8_AARCH64_SYSINS_L_MASK \
+                                                     | ARMV8_AARCH64_SYSINS_OP0_MASK | ARMV8_AARCH64_SYSINS_OP1_MASK \
+                                                     | ARMV8_AARCH64_SYSINS_CRN_MASK | ARMV8_AARCH64_SYSINS_CRN_MASK \
+                                                     | ARMV8_AARCH64_SYSINS_OP2_MASK )
+/* Shift for all system instruction encoding relevant fields in SYS/SYSL/SYSP/WFET/WFIT instructions */
+#define ARMV8_AARCH64_SYSINS_SHIFT                  ARMV8_AARCH64_SYSINS_OP2_SHIFT
+
+/* Mask for all hardcoded system instruction encoding relevant fields in SYS/SYSL/SYSP instructions. */
+#define ARMV8_AARCH64_SYSINS_FIXED_MASK             (ARMV8_AARCH64_SYSINS_P_MASK | ARMV8_AARCH64_SYSINS_L_MASK | ARMV8_AARCH64_SYSINS_OP0_MASK)
+
+/** @} */
+
+/** @name Mapping of P:L:op0:op1:CRn:CRm:op2 to a system instruction ID. This is
+ * IPRT specific and not part of the ARMv8 specification.
+ * @{  */
+#define ARMV8_AARCH64_SYSINS_ID_CREATE(a_P, a_L, a_Op0, a_Op1, a_CRn, a_CRm, a_Op2) \
+    (uint32_t)(  (((a_P)   & 0x1) << 17) \
+               | (((a_L)   & 0x1) << 16) \
+               | (((a_Op0) & 0x3) << 14) \
+               | (((a_Op1) & 0x7) << 11) \
+               | (((a_CRn) & 0xf) <<  7) \
+               | (((a_CRm) & 0xf) <<  3) \
+               |  ((a_Op2) & 0x7))
+
+/** Extract op0 from an IPRT system register ID value. */
+#define ARMV8_AARCH64_SYSINS_ID_GET_OP0(a_idSysReg) (((a_idSysReg) >> 14) & 0x3)
+/** Extract op1 from an IPRT system register ID value. */
+#define ARMV8_AARCH64_SYSINS_ID_GET_OP1(a_idSysReg) (((a_idSysReg) >> 11) & 0x7)
+/** Extract CRn from an IPRT system register ID value. */
+#define ARMV8_AARCH64_SYSINS_ID_GET_CRN(a_idSysReg) (((a_idSysReg) >>  7) & 0xf)
+/** Extract CRm from an IPRT system register ID value. */
+#define ARMV8_AARCH64_SYSINS_ID_GET_CRM(a_idSysReg) (((a_idSysReg) >>  3) & 0xf)
+/** Extract op2 from an IPRT system register ID value. */
+#define ARMV8_AARCH64_SYSINS_ID_GET_OP2(a_idSysReg) ( (a_idSysReg)        & 0x7)
+
+/** Returns the internal system register ID from the given MRS/MSR instruction. */
+#if 0
+# define ARMV8_AARCH64_SYSINS_ID_FROM_SYS_SYSL_ET_AL(a_uSysIns) \
+    ARMV8_AARCH64_SYSINS_ID_CREATE(ARMV8_AARCH64_SYSREG_P_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_L_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_OP0_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_OP1_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_CRN_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_CRM_GET(a_uSysIns), \
+                                   ARMV8_AARCH64_SYSREG_OP2_GET(a_uSysIns))
+#else
+# define ARMV8_AARCH64_SYSINS_ID_FROM_SYS_SYSL_ET_AL(a_uSysIns) \
+    (((a_uSysIns) & ARMV8_AARCH64_SYSINS_MASK) >> ARMV8_AARCH64_SYSINS_SHIFT)
+#endif
+/** Encodes the given system register ID in the given SYS/SYSL/SYSP instruction. */
+#define ARMV8_AARCH64_SYSREG_ID_ENCODE_IN_SYS_SYSL_SYSP(a_uSysIns, a_idSysIns) do { \
+        Assert((a_idSysIns & ARMV8_AARCH64_SYSINS_FIXED_MASK) == (a_uSysIns & ARMV8_AARCH64_SYSINS_FIXED_MASK)); \
+        (a_uSysIns) = ((a_uSysIns) & ~ARMV8_AARCH64_SYSINS_MASK) | (a_SysregId << ARMV8_AARCH64_SYSINS_SHIFT); \
+    } while (0)
+/** @} */
+
+
 /** @defgroup grp_rt_armv8_vmsav864 VMSAv8-64 related definitions
  * @ingroup grp_rt_armv8
  * @{ */
