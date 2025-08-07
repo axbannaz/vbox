@@ -48,7 +48,6 @@
       </li>
       <li>
         <p><b outputclass="bold">Non volatile memory express (NVMe)</b> is a standard for connecting non volatile memory (NVM) directly over PCI Express to lift the bandwidth limitation of the previously used SATA protocol for solid-state devices. Unlike other standards the command set is very simple in order to achieve maximum throughput and is not compatible with ATA or SCSI. OSes need to support NVMe devices to make use of them. For example, Windows 8.1 added native NVMe support. For Windows 7, native support was added with an update.</p>
-        <p>The NVMe controller is part of the extension pack.</p>
         <note>
           <p>Booting from drives attached using NVMe is only supported when EFI is used as the BIOS lacks the
             appropriate driver. </p>
