@@ -37,7 +37,7 @@
     </message>
     <message>
         <source>Unknown error %2 during initialization of the Runtime</source>
-        <translation>Άγνωστο λάθος %2 κατά την εκκίνηση του εκτελέσιμου</translation>
+        <translation>Άγνωστο λάθος %2 κατά την εκκίνηση του Εκτελέσιμου</translation>
     </message>
     <message>
         <source>&lt;b&gt;Cannot access the kernel driver!&lt;/b&gt;&lt;br/&gt;&lt;br/&gt;</source>
@@ -49,7 +49,7 @@
     </message>
     <message>
         <source>VirtualBox - Runtime Error</source>
-        <translation>VirtualBox - Λάθος στην εκτέλεση</translation>
+        <translation>VirtualBox - Λάθος στην Εκτέλεση</translation>
     </message>
     <message>
         <source>VirtualBox - Error In %1</source>
@@ -81,7 +81,7 @@
     </message>
     <message>
         <source>The VirtualBox Linux kernel driver is either not loaded or not set up correctly. Please try setting it up again by executing&lt;br/&gt;&lt;br/&gt;  &lt;font color=blue&gt;&apos;/sbin/vboxconfig&apos;&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;as root.&lt;br/&gt;&lt;br/&gt;If your system has EFI Secure Boot enabled you may also need to sign the kernel modules (vboxdrv, vboxnetflt, vboxnetadp, vboxpci) before you can load them. Please see your Linux system&apos;s documentation for more information.</source>
-        <translation>Ο οδηγός του Λίνουξ πυρήνα του VirtualBox ή δεν φορτώθηκε ή δεν έχει ρυθμιστεί σωστά. Παρακαλώ προσπαθείστε ξανά να το ρυθμίσετε εκτελώντας&lt;br/&gt;&lt;br/&gt;  &lt;font color=blue&gt;&apos;/sbin/vboxconfig&apos;&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;ως διαχειρηστής.&lt;br/&gt;&lt;br/&gt;Αν το σύστημά σας έχει Ασφαλή Εκκίνηση EFI ενεργοποιημένη ίσως επίσης να επιθυμείτε να υπογράψετε επίσης τα αρθρώματα πυρήνα (vboxdrv, vboxnetflt, vboxnetadp, vboxpci) πριν να είστε ικανοί να τα φορτώσετε. Παρακαλώ δείτε την την τεκμηρίωση του Λίνουξ συστήματός σας.</translation>
+        <translation>Ο οδηγός του Λίνουξ πυρήνα του VirtualBox ή δεν φορτώθηκε ή δεν έχει ρυθμιστεί σωστά. Παρακαλώ προσπαθείστε ξανά να τον ρυθμίσετε εκτελώντας&lt;br/&gt;&lt;br/&gt;  &lt;font color=blue&gt;&apos;/sbin/vboxconfig&apos;&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;ως διαχειριστής.&lt;br/&gt;&lt;br/&gt;Αν το σύστημά σας έχει Ασφαλή Εκκίνηση EFI ενεργοποιημένη ίσως επίσης να επιθυμείτε να υπογράψετε τα αρθρώματα πυρήνα (vboxdrv, vboxnetflt, vboxnetadp, vboxpci) πριν να είστε ικανοί να τα φορτώσετε. Παρακαλώ δείτε την την τεκμηρίωση του Λίνουξ συστήματός σας.</translation>
     </message>
     <message>
         <source>The VirtualBox kernel modules do not match this version of VirtualBox. The installation of VirtualBox was apparently not successful. Executing&lt;br/&gt;&lt;br/&gt;  &lt;font color=blue&gt;&apos;/sbin/vboxconfig&apos;&lt;/font&gt;&lt;br/&gt;&lt;br/&gt;may correct this. Make sure that you are not mixing builds of VirtualBox from different sources.</source>
@@ -89,11 +89,11 @@
     </message>
     <message>
         <source>This VirtualBox application was built for a different CPU architecture (&lt;b&gt;%1&lt;/b&gt;) than the host (&lt;b&gt;%2&lt;/b&gt;). Please reinstall.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτή η εφαρμογή του VirtualBox έχει δημιουργηθεί για διαφορετική αρχιτεκτονική επεξεργαστή (&lt;b&gt;%1&lt;/b&gt;) αντί αυτής του οικοδεσπότη (&lt;b&gt;%2&lt;/b&gt;). Παρακαλώ επαναεγκαταστήστε.</translation>
     </message>
     <message>
         <source>Mismatching CPU Architecture</source>
-        <translation type="unfinished"></translation>
+        <translation>Ασυμφωνία Αρχιτεκτονικής Επεξεργαστή</translation>
     </message>
 </context>
 <context>
@@ -224,26 +224,26 @@
     </message>
     <message>
         <source>Hardware Virtualization</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονοποίηση Εξοπλισμού</translation>
     </message>
     <message>
         <source>Nested Pa&amp;ging</source>
-        <translation type="unfinished"></translation>
+        <translation>Ένθετη σελιδοποίηση</translation>
     </message>
     <message>
         <source>Use the nested paging extension of Intel VT-x and AMD-V on the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση της ένθετης σελιδοποίησης των Intel VT-x και AMD-V στην εικονική μηχανή</translation>
     </message>
 </context>
 <context>
     <name>UIAcquireCloudMachineCloneNameDialog</name>
     <message>
         <source>Clone Virtual Machine</source>
-        <translation type="unfinished">Κλωνοποιήση Εικονικής Μηχανής</translation>
+        <translation>Κλωνοποιήση Εικονικής Μηχανής</translation>
     </message>
     <message>
         <source>Enter machine name...</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή ονόματος μηχανής...</translation>
     </message>
 </context>
 <context>
@@ -281,7 +281,7 @@
     </message>
     <message>
         <source>Cut</source>
-        <translation>Αποκόλληση</translation>
+        <translation>Αποκοπή</translation>
     </message>
     <message>
         <source>Log</source>
@@ -401,7 +401,7 @@
     </message>
     <message>
         <source>Show &amp;Log...</source>
-        <translation>Εμφάνιση καταγραφής...</translation>
+        <translation>Εμφάνιση Καταγραφής...</translation>
     </message>
     <message>
         <source>Media Manager</source>
@@ -409,7 +409,7 @@
     </message>
     <message>
         <source>&amp;Minimize Window</source>
-        <translation>Ελαχιστοποίηση παραθύρου</translation>
+        <translation>Ελαχιστοποίηση Παραθύρου</translation>
     </message>
     <message>
         <source>&amp;Detachable Start</source>
@@ -425,7 +425,7 @@
     </message>
     <message>
         <source>Seam&amp;less Mode</source>
-        <translation>Ενσωματωμένη οθόνη</translation>
+        <translation>Ενσωματωμένη Οθόνη</translation>
     </message>
     <message>
         <source>Remove selected virtual machines</source>
@@ -437,7 +437,7 @@
     </message>
     <message>
         <source>Copy the selected object(s) from guest to host</source>
-        <translation>Αντιγραφή των επιλεγμένων αντικειμένων από τον επισκέπτη στον οικοδεσπότη</translation>
+        <translation>Αντιγραφή του(των) επιλεγμένου(ων) αντικειμένου(ων) από τον επισκέπτη στον οικοδεσπότη</translation>
     </message>
     <message>
         <source>Open the browser and go to the VirtualBox product web site</source>
@@ -457,7 +457,7 @@
     </message>
     <message>
         <source>&amp;Status Bar Settings...</source>
-        <translation>Ρυθμίσεις γραμμής κατάστασης...</translation>
+        <translation>Ρυθμίσεις Γραμμής Κατάστασης...</translation>
     </message>
     <message>
         <source>Open panel with file manager log</source>
@@ -553,7 +553,7 @@
     </message>
     <message>
         <source>&amp;Optical Drives</source>
-        <translation>Οπτικές συσκευές</translation>
+        <translation>Οπτικοί Οδηγοί</translation>
     </message>
     <message>
         <source>Take guest display screenshot</source>
@@ -561,7 +561,7 @@
     </message>
     <message>
         <source>Insert the Guest Additions disk file into the virtual optical drive</source>
-        <translation>Εισάγετε τον δίσκο με τις Προσθήκες Επισκέπτη στον εικονικό οπτικό δίσκο</translation>
+        <translation>Εισάγετε το αρχείο δίσκου με τις Προσθήκες Επισκέπτη στον εικονικό οπτικό οδηγό</translation>
     </message>
     <message>
         <source>Clone selected virtual machine</source>
@@ -597,7 +597,7 @@
     </message>
     <message>
         <source>Cr&amp;eate Shortcut on Desktop</source>
-        <translation>Δημιουργήστε μία συντόμευση στην επιφάνεια εργασίας</translation>
+        <translation>Δημιουργήστε μία Συντόμευση στην Επιφάνεια Εργασίας</translation>
     </message>
     <message>
         <source>Discard saved state of selected virtual machines</source>
@@ -609,7 +609,7 @@
     </message>
     <message>
         <source>Allow remote desktop (RDP) connections to this machine</source>
-        <translation>Επιτρέπει συνδέσεις απομακρυσμένης επιφάνειας (RDP) σε αυτή τη μηχανή</translation>
+        <translation>Επιτρέπει συνδέσεις απομακρυσμένης επιφάνειας (RDP) σε αυτή την μηχανή</translation>
     </message>
     <message>
         <source>&amp;Shared Folders</source>
@@ -625,15 +625,15 @@
     </message>
     <message>
         <source>Cut selected file object(s)</source>
-        <translation>Αποκόλληση επιλεγμένων αρχείων</translation>
+        <translation>Αποκοπή επιλεγμένου(ων) αρχείου(ων)</translation>
     </message>
     <message>
         <source>No Webcams Connected</source>
-        <translation>Καμία συνδεδεμένη κάμερα</translation>
+        <translation>Καμία Συνδεδεμένη Κάμερα</translation>
     </message>
     <message>
         <source>Start selected virtual machines</source>
-        <translation>Εκκίνηση των επιλεγμένων εικονικών μηχανών</translation>
+        <translation>Εκκίνηση επιλεγμένων εικονικών μηχανών</translation>
     </message>
     <message>
         <source>Power off the virtual machine</source>
@@ -685,7 +685,7 @@
     </message>
     <message>
         <source>Create New Directory</source>
-        <translation>Δημιουργία Νέου Φακέλου</translation>
+        <translation>Δημιουργία Νέου Καταλόγου</translation>
     </message>
     <message>
         <source>&amp;Network</source>
@@ -705,11 +705,11 @@
     </message>
     <message>
         <source>Show Status &amp;Bar</source>
-        <translation>Εμφάνιση γραμμής κατάστασης</translation>
+        <translation>Εμφάνιση Γραμμής Κατάστασης</translation>
     </message>
     <message>
         <source>Show the properties of currently selected file object(s)</source>
-        <translation>Εμφάνιση των ιδιότητων των επιλεγμένων αρχείων</translation>
+        <translation>Εμφάνιση των ιδιότητων του(ων) επιλεγμένου(ων) αρχείου(ων)</translation>
     </message>
     <message>
         <source>&amp;Show Help...</source>
@@ -745,7 +745,7 @@
     </message>
     <message>
         <source>Display the Extra Data Manager window</source>
-        <translation>Εμφάνιση του Διαχειριστή Επιπλέον Δεδομένων</translation>
+        <translation>Εμφάνιση του παραθύρου Διαχειριστής Επιπλέον Δεδομένων</translation>
     </message>
     <message>
         <source>Open the machine details pane</source>
@@ -761,7 +761,7 @@
     </message>
     <message>
         <source>Log Viewer</source>
-        <translation>Επισκόπηση καταγραφικών</translation>
+        <translation>Επισκόπηση Καταγραφικών</translation>
     </message>
     <message>
         <source>Go to Home Folder</source>
@@ -777,7 +777,7 @@
     </message>
     <message>
         <source>Switch between normal and scaled mode</source>
-        <translation>Εναλλαγή λειτουργείας μεταξύ κανονικής και κλιμακώμενης οθόνης</translation>
+        <translation>Εναλλαγή λειτουργείας μεταξύ κανονικής και κλιμακούμενης οθόνης</translation>
     </message>
     <message>
         <source>Display virtual machine settings window to configure hard disks</source>
@@ -789,7 +789,7 @@
     </message>
     <message>
         <source>&amp;Hard Disks</source>
-        <translation>Σκληροί δίσκοι</translation>
+        <translation>Σκληροί Δίσκοι</translation>
     </message>
     <message>
         <source>&amp;Bookmark</source>
@@ -797,7 +797,7 @@
     </message>
     <message>
         <source>Remove Host-only Network</source>
-        <translation>Αφαίρεση μόνο-με-οικοδεσπότη δίκτυο</translation>
+        <translation>Αφαίρεση μόνο-με-οικοδεσπότη Δίκτυο</translation>
     </message>
     <message>
         <source>Display the global preferences window</source>
@@ -857,7 +857,7 @@
     </message>
     <message>
         <source>&amp;Keyboard Settings...</source>
-        <translation>Ρυθμίσεις πληκτρολογίου...</translation>
+        <translation>Ρυθμίσεις Πληκτρολογίου...</translation>
     </message>
     <message>
         <source>Open the Virtual Media Manager</source>
@@ -869,7 +869,7 @@
     </message>
     <message>
         <source>Add Disk Image</source>
-        <translation>Προσθήκη Σκληρού Δίσκου</translation>
+        <translation>Προσθήκη Εικόνας Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>R&amp;emote Display</source>
@@ -889,11 +889,11 @@
     </message>
     <message>
         <source>&amp;Save State</source>
-        <translation>Αποθήκευση της κατάστασης</translation>
+        <translation>Αποθήκευση της Κατάστασης</translation>
     </message>
     <message>
         <source>Create Disk Image</source>
-        <translation>Δημιουργία Σκληρού Δίσκου</translation>
+        <translation>Δημιουργία Εικόνας Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>No supported webcams connected to the host PC</source>
@@ -905,7 +905,7 @@
     </message>
     <message>
         <source>&amp;Detach GUI</source>
-        <translation>Απόσπαση από το γραφικό περιβάλλον</translation>
+        <translation>Απόσπαση Γραφικού Περιβάλλοντος</translation>
     </message>
     <message>
         <source>Automatically resize the guest display when the window is resized</source>
@@ -929,7 +929,7 @@
     </message>
     <message>
         <source>Delete selected file object(s)</source>
-        <translation>Διαγραφή επιλεγμένων αρχείων</translation>
+        <translation>Διαγραφή επιλεγμένου(ων) αρχείου(ων)</translation>
     </message>
     <message>
         <source>Go to home folder</source>
@@ -1029,7 +1029,7 @@
     </message>
     <message>
         <source>Preview Monitor %1</source>
-        <translation>Προεπισκόπηση οθόνης %1</translation>
+        <translation>Προεπισκόπηση Οθόνης %1</translation>
     </message>
     <message>
         <source>&amp;File</source>
@@ -1038,7 +1038,7 @@
     </message>
     <message>
         <source>Detach the GUI from headless VM</source>
-        <translation>Απόσπαση από το γραφικό περιβάλλον της ακέφαλης ΕΜ</translation>
+        <translation>Απόσπαση Γραφικού Περιβάλλοντος της ακέφαλης ΕΜ</translation>
     </message>
     <message>
         <source>&amp;Virtual Media Manager</source>
@@ -1123,7 +1123,7 @@
     </message>
     <message>
         <source>Copy the selected object(s) from host to guest</source>
-        <translation>Αντιγραφή των επιλεγμένων αντικειμένων από τον οικοδεσπότη στον επισκέπτη</translation>
+        <translation>Αντιγραφή των επιλεγμένου(ων) αντικειμένου(ων) από τον οικοδεσπότη στον επισκέπτη</translation>
     </message>
     <message>
         <source>Take a snapshot of the current virtual machine state</source>
@@ -1143,7 +1143,7 @@
     </message>
     <message>
         <source>Take Screensh&amp;ot...</source>
-        <translation>Νέο Στιγμιότυπο οθόνης...</translation>
+        <translation>Λήψη Στιγμιοτύπου Οθόνης...</translation>
     </message>
     <message>
         <source>Scale to %1% (unscaled output)</source>
@@ -1163,7 +1163,7 @@
     </message>
     <message>
         <source>Discard</source>
-        <translation>Αναίρεση</translation>
+        <translation>Απόρριψη</translation>
     </message>
     <message>
         <source>Resize to %1x%2</source>
@@ -1191,7 +1191,7 @@
     </message>
     <message>
         <source>&amp;Mouse Integration</source>
-        <translation>Ενσωμάτωση ποντικιού</translation>
+        <translation>Ενσωμάτωση Ποντικιού</translation>
     </message>
     <message>
         <source>Refresh accessibility state of selected virtual machines</source>
@@ -1215,7 +1215,7 @@
     </message>
     <message>
         <source>D&amp;iscard Saved State...</source>
-        <translation>Απόρριψη της αποθηκευμένης κατάστασης...</translation>
+        <translation>Απόρριψη Αποθηκευμένης Κατάστασης...</translation>
     </message>
     <message>
         <source>Display virtual machine settings window to configure shared folders</source>
@@ -1243,7 +1243,7 @@
     </message>
     <message>
         <source>Paste copied/cut file object(s)</source>
-        <translation>Επικόλληση αντεγραμένων/αποκολλημένων επιλεγμένων αρχείων</translation>
+        <translation>Επικόλληση αντιγραμένου(ων)/αποκομμένου(ων) αρχείου(ων)</translation>
     </message>
     <message>
         <source>&amp;Window</source>
@@ -1255,7 +1255,7 @@
     </message>
     <message>
         <source>&amp;Status Bar</source>
-        <translation>Γραμμή κατάστασης</translation>
+        <translation>Γραμμή Κατάστασης</translation>
     </message>
     <message>
         <source>&amp;USB Settings...</source>
@@ -1283,7 +1283,7 @@
     </message>
     <message>
         <source>Take Sn&amp;apshot...</source>
-        <translation>Νέο Στιγμιότυπο...</translation>
+        <translation>Λήψη Στιγμιοτύπου...</translation>
     </message>
     <message>
         <source>&amp;Ungroup</source>
@@ -1291,11 +1291,11 @@
     </message>
     <message>
         <source>Cr&amp;eate Alias on Desktop</source>
-        <translation>Δημιουργήστε μία συντόμευση στην επιφάνεια εργασίας</translation>
+        <translation>Δημιουργήστε μία Συντόμευση στην Επιφάνεια Εργασίας</translation>
     </message>
     <message>
         <source>&amp;Menu Bar</source>
-        <translation>Γραμμή κατάλογου επιλογών</translation>
+        <translation>Γραμμή Κατάλογου Επιλογών</translation>
     </message>
     <message>
         <source>Clone Virtual Machine</source>
@@ -1303,7 +1303,7 @@
     </message>
     <message>
         <source>Refresh the list of host-only networks</source>
-        <translation>Ανανέωση της καταλόγου μόνο-με-οικοδεσπότη δικτύων</translation>
+        <translation>Ανανέωση της λίστας των μόνο-με-οικοδεσπότη δικτύων</translation>
     </message>
     <message>
         <source>Rena&amp;me Group...</source>
@@ -1331,7 +1331,7 @@
     </message>
     <message>
         <source>Display virtual machine settings window to configure video/audio recording</source>
-        <translation>Εμφάνιση το παράθυρο ρυθμίσεων της εικονικής μηχανής για τη διαμόρφωση της μαγνητοσκόπησης ήχου/εικόνας</translation>
+        <translation>Εμφάνιση του παράθυρου ρυθμίσεων της εικονικής μηχανής για τη διαμόρφωση της μαγνητοσκόπησης ήχου/εικόνας</translation>
     </message>
     <message>
         <source>Show the VirtualBox Machine Definition files in Finder</source>
@@ -1407,11 +1407,11 @@
     </message>
     <message>
         <source>Session I&amp;nformation...</source>
-        <translation>Πληροφορίες συνεδρίας...</translation>
+        <translation>Πληροφορίες Συνεδρίας...</translation>
     </message>
     <message>
         <source>S&amp;caled Mode</source>
-        <translation>Κλιμακώμενη οθόνη</translation>
+        <translation>Κλιμακούμενη Οθόνη</translation>
     </message>
     <message>
         <source>Sort items of selected virtual machine group alphabetically</source>
@@ -1447,7 +1447,7 @@
     </message>
     <message>
         <source>Copy selected file object(s)</source>
-        <translation>Αντιγραφή επιλεγμένων αρχείων</translation>
+        <translation>Αντιγραφή επιλεγμένου(ων) αρχείου(ων)</translation>
     </message>
     <message>
         <source>Show help contents</source>
@@ -1455,7 +1455,7 @@
     </message>
     <message>
         <source>Create shortcut files to the VirtualBox Machine Definition files on your desktop</source>
-        <translation>Δημιουργήστε μία συντόμευση του αρχείου ορισμού της Εικονικής Μηχανής VirtualBox στην επιφάνεια εργασίας</translation>
+        <translation>Δημιουργήστε μία συντόμευση του αρχείου ορισμού της Εικονικής Μηχανής VirtualBox στην επιφάνεια εργασίας σας</translation>
     </message>
     <message>
         <source>Open pane with bookmarking options</source>
@@ -1475,7 +1475,7 @@
     </message>
     <message>
         <source>Show the VirtualBox Machine Definition files in the File Manager</source>
-        <translation>Δείξε το αρχείο ορισμού της εικονικής μηχανής VirtualBox στον File Manager</translation>
+        <translation>Δείξε το αρχείο ορισμού της εικονικής μηχανής VirtualBox στον Διαχειριστή Αρχείων</translation>
     </message>
     <message>
         <source>Go one level up to parent folder</source>
@@ -1483,7 +1483,7 @@
     </message>
     <message>
         <source>&amp;Drag and Drop</source>
-        <translation>Μεταφορά και απόθεση</translation>
+        <translation>Μεταφορά και Απόθεση</translation>
     </message>
     <message>
         <source>Display window to configure status-bar</source>
@@ -1515,7 +1515,7 @@
     </message>
     <message>
         <source>&amp;Online Documentation...</source>
-        <translation>Διαδυκτιακή Τεκκμηρίωση...</translation>
+        <translation>Διαδικτυακή Τεκμηρίωση...</translation>
     </message>
     <message>
         <source>Open the browser and go to the VirtualBox user manual</source>
@@ -1560,7 +1560,7 @@
     </message>
     <message>
         <source>Reread all the log files and refresh pages</source>
-        <translation>Ανάγνωση ξανά όλων των αρχείων καταγραφών και ανανέωση σελίδων</translation>
+        <translation>Ανάγνωση ξανά όλων των αρχείων καταγραφών και ανανέωση των σελίδων</translation>
     </message>
     <message>
         <source>Reload Log Files</source>
@@ -1584,7 +1584,7 @@
     </message>
     <message>
         <source>Open Operations Pane</source>
-        <translation>Άνοιγμα Καρτέλας Εξεργασιών</translation>
+        <translation>Άνοιγμα Καρτέλας Διεργασιών</translation>
     </message>
     <message>
         <source>Toggle guest session panel of the file manager</source>
@@ -1592,7 +1592,7 @@
     </message>
     <message>
         <source>Toggle Guest Session Panel</source>
-        <translation>Εναλλαγή σε Καρτέλα Συνεδρίας Επισκέπτη</translation>
+        <translation>Εναλλαγή Καρτέλας Συνεδρίας Επισκέπτη</translation>
     </message>
     <message>
         <source>Go One Level Up</source>
@@ -1624,7 +1624,7 @@
     </message>
     <message>
         <source>Paste Copied/Cut Object(s)</source>
-        <translation>Επικόλληση Αντεγραμένου(ων)/Αποκολλημένου(ων) Αντικειμένου(ων)</translation>
+        <translation>Επικόλληση Αντεγραμένου(ων)/Αποκομμένου(ων) Αντικειμένου(ων)</translation>
     </message>
     <message>
         <source>Select All Objects</source>
@@ -2255,283 +2255,283 @@
     </message>
     <message>
         <source>Enable Clipboard File Transfers</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση Μεταφοράς Αρχείου μέσω Προχείρου</translation>
     </message>
     <message>
         <source>Open the browser and go to the VirtualBox user guide</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα πλοηγού και μετάβαση στον οδηγό χρήσης του VirtualBox</translation>
     </message>
     <message>
         <source>&amp;Preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Προτιμήσεις</translation>
     </message>
     <message>
         <source>Open pane with log viewer preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα καρτέλας με τις προτιμήσεις καταγραφών</translation>
     </message>
     <message>
         <source>Open Preferences Pane</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα Καρτέλας Προτιμήσεων</translation>
     </message>
     <message>
         <source>Open pane with file manager preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα πίνακα με τις προτιμήσεις του διαχειριστή αρχείων</translation>
     </message>
     <message>
         <source>Open pane with file manager log</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του πίνακα με τις καταγραφές του διαχειριστή αρχείων</translation>
     </message>
     <message>
         <source>Open pane with file manager operations</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του πίνακα με τις διαδικασίες του διαχειριστή αρχείων</translation>
     </message>
     <message>
         <source>Go Forward</source>
-        <translation type="unfinished">Μπροστά</translation>
+        <translation>Μπροστά</translation>
     </message>
     <message>
         <source>Go forward</source>
-        <translation type="unfinished"></translation>
+        <translation>Μπροστά</translation>
     </message>
     <message>
         <source>Go Backward</source>
-        <translation type="unfinished">Πίσω</translation>
+        <translation>Πίσω</translation>
     </message>
     <message>
         <source>Go backward</source>
-        <translation type="unfinished"></translation>
+        <translation>Πίσω</translation>
     </message>
     <message>
         <source>Open pane with VISO Creator preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα πίνακα με τις προτιμήσεις του Δημιουργού VISO</translation>
     </message>
     <message>
         <source>Remove Selected Item(s) From VISO</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση Επιλεγμένου(ων) Αντικειμένου(ων) από το VISO</translation>
     </message>
     <message>
         <source>&amp;Restore</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά</translation>
     </message>
     <message>
         <source>Restore selected item(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά επιλεγμένου(ων) αντικειμένου(ων)</translation>
     </message>
     <message>
         <source>Restore Selected Item(s)</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά Επιλεγμένου(ων) Αντικειμένου(ων)</translation>
     </message>
     <message>
         <source>Rename Selected VISO File Object</source>
-        <translation type="unfinished"></translation>
+        <translation>Μετονομασία Επιλεγμένου Αντικειμένου Αρχείου VISO</translation>
     </message>
     <message>
         <source>Reset the VISO content</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά του περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Reset the VISO Content</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά του Περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Open</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα</translation>
     </message>
     <message>
         <source>Open the VISO content</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Open the VISO Content</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του Περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Save As</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση Ως</translation>
     </message>
     <message>
         <source>Save the VISO content</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση του περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Save the VISO Content</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση του Περιεχομένου VISO</translation>
     </message>
     <message>
         <source>Import ISO</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή ISO</translation>
     </message>
     <message>
         <source>Import ISO into the VISO content</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή ISO στο περιεχόμενο VISO</translation>
     </message>
     <message>
         <source>Import Selected ISO Into the VISO Content</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή Επιλεγμένου ISO Στο Περιεχόμενο VISO</translation>
     </message>
     <message>
         <source>Remove ISO</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση ISO</translation>
     </message>
     <message>
         <source>Remove the imported ISO from the VISO content</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του εισαγμένου ISO από το περιεχόμενο VISO</translation>
     </message>
     <message>
         <source>Remove the Imported ISO From the VISO Content</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του Εισαγμένου ISO Από το Περιεχόμενο VISO</translation>
     </message>
     <message>
         <source>Open pane with activity monitor preferences</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του πίνακα με τις προτιμήσεις παρακολούθησης δραστηριότητας μηχανής</translation>
     </message>
     <message>
         <source>Stop</source>
-        <translation type="unfinished"></translation>
+        <translation>Τερματισμός</translation>
     </message>
     <message>
         <source>Upgrade guest additions</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναβάθμιση Προσθηκών επισκέπτη</translation>
     </message>
     <message>
         <source>No Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Χωρίς Ομάδα</translation>
     </message>
     <message>
         <source>&amp;Edit...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία...</translation>
     </message>
     <message>
         <source>Edit existing disk image file</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία υπάρχοντος αρχείου σκληρού δίσκου</translation>
     </message>
     <message>
         <source>Edit Disk Image File</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία Αρχείου Εικόνας Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>&amp;Resource Use</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση Πηγής</translation>
     </message>
     <message>
         <source>&amp;Resources...</source>
-        <translation type="unfinished"></translation>
+        <translation>Πηγές...</translation>
     </message>
     <message>
         <source>Navigate to the global resources view</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοήγηση στην συνολική εμφάνιση πηγών</translation>
     </message>
     <message>
         <source>Navigate to the Global Resources View</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοήγηση στην Συνολική Εμφάνιση Πηγών</translation>
     </message>
     <message>
         <source>&amp;Home</source>
-        <translation type="unfinished"></translation>
+        <translation>Αρχική Σελίδα</translation>
     </message>
     <message>
         <source>Open the Home Screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα της Αρχικής Οθόνης</translation>
     </message>
     <message>
         <source>&amp;Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Μηχανές</translation>
     </message>
     <message>
         <source>Open the Machine Manager</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του Διαχειριστή Μηχανών</translation>
     </message>
     <message>
         <source>&amp;Extensions</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεκτάσεις</translation>
     </message>
     <message>
         <source>&amp;Media</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέσα</translation>
     </message>
     <message>
         <source>&amp;Open</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα</translation>
     </message>
     <message>
         <source>&amp;Open Machine...</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα Μηχανής...</translation>
     </message>
     <message>
         <source>Open existing virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα υπάρχουσας εικονικής μηχανής</translation>
     </message>
     <message>
         <source>&amp;Open...</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα...</translation>
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Νέα Ομάδα</translation>
     </message>
     <message>
         <source>Create new group based on selected virtual machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Δημιουργία νέας ομάδας βάσει των επιλεγμένων εικονικών μηχανών</translation>
     </message>
     <message>
         <source>Start with &amp;GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση με Γραφικό Περιβάλλον</translation>
     </message>
     <message>
         <source>Start selected virtual machines with GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση επιλεγμένων εικονικών μηχανών με Γραφικό Περιβάλλον</translation>
     </message>
     <message>
         <source>Start with&amp;out GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση χωρίς Γραφικό Περιβάλλον</translation>
     </message>
     <message>
         <source>Start with &amp;detachable GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση με αποσπώμενο Γραφικό Περιβάλλον</translation>
     </message>
     <message>
         <source>Start selected virtual machines with option of continuing in the background</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση επιλεγμένων εικονικών μηχανών με επιλογή συνέχειας στο παρασκήνιο</translation>
     </message>
     <message>
         <source>Sh&amp;ut Down</source>
-        <translation type="unfinished"></translation>
+        <translation>Τερματισμός</translation>
     </message>
     <message>
         <source>Send ACPI shutdown signal to selected virtual machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποστολή σήματος τερματισμού ACPI στις επιλεγμένες εικονικές μηχανές</translation>
     </message>
     <message>
         <source>&amp;Edit</source>
-        <translation type="unfinished">Επεξεργασία</translation>
+        <translation>Επεξεργασία</translation>
     </message>
     <message>
         <source>Edit selected media</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία επιλεγμένων μέσων</translation>
     </message>
     <message>
         <source>Edit Media</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία Μέσων</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση Πηγής</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation type="unfinished"></translation>
+        <translation>Πηγές</translation>
     </message>
     <message>
         <source>View resource use of the selected virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση χρήσης πηγών της επιλεγμένης εικονικής μηχανής</translation>
     </message>
     <message>
         <source>View Resource Use of the Selected Virtual Machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση Χρήσης Πηγών της Επιλεγμένης Εικονικής Μηχανής</translation>
     </message>
     <message>
         <source>Send the ACPI shutdown signal to the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποστολή σήματος τερματισμού ACPI στην επιλεγμένη εικονική μηχανή</translation>
     </message>
 </context>
 <context>
@@ -2593,111 +2593,111 @@
     <name>UIAdvancedSettingsDialog</name>
     <message>
         <source>Basic</source>
-        <translation type="unfinished"></translation>
+        <translation>Βασικές</translation>
     </message>
     <message>
         <source>Expert</source>
-        <translation type="unfinished"></translation>
+        <translation>Για Προχωρημένους</translation>
     </message>
     <message>
         <source>Search settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογές Αναζήτησης</translation>
     </message>
     <message>
         <source>Invalid settings detected</source>
-        <translation type="unfinished">Εντοπίστηκαν μη έγκυρες ρυθμίσεις</translation>
+        <translation>Εντοπίστηκαν μη έγκυρες ρυθμίσεις</translation>
     </message>
 </context>
 <context>
     <name>UIAdvancedSettingsDialogGlobal</name>
     <message>
         <source>Allows to navigate through Global Property categories</source>
-        <translation type="unfinished">Επιτρέπει την πλοήγηση στις κατηγορίες Ιδιότητες Συστήματος</translation>
+        <translation>Επιτρέπει την πλοήγηση στις κατηγορίες Γενικών Προτιμήσεων</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished">Γενικά</translation>
+        <translation>Γενικά</translation>
     </message>
     <message>
         <source>Input</source>
-        <translation type="unfinished">Εισαγωγή</translation>
+        <translation>Είσοδος</translation>
     </message>
     <message>
         <source>Update</source>
-        <translation type="unfinished">Ενημέρωση</translation>
+        <translation>Ενημέρωση</translation>
     </message>
     <message>
         <source>Language</source>
-        <translation type="unfinished">Γλώσσα</translation>
+        <translation>Γλώσσα</translation>
     </message>
     <message>
         <source>Display</source>
-        <translation type="unfinished">Οθόνη</translation>
+        <translation>Οθόνη</translation>
     </message>
     <message>
         <source>Proxy</source>
-        <translation type="unfinished">Διαμεσολάβηση</translation>
+        <translation>Διαμεσολάβηση</translation>
     </message>
     <message>
         <source>Interface</source>
-        <translation type="unfinished">Περιβάλλον</translation>
+        <translation>Περιβάλλον</translation>
     </message>
     <message>
         <source>VirtualBox - Preferences</source>
         <comment>global preferences dialog name</comment>
-        <translation type="unfinished"></translation>
+        <translation>VirtualBox - Προτιμήσεις</translation>
     </message>
 </context>
 <context>
     <name>UIAdvancedSettingsDialogMachine</name>
     <message>
         <source>Allows to navigate through VM Settings categories</source>
-        <translation type="unfinished">Επιτρέπει την πλοήγηση στις κατηγορίες Ιδιότητες ΕΜ</translation>
+        <translation>Επιτρέπει την πλοήγηση στις κατηγορίες Ρυθμίσεων ΕΜ</translation>
     </message>
     <message>
         <source>General</source>
-        <translation type="unfinished">Γενικά</translation>
+        <translation>Γενικά</translation>
     </message>
     <message>
         <source>System</source>
-        <translation type="unfinished">Σύστημα</translation>
+        <translation>Σύστημα</translation>
     </message>
     <message>
         <source>Display</source>
-        <translation type="unfinished">Οθόνη</translation>
+        <translation>Οθόνη</translation>
     </message>
     <message>
         <source>Storage</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση</translation>
     </message>
     <message>
         <source>Audio</source>
-        <translation type="unfinished">Ήχος</translation>
+        <translation>Ήχος</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Δίκτυο</translation>
+        <translation>Δίκτυο</translation>
     </message>
     <message>
         <source>Serial Ports</source>
-        <translation type="unfinished">Σειριακές Θύρες</translation>
+        <translation>Σειριακές Θύρες</translation>
     </message>
     <message>
         <source>USB</source>
-        <translation type="unfinished">USB</translation>
+        <translation>USB</translation>
     </message>
     <message>
         <source>Shared Folders</source>
-        <translation type="unfinished">Κοινόχρηστοι Φάκελοι</translation>
+        <translation>Κοινόχρηστοι Φάκελοι</translation>
     </message>
     <message>
         <source>User Interface</source>
-        <translation type="unfinished">Περιβάλλον χρήστη</translation>
+        <translation>Περιβάλλον χρήστη</translation>
     </message>
     <message>
         <source>%1 - Settings</source>
         <comment>machine settings dialog name, starts from machine name</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1 - Ρυθμίσεις</translation>
     </message>
 </context>
 <context>
@@ -2945,11 +2945,11 @@
     </message>
     <message>
         <source>Audio &amp;Controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελεγκτής Ήχου</translation>
     </message>
     <message>
         <source>Virtual sound card type. Depending on this value, VirtualBox will provide different audio hardware to the virtual machine.</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος εικονικής κάρτας ήχου. Αναλόγως με αυτή την τιμή, το VirtualBox θα παρέχει διαφορετικό υλικό ήχου στην εικονική μηχανή.</translation>
     </message>
 </context>
 <context>
@@ -2976,23 +2976,23 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>Audio &amp;Output</source>
-        <translation type="unfinished"></translation>
+        <translation>Έξοδος Ήχου</translation>
     </message>
     <message>
         <source>Output to the virtual audio device will reach the host. Otherwise the guest is muted.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η έξοδος της εικονικής συσκευής ήχου θα φτάσει στον οικοδεσπότη. Αλλιώς ο επισκέπτης είναι βουβός.</translation>
     </message>
     <message>
         <source>Audio &amp;Input</source>
-        <translation type="unfinished"></translation>
+        <translation>Είσοδος Ήχου</translation>
     </message>
     <message>
         <source>The guest will be able to capture audio input from the host. Otherwise the guest will capture only silence.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο επισκέπτης θα μπορεί να καταγράψει την είσοδο ήχου από τον οικοδεσπότη. Αλλιώς ο επισκέπτης θα καταγράφει μόνο σιωπή.</translation>
     </message>
 </context>
 <context>
@@ -3007,11 +3007,11 @@
     </message>
     <message>
         <source>Host Audio &amp;Driver</source>
-        <translation type="unfinished"></translation>
+        <translation>Οδηγός Ήχου Οικοδεσπότη</translation>
     </message>
     <message>
         <source>Audio output driver. The Null Audio Driver makes the guest see an audio card, however every access to it will be ignored.</source>
-        <translation type="unfinished"></translation>
+        <translation>Οδηγός εξόδου ήχου. Ο Χωρίς Ήχο οδηγός κάνει τον επισκέπτη να βλέπει μια κάρτα ήχου, ωστόσο κάθε πρόσβαση σε αυτή θα αγνοηθεί.</translation>
     </message>
 </context>
 <context>
@@ -3026,7 +3026,7 @@
     </message>
     <message>
         <source>A virtual PCI audio card will be plugged into the virtual machine and will communicate with the host audio system using the specified driver</source>
-        <translation type="unfinished"></translation>
+        <translation>Μία εικονική κάρτα ήχου PCI θα εισαχθεί στην εικονική μηχανή και θα επικοινωνεί με το σύστημα ήχου του οικοδεσπότη χρησιμοποιώντας τον προσδιορισμένο οδηγό.</translation>
     </message>
 </context>
 <context>
@@ -3045,11 +3045,11 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>Keyboard is automatically captured every time the VM window is activated. When the keyboard is captured, all keystrokes (including system ones like Alt-Tab) are directed to the VM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο δεσμεύεται αυτόματα κάθε φορά που ενεργοποιείται το παράθυρο της ΕΜ. Όταν το πληκτρολόγιο δεσμεύεται, όλη η πληκτρολόγηση (συμπεριλαμβανομένου του συστήματος όπως Alt-Tab) κατευθύνονται στην ΕΜ.</translation>
     </message>
 </context>
 <context>
@@ -3080,19 +3080,19 @@
     </message>
     <message>
         <source>Base &amp;Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Βασική Μνήμη</translation>
     </message>
     <message>
         <source>VM&apos;s installed RAM</source>
-        <translation type="unfinished"></translation>
+        <translation>Η εγκατεστημένη Μνήμη της ΕΜ</translation>
     </message>
     <message>
         <source>Minimum RAM</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστη Μνήμη</translation>
     </message>
     <message>
         <source>Maximum RAM</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστη Μνήμη</translation>
     </message>
 </context>
 <context>
@@ -3139,11 +3139,11 @@
     </message>
     <message>
         <source>The path is invalid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή είναι μη έγκυρη</translation>
     </message>
     <message>
         <source>The path is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή είναι έγκυρη</translation>
     </message>
 </context>
 <context>
@@ -3166,19 +3166,19 @@
     </message>
     <message>
         <source>&amp;Boot Device Order (BIOS only)</source>
-        <translation type="unfinished"></translation>
+        <translation>Σειρά Συσκευών Εκκίνησης (BIOS μόνο)</translation>
     </message>
     <message>
         <source>VM will attempt to boot from checked devices, in order. Note: only supported for BIOS firmware type, i.e. when below UEFI option is off.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η ΕΜ θα προσπαθήσει να εκκινήσει από τις σημειωμένες συσκευές, με τη σειρά. Σημειώστε: μόνο υποστηριζόμενο για BIOS τύπο υλικού, δηλαδή όταν η παρακάτω ιδιότητα UEFI είναι απενεργοποιημένη.</translation>
     </message>
     <message>
         <source>Move device up in boot order</source>
-        <translation type="unfinished"></translation>
+        <translation>Μετακίνηση της συσκευής προς τα πάνω στην σειρά εκκίνησης</translation>
     </message>
     <message>
         <source>Move device down in boot order</source>
-        <translation type="unfinished"></translation>
+        <translation>Μετακίνηση της συσκευής προς τα κάτω στην σειρά εκκίνησης</translation>
     </message>
 </context>
 <context>
@@ -3193,11 +3193,11 @@
     </message>
     <message>
         <source>&amp;Chipset</source>
-        <translation type="unfinished"></translation>
+        <translation>Ολοκληρωμένο κύκλωμα</translation>
     </message>
     <message>
         <source>Emulated chipset type</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσομοιωμένος Τύπος Ολοκληρωμένου Κυκλώματος</translation>
     </message>
 </context>
 <context>
@@ -3208,7 +3208,7 @@
     </message>
     <message>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Νέα Ομάδα</translation>
     </message>
 </context>
 <context>
@@ -3371,7 +3371,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>Add Profile</source>
@@ -3509,7 +3509,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>Add Profile (%1)</source>
@@ -6140,54 +6140,54 @@
     <message>
         <source>QemuRamFB</source>
         <comment>GraphicsControllerType</comment>
-        <translation type="unfinished"></translation>
+        <translation>QemuRamFB</translation>
     </message>
     <message>
         <source>Virtio-Sound</source>
         <comment>AudioControllerType</comment>
-        <translation type="unfinished"></translation>
+        <translation>Virtio-Sound</translation>
     </message>
     <message>
         <source>ARMv8Virtual</source>
         <comment>ChipsetType</comment>
-        <translation type="unfinished"></translation>
+        <translation>ARMv8Virtual</translation>
     </message>
     <message>
         <source>Keyboard Extension</source>
         <comment>IndicatorType</comment>
-        <translation type="unfinished"></translation>
+        <translation>Επέκταση Πληκτρολογίου</translation>
     </message>
     <message>
         <source>TLS</source>
-        <translation type="unfinished"></translation>
+        <translation>TLS</translation>
     </message>
     <message>
         <source>RDP</source>
-        <translation type="unfinished"></translation>
+        <translation>RDP</translation>
     </message>
     <message>
         <source>NEGOTIATE</source>
-        <translation type="unfinished"></translation>
+        <translation>ΔΙΑΠΡΑΓΜΑΤΕΥΣΗ</translation>
     </message>
     <message>
         <source>USB Multi-Touch TouchScreen and TouchPad</source>
         <comment>PointingHIDType</comment>
-        <translation type="unfinished"></translation>
+        <translation>USB Ταμπλέτα Πολλαπλής Αφής Οθόνη Αφής και Πινακίδιο Αφής</translation>
     </message>
     <message>
         <source>Ethernet over USB (usbnet)</source>
         <comment>NetworkAdapterType</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ethernet από USB (usbnet)</translation>
     </message>
     <message>
         <source>1.2</source>
         <comment>TpmType</comment>
-        <translation type="unfinished"></translation>
+        <translation>1.2</translation>
     </message>
     <message>
         <source>2.0</source>
         <comment>TpmType</comment>
-        <translation type="unfinished"></translation>
+        <translation>2.0</translation>
     </message>
 </context>
 <context>
@@ -6237,11 +6237,11 @@
     </message>
     <message>
         <source>Default &amp;Machine Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Προεπιλεγμένος Φάκελος Μηχανών</translation>
     </message>
     <message>
         <source>Path to the default virtual machine folder. This folder is used, if not explicitly specified otherwise, when creating new virtual machines.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή για τον προεπιλεγμένο φάκελο εικονικών μηχανών. Ο φάκελος χρησιμοποιείται, εκτός αν διευκρινιστεί ρητά αλλιώς, όταν δημιουργούνται νέες εικονικές μηχανές.</translation>
     </message>
 </context>
 <context>
@@ -6252,7 +6252,7 @@
     </message>
     <message>
         <source>Description of the VM&apos;s configuration</source>
-        <translation type="unfinished"></translation>
+        <translation>Περιγραφή των ρυθμίσεων της ΕΜ</translation>
     </message>
 </context>
 <context>
@@ -6926,107 +6926,107 @@
     <message>
         <source>Enabled</source>
         <comment>details (display/3D Acceleration)</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποιημένο</translation>
     </message>
     <message>
         <source>3D Acceleration</source>
         <comment>details (display)</comment>
-        <translation type="unfinished"></translation>
+        <translation>3Δ Επιτάχυνση</translation>
     </message>
     <message>
         <source>Cloud Network, &apos;%1&apos;</source>
         <comment>details (network)</comment>
-        <translation type="unfinished"></translation>
+        <translation>Δίκτυο Σύννεφου, &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Hard Disks</source>
         <comment>details (storage)</comment>
-        <translation type="unfinished">Σκληροί δίσκοι</translation>
+        <translation>Σκληροί Δίσκοι</translation>
     </message>
     <message>
         <source>Optical Devices</source>
         <comment>details (storage)</comment>
-        <translation type="unfinished">Οπτικές Συσκευές</translation>
+        <translation>Οπτικές Συσκευές</translation>
     </message>
     <message>
         <source>Floppy Devices</source>
         <comment>details (storage)</comment>
-        <translation type="unfinished">Συσκευές δισκέτας</translation>
+        <translation>Συσκευές Δισκέτας</translation>
     </message>
     <message>
         <source>Input/Output</source>
         <comment>details (audio)</comment>
-        <translation type="unfinished">Είσοδος/Έξοδος</translation>
+        <translation>Είσοδος/Έξοδος</translation>
     </message>
     <message>
         <source>Not Attached</source>
         <comment>details (network adapter)</comment>
-        <translation type="unfinished">Μη συνδεδεμένο</translation>
+        <translation>Μη Συνδεδεμένο</translation>
     </message>
     <message>
         <source>NAT</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">NAT</translation>
+        <translation>NAT</translation>
     </message>
     <message>
         <source>Bridged Adapter</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Γεφυρωμένη Κάρτα</translation>
+        <translation>Γεφυρωμένη Κάρτα</translation>
     </message>
     <message>
         <source>Internal Network</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Εσωτερικό δίκτυο</translation>
+        <translation>Εσωτερικό Δίκτυο</translation>
     </message>
     <message>
         <source>Host-only Adapter</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Μόνο-με-οικοδεσπότη κάρτα</translation>
+        <translation>Μόνο-με-οικοδεσπότη Κάρτα</translation>
     </message>
     <message>
         <source>Generic Driver</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Γενικός Οδηγός</translation>
+        <translation>Γενικός Οδηγός</translation>
     </message>
     <message>
         <source>NAT Network</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Δίκτυο NAT</translation>
+        <translation>Δίκτυο NAT</translation>
     </message>
     <message>
         <source>Cloud Network</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Δίκτυο Σύννεφου</translation>
+        <translation>Δίκτυο Σύννεφου</translation>
     </message>
     <message>
         <source>Host-only Network</source>
         <comment>details (network)</comment>
-        <translation type="unfinished">Μόνο-με-οικοδεσπότη Δίκτυο</translation>
+        <translation>Μόνο-με-οικοδεσπότη Δίκτυο</translation>
     </message>
     <message>
         <source>Disconnected</source>
         <comment>details (serial port)</comment>
-        <translation type="unfinished">Αποσυνδεδεμένο</translation>
+        <translation>Αποσυνδεδεμένο</translation>
     </message>
     <message>
         <source>Host Pipe</source>
         <comment>details (serial)</comment>
-        <translation type="unfinished">Αγωγός Οικοδεσπότη</translation>
+        <translation>Αγωγός Οικοδεσπότη</translation>
     </message>
     <message>
         <source>Host Device</source>
         <comment>details (serial)</comment>
-        <translation type="unfinished">Συσκευή Οικοδεσπότη</translation>
+        <translation>Συσκευή Οικοδεσπότη</translation>
     </message>
     <message>
         <source>Raw File</source>
         <comment>details (serial)</comment>
-        <translation type="unfinished">Πηγαίο αρχείο</translation>
+        <translation>Πηγαίο αρχείο</translation>
     </message>
     <message>
         <source>TCP</source>
         <comment>details (serial)</comment>
-        <translation type="unfinished">TCP</translation>
+        <translation>TCP</translation>
     </message>
 </context>
 <context>
@@ -7115,35 +7115,35 @@
     </message>
     <message>
         <source>&amp;Encrypt Disks</source>
-        <translation type="unfinished"></translation>
+        <translation>Κρυπτογράφηση Δίσκων</translation>
     </message>
     <message>
         <source>Encrypt the disks attached to this VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Κρυπτογράφηση των δίσκων που έχουν συνδεθεί σε αυτή την ΕΜ</translation>
     </message>
     <message>
         <source>Disk Encryption C&amp;ipher</source>
-        <translation type="unfinished"></translation>
+        <translation>Κωδικοποίηση Κρυπτογράφησης Δίσκου</translation>
     </message>
     <message>
         <source>Cipher type used to encrypt the disks</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο τύπος της κωδικοποίησης που χρησιμοποιήθηκε για την κρυπτογράφηση των δίσκων</translation>
     </message>
     <message>
         <source>E&amp;nter New Encryption Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή Νέου Κωδικού Κρυπτογράφησης</translation>
     </message>
     <message>
         <source>Password to access disks attached to this VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Κωδικός για πρόσβαση στους δίσκους που έχουν συνδεθεί σε αυτή την ΕΜ</translation>
     </message>
     <message>
         <source>C&amp;onfirm New Encryption Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιβεβαίωση Νέου Κωδικού Κρυπτογράφησης</translation>
     </message>
     <message>
         <source>Re-enter the password to confirm it matches</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναεισαγωγή του συνθηματικού για να επιβεβαιωθεί οτι ταιριάζει</translation>
     </message>
 </context>
 <context>
@@ -7166,15 +7166,15 @@
     </message>
     <message>
         <source>Disk space is allocated in full to the virtual machine when created</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο χώρος του δίσκου έχει προδεσμευθεί ολόκληρος στην εικονική μηχανή κατά την δημιουργία</translation>
     </message>
     <message>
         <source>&amp;Split Disk Into 2 GB Parts</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαχωρισμός Δίσκου σε τμήματα των 2GB</translation>
     </message>
     <message>
         <source>The virtual hard disk file is split into 2 GB parts</source>
-        <translation type="unfinished"></translation>
+        <translation>Το αρχείο του εικονικού σκληρού δίσκου είναι διαχωρισμένο σε τμήματα των 2GB</translation>
     </message>
 </context>
 <context>
@@ -7201,15 +7201,15 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>Machine windows will be raised when the mouse pointer moves over them</source>
-        <translation type="unfinished"></translation>
+        <translation>Τα παράθυρα των μηχανών θα ανυψώνονται όταν το ποντίκι περνάει από πάνω τους</translation>
     </message>
     <message>
         <source>Screen saver of the host OS is disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Η οθόνη προφύλαξης του ΛΣ του οικοδεσπότη είναι απενεργοποιημένη</translation>
     </message>
 </context>
 <context>
@@ -7228,15 +7228,15 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>&amp;3D Acceleration</source>
-        <translation type="unfinished"></translation>
+        <translation>3Δ Επιτάχυνση</translation>
     </message>
     <message>
         <source>The VM will be given access to the 3D graphics capabilities available on the host</source>
-        <translation type="unfinished"></translation>
+        <translation>Η εικονική μηχανή θα έχει πρόσβαση στις 3Δ γραφικές δυνατότητες που είναι διαθέσιμες στον οικοδεσπότη</translation>
     </message>
 </context>
 <context>
@@ -7299,11 +7299,11 @@
     </message>
     <message>
         <source>VirtualBox User Guide</source>
-        <translation type="unfinished"></translation>
+        <translation>Οδηγός Χρήσης VirtualBox</translation>
     </message>
     <message>
         <source>Select folder to save User Guide to</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλέξτε φάκελο που θα αποθηκεύσετε τον Οδηγό Χρήσης</translation>
     </message>
 </context>
 <context>
@@ -7318,11 +7318,11 @@
     </message>
     <message>
         <source>D&amp;rag-and-Drop</source>
-        <translation type="unfinished"></translation>
+        <translation>Μεταφορά και Απόθεση</translation>
     </message>
     <message>
         <source>Enable the dragging method of copying data between file manager tools</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση της μεθόδου μεταφοράς για αντιγραφή δεδομένων μεταξύ των εργαλείων του διαχειριστή αρχείων</translation>
     </message>
 </context>
 <context>
@@ -7333,7 +7333,7 @@
     </message>
     <message>
         <source>Contains selected file path.</source>
-        <translation type="unfinished"></translation>
+        <translation>Περιέχει την επιλεγμένη διαδρομή αρχείου</translation>
     </message>
 </context>
 <context>
@@ -7366,7 +7366,7 @@
     <message>
         <source>Result&amp;nbsp;Detail:</source>
         <comment>error info</comment>
-        <translation type="unfinished"></translation>
+        <translation>Προκείπτουσα&amp;nbsp;Λεπτομέρεια:</translation>
     </message>
 </context>
 <context>
@@ -7389,19 +7389,19 @@
     </message>
     <message>
         <source>&amp;Processing Cap</source>
-        <translation type="unfinished"></translation>
+        <translation>Όριο Εκτέλεσης</translation>
     </message>
     <message>
         <source>Percentage of processing time allowed per virtual CPU</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποσοστό του επιτρεπόμενου χρόνου λειτουργίας για κάθε εικονικό CPU</translation>
     </message>
     <message>
         <source>Minimum execution cap</source>
-        <translation type="unfinished"></translation>
+        <translation>Το ελάχιστο όριο εκτέλεσης</translation>
     </message>
     <message>
         <source>Maximum execution cap</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μέγιστο όριο εκτέλεσης</translation>
     </message>
 </context>
 <context>
@@ -7520,7 +7520,7 @@
     </message>
     <message>
         <source>File path is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή αρχείου είναι έγκυρη</translation>
     </message>
 </context>
 <context>
@@ -7663,7 +7663,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>Remove All</source>
@@ -7891,27 +7891,27 @@
     </message>
     <message>
         <source>Preferences</source>
-        <translation type="unfinished">Προτιμήσεις</translation>
+        <translation>Προτιμήσεις</translation>
     </message>
     <message>
         <source>Log</source>
-        <translation type="unfinished">Καταγραφικό</translation>
+        <translation>Καταγραφικό</translation>
     </message>
     <message>
         <source>Operations</source>
-        <translation type="unfinished">Διαδικασίες</translation>
+        <translation>Διαδικασίες</translation>
     </message>
     <message>
         <source>NewDirectory</source>
-        <translation type="unfinished"></translation>
+        <translation>ΝέοςΚατάλογος</translation>
     </message>
     <message>
         <source>Interactive Column Widths</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδραστικά Πλάτη Στηλών</translation>
     </message>
     <message>
         <source>Allow setting column widths interactively</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιτρέπεται ρύθιση πλάτους στηλών διαδραστικά</translation>
     </message>
 </context>
 <context>
@@ -7981,19 +7981,19 @@
     </message>
     <message>
         <source>F&amp;ont Scaling</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος Γραμματοσειράς</translation>
     </message>
     <message>
         <source>Scale factor for the font size</source>
-        <translation type="unfinished"></translation>
+        <translation>Συντελεστής κλίμακας για το μέγεθος γραμματοσειράς</translation>
     </message>
     <message>
         <source>Minimum font scale factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστος συντελεστής κλίμακας για το μέγεθος γραμματοσειράς</translation>
     </message>
     <message>
         <source>Maximum font scale factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστος συντελεστής κλίμακας για το μέγεθος γραμματοσειράς</translation>
     </message>
 </context>
 <context>
@@ -8015,7 +8015,7 @@
     <name>UIGlobalSettingsGeneral</name>
     <message>
         <source>Default machine folder is missing.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο προεπιλεγμένος φάκελος μηχανών λείπει.</translation>
     </message>
 </context>
 <context>
@@ -8030,7 +8030,7 @@
     </message>
     <message>
         <source>Host Key Combo</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδυασμός Πλήκτρων Οικοδεσπότη</translation>
     </message>
 </context>
 <context>
@@ -8060,11 +8060,11 @@
     </message>
     <message>
         <source>&amp;Graphics Controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελεγκτής Γραφικών</translation>
     </message>
     <message>
         <source>Graphics controller type the virtual machine will use</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος κάρτας γραφικών που θα χρησιμοποιήσει η εικονική μηχανή</translation>
     </message>
 </context>
 <context>
@@ -8375,23 +8375,23 @@
     <message>
         <source>%1 User Guide</source>
         <comment>[Product Name] User Guide</comment>
-        <translation type="unfinished"></translation>
+        <translation>%1 Οδηγός Χρήσης</translation>
     </message>
     <message>
         <source>&lt;div&gt;&lt;p&gt;&lt;h3&gt;Not found.&lt;/h3&gt;The page &lt;b&gt;%1&lt;/b&gt; could not be found.&lt;/p&gt;&lt;/div&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;div&gt;&lt;p&gt;&lt;h3&gt;Δεν βρέθηκε.&lt;/h3&gt;Η σελίδα &lt;b&gt;%1&lt;/b&gt; δεν μπορούσε να βρεθεί.&lt;/p&gt;&lt;/div&gt;</translation>
     </message>
     <message>
         <source>Not Found</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν Βρέθηκε</translation>
     </message>
     <message>
         <source>Click to open the following URL with an external browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλικ για άνοιγμα του ακόλουθου URL με έναν εξωτερικό πλοηγό</translation>
     </message>
     <message>
         <source>Click to navigate to internal URL</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλικ για πλοήγηση σε εσωτερικό URL</translation>
     </message>
 </context>
 <context>
@@ -8405,19 +8405,19 @@
     <name>UIHomePane</name>
     <message>
         <source>&lt;h3&gt;Get started with VirtualBox&lt;/h3&gt;&lt;p&gt;&lt;a href=#configure#&gt;Configure VirtualBox Manager to work with your computer&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#create#&gt;Create a new virtual machine (VM)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#open#&gt;Open a saved VirtualBox VM&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#import#&gt;Import a VM from open virtualization or cloud formats&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Refer to the &lt;a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html&gt;VirtualBox documentation&lt;/a&gt; or press %1 for help.&lt;/p&gt;&lt;p&gt;Visit &lt;a href=https://www.virtualbox.org&gt;virtualbox.org&lt;/a&gt; to download test builds, access the source code, and more.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;h3&gt;Ξεκινήστε με το VirtualBox&lt;/h3&gt;&lt;p&gt;&lt;a href=#configure#&gt;Ρύθμιση Διαχειριστή VirtualBox για εργασία τον υπολογιστή σας&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#create#&gt;Δημιουργήστε μία νέα εικονική μηχανή (ΕΜ)&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#open#&gt;Ανοίξτε μία αποθηκευμένη ΕΜ του VirtualBox&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;a href=#import#&gt;Εισάγετε μία ΕΜ σε open virtualization ή cloud διαμορφώσεις&lt;/a&gt;&lt;/p&gt;&lt;p&gt;Πλοηγηθείτε στο &lt;a href=https://docs.oracle.com/en/virtualization/virtualbox/index.html&gt;Τεκμηρίωση VirtualBox&lt;/a&gt; ή επιλέξτε %1 για βοήθεια.&lt;/p&gt;&lt;p&gt;Επισκεφθείτε &lt;a href=https://www.virtualbox.org&gt;virtualbox.org&lt;/a&gt; για λήψη δοκιμαστικών εκδόσεων, πρόσβαση στον πηγαίο κώδικα, και άλλα.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;h3&gt;Please choose Experience Mode!&lt;/h3&gt;By default, the VirtualBox GUI is hiding some options, tools and wizards. &lt;p&gt;The &lt;b&gt;Basic Mode&lt;/b&gt; is intended for those users who are not interested in advanced functionality and prefer a simpler, cleaner interface.&lt;/p&gt;&lt;p&gt;The &lt;b&gt;Expert Mode&lt;/b&gt; is intended for experienced users who wish to utilize all VirtualBox functionality.&lt;/p&gt;&lt;p&gt;You can choose whether you are a beginner or experienced user by selecting required option at the right. This choice can always be changed in Global Preferences or Machine Settings windows.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;h3&gt;Παρακαλώ επιλέξτε Λειτουργία για Προχωρημένους!&lt;/h3&gt;Εξ&apos;ορισμού, το Περιβάλλον Χρήστη του VirtualBox κρύβει κάποιες ιδιότητες, εργαλεία και οδηγούς. &lt;p&gt;Η &lt;b&gt;Βασική Λειτουργία&lt;/b&gt; στοχεύει αυτούς τους χρήστες που δεν ενδιαφέρονται για μία προχωρημένη λειτουργικότητα και προτιμούν ένα ευκολότερο, πιο καθαρό διαδραστικό περιβάλλον .&lt;/p&gt;&lt;p&gt;Η &lt;b&gt;Λειτουργία για Προχωρημένους&lt;/b&gt; στοχεύει έμπειρους χρήστες που επιθυμούν να προσαρμόσουν στο μέγιστο όλη τη λειτουργικότητα του VirtualBox.&lt;/p&gt;&lt;p&gt;Μπορείτε να επιλέξετε αν είστε αρχάριος ή έμπειρος χρήστης επιλέγοντας την απαιτούμενη ρύθμιση στα δεξιά. Αυτή η ρύθμιση μπορεί πάντα να αλλάξει στις Γενικές Ρυθμίσεις ή στα παράθυρα Ρυθμίσεων Μηχανής.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Basic Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Βασική Λειτουργία</translation>
     </message>
     <message>
         <source>Expert Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργία Για Προχωρημένους</translation>
     </message>
 </context>
 <context>
@@ -8519,35 +8519,39 @@
     </message>
     <message>
         <source>Domain name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Έγκυρο όνομα Τομέα</translation>
     </message>
     <message>
         <source>Host name should be at least 2 character long. Allowed characters are alphanumerics, &quot;-&quot; and &quot;.&quot;</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα διακομιστή θα πρέπει να έχει μήκος 2 χαρακτήρων τουλάχιστον. Επιτρεπόμενοι χαρακτήρες είναι οι αλφαριθμητικοί, &quot;-&quot; και &quot;.&quot;</translation>
     </message>
     <message>
         <source>Host name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Έγκυρο όνομα Διακομιστή</translation>
     </message>
     <message>
         <source>Selected OS requires a valid product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Το επιλεγμένο ΛΣ απαιτεί ένα έγκυρο κλειδί προϊόντος</translation>
     </message>
     <message>
         <source>Product key is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Το κλειδί προϊόντος είναι έγκυρο</translation>
     </message>
     <message>
         <source>Host Na&amp;me</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Διακομιστή</translation>
     </message>
     <message>
         <source>Host name to be assigned to the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα διακομιστή που θα δοθεί στην εικονική μηχανή</translation>
     </message>
     <message>
         <source>&amp;Domain Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Τομέα</translation>
+    </message>
+    <message>
+        <source>Doamin name to be assigned to the virtual machine</source>
+        <translation type="vanished">Όνομα τομέα που θα δοθεί στην εικονική μηχανή</translation>
     </message>
     <message>
         <source>Domain name to be assigned to the virtual machine</source>
@@ -8604,34 +8608,34 @@
     <name>UIIndicatorAudio</name>
     <message>
         <source>Output enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποιημένη Έξοδος</translation>
     </message>
     <message>
         <source>Output disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Απενεργοποιημένη Έξοδος</translation>
     </message>
     <message>
         <source>Input enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποιημένη Είσοδος</translation>
     </message>
     <message>
         <source>Input disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Απενεργοποιημένη Είσοδος</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorDisplay</name>
     <message>
         <source>%1 MB</source>
-        <translation type="unfinished">%1 MB</translation>
+        <translation>%1 MB</translation>
     </message>
     <message>
         <source>%1 monitors connected</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 συνδεδεμένες οθόνες</translation>
     </message>
     <message>
         <source>3D acceleration enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποιημένη 3Δ επιτάχυνση</translation>
     </message>
 </context>
 <context>
@@ -8639,57 +8643,57 @@
     <message>
         <source>not set</source>
         <comment>Execution engine</comment>
-        <translation type="unfinished">Μη ορισμένη</translation>
+        <translation>Μη ορισμένη</translation>
     </message>
     <message>
         <source>Active</source>
         <comment>Nested paging</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργή</translation>
     </message>
     <message>
         <source>Inactive</source>
         <comment>Nested paging</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ανενεργή</translation>
     </message>
     <message>
         <source>Active</source>
         <comment>Unrestricted execution</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργή</translation>
     </message>
     <message>
         <source>Inactive</source>
         <comment>Unrestricted execution</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ανενεργή</translation>
     </message>
     <message>
         <source>Execution Engine</source>
-        <translation type="unfinished"></translation>
+        <translation>Μηχανή Εκτέλεσης</translation>
     </message>
     <message>
         <source>Unrestricted Execution</source>
-        <translation type="unfinished">Μη-περιορισμένη εκτέλεση</translation>
+        <translation>Εκτέλεση Χωρίς Περιορισμούς</translation>
     </message>
     <message>
         <source>Paravirtualization Interface</source>
-        <translation type="unfinished">Διασύνδεση παραεικονοποίησης</translation>
+        <translation>Περιβάλλον Παραεικονοποίησης</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorFloppyDisks</name>
     <message>
         <source>%1 drives attached</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 συνδεδεμένοι οδηγοί</translation>
     </message>
     <message>
         <source>%1 images mounted</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 προσαρτημένες εικόνες</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorHardDrive</name>
     <message>
         <source>%1 disks attached</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 συνδεδεμένοι δίσκοι</translation>
     </message>
 </context>
 <context>
@@ -8697,58 +8701,58 @@
     <message>
         <source>Indicates whether the host keyboard is captured by the guest OS:%1</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Δείχνει αν το πληκτρολόγιο του οικοδεσπότη είναι δεσμευμένο από το ΛΣ του επισκέπτη:%1</translation>
     </message>
     <message>
         <source>Keyboard is not captured</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο δεν είναι δεσμευμένο</translation>
     </message>
     <message>
         <source>Keyboard is captured</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο είναι δεσμευμένο</translation>
     </message>
     <message>
         <source>Keyboard is not captured, host-combo being pressed</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο δεν είναι δεσμευμένο, έχει πατηθεί συνδιασμός πλήκτρων του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Keyboard is captured, host-combo being pressed</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο είναι δεσμευμένο, έχει πατηθεί συνδιασμός πλήκτρων του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Keyboard is not captured, host-combo to be inserted</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο δεν είναι δεσμευμένο, έχει πατηθεί συνδιασμός πλήκτρων του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Keyboard is captured, host-combo to be inserted</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο είναι δεσμευμένο, Προς εισαγωγή συνδιασμός πλήκτρων του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Keyboard is not captured, host-combo being pressed and to be inserted</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο δεν είναι δεσμευμένο, έχει πατηθεί συνδιασμός πλήκτρων του οικοδεσπότη και είναι προς εισαγωγή</translation>
     </message>
     <message>
         <source>Keyboard is captured, host-combo being pressed and to be inserted</source>
         <comment>Keyboard tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Το πληκτρολόγιο είναι δεσμευμένο, έχει πατηθεί συνδιασμός πλήκτρων του οικοδεσπότη και είναι προς εισαγωγή</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorKeyboardExtension</name>
     <message>
         <source>Shows the currently assigned Host Key Combo.&lt;br&gt;This key combo, when pressed alone, toggles the keyboard and mouse capture state. It can also be used in combination with other keys to quickly perform actions from the main menu.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δείχνει τον τρέχοντα κατοχυρωμένο συνδυασμό Πλήκτρων Οικοδεσπότη.&lt;br&gt; Ο συνδυασμός αυτός, όταν πατηθεί μόνος του, εναλλάσει τη δέσμευση του πληκτρολογίου και του ποντικιού. Μπορεί επίσης να χρησιμοποιηθεί σε συνδυασμό με άλλα πλήκτρα για γρήγορη πρόσβαση σε ενέργειες από τον κεντρικό κατάλογο επιλογών.</translation>
     </message>
     <message>
         <source>Host Key Combo: %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδυασμός Πλήκτρων Οικοδεσπότη: %1</translation>
     </message>
 </context>
 <context>
@@ -8756,146 +8760,146 @@
     <message>
         <source>Indicates whether the host mouse pointer is captured by the guest OS:%1</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Δείχνει αν ο δείκτης ποντικιού του οικοδεσπότη είναι δεσμευμένος από το ΛΣ του επισκέπτη:%1</translation>
     </message>
     <message>
         <source>Pointer is not captured</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ο δείκτης δεν είναι δεσμευμένος</translation>
     </message>
     <message>
         <source>Pointer is captured</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ο δείκτης είναι δεσμευμένος</translation>
     </message>
     <message>
         <source>Mouse integration is Off, pointer is not captured</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Η ενσωμάτωση ποντικιού είναι Ανενεργή, ο δείκτης δεν είναι δεσμευμένος</translation>
     </message>
     <message>
         <source>Mouse integration is Off, pointer is captured</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Η ενσωμάτωση ποντικιού είναι Ανενεργή, ο δείκτης είναι δεσμευμένος</translation>
     </message>
     <message>
         <source>Mouse integration is On</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Η ενσωμάτωση ποντικιού είναι Ενεργή</translation>
     </message>
     <message>
         <source>Note that the mouse integration feature requires Guest Additions to be installed in the guest OS.</source>
         <comment>Mouse tooltip</comment>
-        <translation type="unfinished"></translation>
+        <translation>Σημειώστε οτι η ιδιότητα ενσωμάτωσης ποντικιού απαιτεί οι Προσθήκες Επισκέπτη να είναι εγκατεστημένες στο ΛΣ του επισκέπτη.</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorNetwork</name>
     <message>
         <source>Adapters present</source>
-        <translation type="unfinished"></translation>
+        <translation>Υπάρχουν κάρτες</translation>
     </message>
     <message>
         <source>No network adapters</source>
-        <translation type="unfinished"></translation>
+        <translation>Δεν υπάρχουν κάρτες δικτύου</translation>
     </message>
     <message>
         <source>All cables disconnected</source>
-        <translation type="unfinished"></translation>
+        <translation>Όλα τα καλώδια είναι αποσυνδεδεμένα</translation>
     </message>
     <message>
         <source>Adapter %1 (%2)</source>
-        <translation type="unfinished">Κάρτα δικτύου %1 (%2)</translation>
+        <translation>Κάρτα δικτύου %1 (%2)</translation>
     </message>
     <message>
         <source>IP</source>
-        <translation type="unfinished">IP</translation>
+        <translation>IP</translation>
     </message>
     <message>
         <source>Cable</source>
-        <translation type="unfinished">Καλώδιο</translation>
+        <translation>Καλώδιο</translation>
     </message>
     <message>
         <source>Connected</source>
         <comment>cable</comment>
-        <translation type="unfinished">Συνδεδεμένο</translation>
+        <translation>Συνδεδεμένο</translation>
     </message>
     <message>
         <source>Disconnected</source>
         <comment>cable</comment>
-        <translation type="unfinished">Αποσυνδεδεμένο</translation>
+        <translation>Αποσυνδεδεμένο</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorOpticalDisks</name>
     <message>
         <source>%1 drives attached</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 συνδεδεμένοι οδηγοί</translation>
     </message>
     <message>
         <source>%1 images mounted</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 προσαρτημένες εικόνες</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorRecording</name>
     <message>
         <source>Recording stopped</source>
-        <translation type="unfinished"></translation>
+        <translation>Η μαγνητοσκόπηση σταμάτησε</translation>
     </message>
     <message>
         <source>Recording started</source>
-        <translation type="unfinished"></translation>
+        <translation>Η μαγνητοσκόπηση άρχισε</translation>
     </message>
     <message>
         <source>Recording paused</source>
-        <translation type="unfinished"></translation>
+        <translation>Η μαγνητοσκόπηση παύθηκε</translation>
     </message>
     <message>
         <source>Video/audio recording file</source>
-        <translation type="unfinished">Αρχείο Μαγνητοσκόπησης Ήχου/Εικόνας</translation>
+        <translation>Αρχείο μαγνητοσκόπησης ήχου/εικόνας</translation>
     </message>
     <message>
         <source>Audio recording file</source>
-        <translation type="unfinished">Αρχείο Μαγνητοσκόπησης Ήχου</translation>
+        <translation>Αρχείο μαγνητοσκόπησης ήχου</translation>
     </message>
     <message>
         <source>Video recording file</source>
-        <translation type="unfinished">Αρχείο Μαγνητοσκόπησης Εικόνας</translation>
+        <translation>Αρχείο μαγνητοσκόπησης εικόνας</translation>
     </message>
     <message>
         <source>Recording disabled</source>
-        <translation type="unfinished">Απενεργοποιημένη Μαγνητοσκόπηση</translation>
+        <translation>Απενεργοποιημένη μαγνητοσκόπηση</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorSharedFolders</name>
     <message>
         <source>%1 shared folders</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 κοινόχρηστοι φάκελοι</translation>
     </message>
     <message>
         <source>No shared folders</source>
-        <translation type="unfinished">Κανένας Κοινόχρηστος Φάκελος</translation>
+        <translation>Κανένας κοινόχρηστος φάκελος</translation>
     </message>
 </context>
 <context>
     <name>UIIndicatorUSB</name>
     <message>
         <source>USB enabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποιημένο USB</translation>
     </message>
     <message>
         <source>USB disabled</source>
-        <translation type="unfinished"></translation>
+        <translation>Απενεργοποιημένο USB</translation>
     </message>
     <message>
         <source>%1 USB devices attached</source>
-        <translation type="unfinished"></translation>
+        <translation>%1 συνδεδεμένες συσκευές USB</translation>
     </message>
     <message>
         <source>No USB devices attached</source>
-        <translation type="unfinished">Καμία συνδεδεμένη συσκευή USB</translation>
+        <translation>Καμία συνδεδεμένη συσκευή USB</translation>
     </message>
 </context>
 <context>
@@ -9192,7 +9196,7 @@
     </message>
     <message>
         <source>Available user interface languages. The effective language is written in bold. Select Default to reset to the system default language.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαθέσιμες γλώσσες περιβάλλοντος χρήστη. Η ενεργή γλώσσα είναι γραμμένη με έντονη γραφή. Επιλέξτε Προκαθορισμένη για επαναφορά στην προκαθορισμένη γλώσσα συστήματος.</translation>
     </message>
 </context>
 <context>
@@ -9335,11 +9339,11 @@
     </message>
     <message>
         <source>&amp;Identity</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταυτότητα</translation>
     </message>
     <message>
         <source>&amp;Features</source>
-        <translation type="unfinished"></translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
 </context>
 <context>
@@ -9600,7 +9604,7 @@
     <name>UIMachineView</name>
     <message>
         <source>Holds the graphical canvas containing guest screen contents.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δείχνει τον γραφικό καμβά που περιέχει τα περιεχόμενα οθόνης του επισκέπτη.</translation>
     </message>
 </context>
 <context>
@@ -9645,27 +9649,27 @@
     </message>
     <message>
         <source>Maximum Guest Screen &amp;Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστο Μέγεθος Οθόνης Επισκέπτη</translation>
     </message>
     <message>
         <source>&amp;Width</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλάτος</translation>
     </message>
     <message>
         <source>Maximum width which we would like the guest to use</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μέγιστο πλάτος που θέλουμε ο επισκέπτης να χρησιμοποιεί</translation>
     </message>
     <message>
         <source>&amp;Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Ύψος</translation>
     </message>
     <message>
         <source>Maximum height which we would like the guest to use</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μέγιστο ύψος που θέλουμε ο επισκέπτης να χρησιμοποιεί</translation>
     </message>
     <message>
         <source>Maximum guest screen size policy</source>
-        <translation type="unfinished"></translation>
+        <translation>Πολιτική μέγιστου μεγέθους οθόνης επισκέπτη</translation>
     </message>
 </context>
 <context>
@@ -9673,74 +9677,74 @@
     <message>
         <source>Inaccessible</source>
         <comment>medium</comment>
-        <translation type="unfinished"></translation>
+        <translation>Μη προσβάσιμο</translation>
     </message>
     <message>
         <source>Empty</source>
         <comment>medium</comment>
-        <translation type="unfinished">Κενό</translation>
+        <translation>Κενό</translation>
     </message>
     <message>
         <source>Host Drive &apos;%1&apos;</source>
-        <translation type="unfinished">Οδηγός Οικοδεσπότη &apos;%1&apos;</translation>
+        <translation>Οδηγός Οικοδεσπότη &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Host Drive %1 (%2)</source>
-        <translation type="unfinished">Οδηγός Οικοδεσπότη %1 (%2)</translation>
+        <translation>Οδηγός Οικοδεσπότη %1 (%2)</translation>
     </message>
     <message>
         <source>&lt;p style=white-space:pre&gt;Type (Format):  %1 (%2)&lt;/p&gt;</source>
         <comment>medium</comment>
-        <translation type="unfinished">&lt;p style=white-space:pre&gt;Τύπος (Διαμόρφωση):  %1 (%2)&lt;/p&gt;</translation>
+        <translation>&lt;p style=white-space:pre&gt;Τύπος (Διαμόρφωση):  %1 (%2)&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Attached to:  %1&lt;/p&gt;</source>
         <comment>to machines</comment>
-        <translation type="unfinished">&lt;p&gt;Συνδεδεμένο σε:  %1&lt;/p&gt;</translation>
+        <translation>&lt;p&gt;Συνδεδεμένο σε:  %1&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;i&gt;Not Attached&lt;/i&gt;</source>
         <comment>to machines</comment>
-        <translation type="unfinished">&lt;i&gt;Μη συνδεδεμένο&lt;/i&gt;</translation>
+        <translation>&lt;i&gt;Μη Συνδεδεμένο&lt;/i&gt;</translation>
     </message>
     <message>
         <source>&lt;i&gt;Checking accessibility...&lt;/i&gt;</source>
         <comment>medium</comment>
-        <translation type="unfinished">&lt;i&gt;Έλεγχος προσβασιμότητας...&lt;/i&gt;</translation>
+        <translation>&lt;i&gt;Έλεγχος προσβασιμότητας...&lt;/i&gt;</translation>
     </message>
     <message>
         <source>Failed to check accessibility of disk image files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ελέγχου προσβασιμότητας των αρχείων εικόνας σκληρού δίσκου.</translation>
     </message>
     <message>
         <source>&lt;b&gt;No disk image file selected&lt;/b&gt;</source>
-        <translation type="unfinished">&lt;b&gt;Μη επιλεγμένο αρχείο εικόνας δίσκου&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Κανένα επιλεγμένο αρχείο εικόνας δίσκου&lt;/b&gt;</translation>
     </message>
     <message>
         <source>You can also change this while the machine is running.</source>
-        <translation type="unfinished">Αυτό μπορεί επίσης να αλλαχθεί ενώ η μηχανή είναι σε λειτουργία.</translation>
+        <translation>Αυτό μπορεί επίσης να αλλαχθεί ενώ η μηχανή είναι σε λειτουργία.</translation>
     </message>
     <message>
         <source>&lt;b&gt;No disk image files available&lt;/b&gt;</source>
-        <translation type="unfinished">&lt;b&gt;Μη διαθέσιμα αρχεία εικόνας δίσκου&lt;/b&gt;</translation>
+        <translation>&lt;b&gt;Δεν υπάρχουν διαθέσιμα αρχεία εικόνας δίσκου&lt;/b&gt;</translation>
     </message>
     <message>
         <source>You can create or add disk image files in the virtual machine settings.</source>
-        <translation type="unfinished">Μπορείτε να δημιουρήσετε ή να προσθέσετε αρχεία εικόνας δίσκου στις ρυθμίσεις της εικονικής μηχανής.</translation>
+        <translation>Μπορείτε να δημιουργήσετε ή να προσθέσετε αρχεία εικόνας δίσκου στις ρυθμίσεις της εικονικής μηχανής.</translation>
     </message>
     <message>
         <source>Attaching this hard disk will be performed indirectly using a newly created differencing hard disk.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η προσάρτησηση αυτού του σκληρού δίσκου θα γίνει έμμεσα χρησιμοποιώντας έναν καινούριο διαφορικό σκληρό δίσκο.</translation>
     </message>
     <message>
         <source>Encrypted</source>
         <comment>medium</comment>
-        <translation type="unfinished">Κρυπτογραφημένο</translation>
+        <translation>Κρυπτογραφημένο</translation>
     </message>
     <message>
         <source>Checking...</source>
         <comment>medium</comment>
-        <translation type="unfinished">Έλεγχος...</translation>
+        <translation>Έλεγχος...</translation>
     </message>
     <message>
         <source>Some of the files in this hard disk chain are inaccessible. Please use the Virtual Medium Manager to inspect these files.</source>
@@ -9748,16 +9752,16 @@
     </message>
     <message>
         <source>This base hard disk is indirectly attached using the following differencing hard disk:</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτός ο βασικός σκληρός δίσκος είναι έμμεσα προσαρτημένος χρησιμοποιώντας τον ακόλουθο διαφορικό σκληρό δίσκο:</translation>
     </message>
     <message>
         <source>Differencing</source>
         <comment>medium</comment>
-        <translation type="unfinished">Διαφορικός</translation>
+        <translation>Διαφορικό</translation>
     </message>
     <message>
         <source>Some of the files in this hard disk chain are inaccessible. Please use the Virtual Media Manager to inspect these files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Μερικά από τα αρχεία σ&apos; αυτήν την ακολουθία σκληρών δίσκων δεν είναι προσβάσιμα. Παρακαλούμε χρησιμοποιήστε τον Διαχειριστή Εικονικών Μέσων για να εξετάσετε αυτά τα αρχεία.</translation>
     </message>
 </context>
 <context>
@@ -9818,7 +9822,7 @@
     </message>
     <message>
         <source>Encryption key:</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλειδί Κρυπτογράφησης:</translation>
     </message>
 </context>
 <context>
@@ -9893,7 +9897,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>&amp;Hard disks</source>
@@ -10032,19 +10036,19 @@
     </message>
     <message>
         <source>Navigates to the previous item matching the search term</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοήγηση στο προηγούμενο αντικείμενο που ταιριάζει στον όρο αναζήτησης</translation>
     </message>
     <message>
         <source>Previous Match</source>
-        <translation type="unfinished"></translation>
+        <translation>Προηγούμενο Αποτέλεσμα που ταιριάζει</translation>
     </message>
     <message>
         <source>Navigates to the next item matching the search term</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοήγηση στο επόμενο αντικείμενο που ταιριάζει στον όρο αναζήτησης</translation>
     </message>
     <message>
         <source>Next Match</source>
-        <translation type="unfinished"></translation>
+        <translation>Επόμενο Αποτέλεσμα που ταιριάζει</translation>
     </message>
 </context>
 <context>
@@ -10119,7 +10123,7 @@
     </message>
     <message>
         <source>Shows a list of all registered media</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση λίστας με όλα τα καταχωρημένα μέσα</translation>
     </message>
 </context>
 <context>
@@ -10154,19 +10158,19 @@
     </message>
     <message>
         <source>Disk file path does not exists</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή αρχείου δίσκου δεν υπάρχει</translation>
     </message>
     <message>
         <source>Disk file path is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή αρχείου δίσκου είναι έγκυρη</translation>
     </message>
     <message>
         <source>Disk file name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα αρχείου δίσκου είναι έγκυρο</translation>
     </message>
     <message>
         <source>Specify the location for the new virtual hard disk file...</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορίστε την τοποθεσία για το νέο αρχείο εικονικού σκληρού δίσκου...</translation>
     </message>
 </context>
 <context>
@@ -10189,66 +10193,66 @@
     </message>
     <message>
         <source>D&amp;isk Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος Δίσκου</translation>
     </message>
     <message>
         <source>Medium size</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος Μέσου</translation>
     </message>
     <message>
         <source>Minimum possible disk size</source>
-        <translation type="unfinished"></translation>
+        <translation>Το ελάχιστο δυνατό μέγεθος δίσκου</translation>
     </message>
     <message>
         <source>Maximum possible disk size</source>
-        <translation type="unfinished"></translation>
+        <translation>Το μέγιστο δυνατό μέγεθος δίσκου</translation>
     </message>
     <message>
         <source>Disk size set to %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος δίσκου ρυθμισμένο σε %1</translation>
     </message>
 </context>
 <context>
     <name>UIMediumTools</name>
     <message>
         <source>Please choose a virtual hard disk file</source>
-        <translation type="unfinished">Παρακαλώ επιλέξτε ένα αρχείο εικονικού σκληρού δίσκου</translation>
+        <translation>Παρακαλώ επιλέξτε ένα αρχείο εικονικού σκληρού δίσκου</translation>
     </message>
     <message>
         <source>All virtual hard disk files (%1)</source>
-        <translation type="unfinished">Όλοι οι εικονικοί σκληροί δίσκοι (%1)</translation>
+        <translation>Όλα τα αρχεία εικονικών σκληρών δίσκων (%1)</translation>
     </message>
     <message>
         <source>Please choose a virtual optical disk file</source>
-        <translation type="unfinished">Παρακαλώ επιλέξτε ένα αρχείο εικονικού οπτικού δίσκου</translation>
+        <translation>Παρακαλώ επιλέξτε ένα αρχείο εικονικού οπτικού δίσκου</translation>
     </message>
     <message>
         <source>All virtual optical disk files (%1)</source>
-        <translation type="unfinished">Όλοι οι εικονικοί οπτικοί δίσκοι (%1)</translation>
+        <translation>Όλα τα αρχεία εικονικών οπτικών δίσκων (%1)</translation>
     </message>
     <message>
         <source>Please choose a virtual floppy disk file</source>
-        <translation type="unfinished">Παρακαλώ επιλέξτε μία εικονική δισκέτα</translation>
+        <translation>Παρακαλώ επιλέξτε ένα αρχείο εικονικής δισκέτας</translation>
     </message>
     <message>
         <source>All virtual floppy disk files (%1)</source>
-        <translation type="unfinished">Όλες οι εικονικές δισκέτες (%1)</translation>
+        <translation>Όλα τα αρχεία εικονικών δισκετών (%1)</translation>
     </message>
     <message>
         <source>All files (*)</source>
-        <translation type="unfinished">Όλα τα αρχεία (*)</translation>
+        <translation>Όλα τα αρχεία (*)</translation>
     </message>
     <message>
         <source>Choose/Create a Disk Image...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή/Δημιουργία μιας Εικόνας Σκληρού Δίσκου...</translation>
     </message>
     <message>
         <source>Choose a Disk File...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ενός Αρχείου Δίσκου...</translation>
     </message>
     <message>
         <source>Remove Disk From Virtual Drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση Δίσκου από τον Εικονικό Οδηγό</translation>
     </message>
 </context>
 <context>
@@ -10291,7 +10295,7 @@
     </message>
     <message>
         <source>Configure the virtual machine menus</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρύθμιση των καταλόγων της εικονικής μηχανής</translation>
     </message>
 </context>
 <context>
@@ -12213,309 +12217,309 @@
     </message>
     <message>
         <source>&lt;p&gt;You are going to restore default secure boot keys.&lt;/p&gt;&lt;p&gt;If you proceed your current keys will be rewritten. You may not be able to boot affected VM anymore.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Πρόκειται να επαναφέρετε τα προκαθορισμένα κλειδιά ασφαλούς εκκίνησης.&lt;/p&gt;&lt;p&gt;Αν συνεχίσετε τα τρέχοντα κλειδιά σας θα επανεγγραφούν. Ίσως να μην μπορείτε να εκκινήσετε την επηρεαζόμενη ΕΜ πλέον.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;To open a VISO file you will have to discard the current content.&lt;/p&gt;&lt;p&gt;Are you sure you want to proceed?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Για να ανοίξετε ένα αρχείο VISO θα πρέπει να απορρίψετε το τρέχον περιεχόμενο.&lt;/p&gt;&lt;p&gt;Είστε σίγουροι οτι επιθυμείτε να συνεχίσετε;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;The &lt;b&gt;VirtualBox Guest Additions&lt;/b&gt; disk image file has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; and saved locally as &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to continue with Guest Additions installation?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Το αρχείο εικόνας δίσκου &lt;b&gt;Προσθήκες Επισκέπτη του VirtualBox&lt;/b&gt; κατέβηκε επιτυχώς από &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; και αποθηκεύτηκε επιτυχώς τοπικά ως &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Επιθυμείτε να συνεχίσετε με την εγκατάσταση Προσθηκών Επισκέπτη;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Continue</source>
         <comment>agree with additions installation</comment>
-        <translation type="unfinished">Συνέχεια</translation>
+        <translation>Συνέχεια</translation>
     </message>
     <message>
         <source>&lt;p&gt;Could not find the &lt;b&gt;VirtualBox User Guide&lt;/b&gt; &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Do you wish to download this file from the Internet?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αδυναμία εύρεσης του &lt;b&gt;Οδηγός Χρήσης VirtualBox&lt;/b&gt; &lt;nobr&gt;&lt;b&gt;%1&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Επιθυμείτε να κατεβάσετε αυτό το αρχείο από το Διαδίκτυο;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Are you sure you want to download the &lt;b&gt;VirtualBox User Guide&lt;/b&gt; from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; (size %2 bytes)?&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Είστε σίγουροι οτι θέλετε να κατεβάσετε το &lt;b&gt;Οδηγός Χρήσης VirtualBox&lt;/b&gt; από &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; (μεγέθους %2 bytes);&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;The VirtualBox User Guide has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; but can&apos;t be saved locally as &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Please choose another location for that file.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Ο Οδηγός Χρήσης VirtualBox κατέβηκε επιτυχώς από &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; αλλά δεν μπορεί να αποθηκευτεί τοπικά ως &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;&lt;p&gt;Παρακαλώ επιλέξτε άλλη τοποθεσία για αυτό το αρχείο.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;You have &lt;b&gt;clicked the mouse&lt;/b&gt; inside the Virtual Machine display or pressed the &lt;b&gt;host key combo&lt;/b&gt;. This will cause the Virtual Machine to &lt;b&gt;capture&lt;/b&gt; the host mouse pointer (only if the mouse pointer integration is not currently supported by the guest OS) and the keyboard, which will make them unavailable to other applications running on your host machine.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;host key combo&lt;/b&gt; at any time to &lt;b&gt;uncapture&lt;/b&gt; the keyboard and mouse (if it is captured) and return them to normal operation. The currently assigned host key combo is shown on the status bar at the bottom of the Virtual Machine window, next to the&amp;nbsp;&lt;img src=:/hostkey_16px.png/&gt;&amp;nbsp;icon. This icon, together with the mouse icon placed nearby, indicate the current keyboard and mouse capture state.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Έχετε &lt;b&gt;κάνει κλικ στο ποντίκι&lt;/b&gt; μέσα στην οθόνη της εικονικής μηχανής ή έχετε πατήσει τον &lt;b&gt;συνδυασμό πλήκτρων οικοδεσπότη&lt;/b&gt;. Αυτό θα έχει ως αποτέλεσμα η εικονική μηχανή να &lt;b&gt;δεσμεύσει&lt;/b&gt; τον δείκτη ποντικιού του οικοδεσπότη (μόνο αν η ενσωμάτωση του δείκτη ποντικιού δεν υποστηρίζεται προς το παρών από το ΛΣ του επισκέπτη) και το πληκτρολόγιο, το οποίο θα τα κάνει μη διαθέσιμα στις άλλες εφαρμογές που τρέχουν στον οικοδεσπότη.&lt;/p&gt;&lt;p&gt;Μπορείτε να πατήσετε τον &lt;b&gt;συνδυασμό πλήκτρων οικοδεσπότη&lt;/b&gt; οποτεδήποτε για &lt;b&gt;αποδέσμευση&lt;/b&gt; του πληκτρολόγιου και ποντικιού (αν έχουν δεσμευθεί) και να επιστρέψουν στη φυσιολογική τους λειτουργία. Ο τρέχοντας συνδυασμός πλήκτρων οικοδεσπότη φαίνεται στη γραμμή κατάστασης στο κάτω μέρος του παραθύρου της Εικονικής Μηχανής, δίπλα στο εικονίδιο&lt;img src=:/hostkey_16px.png/&gt;. Αυτό το εικονίδιο, μαζί με το εικονίδιο ποντικιού πιο δίπλα, δείχνουν την τρέχουσα κατάσταση δέσμευσης του πληκτρολογίου και ποντικιού.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;The host key combo is currently defined as &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;</source>
         <comment>additional message box paragraph</comment>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Ο τρέχοντας συνδυασμός πλήκτρων οικοδεσπότη είναι ορισμένος ως &lt;b&gt;%1&lt;/b&gt;.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Continue</source>
         <comment>agree to create VM with no hard disk attached</comment>
-        <translation type="unfinished">Συνέχεια</translation>
+        <translation>Συνέχεια</translation>
     </message>
     <message>
         <source>Go Back</source>
         <comment>reject to create VM with no hard disk attached</comment>
-        <translation type="unfinished">Πίσω</translation>
+        <translation>Πίσω</translation>
     </message>
     <message>
         <source>Continue</source>
         <comment>agree to export VMs without saved-state</comment>
-        <translation type="unfinished">Συνέχεια</translation>
+        <translation>Συνέχεια</translation>
     </message>
     <message>
         <source>VirtualBox is not currently allowed to access USB devices.  You can change this by adding your user to the &apos;vboxusers&apos; group.  Please see the user guide for a more detailed explanation</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox δεν έχει αυτή τη στιγμή πρόσβαση στις συσκευές USB.  Μπορείτε να το αλλάξετε αυτό προσθέτοντας τον χρήστη σας στην ομάδα &apos;vboxusers&apos;. Παρακαλώ δείτε τον οδηγό χρήστη για λεπτομερέστερη εξήγηση</translation>
     </message>
     <message>
         <source>VirtualBox is not currently allowed to access USB devices.  You can change this by allowing your user to access the &apos;usbfs&apos; folder and files.  Please see the user guide for a more detailed explanation</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox δεν έχει αυτή τη στιγμή πρόσβαση στις συσκευές USB.  Μπορείτε να το αλλάξετε αυτό επιτρέποντας στον χρήστη σας την πρόσβαση στους φακέλους και αρχεία &apos;usbfs&apos;.  Παρακαλώ δείτε τον οδηγό χρήστη για λεπτομερέστερη εξήγηση</translation>
     </message>
     <message>
         <source>Don&apos;t show again</source>
-        <translation type="unfinished"></translation>
+        <translation>Να μην εμφανιστεί ξανά</translation>
     </message>
     <message>
         <source>Shared clipboard error ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Λάθος Κοινού Πρόχείρου ...</translation>
     </message>
     <message>
         <source>User guide downloaded ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο οδηγός χρήσης κατέβηκε ...</translation>
     </message>
     <message>
         <source>&lt;p&gt;The VirtualBox User Guide has been successfully downloaded from &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; and saved locally as &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Ο Οδηγός Χρήσης VirtualBox κατέβηκε επιτυχώς από &lt;nobr&gt;&lt;a href=&quot;%1&quot;&gt;%1&lt;/a&gt;&lt;/nobr&gt; και αποθηκεύτηκε τοπικά ως &lt;nobr&gt;&lt;b&gt;%2&lt;/b&gt;.&lt;/nobr&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;You have the &lt;b&gt;Auto capture keyboard&lt;/b&gt; option turned on. This will cause the Virtual Machine to automatically &lt;b&gt;capture&lt;/b&gt; the keyboard every time the VM window is activated and make it unavailable to other applications running on your host machine: when the keyboard is captured, all keystrokes (including system ones like Alt-Tab) will be directed to the VM.&lt;/p&gt;&lt;p&gt;You can press the &lt;b&gt;host key combo&lt;/b&gt; at any time to &lt;b&gt;uncapture&lt;/b&gt; the keyboard and mouse (if it is captured) and return them to normal operation. The currently assigned host key combo is shown on the status bar at the bottom of the Virtual Machine window. This icon, together with the mouse icon placed nearby, indicate the current keyboard and mouse capture state.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Έχετε την &lt;b&gt;Αυτόματη δέσμευση πληκτρολογίου&lt;/b&gt; ρύθμιση ενεργοποιημένη. Αυτό θα προκαλέσει η Εικονική Μηχανή αυτομάτως να &lt;b&gt;δεσμέυσει&lt;/b&gt; το πληκτρολόγιο κάθε φορά που το παράθυρο της ΕΜ είναι ενεργό και θα το καθιστά μη διαθέσιμο σε άλλες εφαρμογές που τρέχουν στον οικοδεσπότη σας: όταν το πληκτρολόγιο είναι δεσμευμένο, κάθε πληκτρολόγηση (συμπεριλαμβανομένου συστεμικές όπως Alt-Tab) θα ανακατευθύνονται στην ΕΜ.&lt;/p&gt;&lt;p&gt;Μπορείτε να πατήσετε τον &lt;b&gt;συνδυασμό πλήκτρων οικοδεσπότη&lt;/b&gt; οποτεδήποτε για να &lt;b&gt;αποδεσμεύσετε&lt;/b&gt; το πληκτρολόγιο και ποντίκι (αν είναι δεσμευμένο) και να τα γυρίσετε στη φυσιολογική λειτουργία. Ο προς το παρόν ορισμένος συνδθασμός πλήκτρων οικοδεσπότη φαίνεται στην γραμμή κατάστασης στο κάτω μέρος του παραθύρου της Εικονικής Μηχανής. Αυτό το εικονίδιο, μαζί με το εικονίδιο ποντικιού δίπλα του, δείχνουν την τρέχουσα κατάσταση δέσμευσης πληκτρολογίου και ποντικιού.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Platform failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία πλατφόρμας ...</translation>
     </message>
     <message>
         <source>Failed to acquire platform parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου πλατφόρμας.</translation>
     </message>
     <message>
         <source>Platform properties failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ιδιοτήτων πλατφόρμας ...</translation>
     </message>
     <message>
         <source>Failed to acquire platform properties parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ιδιοτήτων πλατφόρμας.</translation>
     </message>
     <message>
         <source>System properties failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ιδιοτήτων συστήματος ...</translation>
     </message>
     <message>
         <source>Failed to acquire system properties parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ιδιοτήτων συστήματος.</translation>
     </message>
     <message>
         <source>Storage controller failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ελεγκτή αποθήκευσης ...</translation>
     </message>
     <message>
         <source>Failed to acquire storage controller parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ελεγκτή αποθήκευσης.</translation>
     </message>
     <message>
         <source>Medium attachment failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία δέσμευσης μέσου ...</translation>
     </message>
     <message>
         <source>Failed to acquire medium attachment parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου σύνδεσης μέσου.</translation>
     </message>
     <message>
         <source>Debugger failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αποσφαλμάτωσης ...</translation>
     </message>
     <message>
         <source>Failed to acquire machine debugger parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου αποσφαλμάτωσης μηχανής.</translation>
     </message>
     <message>
         <source>Failed to acquire graphics adapter parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου κάρτας γραφικών.</translation>
     </message>
     <message>
         <source>Audio settings failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ρυθμίσεων ήχου ...</translation>
     </message>
     <message>
         <source>Failed to acquire audio settings parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ρυθμίσεων ήχου.</translation>
     </message>
     <message>
         <source>Failed to acquire audio adapter parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου κάρτας ήχου.</translation>
     </message>
     <message>
         <source>Failed to acquire network adapter parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου κάρτας δικτύου.</translation>
     </message>
     <message>
         <source>Console failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία κονσόλας ...</translation>
     </message>
     <message>
         <source>Failed to acquire console parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου κονσόλας.</translation>
     </message>
     <message>
         <source>Guest failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία επισκέπτη ...</translation>
     </message>
     <message>
         <source>Failed to acquire guest parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου επισκέπτη.</translation>
     </message>
     <message>
         <source>Guest OS type failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία τύπου ΛΣ επισκέπτη ...</translation>
     </message>
     <message>
         <source>Failed to acquire guest OS type parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου τύπου ΛΣ επισκέπτη.</translation>
     </message>
     <message>
         <source>Mouse failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ποντικιού ...</translation>
     </message>
     <message>
         <source>Failed to acquire mouse parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ποντικιού.</translation>
     </message>
     <message>
         <source>Emulated USB failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία προσομοιωμένου USB ...</translation>
     </message>
     <message>
         <source>Failed to acquire emulated USB parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου προσομοιωμένου USB.</translation>
     </message>
     <message>
         <source>Recording settings failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία ρυθμίσεων μαγνητοσκόπησης ...</translation>
     </message>
     <message>
         <source>Failed to acquire recording settings parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου ρυθμίσεων μαγνητοσκόπησης.</translation>
     </message>
     <message>
         <source>VRDE server failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία διακομιστή VRDE ...</translation>
     </message>
     <message>
         <source>Failed to acquire VRDE server parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου διακομιστή VRDE.</translation>
     </message>
     <message>
         <source>VRDE server info failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία πληροφοριών διακομιστή VRDE ...</translation>
     </message>
     <message>
         <source>Failed to acquire VRDE server info parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία απόκτησης παραμέτρου πληροφοριών διακομιστή VRDE.</translation>
     </message>
     <message>
         <source>Failed to change machine debugger parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου αποσφαλμάτωσης μηχανής.</translation>
     </message>
     <message>
         <source>Failed to change display parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου οθόνης.</translation>
     </message>
     <message>
         <source>Failed to change cloud profile parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου προφίλ σύννεφου.</translation>
     </message>
     <message>
         <source>Failed to change update agent parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου εφαρμογής ενημερώσεων.</translation>
     </message>
     <message>
         <source>Keyboard failure ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία πληκτρολογίου ...</translation>
     </message>
     <message>
         <source>Failed to change keyboard parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου πληκτρολογίου.</translation>
     </message>
     <message>
         <source>Failed to change VSD parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου VSD.</translation>
     </message>
     <message>
         <source>Can&apos;t reset machine ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αδυναμία επαναφοράς μηχανής ...</translation>
     </message>
     <message>
         <source>Failed to reset the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία επαναφοράς της εικονικής μηχανής &lt;b&gt;%1&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>&lt;p&gt;Are you sure you want to discard the saved state of the following virtual machines?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;This operation is equivalent to resetting or powering off the machine without doing a proper shut down of the guest OS.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Είστε σίγουροι οτι θέλετε να αναιρέσετε την αποθηκευμένη κατάσταση των ακόλουθων εικονικών μηχανών;&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Η διαδικασία αυτή είναι ισοδύναμη με το να επανεφέρετε ή να σβήνετε τη μηχανή χωρίς κανονικό τερματισμό του ΛΣ επισκέπτη.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Shut down these VMs by sending the ACPI shutdown signal?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Να κλείσουν αυτές οι ΕΜ στέλνοντας το σήμα τερματισμού ACPI;&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Shut Down</source>
         <comment>machine</comment>
-        <translation type="unfinished"></translation>
+        <translation>Τερματισμός</translation>
     </message>
     <message>
         <source>&lt;p&gt;Close these VMs with no shutdown procedure?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Unsaved data in applications running on the VM will be lost.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Να κλείσουν αυτές οι ΕΜ χωρίς διαδικασία κλεισίματος;&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;&lt;p&gt;Μη αποθηκευμένα δεδομένα εφαρμογών που εκτελούνται στην ΕΜ θα χαθούν.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machine items from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αφαίρεση αυτών των αντικειμένων εικονικών μηχανών από την λίστα μηχανών;&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;Remove these virtual machines from the machine list?&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αφαίρεση αυτών των εικονικών μηχανών από την λίστα μηχανών;&lt;/p&gt;&lt;p&gt;&lt;b&gt;%1&lt;/b&gt;&lt;/p&gt;</translation>
     </message>
     <message>
         <source>Delete the virtual machine files and virtual hard disks.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαγραφή των αρχείων εικονικών μηχανών και εικονικών σκληρών δίσκων.</translation>
     </message>
     <message>
         <source>Delete the virtual machine files.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαγραφή των αρχείων εικονικών μηχανών.</translation>
     </message>
     <message>
         <source>Can&apos;t send shutdown signal ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αδυναμία αποστολής του σήματος τερματισμού ...</translation>
     </message>
     <message>
         <source>You are trying to shut down the guest with the ACPI power button. This is currently not possible because the guest does not support software shut down.</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσπαθείτε να τερματίσετε τον επισκέπτη με τη χρήση του κουμπιού ACPI. Αυτό δεν είναι δυνατό προς το παρόν επειδή ο επισκέπτης δεν υποστηρίζει τερματισμό μέσω λογισμικού.</translation>
     </message>
     <message>
         <source>Failed to change storage controller parameter.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αλλαγής παραμέτρου ελεγκτή αποθήκευσης.</translation>
     </message>
     <message>
         <source>Can&apos;t shut down machine ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αδυναμία τερματισμού μηχανής ...</translation>
     </message>
     <message>
         <source>Failed to send the ACPI power button press event to the virtual machine &lt;b&gt;%1&lt;/b&gt;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποτυχία αποστολής του σήματος επιλογής πλήκτρου λειτουργίας ACPI στην εικονική μηχανή &lt;b&gt;%1&lt;/b&gt;.</translation>
     </message>
     <message>
         <source>Can&apos;t drop data to guest ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αδυναμία άφεσης δεδομένων στον επισκέπτη ...</translation>
     </message>
 </context>
 <context>
@@ -12561,15 +12565,15 @@
     </message>
     <message>
         <source>Mini ToolBar</source>
-        <translation type="unfinished"></translation>
+        <translation>Μικρογραμμή Εργαλείων</translation>
     </message>
     <message>
         <source>Show the Mini ToolBar in full-screen and seamless modes</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση της Μικρογραμμής Εργαλείων σε πλήρη και ενσωματωμένη λειτουργία</translation>
     </message>
     <message>
         <source>Show the Mini ToolBar at the top of the screen, rather than in its default position at the bottom of the screen</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση της Μικρογραμμής Εργαλείων στο πάνω μέρος της οθόνης, αντί της προεπιλεγμένης θέσης στο κάτω μέρος της οθόνης</translation>
     </message>
 </context>
 <context>
@@ -12592,19 +12596,19 @@
     </message>
     <message>
         <source>Number of Virtual Mo&amp;nitors</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός Εικονικών Οθονών</translation>
     </message>
     <message>
         <source>Number of virtual monitors the virtual machine has</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός εικονικών οθονών που έχει η εικονική μηχανή</translation>
     </message>
     <message>
         <source>Minimum virtual monitor number</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο ελάχιστος αριθμός εικονικών οθονών</translation>
     </message>
     <message>
         <source>Maximum virtual monitor number</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο μέγιστος αριθμός εικονικών οθονών</translation>
     </message>
 </context>
 <context>
@@ -12656,47 +12660,47 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>&amp;I/O APIC</source>
-        <translation type="unfinished"></translation>
+        <translation>I/O APIC</translation>
     </message>
     <message>
         <source>Use I/O APIC. Performance may be slower.</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση I/O APIC. Η απόδοση μπορεί να είναι πιο αργή.</translation>
     </message>
     <message>
         <source>Hardware Clock in &amp;UTC</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρολόϊ Υλικού σε UTC</translation>
     </message>
     <message>
         <source>Emulated RTC device reports time in UTC rather than local time on the host</source>
-        <translation type="unfinished"></translation>
+        <translation>Η προσομοιωμένη συσκευή RTC αναφέρει ώρα σε UTC αντί της τοπικής ώρας του οικοδεσπότη</translation>
     </message>
     <message>
         <source>U&amp;EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>UEFI</translation>
     </message>
     <message>
         <source>VM uses UEFI to boot OS instead of BIOS</source>
-        <translation type="unfinished"></translation>
+        <translation>Η ΕΜ χρησιμοποιεί UEFI για την εκκίνηση ΛΣ αντί BIOS</translation>
     </message>
     <message>
         <source>&amp;Secure Boot</source>
-        <translation type="unfinished"></translation>
+        <translation>Ασφαλής Εκκίνηση</translation>
     </message>
     <message>
         <source>Use secure boot emulation</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση προσομοίωσης ασφαλούς εκκίνησης</translation>
     </message>
     <message>
         <source>&amp;Reset Secure Boot Keys</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά Κλειδιών Ασφαλούς Εκκίνησης</translation>
     </message>
     <message>
         <source>Reset secure boot keys to default</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά κλειδιών ασφαλούς εκκίνησης στα προεπιλεγμένα</translation>
     </message>
 </context>
 <context>
@@ -12751,59 +12755,60 @@
     </message>
     <message>
         <source>VM &amp;Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα ΕΜ</translation>
     </message>
     <message>
         <source>VM &amp;Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Φάκελος ΕΜ</translation>
     </message>
     <message>
         <source>&amp;ISO Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικόνα ISO</translation>
     </message>
     <message>
         <source>OS &amp;Edition</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκδοση ΛΣ</translation>
     </message>
     <message>
         <source>&amp;OS</source>
-        <translation type="unfinished"></translation>
+        <translation>ΛΣ</translation>
     </message>
     <message>
         <source>OS &amp;Distribution</source>
-        <translation type="unfinished"></translation>
+        <translation>Διανομή ΛΣ</translation>
     </message>
     <message>
         <source>OS &amp;Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκδοση ΛΣ</translation>
     </message>
     <message>
         <source>Descriptive name to uniquely identify the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>Περιγραφικό όνομα για να αναγνωρίζεται με μοναδικό τρόπο η εικονική μηχανή</translatorcomment>
+        <translation></translation>
     </message>
     <message>
         <source>Storage location for virtual machine files</source>
-        <translation type="unfinished"></translation>
+        <translation>Τοποθεσία αποθηκευτικού χώρου για τα αρχεία εικονικής μηχανής</translation>
     </message>
     <message>
         <source>Edition of guest operating system to install</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκδοση του λειτουργικού συστήματος επισκέπτη προς εγκατάσταση</translation>
     </message>
     <message>
         <source>Operating system, for example Linux, Windows</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργικό σύστημα, για παράδειγμα Linux, Windows</translation>
     </message>
     <message>
         <source>OS distribution, if applicable</source>
-        <translation type="unfinished"></translation>
+        <translation>Διανομή ΛΣ, αν είναι εφαρμόσιμο</translation>
     </message>
     <message>
         <source>Version of OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκδοση του ΛΣ</translation>
     </message>
     <message>
         <source>ISO image to be attached to the virtual machine and possibly used in unattended install</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικόνα ISO που θα συνδεθεί στην εικονική μηχανή και πιθανότατα θα χρησιμοποιειθεί στην μη-καθοδηγούμενη εγκατάσταση</translation>
     </message>
 </context>
 <context>
@@ -12918,43 +12923,43 @@
     </message>
     <message>
         <source>&amp;Attached to</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδεδεμένη σε</translation>
     </message>
     <message>
         <source>&amp;Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα</translation>
     </message>
     <message>
         <source>The way this virtual adapter is attached to the real network of the host OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο τρόπος που αυτή η εικονική κάρτα είναι συνδεδεμένη στο πραγματικό δίκτυο του ΛΣ Οικοδεσπότη</translation>
     </message>
     <message>
         <source>Network adapter on the host system that traffic to and from this network card will go through</source>
-        <translation type="unfinished"></translation>
+        <translation>Κάρτα δικτύου στο σύστημα του οικοδεσπότη που δεδομένα από και προς αυτή την κάρτα δικτύου θα περάσουν</translation>
     </message>
     <message>
         <source>Name of the internal network that this network card will be connected to. You can create a new internal network by choosing a name which is not used by any other network cards in this virtual machine or others.</source>
-        <translation type="unfinished"></translation>
+        <translation>΄Ονομα του εσωτερικού δικτύου στο οποίο θα συνδέεται αυτή η κάρτα δικτύου. Μπορείτε να δημιουργήσετε ένα καινούριο εσωτερικό δίκτυο επιλέγοντας ένα όνομα που δεν χρησιμοποιείται από κάποια άλλη κάρτα δικτύου σε αυτή ή σε άλλες εικονικές μηχανές.</translation>
     </message>
     <message>
         <source>Virtual network adapter on the host system that traffic to and from this network card will go through. You can create and remove adapters using the Network Manager tool in the virtual machine manager window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονική κάρτα δικτύου στο σύστημα του οικοδεσπότη που δεδομένα από και προς αυτή την κάρτα δικτύου θα περάσουν. Μπορείτε να δημιουργήσετε και να αφαιρέσετε κάρτες χρησιμοποιώντας το εργαλείο Διαχειριστής Δικτύων στο παράθυρο διαχείρισης της εικονικής μηχανής.</translation>
     </message>
     <message>
         <source>Driver to be used with this network card</source>
-        <translation type="unfinished"></translation>
+        <translation>Οδηγός που θα χρησιμοποιηθεί με αυτή την κάρτα δικτύου</translation>
     </message>
     <message>
         <source>Name of the NAT network that this network card will be connected to. You can create and remove networks using the Network Manager tool in the virtual machine manager window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα του NAT δικτύου στο οποίο θα συνδέεται αυτή η κάρτα δικτύου. Μπορείτε να δημιουργήσετε και να αφαιρέσετε δίκτυα χρησιμοποιώντας το εργαλείο Διαχειριστής Δικτύων στο παράθυρο διαχείρισης της εικονικής μηχανής.</translation>
     </message>
     <message>
         <source>(experimental) Name of the cloud network that this network card will be connected to. You can add and remove networks using the Network Manager tool in the virtual machine manager window.</source>
-        <translation type="unfinished"></translation>
+        <translation>(πειραματικό) Όνομα του δικτύου σύννεφου στο οποίο θα συνδέεται αυτή η κάρτα δικτύου. Μπορείτε να δημιουργήσετε και αφαιρέσετε δίκτυα χρησιμοποιώντας το εργαλείο Διαχειριστής Δικτύων στο παράθυρο διαχείρισης της εικονικής μηχανής.</translation>
     </message>
     <message>
         <source>Name of the host-only network that this network card will be connected to. You can add and remove networks using the Network Manager tool in the virtual machine manager window.</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα του μόνο-με-οικοδεσπότη δικτύου στο οποίο θα συνδέεται αυτή η κάρτα δικτύου. Μπορείτε να δημιουργήσετε και να αφαιρέσετε δίκτυα χρησιμοποιώντας το εργαλείο Διαχειριστής Δικτύων στο παράθυρο διαχείρισης της εικονικής μηχανής.</translation>
     </message>
 </context>
 <context>
@@ -13021,51 +13026,51 @@
     </message>
     <message>
         <source>Adapter &amp;Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος Κάρτας</translation>
     </message>
     <message>
         <source>Virtual network adapter type. Depending on this value, VirtualBox will provide different network hardware to the virtual machine.</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος εικονικής κάρτας δικτύου. Σύμφωνα με αυτή την τιμή, το VirtualBox θα παρέχει διαφορετικό υλικό δικτύου στην εικονική μηχανή.</translation>
     </message>
     <message>
         <source>&amp;Promiscuous Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργία Χωρίς Κριτήρια</translation>
     </message>
     <message>
         <source>Promiscuous mode policy of the network adapter when attached to an internal network, host only network or a bridge</source>
-        <translation type="unfinished"></translation>
+        <translation>Χωρίς περιορισμούς πολιτική λειτουργίας της κάρτας δικτύου όταν συνδέεται σε ένα εσωτερικό δίκτυο, μόνο-με-οικοδεσπότη δίκτυο ή μία γέφυρα.</translation>
     </message>
     <message>
         <source>&amp;MAC Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Διεύθυνση MAC</translation>
     </message>
     <message>
         <source>MAC address of this adapter. It contains exactly 12 characters chosen from {0-9,A-F}. Note that the second character must be an even digit.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διεύθυνση MAC αυτής της κάρτας. Περιέχει ακριβώς 12 χαρακτήρες επιλεγμένους από τα {0-9,A-F}. Σημειώνεται οτι ο δεύτερος χαρακτήρας πρέπει να είναι ζυγός.</translation>
     </message>
     <message>
         <source>Generate a new random MAC address</source>
-        <translation type="unfinished"></translation>
+        <translation>Δημιουργία μιας νέας τυχαίας διεύθυνσης MAC</translation>
     </message>
     <message>
         <source>Generic Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Γενικές Ιδιότητες</translation>
     </message>
     <message>
         <source>Configuration settings for the network attachment driver. The settings should be of the form name=value and will depend on the driver. Use shift-enter to add a new entry.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις διαμόρφωσης για τον οδηγό δικτυακής σύνδεσης. Οι ρυθμίσεις θα πρέπει να είναι του τύπου όνομα=τιμή και θα εξαρτώνται από τον οδηγό. Χρησιμοποιήστε shift-enter για να προσθέσετε μια νέα καταχώρηση.</translation>
     </message>
     <message>
         <source>Virtual &amp;Cable Connected</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονικό Καλώδιο Συνδεδεμένο</translation>
     </message>
     <message>
         <source>Virtual network cable will be plugged in</source>
-        <translation type="unfinished"></translation>
+        <translation>Το καλώδιο του εικονικού δικτύου θα συνδεθεί</translation>
     </message>
     <message>
         <source>Configure port forwarding rules</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις κανόνων προώθησης θυρών</translation>
     </message>
 </context>
 <context>
@@ -13188,7 +13193,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>&amp;DHCP Server</source>
@@ -13530,7 +13535,7 @@
     </message>
     <message>
         <source>Select Network ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ID Δικτύου</translation>
     </message>
 </context>
 <context>
@@ -13616,7 +13621,7 @@
     </message>
     <message>
         <source>Plug this virtual network adapter into the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση αυτής της εικονικής κάρτας δικτύου στην εικονική μηχανή</translation>
     </message>
 </context>
 <context>
@@ -13662,7 +13667,7 @@
     </message>
     <message>
         <source>Downloading User Guide ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Λήψη Οδηγού Χρήσης ...</translation>
     </message>
 </context>
 <context>
@@ -13925,34 +13930,34 @@
     </message>
     <message>
         <source>Cloning cloud VM ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλωνοποίηση ΕΜ σύννεφου ...</translation>
     </message>
     <message>
         <source>Resetting cloud VM ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά ΕΜ σύννεφου ...</translation>
     </message>
     <message>
         <source>Creating host-only network interface ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Δημιουργία διασύνδεσης μόνο-με-οικοδεσπότη δικτύου ...</translation>
     </message>
     <message>
         <source>Removing host-only network interface ...</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση διασύνδεσης μόνο-με-οικοδεσπότη δικτύου ...</translation>
     </message>
 </context>
 <context>
     <name>UIPaneContainer</name>
     <message>
         <source>Detach</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποσύνδεση</translation>
     </message>
     <message>
         <source>Open the tool in separate window</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα του εργαλείου σε ξεχωριστό παράθυρο</translation>
     </message>
     <message>
         <source>Open in Separate Window</source>
-        <translation type="unfinished"></translation>
+        <translation>Άνοιγμα σε Ξεχωριστό Παράθυρο</translation>
     </message>
 </context>
 <context>
@@ -13967,11 +13972,11 @@
     </message>
     <message>
         <source>&amp;Paravirtualization Interface</source>
-        <translation type="unfinished"></translation>
+        <translation>Διασύνδεση Παραεικονοποίησης</translation>
     </message>
     <message>
         <source>Paravirtualization guest interface provider used by this virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Πάροχος διασύνδεσης παραεικονοποίησης του επισκέπτη που χρησιμοποιείται από αυτή την εικονική μηχανή</translation>
     </message>
 </context>
 <context>
@@ -13986,11 +13991,11 @@
     </message>
     <message>
         <source>&amp;Pointing Device</source>
-        <translation type="unfinished"></translation>
+        <translation>Συσκευή Δείκτη</translation>
     </message>
     <message>
         <source>Type of emulated pointing device</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος προσομοιωμένης συσκευής δείκτη</translation>
     </message>
 </context>
 <context>
@@ -14090,23 +14095,23 @@
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>PA&amp;E/NX</source>
-        <translation type="unfinished"></translation>
+        <translation>PAE/NX</translation>
     </message>
     <message>
         <source>Use the Physical Address Extension (PAE) feature of the host CPU on the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση της ιδιότητας Επεκτάσεων Φυσικής Διεύθυνσης (PAE) του επεξεργαστή του οικοδεσπότη στην εικονική μηχανή</translation>
     </message>
     <message>
         <source>Nested &amp;VT-x/AMD-V</source>
-        <translation type="unfinished"></translation>
+        <translation>Ένθετη VT-x/AMD-V</translation>
     </message>
     <message>
         <source>Use the nested hardware virtualization CPU feature on the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση της ένθετης εικονοποίησης υλικού του επεξεργαστή στην εικονική μηχανή</translation>
     </message>
 </context>
 <context>
@@ -14182,23 +14187,23 @@
     </message>
     <message>
         <source>VirtualBox will try to auto-detect host proxy settings for tasks like downloading Guest Additions from the network or checking for updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox θα προσπαθήσει να εντοπίσει αυτόματα τις ρυθμίσεις διαμεσολάβησης του οικοδεσπότη για ενέργειες όπως το κατέβασμα των Προσθηκών Επισκέπτη ή τον έλεγχο ενημερώσεων</translation>
     </message>
     <message>
         <source>VirtualBox will use direct Internet connection for tasks like downloading Guest Additions from the network or checking for updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox θα χρησιμοποιήσει απευθείας σύνδεση στο Διαδίκτυο για ενέργειες όπως το κατέβασμα των Προσθηκών Επισκέπτη από το δίκτυο ή τον έλεγχο ενημερώσεων</translation>
     </message>
     <message>
         <source>VirtualBox will use the proxy settings supplied for tasks like downloading Guest Additions from the network or checking for updates</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox θα χρησιμοποιήσει τις παρεχόμενες ρυθμίσεις διαμεσολάβησης για ενέργειες όπως το κατέβασμα των Προσθηκών Επισκέπτη από το δίκτυο ή τον έλεγχο ενημερώσεων</translation>
     </message>
     <message>
         <source>&amp;URL</source>
-        <translation type="unfinished"></translation>
+        <translation>URL</translation>
     </message>
     <message>
         <source>Proxy URL. The format is: &lt;table cellspacing=0 style=&apos;white-space:pre&apos;&gt;&lt;tr&gt;&lt;td&gt;[{type}://][{userid}[:{password}]@]{server}[:{port}]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;http://username:password@proxy.host.com:port&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>URL διαμεσολάβησης. Η μορφή είναι: &lt;table cellspacing=0 style=&apos;white-space:pre&apos;&gt;&lt;tr&gt;&lt;td&gt;[{τύπος}://][{χρήστης}[:{κωδικός}]@]{εξυπηρετητής}[:{θύρα}]&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;http://username:password@proxy.host.com:port&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</translation>
     </message>
 </context>
 <context>
@@ -14261,7 +14266,7 @@
     </message>
     <message>
         <source>User Defined</source>
-        <translation>Καθορισμένο από τον χρήστη</translation>
+        <translation>Καθορισμένο από τον Χρήστη</translation>
     </message>
     <message>
         <source>Holds the recording mode.</source>
@@ -14332,79 +14337,79 @@
     </message>
     <message>
         <source>VirtualBox will record the virtual machine session as a video file</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox θα καταγράφει τη συνεδρία της εικονικής μηχανής σε ένα αρχείο μαγνητοσκόπησης</translation>
     </message>
     <message>
         <source>Recording &amp;Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργία Μαγνητοσκόπησης</translation>
     </message>
     <message>
         <source>Recording mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργία Μαγνητοσκόπησης</translation>
     </message>
     <message>
         <source>File &amp;Path</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή Αρχείου</translation>
     </message>
     <message>
         <source>The filename VirtualBox uses to save the recorded content</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα του αρχείου στο οποίο το VirtualBox αποθηκεύει τα περιεχόμενα της μαγνητοσκόπησης</translation>
     </message>
     <message>
         <source>Frame Si&amp;ze</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος Εικόνας</translation>
     </message>
     <message>
         <source>Resolution (frame size) of the recorded video</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανάλυση (ταχύτητα εικόνας) του μαγνητοσκοπημένου βίντεο</translation>
     </message>
     <message>
         <source>Horizontal resolution (frame width) of the recorded video</source>
-        <translation type="unfinished"></translation>
+        <translation>Οριζόντια ανάλυση (εύρος εικόνας) του μαγνητοσκοπημένου βίντεο</translation>
     </message>
     <message>
         <source>Vertical resolution (frame height) of the recorded video</source>
-        <translation type="unfinished"></translation>
+        <translation>Κάθετη ανάλυση (ύψος εικόνας) του μαγνητοσκοπημένου βίντεο</translation>
     </message>
     <message>
         <source>Frame R&amp;ate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα Εικόνας</translation>
     </message>
     <message>
         <source>Maximum number of frames per second. Additional frames will be skipped. Reducing this value will increase the number of skipped frames and reduce the file size.</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστος αριθμός εικόνων ανά δευτερόλεπτο. Επιπλέον εικόνες θα παραλειφθούν. Μείωση αυτής της τιμής θα αυξήσει τον αριθμό των παραλειφθέντων εικόνων και θα μειώσει το μέγεθος αρχείου.</translation>
     </message>
     <message>
         <source>Minimum recording frame rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Η ελάχιστη ταχύτητα εικόνας</translation>
     </message>
     <message>
         <source>Maximum recording frame rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Η μέγιστη ταχύτητα εικόνας</translation>
     </message>
     <message>
         <source>&amp;Video Quality</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποιότητα Βίντεο</translation>
     </message>
     <message>
         <source>Video quality. Increasing this value will make the video look better at the cost of an increased file size.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποιότητα βίντεο. Αύξηση αυτής της τιμής θα κάνει το βίντεο να φαίνεται καλύτερα με τίμημα αυξημένο μέγεθος αρχείου.</translation>
     </message>
     <message>
         <source>Bitrate in kilobits per second. Increasing this value will make the video look better at the cost of an increased file size.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα σε kilobits ανά δευτερόλεπτο. Αύξηση αυτής της τιμής θα κάνει το βίντεο να φαίνεται καλύτερα με τίμημα αυξημένο μέγεθος αρχείου.</translation>
     </message>
     <message>
         <source>&amp;Audio Quality</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποιότητα Ήχου</translation>
     </message>
     <message>
         <source>Audio quality. Increasing this value will make the audio sound better at the cost of an increased file size.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποιότητα ήχου. Αύξηση αυτής της τιμής θα κάνει το βίντεο να ακούγεται καλύτερα με τίμημα ένα αυξημένο μέγεθος αρχείου.</translation>
     </message>
     <message>
         <source>Scree&amp;ns</source>
-        <translation type="unfinished"></translation>
+        <translation>Οθόνες</translation>
     </message>
 </context>
 <context>
@@ -14439,23 +14444,23 @@
     </message>
     <message>
         <source>Scale &amp;Factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Συντελεστής Κλίμακας</translation>
     </message>
     <message>
         <source>Index of virtual monitor guest screen scale factor being defined for</source>
-        <translation type="unfinished"></translation>
+        <translation>Κατάλογος του συντελεστή κλίμακας οθόνης επισκέπτη για τον οποίο καθορίζεται</translation>
     </message>
     <message>
         <source>Guest screen scale factor the virtual machine has</source>
-        <translation type="unfinished"></translation>
+        <translation>Συντελεστή κλίμακας οθόνης επισκέπτη που έχει η εικονική μηχανή</translation>
     </message>
     <message>
         <source>Minimum guest screen scale factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστος συντελεστής κλίμακας οθόνης επισκέπτη</translation>
     </message>
     <message>
         <source>Maximum guest screen scale factor</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστος συντελεστής κλίμακας οθόνης επισκέπτη</translation>
     </message>
 </context>
 <context>
@@ -14477,7 +14482,7 @@
     <name>UISerialSettingsEditor</name>
     <message>
         <source>&amp;Enable Serial Port</source>
-        <translation type="unfinished">Ενεργοποίηση Σειριακής Θύρας</translation>
+        <translation>Ενεργοποίηση Σειριακής Θύρας</translation>
     </message>
     <message>
         <source>When checked, enables the given serial port of the virtual machine.</source>
@@ -14509,7 +14514,7 @@
     </message>
     <message>
         <source>&amp;Connect to existing pipe/socket</source>
-        <translation type="unfinished">Σύνδεση σε υπάρχων αγωγό/υποδοχή</translation>
+        <translation>Σύνδεση σε υπάρχων αγωγό/υποδοχή</translation>
     </message>
     <message>
         <source>When checked, the virtual machine will assume that the pipe or socket specified in the Path/Address field exists and try to use it. Otherwise, the pipe or socket will be created by the virtual machine when it starts.</source>
@@ -14521,51 +14526,51 @@
     </message>
     <message>
         <source>In Host Pipe mode: Holds the path to the serial port&apos;s pipe on the host. Examples: &quot;\\.\pipe\myvbox&quot; or &quot;/tmp/myvbox&quot;, for Windows and UNIX-like systems respectively. In Host Device mode: Holds the host serial device name. Examples: &quot;COM1&quot; or &quot;/dev/ttyS0&quot;. In Raw File mode: Holds the file-path on the host system, where the serial output will be dumped. In TCP mode: Holds the TCP &quot;port&quot; when in server mode, or &quot;hostname:port&quot; when in client mode.</source>
-        <translation type="unfinished">Σε τρόπο λειτουργίας Αγωγού Οικοδεσπότη: Δείχνει τη διαδρομή στον αγωγό της σειριακής θύρας στον οικοδεσπότη.Παραδείγματα: &quot;\\.\pipe\myvbox&quot; ή &quot;/tmp/myvbox&quot;, για Windows και τύπου UNIX συστήματα αντιστοίχως. Σε τρόπο λειτουργίας Συσκευής Οικοδεσπότη: Δείχνει το όνομα σειριακής συσκευής οικοδεσπότη. Παραδείγματα: &quot;COM1&quot; ή &quot;/dev/ttyS0&quot;. Σε τρόπο λειτουργίας Πηγαίου Αρχείου: Δείχνει την διαδρομή αρχείου στο σύστημα του οικοδεσπότη, όπου θα ριφθεί η σειριακής έξοδος. Σε τρόπο λειτουργίας TCP: Δείχνει την &quot;θύρα&quot; TCP κατά τη διάρκεια λειτουργίας σαν διακομιστής, ή &quot;όνομα διακομιστή:θύρα&quot; κατά τη διάρκεια λειτουργίας σαν πελάτης.</translation>
+        <translation>Σε τρόπο λειτουργίας Αγωγού Οικοδεσπότη: Δείχνει τη διαδρομή στον αγωγό της σειριακής θύρας στον οικοδεσπότη.Παραδείγματα: &quot;\\.\pipe\myvbox&quot; ή &quot;/tmp/myvbox&quot;, για Windows και τύπου UNIX συστήματα αντιστοίχως. Σε τρόπο λειτουργίας Συσκευής Οικοδεσπότη: Δείχνει το όνομα σειριακής συσκευής οικοδεσπότη. Παραδείγματα: &quot;COM1&quot; ή &quot;/dev/ttyS0&quot;. Σε τρόπο λειτουργίας Πηγαίου Αρχείου: Δείχνει την διαδρομή αρχείου στο σύστημα του οικοδεσπότη, όπου θα ριφθεί η σειριακής έξοδος. Σε τρόπο λειτουργίας TCP: Δείχνει την &quot;θύρα&quot; TCP κατά τη διάρκεια λειτουργίας σαν διακομιστής, ή &quot;όνομα διακομιστή:θύρα&quot; κατά τη διάρκεια λειτουργίας σαν πελάτης.</translation>
     </message>
     <message>
         <source>Enable this serial port of the virtual machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση αυτής της σειριακής θύρας της εικονικής μηχανής</translation>
     </message>
     <message>
         <source>Port &amp;Number</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός Θύρας</translation>
     </message>
     <message>
         <source>Serial port number. You can choose one of the standard serial ports or select User-defined and specify port parameters manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός σειριακής θύρας. Μπορείτε να επιλέξετε μία από τις προκαθορισμένες σειριακές θύρες ή να επιλέξετε μία καθορισμένη από το Χρήστη και να καθορίσετε τις παραμέτρους θύρας χειροκίνητα.</translation>
     </message>
     <message>
         <source>&amp;IRQ</source>
-        <translation type="unfinished"></translation>
+        <translation>IRQ</translation>
     </message>
     <message>
         <source>IRQ number of this serial port. This should be a whole number between &apos;0&apos; and &apos;255&apos;. Values greater than &apos;15&apos; may only be used if the I/O APIC setting is enabled for this virtual machine.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός IRQ αυτής τής σειριακής θύρας. Αυτός πρέπει να είναι ένας ακέραιος μεταξύ &apos;0&apos; και &apos;255&apos;. Τιμές μεγαλύτερες του &apos;15&apos; μπορούν μόνο να χρησιμοποιηθούν αν η ρύθμιση I/O APIC είναι ενεργοποιημένη για αυτή την εικονική μηχανή.</translation>
     </message>
     <message>
         <source>I/O Po&amp;rt</source>
-        <translation type="unfinished"></translation>
+        <translation>Θύρα Ε/Ε</translation>
     </message>
     <message>
         <source>Base I/O port address of this serial port. Valid values are integer numbers in range from &apos;0&apos; to &apos;0xFFFF&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Βασική διεύθυνση θύρας Ε/Ε για αυτή την σειριακή θύρα. Έγκυρες τιμές είναι ακέραιοι αριθμοί ανάμεσα στο &apos;0&apos; και το &apos;0xFFFF&apos;.</translation>
     </message>
     <message>
         <source>Port &amp;Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>Λειτουργία Θύρας</translation>
     </message>
     <message>
         <source>Working mode of this serial port. If you select Disconnected, the guest OS will detect the serial port but will not be able to operate it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Τρόπος εργασίας αυτής της σειριακής θύρας. Αν επιλέξετε Αποσυνδεδεμένη, το ΛΣ επισκέπτη θα ανιχνεύσει την σειριακή θύρα αλλά δεν θα είναι ικανό να την λειτουργήσει.</translation>
     </message>
     <message>
         <source>Virtual machine will assume that the pipe or socket specified in the Path/Address field exists and try to use it. Otherwise, the pipe or socket will be created by the virtual machine when it starts.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η εικονική μηχανή θα υποθέσει οτι ο αγωγός ή η υποδοχή που ορίστηκαν στη πεδίο Διαδρομή/Διεύθυνση υπάρχει και θα προσπαθήσει να τα χρησιμοποιήσει. Αλλιώς, ο αγωγός ή η υποδοχή θα δημιουργηθούν από την εικονική μηχανή όταν εκκινείται.</translation>
     </message>
     <message>
         <source>&amp;Path/Address</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή/Διεύθυνση</translation>
     </message>
 </context>
 <context>
@@ -14585,7 +14590,7 @@
     <message>
         <source>%1 status-bar indicator</source>
         <comment>like &apos;hard-disk status-bar indicator&apos;</comment>
-        <translation type="unfinished"></translation>
+        <translation>Ένδειξη γραμμής κατάστασης %1</translation>
     </message>
 </context>
 <context>
@@ -14713,11 +14718,11 @@
     <name>UISettingsPageValidator</name>
     <message>
         <source>&lt;b&gt;%1&lt;/b&gt; page:</source>
-        <translation type="unfinished">&lt;b&gt;%1&lt;/b&gt; σελίδα:</translation>
+        <translation>&lt;b&gt;%1&lt;/b&gt; σελίδα:</translation>
     </message>
     <message>
         <source>&lt;b&gt;%1: %2&lt;/b&gt; page:</source>
-        <translation type="unfinished">&lt;b&gt;%1: %2&lt;/b&gt; σελίδα:</translation>
+        <translation>&lt;b&gt;%1: %2&lt;/b&gt; σελίδα:</translation>
     </message>
 </context>
 <context>
@@ -14743,11 +14748,11 @@
     </message>
     <message>
         <source>&amp;Shared Clipboard</source>
-        <translation type="unfinished"></translation>
+        <translation>Κοινά Πρόχειρα</translation>
     </message>
     <message>
         <source>Enable sharing of clipboard data as required</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση διαμοιραζόμενων δεδομένων προχείρου όπως απαιτείται</translation>
     </message>
 </context>
 <context>
@@ -14818,51 +14823,51 @@
     </message>
     <message>
         <source>Folder Path</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή Φακέλου</translation>
     </message>
     <message>
         <source>Folder Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Φακέλου</translation>
     </message>
     <message>
         <source>Name of the shared folder (as it will be seen by the guest OS)</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα του κοινόχρηστου φακέλου (όπως θα φαίνεται στο ΛΣ του επισκέπτη)</translation>
     </message>
     <message>
         <source>Path of the shared folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή του διαμοιραζόμενου φακέλου</translation>
     </message>
     <message>
         <source>Guest OS will not be able to write to the specified shared folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Το ΛΣ του επισκέπτη δεν θα έχει δικαίωμα εγγραφής στον συγκεκριμένο κοινό φάκελο</translation>
     </message>
     <message>
         <source>Guest OS will try to automatically mount the shared folder on startup</source>
-        <translation type="unfinished"></translation>
+        <translation>Το ΛΣ του επισκέπτη θα προσπαθήσει να προσαρτήσει αυτόματα τον κοινό φάκελο κατά την εκκίνηση</translation>
     </message>
     <message>
         <source>Mount Point</source>
-        <translation type="unfinished"></translation>
+        <translation>Σημείο Προσάρτησης</translation>
     </message>
     <message>
         <source>Path to automatically mount the folder in the guest. A drive letter (e.g. &apos;G:&apos;) for Windows and OS/2 guests, path for the others. If left empty the guest will pick something fitting.</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή για αυτόματη προσάρτηση του φακέλου στον επισκέπτη. Ένα γράμμα οδηγού (π.χ. &apos;G:&apos;) για Windows και OS/2 επισκέπτες, διαδρομή για τους λοιπούς. Αν αφεθεί άδειο ο επισκέπτης θα επιλέξει κάτι κατάλληλο.</translation>
     </message>
     <message>
         <source>&amp;Make Machine-permanent</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορισμός σαν μόνιμο</translation>
     </message>
     <message>
         <source>This shared folder will be permanent to this guest machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτός ο κοινός φάκελος θα είναι μόνιμος σε αυτή την μηχανή επισκέπτη</translation>
     </message>
     <message>
         <source>&amp;Make Global</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορισμός σαν Καθολικό</translation>
     </message>
     <message>
         <source>This shared folder will be available to all VMs</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτός ο κοινός φάκελος θα είναι διαθέσιμος σε όλες τις ΕΜ</translation>
     </message>
 </context>
 <context>
@@ -14909,7 +14914,7 @@
     </message>
     <message>
         <source> Transient Folders</source>
-        <translation> Φάκελοι Μεταβατικοί</translation>
+        <translation> Μεταβατικοί Φάκελοι</translation>
     </message>
     <message>
         <source>Edit Shared Folder</source>
@@ -14929,23 +14934,23 @@
     </message>
     <message>
         <source>All shared folders accessible to this machine. Use &apos;net use x: \\vboxsvr\share&apos; to access a shared folder named &apos;share&apos; from a DOS-like OS, or &apos;mount -t vboxsf share mount_point&apos; to access it from a Linux OS. This feature requires Guest Additions.</source>
-        <translation type="unfinished"></translation>
+        <translation>Όλοι οι διαμοιραζόμενοι φάκελοι προσβάσιμοι σε αυτή της μηχανή. Χρησιμοποιήστε &apos;net use x: \\vboxsvr\share&apos; για πρόσβαση σε ένα διαμοιραζόμενο φάκελο που ονομάζεται &apos;share&apos; από ένα ΛΣ τύπου DOS, ή &apos;mount -t vboxsf share mount_point&apos; για να έχετε πρόσβαση σε αυτόν από ένα ΛΣ τύπου Linux. Αυτή η ιδιότητα απαιτεί Προσθήκες Επισκέπτη.</translation>
     </message>
     <message>
         <source>Add new shared folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσθήκη ενός νέου κοινού φάκελου</translation>
     </message>
     <message>
         <source>Edit selected shared folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία του επιλεγμένου κοινόχρηστου φακέλου</translation>
     </message>
     <message>
         <source>Remove selected shared folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του επιλεγμένου κοινόχρηστου φακέλου</translation>
     </message>
     <message>
         <source> Global Folders</source>
-        <translation type="unfinished"></translation>
+        <translation> Καθολικοί Φάκελοι</translation>
     </message>
 </context>
 <context>
@@ -14976,11 +14981,11 @@
     </message>
     <message>
         <source>Configurable shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαμορφώσιμες συντομεύσεις</translation>
     </message>
     <message>
         <source>Shortcut list filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο λίστας συντομεύσεων</translation>
     </message>
 </context>
 <context>
@@ -15074,11 +15079,11 @@
     </message>
     <message>
         <source>S&amp;napshot Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Φάκελος Στιγμιότυπων</translation>
     </message>
     <message>
         <source>Folder where snapshots of this VM are saved</source>
-        <translation type="unfinished"></translation>
+        <translation>Φάκελος που αποθηκεύονται τα στιγμιότυπα αυτής της ΕΜ</translation>
     </message>
 </context>
 <context>
@@ -15477,7 +15482,7 @@
     </message>
     <message>
         <source>Close</source>
-        <translation type="unfinished">Κλείσιμο</translation>
+        <translation>Κλείσιμο</translation>
     </message>
 </context>
 <context>
@@ -15500,7 +15505,7 @@
     </message>
     <message>
         <source>Configure the virtual machine status bar</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρύθμιση της γραμμής κατάστασης της εικονικής μηχανής</translation>
     </message>
 </context>
 <context>
@@ -15800,7 +15805,7 @@
     </message>
     <message>
         <source>&amp;Devices</source>
-        <translation type="unfinished">Συσκευές</translation>
+        <translation>Συσκευές</translation>
     </message>
     <message>
         <source>Storage details:</source>
@@ -15808,175 +15813,175 @@
     </message>
     <message>
         <source>Choose a Disk File...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ενός Αρχείου Δίσκου...</translation>
     </message>
     <message>
         <source>Remove Disk From Virtual Drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση Δίσκου από τον Εικονικό Οδηγό</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Expand/Collapse&amp;nbsp;item&lt;/nobr&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;nobr&gt;Ανάπτυξη/Σύμπτυξη&amp;nbsp;αντικειμένου&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Add&amp;nbsp;hard&amp;nbsp;disk&lt;/nobr&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;nobr&gt;Προσθήκη&amp;nbsp;σκληρού&amp;nbsp;δίσκου&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Add&amp;nbsp;optical&amp;nbsp;drive&lt;/nobr&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;nobr&gt;Προσθήκη&amp;nbsp;οπτικού&amp;nbsp;οδηγού&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Add&amp;nbsp;floppy&amp;nbsp;drive&lt;/nobr&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;nobr&gt;Προσθήκη&amp;nbsp;οδηγού&amp;nbsp;δισκέτας&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>Storage tree can contain several controllers of different types. This machine currently has no controllers.</source>
-        <translation type="unfinished"></translation>
+        <translation>Το Δέντρο αποθήκευσης μπορεί να περιέχει ελεγκτές διαφορετικών τύπων. Η μηχανή αυτή τη στιγμή δεν έχει ελεγκτές.</translation>
     </message>
     <message>
         <source>&amp;Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα</translation>
     </message>
     <message>
         <source>Name of the storage controller currently selected in the storage tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα του ελεγκτή αποθήκευσης που είναι προς το παρόν επιλεγμένος στο δέντρο αποθήκευσης</translation>
     </message>
     <message>
         <source>&amp;Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος</translation>
     </message>
     <message>
         <source>Sub-type of the storage controller currently selected in the storage tree</source>
-        <translation type="unfinished"></translation>
+        <translation>Υποτύπος του ελεγκτή αποθήκευσης που είναι προς το παρόν επιλεγμένος στο δέντρο αποθήκευσης</translation>
     </message>
     <message>
         <source>&amp;Port Count</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός Θυρών</translation>
     </message>
     <message>
         <source>Number of ports allocated to the controller. This must always be one greater than the number of ports that can be used.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός θυρών εκχωρημένες στον ελεγκτή. Αυτός πρέπει να είναι πάντα κατά μία μονάδα μεγαλύτερος από τον αριθμό θυρών που μπορούν να χρησιμοποιηθούν.</translation>
     </message>
     <message>
         <source>Allow to use host I/O caching capabilities</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιτρέπεται η χρήση προσωρινής μνήμης Ε/Ε του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Hard &amp;Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Σκληρός Δίσκος</translation>
     </message>
     <message>
         <source>Optical &amp;Drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Οπτικός Οδηγός</translation>
     </message>
     <message>
         <source>Floppy &amp;Drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Συσκευή Δισκέτας</translation>
     </message>
     <message>
         <source>Slot on the storage controller used by this attachment. The available slots depend on the type of the controller and other attachments on it.</source>
-        <translation type="unfinished"></translation>
+        <translation>Θυρίδα του ελεγκτή αποθήκευσης που χρησιμοποιείται από αυτό το προσάρτημα. Οι διαθέσιμες θυρίδες εξαρτώνται από τον τύπο του ελεγκτή και τα υπόλοιπα προσαρτήματα σε αυτόν.</translation>
     </message>
     <message>
         <source>Allow the guest to send ATAPI commands directly to the host-drive which makes it possible to use CD/DVD writers connected to the host inside the VM. Note that writing audio CD inside the VM is not yet supported.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιτρέπεται στον επισκέπτη να στείλει εντολές ATAPI απ&apos; ευθείας στον οδηγό του οικοδεσπότη το οποίο κάνει δυνατή τη χρήση εγγραφής CD/DVD του οικοδεσπότη μέσα από την ΕΜ. Σημειώστε οτι η εγγραφή CD ήχου δεν υποστηρίζεται ακόμα.</translation>
     </message>
     <message>
         <source>Virtual disk will not be removed when the guest system ejects it</source>
-        <translation type="unfinished"></translation>
+        <translation>Ο εικονικός δίσκος δεν θα αφαιρεθεί όταν το σύστημα του επισκέπτη τον εξάγει</translation>
     </message>
     <message>
         <source>Guest system will see the virtual disk as a solid-state device</source>
-        <translation type="unfinished"></translation>
+        <translation>Το σύστημα του επισκέπτη θα βλέπει τον εικονικό δίσκο σαν δίσκο στερεάς κατάστασης</translation>
     </message>
     <message>
         <source>Guest system will see the virtual disk as a hot-pluggable device</source>
-        <translation type="unfinished"></translation>
+        <translation>Το σύστημα του επισκέπτη θα βλέπει τον εικονικό δίσκο σαν δίσκο άμεσης σύνδεσης</translation>
     </message>
     <message>
         <source>Type (Format)</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος (Διαμόρφωση)</translation>
     </message>
     <message>
         <source>Virtual size</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονικό μέγεθος</translation>
     </message>
     <message>
         <source>Actual size</source>
-        <translation type="unfinished"></translation>
+        <translation>Πραγματικό μέγεθος</translation>
     </message>
     <message>
         <source>Storage details</source>
-        <translation type="unfinished"></translation>
+        <translation>Λεπτομέρειες αποθήκευσης</translation>
     </message>
     <message>
         <source>Location</source>
-        <translation type="unfinished">Τοποθεσία</translation>
+        <translation>Τοποθεσία</translation>
     </message>
     <message>
         <source>Attached to</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδεδεμένο σε</translation>
     </message>
     <message>
         <source>Encryption key</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλειδί κρυπτογράφησης</translation>
     </message>
     <message>
         <source>Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος</translation>
     </message>
     <message>
         <source>Size</source>
-        <translation type="unfinished">Μέγεθος</translation>
+        <translation>Μέγεθος</translation>
     </message>
     <message>
         <source>All storage controllers for this machine and the virtual images and host drives attached to them</source>
-        <translation type="unfinished"></translation>
+        <translation>Όλοι οι ελεγκτές αποθήκευσης για αυτή τη μηχανή και οι εικονικές εικόνες με τους συνδεδεμένους οδηγούς του οικοδεσπότη σε αυτές</translation>
     </message>
     <message>
         <source>Add controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσθήκη ελεγκτή</translation>
     </message>
     <message>
         <source>Remove controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση ελεγκτή</translation>
     </message>
     <message>
         <source>Add attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσθήκη προσαρτήματος</translation>
     </message>
     <message>
         <source>Hard disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Σκληρός δίσκος</translation>
     </message>
     <message>
         <source>Optical drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Οπτικός οδηγός</translation>
     </message>
     <message>
         <source>Floppy drive</source>
-        <translation type="unfinished"></translation>
+        <translation>Συσκευή δισκέτας</translation>
     </message>
     <message>
         <source>Remove attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση προσαρτήματος</translation>
     </message>
     <message>
         <source>Add new storage controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσθήκη νέου ελεγκτή αποθήκευσης</translation>
     </message>
     <message>
         <source>Remove selected storage controller</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του επιλεγμένου ελεγκτή αποθήκευσης</translation>
     </message>
     <message>
         <source>Add new storage attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσθήκη νέου προσαρτήματος αποθήκευσης</translation>
     </message>
     <message>
         <source>Remove selected storage attachment</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του επιλεγμένου προσαρτήματος αποθήκευσης</translation>
     </message>
 </context>
 <context>
@@ -16135,23 +16140,23 @@
     </message>
     <message>
         <source>Show text</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση κειμένου</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation type="unfinished">Αρχική Σελίδα</translation>
+        <translation>Αρχική Σελίδα</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Μηχανές</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation type="unfinished"></translation>
+        <translation>Πηγές</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση Πηγής</translation>
     </message>
 </context>
 <context>
@@ -16173,11 +16178,11 @@
     </message>
     <message>
         <source>&amp;TPM Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Έκδοση TPM</translation>
     </message>
     <message>
         <source>Emulate this Trusted Platform Module on this VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Προσομοίωση αυτής της TPM σε αυτή την ΕΜ</translation>
     </message>
 </context>
 <context>
@@ -16358,15 +16363,15 @@
     </message>
     <message>
         <source>Enable virtual USB OHCI controller of this machine. The USB OHCI controller provides USB 1.0 support.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση εικονικού ελεγκτή USB OHCI αυτής της μηχανής. Ο ελεγκτής USB OHCI προσφέρει υποστήριξη για το USB 1.0.</translation>
     </message>
     <message>
         <source>Enable virtual USB OHCI and EHCI controllers of this machine. Together they provide USB 2.0 support.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση εικονικών ελεγκτών USB OHCI και EHCI αυτής της μηχανής. Μαζί προσφέρουν υποστήριξη για το USB 2.0.</translation>
     </message>
     <message>
         <source>Enable virtual USB xHCI controller of this machine. The USB xHCI controller provides USB 3.0 support.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση εικονικού ελεγκτή USB xHCI αυτής της μηχανής. Ο ελεγκτής USB xHCI προσφέρει υποστήριξη για το USB 3.0.</translation>
     </message>
 </context>
 <context>
@@ -16449,75 +16454,75 @@
     </message>
     <message>
         <source>&amp;Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα</translation>
     </message>
     <message>
         <source>Filter name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Φίλτρου</translation>
     </message>
     <message>
         <source>&amp;Vendor ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναγνωριστικό Κατασκευαστή</translation>
     </message>
     <message>
         <source>Vendor ID filter. The exact match string format is &apos;XXXX&apos; where &apos;X&apos; is a hexadecimal digit. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο Αναγνωριστικού Κατασκευαστή. Η ακριβής μορφή σειμβολοσειράς είναι &apos;XXXX&apos; όπου &apos;X&apos; είναι ένα δεκαεξαεδικό ψηφίο. Μία κενή σειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>&amp;Product ID</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναγνωριστικό Προϊόντος</translation>
     </message>
     <message>
         <source>Product ID filter. The exact match string format is &apos;XXXX&apos; where &apos;X&apos; is a hexadecimal digit. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο Αναγνωριστικού Προϊόντος. Η ακριβής μορφή συμβολοσειράς είναι &apos;XXXX&apos; όπου &apos;Χ&apos; είναι ένα δεκαεξαεδικό ψηφίο. Μία κενή σειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>&amp;Revision</source>
-        <translation type="unfinished"></translation>
+        <translation>Αναθεώρηση</translation>
     </message>
     <message>
         <source>Revision number filter. The exact match string format is &apos;IIFF&apos; where &apos;I&apos; is a decimal digit of the integer part and &apos;F&apos; is a decimal digit of the fractional part. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός φίλτρου αναθεώρησης. Η ακριβής μορφή συμβολοσειράς είναι &apos;IIFF&apos; όπου &apos;I&apos; είναι ένα δεκαδικό ψηφίο του ακέραιου μέρους και &apos;F&apos; είναι ένα δεκαδικό ψηφίο του κλασματικού μέρους. Μία κενή συμβολοσειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>&amp;Manufacturer</source>
-        <translation type="unfinished"></translation>
+        <translation>Κατασκευαστής</translation>
     </message>
     <message>
         <source>Manufacturer filter as an exact match string. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο κατασκευαστή ως μία απολύτως ταιριαστή συμβολοσειρά. Μία κενή συμβολοσειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>Pro&amp;duct</source>
-        <translation type="unfinished"></translation>
+        <translation>Προϊόν</translation>
     </message>
     <message>
         <source>Product name filter as an exact match string. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο ονόματος προϊόντος ως μία απολύτως ταιριαστή συμβολοσειρά. Μία κενή συμβολοσειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>&amp;Serial No.</source>
-        <translation type="unfinished"></translation>
+        <translation>Σειριακός Αρθ.</translation>
     </message>
     <message>
         <source>Serial number filter as an exact match string. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο σειριακού αριθμού ως μία απολύτως ταιριαστή συμβολοσειρά. Μία κενή συμβολοσειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>Por&amp;t</source>
-        <translation type="unfinished"></translation>
+        <translation>Θύρα</translation>
     </message>
     <message>
         <source>Host USB port filter as an exact match string. An empty string will match any value.</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο θύρας USB οικοδεσπότη ως μία απολύτως ταιριαστή συμβολοσειρά. Μία κενή συμβολοσειρά θα ταιριάξει οποιαδήποτε τιμή.</translation>
     </message>
     <message>
         <source>R&amp;emote</source>
-        <translation type="unfinished"></translation>
+        <translation>Απομακρυσμένο</translation>
     </message>
     <message>
         <source>Coverage of the USB filter. Defines whether it&apos;s applied to devices attached locally to the host computer (No), to a VRDP client&apos;s computer (Yes), or both (Any).</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεκτασιμότητα του φίλτρου USB. Καθορίζει αν εφαρμόζεται σε συσκευές συνδεδεμένες τοπικά στον οικοδεσπότη (Όχι), σε έναν πελάτη VRDP (Ναι), ή και τα δύο (Όλοι).</translation>
     </message>
 </context>
 <context>
@@ -16598,31 +16603,31 @@
     </message>
     <message>
         <source>All USB filters of this machine. The checkbox to the left defines whether the particular filter is enabled or not. Use the context menu or buttons to the right to add or remove USB filters.</source>
-        <translation type="unfinished"></translation>
+        <translation>Όλα τα φίλτρα USB της μηχανής. Το πλαίσιο ελέγχου στα αριστερά καθορίζει αν το συγκεκριμένο φίλτρο είναι ενεργοποιημένο ή όχι. Χρησιμοποιείστε το σχετικό κατάλογο ή τα κουμπιά στα δεξιά για να προσθέσετε ή να αφαιρέσετε φίλτρα USB.</translation>
     </message>
     <message>
         <source>Add new USB filter with all fields initially set to empty strings. Note that such a filter will match any attached USB device.</source>
-        <translation type="unfinished"></translation>
+        <translation>Πρόσθεση ενός νέου φίλτρου USB με όλα τα πεδία αρχικά ορισμένα με κενές συμβολοσειρές. Σημειώστε οτι ένα τέτοιο φίλτρο θα πιάσει οποιαδήποτε συσκευή USB.</translation>
     </message>
     <message>
         <source>Add new USB filter with all fields set to the values of the selected USB device attached to the host PC</source>
-        <translation type="unfinished"></translation>
+        <translation>Πρόσθεση ενός νέου φίλτρου USB με όλα τα πεδία ορισμένα στις τιμές της επιλεγμένης συσκευής USB που συνδέεται με τον υπολογιστή του οικοδεσπότη</translation>
     </message>
     <message>
         <source>Edit selected USB filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Επεξεργασία του επιλεγμένου φίλτρου USB</translation>
     </message>
     <message>
         <source>Remove selected USB filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Αφαίρεση του επιλεγμένου φίλτρου USB</translation>
     </message>
     <message>
         <source>Move selected USB filter up</source>
-        <translation type="unfinished"></translation>
+        <translation>Μετακίνηση επιλεγμένου φίλτρου USB προς τα πάνω</translation>
     </message>
     <message>
         <source>Move selected USB filter down</source>
-        <translation type="unfinished"></translation>
+        <translation>Μετακίνηση επιλεγμένου φίλτρου USB προς τα κάτω</translation>
     </message>
 </context>
 <context>
@@ -16654,7 +16659,7 @@
     </message>
     <message>
         <source>Enable virtual USB controller of this machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενεργοποίηση του ελεγκτή εικονικού USB αυτής της μηχανής</translation>
     </message>
 </context>
 <context>
@@ -16662,67 +16667,67 @@
     <message>
         <source>Unknown device</source>
         <comment>USB device details</comment>
-        <translation type="unfinished">Άγνωστη συσκευή</translation>
+        <translation>Άγνωστη συσκευή</translation>
     </message>
     <message>
         <source>Unknown device %1:%2</source>
         <comment>USB device details</comment>
-        <translation type="unfinished">Άγνωστη συσκευή %1:%2</translation>
+        <translation>Άγνωστη συσκευή %1:%2</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Revision: %3&lt;/nobr&gt;</source>
         <comment>USB device tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Αναγνωριστικό προμηθευτή: %1&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Αναγνωριστικό προϊόντος: %2&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Έκδοση: %3&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Αναγνωριστικό προμηθευτή: %1&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Αναγνωριστικό προϊόντος: %2&lt;/nobr&gt;&lt;br&gt;&lt;nobr&gt;Έκδοση: %3&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;br&gt;&lt;nobr&gt;Serial No. %1&lt;/nobr&gt;</source>
         <comment>USB device tooltip</comment>
-        <translation type="unfinished">&lt;br&gt;&lt;nobr&gt;Σειριακό Νο. %1&lt;/nobr&gt;</translation>
+        <translation>&lt;br&gt;&lt;nobr&gt;Σειριακός Αριθμός %1&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;br&gt;&lt;nobr&gt;State: %1&lt;/nobr&gt;</source>
         <comment>USB device tooltip</comment>
-        <translation type="unfinished">&lt;br&gt;&lt;nobr&gt;Κατάσταση: %1&lt;/nobr&gt;</translation>
+        <translation>&lt;br&gt;&lt;nobr&gt;Κατάσταση: %1&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Vendor ID: %1&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Αναγνωριστικό προμηθευτή: %1&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Αναγνωριστικό προμηθευτή: %1&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Product ID: %2&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Αναγνωριστικό προϊόντος: %2&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Αναγνωριστικό προϊόντος: %2&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Revision: %3&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Έκδοση: %3&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Έκδοση: %3&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Product: %4&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Προϊόν: %4&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Προϊόν: %4&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Manufacturer: %5&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Κατασκευαστής: %5&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Κατασκευαστής: %5&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Serial No.: %1&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;br&gt;&lt;nobr&gt;Σειριακό Νο. %1&lt;/nobr&gt;</translation>
+        <translation>&lt;br&gt;&lt;nobr&gt;Σειριακός Αριθμός %1&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;Port: %1&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Θύρα: %1&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Θύρα: %1&lt;/nobr&gt;</translation>
     </message>
     <message>
         <source>&lt;nobr&gt;State: %1&lt;/nobr&gt;</source>
         <comment>USB filter tooltip</comment>
-        <translation type="unfinished">&lt;nobr&gt;Κατάσταση: %1&lt;/nobr&gt;</translation>
+        <translation>&lt;nobr&gt;Κατάσταση: %1&lt;/nobr&gt;</translation>
     </message>
 </context>
 <context>
@@ -16832,35 +16837,35 @@
     </message>
     <message>
         <source>Notify about stable updates to VirtualBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενημέρωση για ενημερώσεις σταθερών εκδόσεων του VirtualBox</translation>
     </message>
     <message>
         <source>Notify about all new VirtualBox releases</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενημέρωση για όλες τις νέες εκδόσεις του VirtualBox</translation>
     </message>
     <message>
         <source>Notify about all new VirtualBox releases and pre-release versions of VirtualBox</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενημέρωση για όλες τις νέες εκδόσεις και προ-εκδόσεις του VirtualBox</translation>
     </message>
     <message>
         <source>Notify about all new VirtualBox releases, pre-release versions and testing builds of VirtualBox.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενημέρωση για όλες τις νέες εκδόσεις, προ-εκδόσεις και δοκιμαστικές εκδόσεις του VirtualBox</translation>
     </message>
     <message>
         <source>Periodically connect to the VirtualBox website and check whether a new VirtualBox version is available</source>
-        <translation type="unfinished"></translation>
+        <translation>Περιοδική σύνδεση στην ιστοσελίδα του VirtualBox και έλεγχος για καινούρια έκδοση του VirtualBox</translation>
     </message>
     <message>
         <source>&amp;Once per</source>
-        <translation type="unfinished"></translation>
+        <translation>Κάθε</translation>
     </message>
     <message>
         <source>How often the new version check should be performed</source>
-        <translation type="unfinished"></translation>
+        <translation>Πόσο συχνά θα πρέπει να γίνεται έλεγχος νέας έκδοσης</translation>
     </message>
     <message>
         <source>Next Check</source>
-        <translation type="unfinished"></translation>
+        <translation>Επόμενος Έλεγχος</translation>
     </message>
 </context>
 <context>
@@ -16899,50 +16904,50 @@
     </message>
     <message>
         <source>User name cannot be an empty string</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα χρήστη δεν μπορεί να είναι κενό</translation>
     </message>
     <message>
         <source>User name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Έγκυρο όνομα Χρήστη</translation>
     </message>
     <message>
         <source>&amp;Confirm Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιβεβαιώστε το Συνθηματικό</translation>
     </message>
     <message>
         <source>U&amp;ser Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Χρήστη</translation>
     </message>
     <message>
         <source>User name for the guest operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα χρήστη για το λειτουργικό σύστημα επισκέπτη</translation>
     </message>
     <message>
         <source>Password for the guest operating system user account</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνθηματικό για τον λογαριασμό χρήστη του λειτουργικού συστήματος επισκέπτη</translation>
     </message>
     <message>
         <source>Password must match</source>
-        <translation type="unfinished"></translation>
+        <translation>Το συνθηματικό πρέπει να ταιριάζει</translation>
     </message>
 </context>
 <context>
     <name>UIVMActivityMonitorPaneContainer</name>
     <message>
         <source>Preferences</source>
-        <translation type="unfinished">Προτιμήσεις</translation>
+        <translation>Προτιμήσεις</translation>
     </message>
     <message>
         <source>Data Series 1 Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρώμα Σειράς Δεδομένων 1</translation>
     </message>
     <message>
         <source>Data Series 2 Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρώμα Σειράς Δεδομένων 2</translation>
     </message>
     <message>
         <source>Reset to Defaults</source>
-        <translation type="unfinished"></translation>
+        <translation>Επαναφορά στα Προεπιλεγμένα</translation>
     </message>
 </context>
 <context>
@@ -17045,31 +17050,31 @@
     </message>
     <message>
         <source>Lists all currently active virtual machines.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφανίζει λίστα με όλες τις ενεργές επί του παρόντος εικονικές μηχανές.</translation>
     </message>
     <message>
         <source>List All Virtual Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση λίστας με όλες τις Εικονικές Μηχανές</translation>
     </message>
     <message>
         <source>Show Cloud Virtual Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση Εικονικών Μηχανών Σύννεφου</translation>
     </message>
     <message>
         <source>Network Upload Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα Αποστολής Δικτύου</translation>
     </message>
     <message>
         <source>Network Download Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα Λήψης Δικτύου</translation>
     </message>
     <message>
         <source>Network Upload Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Απεσταλμένα Δικτύου Συνολικά</translation>
     </message>
     <message>
         <source>Network Download Total</source>
-        <translation type="unfinished"></translation>
+        <translation>Ληφθέντα Δικτύου Συνολικά</translation>
     </message>
 </context>
 <context>
@@ -17124,7 +17129,7 @@
     </message>
     <message>
         <source>&lt;p&gt;Sends the ACPI power button press event to the virtual machine.&lt;/p&gt;&lt;p&gt;Normally, the guest operating system running inside the virtual machine will detect this event and perform a clean shutdown procedure. This is a recommended way to turn off the virtual machine because all applications running inside it will get a chance to save their data and state.&lt;/p&gt;&lt;p&gt;If the machine doesn&apos;t respond to this action then the guest operating system may be misconfigured or doesn&apos;t understand ACPI power button events at all. In this case you should select the &lt;b&gt;Power off the machine&lt;/b&gt; action to stop virtual machine execution.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -17191,7 +17196,7 @@
     </message>
     <message>
         <source>Close dialog without saving</source>
-        <translation>Κλείσιμο διαλόγου χωρίς σώσιμο</translation>
+        <translation>Κλείσιμο διαλόγου χωρίς αποθήκευση</translation>
     </message>
     <message>
         <source>Guest Additions</source>
@@ -17412,49 +17417,49 @@
     </message>
     <message>
         <source>Displays the configuration details of the guest system</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφανίζει τις λεπτομέρειες ρυθμίσεων του συστήματος του επισκέπτη</translation>
     </message>
     <message>
         <source>Displays the runtime information of the guest system</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφανίζει τις πληροφορίες χρόνου εκτέλεσης του συστήματος του επισκέπτη</translation>
     </message>
     <message>
         <source>Change 1st Dataseries&apos; Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Αλλαγή Χρώματος Σειράς Δεδομένων 1</translation>
     </message>
     <message>
         <source>Change 2nd Dataseries&apos; Color</source>
-        <translation type="unfinished"></translation>
+        <translation>Αλλαγή Χρώματος Σειράς Δεδομένων 2</translation>
     </message>
     <message>
         <source>Disk IO</source>
-        <translation type="unfinished"></translation>
+        <translation>IO Δίσκου</translation>
     </message>
     <message>
         <source>Sec.</source>
         <comment>short from seconds</comment>
-        <translation type="unfinished">Δευτ.</translation>
+        <translation>Δευτ.</translation>
     </message>
     <message>
         <source>Min.</source>
         <comment>short from minutes</comment>
-        <translation type="unfinished"></translation>
+        <translation>Λεπ.</translation>
     </message>
     <message>
         <source>Download Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα Λήψης</translation>
     </message>
     <message>
         <source>Upload Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Ταχύτητα Αποστολής</translation>
     </message>
     <message>
         <source>Total Downloaded</source>
-        <translation type="unfinished"></translation>
+        <translation>Ληφθέντα Συνολικά</translation>
     </message>
     <message>
         <source>Total Uploaded</source>
-        <translation type="unfinished"></translation>
+        <translation>Απεσταλμένα Συνολικά</translation>
     </message>
 </context>
 <context>
@@ -17625,31 +17630,31 @@
     </message>
     <message>
         <source>Embed</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενσωμάτωση</translation>
     </message>
     <message>
         <source>Embed to manager window</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενσωμάτωση στο παράθυρο διαχείρισης</translation>
     </message>
     <message>
         <source>Embed to Manager Window</source>
-        <translation type="unfinished"></translation>
+        <translation>Ενσωμάτωση στο Παράθυρο Διαχείρισης</translation>
     </message>
     <message>
         <source>Find</source>
-        <translation type="unfinished"></translation>
+        <translation>Εύρεση</translation>
     </message>
     <message>
         <source>Filter</source>
-        <translation type="unfinished"></translation>
+        <translation>Φίλτρο</translation>
     </message>
     <message>
         <source>Bookmarks</source>
-        <translation type="unfinished">Σελιδοδείκτες</translation>
+        <translation>Σελιδοδείκτες</translation>
     </message>
     <message>
         <source>Preferences</source>
-        <translation type="unfinished">Προτιμήσεις</translation>
+        <translation>Προτιμήσεις</translation>
     </message>
 </context>
 <context>
@@ -17664,11 +17669,11 @@
     </message>
     <message>
         <source>V&amp;RDP Authentication Library</source>
-        <translation type="unfinished"></translation>
+        <translation>Βιβλιοθήκη πιστοποίησης VRDP</translation>
     </message>
     <message>
         <source>Path to the library that provides authentication for Remote Display (VRDP) clients</source>
-        <translation type="unfinished"></translation>
+        <translation>Διαδρομή της βιβλιοθήκης που παρέχει πιστοποίηση για τους πελάτες Απομακρυσμένης Οθόνης (VRDP)</translation>
     </message>
 </context>
 <context>
@@ -17719,51 +17724,51 @@
     </message>
     <message>
         <source>VM will act as a Remote Desktop Protocol (RDP) server, allowing remote clients to connect and operate the VM (when it is running) using a standard RDP client</source>
-        <translation type="unfinished"></translation>
+        <translation>Η ΕΜ θα ενεργεί σαν Διακομιστής Απομακρυσμένης Επιφάνειας (RDP), επιτρέποντας σε απομακρυσμένους πελάτες να συνδεθούν και να διαχειριστούν την ΕΜ (όταν τρέχει) χρησιμοποιώντας κάποιο τυποποιημένο πρόγραμμα RDP</translation>
     </message>
     <message>
         <source>Server &amp;Port</source>
-        <translation type="unfinished"></translation>
+        <translation>Θύρα Διακομιστή</translation>
     </message>
     <message>
         <source>VRDP server port number. 3389 is the standard port for RDP.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός θύρας διακομιστή VRDP. 3389 είναι η δεδομένη θύρα για RDP.</translation>
     </message>
     <message>
         <source>&amp;Security Method</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέθοδος Ασφαλείας</translation>
     </message>
     <message>
         <source>VRDP security method</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέθοδος ασφαλείας VRDP</translation>
     </message>
     <message>
         <source>Authentication &amp;Method</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέθοδος Πιστοποίησης</translation>
     </message>
     <message>
         <source>VRDP authentication method</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέθοδος πιστοποίησης VRDP</translation>
     </message>
     <message>
         <source>Authentication &amp;Timeout</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρονικό Όριο Πιστοποίησης</translation>
     </message>
     <message>
         <source>Timeout for guest authentication, in milliseconds</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρονικό Όριο πιστοποίησης του επισκέπτη, σε χιλιοστά του δευτερολέπτου</translation>
     </message>
     <message>
         <source>Features</source>
-        <translation type="unfinished">Χαρακτηριστικά</translation>
+        <translation>Χαρακτηριστικά</translation>
     </message>
     <message>
         <source>&amp;Multiple Connections</source>
-        <translation type="unfinished"></translation>
+        <translation>Πολλαπλές Συνδέσεις</translation>
     </message>
     <message>
         <source>Multiple simultaneous connections to the VM will be permitted</source>
-        <translation type="unfinished"></translation>
+        <translation>Πολλαπλές ταυτόχρονες συνδέσεις προς την ΕΜ θα επιτρέπονται</translation>
     </message>
 </context>
 <context>
@@ -17794,19 +17799,19 @@
     </message>
     <message>
         <source>Video &amp;Memory</source>
-        <translation type="unfinished"></translation>
+        <translation>Μνήμη Γραφικών</translation>
     </message>
     <message>
         <source>Amount of video memory the virtual machine has</source>
-        <translation type="unfinished"></translation>
+        <translation>Ποσό μνήμης γραφικών που έχει η εικονική μηχανή</translation>
     </message>
     <message>
         <source>Minimum video memory size</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστο μέγεθος μνήμης γραφικών</translation>
     </message>
     <message>
         <source>Maximum video memory size</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστο μέγεθος μνήμης γραφικών</translation>
     </message>
 </context>
 <context>
@@ -17875,19 +17880,19 @@
     </message>
     <message>
         <source>&amp;Number of CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός CPU</translation>
     </message>
     <message>
         <source>Number of virtual CPUs in this VM</source>
-        <translation type="unfinished"></translation>
+        <translation>Αριθμός εικονικών CPU σε αυτή την ΕΜ</translation>
     </message>
     <message>
         <source>Minimum number of virtual CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>Ελάχιστος αριθμός εικονικών CPU</translation>
     </message>
     <message>
         <source>Maximum number of virtual CPUs</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγιστος αριθμός εικονικών CPU</translation>
     </message>
 </context>
 <context>
@@ -18028,43 +18033,45 @@
     </message>
     <message>
         <source>Has Removed Child</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>(δημιούργημα, αποτέλεσμα = όρος πληροφορικής)</translatorcomment>
+        <translation>Έχει αφαιρέσει το Τέκνο</translation>
     </message>
     <message>
         <source>VISO Browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοηγός VISO</translation>
     </message>
     <message>
         <source>Child/children removed</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>(Αποτελέσματα, δημιουργήματα = όρος πληροφορικής)</translatorcomment>
+        <translation>Τέκνο/τέκνα έχουν αφαιρεθεί</translation>
     </message>
     <message>
         <source>Host Browser</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλοηγός Οικοδεσπότη</translation>
     </message>
     <message>
         <source>The list of custom options delimited with &apos;;&apos;.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η λίστα των χειροποίητων ρυθμίσεων οριοθετημένη με &apos;;&apos;.</translation>
     </message>
     <message>
         <source>Dialog Settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογές Διαλόγου</translation>
     </message>
     <message>
         <source>VISO Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογές VISO</translation>
     </message>
     <message>
         <source>Select a VISO file to load</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ενός αρχείου VISO προς φόρτωση</translation>
     </message>
     <message>
         <source>Select a file to save VISO content to</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή αρχείου για αποθήκευση του περιεχομένου VISO</translation>
     </message>
     <message>
         <source>&amp;Save and Close</source>
-        <translation type="unfinished"></translation>
+        <translation>Αποθήκευση και Κλείσιμο</translation>
     </message>
 </context>
 <context>
@@ -18079,11 +18086,11 @@
     </message>
     <message>
         <source>&amp;Appearance</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση</translation>
     </message>
     <message>
         <source>Virtual machine visual appearance. If machine is running it will be applied as soon as possible, otherwise desired one will be defined.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η οπτική εμφάνιση της εικονικής μηχανής. Αν η μηχανή την εκτελεί θα εφαρμοστεί το συντομότερο δυνατό, αλλιώς μία επιθυμητή θα καθοριστεί.</translation>
     </message>
 </context>
 <context>
@@ -18141,31 +18148,31 @@
     </message>
     <message>
         <source>&amp;Provider:</source>
-        <translation type="unfinished">Πάροχος:</translation>
+        <translation>Πάροχος</translation>
     </message>
     <message>
         <source>Selects cloud service provider.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή παρόχου υπηρεσιών σύννεφου.</translation>
     </message>
     <message>
         <source>P&amp;rofile:</source>
-        <translation type="unfinished">Προφίλ:</translation>
+        <translation>Προφίλ:</translation>
     </message>
     <message>
         <source>Selects cloud profile.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή προφίλ σύννεφου.</translation>
     </message>
     <message>
         <source>Cloud Profile Manager</source>
-        <translation type="unfinished">Διαχειριστής Προφίλ Σύννεφου</translation>
+        <translation>Διαχειριστής Προφίλ Σύννεφου</translation>
     </message>
     <message>
         <source>Opens cloud profile manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανοίγει τον διαχειριστή προφίλ σύννεφου...</translation>
     </message>
     <message>
         <source>Lists all the cloud VM instances.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση λίστας όλων των συμβάντων ΕΜ σύννεφου.</translation>
     </message>
 </context>
 <context>
@@ -18362,7 +18369,7 @@
         <translation>Πολιτική Διευθύνσεων MAC:</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for cloning:</source>
+        <source>Determines MAC address policy for clonning:</source>
         <translation type="vanished">Προσδιορίζει την πολιτική διευθύνσεων MAC για κλωνοποίηση:</translation>
     </message>
     <message>
@@ -18395,70 +18402,74 @@
     </message>
     <message>
         <source>Clone name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Έγκυρο όνομα Κλώνου</translation>
     </message>
     <message>
         <source>Path is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή είναι έγκυρη</translation>
     </message>
     <message>
         <source>Clone name is not unique</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα κλώνου δεν είναι μοναδικό</translation>
     </message>
     <message>
         <source>&amp;Full Clone</source>
-        <translation type="unfinished"></translation>
+        <translation>Πλήρης Κλώνος</translation>
     </message>
     <message>
         <source>&amp;Linked Clone</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνδεδεμένος Κλώνος</translation>
     </message>
     <message>
         <source>Current &amp;Machine State</source>
-        <translation type="unfinished"></translation>
+        <translation>Τρέχουσα Κατάσταση Μηχανής</translation>
     </message>
     <message>
         <source>Current &amp;Snapshot Tree Branch</source>
-        <translation type="unfinished"></translation>
+        <translation>Τρέχον Παρακλάδι Δέντρου Στιγμιοτύπων</translation>
     </message>
     <message>
         <source>&lt;p&gt;Please choose the type of clone you wish to create.&lt;/p&gt;&lt;p&gt;If you choose &lt;b&gt;Full Clone&lt;/b&gt;, an exact copy (including all virtual hard disk files) of the original virtual machine will be created.&lt;/p&gt;&lt;p&gt;If you choose &lt;b&gt;Linked Clone&lt;/b&gt;, a new machine will be created, but the virtual hard disk files will be tied to the virtual hard disk files of original machine and you will not be able to move the new virtual machine to a different computer without moving the original as well.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Παρακαλώ επιλέξτε τον τύπο του κλώνου που θέλετε να δημιουργήσετε.&lt;/p&gt;&lt;p&gt;Αν επιλέξετε &lt;b&gt;Πλήρης Κλώνος&lt;/b&gt;, θα δημιουργηθεί ένα ακριβές αντίγραφο της αρχικής εικονικής μηχανής (συμπεριλαμβανομένων όλων των αρχείων των εικονικών σκληρών δίσκων).&lt;/p&gt;&lt;p&gt;Αν επιλέξετε &lt;b&gt;Συνδεδεμένος Κλώνος&lt;/b&gt;, θα δημιουργηθεί μία καινούρια μηχανή, αλλά οι εικονικοί σκληροί δίσκοι θα είναι συνδεδεμένοι με τα αρχεία των εικονικών σκληρών δίσκων της αρχικής μηχανής και δεν θα μπορείτε να μετακινήσετε τη νέα εικονική μηχανή σε άλλο υπολογιστή χωρίς να μετακινήσετε ταυτόχρονα και τα αρχικά αρχεία.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;If you create a &lt;b&gt;Linked Clone&lt;/b&gt; then a new snapshot will be created in the original virtual machine as part of the cloning process.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αν δημιουργήσετε ένα &lt;b&gt;Συνδεδεμένο Κλώνο&lt;/b&gt; τότε θα δημιουργηθεί ένα καινούριο στιγμιότυπο στην αρχική εικονική μηχανή ως μέρος της διαδικασίας κλωνοποίησης.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;If you choose &lt;b&gt;Current Machine State&lt;/b&gt;, the new machine will reflect the current state of the original machine and will have no snapshots.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αν επιλέξετε &lt;b&gt;Τρέχουσα Κατάσταση Μηχανής&lt;/b&gt;, η καινούρια μηχανή θα αντικατοπτρίζει την τρέχουσα κατάσταση της αρχικής μηχανής και δεν θα έχει στιγμιότυπα.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>&lt;p&gt;If you choose &lt;b&gt;Current Snapshot Tree Branch&lt;/b&gt;, the new machine will reflect the current state of the original machine and will have matching snapshots for all snapshots in the tree branch starting at the current state in the original machine.&lt;/p&gt;</source>
-        <translation type="unfinished"></translation>
+        <translation>&lt;p&gt;Αν επιλέξετε &lt;b&gt;Τρέχουσα Κατάσταση Δέντρου Στιγμιοτύπων&lt;/b&gt;, η καινούρια μηχανή θα αντικατοπτρίζει την τρέχουσα κατάσταση της αρχικής μηχανής και θα έχει ταιριαστά στιγμιότυπα για όλα τα στιγμιότυπα του δέντρου ξεκινώντας από την τρέχουσα κατάσταση στην αρχική μηχανή.&lt;/p&gt;</translation>
     </message>
     <message>
         <source>New Machine Name and Path</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα και Διαδρομή Νέας Μηχανής</translation>
     </message>
     <message>
         <source>Clone Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος Κλώνου</translation>
     </message>
     <message>
         <source>Additional Options</source>
         <translation type="obsolete">Πρόσθετες Επιλογές</translation>
     </message>
     <message>
-        <source>Determines MAC address policy for cloning.</source>
-        <translation type="unfinished"></translation>
+        <source>Determines MAC address policy for clonning.</source>
+        <translation type="vanished">Προσδιορίζει την πολιτική διευθύνσεων MAC για κλωνοποίηση.</translation>
     </message>
     <message>
         <source>OS Installation Options:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις Εγκατάστασης ΛΣ:</translation>
     </message>
     <message>
         <source>OS Installation Options</source>
+        <translation>Ρυθμίσεις Εγκατάστασης ΛΣ</translation>
+    </message>
+    <message>
+        <source>Determines MAC address policy for cloning.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -18650,19 +18661,19 @@
     </message>
     <message>
         <source>Contains a list of Virtual Machines</source>
-        <translation type="unfinished"></translation>
+        <translation>Περιέχει ένα κατάλογο με Εικονικές Μηχανές</translation>
     </message>
     <message>
         <source>Selects cloud profile.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή προφίλ σύννεφου.</translation>
     </message>
     <message>
         <source>Cloud Profile Manager</source>
-        <translation type="unfinished">Διαχειριστής Προφίλ Σύννεφου</translation>
+        <translation>Διαχειριστής Προφίλ Σύννεφου</translation>
     </message>
     <message>
         <source>Opens cloud profile manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανοίγει τον διαχειριστή προφίλ σύννεφου...</translation>
     </message>
 </context>
 <context>
@@ -18829,23 +18840,23 @@
     </message>
     <message>
         <source>Selects cloud profile.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή προφίλ σύννεφου.</translation>
     </message>
     <message>
         <source>Cloud Profile Manager</source>
-        <translation type="unfinished">Διαχειριστής Προφίλ Σύννεφου</translation>
+        <translation>Διαχειριστής Προφίλ Σύννεφου</translation>
     </message>
     <message>
         <source>Opens cloud profile manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανοίγει τον διαχειριστή προφίλ σύννεφου...</translation>
     </message>
     <message>
         <source>Holds the path to the base virtual machine folder. This folder is used when creating new virtual machine.</source>
-        <translation type="unfinished"></translation>
+        <translation>Δείχνει τη διαδρομή για το βασικό φάκελο εικονικής μηχανής. Αυτός ο φάκελος χρησιμοποιείται κατά τη δημιουργία νέας εικονικής μηχανής.</translation>
     </message>
     <message>
         <source>&amp;Import Hard Drives as VDI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισαγωγή Σκληρών Δίσκων ως VDI</translation>
     </message>
 </context>
 <context>
@@ -18916,43 +18927,43 @@
     </message>
     <message>
         <source>&amp;Provider:</source>
-        <translation type="unfinished">Πάροχος:</translation>
+        <translation>Πάροχος:</translation>
     </message>
     <message>
         <source>Selects cloud service provider.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή παρόχου υπηρεσιών σύννεφου.</translation>
     </message>
     <message>
         <source>P&amp;rofile:</source>
-        <translation type="unfinished">Προφίλ:</translation>
+        <translation>Προφίλ:</translation>
     </message>
     <message>
         <source>Selects cloud profile.</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή προφίλ σύννεφου.</translation>
     </message>
     <message>
         <source>Cloud Profile Manager</source>
-        <translation type="unfinished">Διαχειριστής Προφίλ Σύννεφου</translation>
+        <translation>Διαχειριστής Προφίλ Σύννεφου</translation>
     </message>
     <message>
         <source>Opens cloud profile manager...</source>
-        <translation type="unfinished"></translation>
+        <translation>Ανοίγει τον διαχειριστή προφίλ σύννεφου...</translation>
     </message>
     <message>
         <source>Lists all the source images or boot volumes.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση λίστας όλων των τόμων εκκίνησης ή πηγών εικόνας.</translation>
     </message>
     <message>
         <source>Lists all the cloud VM properties.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφάνιση λίστας όλων των ιδιοτήτων ΕΜ σύννεφου.</translation>
     </message>
     <message>
         <source>&amp;Settings:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις:</translation>
     </message>
     <message>
         <source>Cloud virtual machine settings</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις εικονικής μηχανής σύννεφου</translation>
     </message>
 </context>
 <context>
@@ -18999,23 +19010,23 @@
     </message>
     <message>
         <source>copy</source>
-        <translation type="unfinished">αντιγραφή</translation>
+        <translation>αντιγραφή</translation>
     </message>
     <message>
         <source>Copy Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Αντιγραφή Εικονικού Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>Virtual hard disk file type</source>
-        <translation type="unfinished"></translation>
+        <translation>Τύπος αρχείου εικονικού σκληρού δίσκου</translation>
     </message>
     <message>
         <source>Location and size of the disk image</source>
-        <translation type="unfinished">Τοποθεσία και μέγεθος της εικόνας δίσκου</translation>
+        <translation>Τοποθεσία και μέγεθος της εικόνας δίσκου</translation>
     </message>
     <message>
         <source>Hard Disk File &amp;Type and Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Αρχείο Σκληρού Δίσκου Τύπος και Διαμόρφωση</translation>
     </message>
 </context>
 <context>
@@ -19326,219 +19337,231 @@
     </message>
     <message>
         <source>Invalid guest additions installation media</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο μέσο εγκατάστασης προσθηκών επισκέπτη</translation>
     </message>
     <message>
         <source>Guest additions installation media is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Έγκυρο μέσο εγκατάστασης προσθηκών επισκέπτη</translation>
     </message>
     <message>
         <source>File path is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή αρχείου είναι έγκυρη</translation>
     </message>
     <message>
         <source>Lists chosen configuration of the guest system.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εμφανίζει τη λίστα επιλεγμένης ρύθμισης του συστήματος του επισκέπτη.</translation>
     </message>
     <message>
         <source>&amp;Product Key</source>
-        <translation type="unfinished"></translation>
+        <translation>Κλειδί Προϊόντος</translation>
     </message>
     <message>
         <source>The product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Το κλειδί προϊόντος</translation>
     </message>
     <message>
         <source>Start the virtual machine without a GUI</source>
-        <translation type="unfinished"></translation>
+        <translation>Εκκίνηση της εικονικής μηχανής χωρίς Γραφικό Περιβάλλον</translation>
     </message>
     <message>
         <source>User Name and Password</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Χρήστη και Συνθηματικό</translation>
     </message>
     <message>
         <source>The ISO file to install the VirtualBox Guest Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>Το αρχείο ISO για την εγκατάσταση των Προσθηκών Επισκέπτη του VirtualBox</translation>
     </message>
     <message>
         <source>Guest &amp;Additions ISO Image:</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικόνα ISO Προσθηκών Επισκέπτη:</translation>
     </message>
     <message>
         <source>Install Gu&amp;est Additions</source>
-        <translation type="unfinished"></translation>
+        <translation>Εγκατάσταση Προσθηκών Επισκέπτη</translation>
     </message>
     <message>
         <source>Install the VirtualBox Guest Additions on the guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Εγκατάσταση των Προσθηκών Επισκέπτη του VirtualBox στο ΛΣ του επισκέπτη</translation>
     </message>
     <message>
         <source>OS Installation Options</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρυθμίσεις Εγκατάστασης ΛΣ</translation>
     </message>
     <message>
         <source>&amp;Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση EFI</translation>
     </message>
     <message>
         <source>Use Extended Firmware Interface (EFI). This is required to boot some OSs.</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση Εκτεταμένης Διασύνδεσης Λογισμικού (EFI). Αυτό απαιτείται για την εκκίνηση ορισμένων ΛΣ.</translation>
     </message>
     <message>
         <source>New Virtual Machine</source>
-        <translation type="unfinished"></translation>
+        <translation>Νέα Εικονική Μηχανή</translation>
     </message>
     <message>
         <source>Virtual machine name and operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα και Λειτουργικό Σύστημα Εικονικής Μηχανής</translation>
     </message>
     <message>
         <source>The ISO image is used to install the operating system on the VM.</source>
-        <translation type="unfinished"></translation>
+        <translation>Η εικόνα ISO χρησιμοποιείται για να εγκαταστήσει το λειτουργικό σύστημα στην ΕΜ.</translation>
     </message>
     <message>
         <source>&amp;Proceed with Unattended Installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Συνέχιση με Μη-Καθοδηγούμενη Εγκατάσταση</translation>
+    </message>
+    <message>
+        <source>The ISO is attached to the VM, so you can install the OS manually</source>
+        <translation type="vanished">Το ISO έχει συνδεθεί στην ΕΜ, ώστε να εγκαταστήσετε το ΛΣ χειροποίητα</translation>
     </message>
     <message>
         <source>VirtualBox can&apos;t install an OS from the selected ISO. OS cannot be determined, the guest OS will need to be installed manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox δεν μπορεί να εγκαταστήσει ένα ΛΣ από το επιλεγμένο ISO. Το ΛΣ δεν μπορεί να προσδιοριστεί, το ΛΣ επισκέπτη θα χρειαστεί να  εγκατασταθεί χειροποίητα.</translation>
     </message>
     <message>
         <source>This OS can&apos;t be installed using Unattended Installation. The installation needs to be done manually.</source>
-        <translation type="unfinished"></translation>
+        <translation>Αυτό το ΛΣ δεν μπορεί να εγκατασταθεί με χρήση Μη-Καθοδηγούμενης εγκατάστασης. Η εγκατάσταση πρέπει να γίνει χειροκίνητα.</translation>
     </message>
     <message>
         <source>VirtualBox will install the OS using an unattended installation when the VM is created. Supply the required information in the following steps.</source>
-        <translation type="unfinished"></translation>
+        <translation>Το VirtualBox θα εγκαταστήσει το ΛΣ χρησιμοποιώντας μία μη-καθοδηγούμενη εγκατάσταση όταν η ΕΜ δημιουργείται. Δώστε τις απαιτούμενες πληροφορίες στα επόμενα βήματα.</translation>
     </message>
     <message>
         <source>Virtual machine name cannot be empty</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα της εικονικής μηχανής δεν μπορεί να είναι κενό</translation>
     </message>
     <message>
         <source>Virtual machine name is valid</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα της εικονικής μηχανής είναι έγκυρο</translation>
     </message>
     <message>
         <source>Virtual machine path is not unique</source>
-        <translation type="unfinished"></translation>
+        <translation>Η διαδρομή της εικονικής μηχανής δεν είναι μοναδική</translation>
     </message>
     <message>
         <source>Set up unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρύθμιση μη-καθοδηγούμενης εγκατάστασης ΛΣ επισκέπτη</translation>
     </message>
     <message>
         <source>Enter the information that will be required when the OS is installed.</source>
-        <translation type="unfinished"></translation>
+        <translation>Εισάγετε τις πληροφορίες που απαιτούνται κατά την εγκατάσταση του ΛΣ.</translation>
     </message>
     <message>
         <source>Specify virtual hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορίστε εικονικό υλικό</translation>
     </message>
     <message>
         <source>Specify the VM&apos;s hardware. Resources allocated to the VM will not be available to the host when the VM is running.</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορίστε το υλικό της ΕΜ. Πηγές εκχωρημένες στην ΕΜ δεν θα είναι διαθέσιμες στον οικοδεσπότη όταν εκτελείται η ΕΜ.</translation>
     </message>
     <message>
         <source>Virtual machine name and &amp;operating system</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα και λειτουργικό σύστημα εικονικής μηχανής</translation>
     </message>
     <message>
         <source>Set up &amp;unattended guest OS installation</source>
-        <translation type="unfinished"></translation>
+        <translation>Ρύθμιση μη-καθοδηγούμενης εγκατάστασης ΛΣ επισκέπτη</translation>
     </message>
     <message>
         <source>Specify virtual hard dis&amp;k</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορίστε εικονικό σκληρό δίσκο</translation>
     </message>
     <message>
         <source>Specify virtual h&amp;ardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Καθορίστε εικονικό υλικό</translation>
     </message>
     <message>
         <source>C&amp;reate Virtual Machine Without a Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Δημιουργία Εικονικής Μηχανής Χωρίς έναν Εικονικό Σκληρό Δίσκο</translation>
     </message>
     <message>
         <source>&amp;Create a New Virtual Hard Disk</source>
-        <translation type="unfinished"></translation>
+        <translation>Δημιουργία ενός Νέου Εικονικού Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File...</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ενός Αρχείου Εικονικού Σκληρού Δίσκου...</translation>
     </message>
     <message>
         <source>Select a Virtual Hard Disk File</source>
-        <translation type="unfinished"></translation>
+        <translation>Επιλογή ενός Αρχείου Εικονικού Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>Hard Disk File &amp;Type and Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Αρχείο Σκληρού Δίσκου Τύπος και Διαμόρφωση</translation>
     </message>
     <message>
         <source>Invalid user name and/or password</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο όνομα χρήστη ή/και συνθηματικό</translation>
     </message>
     <message>
         <source>Invalid host name or domain name</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο όνομα διακομιστή ή ονόματος τομέα</translation>
     </message>
     <message>
         <source>Invalid product key</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη έγκυρο κλειδί προϊόντος</translation>
     </message>
     <message>
         <source>Virtual machine name is invalid (possibly empty)</source>
-        <translation type="unfinished"></translation>
+        <translation>Το όνομα της εικονικής μηχανής δεν είναι έγκυρο (πιθανώς κενό)</translation>
+    </message>
+    <message>
+        <source>Virtual` machine path is not unique</source>
+        <translation type="vanished">Η διαδρομή της εικονικής μηχανής δεν είναι μοναδική</translation>
     </message>
     <message>
         <source>Virtual Machine Name and Operating System</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα και Λειτουργικό Σύστημα Εικονικής Μηχανής</translation>
     </message>
     <message>
         <source>VM Name</source>
-        <translation type="unfinished">Όνομα ΕΜ</translation>
+        <translation>Όνομα ΕΜ</translation>
     </message>
     <message>
         <source>VM Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>Φάκελος ΕΜ</translation>
+    </message>
+    <message>
+        <source>Proceed with Unattended Install</source>
+        <translation type="vanished">Συνέχιση με Μη-Καθοδηγούμενη Εγκατάσταση</translation>
     </message>
     <message>
         <source>Unattended Installation of Guest OS</source>
-        <translation type="unfinished"></translation>
+        <translation>Μη-Καθοδηγούμενη Εγκατάσταση του ΛΣ του Επισκέπτη</translation>
     </message>
     <message>
         <source>User Name</source>
-        <translation type="unfinished">Όνομα χρήστη</translation>
+        <translation>Όνομα Χρήστη</translation>
     </message>
     <message>
         <source>Host Name/Domain Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Όνομα Όνομα/Τομέας Οικοδεσπότη</translation>
     </message>
     <message>
         <source>Guest Additions ISO Image</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικόνα ISO Προσθηκών Επισκέπτη</translation>
     </message>
     <message>
         <source>Virtual Hardware</source>
-        <translation type="unfinished"></translation>
+        <translation>Εικονικό Υλικό</translation>
     </message>
     <message>
         <source>Processors</source>
-        <translation type="unfinished">Επεξεργαστές</translation>
+        <translation>Επεξεργαστές</translation>
     </message>
     <message>
         <source>Use EFI</source>
-        <translation type="unfinished"></translation>
+        <translation>Χρήση EFI</translation>
     </message>
     <message>
         <source>Hard Disk Size</source>
-        <translation type="unfinished"></translation>
+        <translation>Μέγεθος Σκληρού Δίσκου</translation>
     </message>
     <message>
         <source>A new VM will be created with the following configuration.</source>
-        <translation type="unfinished"></translation>
+        <translation>Μία νέα ΕΜ θα δημιουργηθεί με τις ακόλουθες ρυθμίσεις.</translation>
     </message>
     <message>
         <source>The ISO is attached to the VM, so you can install the OS automatically</source>
