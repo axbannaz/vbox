@@ -2061,7 +2061,7 @@ void UIMessageCenter::sltShowHelpWebDialog()
 
 void UIMessageCenter::sltShowBugTracker()
 {
-    uiCommon().openURL("https://www.virtualbox.org/wiki/Bugtracker");
+    uiCommon().openURL("https://github.com/VirtualBox/virtualbox/issues");
 }
 
 void UIMessageCenter::sltShowForums()
