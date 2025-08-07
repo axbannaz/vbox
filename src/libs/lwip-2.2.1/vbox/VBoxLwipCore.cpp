@@ -201,7 +201,6 @@ void vboxLwipCoreFinalize(PFNRT1 pfnCallback, void *pvCallbackArg)
              * is tcpip_msg::sem, but it seems to be unused and may be
              * gone in future versions of lwip.
              */
-#if 0
             struct tcpip_msg *msg = (struct tcpip_msg *)memp_malloc(MEMP_TCPIP_MSG_API);
             if (msg)
             {
@@ -210,13 +209,12 @@ void vboxLwipCoreFinalize(PFNRT1 pfnCallback, void *pvCallbackArg)
                 msg->msg.cb.function = lwipCoreFiniDone;
                 msg->msg.cb.ctx = &callback;
 
-                lwipRc = tcpip_callbackmsg((struct tcpip_callback_msg *)msg);
+                lwipRc = tcpip_callbackmsg_trycallback((struct tcpip_callback_msg *)msg);
                 if (lwipRc != ERR_OK)
                     LogFlowFunc(("tcpip_callback_msg error %d\n", lwipRc));
             }
             else
                 LogFlowFunc(("memp_malloc no memory\n"));
-#endif
         }
         else
         {

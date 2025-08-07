@@ -154,8 +154,19 @@ tcpip_thread(void *arg)
       LWIP_ASSERT("tcpip_thread: invalid message", 0);
       continue;
     }
+#ifdef VBOX
+    int fTerminate = msg->type == TCPIP_MSG_CALLBACK_TERMINATE ? 1 : 0;
+#endif
     tcpip_thread_handle_msg(msg);
+#ifdef VBOX
+    if (fTerminate)
+        break;
+#endif
   }
+#ifdef VBOX
+  /* XXX: TODO: lwip cleanup? */
+  UNLOCK_TCPIP_CORE();
+#endif
 }
 
 /* Handle a single tcpip_msg
@@ -205,6 +216,9 @@ tcpip_thread_handle_msg(struct tcpip_msg *msg)
       break;
 #endif /* LWIP_TCPIP_TIMEOUT && LWIP_TIMERS */
 
+#ifdef VBOX
+    case TCPIP_MSG_CALLBACK_TERMINATE:
+#endif
     case TCPIP_MSG_CALLBACK:
       LWIP_DEBUGF(TCPIP_DEBUG, ("tcpip_thread: CALLBACK %p\n", (void *)msg));
       msg->msg.cb.function(msg->msg.cb.ctx);

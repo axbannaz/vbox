@@ -125,6 +125,9 @@ enum tcpip_msg_type {
   TCPIP_MSG_CALLBACK,
   TCPIP_MSG_CALLBACK_STATIC,
   TCPIP_MSG_CALLBACK_STATIC_WAIT
+#ifdef VBOX
+  ,TCPIP_MSG_CALLBACK_TERMINATE
+#endif
 };
 
 struct tcpip_msg {
