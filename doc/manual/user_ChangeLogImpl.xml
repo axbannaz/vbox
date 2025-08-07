@@ -73,205 +73,7 @@ Rules for adding a changelog entry to make them look more uniform:
                            So, we use chapter and xpointer="xpointer(/chapter/)" with xi:include. -->
   <sect1>
 
-    <title>Version X.Y.Z (date tbd)</title>
-
-    <para>This is a maintenance release. The following items were fixed and/or
-      added:</para>
-
-    <itemizedlist>
-
-      <listitem>
-        <para></para>
-      </listitem>
-
-    </itemizedlist>
-  </sect1>
-
-  <sect1>
-
-    <title>Version 7.2.0_RC1 (2025-07-31)</title>
-
-    <para>This is a maintenance release. The following items were fixed or
-      added:</para>
-
-    <itemizedlist>
-
-      <listitem>
-        <para>VMM: Fixed issue when X86_64-v3 features were not
-          passed to the guest (github:gh-36)</para>
-      </listitem>
-
-      <listitem>
-        <para>VMM: Fixed issue when VM was not able to start when using Hyper-V
-          on older Intel CPUs (github:gh-85)</para>
-      </listitem>
-
-      <listitem>
-        <para>GUI: Fixed a bug in clone VM wizard which made impossible to include
-          snapshots in clone result (github:GH-59)</para>
-      </listitem>
-
-      <listitem>
-        <para>Audio: Fixed crash in rare circumstances (github:gh-72)</para>
-      </listitem>
-
-      <listitem>
-        <para>NAT: Fixed possible crash in rare circumstances when no nameservers
-          could be detected in the host system</para>
-      </listitem>
-
-      <listitem>
-        <para>Main/Unattended: Added explicit unattended installation support for Oracle Linux 10</para>
-      </listitem>
-
-      <listitem>
-        <para>Main: Fixed issue when OVF/OVA import resulted in a broken VM on Arm (bug #22370)</para>
-      </listitem>
-
-      <listitem>
-        <para>Main: Fixed issue when exporting a VM which had an inaccessible
-          disk resulted in crash</para>
-      </listitem>
-
-      <listitem>
-        <para>Windows Host: Added improvements in Windows drivers installation</para>
-      </listitem>
-
-      <listitem>
-        <para>Linux Guest Additions: Fixed issue when autorun installer was not automatically
-          starting on Additions ISO image insert for Oracle Linux 10 and RHEL 10 guests</para>
-      </listitem>
-
-      <listitem>
-        <para>EFI: Fixed macOS kernel logging over serial port (github:gh-82)</para>
-      </listitem>
-
-    </itemizedlist>
-  </sect1>
-
-  <sect1>
-
-    <title>Version 7.2.0_BETA2 (2025-06-26)</title>
-
-    <para>This is a maintenance release. The following items were fixed or
-      added:</para>
-
-    <itemizedlist>
-
-      <listitem>
-        <para>VMM: Improved x86_64 and Arm CPU feature reporting when using
-          Windows Hyper-V as the virtualization engine</para>
-      </listitem>
-
-      <listitem>
-        <para>VMM: Added xsave/xrestor instruction handling when using
-          Windows/x86_64 Hyper-V as the virtualization engine, offering the
-          x86_64-v3 instruction set extensions (including AVX and AVX2) on
-          recent CPUs</para>
-      </listitem>
-
-      <listitem>
-        <para>VMM/HM: Fixed Nested Virtualization feature on Intel CPUs</para>
-      </listitem>
-
-      <listitem>
-        <para>GUI: Polished Preferences and Settings pages, NLS fixing</para>
-      </listitem>
-
-      <listitem>
-        <para>GUI: Improved handling of keyboard LEDs in the Soft Keyboard</para>
-      </listitem>
-
-      <listitem>
-        <para>GUI: Removed IO-APIC from Arm VM settings</para>
-      </listitem>
-
-      <listitem>
-        <para>Graphics: Avoid assertion when guest tries to use VMSVGA 3D
-          functions when the feature is disabled</para>
-      </listitem>
-
-      <listitem>
-        <para>VBoxManage: Document currently unavailable NAT options</para>
-      </listitem>
-
-      <listitem>
-        <para>NAT: Multiple fixes and improvements, for example better DNS
-          server handling, saving of the VM settings and genertating a
-          boot file name which stays within the length limit</para>
-      </listitem>
-
-      <listitem>
-        <para>NAT Network: Use the (almost) same code as for NAT, unifying
-          behavior and features</para>
-      </listitem>
-
-      <listitem>
-        <para>TPM: Fixed save state load failures</para>
-      </listitem>
-
-      <listitem>
-        <para>Storage: Fixed corruption of VMDK images when resizing</para>
-      </listitem>
-
-      <listitem>
-        <para>Video Recording: Fixed frame synchronization, a small memory leak
-          and other bugs</para>
-      </listitem>
-
-      <listitem>
-        <para>Linux host and guest: Initial support for kernel version 6.16</para>
-      </listitem>
-
-      <listitem>
-        <para>Linux/Solaris host: Fixed swapped scan code for Pause and Num Lock
-          keys in the table used when relying on Xkb for translation</para>
-      </listitem>
-
-      <listitem>
-        <para>Linux guest: Fixed handling of (long optional) vboxvideo kernel
-          module in init script</para>
-      </listitem>
-
-      <listitem>
-        <para>Linux guest: Fixed start failure of VBoxClient with kernel from
-          the 2.6 series or older</para>
-      </listitem>
-
-      <listitem>
-        <para>Windows host: Removed release assertion causing crash of VBoxUsbMon
-          driver if unloading fails</para>
-      </listitem>
-
-      <listitem>
-        <para>Windows/Arm guest: Added WDDM Graphics driver, so far tested in 2D
-          mode only</para>
-      </listitem>
-
-      <listitem>
-        <para>Windows/Arm guest: Added Shared Folder feature</para>
-      </listitem>
-
-      <listitem>
-        <para>UEFI: Added workaround for Grub bug causing guest OS crashes</para>
-      </listitem>
-
-      <listitem>
-        <para>BIOS: Fixed keyboard translation, added and updated several entries
-          and do not report keypresses when scan code and ASCII code are both zero</para>
-      </listitem>
-
-      <listitem>
-        <para>BIOS: Fixed error reporting fo single sided floppy disks</para>
-      </listitem>
-
-    </itemizedlist>
-
-  </sect1>
-
-  <sect1>
-
-    <title>Version 7.2.0_BETA1 (2025-05-27)</title>
+    <title>Version 7.2.0 (date tbd)</title>
 
     <para>This is a major update. The following new features were added:</para>
 
@@ -294,7 +96,7 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Linux host: video decoding acceleration when 3D is enabled</para>
+        <para>Linux host: Video decoding acceleration when 3D is enabled</para>
       </listitem>
 
       <listitem>
@@ -317,7 +119,83 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Arm host: vboxwebsrv is now included in the packages</para>
+        <para>VMM: Improved x86_64 and Arm CPU feature reporting when using
+          Windows Hyper-V as the virtualization engine</para>
+      </listitem>
+
+      <listitem>
+        <para>VMM: Added xsave/xrestor instruction handling when using
+          Windows/x86_64 Hyper-V as the virtualization engine, offering the
+          x86_64-v3 instruction set extensions (including AVX and AVX2) on
+          recent CPUs</para>
+      </listitem>
+
+      <listitem>
+        <para>VMM: Fixed issue when X86_64-v3 features were not
+          passed to the guest (github:gh-36)</para>
+      </listitem>
+
+      <listitem>
+        <para>VMM/HM: Fixed Nested Virtualization feature on Intel CPUs</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixed a bug in clone VM wizard which made impossible to include
+          snapshots in clone result (github:GH-59)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Polished Preferences and Settings pages, NLS fixing</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Improved handling of keyboard LEDs in the Soft Keyboard</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Added checkbox for making a Shared Folder global to all VMs</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Removed IO-APIC from Arm VM settings</para>
+      </listitem>
+
+      <listitem>
+        <para>Graphics: Avoid assertion when guest tries to use VMSVGA 3D
+          functions when the feature is disabled</para>
+      </listitem>
+
+      <listitem>
+        <para>Audio: Fixed crash in rare circumstances (github:gh-72)</para>
+      </listitem>
+
+      <listitem>
+        <para>NAT: Multiple fixes and improvements, for example better DNS
+          server handling, saving of the VM settings and generating a
+          boot file name which stays within the length limit</para>
+      </listitem>
+
+      <listitem>
+        <para>NAT Network: Use the (almost) same code as for NAT, unifying
+          behavior and features</para>
+      </listitem>
+
+      <listitem>
+        <para>NAT: Fixed possible crash in rare circumstances when no nameservers
+          could be detected in the host system</para>
+      </listitem>
+
+      <listitem>
+        <para>Storage: Fixed corruption of VMDK images when resizing</para>
+      </listitem>
+
+      <listitem>
+        <para>Video Recording: Fixed frame synchronization, a small memory leak
+          and other bugs</para>
+      </listitem>
+
+      <listitem>
+        <para>TPM: Fixed save state load failures</para>
       </listitem>
 
       <listitem>
@@ -325,7 +203,91 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>3rd Party Tools: Eliminated dependency on libIDL and IASL</para>
+        <para>API/Unattended: Added explicit unattended installation support for Oracle Linux 10</para>
+      </listitem>
+
+      <listitem>
+        <para>API and VBoxManage: Added functionality to define global Shared Folders for all VMs</para>
+      </listitem>
+
+      <listitem>
+        <para>API: Fixed issue when OVF/OVA import resulted in a broken VM on Arm (bug #22370)</para>
+      </listitem>
+
+      <listitem>
+        <para>API: Fixed issue when exporting a VM which had an inaccessible
+          disk resulted in crash</para>
+      </listitem>
+
+      <listitem>
+        <para>VBoxManage: Document currently unavailable NAT options</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux host and guest: Initial support for kernel version 6.16</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux/Solaris host: Fixed swapped scan code for Pause and Num Lock
+          keys in the table used when relying on Xkb for translation</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows host: Removed release assertion causing crash of VBoxUsbMon
+          driver if unloading fails</para>
+      </listitem>
+
+      <listitem>
+        <para>Arm host: vboxwebsrv is now included in the packages</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux guest: Fixed handling of (long optional) vboxvideo kernel
+          module in init script</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux guest: Fixed start failure of VBoxClient with kernel from
+          the 2.6 series or older</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows/Arm guest: Added WDDM Graphics driver, so far tested in 2D
+          mode only</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows/Arm guest: Added Shared Folder feature</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows Host: Added improvements in Windows drivers installation</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux Guest Additions: Fixed issue when autorun installer was not automatically
+          starting on Additions ISO image insert for Oracle Linux 10 and RHEL 10 guests</para>
+      </listitem>
+
+      <listitem>
+        <para>BIOS: Fixed keyboard translation, added and updated several entries
+          and do not report keypresses when scan code and ASCII code are both zero</para>
+      </listitem>
+
+      <listitem>
+        <para>BIOS: Fixed error reporting fo single sided floppy disks</para>
+      </listitem>
+
+      <listitem>
+        <para>UEFI: Added workaround for Grub bug causing guest OS crashes</para>
+      </listitem>
+
+      <listitem>
+        <para>UEFI: Fixed macOS kernel logging over serial port (github:gh-82)</para>
+      </listitem>
+
+      <listitem>
+        <para>3rd Party Tools: Eliminated build time dependency on libIDL and IASL</para>
       </listitem>
 
     </itemizedlist>
