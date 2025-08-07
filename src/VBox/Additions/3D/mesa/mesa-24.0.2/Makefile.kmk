@@ -134,8 +134,8 @@ ifeq ($(KBUILD_TARGET),win)
   # -wd4296: svga_tgsi_vgpu10.c(3403): warning C4296: '>=': expression is always true
   # -wd5249: shader_info.h(491): warning C5249: 'shader_info::<unnamed-tag>::depth_layout' of type 'gl_frag_depth_layout' has named enumerators with values that cannot be represented in the given bit field width of '3'.
   # -wd5262: ast_to_hir.cpp(1421): warning C5262: implicit fall-through occurs here; are you missing a break statement? Use [[fallthrough]] when a break statement is intentionally omitted between cases
- VBOX_MESA3D_VCC_DISABLED_WARNINGS         += \
- 	-wd4296 -wd5249 -wd5262
+  VBOX_MESA3D_VCC_DISABLED_WARNINGS        += \
+  	-wd4296 -wd5249 -wd5262
  endif
 
  TEMPLATE_VBoxMesa3DGuestR3Lib_CFLAGS.win   = $(TEMPLATE_VBoxMesa3DGuestR3Dll_CFLAGS.win) $(VBOX_MESA3D_VCC_DISABLED_WARNINGS)
@@ -1442,7 +1442,7 @@ $$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/indices/:
 	$(QUIET)$(MKDIR) -p $@
 
 $$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_trace/tr_util.h \
-$$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_trace/tr_util.c : \
+$$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_trace/tr_util.c: \
 		$(VBOX_PATH_MESA)/src/gallium/auxiliary/driver_trace/enums2names.py | $$(dir $$@)
 	$(call MSG_GENERATE,python,$@,$$@)
 	$(QUIET)$(PYTHON_CMD) $< $(VBOX_PATH_MESA)/src/gallium/include/pipe/p_defines.h \
@@ -1452,7 +1452,7 @@ $$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_tra
 		-H $(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_trace/tr_util.h \
 		-I $(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/driver_trace/tr_util.h >$@
 
-$$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/u_tracepoints.h : \
+$$(VBoxMesaGalliumAuxLib_0_OUTDIR)/$(VBOX_MESA)/src/gallium/auxiliary/u_tracepoints.h: \
 		$(VBOX_PATH_MESA)/src/gallium/auxiliary/util/u_tracepoints.py | $$(dir $$@)
 	$(call MSG_GENERATE,python,$@,$$@)
 	$(QUIET)$(PYTHON_CMD) $< \
