@@ -544,6 +544,10 @@ static int rtAcpiTblAmlDecodePkgPush(PRTACPITBLAMLDECODE pThis, RTVFSIOSTREAM hV
         pThis->pacbPkgLeft  = pacbPkgLeftNew;
         pThis->pacbPkg      = pacbPkgLeftNew + cPkgElemsNew;
         pThis->cPkgStackMax = cPkgElemsNew;
+
+        /* Make sure the first elements in the stacks are initialized, even though we are never using them. */
+        pThis->pacbPkgLeft[0] = 0;
+        pThis->pacbPkg[0]     = 0;
     }
 
     uint32_t const iLvlNew = pThis->iLvl + 1;
@@ -557,18 +561,26 @@ static int rtAcpiTblAmlDecodePkgPush(PRTACPITBLAMLDECODE pThis, RTVFSIOSTREAM hV
 
 DECLINLINE(int) rtAcpiTblAmlDecodePkgPop(PRTACPITBLAMLDECODE pThis, RTVFSIOSTREAM hVfsIosOut, PRTERRINFO pErrInfo)
 {
+    Assert(pThis->iLvl > 0);
+
     while (!pThis->pacbPkgLeft[pThis->iLvl])
     {
         size_t cbPkg = pThis->pacbPkg[pThis->iLvl];
         pThis->iLvl--;
 
+        int rc = rtAcpiTblAmlDecodeFormat(pThis, hVfsIosOut, "}");
+        if (RT_FAILURE(rc))
+            return rc;
+
+        /* Are we at the root of the table? Stop the walk in any case. */
+        if (!pThis->iLvl)
+            break;
+
         if (pThis->pacbPkgLeft[pThis->iLvl] < cbPkg)
             return RTErrInfoSetF(pErrInfo, VERR_INVALID_STATE, "AML contains invalid package length encoding");
 
         pThis->pacbPkgLeft[pThis->iLvl] -= cbPkg;
-        int rc = rtAcpiTblAmlDecodeFormat(pThis, hVfsIosOut, "}");
-        if (RT_FAILURE(rc))
-            return rc;
+        Assert(pThis->iLvl > 0);
     }
 
     return VINF_SUCCESS;
