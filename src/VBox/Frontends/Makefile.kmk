@@ -60,7 +60,7 @@ ifndef VBOX_ONLY_DOCS
   include $(PATH_SUB_CURRENT)/VirtualBox/Makefile.kmk
  endif
  ifdef VBOX_WITH_INTNET_PCAP
-  include $(PATH_SUB_CURRENT)/VBoxIntNetPcap/Makefile.kmk
+  include $(PATH_SUB_CURRENT)/VBoxIntnetPcap/Makefile.kmk
  endif
  include $(PATH_SUB_CURRENT)/Common/Makefile.kmk
 endif # !VBOX_ONLY_DOCS
