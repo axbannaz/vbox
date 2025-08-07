@@ -81,6 +81,7 @@ static FNDISPARSEARMV8 disArmV8ParseImmZero;
 static FNDISPARSEARMV8 disArmV8ParseGprZr;
 static FNDISPARSEARMV8 disArmV8ParseGprZr32;
 static FNDISPARSEARMV8 disArmV8ParseGprZr64;
+static FNDISPARSEARMV8 disArmV8ParseGprZr64PlusOne;
 static FNDISPARSEARMV8 disArmV8ParseGprSp;
 static FNDISPARSEARMV8 disArmV8ParseGprOff;
 static FNDISPARSEARMV8 disArmV8ParseVecReg;
@@ -91,7 +92,7 @@ static FNDISPARSEARMV8 disArmV8ParseImmsImmrN;
 static FNDISPARSEARMV8 disArmV8ParseHw;
 static FNDISPARSEARMV8 disArmV8ParseCond;
 static FNDISPARSEARMV8 disArmV8ParsePState;
-static FNDISPARSEARMV8 disArmV8ParseCRnCRm;
+static FNDISPARSEARMV8 disArmV8ParseSysIns;
 static FNDISPARSEARMV8 disArmV8ParseSysReg;
 static FNDISPARSEARMV8 disArmV8ParseSh12;
 static FNDISPARSEARMV8 disArmV8ParseImmTbz;
@@ -149,6 +150,7 @@ static PFNDISPARSEARMV8 const g_apfnDisasm[kDisParmParseMax] =
     disArmV8ParseGprZr,
     disArmV8ParseGprZr32,
     disArmV8ParseGprZr64,
+    disArmV8ParseGprZr64PlusOne,
     disArmV8ParseGprSp,
     disArmV8ParseGprOff,
     disArmV8ParseVecReg,
@@ -159,7 +161,7 @@ static PFNDISPARSEARMV8 const g_apfnDisasm[kDisParmParseMax] =
     disArmV8ParseHw,
     disArmV8ParseCond,
     disArmV8ParsePState,
-    disArmV8ParseCRnCRm,
+    disArmV8ParseSysIns,
     disArmV8ParseSysReg,
     disArmV8ParseSh12,
     disArmV8ParseImmTbz,
@@ -381,6 +383,21 @@ static int disArmV8ParseGprZr64(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCO
 }
 
 
+static int disArmV8ParseGprZr64PlusOne(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                       PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pDis, pOp, pInsnClass, pf64Bit);
+    Assert(pParam->armv8.enmType == kDisArmv8OpParmNone);
+
+    pParam->armv8.enmType           = kDisArmv8OpParmReg;
+    pParam->armv8.Op.Reg.cRegs      = 1;
+    pParam->armv8.Op.Reg.idReg      = disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits);
+    pParam->armv8.Op.Reg.idReg      = RT_MIN(pParam->armv8.Op.Reg.idReg + 1, 31); /* See SYSP docs. */
+    pParam->armv8.Op.Reg.enmRegType = kDisOpParamArmV8RegType_Gpr_64Bit;
+    return VINF_SUCCESS;
+}
+
+
 static int disArmV8ParseGprSp(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass, PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
 {
     RT_NOREF(pDis, pOp, pInsnClass);
@@ -457,7 +474,8 @@ static int disArmV8ParseGprCount(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPC
 {
     RT_NOREF(pDis, u32Insn, pOp, pInsnClass, pParam, pInsnParm, pf64Bit);
 
-    /* This is special as it doesn't really parse the instruction but sets the register count of the given parameter based on the number if bits. */
+    /* This is special as it doesn't really parse the instruction but sets the
+       register count of the given parameter based on the number of bits. */
     Assert(pInsnParm->cBits <= 2);
     Assert(pInsnParm->idxBitStart == 0);
     Assert(pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_64Bit);
@@ -590,14 +608,18 @@ static int disArmV8ParsePState(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCOD
 }
 
 
-static int disArmV8ParseCRnCRm(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass, PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+static int disArmV8ParseSysIns(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                               PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
 {
     RT_NOREF(pDis, u32Insn, pOp, pInsnClass, pParam, pInsnParm, pf64Bit);
-
-    Assert(pInsnParm->cBits == 8);
-
-    /** @todo Needs implementation. */
-    return VERR_DIS_INVALID_OPCODE;
+    Assert(pInsnParm->idxBitStart == 5);
+    Assert(pInsnParm->cBits       == 23 - 5);
+    Assert(pParam->armv8.enmType == kDisArmv8OpParmNone);
+    pParam->armv8.enmType     = kDisArmv8OpParmSysIns;
+    pParam->armv8.Op.idSysIns = ARMV8_AARCH64_SYSINS_ID_FROM_SYS_SYSL_ET_AL(u32Insn);
+    pParam->armv8.cb          = 0;
+    pParam->fUse             |= DISUSE_REG_SYSTEM;
+    return VINF_SUCCESS;
 }
 
 
@@ -1180,7 +1202,9 @@ static int disArmV8ParseVecGrp(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCOD
 {
     RT_NOREF(pDis, u32Insn, pOp, pInsnClass, pParam, pInsnParm, pf64Bit);
 
-    /* This is special as it doesn't really parse the instruction but sets the given parameter from vector to group vector and sets the register count based on the number if bits. */
+    /* This is special as it doesn't really parse the instruction but sets the
+       given parameter from vector to group vector and sets the register count
+       based on the number of bits. */
     Assert(pInsnParm->cBits <= 4);
     Assert(pInsnParm->idxBitStart == 0);
     Assert(pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Simd_Vector);

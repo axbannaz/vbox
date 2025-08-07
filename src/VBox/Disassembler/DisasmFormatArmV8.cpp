@@ -372,14 +372,14 @@ DECLINLINE(const char *) disasmFormatArmV8Reg(PCDISSTATE pDis, uint8_t enmRegTyp
     {
         case kDisOpParamArmV8RegType_Gpr_32Bit:
         {
-            Assert(idReg < RT_ELEMENTS(g_aszArmV8RegGen32));
+            AssertStmt(idReg < RT_ELEMENTS(g_aszArmV8RegGen32), idReg = RT_ELEMENTS(g_aszArmV8RegGen32) - 1);
             const char *psz = g_aszArmV8RegGen32[idReg];
             *pcchReg = 2 + !!psz[2];
             return psz;
         }
         case kDisOpParamArmV8RegType_Gpr_64Bit:
         {
-            Assert(idReg < RT_ELEMENTS(g_aszArmV8RegGen64));
+            AssertStmt(idReg < RT_ELEMENTS(g_aszArmV8RegGen64), idReg = RT_ELEMENTS(g_aszArmV8RegGen64) - 1);
             const char *psz = g_aszArmV8RegGen64[idReg];
             *pcchReg = 2 + !!psz[2];
             return psz;
@@ -536,6 +536,47 @@ static const char *disasmFormatArmV8SysReg(PCDISSTATE pDis, PCDISOPPARAM pParam,
 
     pachTmp[idx++] = '_';
     pachTmp[idx++] = '0' + (idSysReg & 0x7);
+    pachTmp[idx]   = '\0';
+    *pcchReg = idx;
+    return pachTmp;
+}
+
+
+/**
+ * Formats an unknown system instruction designation.
+ *
+ * @returns Pointer to the register name.
+ * @param   pParam      The parameter.
+ * @param   pachTmp     Pointer to temporary string storage when building
+ *                      the register name.
+ * @param   pcchReg     Where to store the length of the name.
+ */
+static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, size_t *pcchReg)
+{
+    /* Generate  #<op1>,<CRn>,<CRm>,#<op2> identifier. */
+    uint32_t const idSysIns = pParam->armv8.Op.idSysIns;
+    uint8_t idx = 0;
+    pachTmp[idx++] = '#';
+    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP1(idSysIns);
+    pachTmp[idx++] = ',';
+    uint8_t bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRN(idSysIns);
+    if (bTmp >= 10)
+    {
+        pachTmp[idx++] = '1' + (bTmp - 10);
+        bTmp -= 10;
+    }
+    pachTmp[idx++] = '0' + bTmp;
+    pachTmp[idx++] = ',';
+    bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRM(idSysIns);
+    if (bTmp >= 10)
+    {
+        pachTmp[idx++] = '1' + (bTmp - 10);
+        bTmp -= 10;
+    }
+    pachTmp[idx++] = '0' + bTmp;
+    pachTmp[idx++] = ',';
+    pachTmp[idx++] = '#';
+    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP2(idSysIns);
     pachTmp[idx]   = '\0';
     *pcchReg = idx;
     return pachTmp;
@@ -867,35 +908,23 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
 
                         PUT_C('}');
                     }
-                    else
+                    else if (pParam->armv8.Op.Reg.cRegs > 1)
                     {
-                        if (pParam->armv8.Op.Reg.cRegs > 1)
+                        /** @todo r=bird: must consider how to prevent out of bounds issues here due
+                         *        to idReg exceeding the register tables.  I've fixed the GPR ones in
+                         *        disasmFormatArmV8Reg since questionable RCWSCASP++ decoding may
+                         *        lead 31 + 1 there.  Haven't checked the other uses. */
+                        for (uint8_t idReg = pParam->armv8.Op.Reg.idReg;
+                             idReg < (pParam->armv8.Op.Reg.idReg + pParam->armv8.Op.Reg.cRegs);
+                             idReg++)
                         {
-                            for (uint8_t idReg = pParam->armv8.Op.Reg.idReg; idReg < (pParam->armv8.Op.Reg.idReg + pParam->armv8.Op.Reg.cRegs); idReg++)
-                            {
-                                if (idReg > pParam->armv8.Op.Reg.idReg)
-                                    PUT_C(',');
-                                PUT_C(' '); /** @todo Make the indenting configurable. */
+                            if (idReg > pParam->armv8.Op.Reg.idReg)
+                                PUT_C(',');
+                            PUT_C(' '); /** @todo Make the indenting configurable. */
 
-                                size_t cchTmp;
-                                const char *pszTmp = disasmFormatArmV8Reg(pDis, pParam->armv8.Op.Reg.enmRegType,
-                                                                          idReg, &cchTmp);
-                                PUT_STR(pszTmp, cchTmp);
-
-                                if (   pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Simd_Vector
-                                    && pParam->armv8.Op.Reg.enmVecType != kDisOpParamArmV8VecRegType_None)
-                                {
-                                    PUT_C('.');
-                                    pszTmp = disasmFormatArmV8VecRegType(pParam->armv8.Op.Reg.enmVecType, &cchTmp);
-                                    PUT_STR(pszTmp, cchTmp);
-                                }
-                            }
-                        }
-                        else
-                        {
                             size_t cchTmp;
                             const char *pszTmp = disasmFormatArmV8Reg(pDis, pParam->armv8.Op.Reg.enmRegType,
-                                                                      pParam->armv8.Op.Reg.idReg, &cchTmp);
+                                                                      idReg, &cchTmp);
                             PUT_STR(pszTmp, cchTmp);
 
                             if (   pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Simd_Vector
@@ -907,6 +936,21 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                             }
                         }
                     }
+                    else
+                    {
+                        size_t cchTmp;
+                        const char *pszTmp = disasmFormatArmV8Reg(pDis, pParam->armv8.Op.Reg.enmRegType,
+                                                                  pParam->armv8.Op.Reg.idReg, &cchTmp);
+                        PUT_STR(pszTmp, cchTmp);
+
+                        if (   pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Simd_Vector
+                            && pParam->armv8.Op.Reg.enmVecType != kDisOpParamArmV8VecRegType_None)
+                        {
+                            PUT_C('.');
+                            pszTmp = disasmFormatArmV8VecRegType(pParam->armv8.Op.Reg.enmVecType, &cchTmp);
+                            PUT_STR(pszTmp, cchTmp);
+                        }
+                    }
                     break;
                 }
                 case kDisArmv8OpParmSysReg:
@@ -916,6 +960,16 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                     size_t cchReg;
                     char achTmp[32];
                     const char *pszReg = disasmFormatArmV8SysReg(pDis, pParam, &achTmp[0], &cchReg);
+                    PUT_STR(pszReg, cchReg);
+                    break;
+                }
+                case kDisArmv8OpParmSysIns:
+                {
+                    Assert(pParam->fUse == DISUSE_REG_SYSTEM);
+
+                    size_t cchReg;
+                    char   achTmp[32];
+                    const char *pszReg = disasmFormatArmV8SysIns(pParam, &achTmp[0], &cchReg);
                     PUT_STR(pszReg, cchReg);
                     break;
                 }

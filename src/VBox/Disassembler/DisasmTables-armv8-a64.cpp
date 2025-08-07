@@ -386,10 +386,8 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysResult, 0xfffffffe /*fFixedInsn*/,
 
 /* SYS */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(Sys)
-    DIS_ARMV8_INSN_DECODE(kDisParmParseImm,           16,  3, 0 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseCRnCRm,         8,  8, 1 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseImm,            5,  3, 2 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 3 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 1 /*idxParam*/), /** @todo r=bird: kDisParmParseGprZr64? */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(Sys)
     DIS_ARMV8_OP(0xd5080000, "sys",             OP_ARMV8_A64_SYS,       DISOPTYPE_HARMLESS),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(Sys, 0xfff80000 /*fFixedInsn*/,
@@ -398,13 +396,21 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(Sys, 0xfff80000 /*fFixedInsn*/,
 
 /* SYSL */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(SysL)
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 0 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseImm,           16,  3, 1 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseCRnCRm,         8,  8, 2 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseImm,            5,  3, 3 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 0 /*idxParam*/), /** @todo r=bird: kDisParmParseGprZr64? */
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 1 /*idxParam*/),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(SysL)
     DIS_ARMV8_OP(0xd5280000, "sysl",            OP_ARMV8_A64_SYSL,      DISOPTYPE_HARMLESS),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysL, 0xfff80000 /*fFixedInsn*/,
+                                       kDisArmV8OpcDecodeNop, 0, 0); /** @todo */
+
+/* SYSP */
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(SysP)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64PlusOne, 0,  5, 2 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(SysP)
+    DIS_ARMV8_OP(0xd5480000, "sysp",            OP_ARMV8_A64_SYSP,      DISOPTYPE_HARMLESS),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysP, 0xfff80000 /*fFixedInsn*/,
                                        kDisArmV8OpcDecodeNop, 0, 0); /** @todo */
 
 
@@ -572,8 +578,9 @@ DIS_ARMV8_DECODE_TBL_DEFINE_BEGIN(BrExcpSys)
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfffff01f, 0xd503301f,                                                     DecodeBarriers),  /* op0: 110, op1: 01000000110011, op2: - (we include Rt:  11111 from the next stage here). */
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff8f01f, 0xd500401f,                                                     PState),          /* op0: 110, op1: 0100000xxx0100, op2: - (we include Rt:  11111 from the next stage here). */
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfffff0e0, 0xd5233060,                                                     SysResult),       /* op0: 110, op1: 0100100xxxxxxx, op2: - (we include op1, CRn and op2 from the next stage here). */
-    DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff80000, 0xd5080000,                                                     Sys),             /* op0: 110, op1: 0100x01xxxxxxx, op2: - (we include the L field of the next stage here to differentiate between SYS/SYSL as they have a different string representation). */
-    DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff80000, 0xd5280000,                                                     SysL),            /* op0: 110, op1: 0100x01xxxxxxx, op2: - (we include the L field of the next stage here to differentiate between SYS/SYSL as they have a different string representation). */
+    DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff80000, 0xd5080000,                                                     Sys),             /* op0: 110, op1: 0100x01xxxxxxx, op2: - (we include the L field of the next stage here to differentiate between SYS/SYSL/SYSP as they have a different string representation). */
+    DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff80000, 0xd5280000,                                                     SysL),            /* op0: 110, op1: 0100x01xxxxxxx, op2: - (we include the L field of the next stage here to differentiate between SYS/SYSL/SYSP as they have a different string representation). */
+    DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff80000, 0xd5480000,                                                     SysP),            /* op0: 110, op1: 0100x01xxxxxxx, op2: - (we include the L field of the next stage here to differentiate between SYS/SYSL/SYSP as they have a different string representation). */
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff00000, 0xd5100000,                                                     Msr),             /* op0: 110, op1: 0100x1xxxxxxxx, op2: - (we include the L field of the next stage here to differentiate between MSR/MRS as they have a different string representation). */
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfff00000, 0xd5300000,                                                     Mrs),             /* op0: 110, op1: 0100x1xxxxxxxx, op2: - (we include the L field of the next stage here to differentiate between MSR/MRS as they have a different string representation). */
     DIS_ARMV8_DECODE_TBL_ENTRY_INIT(0xfe1f0000, 0xd61f0000,                                                     UncondBrReg),     /* op0: 110, op1: 1xxxxxxxxxxxxx, op2: - (we include the op2 field from the next stage here as it should be always 11111). */

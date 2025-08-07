@@ -60,7 +60,7 @@ ifdef VBOX_WITH_TESTCASES
  	$(LIB_RUNTIME)
 
 
- ifeq ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH),darwin.arm64)
+ if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), darwin.arm64) ## @todo make this compile on win.arm64. Trouble with ';' and feats.
   #
   # tstDisasmArmv8-1 assembly files -> .cpp
   #
@@ -68,7 +68,6 @@ ifdef VBOX_WITH_TESTCASES
   TST_DISASM_ARMV8_1_SOURCES := \
   	tstDisasmArmv8_1=tstDisasmArmv8-1-asm.S
 
-  TST_DISASM_ARMV8_1_NAMES := $(foreach cert,$(VBOX_SVC_CERTS),$(firstword $(subst =,$(SP),$(cert))))
   TST_DISASM_ARMV8_1_PATH_SOURCES := $(PATH_SUB_CURRENT)
 
   $$(TST_DISASM_ARMV8_1_FILE): $(MAKEFILE_CURRENT) \
@@ -79,7 +78,7 @@ ifdef VBOX_WITH_TESTCASES
 	$(QUIET)$(APPEND) -n "$@" \
         	'' \
         	'#include "tstDisasmArmv8-1-tests.h"' \
-                ''
+               ''
 	$(foreach source,$(TST_DISASM_ARMV8_1_SOURCES), $(NLTAB)$(VBOX_BIN2C) -ascii --append \
 		"$(firstword $(subst =,$(SP),$(source)))" \
 		"$(TST_DISASM_ARMV8_1_PATH_SOURCES)/$(lastword $(subst =,$(SP),$(source)))" \

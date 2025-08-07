@@ -46,7 +46,7 @@
 *   Structures and Typedefs                                                                                                      *
 *********************************************************************************************************************************/
 typedef enum { kAsmStyle_Default, kAsmStyle_yasm, kAsmStyle_masm, kAsmStyle_gas, kAsmStyle_invalid } ASMSTYLE;
-typedef enum { kUndefOp_Fail, kUndefOp_All, kUndefOp_DefineByte, kUndefOp_End } UNDEFOPHANDLING;
+typedef enum { kUndefOp_Fail, kUndefOp_All, kUndefOp_DefineByte, kUndefOp_DefineU32, kUndefOp_End } UNDEFOPHANDLING;
 
 typedef struct MYDISSTATE
 {
@@ -298,12 +298,13 @@ static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAdd
         State.uNextAddr = State.uAddress;
         State.pbNext = State.pbInstr;
 
+        State.szLine[0] = '\0';
         int rc = DISInstrToStrWithReader(State.uAddress, enmCpuMode, MyDisasInstrRead, &State,
                                          &State.Dis, &State.cbInstr, State.szLine, sizeof(State.szLine));
         if (    RT_SUCCESS(rc)
             ||  (   (   rc == VERR_DIS_INVALID_OPCODE
                      || rc == VERR_DIS_GEN_FAILURE)
-                 &&  State.enmUndefOp == kUndefOp_DefineByte))
+                 &&  (State.enmUndefOp == kUndefOp_DefineByte || State.enmUndefOp == kUndefOp_DefineU32) ))
         {
             State.fUndefOp = rc == VERR_DIS_INVALID_OPCODE
                           || rc == VERR_DIS_GEN_FAILURE
@@ -323,6 +324,16 @@ static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAdd
                 for (unsigned off = 0; off < State.cbInstr; off++)
                     RTPrintf(off ? ", %03xh" : " %03xh", State.Dis.Instr.ab[off]);
                 RTPrintf("    ; %s\n", State.szLine);
+            }
+            else if (State.fUndefOp && State.enmUndefOp == kUndefOp_DefineU32)
+            {
+                if (State.cbInstr < sizeof(uint32_t))
+                {
+                    State.Dis.Instr.au32[0] = 0;
+                    State.Dis.pfnReadBytes(&State.Dis, 0, sizeof(uint32_t), sizeof(uint32_t));
+                    State.cbInstr = sizeof(uint32_t);
+                }
+                RTPrintf("    dd %008xh ; %s\n", State.Dis.Instr.au32[0], State.szLine);
             }
             else if (!State.fUndefOp && State.enmUndefOp == kUndefOp_All)
             {
@@ -462,7 +473,7 @@ static int Usage(const char *argv0)
 "    The file offset at which to start disassembling. Default: 0\n"
 "  --style|-s <default|yasm|masm>\n"
 "    The assembly output style. Default: default\n"
-"  --undef-op|-u <fail|all|db>\n"
+"  --undef-op|-u <fail|all|db|32>\n"
 "    How to treat undefined opcodes. Default: fail\n"
              , argv0, argv0, argv0);
     return 1;
@@ -491,6 +502,7 @@ int main(int argc, char **argv)
     static const RTGETOPTDEF g_aOptions[] =
     {
         { "--address",      'a', RTGETOPT_REQ_UINT64 },
+        { "--arch",         'A', RTGETOPT_REQ_STRING },
         { "--cpumode",      'c', RTGETOPT_REQ_UINT32 },
         { "--bytes",        'b', RTGETOPT_REQ_INT64 },
         { "--listing",      'l', RTGETOPT_REQ_NOTHING },
@@ -510,6 +522,32 @@ int main(int argc, char **argv)
     {
         switch (ch)
         {
+            case 'A':
+                if (   strcmp(ValueUnion.psz, "aarch64") == 0
+                    || strcmp(ValueUnion.psz, "arm64") == 0
+                    || strcmp(ValueUnion.psz, "a64") == 0)
+                    enmCpuMode = DISCPUMODE_ARMV8_A64;
+                else if (   strcmp(ValueUnion.psz, "amd64") == 0
+                         || strcmp(ValueUnion.psz, "x86_64") == 0
+                         || strcmp(ValueUnion.psz, "x86-64") == 0
+                         || strcmp(ValueUnion.psz, "x64") == 0)
+                    enmCpuMode = DISCPUMODE_64BIT;
+                else if (   strcmp(ValueUnion.psz, "x86-32") == 0
+                         || strcmp(ValueUnion.psz, "x86") == 0)
+                    enmCpuMode = DISCPUMODE_32BIT;
+                else if (   strcmp(ValueUnion.psz, "x86-16") == 0
+                         || strcmp(ValueUnion.psz, "80286") == 0
+                         || strcmp(ValueUnion.psz, "80186") == 0
+                         || strcmp(ValueUnion.psz, "8088") == 0
+                         || strcmp(ValueUnion.psz, "8086") == 0)
+                    enmCpuMode = DISCPUMODE_16BIT;
+                else
+                {
+                    RTStrmPrintf(g_pStdErr, "%s: Invalid architecture: %s\n", argv0, ValueUnion.psz);
+                    return 1;
+                }
+                break;
+
             case 'a':
                 uAddress = ValueUnion.u64;
                 break;
@@ -572,6 +610,8 @@ int main(int argc, char **argv)
                     enmUndefOp = kUndefOp_All;
                 else if (!strcmp(ValueUnion.psz, "db"))
                     enmUndefOp = kUndefOp_DefineByte;
+                else if (!strcmp(ValueUnion.psz, "32"))
+                    enmUndefOp = kUndefOp_DefineU32;
                 else
                 {
                     RTStrmPrintf(g_pStdErr, "%s: unknown undefined opcode handling method: %s\n", argv0, ValueUnion.psz);

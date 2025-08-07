@@ -1114,9 +1114,9 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(LdStRcwCmpSwp, 0xffe0fc00 /*fFixedInsn*/,
 /* C4.1.94.6 - RCW compare and swap pair. */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(LdStRcwCmpSwpPair)
     DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        16,  5, 0 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprCount,        0,  2, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprCount,        0,  2, 0 /*idxParam*/), /** @todo r=bird: aren't they undefined if odd? See https://developer.arm.com/documentation/ddi0602/2025-06/Base-Instructions/RCWSCASP--RCWSCASPA--RCWSCASPAL--RCWSCASPL--Read-check-write-software-compare-and-swap-quadword-in-memory-?lang=en  */
     DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,         0,  5, 1 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprCount,        0,  2, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprCount,        0,  2, 1 /*idxParam*/), /** @todo r=bird: aren't they undefined if odd? */
     DIS_ARMV8_INSN_DECODE(kDisParmParseAddrGprSp,       5,  5, 2 /*idxParam*/),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(LdStRcwCmpSwpPair)
     DIS_ARMV8_OP(0x19200c00, "rcwcasp",         OP_ARMV8_A64_RCWCASP,    DISOPTYPE_HARMLESS), /* FEAT_D128 && FEAT_THE */
