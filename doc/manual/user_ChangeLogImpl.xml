@@ -252,8 +252,7 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Windows/Arm guest: Added WDDM Graphics driver, so far tested in 2D
-          mode only</para>
+        <para>Windows/Arm guest: Added WDDM Graphics driver, with 2D and 3D mode</para>
       </listitem>
 
       <listitem>
