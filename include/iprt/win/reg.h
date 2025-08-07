@@ -86,7 +86,7 @@ RTDECL(int) RTWinRegQueryValueU32(RTWINREGROOT enmRoot, PCRTUTF16 pwszKeyPath, P
  * @param   enmRoot             The root for the key path.
  * @param   pwszKeyPath         The path to the key.
  * @param   pwszValue           The value to read. NULL for default.
- * @param   puValue             Where to return the value.
+ * @param   piValue             Where to return the value.
  */
 RTDECL(int) RTWinRegQueryValueS32(RTWINREGROOT enmRoot, PCRTUTF16 pwszKeyPath, PCRTUTF16 pwszValue, int32_t *piValue);
 
@@ -108,7 +108,7 @@ RTDECL(int) RTWinRegQueryValueU64(RTWINREGROOT enmRoot, PCRTUTF16 pwszKeyPath, P
  * @param   enmRoot             The root for the key path.
  * @param   pwszKeyPath         The path to the key.
  * @param   pwszValue           The value to read. NULL for default.
- * @param   puValue             Where to return the value.
+ * @param   piValue             Where to return the value.
  */
 RTDECL(int) RTWinRegQueryValueS64(RTWINREGROOT enmRoot, PCRTUTF16 pwszKeyPath, PCRTUTF16 pwszValue, int64_t *piValue);
 
