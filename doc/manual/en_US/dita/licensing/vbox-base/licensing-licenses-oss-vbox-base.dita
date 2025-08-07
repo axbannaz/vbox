@@ -5,14 +5,15 @@
   <body>
   
   <p>Required notices for open source or other separately licensed software products or components distributed in <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/> are identified in the following table, along with the applicable licensing information. Additional notices and/or licenses may be found in the included documentation or readme files of the individual third party software.</p>
-        
+  	
         <table id="table-oss-vbox-base">
-                
+		
           <title>Open Source or Other Separately Licensed Software Included With <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/></title>
          <desc>
-           <ph>This table shows the additional licensing information for the software packages and container images used for <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/></ph>
-      </desc>
-                
+           <ph>This table shows the additional licensing information for
+             the software packages and container images used for <ph conkeyref="vbox-conkeyref-phrases/vbox-base"/></ph>
+        </desc>
+		
         <tgroup cols="3">
           <colspec/>
           <colspec/>
@@ -372,8 +373,7 @@
               </entry>
              
             <entry>
-               <p> A copy of the License is reproduced in <xref href="licensing-license-vbox-base-reference-implementations-for-intel-arch.dita"/>
-              </p>
+               <p> A copy of the License is reproduced in <xref href="licensing-license-vbox-base-reference-implementations-for-intel-arch.dita"/></p>
              </entry>        
             </row>
            <row>
@@ -398,25 +398,9 @@
              </entry>     
              
              <entry>
-            <p>Zlib Data Compression Library 1.3.1</p>
-             </entry>
-            
-            <entry>
-               <p>
-             A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-base-zlib-data-compression-library-1.3.1.dita#license-zlib-data-compression-library-1.3.1" scope="local"/>
-              </p>
-             </entry>        
-            </row>
-           <row>
-             <entry>
-               <p>Jean-loup Gailly and Mark Adler</p>
-             </entry>     
+            <p>Zlib Data Compression Library</p>
+              </entry>
              
-             <entry>
-            <p>Zlib Data Compression Library 1.3.1</p>
-             </entry>
-            
             <entry>
                <p>
              A copy of the License is reproduced in 
@@ -1358,13 +1342,29 @@
              </entry>     
              
              <entry>
-            <p>xorg-server 1.15.0</p>
+            <p>xorg-server 1.17.1</p>
              </entry>
             
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-base-xorg-server-1.15.0.dita#license-xorg-server-1.15.0" scope="local"/>
+                 <xref href="licensing-license-vbox-base-xorg-server-1.17.1.dita#license-xorg-server-1.17.1" scope="local"/>
+              </p>
+             </entry>        
+            </row>
+           <row>
+             <entry>
+               <p>X.Org Foundation</p>
+             </entry>     
+             
+             <entry>
+            <p>xorg-server 1.18.0</p>
+             </entry>
+            
+            <entry>
+               <p>
+             A copy of the License is reproduced in 
+                 <xref href="licensing-license-vbox-base-xorg-server-1.18.0.dita#license-xorg-server-1.18.0" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -1390,29 +1390,13 @@
              </entry>     
              
              <entry>
-            <p>xorg-server 1.17.1</p>
+            <p>xorg-server 1.15.0</p>
              </entry>
             
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-base-xorg-server-1.17.1.dita#license-xorg-server-1.17.1" scope="local"/>
-              </p>
-             </entry>        
-            </row>
-           <row>
-             <entry>
-               <p>X.Org Foundation</p>
-             </entry>     
-             
-             <entry>
-            <p>xorg-server 1.18.0</p>
-             </entry>
-            
-            <entry>
-               <p>
-             A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-base-xorg-server-1.18.0.dita#license-xorg-server-1.18.0" scope="local"/>
+                 <xref href="licensing-license-vbox-base-xorg-server-1.15.0.dita#license-xorg-server-1.15.0" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -1549,4 +1533,3 @@
         </table>
       </body>   
   </topic>
-

@@ -16,7 +16,7 @@
     <publisherinformation>
       <published>
         <completed>
-          <month>July</month>
+          <month>August</month>
           <year>2025</year>
         </completed>
       </published>
@@ -176,12 +176,11 @@
       <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.12.0.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.13.0.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.14.0.dita"/>
-      <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.15.0.dita"/>
-      <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.16.0.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.17.1.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.18.0.dita"/>
+      <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.16.0.dita"/>
+      <topicref href="vbox-base/licensing-license-vbox-base-xorg-server-1.15.0.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-xproto-7.0.31.dita"/>
-      <topicref href="vbox-base/licensing-license-vbox-base-zlib-data-compression-library-1.3.1.dita"/>
       <topicref href="vbox-base/licensing-license-vbox-base-zlib-data-compression-library-1.3.1.dita"/>
     </topicref>
   </chapter>
@@ -190,15 +189,15 @@
     <topicref href="vbox-ext/licensing-licenses-oss-vbox-ext.dita"/>
     <topicref href="vbox-ext/licensing-sw-licenses-vbox-ext.dita">
       <!--Copy in content from generated ditamap here-->
-      <topicref href="vbox-ext/licensing-license-vbox-ext-curl-8.7.1.dita"/>
-      <topicref href="vbox-ext/licensing-license-vbox-ext-libssh-0.10.5.dita"/>
-      <topicref href="vbox-ext/licensing-license-vbox-ext-light-weight-ip-cd024500-1.dita"/>
+      <topicref href="vbox-ext/licensing-license-vbox-ext-curl-8.11.1.dita"/>
+      <topicref href="vbox-ext/licensing-license-vbox-ext-libssh-0.11.2.dita"/>
+      <topicref href="vbox-ext/licensing-license-vbox-ext-lightweight-tcp-ip-stack-lwip-2.2.1.dita"/>
       <topicref href="vbox-ext/licensing-license-vbox-ext-mozilla-suite-1.8a4-1.dita"/>
-      <topicref href="vbox-ext/licensing-license-vbox-ext-openssl-3.1.5.dita"/>
+      <topicref href="vbox-ext/licensing-license-vbox-ext-openssl-3.4.1.dita"/>
       <topicref href="vbox-ext/licensing-license-vbox-ext-qemu-0.10.0.dita"/>
       <topicref href="vbox-ext/licensing-license-vbox-ext-softfloat-3e.dita"/>
       <topicref href="vbox-ext/licensing-license-vbox-ext-wine-1.5.14.dita"/>
-      <topicref href="vbox-ext/licensing-license-vbox-ext-zlib-data-compression-library-1.2.13.dita"/>
+      <topicref href="vbox-ext/licensing-license-vbox-ext-zlib-data-compression-library-1.3.1.dita"/>
     </topicref>
   </chapter>
 </bookmap>

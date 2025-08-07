@@ -5,15 +5,15 @@
   <body>
   
     <p>Required notices for open source or other separately licensed software products or components distributed in <ph conkeyref="vbox-conkeyref-phrases/vbox-ext"/> are identified in the following table, along with the applicable licensing information. Additional notices and/or licenses may be found in the included documentation or readme files of the individual third party software.</p>
-        
+  	
         <table id="table-oss-vbox-ext">
-                
+		
           <title>Open Source or Other Separately Licensed Software Included With <ph conkeyref="vbox-conkeyref-phrases/vbox-ext"/></title>
          <desc>
            <ph>This table shows the additional licensing information for
              the software packages and container images used for <ph conkeyref="vbox-conkeyref-phrases/vbox-ext"/></ph>
         </desc>
-                
+		
         <tgroup cols="3">
           <colspec/>
           <colspec/>
@@ -39,7 +39,7 @@
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-ext-libssh-0.10.5.dita#license-libssh-0.10.5" scope="local"/>
+                 <xref href="licensing-license-vbox-ext-libssh-0.11.2.dita#license-libssh-0.11.2" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -55,7 +55,7 @@
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-ext-curl-8.7.1.dita#license-curl-8.7.1" scope="local"/>
+                 <xref href="licensing-license-vbox-ext-curl-8.11.1.dita#license-curl-8.11.1" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -87,7 +87,7 @@
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-ext-zlib-data-compression-library-1.2.13.dita#license-zlib-data-compression-library-1.2.13" scope="local"/>
+                 <xref href="licensing-license-vbox-ext-zlib-data-compression-library-1.3.1.dita#license-zlib-data-compression-library-1.3.1" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -135,7 +135,7 @@
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-ext-openssl-3.1.5.dita#license-openssl-3.1.5" scope="local"/>
+                 <xref href="licensing-license-vbox-ext-openssl-3.4.1.dita#license-openssl-3.4.1" scope="local"/>
               </p>
              </entry>        
             </row>
@@ -145,13 +145,13 @@
              </entry>     
              
              <entry>
-            <p>Light Weight IP</p>
+            <p>Lightweight TCP/IP stack (LWIP)</p>
               </entry>
              
             <entry>
                <p>
              A copy of the License is reproduced in 
-                 <xref href="licensing-license-vbox-ext-light-weight-ip-cd024500-1.dita#license-light-weight-ip-cd024500-1" scope="local"/>
+                 <xref href="licensing-license-vbox-ext-lightweight-tcp-ip-stack-lwip-2.2.1.dita#license-lightweight-tcp-ip-stack-lwip-2.2.1" scope="local"/>
               </p>
              </entry>        
             </row>
