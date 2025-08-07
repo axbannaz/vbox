@@ -40,20 +40,6 @@
     </message>
 </context>
 <context>
-    <name>Print Device Input Slot</name>
-    <message>
-        <source>Automatic</source>
-        <translation type="unfinished">آليّ</translation>
-    </message>
-</context>
-<context>
-    <name>Print Device Output Bin</name>
-    <message>
-        <source>Automatic</source>
-        <translation type="unfinished">آليّ</translation>
-    </message>
-</context>
-<context>
     <name>QAbstractSocket</name>
     <message>
         <source>Socket operation timed out</source>
@@ -224,13 +210,12 @@
 <context>
     <name>QApplication</name>
     <message>
-        <source>Executable &apos;%1&apos; requires Qt %2, found Qt %3.</source>
-        <translatorcomment>الأعداد هنا ترجع كسلاسل ولا يمكن توطينها</translatorcomment>
-        <translation>يتطلّب التّنفيذيّ ’%1‘ كيوت %2، وجدتُ كيوت %3.</translation>
-    </message>
-    <message>
         <source>Incompatible Qt Library Error</source>
         <translation>خطأ مكتبة كيوت غير متوافقة</translation>
+    </message>
+    <message>
+        <source>Application &quot;%1&quot; requires Qt %2, found Qt %3.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -414,26 +399,8 @@ Press ESC to cancel</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Displays help including Qt specific options.</source>
+        <source>Displays help, including generic Qt options.</source>
         <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QCoreApplication</name>
-    <message>
-        <source>%1: key is empty</source>
-        <comment>QSystemSemaphore</comment>
-        <translation>%1: المفتاح فارغ</translation>
-    </message>
-    <message>
-        <source>%1: unable to make key</source>
-        <comment>QSystemSemaphore</comment>
-        <translation>%1: تعذّر عمل المفتاح</translation>
-    </message>
-    <message>
-        <source>%1: ftok failed</source>
-        <comment>QSystemSemaphore</comment>
-        <translation>%1: فشل ftok</translation>
     </message>
 </context>
 <context>
@@ -541,29 +508,6 @@ Press ESC to cancel</source>
     </message>
 </context>
 <context>
-    <name>QCupsPrinterSupport</name>
-    <message>
-        <source>Authentication Needed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Authentication needed to use %1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Authentication needed to use %1 on %2.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Username:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Password:</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>QDB2Driver</name>
     <message>
         <source>Unable to connect</source>
@@ -617,25 +561,6 @@ Press ESC to cancel</source>
     </message>
 </context>
 <context>
-    <name>QDateTimeParser</name>
-    <message>
-        <source>AM</source>
-        <translation>ص</translation>
-    </message>
-    <message>
-        <source>am</source>
-        <translation>ص</translation>
-    </message>
-    <message>
-        <source>PM</source>
-        <translation>م</translation>
-    </message>
-    <message>
-        <source>pm</source>
-        <translation>م</translation>
-    </message>
-</context>
-<context>
     <name>QDialog</name>
     <message>
         <source>What&apos;s This?</source>
@@ -650,134 +575,105 @@ Press ESC to cancel</source>
     </message>
 </context>
 <context>
-    <name>QDirModel</name>
-    <message>
-        <source>Name</source>
-        <translation>الاسم</translation>
-    </message>
-    <message>
-        <source>Size</source>
-        <translation>الحجم</translation>
-    </message>
-    <message>
-        <source>Kind</source>
-        <comment>Match OS X Finder</comment>
-        <translation>النّوع</translation>
-    </message>
-    <message>
-        <source>Type</source>
-        <comment>All other platforms</comment>
-        <translation>النّوع</translation>
-    </message>
-    <message>
-        <source>Date Modified</source>
-        <translation>تاريخ التّعديل</translation>
-    </message>
-</context>
-<context>
     <name>QDnsLookup</name>
     <message>
         <source>Operation cancelled</source>
         <translation>أُلغيت العمليّة</translation>
     </message>
+    <message>
+        <source>Invalid domain name</source>
+        <translation type="unfinished">اسم المجال غير صالح</translation>
+    </message>
+    <message>
+        <source>SSL/TLS support not present</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Request timed out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Server could not process query</source>
+        <translation type="unfinished">تعذّر على الخادوم معالجة الاستعلام</translation>
+    </message>
+    <message>
+        <source>Server failure</source>
+        <translation type="unfinished">فشل في الخادوم</translation>
+    </message>
+    <message>
+        <source>Non existent domain</source>
+        <translation type="unfinished">النّطاق غير موجود</translation>
+    </message>
+    <message>
+        <source>Server refused to answer</source>
+        <translation type="unfinished">رفض الخادوم الرّدّ</translation>
+    </message>
+    <message>
+        <source>Invalid reply received (rcode %1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid reply received</source>
+        <translation type="unfinished">استقبلتُ ردًّا غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid reply received (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>IPv6 nameservers are currently not supported on this OS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Reply was too large</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not expand domain name</source>
+        <translation type="unfinished">تعذّر توسيع اسم النّطاق</translation>
+    </message>
+    <message>
+        <source>Invalid IPv4 address record</source>
+        <translation type="unfinished">سجلّ عنوان IPv4 غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid IPv6 address record</source>
+        <translation type="unfinished">سجلّ عنوان IPv6 غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid canonical name record</source>
+        <translation type="unfinished">سجلّ الاسم المتعارف عليه غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid name server record</source>
+        <translation type="unfinished">سجلّ خادوم أسماء غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid pointer record</source>
+        <translation type="unfinished">سجلّ مؤشّر غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid mail exchange record</source>
+        <translation type="unfinished">سجلّ تبادل بريد غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid service record</source>
+        <translation type="unfinished">سجلّ خدمة غير صالح</translation>
+    </message>
+    <message>
+        <source>Invalid TLS association record</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid text record</source>
+        <translation type="unfinished">سجلّ نصوص غير صالح</translation>
+    </message>
 </context>
 <context>
     <name>QDnsLookupRunnable</name>
     <message>
-        <source>IPv6 addresses for nameservers are currently not supported</source>
-        <translation>عناوين IPv6 لخواديم الأسماء ليست مدعومة حاليًّا</translation>
-    </message>
-    <message>
-        <source>Invalid domain name</source>
-        <translation>اسم المجال غير صالح</translation>
-    </message>
-    <message>
-        <source>Not yet supported on Android</source>
-        <translation>ليس مدعومًا في أندرويد بعد</translation>
-    </message>
-    <message>
-        <source>Resolver functions not found</source>
-        <translation>لم يُعثر على دوال الحلّال</translation>
-    </message>
-    <message>
-        <source>Resolver initialization failed</source>
-        <translation>فشل تمهيد الحلّال</translation>
-    </message>
-    <message>
-        <source>Server could not process query</source>
-        <translation>تعذّر على الخادوم معالجة الاستعلام</translation>
-    </message>
-    <message>
-        <source>Server failure</source>
-        <translation>فشل في الخادوم</translation>
-    </message>
-    <message>
-        <source>Non existent domain</source>
-        <translation>النّطاق غير موجود</translation>
-    </message>
-    <message>
-        <source>Server refused to answer</source>
-        <translation>رفض الخادوم الرّدّ</translation>
-    </message>
-    <message>
-        <source>Invalid reply received</source>
-        <translation>استقبلتُ ردًّا غير صالح</translation>
-    </message>
-    <message>
-        <source>Could not expand domain name</source>
-        <translation>تعذّر توسيع اسم النّطاق</translation>
-    </message>
-    <message>
-        <source>Invalid IPv4 address record</source>
-        <translation>سجلّ عنوان IPv4 غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid IPv6 address record</source>
-        <translation>سجلّ عنوان IPv6 غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid canonical name record</source>
-        <translation>سجلّ الاسم المتعارف عليه غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid name server record</source>
-        <translation>سجلّ خادوم أسماء غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid pointer record</source>
-        <translation>سجلّ مؤشّر غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid mail exchange record</source>
-        <translation>سجلّ تبادل بريد غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid service record</source>
-        <translation>سجلّ خدمة غير صالح</translation>
-    </message>
-    <message>
-        <source>Invalid text record</source>
-        <translation>سجلّ نصوص غير صالح</translation>
-    </message>
-    <message>
-        <source>Resolver library can&apos;t be loaded: No runtime library loading support</source>
-        <translation>تعذّر تحميل مكتبة الحلّال: لا دعم لتحميل مكتبة بيئة تشغيل</translation>
-    </message>
-    <message>
-        <source>No hostname given</source>
-        <translation>لم يُعط اسم المضيف</translation>
-    </message>
-    <message>
-        <source>Invalid hostname</source>
-        <translation>اسم المضيف غير صالح</translation>
-    </message>
-    <message>
-        <source>Host %1 could not be found.</source>
-        <translation>تعذّر العثور على المضيف %1.</translation>
-    </message>
-    <message>
-        <source>Unknown error</source>
-        <translation>خطأ مجهول</translation>
+        <source>Not yet supported on this OS</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -799,196 +695,6 @@ Press ESC to cancel</source>
     <message>
         <source>Closes the dock widget</source>
         <translation>يغلق ودجة الرّصف</translation>
-    </message>
-</context>
-<context>
-    <name>QDomParser</name>
-    <message>
-        <source>Error occurred while processing XML declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Multiple DTD sections are not allowed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing document type declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing comment</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing a processing instruction</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing a start element</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unexpected end element &apos;%1&apos;</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing an end element</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing the element content</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing comments</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing an entity reference</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unexpected token</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Tag mismatch</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing entity declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error occurred while processing notation declaration</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
-    <name>QDtls</name>
-    <message>
-        <source>Invalid (empty) secret</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Multicast and broadcast addresses are not supported</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot set peer after handshake started</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid address</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot set verification name after handshake started</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot set configuration after handshake started</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot start/continue handshake, invalid handshake state</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid (nullptr) socket</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>To start a handshake you must set peer&apos;s address and port first</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>To start a handshake, DTLS server requires non-empty datagram (client hello)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot start handshake, already done/in progress</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>A valid QUdpSocket and non-empty datagram are needed to continue the handshake</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot continue handshake, not in InProgress state</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot resume, not in VerificationError state</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>No handshake in progress, nothing to abort</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot send shutdown alert, not encrypted</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot write a datagram, not in encrypted state</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot read a datagram, not in encrypted state</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>%1 failed</source>
-        <extracomment>%1: Some function</extracomment>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid SslMode, SslServerMode or SslClientMode expected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Invalid protocol version, DTLS protocol expected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BIO_ADD_new failed, cannot start handshake</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cannot start the handshake, verified client hello expected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Peer verification failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The DTLS connection has been closed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error while writing: %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>The DTLS connection has been shutdown</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error while reading: %1</source>
-        <translation type="unfinished">خطأ أثناء القراءة: %1</translation>
-    </message>
-</context>
-<context>
-    <name>QDtlsClientVerifier</name>
-    <message>
-        <source>A valid UDP socket, non-empty datagram, valid address/port were expected</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>BIO_ADDR_new failed, ignoring client hello</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1020,6 +726,10 @@ Press ESC to cancel</source>
     <message>
         <source>&amp;OK</source>
         <translation>&amp;حسنًا</translation>
+    </message>
+    <message>
+        <source>An error occurred</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1053,14 +763,6 @@ Press ESC to cancel</source>
         <translation>تعذّر فتح %1 كدخل</translation>
     </message>
     <message>
-        <source>Failure to write block</source>
-        <translation>فشلت كتابة الكتلة</translation>
-    </message>
-    <message>
-        <source>Cannot create %1 for output</source>
-        <translation>تعذّر إنشاء %1 كخرج</translation>
-    </message>
-    <message>
         <source>Error while renaming: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1070,6 +772,14 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Cannot open for output: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failure to write block: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot create %1 for output: %2</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1282,54 +992,9 @@ Do you want to delete it anyway?</source>
         <source>Remove</source>
         <translation>أزل</translation>
     </message>
-    <message>
-        <source>My Computer</source>
-        <translation>حاسوبي</translation>
-    </message>
-    <message>
-        <source>Drive</source>
-        <translation>القرص</translation>
-    </message>
-    <message>
-        <source>%1 File</source>
-        <extracomment>%1 is a file name suffix, for example txt</extracomment>
-        <translation>ملفّ %1</translation>
-    </message>
-    <message>
-        <source>File</source>
-        <translation>ملفّ</translation>
-    </message>
-    <message>
-        <source>File Folder</source>
-        <comment>Match Windows Explorer</comment>
-        <translation>مجلّد</translation>
-    </message>
-    <message>
-        <source>Folder</source>
-        <comment>All other platforms</comment>
-        <translation>مجلّد</translation>
-    </message>
-    <message>
-        <source>Alias</source>
-        <comment>OS X Finder</comment>
-        <translation>اختصار</translation>
-    </message>
-    <message>
-        <source>Shortcut</source>
-        <comment>All other platforms</comment>
-        <translation>اختصار</translation>
-    </message>
-    <message>
-        <source>Unknown</source>
-        <translation>مجهول</translation>
-    </message>
 </context>
 <context>
     <name>QFileSystemModel</name>
-    <message>
-        <source>Invalid filename</source>
-        <translation>اسم الملفّ غير صالح</translation>
-    </message>
     <message>
         <source>Name</source>
         <translation>الاسم</translation>
@@ -1359,10 +1024,6 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Computer</source>
         <translation>الحاسوب</translation>
-    </message>
-    <message>
-        <source>&lt;b&gt;The name &quot;%1&quot; cannot be used.&lt;/b&gt;&lt;p&gt;Try using another name, with fewer characters or no punctuation marks.</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1601,95 +1262,6 @@ Do you want to delete it anyway?</source>
     </message>
 </context>
 <context>
-    <name>QFtp</name>
-    <message>
-        <source>Not connected</source>
-        <translation>غير متّصل</translation>
-    </message>
-    <message>
-        <source>Host %1 not found</source>
-        <translation>لم يُعثر على المضيف %1</translation>
-    </message>
-    <message>
-        <source>Connection refused to host %1</source>
-        <translation>رُفض الاتّصال بالمضيف %1</translation>
-    </message>
-    <message>
-        <source>Connection timed out to host %1</source>
-        <translation>انتهت مهلة الاتّصال بالمضيف %1</translation>
-    </message>
-    <message>
-        <source>Connected to host %1</source>
-        <translation>اتّصلتُ بالمضيف %1</translation>
-    </message>
-    <message>
-        <source>Data Connection refused</source>
-        <translation>رُفض اتّصال البيانات</translation>
-    </message>
-    <message>
-        <source>Unknown error</source>
-        <translation>خطأ مجهول</translation>
-    </message>
-    <message>
-        <source>Connecting to host failed:
-%1</source>
-        <translation>فشل الاتّصال بالمضيف:
-%1</translation>
-    </message>
-    <message>
-        <source>Login failed:
-%1</source>
-        <translation>فشل الولوج:
-%1</translation>
-    </message>
-    <message>
-        <source>Listing directory failed:
-%1</source>
-        <translation>فشل سرد الأدّلة:
-%1</translation>
-    </message>
-    <message>
-        <source>Changing directory failed:
-%1</source>
-        <translation>فشل تغيير الدّليل:
-%1</translation>
-    </message>
-    <message>
-        <source>Downloading file failed:
-%1</source>
-        <translation>فشل تنزيل الملفّ:
-%1</translation>
-    </message>
-    <message>
-        <source>Uploading file failed:
-%1</source>
-        <translation>فشل رفع الملفّ:
-%1</translation>
-    </message>
-    <message>
-        <source>Removing file failed:
-%1</source>
-        <translation>فشلت إزالة الملفّ:
-%1</translation>
-    </message>
-    <message>
-        <source>Creating directory failed:
-%1</source>
-        <translation>فشل إنشاء الدّليل:
-%1</translation>
-    </message>
-    <message>
-        <source>Removing directory failed:
-%1</source>
-        <translation>فشلت إزالة الدّليل:
-%1</translation>
-    </message>
-    <message>
-        <source>Connection closed</source>
-        <translation>رُفض الاتّصال</translation>
-    </message>
-</context>
-<context>
     <name>QGnomeTheme</name>
     <message>
         <source>&amp;OK</source>
@@ -1776,15 +1348,15 @@ Do you want to delete it anyway?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Alias for --windowgeometry.</source>
+        <source>Alias for --qwindowgeometry.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Alias for --windowicon.</source>
+        <source>Alias for --qwindowicon.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Alias for --windowtitle.</source>
+        <source>Alias for --qwindowtitle.</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1860,6 +1432,30 @@ Do you want to delete it anyway?</source>
         <source>Insecure redirect</source>
         <translation>إعادة توجيه غير آمنة</translation>
     </message>
+    <message>
+        <source>Unsupported content encoding: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to initialize the compression decoder.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The decompressed output exceeds the limits specified by QNetworkRequest::decompressedSafetyCheckThreshold()</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Decompression failed: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data downloaded is too large to store</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to initialize decompression: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QHttpSocketEngine</name>
@@ -1917,6 +1513,14 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Unable to rollback transaction</source>
         <translation>تعذّر التّراجع عن التّبادل</translation>
+    </message>
+    <message>
+        <source>Could not subscribe to event notifications for %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not unsubscribe from event notifications for %1.</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1988,6 +1592,18 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Could not get statement info</source>
         <translation>تعذّر الحصول على معلومات الإفادة</translation>
+    </message>
+    <message>
+        <source>Array size mismatch. Field name: %3, expected size: %1. Supplied size: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Array dimensions mismatch. Field name: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Array size mismatch: size of %1 is %2, size of provided list is %3</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2152,77 +1768,8 @@ Do you want to delete it anyway?</source>
 <context>
     <name>QLibrary</name>
     <message>
-        <source>&apos;%1&apos; is not an ELF object (%2)</source>
-        <translation>ليس ’%1‘ كائن ELF ‏(%2)</translation>
-    </message>
-    <message>
         <source>file too small</source>
         <translation>الملفّ صغير جدًّا</translation>
-    </message>
-    <message>
-        <source>&apos;%1&apos; is not an ELF object</source>
-        <translation>ليس ’%1‘ كائن ELF</translation>
-    </message>
-    <message>
-        <source>&apos;%1&apos; is an invalid ELF object (%2)</source>
-        <translation>ليس ’%1‘ كائن ELF صالح (%2)</translation>
-    </message>
-    <message>
-        <source>odd cpu architecture</source>
-        <translation>معماريّة المعالج غريبة</translation>
-    </message>
-    <message>
-        <source>wrong cpu architecture</source>
-        <translation>معماريّة المعالج خاطئة</translation>
-    </message>
-    <message>
-        <source>odd endianness</source>
-        <translation>طرفيّة البايتات غريبة</translation>
-    </message>
-    <message>
-        <source>unexpected e_shsize</source>
-        <translation>‏e_shsize غير متوقّع</translation>
-    </message>
-    <message>
-        <source>unexpected e_shentsize</source>
-        <translation>‏e_shentsize غير متوقّع</translation>
-    </message>
-    <message numerus="yes">
-        <source>announced %n section(s), each %1 byte(s), exceed file size</source>
-        <translation>
-            <numerusform>لم يُعلن أيّ قسم، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-            <numerusform>أُعلن قسم واحد، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-            <numerusform>أُعلن قسمين، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-            <numerusform>أُعلنت %Ln أقسام، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-            <numerusform>أُعلن %Ln قسمًا، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-            <numerusform>أُعلن %Ln قسم، بطول %L1 بايت، تخطّى حجم الملفّ</numerusform>
-        </translation>
-    </message>
-    <message>
-        <source>shstrtab section header seems to be at %1</source>
-        <translatorcomment>عدد ليس عاديا</translatorcomment>
-        <translation>تبدو ترويسة قسم shstrtab عند %1</translation>
-    </message>
-    <message>
-        <source>string table seems to be at %1</source>
-        <translatorcomment>عدد ليس عاديا</translatorcomment>
-        <translation>يبدو جدول السّلاسل عند %1</translation>
-    </message>
-    <message>
-        <source>section name %1 of %2 behind end of file</source>
-        <translation>اسم القسم %L1 من أصل %L2 خلف نهاية الملفّ</translation>
-    </message>
-    <message>
-        <source>empty .rodata. not a library.</source>
-        <translation>‏‎.rodate فارغة. ليست مكتبة.</translation>
-    </message>
-    <message>
-        <source>missing section data. This is not a library.</source>
-        <translation>بيانات القسم ناقصة. ليست هذه بمكتبة.</translation>
-    </message>
-    <message>
-        <source>Failed to extract plugin meta data from &apos;%1&apos;</source>
-        <translation>فشل استخراج البيانات الوصفيّة للملحقة من ’%1‘</translation>
     </message>
     <message>
         <source>The shared library was not found.</source>
@@ -2279,6 +1826,146 @@ Do you want to delete it anyway?</source>
     <message>
         <source>&apos;%1&apos; is not a Qt plugin</source>
         <translation>ليست ’%1‘ ليست ملحقة كيوت</translation>
+    </message>
+    <message>
+        <source>&apos;%1&apos; is not a valid Windows DLL (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&apos;%1&apos; is too small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&apos;%1&apos; is not a Qt plugin (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>metadata not found</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>invalid signature</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file is for a different processor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file has no sections</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>wrong characteristics</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file is for a different word size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file has no code</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a section name is empty or extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>section contents extend past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>.qtmetadata section is too small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>.qtmetadata section has incorrect magic</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>.qtmetadata section is writable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>.qtmetadata section is executable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file is for the wrong endianness</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file has an unknown ELF version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file has an unexpected ABI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>file is not a shared object</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>&apos;%1&apos; is not a valid ELF object (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unimplemented: PN_XNUM program headers</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>program header table extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a program header entry extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a note segment start is not properly aligned (offset 0x%1, alignment %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>section table extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>section header string table extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>a section name extends past the end of the file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unexpected program header entry size (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unexpected section entry size (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>e_shstrndx greater than the number of sections e_shnum (%1 &gt;= %2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Failed to extract plugin meta data from &apos;%1&apos;: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not resolve &apos;qt_plugin_instance&apos; function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>metadata too small</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>entrypoint to query the plugin meta data not found</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2392,6 +2079,10 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Socket is not connected</source>
         <translation type="unfinished">المقبس غير متّصل</translation>
+    </message>
+    <message>
+        <source>Remote closed</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2571,7 +2262,7 @@ Do you want to delete it anyway?</source>
         <translation>عنْ كيوت</translation>
     </message>
     <message>
-        <source>&lt;p&gt;Qt is a C++ toolkit for cross-platform application development.&lt;/p&gt;&lt;p&gt;Qt provides single-source portability across all major desktop operating systems. It is also available for embedded Linux and other embedded and mobile operating systems.&lt;/p&gt;&lt;p&gt;Qt is available under multiple licensing options designed to accommodate the needs of our various users.&lt;/p&gt;&lt;p&gt;Qt licensed under our commercial license agreement is appropriate for development of proprietary/commercial software where you do not want to share any source code with third parties or otherwise cannot comply with the terms of GNU (L)GPL.&lt;/p&gt;&lt;p&gt;Qt licensed under GNU (L)GPL is appropriate for the development of Qt&amp;nbsp;applications provided you can comply with the terms and conditions of the respective licenses.&lt;/p&gt;&lt;p&gt;Please see &lt;a href=&quot;http://%2/&quot;&gt;%2&lt;/a&gt; for an overview of Qt licensing.&lt;/p&gt;&lt;p&gt;Copyright (C) %1 The Qt Company Ltd and other contributors.&lt;/p&gt;&lt;p&gt;Qt and the Qt logo are trademarks of The Qt Company Ltd.&lt;/p&gt;&lt;p&gt;Qt is The Qt Company Ltd product developed as an open source project. See &lt;a href=&quot;http://%3/&quot;&gt;%3&lt;/a&gt; for more information.&lt;/p&gt;</source>
+        <source>&lt;p&gt;Qt is a C++ toolkit for cross-platform application development.&lt;/p&gt;&lt;p&gt;Qt provides single-source portability across all major desktop operating systems. It is also available for embedded Linux and other embedded and mobile operating systems.&lt;/p&gt;&lt;p&gt;Qt is available under multiple licensing options designed to accommodate the needs of our various users.&lt;/p&gt;&lt;p&gt;Qt licensed under our commercial license agreement is appropriate for development of proprietary/commercial software where you do not want to share any source code with third parties or otherwise cannot comply with the terms of GNU (L)GPL.&lt;/p&gt;&lt;p&gt;Qt licensed under GNU (L)GPL is appropriate for the development of Qt&amp;nbsp;applications provided you can comply with the terms and conditions of the respective licenses.&lt;/p&gt;&lt;p&gt;Please see &lt;a href=&quot;https://%2/&quot;&gt;%2&lt;/a&gt; for an overview of Qt licensing.&lt;/p&gt;&lt;p&gt;Copyright (C) The Qt Company Ltd. and other contributors.&lt;/p&gt;&lt;p&gt;Qt and the Qt logo are trademarks of The Qt Company Ltd.&lt;/p&gt;&lt;p&gt;Qt is The Qt Company Ltd. product developed as an open source project. See &lt;a href=&quot;https://%3/&quot;&gt;%3&lt;/a&gt; for more information.&lt;/p&gt;</source>
         <extracomment>Leave this text untranslated or include a verbatim copy of it below and note that it is the authoritative version in case of doubt.</extracomment>
         <translation type="unfinished"></translation>
     </message>
@@ -2748,49 +2439,14 @@ Do you want to delete it anyway?</source>
     </message>
 </context>
 <context>
-    <name>QNetworkAccessFtpBackend</name>
-    <message>
-        <source>No suitable proxy found</source>
-        <translation>لم يُعثر على وكيل مناسب</translation>
-    </message>
-    <message>
-        <source>Cannot open %1: is a directory</source>
-        <translation>تعذّر فتح %1: يبدو دليلًا</translation>
-    </message>
-    <message>
-        <source>Logging in to %1 failed: authentication required</source>
-        <translation>فشل الولوج إلى %1: الاستيثاق مطلوب</translation>
-    </message>
-    <message>
-        <source>Error while downloading %1: %2</source>
-        <translation>خطأ أثناء تنزيل %1: ‏%2</translation>
-    </message>
-    <message>
-        <source>Error while uploading %1: %2</source>
-        <translation>خطأ أثناء رفع %1: ‏%2</translation>
-    </message>
-</context>
-<context>
     <name>QNetworkReply</name>
     <message>
         <source>Error transferring %1 - server replied: %2</source>
         <translation>خطأ في نقل %1 - ردّ الخادوم بِ‍: %2</translation>
     </message>
     <message>
-        <source>Background request not allowed.</source>
-        <translation>الطّلب الخلفيّ غير مسموح.</translation>
-    </message>
-    <message>
-        <source>Network session error.</source>
-        <translation>خطأ في جلسة الشّبكة.</translation>
-    </message>
-    <message>
         <source>backend start error.</source>
         <translation>خطأ في بدء السّند.</translation>
-    </message>
-    <message>
-        <source>Temporary network failure.</source>
-        <translation>فشل شبكيّ مؤقّت.</translation>
     </message>
     <message>
         <source>Protocol &quot;%1&quot; is unknown</source>
@@ -2813,36 +2469,6 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Operation canceled</source>
         <translation>أُلغيت العمليّة</translation>
-    </message>
-</context>
-<context>
-    <name>QNetworkSession</name>
-    <message>
-        <source>Invalid configuration.</source>
-        <translation>الضّبط غير صالح.</translation>
-    </message>
-</context>
-<context>
-    <name>QNetworkSessionPrivateImpl</name>
-    <message>
-        <source>Unknown session error.</source>
-        <translation>خطأ مقبس مجهول.</translation>
-    </message>
-    <message>
-        <source>The session was aborted by the user or system.</source>
-        <translation>أُجهضت الجلسة من المستخدم أو النّظام.</translation>
-    </message>
-    <message>
-        <source>The requested operation is not supported by the system.</source>
-        <translation>العمليّة المطلوبة لا يدعمها النّظام.</translation>
-    </message>
-    <message>
-        <source>The specified configuration cannot be used.</source>
-        <translation>تعذّر استخدام الضّبط المحدّد.</translation>
-    </message>
-    <message>
-        <source>Roaming was aborted or is not possible.</source>
-        <translation>أُجهض التّجوال أو أنّه غير ممكن.</translation>
     </message>
 </context>
 <context>
@@ -2969,6 +2595,10 @@ Do you want to delete it anyway?</source>
         <source>Unable to bind variable</source>
         <translation>تعذّر ربط المتغيّر</translation>
     </message>
+    <message>
+        <source>QODBCResult::reset: Unable to set &apos;SQL_ATTR_CURSOR_TYPE&apos; as statement attribute. Please check your ODBC driver configuration</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QPSQLDriver</name>
@@ -2995,6 +2625,10 @@ Do you want to delete it anyway?</source>
     <message>
         <source>Unable to unsubscribe</source>
         <translation>تعذّر إلغاء الاشتراك</translation>
+    </message>
+    <message>
+        <source>Unable to set client encoding to &apos;UNICODE&apos;</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -3852,10 +3486,6 @@ Please turn one of those options off.</source>
         <translation>لا يمكن أن تكون قيمة ’من‘ أعلى من قيمة ’إلى‘.</translation>
     </message>
     <message>
-        <source>OK</source>
-        <translation>حسنًا</translation>
-    </message>
-    <message>
         <source>Invalid Pages Definition</source>
         <translation type="unfinished"></translation>
     </message>
@@ -4173,63 +3803,28 @@ Please turn one of those options off.</source>
         <source>Process failed to start: %1</source>
         <translation>فشل بدء العمليّة: %1</translation>
     </message>
+    <message>
+        <source>Child process modifier threw an exception: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Child process modifier reported error: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Child process modifier reported error: %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Child process set up failed: %1: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QProgressDialog</name>
     <message>
         <source>Cancel</source>
         <translation>ألغِ</translation>
-    </message>
-</context>
-<context>
-    <name>QRegExp</name>
-    <message>
-        <source>no error occurred</source>
-        <translation>لم تحدث أخطاء</translation>
-    </message>
-    <message>
-        <source>disabled feature used</source>
-        <translation>استُخدمت ميزة معطّلة</translation>
-    </message>
-    <message>
-        <source>bad char class syntax</source>
-        <translation>صياغة صنف المحرف سيّئة</translation>
-    </message>
-    <message>
-        <source>bad lookahead syntax</source>
-        <translation>صياغة نظر للأمام سيّئة</translation>
-    </message>
-    <message>
-        <source>lookbehinds not supported, see QTBUG-2371</source>
-        <translation>النّظر للخلف غير مدعوم، طالع العلّة رقم ٢٣٧١</translation>
-    </message>
-    <message>
-        <source>bad repetition syntax</source>
-        <translation>صياغة تكرار سيّئة</translation>
-    </message>
-    <message>
-        <source>invalid octal value</source>
-        <translation>قيمة ثمانيّة غير صالحة</translation>
-    </message>
-    <message>
-        <source>missing left delim</source>
-        <translation>محدّد اليسار ناقص</translation>
-    </message>
-    <message>
-        <source>unexpected end</source>
-        <translation>نهاية غير متوقّعة</translation>
-    </message>
-    <message>
-        <source>met internal limit</source>
-        <translation>قابلتُ الحدّ الدّاخليّ</translation>
-    </message>
-    <message>
-        <source>invalid interval</source>
-        <translation>فترة غير صالحة</translation>
-    </message>
-    <message>
-        <source>invalid category</source>
-        <translation>فئة غير صالحة</translation>
     </message>
 </context>
 <context>
@@ -4898,35 +4493,9 @@ Please turn one of those options off.</source>
         <source>PCRE2_MATCH_INVALID_UTF is not supported for DFA matching</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>QSQLite2Driver</name>
     <message>
-        <source>Error opening database</source>
-        <translation>خطأ في فتح قاعدة البيانات</translation>
-    </message>
-    <message>
-        <source>Unable to begin transaction</source>
-        <translation>تعذّر بدء التّبادل</translation>
-    </message>
-    <message>
-        <source>Unable to commit transaction</source>
-        <translation>تعذّر إيداع التّبادل</translation>
-    </message>
-    <message>
-        <source>Unable to rollback transaction</source>
-        <translation>تعذّر التّراجع عن التّبادل</translation>
-    </message>
-</context>
-<context>
-    <name>QSQLite2Result</name>
-    <message>
-        <source>Unable to fetch results</source>
-        <translation>تعذّر جلب النّتائج</translation>
-    </message>
-    <message>
-        <source>Unable to execute statement</source>
-        <translation>تعذّر تنفيذ الإفادة</translation>
+        <source>INTERNAL ERROR: invalid substring offset</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -5067,10 +4636,6 @@ Please turn one of those options off.</source>
 <context>
     <name>QSharedMemory</name>
     <message>
-        <source>%1: unable to set key on lock</source>
-        <translation>‏%1: تعذّر ضبط مفتاح للقفل</translation>
-    </message>
-    <message>
         <source>%1: create size is less then 0</source>
         <translation>‏%1: حجم الإنشاء أقلّ من ٠</translation>
     </message>
@@ -5089,14 +4654,6 @@ Please turn one of those options off.</source>
     <message>
         <source>%1: bad name</source>
         <translation>‏%1: الاسم سيّء</translation>
-    </message>
-    <message>
-        <source>%1: UNIX key file doesn&apos;t exist</source>
-        <translation>‏%1: مفتاح ملفّ يونكس غير موجود</translation>
-    </message>
-    <message>
-        <source>%1: ftok failed</source>
-        <translation>‏%1: فشل ftok</translation>
     </message>
     <message>
         <source>%1: unable to make key</source>
@@ -5127,10 +4684,6 @@ Please turn one of those options off.</source>
         <translation>‏%1: نفذت الموارد</translation>
     </message>
     <message>
-        <source>%1: unknown error %2</source>
-        <translation>‏%1: الخطأ %2 مجهول</translation>
-    </message>
-    <message>
         <source>%1: invalid size</source>
         <translation>‏%1: الحجم غير صالح</translation>
     </message>
@@ -5141,6 +4694,18 @@ Please turn one of those options off.</source>
     <message>
         <source>%1: size query failed</source>
         <translation>‏%1 فشل استعلام الحجم</translation>
+    </message>
+    <message>
+        <source>%1: unsupported key type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: unable to set key on lock (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: unknown error: %2</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -6164,6 +5729,10 @@ Please turn one of those options off.</source>
         <source>To-do list</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Control</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>QSocks5SocketEngine</name>
@@ -6273,9 +5842,7 @@ Please turn one of those options off.</source>
     </message>
     <message>
         <source>frame</source>
-        <extracomment>Role of an accessible object: a window with frame and title
-----------
-Role of an accessible object</extracomment>
+        <extracomment>Role of an accessible object: a window with frame and title</extracomment>
         <translation>إطار</translation>
     </message>
     <message>
@@ -6633,10 +6200,6 @@ Role of an accessible object</extracomment>
         <translation>قائمة الشّفرات فارغة أو غير صالحة (%1)</translation>
     </message>
     <message>
-        <source>Cannot provide a certificate with no key, %1</source>
-        <translation>لا يمكن توفير شهادة دون مفتاح، %1</translation>
-    </message>
-    <message>
         <source>Error loading local certificate, %1</source>
         <translation>خطأ في تحميل الشّهادة المحليّة، %1</translation>
     </message>
@@ -6781,46 +6344,6 @@ Role of an accessible object</extracomment>
         <translation>خطأ أثناء مصافحة SSL: ‏%1</translation>
     </message>
     <message>
-        <source>Error when setting the OpenSSL configuration (%1)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error while setting the minimal protocol version</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Error while setting the maximum protocol version</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>OpenSSL version with disabled elliptic curves</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Expecting QByteArray for %1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>An error occurred attempting to set %1 to %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Wrong value for %1 (%2)</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Unrecognized command %1 = %2</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SSL_CONF_finish() failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>SSL_CONF_CTX_new() failed</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>No OCSP status response found</source>
         <translation type="unfinished"></translation>
     </message>
@@ -6870,6 +6393,54 @@ Role of an accessible object</extracomment>
     </message>
     <message>
         <source>Attempted to use an unsupported protocol.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error when setting the OpenSSL configuration (%1)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while setting the minimal protocol version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while setting the maximum protocol version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot provide a certificate with no key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>OpenSSL version with disabled elliptic curves</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Expecting QByteArray for %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>An error occurred attempting to set %1 to %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wrong value for %1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unrecognized command %1 = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL_CONF_finish() failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>SSL_CONF_CTX_new() failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>TLS certificate unexpectedly changed during renegotiation!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -7020,10 +6591,6 @@ Role of an accessible object</extracomment>
         <source>Schannel failed to encrypt data: %1</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Cannot provide a certificate with no key</source>
-        <translation type="unfinished"></translation>
-    </message>
 </context>
 <context>
     <name>QStandardPaths</name>
@@ -7099,27 +6666,25 @@ Role of an accessible object</extracomment>
         <source>Application Configuration</source>
         <translation>ضبط التّطبيقات</translation>
     </message>
-</context>
-<context>
-    <name>QStateMachine</name>
     <message>
-        <source>Missing initial state in compound state &apos;%1&apos;</source>
-        <translation>الحالة الأوّليّة للحالة المركّبة ’%1‘ ناقصة</translation>
+        <source>State</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Missing default state in history state &apos;%1&apos;</source>
-        <translation>الحالة الافتراضيّة ناقصة في تأريخ الحالات ’%1‘</translation>
+        <source>Shared State</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>No common ancestor for targets and source of transition from state &apos;%1&apos;</source>
-        <translation>لا سلف عام لأهداف الانتقال من الحالة ’%1‘ ومصادره</translation>
+        <source>Public</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unknown error</source>
-        <translation>خطأ مجهول</translation>
+        <source>Templates</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Child mode of state machine &apos;%1&apos; is not &apos;ExclusiveStates&apos;.</source>
+        <source>Temporary Items</source>
+        <extracomment>macOS: Temporary directory</extracomment>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -7142,19 +6707,32 @@ Role of an accessible object</extracomment>
         <translation>‏%1: نفذت الموارد</translation>
     </message>
     <message>
-        <source>%1: unknown error %2</source>
-        <translation>‏%1: الخطأ %2 مجهول</translation>
-    </message>
-</context>
-<context>
-    <name>QTDSDriver</name>
-    <message>
-        <source>Unable to open connection</source>
-        <translation>تعذّر فتح اتّصال</translation>
+        <source>%1: unsupported key type</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Unable to use database</source>
-        <translation>تعذّر استخدام قاعدة البيانات</translation>
+        <source>%1: key too long</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: unknown error: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: key is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: System V semaphores are not available for sandboxed applications. Please build Qt with -feature-ipc_posix</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: unable to make key</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1: ftok failed</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -7410,101 +6988,6 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     </message>
 </context>
 <context>
-    <name>QXml</name>
-    <message>
-        <source>no error occurred</source>
-        <translation>لم تحدث أخطاء</translation>
-    </message>
-    <message>
-        <source>error triggered by consumer</source>
-        <translation>خطأ حفّزه مستهلك</translation>
-    </message>
-    <message>
-        <source>unexpected end of file</source>
-        <translation>توقّعتُ نهاية الملفّ</translation>
-    </message>
-    <message>
-        <source>more than one document type definition</source>
-        <translation>أكثر من تعريف واحد لنوع المستند</translation>
-    </message>
-    <message>
-        <source>error occurred while parsing element</source>
-        <translation>حدث خطأ في تحليل العنصر</translation>
-    </message>
-    <message>
-        <source>tag mismatch</source>
-        <translation>الوسوم لا تتطابق</translation>
-    </message>
-    <message>
-        <source>error occurred while parsing content</source>
-        <translation>حدث خطأ في تحليل المحتويات</translation>
-    </message>
-    <message>
-        <source>unexpected character</source>
-        <translation>محرف غير متوقّع</translation>
-    </message>
-    <message>
-        <source>invalid name for processing instruction</source>
-        <translation>اسم غير صالح لتعليمة المعالجة</translation>
-    </message>
-    <message>
-        <source>version expected while reading the XML declaration</source>
-        <translation>توقّعتُ الإصدارة أثناء قراءة تعريف XML</translation>
-    </message>
-    <message>
-        <source>wrong value for standalone declaration</source>
-        <translation>قيمة خاطئة للتّعريف المستقلّ</translation>
-    </message>
-    <message>
-        <source>encoding declaration or standalone declaration expected while reading the XML declaration</source>
-        <translation>توقّعتُ تعريف التّرميز أو تعريفًا مستقلًا أثناء قراءة تعريف XML</translation>
-    </message>
-    <message>
-        <source>standalone declaration expected while reading the XML declaration</source>
-        <translation>توقّعتُ تعريفًا مستقلًا أثناء قراءة تعريف XML</translation>
-    </message>
-    <message>
-        <source>error occurred while parsing document type definition</source>
-        <translation>حدث خطأ أثناء تحليل تعريف نوع المستند</translation>
-    </message>
-    <message>
-        <source>letter is expected</source>
-        <translation>توقّعتُ حرفًا</translation>
-    </message>
-    <message>
-        <source>error occurred while parsing comment</source>
-        <translation>حدث خطأ أثناء تحليل التّعليق</translation>
-    </message>
-    <message>
-        <source>error occurred while parsing reference</source>
-        <translation>حدث خطأ أثناء تحليل المرجع</translation>
-    </message>
-    <message>
-        <source>internal general entity reference not allowed in DTD</source>
-        <translation>لا يسمح DTD بمراجع الكيان العامّة الدّاخليّة</translation>
-    </message>
-    <message>
-        <source>external parsed general entity reference not allowed in attribute value</source>
-        <translation>مراجع الكيانات العامّة المحلّلة خارجًا ليست مسموحة في قيم الخواصّ</translation>
-    </message>
-    <message>
-        <source>external parsed general entity reference not allowed in DTD</source>
-        <translation>لا يسمح DTD بمراجع الكيان العامّة المحلّلة خارجًا</translation>
-    </message>
-    <message>
-        <source>unparsed entity reference in wrong context</source>
-        <translation>مرجع كيان لم يُحلّل في سياق خاطئ</translation>
-    </message>
-    <message>
-        <source>recursive entities</source>
-        <translation>كيانات تكراريّة</translation>
-    </message>
-    <message>
-        <source>error in the text declaration of an external entity</source>
-        <translation>خطأ في التّعريف النّصّيّ لكيان خارجيّ</translation>
-    </message>
-</context>
-<context>
     <name>QXmlStream</name>
     <message>
         <source>Extra content at end of document.</source>
@@ -7567,10 +7050,6 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
         <translation>يقبل خيار مستقلّ/Standalone قمتيّ نعم/yes ولا/no فقط.</translation>
     </message>
     <message>
-        <source>Invalid attribute in XML declaration.</source>
-        <translation>خاصيّة غير صالحة في تعريف XML.</translation>
-    </message>
-    <message>
         <source>Premature end of document.</source>
         <translation>انتهى المستند قبل أوانه.</translation>
     </message>
@@ -7631,6 +7110,14 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
         <translation>مرجع محرفيّ غير صالح.</translation>
     </message>
     <message>
+        <source>Invalid attribute in XML declaration: %1 = %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Length of XML attribute name exceeds implementation limits (4KiB characters).</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>&apos;%1&apos;</source>
         <comment>expected</comment>
         <extracomment>&apos;&lt;first option&gt;&apos;</extracomment>
@@ -7663,11 +7150,448 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Unexpected token type %1 in %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Found second DTD token in %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Self-referencing entity detected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Entity expands to more characters than the entity expansion limit.</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Assets::Downloader::AssetDownloader</name>
+    <message>
+        <source>Downloading JSON file...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading zip file...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unzipping...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Downloading assets...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Copying assets...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QFactoryLoader</name>
+    <message>
+        <source>Metadata parsing error: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid metadata version</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unexpected metadata contents</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QAbstractFileIconProvider</name>
+    <message>
+        <source>Drive</source>
+        <translation type="unfinished">القرص</translation>
+    </message>
+    <message>
+        <source>File</source>
+        <translation type="unfinished">ملفّ</translation>
+    </message>
+    <message>
+        <source>File Folder</source>
+        <comment>Match Windows Explorer</comment>
+        <translation type="unfinished">مجلّد</translation>
+    </message>
+    <message>
+        <source>Folder</source>
+        <comment>All other platforms</comment>
+        <translation type="unfinished">مجلّد</translation>
+    </message>
+    <message>
+        <source>Alias</source>
+        <comment>macOS Finder</comment>
+        <translation type="unfinished">اختصار</translation>
+    </message>
+    <message>
+        <source>Shortcut</source>
+        <comment>All other platforms</comment>
+        <translation type="unfinished">اختصار</translation>
+    </message>
+    <message>
+        <source>Unknown</source>
+        <translation type="unfinished">مجهول</translation>
+    </message>
+</context>
+<context>
+    <name>QDtls</name>
+    <message>
+        <source>Multicast and broadcast addresses are not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot set peer after handshake started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot set verification name after handshake started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot set configuration after handshake started</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot start/continue handshake, invalid handshake state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid (nullptr) socket</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To start a handshake you must set peer&apos;s address and port first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>To start a handshake, DTLS server requires non-empty datagram (client hello)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot start handshake, already done/in progress</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>A valid QUdpSocket and non-empty datagram are needed to continue the handshake</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot continue handshake, not in InProgress state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot resume, not in VerificationError state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>No handshake in progress, nothing to abort</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot send shutdown alert, not encrypted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot write a datagram, not in encrypted state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot read a datagram, not in encrypted state</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 failed</source>
+        <extracomment>%1: Some function</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid SslMode, SslServerMode or SslClientMode expected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Invalid protocol version, DTLS protocol expected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BIO_ADD_new failed, cannot start handshake</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Cannot start the handshake, verified client hello expected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Peer verification failed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The DTLS connection has been closed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while writing: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The DTLS connection has been shutdown</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error while reading: %1</source>
+        <translation type="unfinished">خطأ أثناء القراءة: %1</translation>
+    </message>
+    <message>
+        <source>Invalid (empty) secret</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QDtlsClientVerifier</name>
+    <message>
+        <source>A valid UDP socket, non-empty datagram, and valid address/port were expected</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>BIO_ADDR_new failed, ignoring client hello</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QCocoaMenuBar</name>
+    <message>
+        <source>Edit</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>quiaccessibilityelement</name>
+    <message>
+        <source>checked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>unchecked</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QCupsPrinterSupport</name>
+    <message>
+        <source>Authentication Needed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication needed to use %1.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Authentication needed to use %1 on %2.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Username:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Password:</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QMimerSQL</name>
+    <message>
+        <source>No Mimer SQL error for code %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Generic Mimer SQL error</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QMimerSQLResult</name>
+    <message>
+        <source>Could not get %1, column %2</source>
+        <extracomment>Data type, column</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not set %1, parameter %2</source>
+        <extracomment>Data type, parameter</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not close cursor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not close statement</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch did not succeed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Fetch first did not succeed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not fetch next row</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown data type %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not check null, column %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not prepare/execute statement</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Wrong number of parameters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unknown datatype, parameter %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not execute statement/open cursor</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Only input parameters can be used in batch operations</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not add batch %1</source>
+        <extracomment>%1 is the batch number</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not execute batch</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QMimerSQLResult:</name>
+    <message>
+        <source>Fetch last did not succeed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Column %1 out of range</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>QMimerSQLDriver</name>
+    <message>
+        <source>Could not connect to database</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Could not start transaction</source>
+        <translation type="unfinished">تعذّر بدء التّبادل</translation>
+    </message>
+    <message>
+        <source>Could not commit transaction</source>
+        <translation type="unfinished">تعذّر إيداع التّبادل</translation>
+    </message>
+    <message>
+        <source>Could not roll back transaction</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>Print Device Input Slot</name>
+    <message>
+        <source>Automatic</source>
+        <translation type="unfinished">آليّ</translation>
+    </message>
+</context>
+<context>
+    <name>Print Device Output Bin</name>
+    <message>
+        <source>Automatic</source>
+        <translation type="unfinished">آليّ</translation>
+    </message>
+</context>
+<context>
+    <name>QDomParser</name>
+    <message>
+        <source>Error occurred while processing XML declaration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Multiple DTD sections are not allowed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing document type declaration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing a processing instruction</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing a start element</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unexpected end element &apos;%1&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing an end element</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing the element content</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing comments</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing an entity reference</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Unexpected token</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Tag mismatch</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing entity declaration</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Error occurred while processing notation declaration</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
