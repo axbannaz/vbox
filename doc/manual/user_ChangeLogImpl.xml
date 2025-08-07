@@ -112,7 +112,7 @@ Rules for adding a changelog entry to make them look more uniform:
 
       <listitem>
         <para>Arm VMs: Note that the saved state of Arm VMs from
-          VirtualBox 7.1 is <b>incompatible</b> with VirtualBox 7.2, so
+          VirtualBox 7.1 is <emphasis role="bold">incompatible</emphasis> with VirtualBox 7.2, so
           please shut down such VMs in saved state before upgrading
           to 7.2 (snapshots with associated saved state created with 7.1
           will no longer work with 7.2)</para>
