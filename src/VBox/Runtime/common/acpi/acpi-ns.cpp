@@ -75,6 +75,12 @@ static void rtAcpiNsEntryDestroy(PRTACPINSENTRY pNsEntry)
         RTListNodeRemove(&pIt->NdNs);
         rtAcpiNsEntryDestroy(pIt);
     }
+    if (pNsEntry->enmType == kAcpiNsEntryType_External)
+    {
+        AssertPtr(pNsEntry->pExternal);
+        RTMemFree((void *)pNsEntry->pExternal);
+        pNsEntry->pExternal = NULL;
+    }
     RTMemFree(pNsEntry);
 }
 

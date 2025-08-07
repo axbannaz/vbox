@@ -105,6 +105,25 @@ DECLHIDDEN(void) rtAcpiAstNodeFree(PRTACPIASTNODE pAstNd)
         }
     }
 
+    switch (pAstNd->enmOp)
+    {
+        case kAcpiAstNodeOp_Field:
+        {
+            RTMemFree(pAstNd->Fields.paFields);
+            pAstNd->Fields.paFields = NULL;
+            pAstNd->Fields.cFields  = 0;
+            break;
+        }
+        case kAcpiAstNodeOp_ResourceTemplate:
+        {
+            RTAcpiResourceDestroy(pAstNd->hAcpiRes);
+            pAstNd->hAcpiRes = NIL_RTACPIRES;
+            break;
+        }
+        default:
+            break;
+    }
+
     pAstNd->enmOp  = kAcpiAstNodeOp_Invalid;
     pAstNd->cArgs  = 0;
     pAstNd->fFlags = 0;
