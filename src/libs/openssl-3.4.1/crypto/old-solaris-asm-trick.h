@@ -2,12 +2,12 @@
 /** @file
  * OpenSSL - Hack for older binutils/gas on solaris (10).
  *
- * Disable the .cfi_xxxx directives for Solaris 10/amd64 with old gas, as gas will 
- * be creating .eh_frame with the wrong kind of of section type, causing the 
+ * Disable the .cfi_xxxx directives for Solaris 10/amd64 with old gas, as gas will
+ * be creating .eh_frame with the wrong kind of of section type, causing the
  * linker to stop with an fatal error.  Looks like this was addressed between
- * binutils 2.18 and 2.20.1. 
- * 
- * The .xref directive is ignored by gas v2.15, so we map the .cfi_xxxx stuff 
+ * binutils 2.18 and 2.20.1.
+ *
+ * The .xref directive is ignored by gas v2.15, so we map the .cfi_xxxx stuff
  * onto it.
  */
 
@@ -33,6 +33,12 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
+#ifndef VBOX_INCLUDED_SRC_crypto_old_solaris_asm_trick_h
+#define VBOX_INCLUDED_SRC_crypto_old_solaris_asm_trick_h
+#ifndef RT_WITHOUT_PRAGMA_ONCE
+# pragma once
+#endif
+
 #define cfi_adjust_cfa_offset   xref
 #define cfi_def_cfa             xref
 #define cfi_def_cfa_register    xref
@@ -45,3 +51,5 @@
 #define cfi_restore             xref
 #define cfi_restore_state       xref
 #define cfi_startproc           xref
+
+#endif /* !VBOX_INCLUDED_SRC_crypto_old_solaris_asm_trick_h */
