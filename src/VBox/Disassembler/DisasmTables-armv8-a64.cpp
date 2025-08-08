@@ -386,32 +386,400 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysResult, 0xfffffffe /*fFixedInsn*/,
 
 /* SYS */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(Sys)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysInsExtraStr, 5, 18, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(SysFallback)
     DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 0 /*idxParam*/),
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 1 /*idxParam*/), /** @todo r=bird: kDisParmParseGprZr64? */
-DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(Sys)
-    DIS_ARMV8_OP(0xd5080000, "sys",             OP_ARMV8_A64_SYS,       DISOPTYPE_HARMLESS),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(Sys) /** @todo DISOPTYPE_PRIVILEGED */
+    DIS_ARMV8_OP(0xd5087100,            "ic\0ialluis",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd5087500,            "ic\0iallu",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 5 op2=0 */
+    DIS_ARMV8_OP(0xd5087620,            "dc\0ivac",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd5087640,            "dc\0isw",              OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=2 */
+    DIS_ARMV8_OP(0xd5087660,            "dc\0igvac",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=3 */
+    DIS_ARMV8_OP(0xd5087680,            "dc\0igsw",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=4 */
+    DIS_ARMV8_OP(0xd50876a0,            "dc\0igdvac",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50876c0,            "dc\0igdsw",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 6 op2=6 */
+    DIS_ARMV8_OP(0xd5087780,            "gcspushx\0",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 7 op2=4 */
+    DIS_ARMV8_OP(0xd50877a0,            "gcspopcx\0",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50877c0,            "gcspopx\0",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 7 op2=6 */
+    DIS_ARMV8_OP(0xd5087800,            "at\0s1e1r",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 8 op2=0 */
+    DIS_ARMV8_OP(0xd5087820,            "at\0s1e1w",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 8 op2=1 */
+    DIS_ARMV8_OP(0xd5087840,            "at\0s1e0r",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 8 op2=2 */
+    DIS_ARMV8_OP(0xd5087860,            "at\0s1e0w",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 8 op2=3 */
+    DIS_ARMV8_OP(0xd5087900,            "at\0s1e1rp",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 9 op2=0 */
+    DIS_ARMV8_OP(0xd5087920,            "at\0s1e1wp",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 9 op2=1 */
+    DIS_ARMV8_OP(0xd5087940,            "at\0s1e1a",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm= 9 op2=2 */
+    DIS_ARMV8_OP(0xd5087a40,            "dc\0csw",              OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=10 op2=2 */
+    DIS_ARMV8_OP(0xd5087a80,            "dc\0cgsw",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=10 op2=4 */
+    DIS_ARMV8_OP(0xd5087ac0,            "dc\0cgdsw",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=10 op2=6 */
+    DIS_ARMV8_OP(0xd5087e40,            "dc\0cisw",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=14 op2=2 */
+    DIS_ARMV8_OP(0xd5087e80,            "dc\0cigsw",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=14 op2=4 */
+    DIS_ARMV8_OP(0xd5087ec0,            "dc\0cigdsw",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=14 op2=6 */
+    DIS_ARMV8_OP(0xd5087f20,            "dc\0civaps",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=15 op2=1 */
+    DIS_ARMV8_OP(0xd5087fa0,            "dc\0cigdvaps",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 7 CRm=15 op2=5 */
+    DIS_ARMV8_OP(0xd5088100,            "tlbi\0vmalle1os",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd5088120,            "tlbi\0vae1os",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd5088140,            "tlbi\0aside1os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=2 */
+    DIS_ARMV8_OP(0xd5088160,            "tlbi\0vaae1os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=3 */
+    DIS_ARMV8_OP(0xd50881a0,            "tlbi\0vale1os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50881e0,            "tlbi\0vaale1os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=7 */
+    DIS_ARMV8_OP(0xd5088220,            "tlbi\0rvae1is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd5088260,            "tlbi\0rvaae1is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=3 */
+    DIS_ARMV8_OP(0xd50882a0,            "tlbi\0rvale1is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50882e0,            "tlbi\0rvaale1is",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=7 */
+    DIS_ARMV8_OP(0xd5088300,            "tlbi\0vmalle1is",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd5088320,            "tlbi\0vae1is",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd5088340,            "tlbi\0aside1is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=2 */
+    DIS_ARMV8_OP(0xd5088360,            "tlbi\0vaae1is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=3 */
+    DIS_ARMV8_OP(0xd50883a0,            "tlbi\0vale1is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50883e0,            "tlbi\0vaale1is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=7 */
+    DIS_ARMV8_OP(0xd5088520,            "tlbi\0rvae1os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd5088560,            "tlbi\0rvaae1os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=3 */
+    DIS_ARMV8_OP(0xd50885a0,            "tlbi\0rvale1os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50885e0,            "tlbi\0rvaale1os",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=7 */
+    DIS_ARMV8_OP(0xd5088620,            "tlbi\0rvae1",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd5088660,            "tlbi\0rvaae1",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=3 */
+    DIS_ARMV8_OP(0xd50886a0,            "tlbi\0rvale1",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50886e0,            "tlbi\0rvaale1",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=7 */
+    DIS_ARMV8_OP(0xd5088700,            "tlbi\0vmalle1",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd5088720,            "tlbi\0vae1",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd5088740,            "tlbi\0aside1",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=2 */
+    DIS_ARMV8_OP(0xd5088760,            "tlbi\0vaae1",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=3 */
+    DIS_ARMV8_OP(0xd50887a0,            "tlbi\0vale1",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50887e0,            "tlbi\0vaale1",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=7 */
+    DIS_ARMV8_OP(0xd5089100,            "tlbi\0vmalle1osnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd5089120,            "tlbi\0vae1osnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd5089140,            "tlbi\0aside1osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=2 */
+    DIS_ARMV8_OP(0xd5089160,            "tlbi\0vaae1osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=3 */
+    DIS_ARMV8_OP(0xd50891a0,            "tlbi\0vale1osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50891e0,            "tlbi\0vaale1osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=7 */
+    DIS_ARMV8_OP(0xd5089220,            "tlbi\0rvae1isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd5089260,            "tlbi\0rvaae1isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=3 */
+    DIS_ARMV8_OP(0xd50892a0,            "tlbi\0rvale1isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50892e0,            "tlbi\0rvaale1isnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=7 */
+    DIS_ARMV8_OP(0xd5089300,            "tlbi\0vmalle1isnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd5089320,            "tlbi\0vae1isnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd5089340,            "tlbi\0aside1isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=2 */
+    DIS_ARMV8_OP(0xd5089360,            "tlbi\0vaae1isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=3 */
+    DIS_ARMV8_OP(0xd50893a0,            "tlbi\0vale1isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50893e0,            "tlbi\0vaale1isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=7 */
+    DIS_ARMV8_OP(0xd5089520,            "tlbi\0rvae1osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd5089560,            "tlbi\0rvaae1osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=3 */
+    DIS_ARMV8_OP(0xd50895a0,            "tlbi\0rvale1osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50895e0,            "tlbi\0rvaale1osnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=7 */
+    DIS_ARMV8_OP(0xd5089620,            "tlbi\0rvae1nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd5089660,            "tlbi\0rvaae1nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=3 */
+    DIS_ARMV8_OP(0xd50896a0,            "tlbi\0rvale1nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50896e0,            "tlbi\0rvaale1nxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=7 */
+    DIS_ARMV8_OP(0xd5089700,            "tlbi\0vmalle1nxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd5089720,            "tlbi\0vae1nxs",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd5089740,            "tlbi\0aside1nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=2 */
+    DIS_ARMV8_OP(0xd5089760,            "tlbi\0vaae1nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=3 */
+    DIS_ARMV8_OP(0xd50897a0,            "tlbi\0vale1nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50897e0,            "tlbi\0vaale1nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=7 */
+    DIS_ARMV8_OP(0xd5097280,            "brb\0iall",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=1 CRn= 7 CRm= 2 op2=4 */
+    DIS_ARMV8_OP(0xd50972a0,            "brb\0inj",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=1 CRn= 7 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50b72e0,            "trcit\0",              OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 2 op2=7 */
+    DIS_ARMV8_OP(0xd50b7380,            "cfp\0rctx",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 3 op2=4 */
+    DIS_ARMV8_OP(0xd50b73a0,            "dvp\0rctx",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50b73c0,            "cosp\0rctx",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 3 op2=6 */
+    DIS_ARMV8_OP(0xd50b73e0,            "cpp\0rctx",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 3 op2=7 */
+    DIS_ARMV8_OP(0xd50b7420,            "dc\0zva",              OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 4 op2=1 */
+    DIS_ARMV8_OP(0xd50b7460,            "dc\0gva",              OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd50b7480,            "dc\0gzva",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 4 op2=4 */
+    DIS_ARMV8_OP(0xd50b7520,            "ic\0ivau",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd50b7700,            "gcspushm\0",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd50b7740,            "gcsss1\0",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 7 op2=2 */
+    DIS_ARMV8_OP(0xd50b7a20,            "dc\0cvac",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=10 op2=1 */
+    DIS_ARMV8_OP(0xd50b7a60,            "dc\0cgvac",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=10 op2=3 */
+    DIS_ARMV8_OP(0xd50b7aa0,            "dc\0cgdvac",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=10 op2=5 */
+    DIS_ARMV8_OP(0xd50b7b00,            "dc\0cvaoc",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=11 op2=0 */
+    DIS_ARMV8_OP(0xd50b7b20,            "dc\0cvau",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=11 op2=1 */
+    DIS_ARMV8_OP(0xd50b7be0,            "dc\0cgdvaoc",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=11 op2=7 */
+    DIS_ARMV8_OP(0xd50b7c20,            "dc\0cvap",             OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=12 op2=1 */
+    DIS_ARMV8_OP(0xd50b7c60,            "dc\0cgvap",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=12 op2=3 */
+    DIS_ARMV8_OP(0xd50b7ca0,            "dc\0cgdvap",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=12 op2=5 */
+    DIS_ARMV8_OP(0xd50b7d20,            "dc\0cvadp",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=13 op2=1 */
+    DIS_ARMV8_OP(0xd50b7d60,            "dc\0cgvadp",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=13 op2=3 */
+    DIS_ARMV8_OP(0xd50b7da0,            "dc\0cgdvadp",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=13 op2=5 */
+    DIS_ARMV8_OP(0xd50b7e20,            "dc\0civac",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=14 op2=1 */
+    DIS_ARMV8_OP(0xd50b7e60,            "dc\0cigvac",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=14 op2=3 */
+    DIS_ARMV8_OP(0xd50b7ea0,            "dc\0cigdvac",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=14 op2=5 */
+    DIS_ARMV8_OP(0xd50b7f00,            "dc\0civaoc",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=15 op2=0 */
+    DIS_ARMV8_OP(0xd50b7fe0,            "dc\0cigdvaoc",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm=15 op2=7 */
+    DIS_ARMV8_OP(0xd50c7800,            "at\0s1e2r",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=0 */
+    DIS_ARMV8_OP(0xd50c7820,            "at\0s1e2w",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=1 */
+    DIS_ARMV8_OP(0xd50c7880,            "at\0s12e1r",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=4 */
+    DIS_ARMV8_OP(0xd50c78a0,            "at\0s12e1w",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=5 */
+    DIS_ARMV8_OP(0xd50c78c0,            "at\0s12e0r",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=6 */
+    DIS_ARMV8_OP(0xd50c78e0,            "at\0s12e0w",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 8 op2=7 */
+    DIS_ARMV8_OP(0xd50c7940,            "at\0s1e2a",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm= 9 op2=2 */
+    DIS_ARMV8_OP(0xd50c7e00,            "dc\0cipae",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm=14 op2=0 */
+    DIS_ARMV8_OP(0xd50c7ee0,            "dc\0cigdpae",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 7 CRm=14 op2=7 */
+    DIS_ARMV8_OP(0xd50c8020,            "tlbi\0ipas2e1is",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=1 */
+    DIS_ARMV8_OP(0xd50c8040,            "tlbi\0ripas2e1is",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=2 */
+    DIS_ARMV8_OP(0xd50c80a0,            "tlbi\0ipas2le1is",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=5 */
+    DIS_ARMV8_OP(0xd50c80c0,            "tlbi\0ripas2le1is",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=6 */
+    DIS_ARMV8_OP(0xd50c8100,            "tlbi\0alle2os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd50c8120,            "tlbi\0vae2os",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd50c8180,            "tlbi\0alle1os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=4 */
+    DIS_ARMV8_OP(0xd50c81a0,            "tlbi\0vale2os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50c81c0,            "tlbi\0vmalls12e1os",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=6 */
+    DIS_ARMV8_OP(0xd50c8220,            "tlbi\0rvae2is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd50c8240,            "tlbi\0vmallws2e1is",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 2 op2=2 */
+    DIS_ARMV8_OP(0xd50c82a0,            "tlbi\0rvale2is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50c8300,            "tlbi\0alle2is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd50c8320,            "tlbi\0vae2is",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd50c8380,            "tlbi\0alle1is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=4 */
+    DIS_ARMV8_OP(0xd50c83a0,            "tlbi\0vale2is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50c83c0,            "tlbi\0vmalls12e1is",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=6 */
+    DIS_ARMV8_OP(0xd50c8400,            "tlbi\0ipas2e1os",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=0 */
+    DIS_ARMV8_OP(0xd50c8420,            "tlbi\0ipas2e1",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=1 */
+    DIS_ARMV8_OP(0xd50c8440,            "tlbi\0ripas2e1",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=2 */
+    DIS_ARMV8_OP(0xd50c8460,            "tlbi\0ripas2e1os",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd50c8480,            "tlbi\0ipas2le1os",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=4 */
+    DIS_ARMV8_OP(0xd50c84a0,            "tlbi\0ipas2le1",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=5 */
+    DIS_ARMV8_OP(0xd50c84c0,            "tlbi\0ripas2le1",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=6 */
+    DIS_ARMV8_OP(0xd50c84e0,            "tlbi\0ripas2le1os",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=7 */
+    DIS_ARMV8_OP(0xd50c8520,            "tlbi\0rvae2os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd50c8540,            "tlbi\0vmallws2e1os",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 5 op2=2 */
+    DIS_ARMV8_OP(0xd50c85a0,            "tlbi\0rvale2os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50c8620,            "tlbi\0rvae2",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd50c8640,            "tlbi\0vmallws2e1",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 6 op2=2 */
+    DIS_ARMV8_OP(0xd50c86a0,            "tlbi\0rvale2",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50c8700,            "tlbi\0alle2",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd50c8720,            "tlbi\0vae2",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd50c8780,            "tlbi\0alle1",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=4 */
+    DIS_ARMV8_OP(0xd50c87a0,            "tlbi\0vale2",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50c87c0,            "tlbi\0vmalls12e1",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=6 */
+    DIS_ARMV8_OP(0xd50c9020,            "tlbi\0ipas2e1isnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=1 */
+    DIS_ARMV8_OP(0xd50c9040,            "tlbi\0ripas2e1isnxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=2 */
+    DIS_ARMV8_OP(0xd50c90a0,            "tlbi\0ipas2le1isnxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=5 */
+    DIS_ARMV8_OP(0xd50c90c0,            "tlbi\0ripas2le1isnxs", OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=6 */
+    DIS_ARMV8_OP(0xd50c9100,            "tlbi\0alle2osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd50c9120,            "tlbi\0vae2osnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd50c9180,            "tlbi\0alle1osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=4 */
+    DIS_ARMV8_OP(0xd50c91a0,            "tlbi\0vale2osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50c91c0,            "tlbi\0vmalls12e1osnxs",OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=6 */
+    DIS_ARMV8_OP(0xd50c9220,            "tlbi\0rvae2isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd50c9240,            "tlbi\0vmallws2e1isnxs",OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 2 op2=2 */
+    DIS_ARMV8_OP(0xd50c92a0,            "tlbi\0rvale2isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50c9300,            "tlbi\0alle2isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd50c9320,            "tlbi\0vae2isnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd50c9380,            "tlbi\0alle1isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=4 */
+    DIS_ARMV8_OP(0xd50c93a0,            "tlbi\0vale2isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50c93c0,            "tlbi\0vmalls12e1isnxs",OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=6 */
+    DIS_ARMV8_OP(0xd50c9400,            "tlbi\0ipas2e1osnxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=0 */
+    DIS_ARMV8_OP(0xd50c9420,            "tlbi\0ipas2e1nxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=1 */
+    DIS_ARMV8_OP(0xd50c9440,            "tlbi\0ripas2e1nxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=2 */
+    DIS_ARMV8_OP(0xd50c9460,            "tlbi\0ripas2e1osnxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd50c9480,            "tlbi\0ipas2le1osnxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=4 */
+    DIS_ARMV8_OP(0xd50c94a0,            "tlbi\0ipas2le1nxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=5 */
+    DIS_ARMV8_OP(0xd50c94c0,            "tlbi\0ripas2le1nxs",   OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=6 */
+    DIS_ARMV8_OP(0xd50c94e0,            "tlbi\0ripas2le1osnxs", OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=7 */
+    DIS_ARMV8_OP(0xd50c9520,            "tlbi\0rvae2osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd50c9540,            "tlbi\0vmallws2e1osnxs",OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 5 op2=2 */
+    DIS_ARMV8_OP(0xd50c95a0,            "tlbi\0rvale2osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50c9620,            "tlbi\0rvae2nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd50c9640,            "tlbi\0vmallws2e1nxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 6 op2=2 */
+    DIS_ARMV8_OP(0xd50c96a0,            "tlbi\0rvale2nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50c9700,            "tlbi\0alle2nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd50c9720,            "tlbi\0vae2nxs",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd50c9780,            "tlbi\0alle1nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=4 */
+    DIS_ARMV8_OP(0xd50c97a0,            "tlbi\0vale2nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50c97c0,            "tlbi\0vmalls12e1nxs",  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=6 */
+    DIS_ARMV8_OP(0xd50e7000,            "apas\0",               OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm= 0 op2=0 */
+    DIS_ARMV8_OP(0xd50e7800,            "at\0s1e3r",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm= 8 op2=0 */
+    DIS_ARMV8_OP(0xd50e7820,            "at\0s1e3w",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm= 8 op2=1 */
+    DIS_ARMV8_OP(0xd50e7940,            "at\0s1e3a",            OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm= 9 op2=2 */
+    DIS_ARMV8_OP(0xd50e7e20,            "dc\0cipapa",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm=14 op2=1 */
+    DIS_ARMV8_OP(0xd50e7ea0,            "dc\0cigdpapa",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 7 CRm=14 op2=5 */
+    DIS_ARMV8_OP(0xd50e8100,            "tlbi\0alle3os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd50e8120,            "tlbi\0vae3os",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd50e8180,            "tlbi\0paallos",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=4 */
+    DIS_ARMV8_OP(0xd50e81a0,            "tlbi\0vale3os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50e8220,            "tlbi\0rvae3is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd50e82a0,            "tlbi\0rvale3is",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50e8300,            "tlbi\0alle3is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd50e8320,            "tlbi\0vae3is",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd50e83a0,            "tlbi\0vale3is",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50e8460,            "tlbi\0rpaos",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd50e84e0,            "tlbi\0rpalos",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 4 op2=7 */
+    DIS_ARMV8_OP(0xd50e8520,            "tlbi\0rvae3os",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd50e85a0,            "tlbi\0rvale3os",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50e8620,            "tlbi\0rvae3",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd50e86a0,            "tlbi\0rvale3",         OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50e8700,            "tlbi\0alle3",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd50e8720,            "tlbi\0vae3",           OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd50e8780,            "tlbi\0paall",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=4 */
+    DIS_ARMV8_OP(0xd50e87a0,            "tlbi\0vale3",          OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd50e9100,            "tlbi\0alle3osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 1 op2=0 */
+    DIS_ARMV8_OP(0xd50e9120,            "tlbi\0vae3osnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd50e91a0,            "tlbi\0vale3osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd50e9220,            "tlbi\0rvae3isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd50e92a0,            "tlbi\0rvale3isnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd50e9300,            "tlbi\0alle3isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 3 op2=0 */
+    DIS_ARMV8_OP(0xd50e9320,            "tlbi\0vae3isnxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd50e93a0,            "tlbi\0vale3isnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd50e9520,            "tlbi\0rvae3osnxs",     OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd50e95a0,            "tlbi\0rvale3osnxs",    OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd50e9620,            "tlbi\0rvae3nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd50e96a0,            "tlbi\0rvale3nxs",      OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd50e9700,            "tlbi\0alle3nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 7 op2=0 */
+    DIS_ARMV8_OP(0xd50e9720,            "tlbi\0vae3nxs",        OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd50e97a0,            "tlbi\0vale3nxs",       OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP_ALT_DECODE(0xd5080000, "sys",                  OP_ARMV8_A64_SYS, DISOPTYPE_HARMLESS, SysFallback),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(Sys, 0xfff80000 /*fFixedInsn*/,
-                                       kDisArmV8OpcDecodeNop, 0, 0); /** @todo */
-
+                                       kDisArmV8OpcDecodeBinaryLookupWithDefault, 0xffffffe0 /*fMask*/, 0);
 
 /* SYSL */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(SysL)
-    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr,          0,  5, 0 /*idxParam*/), /** @todo r=bird: kDisParmParseGprZr64? */
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysInsExtraStr, 5, 18, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(SysLDefault)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 0 /*idxParam*/),
     DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 1 /*idxParam*/),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(SysL)
-    DIS_ARMV8_OP(0xd5280000, "sysl",            OP_ARMV8_A64_SYSL,      DISOPTYPE_HARMLESS),
+    DIS_ARMV8_OP(0xd52b7720,            "gcspopm\0",    OP_ARMV8_A64_SYSL, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd52b7760,            "gcsss2\0",     OP_ARMV8_A64_SYSL, DISOPTYPE_HARMLESS), /* op1=3 CRn= 7 CRm= 7 op2=3 */
+    DIS_ARMV8_OP_ALT_DECODE(0xd5280000, "sysl",         OP_ARMV8_A64_SYSL, DISOPTYPE_HARMLESS, SysLDefault),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysL, 0xfff80000 /*fFixedInsn*/,
-                                       kDisArmV8OpcDecodeNop, 0, 0); /** @todo */
+                                       kDisArmV8OpcDecodeBinaryLookupWithDefault, 0xffffffe0 /*fMask*/, 0);
 
 /* SYSP */
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(SysP)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseSysInsExtraStr, 5, 18, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64PlusOne, 0,  5, 2 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(SysPDefault)
     DIS_ARMV8_INSN_DECODE(kDisParmParseSysIns,         5, 18, 0 /*idxParam*/),
     DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64,        0,  5, 1 /*idxParam*/),
     DIS_ARMV8_INSN_DECODE(kDisParmParseGprZr64PlusOne, 0,  5, 2 /*idxParam*/),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(SysP)
-    DIS_ARMV8_OP(0xd5480000, "sysp",            OP_ARMV8_A64_SYSP,      DISOPTYPE_HARMLESS),
+    DIS_ARMV8_OP(0xd5488120,            "tlbip\0vae1os",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd5488160,            "tlbip\0vaae1os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=3 */
+    DIS_ARMV8_OP(0xd54881a0,            "tlbip\0vale1os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54881e0,            "tlbip\0vaale1os",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 1 op2=7 */
+    DIS_ARMV8_OP(0xd5488220,            "tlbip\0rvae1is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd5488260,            "tlbip\0rvaae1is",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=3 */
+    DIS_ARMV8_OP(0xd54882a0,            "tlbip\0rvale1is",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54882e0,            "tlbip\0rvaale1is",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 2 op2=7 */
+    DIS_ARMV8_OP(0xd5488320,            "tlbip\0vae1is",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd5488360,            "tlbip\0vaae1is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=3 */
+    DIS_ARMV8_OP(0xd54883a0,            "tlbip\0vale1is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54883e0,            "tlbip\0vaale1is",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 3 op2=7 */
+    DIS_ARMV8_OP(0xd5488520,            "tlbip\0rvae1os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd5488560,            "tlbip\0rvaae1os",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=3 */
+    DIS_ARMV8_OP(0xd54885a0,            "tlbip\0rvale1os",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54885e0,            "tlbip\0rvaale1os",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 5 op2=7 */
+    DIS_ARMV8_OP(0xd5488620,            "tlbip\0rvae1",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd5488660,            "tlbip\0rvaae1",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=3 */
+    DIS_ARMV8_OP(0xd54886a0,            "tlbip\0rvale1",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54886e0,            "tlbip\0rvaale1",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 6 op2=7 */
+    DIS_ARMV8_OP(0xd5488720,            "tlbip\0vae1",          OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd5488760,            "tlbip\0vaae1",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=3 */
+    DIS_ARMV8_OP(0xd54887a0,            "tlbip\0vale1",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd54887e0,            "tlbip\0vaale1",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 8 CRm= 7 op2=7 */
+    DIS_ARMV8_OP(0xd5489120,            "tlbip\0vae1osnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd5489160,            "tlbip\0vaae1osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=3 */
+    DIS_ARMV8_OP(0xd54891a0,            "tlbip\0vale1osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54891e0,            "tlbip\0vaale1osnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 1 op2=7 */
+    DIS_ARMV8_OP(0xd5489220,            "tlbip\0rvae1isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd5489260,            "tlbip\0rvaae1isnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=3 */
+    DIS_ARMV8_OP(0xd54892a0,            "tlbip\0rvale1isnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54892e0,            "tlbip\0rvaale1isnxs",  OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 2 op2=7 */
+    DIS_ARMV8_OP(0xd5489320,            "tlbip\0vae1isnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd5489360,            "tlbip\0vaae1isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=3 */
+    DIS_ARMV8_OP(0xd54893a0,            "tlbip\0vale1isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54893e0,            "tlbip\0vaale1isnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 3 op2=7 */
+    DIS_ARMV8_OP(0xd5489520,            "tlbip\0rvae1osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd5489560,            "tlbip\0rvaae1osnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=3 */
+    DIS_ARMV8_OP(0xd54895a0,            "tlbip\0rvale1osnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54895e0,            "tlbip\0rvaale1osnxs",  OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 5 op2=7 */
+    DIS_ARMV8_OP(0xd5489620,            "tlbip\0rvae1nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd5489660,            "tlbip\0rvaae1nxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=3 */
+    DIS_ARMV8_OP(0xd54896a0,            "tlbip\0rvale1nxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54896e0,            "tlbip\0rvaale1nxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 6 op2=7 */
+    DIS_ARMV8_OP(0xd5489720,            "tlbip\0vae1nxs",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd5489760,            "tlbip\0vaae1nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=3 */
+    DIS_ARMV8_OP(0xd54897a0,            "tlbip\0vale1nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd54897e0,            "tlbip\0vaale1nxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=0 CRn= 9 CRm= 7 op2=7 */
+    DIS_ARMV8_OP(0xd54c8020,            "tlbip\0ipas2e1is",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=1 */
+    DIS_ARMV8_OP(0xd54c8040,            "tlbip\0ripas2e1is",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=2 */
+    DIS_ARMV8_OP(0xd54c80a0,            "tlbip\0ipas2le1is",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=5 */
+    DIS_ARMV8_OP(0xd54c80c0,            "tlbip\0ripas2le1is",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 0 op2=6 */
+    DIS_ARMV8_OP(0xd54c8120,            "tlbip\0vae2os",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd54c81a0,            "tlbip\0vale2os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54c8220,            "tlbip\0rvae2is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd54c82a0,            "tlbip\0rvale2is",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54c8320,            "tlbip\0vae2is",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd54c83a0,            "tlbip\0vale2is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54c8400,            "tlbip\0ipas2e1os",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=0 */
+    DIS_ARMV8_OP(0xd54c8420,            "tlbip\0ipas2e1",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=1 */
+    DIS_ARMV8_OP(0xd54c8440,            "tlbip\0ripas2e1",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=2 */
+    DIS_ARMV8_OP(0xd54c8460,            "tlbip\0ripas2e1os",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd54c8480,            "tlbip\0ipas2le1os",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=4 */
+    DIS_ARMV8_OP(0xd54c84a0,            "tlbip\0ipas2le1",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=5 */
+    DIS_ARMV8_OP(0xd54c84c0,            "tlbip\0ripas2le1",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=6 */
+    DIS_ARMV8_OP(0xd54c84e0,            "tlbip\0ripas2le1os",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 4 op2=7 */
+    DIS_ARMV8_OP(0xd54c8520,            "tlbip\0rvae2os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd54c85a0,            "tlbip\0rvale2os",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54c8620,            "tlbip\0rvae2",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd54c86a0,            "tlbip\0rvale2",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54c8720,            "tlbip\0vae2",          OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd54c87a0,            "tlbip\0vale2",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd54c9020,            "tlbip\0ipas2e1isnxs",  OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=1 */
+    DIS_ARMV8_OP(0xd54c9040,            "tlbip\0ripas2e1isnxs", OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=2 */
+    DIS_ARMV8_OP(0xd54c90a0,            "tlbip\0ipas2le1isnxs", OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=5 */
+    DIS_ARMV8_OP(0xd54c90c0,            "tlbip\0ripas2le1isnxs",OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 0 op2=6 */
+    DIS_ARMV8_OP(0xd54c9120,            "tlbip\0vae2osnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd54c91a0,            "tlbip\0vale2osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54c9220,            "tlbip\0rvae2isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd54c92a0,            "tlbip\0rvale2isnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54c9320,            "tlbip\0vae2isnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd54c93a0,            "tlbip\0vale2isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54c9400,            "tlbip\0ipas2e1osnxs",  OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=0 */
+    DIS_ARMV8_OP(0xd54c9420,            "tlbip\0ipas2e1nxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=1 */
+    DIS_ARMV8_OP(0xd54c9440,            "tlbip\0ripas2e1nxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=2 */
+    DIS_ARMV8_OP(0xd54c9460,            "tlbip\0ripas2e1osnxs", OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=3 */
+    DIS_ARMV8_OP(0xd54c9480,            "tlbip\0ipas2le1osnxs", OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=4 */
+    DIS_ARMV8_OP(0xd54c94a0,            "tlbip\0ipas2le1nxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=5 */
+    DIS_ARMV8_OP(0xd54c94c0,            "tlbip\0ripas2le1nxs",  OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=6 */
+    DIS_ARMV8_OP(0xd54c94e0,            "tlbip\0ripas2le1osnxs",OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 4 op2=7 */
+    DIS_ARMV8_OP(0xd54c9520,            "tlbip\0rvae2osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd54c95a0,            "tlbip\0rvale2osnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54c9620,            "tlbip\0rvae2nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd54c96a0,            "tlbip\0rvale2nxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54c9720,            "tlbip\0vae2nxs",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd54c97a0,            "tlbip\0vale2nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=4 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd54e8120,            "tlbip\0vae3os",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd54e81a0,            "tlbip\0vale3os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54e8220,            "tlbip\0rvae3is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd54e82a0,            "tlbip\0rvale3is",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54e8320,            "tlbip\0vae3is",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd54e83a0,            "tlbip\0vale3is",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54e8520,            "tlbip\0rvae3os",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd54e85a0,            "tlbip\0rvale3os",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54e8620,            "tlbip\0rvae3",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd54e86a0,            "tlbip\0rvale3",        OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54e8720,            "tlbip\0vae3",          OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd54e87a0,            "tlbip\0vale3",         OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 8 CRm= 7 op2=5 */
+    DIS_ARMV8_OP(0xd54e9120,            "tlbip\0vae3osnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 1 op2=1 */
+    DIS_ARMV8_OP(0xd54e91a0,            "tlbip\0vale3osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 1 op2=5 */
+    DIS_ARMV8_OP(0xd54e9220,            "tlbip\0rvae3isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 2 op2=1 */
+    DIS_ARMV8_OP(0xd54e92a0,            "tlbip\0rvale3isnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 2 op2=5 */
+    DIS_ARMV8_OP(0xd54e9320,            "tlbip\0vae3isnxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 3 op2=1 */
+    DIS_ARMV8_OP(0xd54e93a0,            "tlbip\0vale3isnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 3 op2=5 */
+    DIS_ARMV8_OP(0xd54e9520,            "tlbip\0rvae3osnxs",    OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 5 op2=1 */
+    DIS_ARMV8_OP(0xd54e95a0,            "tlbip\0rvale3osnxs",   OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 5 op2=5 */
+    DIS_ARMV8_OP(0xd54e9620,            "tlbip\0rvae3nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 6 op2=1 */
+    DIS_ARMV8_OP(0xd54e96a0,            "tlbip\0rvale3nxs",     OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 6 op2=5 */
+    DIS_ARMV8_OP(0xd54e9720,            "tlbip\0vae3nxs",       OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 7 op2=1 */
+    DIS_ARMV8_OP(0xd54e97a0,            "tlbip\0vale3nxs",      OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS), /* op1=6 CRn= 9 CRm= 7 op2=5 */
+    DIS_ARMV8_OP_ALT_DECODE(0xd5480000, "sysp",                 OP_ARMV8_A64_SYSP, DISOPTYPE_HARMLESS, SysPDefault),
 DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(SysP, 0xfff80000 /*fFixedInsn*/,
-                                       kDisArmV8OpcDecodeNop, 0, 0); /** @todo */
+                                       kDisArmV8OpcDecodeBinaryLookupWithDefault, 0xffffffe0 /*fMask*/, 0);
 
 
 /* MSR */

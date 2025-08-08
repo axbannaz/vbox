@@ -556,9 +556,12 @@ static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, s
     /* Generate  #<op1>,<CRn>,<CRm>,#<op2> identifier. */
     uint32_t const idSysIns = pParam->armv8.Op.idSysIns;
     uint8_t idx = 0;
-    pachTmp[idx++] = '#';
+    pachTmp[idx++] = 'S';
+    pachTmp[idx++] = '1';
+    pachTmp[idx++] = '_';
     pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP1(idSysIns);
-    pachTmp[idx++] = ',';
+    pachTmp[idx++] = '_';
+    pachTmp[idx++] = 'C';
     uint8_t bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRN(idSysIns);
     if (bTmp >= 10)
     {
@@ -566,7 +569,8 @@ static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, s
         bTmp -= 10;
     }
     pachTmp[idx++] = '0' + bTmp;
-    pachTmp[idx++] = ',';
+    pachTmp[idx++] = '_';
+    pachTmp[idx++] = 'C';
     bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRM(idSysIns);
     if (bTmp >= 10)
     {
@@ -574,8 +578,7 @@ static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, s
         bTmp -= 10;
     }
     pachTmp[idx++] = '0' + bTmp;
-    pachTmp[idx++] = ',';
-    pachTmp[idx++] = '#';
+    pachTmp[idx++] = '_';
     pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP2(idSysIns);
     pachTmp[idx]   = '\0';
     *pcchReg = idx;
@@ -785,6 +788,7 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
          */
         RTINTPTR off;
         char szSymbol[128];
+        uint32_t cSkippedParams = 0;
         for (uint32_t i = 0; i < RT_ELEMENTS(pDis->aParams); i++)
         {
             PCDISOPPARAM pParam = &pDis->aParams[i];
@@ -793,7 +797,7 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
             if (pParam->armv8.enmType == kDisArmv8OpParmNone)
                 break;
 
-            if (i > 0)
+            if (i > cSkippedParams)
                 PUT_C(',');
             PUT_C(' '); /** @todo Make the indenting configurable. */
 
@@ -971,6 +975,26 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                     char   achTmp[32];
                     const char *pszReg = disasmFormatArmV8SysIns(pParam, &achTmp[0], &cchReg);
                     PUT_STR(pszReg, cchReg);
+                    break;
+                }
+                case kDisArmv8OpParmSysInsExtraStr:
+                {
+                    Assert(pParam->fUse == DISUSE_REG_SYSTEM);
+                    /* HACK! The decoded system instruction option string is found following the instruction. */
+                    /** @todo this isn't elegant.   */
+                    const char * const psz = strchr(pOp->pszOpcode, '\0') + 1;
+                    if (*psz)
+                        PUT_PSZ(psz);
+                    else
+                    {
+                        /* If the string is empty, there is no option parameter and we need to
+                           skip a parameter, undoing 1 or two output characters emitted above. */
+                        uint32_t const cchToUnput = i == cSkippedParams ? 1 : 2;
+                        Assert(cchDst >= cchToUnput);
+                        pszDst -= cchToUnput;
+                        cchDst -= cchToUnput;
+                        cSkippedParams++;
+                    }
                     break;
                 }
                 case kDisArmv8OpParmAddrInGpr:

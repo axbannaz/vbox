@@ -70,6 +70,7 @@ typedef enum DISPARMPARSEIDX
     kDisParmParseCond,
     kDisParmParsePState,
     kDisParmParseSysIns,
+    kDisParmParseSysInsExtraStr,
     kDisParmParseSysReg,
     kDisParmParseSh12,
     kDisParmParseImmTbz,
@@ -156,6 +157,7 @@ typedef enum DISARMV8OPCDECODE
     kDisArmV8OpcDecodeNop = 0,
     kDisArmV8OpcDecodeLookup,
     kDisArmV8OpcDecodeCollate,
+    kDisArmV8OpcDecodeBinaryLookupWithDefault,
     kDisArmV8OpcDecodeMax
 } DISARMV8OPCDECODE;
 
@@ -198,7 +200,7 @@ typedef struct DISARMV8INSNCLASS
 {
     /** Decoder header. */
     DISARMV8DECODEHDR       Hdr;
-    /** Pointer to the arry of opcodes. */
+    /** Pointer to the array of opcodes. */
     PCDISARMV8OPCODE        paOpcodes;
     /** The mask of fixed instruction bits. */
     uint32_t                fFixedInsn;
