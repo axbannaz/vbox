@@ -4033,9 +4033,9 @@ AssertCompileMemberOffset(X86FXSTATE, au32RsrvdForSoftware, X86_OFF_FXSTATE_RSVD
  */
 typedef struct X86XSAVEHDR
 {
-    /** XTATE_BV - Bitmap indicating whether a component is in the state. */
+    /** XSTATE_BV - Bitmap indicating whether a component is in the state. */
     uint64_t        bmXState;
-    /** XCOMP_BC - Bitmap used by instructions applying structure compaction. */
+    /** XCOMP_BV  - Bitmap used by instructions applying structure compaction. */
     uint64_t        bmXComp;
     /** Reserved for furture extensions, probably MBZ. */
     uint64_t        au64Reserved[6];
