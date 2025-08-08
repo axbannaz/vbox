@@ -1155,7 +1155,7 @@ static void usbNetCompleteNotificationOk(PUSBNET pThis, PVUSBURB pUrb, const voi
     if (pSrc)   /* Can be NULL if not copying anything. */
     {
         Assert(cbSrc);
-        uint8_t *pDst = pUrb->abData;
+        uint8_t *pDst = pUrb->pbData;
 
         /* Returned data is written after the setup message in control URBs. */
         Assert (pUrb->enmType == VUSBXFERTYPE_INTR);
@@ -1164,7 +1164,7 @@ static void usbNetCompleteNotificationOk(PUSBNET pThis, PVUSBURB pUrb, const voi
         size_t cbCopy = RT_MIN(pUrb->cbData, cbSrc);
         memcpy(pDst, pSrc, cbCopy);
         pUrb->cbData = (uint32_t)cbCopy;
-        Log2Func(("/#%u/ Copied %zu bytes to pUrb->abData, source had %zu bytes\n", pThis->pUsbIns->iInstance, cbCopy, cbSrc));
+        Log2Func(("/#%u/ Copied %zu bytes to pUrb->pbData, source had %zu bytes\n", pThis->pUsbIns->iInstance, cbCopy, cbSrc));
 
         /*
          * Need to check length differences. If cbSrc is less than what
@@ -1408,7 +1408,7 @@ static DECLCALLBACK(int) usbNetNetworkDown_Receive(PPDMINETWORKDOWN pInterface, 
 
     usbNetPacketDump(pThis, pvBuf, cb, "<-- Rx");
 
-    PUSBNCMNTH16 pNth16 = (PUSBNCMNTH16)&pUrb->abData[0];
+    PUSBNCMNTH16 pNth16 = (PUSBNCMNTH16)&pUrb->pbData[0];
     PUSBNCMNDP16 pNdp16 = (PUSBNCMNDP16)(pNth16 + 1);
 
     /* Build NTH16. */
@@ -1620,7 +1620,7 @@ static int usbNetHandleBulkHostToDev(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb
     /*
      * Process the transfer.
      */
-    PCUSBNCMNTH16 pNth16 = (PCUSBNCMNTH16)&pUrb->abData[0];
+    PCUSBNCMNTH16 pNth16 = (PCUSBNCMNTH16)&pUrb->pbData[0];
     if (pUrb->cbData < sizeof(*pNth16))
     {
         LogFunc(("/#%u/ Bad NTH16: cbData=%#x < min=%#x\n", pThis->pUsbIns->iInstance, pUrb->cbData, sizeof(*pNth16) ));
@@ -1663,7 +1663,7 @@ static int usbNetHandleBulkHostToDev(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb
         }
 
         size_t cbNdpMax = pUrb->cbData - offNdp16Next;
-        PCUSBNCMNDP16 pNdp16 = (PCUSBNCMNDP16)&pUrb->abData[pNth16->wNdpIndex];
+        PCUSBNCMNDP16 pNdp16 = (PCUSBNCMNDP16)&pUrb->pbData[pNth16->wNdpIndex];
         if (cbNdpMax < sizeof(*pNdp16))
         {
             LogFunc(("/#%u/ Bad NDP16: cbNdpMax=%#x < min=%#x\n", pThis->pUsbIns->iInstance, cbNdpMax, sizeof(*pNdp16) ));
@@ -1721,7 +1721,7 @@ static int usbNetHandleBulkHostToDev(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb
                 if (RT_SUCCESS(rc) && pSgBuf)
                 {
                     uint8_t *pbBuf = (uint8_t *)pSgBuf->aSegs[0].pvSeg;
-                    memcpy(pbBuf, &pUrb->abData[pDGram->wDatagramIndex], pDGram->wDatagramLength);
+                    memcpy(pbBuf, &pUrb->pbData[pDGram->wDatagramIndex], pDGram->wDatagramLength);
                     usbNetPacketDump(pThis, pbBuf, pDGram->wDatagramLength, "--> Tx");
                     pSgBuf->cbUsed = pDGram->wDatagramLength;
                     rc = pThis->Lun0.pINetwork->pfnSendBuf(pThis->Lun0.pINetwork, pSgBuf, true /* fOnWorkerThread */);
@@ -1842,7 +1842,7 @@ DECLHIDDEN(void) usbNetLinkStateNotify(PUSBNET pThis, PDMNETWORKLINKSTATE enmLin
  */
 static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
 {
-    PVUSBSETUP pSetup = (PVUSBSETUP)&pUrb->abData[0];
+    PVUSBSETUP pSetup = (PVUSBSETUP)&pUrb->pbData[0];
     AssertReturn(pUrb->cbData >= sizeof(*pSetup), VERR_VUSB_FAILED_TO_QUEUE_URB);
 
     if ((pSetup->bmRequestType & VUSB_REQ_MASK) == VUSB_REQ_STANDARD)
@@ -1869,14 +1869,14 @@ static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
                         /* Returned data is written after the setup message. */
                         cbCopy = pUrb->cbData - sizeof(*pSetup);
                         cbCopy = RT_MIN(cbCopy, sizeof(g_UsbNetDeviceQualifier));
-                        memcpy(&pUrb->abData[sizeof(*pSetup)], &g_UsbNetDeviceQualifier, cbCopy);
+                        memcpy(&pUrb->pbData[sizeof(*pSetup)], &g_UsbNetDeviceQualifier, cbCopy);
                         return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
                     case VUSB_DT_BOS:
                         LogFunc(("/#%u/ GET_DESCRIPTOR DT_BOS wValue=%#x wIndex=%#x\n", pThis->pUsbIns->iInstance, pSetup->wValue, pSetup->wIndex));
                         /* Returned data is written after the setup message. */
                         cbCopy = pUrb->cbData - sizeof(*pSetup);
                         cbCopy = RT_MIN(cbCopy, sizeof(g_UsbNetBOS));
-                        memcpy(&pUrb->abData[sizeof(*pSetup)], &g_UsbNetBOS, cbCopy);
+                        memcpy(&pUrb->pbData[sizeof(*pSetup)], &g_UsbNetBOS, cbCopy);
                         return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
                     default:
                         LogFunc(("/#%u/ GET_DESCRIPTOR, huh? wValue=%#x wIndex=%#x\n", pThis->pUsbIns->iInstance, pSetup->wValue, pSetup->wIndex));
@@ -1906,7 +1906,7 @@ static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
                         wRet = 0;   /* Not self-powered, no remote wakeup. */
                         cbCopy = pUrb->cbData - sizeof(*pSetup);
                         cbCopy = RT_MIN(cbCopy, sizeof(wRet));
-                        memcpy(&pUrb->abData[sizeof(*pSetup)], &wRet, cbCopy);
+                        memcpy(&pUrb->pbData[sizeof(*pSetup)], &wRet, cbCopy);
                         return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
                     }
 
@@ -1916,7 +1916,7 @@ static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
                         {
                             cbCopy = pUrb->cbData - sizeof(*pSetup);
                             cbCopy = RT_MIN(cbCopy, sizeof(wRet));
-                            memcpy(&pUrb->abData[sizeof(*pSetup)], &wRet, cbCopy);
+                            memcpy(&pUrb->pbData[sizeof(*pSetup)], &wRet, cbCopy);
                             return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
                         }
                         LogRelFlow(("UsbNet: GET_STATUS (interface) invalid, wIndex=%#x\n", pSetup->wIndex));
@@ -1930,7 +1930,7 @@ static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
                             wRet = pThis->aEps[pSetup->wIndex].fHalted ? 1 : 0;
                             cbCopy = pUrb->cbData - sizeof(*pSetup);
                             cbCopy = RT_MIN(cbCopy, sizeof(wRet));
-                            memcpy(&pUrb->abData[sizeof(*pSetup)], &wRet, cbCopy);
+                            memcpy(&pUrb->pbData[sizeof(*pSetup)], &wRet, cbCopy);
                             return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
                         }
                         LogRelFlow(("UsbNet: GET_STATUS (endpoint) invalid, wIndex=%#x\n", pSetup->wIndex));
@@ -1987,7 +1987,7 @@ static int usbNetHandleDefaultPipe(PUSBNET pThis, PUSBNETEP pEp, PVUSBURB pUrb)
 
                 uint32_t cbCopy = pUrb->cbData - sizeof(*pSetup);
                 cbCopy = RT_MIN(cbCopy, sizeof(NtbParams));
-                memcpy(&pUrb->abData[sizeof(*pSetup)], &NtbParams, cbCopy);
+                memcpy(&pUrb->pbData[sizeof(*pSetup)], &NtbParams, cbCopy);
                 return usbNetCompleteOk(pThis, pUrb, cbCopy + sizeof(*pSetup));
             }
 

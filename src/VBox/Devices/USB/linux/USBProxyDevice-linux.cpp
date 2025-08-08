@@ -1002,7 +1002,7 @@ static void usbProxyLinuxCleanupFailedSubmit(PUSBPROXYDEV pProxyDev, PUSBPROXYUR
                                              PVUSBURB pUrb, bool *pfUnplugged)
 {
     if (pUrb->enmType == VUSBXFERTYPE_MSG)
-        usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->abData);
+        usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->pbData);
 
     /* discard and reap later (walking with pUrbLnx). */
     if (pUrbLnx != pCur)
@@ -1137,7 +1137,7 @@ static int usbProxyLinuxUrbQueueSplit(PUSBPROXYDEV pProxyDev, PUSBPROXYURBLNX pU
     LogFlow(("usbProxyLinuxUrbQueueSplit: pUrb=%p cKUrbs=%d cbData=%d\n", pUrb, cKUrbs, pUrb->cbData));
 
     uint32_t cbLeft = pUrb->cbData;
-    uint8_t *pb = &pUrb->abData[0];
+    uint8_t *pb = &pUrb->pbData[0];
 
     /* the first one (already allocated) */
     switch (pUrb->enmType)
@@ -1243,7 +1243,7 @@ static DECLCALLBACK(int) usbProxyLinuxUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB 
     pUrbLnx->KUrb.flags             = 0;
     if (pUrb->enmDir == VUSBDIRECTION_IN && pUrb->fShortNotOk)
         pUrbLnx->KUrb.flags        |= USBDEVFS_URB_SHORT_NOT_OK;
-    pUrbLnx->KUrb.buffer            = pUrb->abData;
+    pUrbLnx->KUrb.buffer            = pUrb->pbData;
     pUrbLnx->KUrb.buffer_length     = pUrb->cbData;
     pUrbLnx->KUrb.actual_length     = 0;
     pUrbLnx->KUrb.start_frame       = 0;
@@ -1261,7 +1261,7 @@ static DECLCALLBACK(int) usbProxyLinuxUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB 
                 usbProxyLinuxUrbFree(pProxyDev, pUrbLnx);
                 return VERR_BUFFER_UNDERFLOW;
             }
-            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->abData);
+            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->pbData);
             LogFlow(("usbProxyLinuxUrbQueue: message\n"));
             break;
         case VUSBXFERTYPE_BULK:
@@ -1319,7 +1319,7 @@ static DECLCALLBACK(int) usbProxyLinuxUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB 
             rc = RTErrConvertFromErrno(errno);
             Log(("usbProxyLinuxUrbQueue: ENODEV -> unplugged. pProxyDev=%s\n", usbProxyGetName(pProxyDev)));
             if (pUrb->enmType == VUSBXFERTYPE_MSG)
-                usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->abData);
+                usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->pbData);
 
             RTCritSectLeave(&pDevLnx->CritSect);
             usbProxyLinuxUrbFree(pProxyDev, pUrbLnx);
@@ -1351,7 +1351,7 @@ static DECLCALLBACK(int) usbProxyLinuxUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB 
         RTCritSectLeave(&pDevLnx->CritSect);
         rc = RTErrConvertFromErrno(errno);
         if (pUrb->enmType == VUSBXFERTYPE_MSG)
-            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->abData);
+            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->pbData);
         usbProxyLinuxUrbFree(pProxyDev, pUrbLnx);
         return rc;
     }
@@ -1560,7 +1560,7 @@ static DECLCALLBACK(PVUSBURB) usbProxyLinuxUrbReap(PUSBPROXYDEV pProxyDev, RTMSI
         {
             /* split - find the end byte and the first error status. */
             Assert(pUrbLnx == pUrbLnx->pSplitHead);
-            uint8_t *pbEnd = &pUrb->abData[0];
+            uint8_t *pbEnd = &pUrb->pbData[0];
             pUrb->enmStatus = VUSBSTATUS_OK;
             PUSBPROXYURBLNX pCur;
             for (pCur = pUrbLnx; pCur; pCur = pCur->pSplitNext)
@@ -1570,7 +1570,7 @@ static DECLCALLBACK(PVUSBURB) usbProxyLinuxUrbReap(PUSBPROXYDEV pProxyDev, RTMSI
                 if (pUrb->enmStatus == VUSBSTATUS_OK)
                     pUrb->enmStatus = vusbProxyLinuxUrbGetStatus(pCur);
             }
-            pUrb->cbData = pbEnd - &pUrb->abData[0];
+            pUrb->cbData = pbEnd - &pUrb->pbData[0];
             usbProxyLinuxUrbUnlinkInFlight(pDevLnx, pUrbLnx);
             usbProxyLinuxUrbFreeSplitList(pProxyDev, pUrbLnx);
         }
@@ -1606,7 +1606,7 @@ static DECLCALLBACK(PVUSBURB) usbProxyLinuxUrbReap(PUSBPROXYDEV pProxyDev, RTMSI
         if (pUrb->enmType == VUSBXFERTYPE_MSG)
         {
             pUrb->cbData += sizeof(VUSBSETUP);
-            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->abData);
+            usbProxyLinuxUrbSwapSetup((PVUSBSETUP)pUrb->pbData);
         }
     }
     else

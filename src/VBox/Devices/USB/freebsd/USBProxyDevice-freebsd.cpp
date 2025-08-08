@@ -728,7 +728,7 @@ retry:
     pEndpointFBSD = &pDevFBSD->aSwEndpoint[index];
     pXferEndpoint = &pDevFBSD->aHwEndpoint[index];
 
-    pbData = pUrb->abData;
+    pbData = pUrb->pbData;
 
     switch (pUrb->enmType)
     {

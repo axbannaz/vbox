@@ -1449,11 +1449,13 @@ typedef struct VUSBURB
      * IN: The amount of data to send / receive - set at allocation time.
      * OUT: The amount of data sent / received. */
     uint32_t        cbData;
-    /** The message data.
-     * IN: On host to device transfers, the data to send.
-     * OUT: On device to host transfers, the data to received.
-     * This array has actually a size of VUsb.cbDataAllocated, not 8KB! */
-    uint8_t         abData[8*_1K];
+    /** The message buffer size.
+     * IN: Set at allocation time. */
+    uint32_t        cbDataAllocated;
+    /** Pointer to the message data.
+     * IN: On host to device transfers, the data to be sent.
+     * OUT: On device to host transfers, the data to be received. */
+    uint8_t         *pbData;
 } VUSBURB;
 
 /** The magic value of a valid VUSBURB. (Murakami Haruki) */

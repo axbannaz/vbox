@@ -643,10 +643,10 @@ static void usbProxyDarwinUrbAsyncComplete(void *pvUrbOsX, IOReturn irc, void *S
 #ifdef USE_LOW_LATENCY_API
             /* copy the data. */
             //if (pUrb->enmDir == VUSBDIRECTION_IN)
-                memcpy(pUrb->abData, pUrbOsX->u.Isoc.pBuf->pvBuf, pUrb->cbData);
+                memcpy(pUrb->pbData, pUrbOsX->u.Isoc.pBuf->pvBuf, pUrb->cbData);
 #endif
             Log3(("AsyncComplete isoc - raw data (%d bytes):\n"
-                  "%16.*Rhxd\n", pUrb->cbData, pUrb->cbData, pUrb->abData));
+                  "%16.*Rhxd\n", pUrb->cbData, pUrb->cbData, pUrb->pbData));
             uint32_t off = 0;
             for (unsigned i = 0; i < pUrb->cIsocPkts; i++)
             {
@@ -1697,7 +1697,7 @@ static DECLCALLBACK(int) usbProxyDarwinUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB
         case VUSBXFERTYPE_MSG:
         {
             AssertMsgBreak(pUrb->cbData >= sizeof(VUSBSETUP), ("cbData=%d\n", pUrb->cbData));
-            PVUSBSETUP pSetup = (PVUSBSETUP)&pUrb->abData[0];
+            PVUSBSETUP pSetup = (PVUSBSETUP)&pUrb->pbData[0];
             pUrbOsX->u.ControlMsg.bmRequestType = pSetup->bmRequestType;
             pUrbOsX->u.ControlMsg.bRequest      = pSetup->bRequest;
             pUrbOsX->u.ControlMsg.wValue        = pSetup->wValue;
@@ -1721,10 +1721,10 @@ static DECLCALLBACK(int) usbProxyDarwinUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB
             AssertBreak(pIf);
             Assert(pUrb->enmDir == VUSBDIRECTION_IN || pUrb->enmDir == VUSBDIRECTION_OUT);
             if (pUrb->enmDir == VUSBDIRECTION_OUT)
-                irc = (*pIf->ppIfI)->WritePipeAsync(pIf->ppIfI, u8PipeRef, pUrb->abData, pUrb->cbData,
+                irc = (*pIf->ppIfI)->WritePipeAsync(pIf->ppIfI, u8PipeRef, pUrb->pbData, pUrb->cbData,
                                                     usbProxyDarwinUrbAsyncComplete, pUrbOsX);
             else
-                irc = (*pIf->ppIfI)->ReadPipeAsync(pIf->ppIfI, u8PipeRef, pUrb->abData, pUrb->cbData,
+                irc = (*pIf->ppIfI)->ReadPipeAsync(pIf->ppIfI, u8PipeRef, pUrb->pbData, pUrb->cbData,
                                                    usbProxyDarwinUrbAsyncComplete, pUrbOsX);
 
             break;
@@ -1741,7 +1741,7 @@ static DECLCALLBACK(int) usbProxyDarwinUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB
             int rc = usbProxyDarwinUrbAllocIsocBuf(pUrbOsX, pIf);
             AssertRCBreak(rc);
             if (pUrb->enmDir == VUSBDIRECTION_OUT)
-                memcpy(pUrbOsX->u.Isoc.pBuf->pvBuf, pUrb->abData, pUrb->cbData);
+                memcpy(pUrbOsX->u.Isoc.pBuf->pvBuf, pUrb->pbData, pUrb->cbData);
             else
                 memset(pUrbOsX->u.Isoc.pBuf->pvBuf, 0xfe, pUrb->cbData);
 #endif
@@ -1793,11 +1793,11 @@ static DECLCALLBACK(int) usbProxyDarwinUrbQueue(PUSBPROXYDEV pProxyDev, PVUSBURB
 #else
                 if (pUrb->enmDir == VUSBDIRECTION_OUT)
                     irc = (*pIf->ppIfI)->WriteIsochPipeAsync(pIf->ppIfI, u8PipeRef,
-                                                             pUrb->abData, FrameNo, pUrb->cIsocPkts, &pUrbOsX->u.Isoc.aFrames[0],
+                                                             pUrb->pbData, FrameNo, pUrb->cIsocPkts, &pUrbOsX->u.Isoc.aFrames[0],
                                                              usbProxyDarwinUrbAsyncComplete, pUrbOsX);
                 else
                     irc = (*pIf->ppIfI)->ReadIsochPipeAsync(pIf->ppIfI, u8PipeRef,
-                                                            pUrb->abData, FrameNo, pUrb->cIsocPkts, &pUrbOsX->u.Isoc.aFrames[0],
+                                                            pUrb->pbData, FrameNo, pUrb->cIsocPkts, &pUrbOsX->u.Isoc.aFrames[0],
                                                             usbProxyDarwinUrbAsyncComplete, pUrbOsX);
 #endif
                 if (    irc != kIOReturnIsoTooOld

@@ -2772,11 +2772,11 @@ xhciR3WalkDataTRBsSubmit(PPDMDEVINS pDevIns, PXHCI pThis, const XHCI_XFER_TRB *p
 
                     Assert(uXferLen >= 1 && uXferLen <= 8);
                     Log2(("Copying %u bytes to URB offset %u (immediate data)\n", uXferLen, pCtx->uXferPos));
-                    memcpy(pCtx->pUrb->abData + pCtx->uXferPos, pXferTRB, uXferLen);
+                    memcpy(pCtx->pUrb->pbData + pCtx->uXferPos, pXferTRB, uXferLen);
                 }
                 else
                 {
-                    PDMDevHlpPCIPhysReadUser(pDevIns, pXferTRB->norm.data_ptr, pCtx->pUrb->abData + pCtx->uXferPos, uXferLen);
+                    PDMDevHlpPCIPhysReadUser(pDevIns, pXferTRB->norm.data_ptr, pCtx->pUrb->pbData + pCtx->uXferPos, uXferLen);
                     Log2(("Copying %u bytes to URB offset %u (from %RGp)\n", uXferLen, pCtx->uXferPos, pXferTRB->norm.data_ptr));
                 }
                 pCtx->uXferPos += uXferLen;
@@ -2850,7 +2850,7 @@ xhciR3WalkDataTRBsComplete(PPDMDEVINS pDevIns, PXHCI pThis, const XHCI_XFER_TRB 
                 if (uXferLen <= pCtx->uXferLeft)
                 {
                     Log2(("Writing %u bytes to %RGp from URB offset %u (TRB@%RGp)\n", uXferLen, pXferTRB->norm.data_ptr, pCtx->uXferPos, GCPhysXfrTRB));
-                    PDMDevHlpPCIPhysWriteUser(pDevIns, pXferTRB->norm.data_ptr, pCtx->pUrb->abData + pCtx->uXferPos, uXferLen);
+                    PDMDevHlpPCIPhysWriteUser(pDevIns, pXferTRB->norm.data_ptr, pCtx->pUrb->pbData + pCtx->uXferPos, uXferLen);
                 }
                 else
                 {
@@ -4051,7 +4051,7 @@ static bool xhciR3IssueSetAddress(PXHCICC pThisCC, uint8_t uSlotID, uint8_t uDev
     pUrb->pHci->cTRB      = 0;
 
     /* Build the request. */
-    PVUSBSETUP  pSetup    = (PVUSBSETUP)pUrb->abData;
+    PVUSBSETUP  pSetup    = (PVUSBSETUP)pUrb->pbData;
     pSetup->bmRequestType = VUSB_DIR_TO_DEVICE | VUSB_REQ_STANDARD | VUSB_TO_DEVICE;
     pSetup->bRequest      = VUSB_REQ_SET_ADDRESS;
     pSetup->wValue        = uDevAddr;
