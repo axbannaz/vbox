@@ -26,8 +26,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef VBOX_INCLUDED_SRC_Network_lwip_new_vbox_VBoxLwipCore_h
-#define VBOX_INCLUDED_SRC_Network_lwip_new_vbox_VBoxLwipCore_h
+#ifndef VBOX_INCLUDED_SRC_vbox_VBoxLwipCore_h
+#define VBOX_INCLUDED_SRC_vbox_VBoxLwipCore_h
 #ifndef RT_WITHOUT_PRAGMA_ONCE
 # pragma once
 #endif
@@ -38,4 +38,4 @@
 int vboxLwipCoreInitialize(PFNRT1 pfnCallback, void * pfnCallbackArg);
 void vboxLwipCoreFinalize(PFNRT1 pfnCallback, void * pfnCallbackArg);
 
-#endif /* !VBOX_INCLUDED_SRC_Network_lwip_new_vbox_VBoxLwipCore_h */
+#endif /* !VBOX_INCLUDED_SRC_vbox_VBoxLwipCore_h */
