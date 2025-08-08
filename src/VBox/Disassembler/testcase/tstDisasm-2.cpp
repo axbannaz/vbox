@@ -333,7 +333,7 @@ static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAdd
                     State.Dis.pfnReadBytes(&State.Dis, 0, sizeof(uint32_t), sizeof(uint32_t));
                     State.cbInstr = sizeof(uint32_t);
                 }
-                RTPrintf("    dd %008xh ; %s\n", State.Dis.Instr.au32[0], State.szLine);
+                RTPrintf("    dd %08xh ; %s\n", State.Dis.Instr.au32[0], State.szLine);
             }
             else if (!State.fUndefOp && State.enmUndefOp == kUndefOp_All)
             {
