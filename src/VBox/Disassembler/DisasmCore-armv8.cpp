@@ -132,7 +132,7 @@ static FNDISDECODEARMV8 disArmV8DecodeBinaryLookupWithDefault;
 /** @} */
 
 /** @todo reorg functions   */
-template<const bool s_fSkipValueMatching = false>
+template<const bool s_fSkipValueMatching>
 static int disArmV8A64ParseInstruction(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass);
 static int disArmV8A64ParseInvOpcode(PDISSTATE pDis);
 
@@ -1259,7 +1259,7 @@ static int disArmV8DecodeLookup(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8INSN
     {
         PCDISARMV8OPCODE pOp = &pInsnClass->paOpcodes[i];
         if (uOpcRaw == pOp->fValue)
-            return disArmV8A64ParseInstruction(pDis, u32Insn, pOp, pInsnClass);
+            return disArmV8A64ParseInstruction<false>(pDis, u32Insn, pOp, pInsnClass);
     }
     return disArmV8A64ParseInvOpcode(pDis);
 }
@@ -1289,7 +1289,7 @@ static int disArmV8DecodeCollate(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8INS
     }
 
     if (RT_LIKELY(idx < pInsnClass->Hdr.cDecode))
-        return disArmV8A64ParseInstruction(pDis, u32Insn, &pInsnClass->paOpcodes[idx], pInsnClass);
+        return disArmV8A64ParseInstruction<false>(pDis, u32Insn, &pInsnClass->paOpcodes[idx], pInsnClass);
     return disArmV8A64ParseInvOpcode(pDis);
 }
 
@@ -1543,7 +1543,7 @@ static int disInstrArmV8DecodeWorker(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV
             if (uOpcRaw < pInsnClass->Hdr.cDecode)
             {
                 PCDISARMV8OPCODE pOp = &pInsnClass->paOpcodes[uOpcRaw];
-                return disArmV8A64ParseInstruction(pDis, u32Insn, pOp, pInsnClass);
+                return disArmV8A64ParseInstruction<false>(pDis, u32Insn, pOp, pInsnClass);
             }
         }
         else
