@@ -635,7 +635,7 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
   	Storage/DevLsiLogicSCSI.cpp
  endif
 
- if defined(VBOX_WITH_NVME_IMPL) && !defined(VBOX_WITH_EXTPACK_PUEL)
+ if defined(VBOX_WITH_NVME_IMPL)
   VBoxDD_DEFS          += VBOX_WITH_NVME_IMPL
   VBoxDD_SOURCES       += \
   	Storage/DevNVMe.cpp
@@ -1135,9 +1135,9 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
    	Storage/DevLsiLogicSCSI.cpp
   endif
 
-  if defined(VBOX_WITH_NVME_IMPL) && !defined(VBOX_WITH_EXTPACK_PUEL)
-   VBoxDDGC_DEFS       += VBOX_WITH_NVME_IMPL
-   VBoxDDGC_SOURCES    += \
+  if defined(VBOX_WITH_NVME_IMPL)
+   VBoxDDRC_DEFS       += VBOX_WITH_NVME_IMPL
+   VBoxDDRC_SOURCES    += \
    	Storage/DevNVMe.cpp
   endif
 
@@ -1363,7 +1363,7 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
   	Storage/DevLsiLogicSCSI.cpp
  endif
 
- if defined(VBOX_WITH_NVME_IMPL) && !defined(VBOX_WITH_EXTPACK_PUEL)
+ if defined(VBOX_WITH_NVME_IMPL)
   VBoxDDR0_DEFS       += VBOX_WITH_NVME_IMPL
   VBoxDDR0_SOURCES    += \
   	Storage/DevNVMe.cpp
@@ -1534,56 +1534,6 @@ if defined(VBOX_WITH_EXTPACK) && defined(VBOX_WITH_EXTPACK_PUEL) && defined(VBOX
   endif
 
   Bus/DevPciRaw.cpp_INCS    = Bus
- endif
-
- #
- # The NVMe Extension Pack Modules.
- #
- if defined(VBOX_WITH_NVME_IMPL)
-  DLLS += VBoxNvmeR3
-  VBoxNvmeR3_TEMPLATE = VBoxR3ExtPackPuel
-  VBoxNvmeR3_SOURCES  = \
-  	Storage/DevNVMe.cpp
-  $(call VBOX_SET_VER_INFO_DLL,VBoxNvmeR3,PUEL Extension Pack - NVMe Device)
-
-  if defined(VBOX_WITH_R0_MODULES) && !defined(VBOX_WITH_MINIMAL_R0)
-   ifdef VBOX_WITH_VBOXR0_AS_DLL
-    DLLS    += VBoxNvmeR0
-   else
-    SYSMODS += VBoxNvmeR0
-   endif
-   VBoxNvmeR0_TEMPLATE = VBoxR0ExtPackPuel
-   VBoxNvmeR0_SOURCES  = \
-   	Storage/DevNVMe.cpp
-   $(call VBOX_SET_VER_INFO_R0,VBoxNvmeR0,PUEL Extension Pack - NVMe Device$(COMMA) ring-0)
-   ifdef VBOX_WITH_KMOD_WRAPPED_R0_MODS # Wrapper kmod for VBoxEhciR0.r0
-    INSTALLS.linux += vbox_vboxnvmer0-src
-    vbox_vboxnvmer0-src_INST = bin/src/vbox_vboxnvmer0/
-    vbox_vboxnvmer0-src_SYMLINKS = \
-    	SUPWrapperMod-linux.c=>../common/SUPWrapperMod-linux.c \
-    	Makefile-wrapper.gmk=>../common/Makefile-wrapper.gmk
-    vbox_vboxnvmer0-src_SOURCES = \
-    	$(PATH_ROOT)/src/VBox/HostDrivers/Support/linux/Makefile-vbox_vboxnvmer0.gmk=>Makefile \
-    	$(VBoxNvmeR0_0_OUTDIR)/VBoxNvmeR0.r0=>VBoxNvmeR0.r0 \
-    	$(VBoxNvmeR0_0_OUTDIR)/VBoxNvmeR0.debug=>VBoxNvmeR0.debug
-   endif
-  endif # VBOX_WITH_R0_MODULES && !VBOX_WITH_MINIMAL_R0
-
-  ifdef VBOX_WITH_RAW_MODE
-   SYSMODS += VBoxNvmeRC
-   VBoxNvmeRC_TEMPLATE = VBoxRcExtPackPuel
-   VBoxNvmeRC_SOURCES  = \
-   	Storage/DevNVMe.cpp
-   $(call VBOX_SET_VER_INFO_RC,VBoxNvmeRC,PUEL Extension Pack - NVMe Device$(COMMA) raw-mode)
-  endif
-
-  # Hacky but MSI support *must* be enabled
-  ifdef VBOX_WITH_MSI_DEVICES
-   VBoxNvmeR3_DEFS += VBOX_WITH_MSI_DEVICES
-   VBoxNvmeR0_DEFS += VBOX_WITH_MSI_DEVICES
-   VBoxNvmeRC_DEFS += VBOX_WITH_MSI_DEVICES
-  endif
-
  endif
 
 
