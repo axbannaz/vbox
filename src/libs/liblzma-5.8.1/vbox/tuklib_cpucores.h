@@ -18,7 +18,7 @@ RT_C_DECLS_BEGIN
 
 DECL_FORCE_INLINE(uint32_t) tuklib_cpucores(void)
 {
-	return RTMpGetOnlineCount();
+    return RTMpGetOnlineCount();
 }
 
 RT_C_DECLS_END

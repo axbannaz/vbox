@@ -25,8 +25,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef LZMA_SYSDEFS_H
-#define LZMA_SYSDEFS_H
+#ifndef VBOX_INCLUDED_SRC_vbox_sysdefs_h
+#define VBOX_INCLUDED_SRC_vbox_sysdefs_h
+#ifndef RT_WITHOUT_PRAGMA_ONCE
+# pragma once
+#endif
 
 //////////////
 // Includes //
@@ -50,7 +53,7 @@
 // are no symbol conflicts in case someone links your library
 // into application that also uses the same tuklib module.
 #ifndef TUKLIB_SYMBOL_PREFIX
-#	define TUKLIB_SYMBOL_PREFIX
+# define TUKLIB_SYMBOL_PREFIX
 #endif
 
 #ifndef TUKLIB_SYMBOL
@@ -63,16 +66,16 @@
 #if 0
 // The code currently assumes that size_t is either 32-bit or 64-bit.
 #ifndef SIZE_MAX
-#	if SIZEOF_SIZE_T == 4
-#		define SIZE_MAX UINT32_MAX
-#	elif SIZEOF_SIZE_T == 8
-#		define SIZE_MAX UINT64_MAX
-#	else
-#		error size_t is not 32-bit or 64-bit
-#	endif
+# if SIZEOF_SIZE_T == 4
+#  define SIZE_MAX UINT32_MAX
+# elif SIZEOF_SIZE_T == 8
+#  define SIZE_MAX UINT64_MAX
+# else
+#  error size_t is not 32-bit or 64-bit
+# endif
 #endif
 #if SIZE_MAX != UINT32_MAX && SIZE_MAX != UINT64_MAX
-#	error size_t is not 32-bit or 64-bit
+# error size_t is not 32-bit or 64-bit
 #endif
 
 #include <stdlib.h>
@@ -89,15 +92,15 @@
 //    bool baz = (flags & 0x100);
 //
 #ifdef HAVE_STDBOOL_H
-#	include <stdbool.h>
+# include <stdbool.h>
 #else
-#	if ! HAVE__BOOL
+# if ! HAVE__BOOL
 typedef unsigned char _Bool;
-#	endif
-#	define bool _Bool
-#	define false 0
-#	define true 1
-#	define __bool_true_false_are_defined 1
+# endif
+# define bool _Bool
+# define false 0
+# define true 1
+# define __bool_true_false_are_defined 1
 #endif
 
 #include <string.h>
@@ -105,27 +108,27 @@ typedef unsigned char _Bool;
 // As of MSVC 2013, inline and restrict are supported with
 // non-standard keywords.
 #if defined(_WIN32) && defined(_MSC_VER)
-#	ifndef inline
-#		define inline __inline
-#	endif
-#	ifndef restrict
-#		define restrict __restrict
-#	endif
+# ifndef inline
+#  define inline __inline
+# endif
+# ifndef restrict
+#  define restrict __restrict
+# endif
 #endif
 
 #endif
 
 // We may need alignas from C11/C17/C23.
 #if __STDC_VERSION__ >= 202311
-	// alignas is a keyword in C23. Do nothing.
+    // alignas is a keyword in C23. Do nothing.
 #elif __STDC_VERSION__ >= 201112
-	// Oracle Developer Studio 12.6 lacks <stdalign.h>.
-	// For simplicity, avoid the header with all C11/C17 compilers.
-#	define alignas _Alignas
+    // Oracle Developer Studio 12.6 lacks <stdalign.h>.
+    // For simplicity, avoid the header with all C11/C17 compilers.
+# define alignas _Alignas
 #elif defined(__GNUC__) || defined(__clang__)
-#	define alignas(n) __attribute__((__aligned__(n)))
+# define alignas(n) __attribute__((__aligned__(n)))
 #else
-#	define alignas(n)
+# define alignas(n)
 #endif
 
 // MSVC v19.00 (VS 2015 version 14.0) and later should work.
@@ -133,9 +136,9 @@ typedef unsigned char _Bool;
 // MSVC v19.27 (VS 2019 version 16.7) added support for restrict.
 // Older ones support only __restrict.
 #ifdef _MSC_VER
-#	if _MSC_VER < 1927 && !defined(restrict)
-#		define restrict __restrict
-#	endif
+# if _MSC_VER < 1927 && !defined(restrict)
+#  define restrict __restrict
+# endif
 #endif
 
 ////////////
@@ -148,23 +151,23 @@ typedef unsigned char _Bool;
 #define my_max(x, y) RT_MAX(x, y)
 
 #ifndef ARRAY_SIZE
-#	define ARRAY_SIZE(array) RT_ELEMENTS(array)
+# define ARRAY_SIZE(array) RT_ELEMENTS(array)
 #endif
 
 #if defined(__GNUC__) \
-		&& ((__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __GNUC__ > 4)
-#	define lzma_attr_alloc_size(x) __attribute__((__alloc_size__(x)))
+    && ((__GNUC__ == 4 && __GNUC_MINOR__ >= 3) || __GNUC__ > 4)
+# define lzma_attr_alloc_size(x) __attribute__((__alloc_size__(x)))
 #else
-#	define lzma_attr_alloc_size(x)
+# define lzma_attr_alloc_size(x)
 #endif
 
 #if __STDC_VERSION__ >= 202311
-#	define FALLTHROUGH [[__fallthrough__]]
+# define FALLTHROUGH [[__fallthrough__]]
 #elif (defined(__GNUC__) && __GNUC__ >= 7) \
-		|| (defined(__clang_major__) && __clang_major__ >= 10)
-#	define FALLTHROUGH __attribute__((__fallthrough__))
+    || (defined(__clang_major__) && __clang_major__ >= 10)
+# define FALLTHROUGH __attribute__((__fallthrough__))
 #else
-#	define FALLTHROUGH ((void)0)
+# define FALLTHROUGH ((void)0)
 #endif
 
-#endif
+#endif /* !VBOX_INCLUDED_SRC_vbox_sysdefs_h */

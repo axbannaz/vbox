@@ -25,8 +25,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-#ifndef MYTHREAD_H
-#define MYTHREAD_H
+#ifndef VBOX_INCLUDED_SRC_vbox_mythread_h
+#define VBOX_INCLUDED_SRC_vbox_mythread_h
+#ifndef RT_WITHOUT_PRAGMA_ONCE
+# pragma once
+#endif
 
 #include "sysdefs.h"
 
@@ -66,14 +69,14 @@
 #define mythread_sync(mutex) mythread_sync_helper1(mutex, __LINE__)
 #define mythread_sync_helper1(mutex, line) mythread_sync_helper2(mutex, line)
 #define mythread_sync_helper2(mutex, line) \
-	for (unsigned int mythread_i_ ## line = 0; \
-			mythread_i_ ## line \
-				? (mythread_mutex_unlock(&(mutex)), 0) \
-				: (mythread_mutex_lock(&(mutex)), 1); \
-			mythread_i_ ## line = 1) \
-		for (unsigned int mythread_j_ ## line = 0; \
-				!mythread_j_ ## line; \
-				mythread_j_ ## line = 1)
+    for (unsigned int mythread_i_ ## line = 0; \
+            mythread_i_ ## line \
+                ? (mythread_mutex_unlock(&(mutex)), 0) \
+                : (mythread_mutex_lock(&(mutex)), 1); \
+            mythread_i_ ## line = 1) \
+        for (unsigned int mythread_j_ ## line = 0; \
+                !mythread_j_ ## line; \
+                mythread_j_ ## line = 1)
 #endif
 
 
@@ -90,23 +93,23 @@ typedef RTCRITSECT mythread_mutex;
 typedef RTCONDVAR mythread_cond;
 
 typedef struct {
-	// Tick count (milliseconds) in the beginning of the timeout.
-	// NOTE: This is 32 bits so it wraps around after 49.7 days.
-	// Multi-day timeouts may not work as expected.
-	uint32_t start;
+    // Tick count (milliseconds) in the beginning of the timeout.
+    // NOTE: This is 32 bits so it wraps around after 49.7 days.
+    // Multi-day timeouts may not work as expected.
+    uint32_t start;
 
-	// Length of the timeout in milliseconds. The timeout expires
-	// when the current tick count minus "start" is equal or greater
-	// than "timeout".
-	uint32_t timeout;
+    // Length of the timeout in milliseconds. The timeout expires
+    // when the current tick count minus "start" is equal or greater
+    // than "timeout".
+    uint32_t timeout;
 } mythread_condtime;
 
 
 #define mythread_once(func) \
-	do { \
-		static RTONCE s_Once = RTONCE_INITIALIZER; \
-		RTOnce(&s_Once, (PFNRTONCE)func, NULL /*pvUser*/); \
-	} while (0)
+    do { \
+        static RTONCE s_Once = RTONCE_INITIALIZER; \
+        RTOnce(&s_Once, (PFNRTONCE)func, NULL /*pvUser*/); \
+    } while (0)
 
 // mythread_sigmask() isn't available on Windows. Even a dummy version would
 // make no sense because the other POSIX signal functions are missing anyway.
@@ -115,89 +118,89 @@ typedef struct {
 static inline int
 mythread_create(mythread *thread, PFNRTTHREAD pfnThread, void *arg)
 {
-	RTThreadCreate(thread, pfnThread, arg, 0 /*cbStack*/, RTTHREADTYPE_DEFAULT, RTTHREADFLAGS_WAITABLE, "VBox-LZMA");
-	return 0;
+    RTThreadCreate(thread, pfnThread, arg, 0 /*cbStack*/, RTTHREADTYPE_DEFAULT, RTTHREADFLAGS_WAITABLE, "VBox-LZMA");
+    return 0;
 }
 
 static inline int
 mythread_join(mythread thread)
 {
-	int rc = RTThreadWait(thread, RT_INDEFINITE_WAIT, NULL/*prc*/);
-	if (RT_FAILURE(rc))
-		rc = -1;
+    int rc = RTThreadWait(thread, RT_INDEFINITE_WAIT, NULL/*prc*/);
+    if (RT_FAILURE(rc))
+        rc = -1;
 
-	return rc;
+    return rc;
 }
 
 
 static inline int
 mythread_mutex_init(mythread_mutex *mutex)
 {
-	RTCritSectInit(mutex);
-	return 0;
+    RTCritSectInit(mutex);
+    return 0;
 }
 
 static inline void
 mythread_mutex_destroy(mythread_mutex *mutex)
 {
-	RTCritSectDelete(mutex);
+    RTCritSectDelete(mutex);
 }
 
 static inline void
 mythread_mutex_lock(mythread_mutex *mutex)
 {
-	RTCritSectEnter(mutex);
+    RTCritSectEnter(mutex);
 }
 
 static inline void
 mythread_mutex_unlock(mythread_mutex *mutex)
 {
-	RTCritSectLeave(mutex);
+    RTCritSectLeave(mutex);
 }
 
 
 static inline int
 mythread_cond_init(mythread_cond *cond)
 {
-	RTCondVarCreate(cond);
-	return 0;
+    RTCondVarCreate(cond);
+    return 0;
 }
 
 static inline void
 mythread_cond_destroy(mythread_cond *cond)
 {
-	RTCondVarDestroy(*cond);
+    RTCondVarDestroy(*cond);
 }
 
 static inline void
 mythread_cond_signal(mythread_cond *cond)
 {
-	RTCondVarSignal(*cond);
+    RTCondVarSignal(*cond);
 }
 
 static inline void
 mythread_cond_wait(mythread_cond *cond, mythread_mutex *mutex)
 {
-	RTCondVarCritSectWait(*cond, mutex, RT_INDEFINITE_WAIT);
+    RTCondVarCritSectWait(*cond, mutex, RT_INDEFINITE_WAIT);
 }
 
 static inline int
 mythread_cond_timedwait(mythread_cond *cond, mythread_mutex *mutex,
-		const mythread_condtime *condtime)
+        const mythread_condtime *condtime)
 {
-	int rc = RTCondVarCritSectWait(*cond, mutex, condtime->timeout);
-	if (rc == VERR_TIMEOUT)
-		return -1;
-	return 0;
+    int rc = RTCondVarCritSectWait(*cond, mutex, condtime->timeout);
+    if (rc == VERR_TIMEOUT)
+        return -1;
+    return 0;
 }
 
 static inline void
 mythread_condtime_set(mythread_condtime *condtime, const mythread_cond *cond,
-		uint32_t timeout)
+        uint32_t timeout)
 {
-	(void)cond;
-	//condtime->start = RTTimeSystemMilliTS();
-	condtime->timeout = timeout;
+    (void)cond;
+    //condtime->start = RTTimeSystemMilliTS();
+    condtime->timeout = timeout;
 }
 
-#endif
+#endif /* !VBOX_INCLUDED_SRC_vbox_mythread_h */
