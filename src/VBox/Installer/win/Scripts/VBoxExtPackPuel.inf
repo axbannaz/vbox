@@ -60,7 +60,7 @@ AddService=,2   ; Dummy service using the NULL driver.
 
 [VBoxExtPackPuel_CopyFiles]
 ;VBoxEhciR0.r0,,,2
-VBoxNvmeR0.r0,,,2
+;VBoxNvmeR0.r0,,,2
 ;VBoxPciRawR0.r0,,,2
 
 [Strings]
