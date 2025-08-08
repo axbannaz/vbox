@@ -46,7 +46,7 @@
 #define VUSBURB_AGE_MAX 10
 
 /** Convert from a URB to the URB buffer header. */
-#define VUSBURBPOOL_URB_2_URBHDR(a_pUrb) RT_FROM_MEMBER(a_pUrb->pbData, VUSBURBHDR, abUrbData);
+#define VUSBURBPOOL_URB_2_URBHDR(a_pUrb) RT_FROM_MEMBER(a_pUrb->pbData, VUSBURBHDR, abHdrData);
 
 
 /*********************************************************************************************************************************
@@ -81,7 +81,7 @@ typedef struct VUSBURBHDR
     uint32_t        u32Alignment0;
 #endif
     /** The data immediately following this header. */
-    uint8_t         abUrbData[0];
+    uint8_t         abHdrData[1];
 } VUSBURBHDR;
 /** Pointer to a URB header. */
 typedef VUSBURBHDR *PVUSBURBHDR;
@@ -206,7 +206,7 @@ DECLHIDDEN(PVUSBURB) vusbUrbPoolAlloc(PVUSBURBPOOL pUrbPool, VUSBXFERTYPE enmTyp
                                : cbData <= _32K ? RT_ALIGN_32(cbData, _4K)
                                                 : RT_ALIGN_32(cbData, 16*_1K);
 
-        pHdr = (PVUSBURBHDR)RTMemAllocZ(RT_UOFFSETOF_DYN(VUSBURBHDR, abUrbData[cbDataAllocated]));
+        pHdr = (PVUSBURBHDR)RTMemAllocZ(RT_UOFFSETOF_DYN(VUSBURBHDR, abHdrData[cbDataAllocated - 1]));
         if (RT_UNLIKELY(!pHdr))
         {
             RTCritSectLeave(&pUrbPool->CritSectPool);
@@ -224,7 +224,7 @@ DECLHIDDEN(PVUSBURB) vusbUrbPoolAlloc(PVUSBURBPOOL pUrbPool, VUSBXFERTYPE enmTyp
          */
         if (cbData > pHdr->cbData)
         {
-            memset(&pHdr->abUrbData[pHdr->cbData], 0, cbData - pHdr->cbData);
+            memset(&pHdr->abHdrData[pHdr->cbData], 0, cbData - pHdr->cbData);
         }
     }
     RTCritSectLeave(&pUrbPool->CritSectPool);
@@ -252,7 +252,7 @@ DECLHIDDEN(PVUSBURB) vusbUrbPoolAlloc(PVUSBURBPOOL pUrbPool, VUSBXFERTYPE enmTyp
     pUrb->fShortNotOk            = false;
     pUrb->enmStatus              = VUSBSTATUS_INVALID;
     pUrb->cbData                 = (uint32_t)cbData;
-    pUrb->pbData                 = pHdr->abUrbData;
+    pUrb->pbData                 = pHdr->abHdrData;
     /* Any of cbHci, cbHciTd, and cTds can be zero. We have to be careful. */
     pUrb->pHci                   = cbHci ? (PVUSBURBHCI)(pUrb->pVUsb + 1) : NULL;
     pUrb->paTds                  = (cbHciTd && cTds) ? (PVUSBURBHCITD)((uint8_t *)(pUrb->pVUsb + 1) + cbHci) : NULL;
