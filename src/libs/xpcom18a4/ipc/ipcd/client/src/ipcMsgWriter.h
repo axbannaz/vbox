@@ -61,9 +61,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-
-#ifndef ipcMsgWriter_h__
-#define ipcMsgWriter_h__
+#ifndef VBOX_INCLUDED_SRC_src_ipcMsgWriter_h
+#define VBOX_INCLUDED_SRC_src_ipcMsgWriter_h
+#ifndef RT_WITHOUT_PRAGMA_ONCE
+# pragma once
+#endif
 
 #include <iprt/types.h>
 #include <iprt/string.h>
@@ -325,4 +327,4 @@ DECL_FORCE_INLINE(void) IPCMsgWriterPutBytes(PIPCMSGWRITER pThis, const void *pv
     pThis->pbBufCur += cbBuf;
 }
 
-#endif /* ipcMsgWriter_h__ */
+#endif /* !VBOX_INCLUDED_SRC_src_ipcMsgWriter_h */
