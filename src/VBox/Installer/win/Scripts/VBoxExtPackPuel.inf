@@ -39,7 +39,7 @@ PnpLockdown=1
 
 [SourceDisksFiles]
 ;VBoxEhciR0.r0=1
-VBoxNvmeR0.r0=1
+;VBoxNvmeR0.r0=1 Part of the base package now
 ;VBoxPciRawR0.r0=1
 
 [DestinationDirs]
