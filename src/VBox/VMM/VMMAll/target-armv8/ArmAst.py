@@ -332,11 +332,24 @@ class ArmAstBase(object):
         """ Checks if this is a leaf node or not. """
         return False;
 
+    def isStatement(self):
+        """ Checks if this is a statement node (returns False if expression). """
+        return False;
+
     def containsNode(self, oNodeToFind):
         """ Checks if oNodeToFind is part of this tree. """
         dResult = {'ret': False,};
         def callback(oNode, dResult):
             if oNode == oNodeToFind:
+                dResult['ret'] = True;
+        self.walk(callback, dResult);
+        return dResult['ret'];
+
+    def containsClassInstances(self, oClass):
+        """ Checks if any instance of oClass is part of this tree. oClass can be a list or a single class. """
+        dResult = {'ret': False,};
+        def callback(oNode, dResult):
+            if isinstance(oNode, oClass):
                 dResult['ret'] = True;
         self.walk(callback, dResult);
         return dResult['ret'];
@@ -1228,17 +1241,22 @@ class ArmAstFunction(ArmAstFunctionCallBase):
     """ This is used both as an expression and as a statment... """
     koReValidName = re.compile('^[_A-Za-z][_A-Za-z0-9]+$');
 
-    def __init__(self, sName, aoArgs):
+    def __init__(self, sName, aoArgs, fIsStmt = False):
         assert self.koReValidName.match(sName), 'sName=%s' % (sName);
         ArmAstFunctionCallBase.__init__(self, ArmAstBase.ksTypeFunction, sName, aoArgs);
+        self.fIsStmt = fIsStmt;
 
     def clone(self):
-        return ArmAstFunction(self.sName, [oArg.clone() for oArg in self.aoArgs]);
+        return ArmAstFunction(self.sName, [oArg.clone() for oArg in self.aoArgs], self.fIsStmt);
 
     def isSame(self, oOther):
         if isinstance(oOther, ArmAstFunction):
-            return ArmAstFunctionCallBase.isSame(self, oOther);
+            if self.fIsStmt == oOther.fIsStmt:
+                return ArmAstFunctionCallBase.isSame(self, oOther);
         return False;
+
+    def isStatement(self):
+        return self.fIsStmt;
 
     def isMatchingFunctionCall(self, sFunctionName, *aoArgMatches):
         if self.sName == sFunctionName:
@@ -1809,6 +1827,9 @@ class ArmAstStatementBase(ArmAstBase):
         _ = oHelper;
         raise Exception('not implemented');
 
+    def isStatement(self):
+        return True;
+
     def isNop(self):
         """ Checks if this is a NOP statement. """
         return isinstance(self, ArmAstNop);
@@ -2153,6 +2174,8 @@ class ArmAstIfList(ArmAstStatementBase):
         #
         if not isinstance(dJson['access'], list):
             oStmt = ArmAstBase.fromJson(dJson['access'], ArmAstBase.ksModeAccessor);
+            if isinstance(oStmt, ArmAstFunction):
+                oStmt.fIsStmt = True;
             if oCondition.isBoolAndTrue():
                 assert isinstance(oStmt, (ArmAstStatementBase, ArmAstFunction)); ## @todo may need a wrapper.
                 #print('debug/IfList/%u:%s 1a. oStmt=%s' % (uDepth, ' '*uDepth, oStmt,));

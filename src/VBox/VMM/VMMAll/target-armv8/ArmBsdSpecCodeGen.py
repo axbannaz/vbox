@@ -328,6 +328,7 @@ g_dSpecFeatToCpumFeat = {
     'FEAT_PMUv3p8':                 'fPmuV3p8',
     'FEAT_PMUv3p9':                 'fPmuV3p9',
     'FEAT_PRFMSLC':                 'fPrfmSlc',
+    'FEAT_PoPS':                    'fPoPs',
     'FEAT_RAS':                     'fRas',
     #'FEAT_RASSAv1p1':               'fRassaV1p1',          # difficult to detect
     #'FEAT_RASSAv2':                 'fRasSaV2',            # difficult to detect
@@ -459,11 +460,15 @@ g_dRegToCpumCtx = {
     'AArch64.AMUSERENR_EL0':    ( 0, ), # We don't support this, so report zero.
     'AArch64.CNTP_CTL_EL0':     ( 0, ), # We don't seem to support this, so report zero.
     'AArch64.GCSCRE0_EL1':      ( 0, ), # FEAT_GCS / ARMv9.4; we don't support this, returning zero for now.
+    'AArch64.GCSCR_EL1':        ( 0, ), # FEAT_GCS / ARMv9.4; we don't support this, returning zero for now.
+    'AArch64.GCSCR_EL2':        ( 0, ), # FEAT_GCS / ARMv9.4; we don't support this, returning zero for now.
+    'AArch64.GCSCR_EL3':        ( 0, ), # FEAT_GCS / ARMv9.4; we don't support this, returning zero for now.
     'AArch64.HCRX_EL2':         ( 0, ), # FEAT_HCX / ARMv8.7; we don't support this, returning zero for now.
     'AArch64.HDFGRTR_EL2':      ( 0, ), # FEAT_FGT / ARMv8.6; we don't support this, returning zero for now.
     'AArch64.HDFGWTR_EL2':      ( 0, ), # FEAT_FGT / ARMv8.6; we don't support this, returning zero for now.
     'AArch64.HFGRTR_EL2':       ( 0, ), # FEAT_FGT / ARMv8.6; we don't support this, returning zero for now.
     'AArch64.HFGWTR_EL2':       ( 0, ), # FEAT_FGT / ARMv8.6; we don't support this, returning zero for now.
+    'AArch64.HFGITR_EL2':       ( 0, ), # FEAT_FGT / ARMv8.6; we don't support this, returning zero for now.
     ## @todo 'AArch64.ICC_SRE_EL1': ( '.u64', ), - GIC has debug logging of this, but no handling.
     ## @todo 'AArch64.ICC_SRE_EL2': ( '.u64', ), - GIC lists this in the range, but not sure how to get at any value...
     ## @todo 'AArch64.ICH_HCR_EL2': ( '.u64', ), - This is part of GICv3, but our GIC doesn't mention it.
@@ -626,6 +631,84 @@ g_dRegToCpumCtx = {
     'AArch64.FPSR':             ('fpsr',),
     'AArch64.CNTV_CTL_EL0':     ('CntvCtlEl0',),
     'AArch64.CNTV_CVAL_EL0':    ('CntvCValEl0',),
+};
+
+
+#
+# Enum mappings.
+#
+
+kdMapELx = {
+    'EL0':                          '0',
+    'EL1':                          '1',
+    'EL2':                          '2',
+    'EL3':                          '3',
+};
+
+kdMapTranslationStage = {
+    'TranslationStage_1':           'kIemCImplA64TranslationStage_1',
+    'TranslationStage_12':          'kIemCImplA64TranslationStage_12',
+};
+kdMapATAccess = {
+    'ATAccess_Read':                'kIemCImplA64ATAccess_Read',
+    'ATAccess_Write':               'kIemCImplA64ATAccess_Write',
+    'ATAccess_Any':                 'kIemCImplA64ATAccess_Any',
+    'ATAccess_ReadPAN':             'kIemCImplA64ATAccess_ReadPan',
+    'ATAccess_WritePAN':            'kIemCImplA64ATAccess_WritePan',
+};
+kdMapCacheType = {
+    'CacheType_Data':               'kIemCImplA64CacheType_Data',
+    'CacheType_Tag':                'kIemCImplA64CacheType_Tag',
+    'CacheType_Data_Tag':           'kIemCImplA64CacheType_DataTag',
+    'CacheType_Instruction':        'kIemCImplA64CacheType_Instruction',
+};
+kdMapCacheOp = {
+    'CacheOp_Clean':                'kIemCImplA64CacheOp_Clean',
+    'CacheOp_Invalidate':           'kIemCImplA64CacheOp_Invalidate',
+    'CacheOp_CleanInvalidate':      'kIemCImplA64CacheOp_CleanInvalidate',
+};
+kdMapCacheOpScope = {
+    'CacheOpScope_SetWay':          'kIemCImplA64CacheOpScope_SetWay',
+    'CacheOpScope_PoU':             'kIemCImplA64CacheOpScope_PoU',
+    'CacheOpScope_PoC':             'kIemCImplA64CacheOpScope_PoC',
+    'CacheOpScope_PoE':             'kIemCImplA64CacheOpScope_PoE',
+    'CacheOpScope_PoP':             'kIemCImplA64CacheOpScope_PoP',
+    'CacheOpScope_PoDP':            'kIemCImplA64CacheOpScope_PoDP',
+    'CacheOpScope_PoPA':            'kIemCImplA64CacheOpScope_PoPA',
+    'CacheOpScope_PoPS':            'kIemCImplA64CacheOpScope_PoPS',       #
+    'CacheOpScope_ALLU':            'kIemCImplA64CacheOpScope_AllU',
+    'CacheOpScope_ALLUIS':          'kIemCImplA64CacheOpScope_AllUIS',
+    'CacheOpScope_OuterCache':      'kIemCImplA64CacheOpScope_OuterCache', #
+};
+kdMapRestrictType = {
+    'RestrictType_CachePrefetch':   'kIemCImplA64RestrictType_CachePrefetch',
+    'RestrictType_ControlFlow':     'kIemCImplA64RestrictType_ControlFlow',
+    'RestrictType_DataValue':       'kIemCImplA64RestrictType_DataValue',
+    'RestrictType_Other':           'kIemCImplA64RestrictType_Other',
+};
+kdMapRegime = {
+    'Regime_EL10':                  'kIemCImplA64Regime_El10',
+    'Regime_EL20':                  'kIemCImplA64Regime_El20',
+    'Regime_EL2':                   'kIemCImplA64Regime_El2',
+    'Regime_EL30':                  'kIemCImplA64Regime_El30',
+    'Regime_EL3':                   'kIemCImplA64Regime_El3',
+};
+kdMapBroadcast = {
+    'Broadcast_ISH':                'kIemCImplA64Broadcast_Ish',
+    'Broadcast_ForcedISH':          'kIemCImplA64Broadcast_ForcedIsh',
+    'Broadcast_OSH':                'kIemCImplA64Broadcast_Osh',
+    'Broadcast_NSH':                'kIemCImplA64Broadcast_Nsh',
+};
+kdMapTlbiMemAttr = {
+    'TLBI_AllAttr':                 'kIemCImplA64TlbiMemAttr_AllAttr',
+    'TLBI_ExcludeXS':               'kIemCImplA64TlbiMemAttr_ExcludeXs',
+};
+kdMapTlbiLevel = {
+    'TLBILevel_Any':                'kIemCImplA64TlbiLevel_Any',
+    'TLBILevel_Last':               'kIemCImplA64TlbiLevel_Last',
+};
+kdMapVmId = {
+    'VMID_NONE':                    '0'
 };
 
 
@@ -1270,12 +1353,12 @@ class DecoderNode(object):
 
 class SysRegAccessorInfo(object):
     """ Info about an accessor we're emitting code for. """
-    def __init__(self, oAccessor, oReg, sEnc):
+    def __init__(self, oAccessor, oReg, sEnc, sAsmValue = None):
         self.oAccessor  = oAccessor     # type: ArmAccessorSystem
         self.oReg       = oReg;
         self.sEnc       = sEnc;
         self.oCode      = None;
-        self.sAsmValue  = oAccessor.oEncoding.sAsmValue;
+        self.sAsmValue  = sAsmValue if sAsmValue else oAccessor.oEncoding.sAsmValue;
         self.sRegName   = oReg.sName;
         # Stats for the code generator.
         self.cGstFeatsRefs                  = 0;
@@ -1283,6 +1366,15 @@ class SysRegAccessorInfo(object):
         self.cAssignmentsWithUnresolvedRegs = 0;  # Number of unresolved system register assignment reference.
         ## This is updated by morphCodeToC() and will be zero the code is ready for compilation.
         self.cIncompleteNodes             = -1;
+
+    def toString(self):
+        return 'SysRegAccessorInfo<sAsmValue=%s, sEnc=%s, sRegName=%s>' % (self.sAsmValue, self.sEnc, self.sRegName,);
+
+    def __str__(self):
+        return self.toString();
+
+    def __repr__(self):
+        return self.toString();
 
 
 class SysRegGeneratorBase(object):
@@ -1505,6 +1597,14 @@ class SysRegGeneratorBase(object):
             ArmAstDotAtom([ArmAstIdentifier('SCR_curr'), ArmAstIdentifier('NS')]), # SCR_curr is SCR or SCR_EL3.
             ArmAstFunction('IsSecureEL2Enabled', []),
         ])),
+        'IsHCRXEL2Enabled': # IsFeatureImplemented(FEAT_HCX) && (!HaveEL(EL3) || SCR_EL3.HXEn != 0) && EL2Enabled()
+            ArmAstBinaryOp.andListToTree([
+                ArmAstFunction('IsFeatureImplemented', [ArmAstIdentifier('FEAT_HCX')]),
+                ArmAstBinaryOp(ArmAstUnaryOp('!', ArmAstFunction('HaveEL', [ArmAstIdentifier('EL3')])),
+                               '||',
+                               ArmAstBinaryOp(ArmAstField('HXEn', 'SCR_EL3'), '!=', ArmAstValue('\'0\''))),
+                ArmAstFunction('EL2Enabled', []),
+        ]),
     };
 
     def transformCodePass1_HaveAArch64(self):
@@ -2043,6 +2143,26 @@ class SysRegGeneratorBase(object):
         """ Pass 2: Translate PhysicalCountInt(). """
         if len(oNode.aoArgs) == 0:
             return ArmAstCppCall('iemCImplHlpGetPhysicalSystemTimerCount', [ ArmAstCppExpr('pVCpu'), ], cBitsWidth = 64);
+        raise Exception('Unexpected: %s' % (oNode,));
+
+    def transformCodePass2_SecurityStateAtEL(self, oNode):
+        """ Pass 2: Translate SecurityStateAtEL(). """
+        if len(oNode.aoArgs) == 1:
+            idxEl = self.kdELxToNum.get(oNode.aoArgs[0].getIdentifierName(), -1);
+            if idxEl >= 0:
+                return ArmAstCppCall('iemCImplHlpGetSecurityStateAtEl',
+                                     [ ArmAstCppExpr('pVCpu'), ArmAstCppExpr(str(idxEl)),], cBitsWidth = 64);
+        raise Exception('Unexpected: %s' % (oNode,));
+
+    def transformCodePass2_GCSEnabled(self, oNode):
+        """ Pass 2: Translate GCSEnabled(EL0|EL1|EL2|EL3|PSTATE.EL). """
+        if len(oNode.aoArgs) == 1:
+            if oNode.aoArgs[0].isMatchingDotAtom('PSTATE', 'EL'):
+                return ArmAstCppCall('iemCImplHlpIsGcsEnabledAtCurrentEl', [ ArmAstCppExpr('pVCpu'), ],  cBitsWidth = 1);
+            idxEl = self.kdELxToNum.get(oNode.aoArgs[0].getIdentifierName(), -1);
+            if idxEl >= 0:
+                return ArmAstCppCall('iemCImplHlpIsGcsEnabled',
+                                     [ ArmAstCppExpr('pVCpu'), ArmAstCppExpr(str(idxEl)) ],  cBitsWidth = 1);
         raise Exception('Unexpected: %s' % (oNode,));
 
     def transformCodePass2_UInt(self, oNode):
@@ -2650,6 +2770,12 @@ class SysRegGeneratorBase(object):
             if oNode.sName == 'PhysicalCountInt':
                 return self.transformCodePass2_PhysicalCountInt(oNode);
 
+            if oNode.sName == 'SecurityStateAtEL':
+                return self.transformCodePass2_SecurityStateAtEL(oNode);
+
+            if oNode.sName == 'GCSEnabled':
+                return self.transformCodePass2_GCSEnabled(oNode);
+
             # UInt.
             if oNode.sName == 'UInt':
                 return self.transformCodePass2_UInt(oNode);
@@ -2662,7 +2788,9 @@ class SysRegGeneratorBase(object):
             if oNode.sName == 'SignExtend':
                 return self.transformCodePass2_SignExtend(oNode);
 
-        elif isinstance(oNode, ArmAstBinaryOp):
+            return self.warn('Call to untranslated function: %s' % (oNode.sName,), oNode);
+
+        if isinstance(oNode, ArmAstBinaryOp):
             # PSTATE.EL == EL0 and similar:
             if oNode.oLeft.isMatchingDotAtom('PSTATE', 'EL'):
                 idxEl = self.kdELxToNum.get(oNode.oRight.getIdentifierName(), -1);
@@ -2729,6 +2857,11 @@ class SysRegGeneratorBase(object):
                 and aoStack
                 and isinstance(aoStack[-1], (ArmAstAssignment, ArmAstFunction))):
                 return self.transformCodePass2_SlicedIdentifier(oNode);
+
+            # Weird VMID[] var/function.
+            if oNode.oVar.isMatchingIdentifier('VMID') and len(oNode.aoValues) == 0:
+                return ArmAstCppCall('iemCImplHlpGetCurrentVmId', [ArmAstCppExpr('pVCpu'),]);
+
 
         elif isinstance(oNode, ArmAstAssignment):
             if isinstance(oNode.oVar, ArmAstSquareOp):
@@ -2973,6 +3106,367 @@ class SysRegGeneratorA64MsrReg(SysRegGeneratorBase):
 
         return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
 
+
+class SysRegGeneratorA64Sys(SysRegGeneratorBase):
+    """
+    Code generator specialization for the SYS instruction.
+    """
+
+    def __init__(self):
+        SysRegGeneratorBase.__init__(self, 'A64.SYS', 'iemCImplA64_sys');
+
+    def generateOneHandler(self, oInfo):
+        """ Generates one 'register' access for A64.SYS. """
+        asLines = [
+            '',
+            '/**',
+            ' * %s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
+                               oInfo.oAccessor.oEncoding.dNamedValues,),
+            ' * Transformation status: %u - %s'
+            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
+            ' */',
+            'static VBOXSTRICTRC iemCImplA64_sys_%s(PVMCPU pVCpu, uint64_t uValue%s) RT_NOEXCEPT'
+            % (oInfo.sAsmValue, ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+            '{',
+        ];
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '    RT_NOREF(pVCpu, uValue%s);' % (', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+                '#ifdef IEM_SYSREG_TODO',
+            ];
+        elif isinstance(oInfo.oCode, ArmAstReturn) and oInfo.oCode.toString().find('Raise') >= 0:
+            asLines.append('    RT_NOREF(uValue);');
+        if oInfo.cGstFeatsRefs > 0:
+            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
+
+        if oInfo.oCode:
+            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
+
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '#endif',
+                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
+            ];
+
+        asLines.append('    /* -------- Original code specification: -------- */');
+        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
+
+        asLines += [
+            '}',
+        ];
+        return asLines;
+
+    def generateMainFunction(self):
+        """ Generates the CIMPL function for A64.SYS. """
+        asLines = [
+            '',
+            '/**',
+            ' * Implements the SYS instruction.',
+            ' *',
+            ' * @returns Strict VBox status code.',
+            ' * @param   pVCpu       The cross context virtual CPU structure of the',
+            ' *                      calling thread.',
+            ' * @param   idSysIns    The system register to write to (IPRT format).',
+            ' * @param   idxGprSrc   The source GPR register number (for exceptions).',
+            ' * @param   uValue      The value to write.',
+            ' */',
+            'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sys_generic(PVMCPU pVCpu, uint32_t idSysIns, uint32_t idxGprSrc,',
+            '                                                 uint64_t uValue)',
+            '{',
+            '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysIns, idxGprSrc, 1, 0xf);',
+            '    switch (idSysIns)',
+            '    {',
+        ];
+        for oInfo in self.aoInfo:
+            if oInfo.sEnc[0] == 'A':
+                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
+                    asLines.append('        case %s: %sreturn %s(pVCpu, iemCImplA64_sys_%s(pVCpu, uValue%s));'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
+                                      oInfo.sAsmValue, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                else:
+                    asLines.append('        case %s: %sreturn iemCImplA64_sys_%s(pVCpu, uValue%s);'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.sAsmValue,
+                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+        asLines += [
+            '    }',
+            '    /* Fall back on handcoded handler. */',
+            '    return iemCImplA64_sys_fallback(pVCpu, idSysIns, uValue, idxGprSrc);',
+            '}',
+            '',
+            '/**',
+            ' * Implements the SYS instruction.',
+            ' *',
+            ' * @param   idSysIns    The system register to write to (IPRT format).',
+            ' * @param   idxGprSrc   The source GPR register number.',
+            ' */',
+            'IEM_CIMPL_DEF_2(iemCImplA64_sys, uint32_t, idSysIns, uint32_t, idxGprSrc)',
+            '{',
+            '    uint64_t const uValue = idxGprSrc < ARMV8_A64_REG_XZR ? pVCpu->cpum.GstCtx.aGRegs[idxGprSrc].x : 0;',
+            '    return iemCImplA64_sys_generic(pVCpu, idSysIns, idxGprSrc, uValue);',
+            '}',
+        ];
+        return asLines;
+
+    #
+    # Pass 2 function rewriters.
+    #
+
+    kdPass2FunctionHandlersEx = {
+        # AArch64_AT(uValue, TranslationStage_1, EL1, ATAccess_Read)
+        'AArch64_AT':           (('iemCImplHlpA64SysAt', [ArmAstCppExprBase, kdMapTranslationStage, kdMapELx, kdMapATAccess,]), ),
+        # AArch64_DC(uValue, CacheType_Data, CacheOp_Clean, CacheOpScope_SetWay)
+        'AArch64_DC':           (('iemCImplHlpA64SysDc', [ArmAstCppExprBase, kdMapCacheType, kdMapCacheOp, kdMapCacheOpScope,]),),
+        # Arch64_IC(CacheOpScope_ALLUIS)
+        # Arch64_IC(uValue, CacheOpScope_PoU)
+        'AArch64_IC':           (('iemCImplHlpA64SysIc', [kdMapCacheOpScope,]),
+                                 ('iemCImplHlpA64SysIcWithArg', [ArmAstCppExprBase, kdMapCacheOpScope,]), ),
+        # AArch64_MemZero(uValue, CacheType_Data)
+        'AArch64_MemZero':       (('iemCImplHlpA64MemZero', [ArmAstCppExprBase, kdMapCacheType,]), ),
+        # AArch64_RestrictPrediction(uValue, RestrictType_DataValue)
+        'AArch64_RestrictPrediction':   (('iemCImplHlpA64RestrictPrediction', [ArmAstCppExprBase, kdMapRestrictType,]),),
+        # AArch64_TLBI_ALL(iemCImplHlpGetSecurityStateAtEl(pVCpu, 2), Regime_EL2, Broadcast_OSH, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_ALL':      (('iemCImplHlpA64TlbiAll', [ArmAstCppCall, kdMapRegime, kdMapBroadcast,
+                                                             kdMapTlbiMemAttr, ArmAstCppExprBase,]), ),
+        # AArch64_TLBI_ASID(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10, VMID<> | VMID_NONE,
+        #                   Broadcast_OSH, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_ASID':     (('iemCImplHlpA64TlbiAsid', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                              kdMapBroadcast, kdMapTlbiMemAttr, ArmAstCppExprBase,]),),
+        # AArch64_TLBI_IPAS2(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10, iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE,
+        #                     Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_IPAS2':    (('iemCImplHlpA64TlbiIpAs2', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                               kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                               ArmAstCppExprBase,]), ),
+        # AArch64_TLBI_RIPAS2(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10,
+        #                     iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_RIPAS2':   (('iemCImplHlpA64TlbiRIpAs2', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                                kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                                ArmAstCppExprBase,]), ),
+        # AArch64_TLBI_RVA(iemCImplHlpGetSecurityStateAtEl(pVCpu, 2), Regime_EL20,
+        #                  iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_RVA':      (('iemCImplHlpA64TlbiRva', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                             kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                             ArmAstCppExprBase,]),),
+        # AArch64_TLBI_RVAA(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10,
+        #                   iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_RVAA':     (('iemCImplHlpA64TlbiRvaa', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                              kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                              ArmAstCppExprBase,]), ),
+        # AArch64_TLBI_VA(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10, iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE,
+        #                 Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_VA':       (('iemCImplHlpA64TlbiVa', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                            kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                            ArmAstCppExprBase,]), ),
+        # AArch64_TLBI_VAA(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10, iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE,
+        #                  Broadcast_ISH, TLBILevel_Any, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_VAA':      (('iemCImplHlpA64TlbiVaa', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                             kdMapBroadcast, kdMapTlbiLevel, kdMapTlbiMemAttr,
+                                                             ArmAstCppExprBase,]),),
+        # AArch64_TLBI_VMALL(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10,
+        #                    iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_ForcedISH, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_VMALL':    (('iemCImplHlpA64TlbiVmAll', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                               kdMapBroadcast, kdMapTlbiMemAttr, ArmAstCppExprBase,]),),
+
+        # AArch64_TLBI_VMALLS12(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10,
+        #                       iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_OSH, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_VMALLS12': (('iemCImplHlpA64TlbiVmAllS12', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                                  kdMapBroadcast, kdMapTlbiMemAttr, ArmAstCppExprBase,]),),
+        # AArch64_TLBI_VMALLWS2(iemCImplHlpGetSecurityStateAtEl(pVCpu, 1), Regime_EL10,
+        #                       iemCImplHlpGetCurrentVmId(pVCpu) | VMID_NONE, Broadcast_ISH, TLBI_AllAttr, uValue)
+        'AArch64_TLBI_VMALLWS2': (('iemCImplHlpA64TlbiVmAllWs2', [ArmAstCppCall, kdMapRegime, (kdMapVmId, ArmAstCppCall),
+                                                                  kdMapBroadcast, kdMapTlbiMemAttr, ArmAstCppExprBase,]),),
+        # AArch64_TRCIT(uValue)
+        'AArch64_TRCIT':         (('iemCImplHlpA64TrcIt', [ArmAstCppExprBase,]),),  # 'trace-it'
+        # BRB_IALL()
+        'BRB_IALL':              (('iemCImplHlpA64BrbIAll', []),),              # branch buffers
+        # BRB_INJ()
+        'BRB_INJ':               (('iemCImplHlpA64BrbInj', []),),               # branch buffers
+        # GCSPOPCX()
+        'GCSPOPCX':              (('iemCImplHlpA64GcsPopCX', []),),
+        # GCSPOPX()
+        'GCSPOPX':               (('iemCImplHlpA64GcsPopX', []),),
+        # GCSPUSHM(uValue)
+        'GCSPUSHM':              (('iemCImplHlpA64GcsPushM', [ArmAstCppExprBase,]),),
+        # GCSPUSHX()
+        'GCSPUSHX':              (('iemCImplHlpA64GcsPushX', []),),
+        # GCSSS1(uValue)
+        'GCSSS1':                (('iemCImplHlpA64GcsSs1', [ArmAstCppExprBase,]),),
+    };
+
+    def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
+        """ Callback used by the second pass."""
+        # Replace X<t,64> references with uValue
+        if oNode.isMatchingSquareOp('X', 't', 64):
+            if aoStack and isinstance(aoStack[-1], (ArmAstFunction, ArmAstBinaryOp, ArmAstSquareOp)):
+                return ArmAstCppExpr('uValue', cBitsWidth = 64);
+
+        # Return statements w/o a value are NOP branches, make them return VINF_SUCCESS.
+        elif isinstance(oNode, ArmAstReturn):
+            if not oNode.oValue:
+                return ArmAstReturn(ArmAstCppExpr('iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS)', 32));
+
+        # Refactor function calls.
+        elif isinstance(oNode, ArmAstFunction):
+            if oNode.sName in self.kdPass2FunctionHandlersEx:
+                asErrs = [];
+                if oNode.isStatement():
+                    for i, t in enumerate(self.kdPass2FunctionHandlersEx[oNode.sName]):
+                        sCImplHlpName, aoArgTypeMap = t;
+                        if len(aoArgTypeMap) == len(oNode.aoArgs):
+                            aoCppArgs = [ ArmAstCppExpr('pVCpu'), ];
+                            for iArg, aoTypesOrMap in enumerate(aoArgTypeMap):
+                                if not isinstance(aoTypesOrMap, tuple):
+                                    aoTypesOrMap = (aoTypesOrMap,);
+                                for oTypesOrMap in aoTypesOrMap:
+                                    if isinstance(oTypesOrMap, dict):
+                                        sId = oNode.aoArgs[iArg].getIdentifierName();
+                                        if sId and sId in oTypesOrMap:
+                                            aoCppArgs.append(ArmAstCppExpr(oTypesOrMap[sId]));
+                                            break;
+                                        asErrs.append('%s: Mapping of call arg #%u failed: %s' % (i, iArg, oNode.aoArgs[iArg],));
+                                    elif isinstance(oNode.aoArgs[iArg], oTypesOrMap):
+                                        aoCppArgs.append(oNode.aoArgs[iArg].clone());
+                                        break;
+                                    else:
+                                        asErrs.append('%s: Call arg #%u type mismatch: %s, expected %s'
+                                                      % (i, iArg, type(oNode.aoArgs[iArg]), oTypesOrMap,));
+                            if len(aoCppArgs) == len(oNode.aoArgs) + 1:
+                                return ArmAstReturn(ArmAstCppCall(sCImplHlpName, aoCppArgs, cBitsWidth = 32));
+                        else:
+                            asErrs.append('%u: Argument count mismatch: %s vs %s' % (i, len(aoArgTypeMap), len(oNode.aoArgs),));
+                else:
+                    asErrs.append('Not statement!');
+                raise Exception('Unexpected call: %s\n%s' % (oNode, '\n'.join(asErrs)))
+
+        return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
+
+
+class SysRegGeneratorA64SysL(SysRegGeneratorBase):
+    """
+    Code generator specialization for the SYSL instruction.
+    """
+
+    def __init__(self):
+        SysRegGeneratorBase.__init__(self, 'A64.SYSL', 'iemCImplA64_sysl');
+
+    def generateOneHandler(self, oInfo):
+        """ Generates one 'register' access for A64.SYS. """
+        asLines = [
+            '',
+            '/**',
+            ' * %s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
+                               oInfo.oAccessor.oEncoding.dNamedValues,),
+            ' * Transformation status: %u - %s'
+            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
+            ' */',
+            'static VBOXSTRICTRC iemCImplA64_sysl_%s(PVMCPU pVCpu, uint64_t *puDst%s) RT_NOEXCEPT'
+            % (oInfo.sAsmValue, ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+            '{',
+        ];
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '    RT_NOREF(pVCpu, uValue%s);' % (', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+                '#ifdef IEM_SYSREG_TODO',
+            ];
+        elif isinstance(oInfo.oCode, ArmAstReturn) and oInfo.oCode.toString().find('Raise') >= 0:
+            asLines.append('    RT_NOREF(uValue);');
+        if oInfo.cGstFeatsRefs > 0:
+            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
+
+        if oInfo.oCode:
+            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
+
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '#endif',
+                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
+            ];
+
+        asLines.append('    /* -------- Original code specification: -------- */');
+        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
+
+        asLines += [
+            '}',
+        ];
+        return asLines;
+
+    def generateMainFunction(self):
+        """ Generates the CIMPL function for A64.SYS. """
+        asLines = [
+            '',
+            '/**',
+            ' * Implements the SYSL instruction.',
+            ' *',
+            ' * @returns Strict VBox status code.',
+            ' * @param   pVCpu       The cross context virtual CPU structure of the',
+            ' *                      calling thread.',
+            ' * @param   idSysIns    The system register to write to (IPRT format).',
+            ' * @param   idxGprDst   The destination GPR register number (for exceptions).',
+            ' * @param   puDst       Where to return the return value.',
+            ' */',
+            'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sysl_generic(PVMCPU pVCpu, uint32_t idSysIns, uint32_t idxGprDst,',
+            '                                                  uint64_t *puDst)',
+            '{',
+            '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysIns, idxGprDst, 1, 0xf);',
+            '    switch (idSysIns)',
+            '    {',
+        ];
+        for oInfo in self.aoInfo:
+            if oInfo.sEnc[0] == 'A':
+                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
+                    asLines.append('        case %s: %sreturn %s(pVCpu, iemCImplA64_sysl_%s(pVCpu, puDst%s));'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
+                                      oInfo.sAsmValue, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                else:
+                    asLines.append('        case %s: %sreturn iemCImplA64_sysl_%s(pVCpu, puDst%s);'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.sAsmValue,
+                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+        asLines += [
+            '    }',
+            '    /* Fall back on handcoded handler. */',
+            '    return iemCImplA64_sysl_fallback(pVCpu, idSysIns, idxGprDst);',
+            '}',
+            '',
+            '/**',
+            ' * Implements the MSR (register) instruction.',
+            ' *',
+            ' * @param   idSysIns    The system register to write to (IPRT format).',
+            ' * @param   idxGprDst   The destination GPR register number.',
+            ' */',
+            'IEM_CIMPL_DEF_2(iemCImplA64_sysl, uint32_t, idSysIns, uint32_t, idxGprDst)',
+            '{',
+            '    uint64_t         uZeroDummy;',
+            '    uint64_t * const puDst = idxGprDst < ARMV8_A64_REG_XZR',
+            '                           ? &pVCpu->cpum.GstCtx.aGRegs[idxGprDst].x : &uZeroDummy;',
+            '    return iemCImplA64_msr_generic(pVCpu, idSysIns, idxGprSrc, uValue);',
+            '}',
+        ];
+        return asLines;
+
+
+    def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
+        """ Callback used by the second pass."""
+        # Replace X[t,64] references with uValue, but not in assignments (handled below).
+        if oNode.isMatchingSquareOp('X', 't', 64):
+            if aoStack and isinstance(aoStack[-1], (ArmAstBinaryOp, ArmAstSquareOp)):
+                return ArmAstCppExpr('uValue', cBitsWidth = 64);
+
+        # Assignments to uValue
+        elif isinstance(oNode, ArmAstAssignment):
+            if oNode.oVar.isMatchingSquareOp('X', 't', 64):
+                if oNode.oValue.isMatchingFunctionCall('GCSPOPM'):
+                    return ArmAstReturn(ArmAstCppCall('iemCImplA64SyslGcsPopM',
+                                                      [ArmAstCppExpr('pVCpu'), ArmAstCppExpr('puDst'),], cBitsWidth = 32));
+                if oNode.oValue.isMatchingFunctionCall('GCSSS2'):
+                    return ArmAstReturn(ArmAstCppCall('iemCImplA64SyslGcsSs2',
+                                                      [ArmAstCppExpr('pVCpu'), ArmAstCppExpr('puDst'),], cBitsWidth = 32));
+            raise Exception('Unexpected assignment: %s' % (oNode,));
+
+        # Return statements w/o a value are NOP branches, make them return VINF_SUCCESS.
+        elif isinstance(oNode, ArmAstReturn):
+            if not oNode.oValue:
+                return ArmAstReturn(ArmAstCppExpr('iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS)', 32));
+
+        return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
 
 #
 # Generators
@@ -3534,19 +4028,41 @@ class IEMArmGenerator(object):
             'A64.MSRimmediate': SysRegGeneratorBase('A64.MSRimmediate', 'iemCImplA64_msr_imm'),
             'A64.MRRS':         SysRegGeneratorBase('A64.MRRS',         'iemCImplA64_mrrs'),
             'A64.MSRRregister': SysRegGeneratorBase('A64.MSRRregister', 'iemCImplA64_msrr'),
+            'A64.SYS':          SysRegGeneratorA64Sys(),
+            'A64.SYSL':         SysRegGeneratorA64SysL(),
+            'A64.SYSP':         SysRegGeneratorBase('A64.SYSP',         'iemCImplA64_sysp'), #SysRegGeneratorA64SysP(),
         } # type: Dict[str,SysRegGeneratorBase]
 
         for oReg in spec.g_daoAllArmRegistersByState[sState]: # type: ArmRegister
             assert oReg.sState == sState;
             for oAccessor in oReg.aoAccessors:  # type: ArmAccessorBase
-                if isinstance(oAccessor, spec.ArmAccessorSystem) and oAccessor.sName in dAccessors:
-                    sEncSortKey = 'encoding=%s' % (oAccessor.oEncoding.dNamedValues,);
-                    if (    not isinstance(oAccessor, spec.ArmAccessorSystemArray)
-                        and not oAccessor.oEncoding.fHasWildcard
-                        and not oAccessor.oEncoding.fHasIndex
-                        and oAccessor.sName in ('A64.MRS', 'A64.MSRregister')):
+                if isinstance(oAccessor, spec.ArmAccessorSystem):
+                    if oAccessor.sName in { 'SYS', 'SYSL', 'SYSP', }:
+                        pass; # Skip the generic system instruction entries.
+                    elif oAccessor.sName in dAccessors:
+                        # System Register.
+                        sEncSortKey = 'encoding=%s' % (oAccessor.oEncoding.dNamedValues,);
+                        if (    not isinstance(oAccessor, spec.ArmAccessorSystemArray)
+                            and not oAccessor.oEncoding.fHasWildcard
+                            and not oAccessor.oEncoding.fHasIndex
+                            and oAccessor.sName in {'A64.MRS', 'A64.MSRregister'}):
+                            sEncSortKey = oAccessor.oEncoding.getSysRegIdCreate();
+                        dAccessors[oAccessor.sName].aoInfo.append(SysRegAccessorInfo(oAccessor, oReg, sEncSortKey));
+                    else:
+                        # System instruction - categorize by aliased instruction.
+                        sAliasing = 'A64.SYS';
+                        if oAccessor.oAccess.containsClassInstances(ArmAstAssignment):
+                            sAliasing = 'A64.SYSL';
+                        if oReg.aoFieldsets and oReg.aoFieldsets[0].cBitsWidth == 128:
+                            assert sAliasing == 'A64.SYS';
+                            sAliasing = 'A64.SYSP';
+                            continue; # Skipping for now. (Concat issues)
                         sEncSortKey = oAccessor.oEncoding.getSysRegIdCreate();
-                    dAccessors[oAccessor.sName].aoInfo.append(SysRegAccessorInfo(oAccessor, oReg, sEncSortKey));
+                        sAsmValue = oAccessor.sName[oAccessor.sName.find('.') + 1:];
+                        if oAccessor.oEncoding.sAsmValue:
+                            sAsmValue = '%s_%s' % (sAsmValue, oAccessor.oEncoding.sAsmValue,);
+                        dAccessors[sAliasing].aoInfo.append(SysRegAccessorInfo(oAccessor, oReg, sEncSortKey, sAsmValue));
+
 
         for sKey, oGenerator in dAccessors.items():
             assert sKey == oGenerator.sInstr;
@@ -3680,8 +4196,8 @@ class IEMArmGenerator(object):
 
         return (True, asLines);
 
-    def generateA64CImplSysRegCpp(self, sFilename, iPartNo):
-        """ Generates the IEMAllCImplA64SysReg-armv8.cpp file. """
+    def generateA64CImplSysRegInsCpp(self, sFilename, iPartNo):
+        """ Generates the IEMAllCImplA64SysRegsAndIns-armv8.cpp file. """
         _ = sFilename; _ = iPartNo;
         return self.generateCImplSysRegCpp('A64', 'AArch64');
 
@@ -3989,12 +4505,12 @@ Then add @hints.rsp to the command line to make use of them.''');
                                 action  = 'store',
                                 default = None,
                                 help    = 'The output header file for the implementation stubs.');
-        oArgParser.add_argument('--out-cimpl-sysreg-cpp',
-                                metavar = 'file-cimpl-sysreg.cpp',
-                                dest    = 'sFileCImplSysRegCpp',
+        oArgParser.add_argument('--out-cimpl-sysregins-cpp',
+                                metavar = 'file-cimpl-sysregins.cpp',
+                                dest    = 'sFileCImplSysRegInsCpp',
                                 action  = 'store',
                                 default = None,
-                                help    = 'The output C++ file for system register handling (MRS, MSR, ++).');
+                                help    = 'The output C++ file for system register & instruction handling (MRS, SYS, et al).');
         oArgParser.add_argument('--out-features-hdr',
                                 metavar = 'file-features.h',
                                 dest    = 'sFileFeaturesHdr',
@@ -4108,11 +4624,11 @@ Then add @hints.rsp to the command line to make use of them.''');
             # Check if we're generating any output before constructing the decoder.
             #
             aaoOutputFiles = [
-                 ( oOptions.sFileDecoderCpp,      self.generateA64DecoderCpp,            0, 1, ),
-                 ( oOptions.sFileDecoderHdr,      self.generateDecoderHdr,               0, 1, ), # after generateA64DecoderCpp!
-                 ( oOptions.sFileStubHdr,         self.generateA64ImplementationStubHdr, 0, 1, ),
-                 ( oOptions.sFileCImplSysRegCpp,  self.generateA64CImplSysRegCpp,        0, 0, ),
-                 ( oOptions.sFileFeaturesHdr,     self.generateFeaturesHdr,              0, 0, ),
+                 ( oOptions.sFileDecoderCpp,        self.generateA64DecoderCpp,            0, 1, ),
+                 ( oOptions.sFileDecoderHdr,        self.generateDecoderHdr,               0, 1, ), # after generateA64DecoderCpp!
+                 ( oOptions.sFileStubHdr,           self.generateA64ImplementationStubHdr, 0, 1, ),
+                 ( oOptions.sFileCImplSysRegInsCpp, self.generateA64CImplSysRegInsCpp,     0, 0, ),
+                 ( oOptions.sFileFeaturesHdr,       self.generateFeaturesHdr,              0, 0, ),
             ];
 
             cOutputFiles        = 0;
