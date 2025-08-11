@@ -2551,7 +2551,6 @@ IEM_CIMPL_DEF_2(iemCImpl_retf, IEMMODE, enmEffOpSize, uint16_t, cbPop)
             }
             u64Base  = 0;
             f64BitCs = true;
-            f64BitCs = true;
         }
         else
         {
