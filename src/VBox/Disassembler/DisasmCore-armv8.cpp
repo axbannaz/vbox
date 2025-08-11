@@ -620,7 +620,7 @@ static int disArmV8ParseSysIns(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCOD
     Assert(pInsnParm->cBits       == 23 - 5);
     Assert(pParam->armv8.enmType == kDisArmv8OpParmNone);
     pParam->armv8.enmType     = kDisArmv8OpParmSysIns;
-    pParam->armv8.Op.idSysIns = ARMV8_AARCH64_SYSINS_ID_FROM_SYS_SYSL_ET_AL(u32Insn);
+    pParam->armv8.Op.idSysReg = ARMV8_AARCH64_SYSINS_ID_FROM_SYS_SYSL_ET_AL(u32Insn);
     pParam->armv8.cb          = 0;
     pParam->fUse             |= DISUSE_REG_SYSTEM;
     return VINF_SUCCESS;

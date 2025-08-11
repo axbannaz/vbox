@@ -554,15 +554,15 @@ static const char *disasmFormatArmV8SysReg(PCDISSTATE pDis, PCDISOPPARAM pParam,
 static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, size_t *pcchReg)
 {
     /* Generate  #<op1>,<CRn>,<CRm>,#<op2> identifier. */
-    uint32_t const idSysIns = pParam->armv8.Op.idSysIns;
+    uint32_t const idSysIns = pParam->armv8.Op.idSysReg;
     uint8_t idx = 0;
     pachTmp[idx++] = 'S';
     pachTmp[idx++] = '1';
     pachTmp[idx++] = '_';
-    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP1(idSysIns);
+    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSREG_ID_GET_OP1(idSysIns);
     pachTmp[idx++] = '_';
     pachTmp[idx++] = 'C';
-    uint8_t bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRN(idSysIns);
+    uint8_t bTmp =  + ARMV8_AARCH64_SYSREG_ID_GET_CRN(idSysIns);
     if (bTmp >= 10)
     {
         pachTmp[idx++] = '1' + (bTmp - 10);
@@ -571,7 +571,7 @@ static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, s
     pachTmp[idx++] = '0' + bTmp;
     pachTmp[idx++] = '_';
     pachTmp[idx++] = 'C';
-    bTmp =  + ARMV8_AARCH64_SYSINS_ID_GET_CRM(idSysIns);
+    bTmp =  + ARMV8_AARCH64_SYSREG_ID_GET_CRM(idSysIns);
     if (bTmp >= 10)
     {
         pachTmp[idx++] = '1' + (bTmp - 10);
@@ -579,7 +579,7 @@ static const char *disasmFormatArmV8SysIns(PCDISOPPARAM pParam, char *pachTmp, s
     }
     pachTmp[idx++] = '0' + bTmp;
     pachTmp[idx++] = '_';
-    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSINS_ID_GET_OP2(idSysIns);
+    pachTmp[idx++] = '0' + ARMV8_AARCH64_SYSREG_ID_GET_OP2(idSysIns);
     pachTmp[idx]   = '\0';
     *pcchReg = idx;
     return pachTmp;

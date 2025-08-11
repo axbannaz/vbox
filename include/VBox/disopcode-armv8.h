@@ -715,11 +715,11 @@ typedef enum DISARMV8OPPARM
     kDisArmv8OpParmImmRel,
     /** Register. */
     kDisArmv8OpParmReg,
-    /** System instruction. */
+    /** System instruction (in idSysReg). */
     kDisArmv8OpParmSysIns,
-    /** System instruction, with the mnemonic found after the instruction string. */
+    /** System instruction (in idSysReg), with the mnemonic found after the instruction string. */
     kDisArmv8OpParmSysInsExtraStr,
-    /** System register. */
+    /** System register (in idSysReg). */
     kDisArmv8OpParmSysReg,
     /** Accessing memory from address in base register + potential offset. */
     kDisArmv8OpParmAddrInGpr,

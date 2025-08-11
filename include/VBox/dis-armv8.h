@@ -125,10 +125,8 @@ typedef struct
         /** General register index (DISGREG_XXX), applicable if DISUSE_REG_GEN32
          * or DISUSE_REG_GEN64 is set in fUse. */
         DISOPPARAMARMV8REG          Reg;
-        /** IPRT System register ID. */
+        /** IPRT System register/instruction ID. */
         uint16_t                    idSysReg;
-        /** IPRT System instruction ID. */
-        uint32_t                    idSysIns;
         /** Conditional parameter - DISARMV8INSTRCOND */
         uint8_t                     enmCond;
         /** PState field (for MSR) - DISARMV8INSTRPSTATE. */
