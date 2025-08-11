@@ -1643,7 +1643,7 @@ iemExecMemAllocatorInitAndRegisterUnwindInfoForChunk(PVMCPUCC pVCpu, PIEMEXECMEM
     Ptr.pu32++;
     *Ptr.pu64++ = (uintptr_t)pvChunk;                       /* Absolute start PC of this FDE. */
     *Ptr.pu64++ = pExecMemAllocator->cbChunk;               /* PC range length for this PDE. */
-#  if 0 /* not requried for recent libunwind.dylib nor recent libgcc/glib. */
+#  if 0 /* not requried for recent libunwind.dylib nor recent libgcc/glibc. */
     *Ptr.pb++ = DW_CFA_nop;
 #  endif
     while ((Ptr.u - PtrFde.u) & 3)
