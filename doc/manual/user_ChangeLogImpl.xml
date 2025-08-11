@@ -104,6 +104,12 @@ Rules for adding a changelog entry to make them look more uniform:
           11/Arm</para>
       </listitem>
 
+      <listitem>
+        <para>macOS Arm host: Experimental 3D acceleration support using DXMT, removing
+          the previous non working solution using DXVK on top of MoltenVK.
+          3D acceleration is not supported on macOS hosts using Intel CPUs anymore.</para>
+      </listitem>
+
     </itemizedlist>
 
     <para>In addition, the following items were fixed or added:</para>
