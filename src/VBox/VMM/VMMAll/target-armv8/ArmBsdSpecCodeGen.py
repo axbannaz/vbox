@@ -1544,7 +1544,7 @@ class SysRegGeneratorBase(object):
                     asLines.append('            LogFlow(("%s_%s -> %%Rrc & *%s=%s\\n", VBOXSTRICTRC_VAL(rcStrict), *%s));'
                                    % (self.sFuncPrefix, oInfo.sAsmValue, self.sParamName, sLogFmt, self.sParamName,));
                 else:
-                    asLines.append('            LogFlow(("%s_%s(%s) -> %%Rrc\\n", VBOXSTRICTRC_VAL(rcStrict), %s));'
+                    asLines.append('            LogFlow(("%s_%s(%s) -> %%Rrc\\n", %s, VBOXSTRICTRC_VAL(rcStrict)));'
                                    % (self.sFuncPrefix, oInfo.sAsmValue, sLogFmt, self.sParamName,));
                 if oInfo.sRegName in self.kdRegsRequiringRecalcs:
                     asLines.append('            return %s(pVCpu, rcStrict);' % (self.kdRegsRequiringRecalcs[oInfo.sRegName],));
@@ -2135,6 +2135,9 @@ class SysRegGeneratorBase(object):
             or oEncoding.compareCStyle(2, 1,  0, range(8, 16),    7) == 0 # TRCIDR[0-7]
             or oEncoding.compareCStyle(2, 1,  0,     range(6),    6) == 0 # TRCIDR[8-13]
             or oEncoding.compareCStyle(2, 1,  7,           15,    6) == 0 # TRCDEVARCH
+            # misc:
+            or oEncoding.compareCStyle(3, 3,  0,            0,    1) == 0 # CTR_EL0
+            or oEncoding.compareCStyle(3, 3,  0,            0,    7) == 0 # DCZID_EL0
             ):
             return True;
         return False;
@@ -3086,6 +3089,53 @@ class SysRegGeneratorA64MsrReg(SysRegGeneratorBase):
         return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
 
 
+class SysRegGeneratorA64MsrImmediate(SysRegGeneratorBase):
+    """
+    Code generator specialization for the MSR (set system register) instruction.
+    """
+
+    def __init__(self):
+        SysRegGeneratorBase.__init__(self, 'A64.MSRimmediate', 'iemCImplA64_msr', 'uint64_t', 'uValue', 'write');
+
+    def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
+        """ Callback used by the second pass."""
+        # Replace X[t,64] references with uValue.
+        if oNode.isMatchingSquareOp('X', 't', 64):# or oNode.oVar.isMatchingSquareOp('X', 't', 32):
+            if aoStack and isinstance(aoStack[-1], (ArmAstAssignment, ArmAstBinaryOp, ArmAstSquareOp)):
+                return ArmAstCppExpr('uValue', cBitsWidth = 64);
+
+        # Return statements w/o a value are NOP branches, make them return VINF_SUCCESS.
+        elif isinstance(oNode, ArmAstReturn):
+            if not oNode.oValue:
+                return ArmAstReturn(ArmAstCppExpr('iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS)', 32));
+
+        return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
+
+
+class SysRegGeneratorA64MsrrReg(SysRegGeneratorBase):
+    """
+    Code generator specialization for the MSRR (set 128-bit system register) instruction.
+    """
+
+    def __init__(self):
+        SysRegGeneratorBase.__init__(self, 'A64.MSRRregister', 'iemCImplA64_msrr', 'PCRTUINT128U', 'puuValue', 'write');
+
+    def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
+        """ Callback used by the second pass."""
+        ## @todo this needs lots more work and real 128-bit register variables.
+        # Replace X[t,64] references with uValue.
+        if oNode.isMatchingSquareOp('X', 't', 64):# or oNode.oVar.isMatchingSquareOp('X', 't', 32):
+            if aoStack and isinstance(aoStack[-1], (ArmAstAssignment, ArmAstBinaryOp, ArmAstSquareOp)):
+                return ArmAstCppExpr('uValue', cBitsWidth = 64);
+
+        # Return statements w/o a value are NOP branches, make them return VINF_SUCCESS.
+        elif isinstance(oNode, ArmAstReturn):
+            if not oNode.oValue:
+                return ArmAstReturn(ArmAstCppExpr('iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS)', 32));
+
+        return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
+
+
 class SysRegGeneratorA64Sys(SysRegGeneratorBase):
     """
     Code generator specialization for the SYS instruction.
@@ -3921,9 +3971,9 @@ class IEMArmGenerator(object):
         dAccessors = {
             'A64.MRS':          SysRegGeneratorA64Mrs(),
             'A64.MSRregister':  SysRegGeneratorA64MsrReg(),
-            'A64.MSRimmediate': SysRegGeneratorNop('A64.MSRimmediate', 'iemCImplA64_msr_imm'),
-            'A64.MRRS':         SysRegGeneratorNop('A64.MRRS',         'iemCImplA64_mrrs'),
-            'A64.MSRRregister': SysRegGeneratorNop('A64.MSRRregister', 'iemCImplA64_msrr'),
+            #'A64.MSRimmediate': SysRegGeneratorNop('A64.MSRimmediate', 'iemCImplA64_msr_imm'), # No code, must be handcoded.
+            'A64.MRRS':         SysRegGeneratorNop('A64.MRRS',         'iemCImplA64_mrrs'), ## @todo requires 128-bit state.
+            'A64.MSRRregister': SysRegGeneratorNop('A64.MSRRregister', 'iemCImplA64_msrr'), # SysRegGeneratorA64MsrrReg(),
             'A64.SYS':          SysRegGeneratorA64Sys(),
             'A64.SYSL':         SysRegGeneratorA64SysL(),
             'A64.SYSP':         SysRegGeneratorA64SysP(),
@@ -3933,15 +3983,15 @@ class IEMArmGenerator(object):
             assert oReg.sState == sState;
             for oAccessor in oReg.aoAccessors:  # type: ArmAccessorBase
                 if isinstance(oAccessor, spec.ArmAccessorSystem):
-                    if oAccessor.sName in { 'A64.SYS', 'A64.SYSL', 'A64.SYSP', }:
-                        pass; # Skip the generic system instruction entries.
+                    if oAccessor.sName in { 'A64.SYS', 'A64.SYSL', 'A64.SYSP', 'A64.MSRimmediate'}:
+                        pass; # Skip the generic system instruction entries and instruction w/o any access code.
                     elif oAccessor.sName in dAccessors:
                         # System Register.
                         sEncSortKey = 'encoding=%s' % (oAccessor.oEncoding.dNamedValues,);
                         if (    not isinstance(oAccessor, spec.ArmAccessorSystemArray)
                             and not oAccessor.oEncoding.fHasWildcard
                             and not oAccessor.oEncoding.fHasIndex
-                            and oAccessor.sName in {'A64.MRS', 'A64.MSRregister'}):
+                            and oAccessor.sName in {'A64.MRS', 'A64.MSRregister',}):
                             sEncSortKey = oAccessor.oEncoding.getSysRegIdCreate();
                         dAccessors[oAccessor.sName].aoInfo.append(SysRegAccessorInfo(oAccessor, oReg, sEncSortKey));
                     else:

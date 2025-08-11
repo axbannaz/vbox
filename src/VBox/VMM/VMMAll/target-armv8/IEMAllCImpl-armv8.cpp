@@ -190,8 +190,11 @@ DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpReadDbgDtrEl0U32(PVMCPU pVCpu, uint64_t *puD
 
 DECLHIDDEN(uint64_t)     iemCImplHlpGetIdSysReg(PVMCPU pVCpu, uint32_t idSysReg) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, idSysReg);
-    AssertFailedReturn(0);
+    uint64_t uRet = 0;
+    int const rc = CPUMR3QueryGuestIdReg(pVCpu->CTX_SUFF(pVM), idSysReg, &uRet);
+    if (RT_SUCCESS(rc))
+        return uRet;
+    AssertMsgFailedReturn(("idSysReg=%#x\n", idSysReg), 0);
 }
 
 
@@ -357,8 +360,11 @@ DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysDc(PVMCPU pVCpu, uint64_t uValue, kIem
 
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysIc(PVMCPU pVCpu, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, enmScope);
-    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+    /*
+     * This is a nop for now.
+     */
+    RT_NOREF(enmScope);
+    return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
 }
 
 

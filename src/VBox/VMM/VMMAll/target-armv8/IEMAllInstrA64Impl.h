@@ -22041,7 +22041,10 @@
  */
 
 /* SYSP  #<op1>, <Cn>, <Cm>, #<op2>{, <Xt1>, <Xt2>} (fff80000/d5480000) */
-//#define IEM_INSTR_IMPL_A64__SYSP_CR_syspairinstrs(Rt, op2, CRm, CRn, op1)
+#define IEM_INSTR_IMPL_A64__SYSP_CR_syspairinstrs(Rt, op2, CRm, CRn, op1) \
+    IEM_MC_CALL_CIMPL_2(IEM_CIMPL_F_MODE | IEM_CIMPL_F_CHECK_IRQ_BEFORE_AND_AFTER | IEM_CIMPL_F_XCPT, \
+                        0, /** @todo any relevant sideeffects? */ \
+                        iemCImplA64_sysp, ARMV8_AARCH64_SYSREG_ID_CREATE(1, op1, CRn, CRm, op2), Rt)
 
 
 
@@ -22052,11 +22055,16 @@
  */
 
 /* SYS  #<op1>, <Cn>, <Cm>, #<op2>{, <Xt>} (fff80000/d5080000) */
-//#define IEM_INSTR_IMPL_A64__SYS_CR_systeminstrs(Rt, op2, CRm, CRn, op1)
-
+#define IEM_INSTR_IMPL_A64__SYS_CR_systeminstrs(Rt, op2, CRm, CRn, op1) \
+    IEM_MC_CALL_CIMPL_2(IEM_CIMPL_F_MODE | IEM_CIMPL_F_CHECK_IRQ_BEFORE_AND_AFTER | IEM_CIMPL_F_XCPT, \
+                        0, /** @todo any relevant sideeffects? */ \
+                        iemCImplA64_sys, ARMV8_AARCH64_SYSREG_ID_CREATE(1, op1, CRn, CRm, op2), Rt)
 
 /* SYSL  <Xt>, #<op1>, <Cn>, <Cm>, #<op2> (fff80000/d5280000) */
-//#define IEM_INSTR_IMPL_A64__SYSL_RC_systeminstrs(Rt, op2, CRm, CRn, op1)
+#define IEM_INSTR_IMPL_A64__SYSL_RC_systeminstrs(Rt, op2, CRm, CRn, op1) \
+    IEM_MC_CALL_CIMPL_2(IEM_CIMPL_F_MODE | IEM_CIMPL_F_CHECK_IRQ_BEFORE_AND_AFTER | IEM_CIMPL_F_XCPT, \
+                        RT_BIT_64(kIemNativeGstReg_GprFirst + Rt), \
+                        iemCImplA64_sysl, ARMV8_AARCH64_SYSREG_ID_CREATE(1, op1, CRn, CRm, op2), Rt)
 
 
 
