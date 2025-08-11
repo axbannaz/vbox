@@ -182,6 +182,12 @@ typedef struct VBOXNETFLTNOTIFIER *PVBOXNETFLTNOTIFIER;
 # define VBOX_SKB_FRAG_OFFSET(_pFrag)    ((_pFrag)->page_offset)
 #endif /* > KERNEL_VERSION(6, 9, 0) */
 
+#if RTLNX_VER_MIN(6,17,0)
+# define VBOX_NETDEV_GET_FLAGS  netif_get_flags
+#else
+# define VBOX_NETDEV_GET_FLAGS  dev_get_flags
+#endif
+
 #if RTLNX_VER_MIN(3,20,0) || RTLNX_RHEL_RANGE(7,2,  8,0) || RTLNX_RHEL_RANGE(6,8,  7,0)
 # define VBOX_HAVE_SKB_VLAN
 #endif
@@ -2450,7 +2456,7 @@ void vboxNetFltPortOsSetActive(PVBOXNETFLTINS pThis, bool fActive)
             pThis->u.s.fPromiscuousSet = false;
 
 #ifdef LOG_ENABLED
-            fIf = dev_get_flags(pDev);
+            fIf = VBOX_NETDEV_GET_FLAGS(pDev);
             Log(("VBoxNetFlt: fIf=%#x; %d->%d\n", fIf, cPromiscBefore, pDev->promiscuity));
 #endif
         }
