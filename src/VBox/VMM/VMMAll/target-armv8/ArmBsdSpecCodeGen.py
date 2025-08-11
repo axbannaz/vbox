@@ -1398,20 +1398,164 @@ class SysRegGeneratorBase(object):
         'MDSCR_EL1': 'iemCImplHlpRecalcFlags',
     };
 
-    def __init__(self, sInstr, sFuncPrefix):
+    ## Mapping of self.sType.
+    kdTypeToGprSuff   = { 'read': 'Dst',         'write': 'Src' };
+    kdTypeToGprDesc   = { 'read': 'destination', 'write': 'source' };
+    kdTypeToParamDesc = {
+        'read':     'Where to return the value.',
+        'write':    'The value to write.'
+    };
+
+    def __init__(self, sInstr, sFuncPrefix, sParamType, sParamName, sType = 'read'):
+        assert sType in {'write','read'}
         self.sInstr         = sInstr;
         self.sFuncPrefix    = sFuncPrefix;
+        self.sParamType     = sParamType;
+        self.sParamName     = sParamName;
+        self.sType          = sType;
         self.aoInfo         = []        # type: List[SysRegAccessorInfo]
         self.cComplete      = 0;
         self.cIncomplete    = 0;
         self.cUnresolvedRegs = 0;       # Number of info items with unresolved registers.
         self.dWarnings      = {};
 
+    def isCppIdentifierInAst(self, oNode, sCppExpr):
+        """ Checks if the given C++ identifier s part of the given AST. """
+        dResult = {'ret': False,};
+        def callback(oNode, dResult):
+            if isinstance(oNode, ArmAstCppExpr):
+                off = oNode.sExpr.find(sCppExpr);
+                if (   off == 0
+                    or (off > 0 and not oNode.sExpr[off - 1].isalnum() and oNode.sExpr[off - 1] != '_')):
+                    offEnd = off + len(sCppExpr);
+                    if (    offEnd == len(oNode.sExpr)
+                        or (not oNode.sExpr[offEnd].isalnum() and oNode.sExpr[offEnd] != '_')):
+                        dResult['ret'] = True;
+        oNode.walk(callback, dResult);
+        return dResult['ret'];
+
+    def getDescriptionFromInfo(self, oInfo):
+        return '%s - %s' % (oInfo.sAsmValue, oInfo.oAccessor.oEncoding.dNamedValues,);
+
     def generateOneHandler(self, oInfo):
-        return [ '', '/// @todo %s / %s' % (self.sInstr, oInfo.sEnc,) ];
+        """ Generates one register access handler. """
+        asLines = [
+            '',
+            '/**',
+            ' * %s' % (self.getDescriptionFromInfo(oInfo),),
+            ' * Transformation status: %u - %s'
+            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
+            ' */',
+            'static VBOXSTRICTRC %s_%s(PVMCPU pVCpu, %s %s%s) RT_NOEXCEPT'
+            % (self.sFuncPrefix, oInfo.sAsmValue, self.sParamType, self.sParamName,
+               ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+            '{',
+        ];
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '    RT_NOREF(pVCpu, %s%s);' % (self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
+                '#ifdef IEM_SYSREG_TODO',
+            ];
+        elif not self.isCppIdentifierInAst(oInfo.oCode, self.sParamName):
+            asLines.append('    RT_NOREF(%s);' % (self.sParamName,) );
+        if oInfo.cGstFeatsRefs > 0:
+            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
+
+        if oInfo.oCode:
+            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
+
+        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
+            asLines += [
+                '#endif',
+                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
+            ];
+
+        asLines.append('    /* -------- Original code specification: -------- */');
+        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
+
+        asLines += [
+            '}',
+        ];
+        return asLines;
+
+    def generateMainFunctionBody(self):
+        """ Generates the main CIMPL function body. """
+        if self.sType == 'read':
+            return [
+                '    uint64_t         uZeroDummy;',
+                '    uint64_t * const puDst = idxGprDst < ARMV8_A64_REG_XZR',
+                '                           ? &pVCpu->cpum.GstCtx.aGRegs[idxGprDst].x : &uZeroDummy;',
+                '    return %s_generic(pVCpu, idSysReg, idxGprDst, puDst);' % (self.sFuncPrefix,),
+            ];
+
+        return [
+            '    uint64_t const uValue = idxGprSrc < ARMV8_A64_REG_XZR ? pVCpu->cpum.GstCtx.aGRegs[idxGprSrc].x : 0;',
+            '    return %s_generic(pVCpu, idSysReg, idxGprSrc, uValue);' % (self.sFuncPrefix,),
+        ];
 
     def generateMainFunction(self):
-        return [ '', '/// @todo %s main function' % (self.sInstr,) ];
+        asLines = [
+            '',
+            '/**',
+            ' * Implements the %s instruction (generic).' % (self.sInstr),
+            ' *',
+            ' * @returns Strict VBox status code.',
+            ' * @param   pVCpu       The cross context virtual CPU structure of the',
+            ' *                      calling thread.',
+            ' * @param   idSysReg    The system register to %s (IPRT format).' % (self.sType,),
+            ' * @param   idxGpr%s   The %s GPR register number (for exceptions).'
+            % (self.kdTypeToGprSuff[self.sType], self.kdTypeToGprDesc[self.sType],),
+            ' * @param   %-11s %s' % (self.sParamName, self.kdTypeToParamDesc[self.sType],),
+            ' */',
+            'DECLHIDDEN(VBOXSTRICTRC) %s_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGpr%s,'
+            % (self.sFuncPrefix, self.kdTypeToGprSuff[self.sType],),
+            '                                                 %s %s)' % (self.sParamType, self.sParamName,),
+            '{',
+        ];
+        for oInfo in self.aoInfo:
+            if oInfo.cInstrEssenceRefs:
+                asLines += [
+                    '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysReg, idxGpr%s, 0, 0xf);'
+                    % (self.kdTypeToGprSuff[self.sType],),
+                ];
+                break;
+        asLines += [
+            '    switch (idSysReg)',
+            '    {',
+        ];
+        for oInfo in self.aoInfo:
+            if oInfo.sEnc[0] == 'A': ## @todo better filtering out of non A64/whatever stuff.
+                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
+                    asLines.append('        case %s: %sreturn %s(pVCpu, %s_%s(pVCpu, %s%s));'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
+                                      self.sFuncPrefix, oInfo.sAsmValue,
+                                      self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                else:
+                    asLines.append('        case %s: %sreturn %s_%s(pVCpu, %s%s);'
+                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.sFuncPrefix, oInfo.sAsmValue,
+                                      self.sParamName,  ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+        asLines += [
+            '    }',
+            '    /* Fall back on handcoded handler. */',
+            '    return %s_fallback(pVCpu, idSysReg, idxGpr%s, %s);'
+            % (self.sFuncPrefix, self.kdTypeToGprSuff[self.sType], self.sParamName,),
+            '}',
+            '',
+            '/**',
+            ' * Implements the %s instruction.' % (self.sInstr,),
+            ' *',
+            ' * @param   idSysReg    The system register to %s (IPRT format).' % (self.sType,),
+            ' * @param   idxGpr%s   The %s GPR register number (for exceptions).'
+            % (self.kdTypeToGprSuff[self.sType], self.kdTypeToGprDesc[self.sType],),
+            ' */',
+            'IEM_CIMPL_DEF_2(%s, uint32_t, idSysReg, uint32_t, idxGpr%s)' % (self.sFuncPrefix, self.kdTypeToGprSuff[self.sType],),
+            '{',
+        ]
+        asLines += self.generateMainFunctionBody();
+        asLines += [
+            '}',
+        ];
+        return asLines;
 
     def isA64Instruction(self):
         return self.sInstr.startswith('A64');
@@ -2892,96 +3036,7 @@ class SysRegGeneratorA64Mrs(SysRegGeneratorBase):
     """
 
     def __init__(self):
-        SysRegGeneratorBase.__init__(self, 'A64.MRS', 'iemCImplA64_mrs');
-
-    def generateOneHandler(self, oInfo):
-        """ Generates one register access for A64.MRS. """
-        asLines = [
-            '',
-            '/**',
-            ' * %s - %s' % (oInfo.oAccessor.oEncoding.sAsmValue, oInfo.oAccessor.oEncoding.dNamedValues,),
-            ' * Transformation status: %u - %s'
-            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
-            ' */',
-            'static VBOXSTRICTRC iemCImplA64_mrs_%s(PVMCPU pVCpu, uint64_t *puDst%s) RT_NOEXCEPT'
-            % (oInfo.oAccessor.oEncoding.sAsmValue, ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-            '{',
-        ];
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '    RT_NOREF(pVCpu, puDst%s);' % (', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-                '#ifdef IEM_SYSREG_TODO',
-            ];
-        elif isinstance(oInfo.oCode, ArmAstReturn) and oInfo.oCode.toString().find('Raise') >= 0:
-            asLines.append('    RT_NOREF(puDst);');
-        if oInfo.cGstFeatsRefs > 0:
-            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
-
-        if oInfo.oCode:
-            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
-
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '#endif',
-                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
-            ];
-
-        asLines.append('    /* -------- Original code specification: -------- */');
-        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
-
-        asLines += [
-            '}',
-        ];
-        return asLines;
-
-    def generateMainFunction(self):
-        """ Generates the CIMPL function for A64.MRS. """
-        asLines = [
-            '',
-            '/**',
-            ' * Implements the MRS instruction.',
-            ' *',
-            ' * @returns Strict VBox status code.',
-            ' * @param   pVCpu       The cross context virtual CPU structure of the',
-            ' *                      calling thread.',
-            ' * @param   idSysReg    The system register to read from (IPRT format).',
-            ' * @param   idxGprDst   The destination GPR register number (for exceptions).',
-            ' * @param   puDst       Where to return the value.',
-            ' */',
-            'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_mrs_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGprDst,',
-            '                                                 uint64_t *puDst)',
-            '{',
-            '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysReg, idxGprDst, 0, 0xf);',
-            '    switch (idSysReg)',
-            '    {',
-        ];
-        for oInfo in self.aoInfo:
-            if oInfo.sEnc[0] == 'A':
-                asLines.append('        case %s: %sreturn iemCImplA64_mrs_%s(pVCpu, puDst%s);'
-                               % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.oAccessor.oEncoding.sAsmValue,
-                                  ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-        asLines += [
-            '    }',
-            '    /* Fall back on handcoded handler. */',
-            '    return iemCImplA64_mrs_fallback(pVCpu, idxGprDst, idSysReg);',
-            '}',
-            '',
-            '/**',
-            ' * Implements the MRS instruction.',
-            ' *',
-            ' * @param   idSysReg    The system register to read from (IPRT format).',
-            ' * @param   idxGprDst   The destination GPR register number.',
-            ' */',
-            'IEM_CIMPL_DEF_2(iemCImplA64_mrs, uint32_t, idSysReg, uint32_t, idxGprDst)',
-            '{',
-            '    uint64_t         uZeroDummy;',
-            '    uint64_t * const puDst = idxGprDst < ARMV8_A64_REG_XZR',
-            '                           ? &pVCpu->cpum.GstCtx.aGRegs[idxGprDst].x : &uZeroDummy;',
-            '    return iemCImplA64_mrs_generic(pVCpu, idSysReg, idxGprDst, puDst);',
-            '}',
-        ];
-        return asLines;
-
+        SysRegGeneratorBase.__init__(self, 'A64.MRS', 'iemCImplA64_mrs', 'uint64_t *', 'puDst', 'read');
 
     def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
         """ Callback used by the second pass."""
@@ -2997,100 +3052,7 @@ class SysRegGeneratorA64MsrReg(SysRegGeneratorBase):
     """
 
     def __init__(self):
-        SysRegGeneratorBase.__init__(self, 'A64.MSRregister', 'iemCImplA64_msr');
-
-    def generateOneHandler(self, oInfo):
-        """ Generates one register access for A64.MSR. """
-        asLines = [
-            '',
-            '/**',
-            ' * %s - %s' % (oInfo.oAccessor.oEncoding.sAsmValue, oInfo.oAccessor.oEncoding.dNamedValues,),
-            ' * Transformation status: %u - %s'
-            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
-            ' */',
-            'static VBOXSTRICTRC iemCImplA64_msr_%s(PVMCPU pVCpu, uint64_t uValue%s) RT_NOEXCEPT'
-            % (oInfo.oAccessor.oEncoding.sAsmValue, ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-            '{',
-        ];
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '    RT_NOREF(pVCpu, uValue%s);' % (', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-                '#ifdef IEM_SYSREG_TODO',
-            ];
-        elif isinstance(oInfo.oCode, ArmAstReturn) and oInfo.oCode.toString().find('Raise') >= 0:
-            asLines.append('    RT_NOREF(uValue);');
-        if oInfo.cGstFeatsRefs > 0:
-            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
-
-        if oInfo.oCode:
-            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
-
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '#endif',
-                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
-            ];
-
-        asLines.append('    /* -------- Original code specification: -------- */');
-        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
-
-        asLines += [
-            '}',
-        ];
-        return asLines;
-
-    def generateMainFunction(self):
-        """ Generates the CIMPL function for A64.MSRRegister. """
-        asLines = [
-            '',
-            '/**',
-            ' * Implements the MSR (register) instruction.',
-            ' *',
-            ' * @returns Strict VBox status code.',
-            ' * @param   pVCpu       The cross context virtual CPU structure of the',
-            ' *                      calling thread.',
-            ' * @param   idSysReg    The system register to write to (IPRT format).',
-            ' * @param   idxGprSrc   The source GPR register number (for exceptions).',
-            ' * @param   uValue      The value to write.',
-            ' */',
-            'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_msr_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGprSrc,',
-            '                                                 uint64_t uValue)',
-            '{',
-            '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysReg, idxGprSrc, 1, 0xf);',
-            '    switch (idSysReg)',
-            '    {',
-        ];
-        for oInfo in self.aoInfo:
-            if oInfo.sEnc[0] == 'A':
-                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
-                    asLines.append('        case %s: %sreturn %s(pVCpu, iemCImplA64_msr_%s(pVCpu, uValue%s));'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
-                                      oInfo.oAccessor.oEncoding.sAsmValue,
-                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-                else:
-                    asLines.append('        case %s: %sreturn iemCImplA64_msr_%s(pVCpu, uValue%s);'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.oAccessor.oEncoding.sAsmValue,
-                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-        asLines += [
-            '    }',
-            '    /* Fall back on handcoded handler. */',
-            '    return iemCImplA64_msr_fallback(pVCpu, idSysReg, uValue, idxGprSrc);',
-            '}',
-            '',
-            '/**',
-            ' * Implements the MSR (register) instruction.',
-            ' *',
-            ' * @param   idSysReg    The system register to write to (IPRT format).',
-            ' * @param   idxGprSrc   The source GPR register number.',
-            ' */',
-            'IEM_CIMPL_DEF_2(iemCImplA64_msr, uint32_t, idSysReg, uint32_t, idxGprSrc)',
-            '{',
-            '    uint64_t const uValue = idxGprSrc < ARMV8_A64_REG_XZR ? pVCpu->cpum.GstCtx.aGRegs[idxGprSrc].x : 0;',
-            '    return iemCImplA64_msr_generic(pVCpu, idSysReg, idxGprSrc, uValue);',
-            '}',
-        ];
-        return asLines;
-
+        SysRegGeneratorBase.__init__(self, 'A64.MSRregister', 'iemCImplA64_msr', 'uint64_t', 'uValue', 'write');
 
     def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
         """ Callback used by the second pass."""
@@ -3112,121 +3074,12 @@ class SysRegGeneratorA64Sys(SysRegGeneratorBase):
     Code generator specialization for the SYS instruction.
     """
 
-    def __init__(self, sInstr = 'A64.SYS', sFuncPrefix = 'iemCImplA64_sys', sParamName = 'uValue', sParamType = 'uint64_t'):
-        SysRegGeneratorBase.__init__(self, sInstr, sFuncPrefix);
-        self.sParamType = sParamType;
-        self.sParamName = sParamName;
+    def __init__(self, sInstr = 'A64.SYS', sFuncPrefix = 'iemCImplA64_sys', sParamType = 'uint64_t', sParamName = 'uValue'):
+        SysRegGeneratorBase.__init__(self, sInstr, sFuncPrefix, sParamType, sParamName, 'write');
 
-    def isCppExprInAst(self, oNode, sCppExpr):
-        """ Checks if the given C++ expression (full) is part of the given AST. """
-        dResult = {'ret': False,};
-        def callback(oNode, dResult):
-            if isinstance(oNode, ArmAstCppExpr) and oNode.sExpr == sCppExpr:
-                dResult['ret'] = True;
-        oNode.walk(callback, dResult);
-        return dResult['ret'];
-
-    def generateOneHandler(self, oInfo):
-        """ Generates one 'register' access for A64.SYS. """
-        asLines = [
-            '',
-            '/**',
-            ' * %s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
-                               oInfo.oAccessor.oEncoding.dNamedValues,),
-            ' * Transformation status: %u - %s'
-            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
-            ' */',
-            'static VBOXSTRICTRC %s_%s(PVMCPU pVCpu, %s %s%s) RT_NOEXCEPT'
-            % (self.sFuncPrefix, oInfo.sAsmValue, self.sParamType, self.sParamName,
-               ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-            '{',
-        ];
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '    RT_NOREF(pVCpu, %s%s);' % (self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-                '#ifdef IEM_SYSREG_TODO',
-            ];
-        elif not self.isCppExprInAst(oInfo.oCode, self.sParamName):
-            asLines.append('    RT_NOREF(%s);' % (self.sParamName,));
-        if oInfo.cGstFeatsRefs > 0:
-            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
-
-        if oInfo.oCode:
-            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
-
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '#endif',
-                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
-            ];
-
-        asLines.append('    /* -------- Original code specification: -------- */');
-        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
-
-        asLines += [
-            '}',
-        ];
-        return asLines;
-
-    def generateMainFunctionBody(self):
-        """ Generates the main CIMPL function body. """
-        return [
-            '    uint64_t const uValue = idxGprSrc < ARMV8_A64_REG_XZR ? pVCpu->cpum.GstCtx.aGRegs[idxGprSrc].x : 0;',
-            '    return %s_generic(pVCpu, idSysIns, idxGprSrc, uValue);' % (self.sFuncPrefix,),
-        ];
-
-    def generateMainFunction(self):
-        """ Generates the CIMPL function for A64.SYS. """
-        asLines = [
-            '',
-            '/**',
-            ' * Implements the SYS instruction.',
-            ' *',
-            ' * @returns Strict VBox status code.',
-            ' * @param   pVCpu       The cross context virtual CPU structure of the',
-            ' *                      calling thread.',
-            ' * @param   idSysIns    The system register to write to (IPRT format).',
-            ' * @param   idxGprSrc   The source GPR register number (for exceptions).',
-            ' * @param   %-11s The value to write.' % (self.sParamName,),
-            ' */',
-            'DECLHIDDEN(VBOXSTRICTRC) %s_generic(PVMCPU pVCpu, uint32_t idSysIns, uint32_t idxGprSrc,' % (self.sFuncPrefix,),
-            '                                                 %s %s)' % (self.sParamType, self.sParamName,),
-            '{',
-            '    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysIns, idxGprSrc, 1, 0xf);',
-            '    switch (idSysIns)',
-            '    {',
-        ];
-        for oInfo in self.aoInfo:
-            if oInfo.sEnc[0] == 'A':
-                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
-                    asLines.append('        case %s: %sreturn %s(pVCpu, %s_%s(pVCpu, %s%s));'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
-                                      self.sFuncPrefix, oInfo.sAsmValue,
-                                      self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-                else:
-                    asLines.append('        case %s: %sreturn %s_%s(pVCpu, %s%s);'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.sFuncPrefix, oInfo.sAsmValue,
-                                      self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-        asLines += [
-            '    }',
-            '    /* Fall back on handcoded handler. */',
-            '    return %s_fallback(pVCpu, idSysIns, %s, idxGprSrc);' % (self.sFuncPrefix, self.sParamName,),
-            '}',
-            '',
-            '/**',
-            ' * Implements the SYS instruction.',
-            ' *',
-            ' * @param   idSysIns    The system register to write to (IPRT format).',
-            ' * @param   idxGprSrc   The source GPR register number.',
-            ' */',
-            'IEM_CIMPL_DEF_2(%s, uint32_t, idSysIns, uint32_t, idxGprSrc)' % (self.sFuncPrefix,),
-            '{',
-        ];
-        asLines += self.generateMainFunctionBody();
-        asLines += [
-            '}',
-        ];
-        return asLines;
+    def getDescriptionFromInfo(self, oInfo):
+        return '%s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
+                               oInfo.oAccessor.oEncoding.dNamedValues,);
 
     #
     # Pass 2 function rewriters.
@@ -3402,7 +3255,7 @@ class SysRegGeneratorA64SysP(SysRegGeneratorA64Sys):
     """
 
     def __init__(self):
-        SysRegGeneratorA64Sys.__init__(self, 'A64.SYSP', 'iemCImplA64_sysp', 'puValue', 'PCRTUINT128U');
+        SysRegGeneratorA64Sys.__init__(self, 'A64.SYSP', 'iemCImplA64_sysp', 'PCRTUINT128U', 'puValue');
 
     def generateMainFunctionBody(self):
         return [
@@ -3413,7 +3266,7 @@ class SysRegGeneratorA64SysP(SysRegGeneratorA64Sys):
             '            idxGprSrc + 1 < ARMV8_A64_REG_XZR ? pVCpu->cpum.GstCtx.aGRegs[idxGprSrc + 1].x : 0,',
             '        }',
             '    };',
-            '    return %s_generic(pVCpu, idSysIns, idxGprSrc, &uValue);' % (self.sFuncPrefix,),
+            '    return %s_generic(pVCpu, idSysReg, idxGprSrc, &uValue);' % (self.sFuncPrefix,),
         ];
 
     #
@@ -3447,102 +3300,11 @@ class SysRegGeneratorA64SysL(SysRegGeneratorBase):
     """
 
     def __init__(self):
-        SysRegGeneratorBase.__init__(self, 'A64.SYSL', 'iemCImplA64_sysl');
+        SysRegGeneratorBase.__init__(self, 'A64.SYSL', 'iemCImplA64_sysl', 'uint64_t *', 'puDst', 'read');
 
-    def generateOneHandler(self, oInfo):
-        """ Generates one 'register' access for A64.SYS. """
-        asLines = [
-            '',
-            '/**',
-            ' * %s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
-                               oInfo.oAccessor.oEncoding.dNamedValues,),
-            ' * Transformation status: %u - %s'
-            % (oInfo.cIncompleteNodes, 'complete' if oInfo.cIncompleteNodes == 0 else 'incomplete'),
-            ' */',
-            'static VBOXSTRICTRC iemCImplA64_sysl_%s(PVMCPU pVCpu, uint64_t *puDst%s) RT_NOEXCEPT'
-            % (oInfo.sAsmValue, ', uint32_t uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-            '{',
-        ];
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '    RT_NOREF(pVCpu, uValue%s);' % (', uInstrEssence' if oInfo.cInstrEssenceRefs > 0 else ''),
-                '#ifdef IEM_SYSREG_TODO',
-            ];
-        elif isinstance(oInfo.oCode, ArmAstReturn) and oInfo.oCode.toString().find('Raise') >= 0:
-            asLines.append('    RT_NOREF(uValue);');
-        if oInfo.cGstFeatsRefs > 0:
-            asLines.append('    const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);');
-
-        if oInfo.oCode:
-            asLines.extend(oInfo.oCode.toStringList('    ', 'C'));
-
-        if oInfo.cIncompleteNodes > 0 or not oInfo.oCode:
-            asLines += [
-                '#endif',
-                '    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;'
-            ];
-
-        asLines.append('    /* -------- Original code specification: -------- */');
-        asLines.extend([ '    // ' + sLine for sLine in oInfo.oAccessor.oAccess.toStringList()]);
-
-        asLines += [
-            '}',
-        ];
-        return asLines;
-
-    def generateMainFunction(self):
-        """ Generates the CIMPL function for A64.SYS. """
-        asLines = [
-            '',
-            '/**',
-            ' * Implements the SYSL instruction.',
-            ' *',
-            ' * @returns Strict VBox status code.',
-            ' * @param   pVCpu       The cross context virtual CPU structure of the',
-            ' *                      calling thread.',
-            ' * @param   idSysIns    The system register to write to (IPRT format).',
-            ' * @param   idxGprDst   The destination GPR register number (for exceptions).',
-            ' * @param   puDst       Where to return the return value.',
-            ' */',
-            'DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sysl_generic(PVMCPU pVCpu, uint32_t idSysIns, uint32_t idxGprDst,',
-            '                                                  uint64_t *puDst)',
-            '{',
-            #'    uint32_t const uInstrEssence = IEM_CIMPL_SYSREG_INSTR_ESSENCE_MAKE(idSysIns, idxGprDst, 1, 0xf);',
-            '    switch (idSysIns)',
-            '    {',
-        ];
-        for oInfo in self.aoInfo:
-            if oInfo.sEnc[0] == 'A':
-                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
-                    asLines.append('        case %s: %sreturn %s(pVCpu, iemCImplA64_sysl_%s(pVCpu, puDst%s));'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
-                                      oInfo.sAsmValue, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-                else:
-                    asLines.append('        case %s: %sreturn iemCImplA64_sysl_%s(pVCpu, puDst%s);'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), oInfo.sAsmValue,
-                                      ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
-        asLines += [
-            '    }',
-            '    /* Fall back on handcoded handler. */',
-            '    return iemCImplA64_sysl_fallback(pVCpu, idSysIns, idxGprDst);',
-            '}',
-            '',
-            '/**',
-            ' * Implements the MSR (register) instruction.',
-            ' *',
-            ' * @param   idSysIns    The system register to write to (IPRT format).',
-            ' * @param   idxGprDst   The destination GPR register number.',
-            ' */',
-            'IEM_CIMPL_DEF_2(iemCImplA64_sysl, uint32_t, idSysIns, uint32_t, idxGprDst)',
-            '{',
-            '    uint64_t         uZeroDummy;',
-            '    uint64_t * const puDst = idxGprDst < ARMV8_A64_REG_XZR',
-            '                           ? &pVCpu->cpum.GstCtx.aGRegs[idxGprDst].x : &uZeroDummy;',
-            '    return %s_generic(pVCpu, idSysIns, idxGprDst, puDst);' % (self.sFuncPrefix,),
-            '}',
-        ];
-        return asLines;
-
+    def getDescriptionFromInfo(self, oInfo):
+        return '%s %s - %s' % (oInfo.oAccessor.sName, oInfo.oAccessor.oEncoding.sAsmValue or '',
+                               oInfo.oAccessor.oEncoding.dNamedValues,);
 
     def transformCodePass2Callback(self, oNode, fEliminationAllowed, oInfo, aoStack):
         """ Callback used by the second pass."""
@@ -3568,6 +3330,22 @@ class SysRegGeneratorA64SysL(SysRegGeneratorBase):
                 return ArmAstReturn(ArmAstCppExpr('iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS)', 32));
 
         return super().transformCodePass2Callback(oNode, fEliminationAllowed, oInfo, aoStack);
+
+
+class SysRegGeneratorNop(SysRegGeneratorBase):
+    """
+    Code generator specialization for the SYS instruction.
+    """
+
+    def __init__(self, sInstr, sFuncPrefix, sParamType = 'uint64_t', sParamName = 'uValue'):
+        SysRegGeneratorBase.__init__(self, sInstr, sFuncPrefix, sParamType, sParamName);
+
+    def generateOneHandler(self, oInfo):
+        return [];
+
+    def generateMainFunction(self):
+        return [];
+
 
 #
 # Generators
@@ -4126,9 +3904,9 @@ class IEMArmGenerator(object):
         dAccessors = {
             'A64.MRS':          SysRegGeneratorA64Mrs(),
             'A64.MSRregister':  SysRegGeneratorA64MsrReg(),
-            'A64.MSRimmediate': SysRegGeneratorBase('A64.MSRimmediate', 'iemCImplA64_msr_imm'),
-            'A64.MRRS':         SysRegGeneratorBase('A64.MRRS',         'iemCImplA64_mrrs'),
-            'A64.MSRRregister': SysRegGeneratorBase('A64.MSRRregister', 'iemCImplA64_msrr'),
+            'A64.MSRimmediate': SysRegGeneratorNop('A64.MSRimmediate', 'iemCImplA64_msr_imm'),
+            'A64.MRRS':         SysRegGeneratorNop('A64.MRRS',         'iemCImplA64_mrrs'),
+            'A64.MSRRregister': SysRegGeneratorNop('A64.MSRRregister', 'iemCImplA64_msrr'),
             'A64.SYS':          SysRegGeneratorA64Sys(),
             'A64.SYSL':         SysRegGeneratorA64SysL(),
             'A64.SYSP':         SysRegGeneratorA64SysP(),
