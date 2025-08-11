@@ -1412,6 +1412,7 @@ class SysRegGeneratorBase(object):
         self.sFuncPrefix    = sFuncPrefix;
         self.sParamType     = sParamType;
         self.sParamName     = sParamName;
+        self.fIs128Bit      = sParamType.find('128') >= 0; ## @todo we can do better than this...
         self.sType          = sType;
         self.aoInfo         = []        # type: List[SysRegAccessorInfo]
         self.cComplete      = 0;
@@ -1507,11 +1508,18 @@ class SysRegGeneratorBase(object):
             % (self.kdTypeToGprSuff[self.sType], self.kdTypeToGprDesc[self.sType],),
             ' * @param   %-11s %s' % (self.sParamName, self.kdTypeToParamDesc[self.sType],),
             ' */',
-            'DECLHIDDEN(VBOXSTRICTRC) %s_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGpr%s,'
-            % (self.sFuncPrefix, self.kdTypeToGprSuff[self.sType],),
-            '                                                 %s %s)' % (self.sParamType, self.sParamName,),
+            'DECLHIDDEN(VBOXSTRICTRC) %s_generic(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGpr%s, %s %s)'
+            % (self.sFuncPrefix, self.kdTypeToGprSuff[self.sType],self.sParamType, self.sParamName,),
             '{',
         ];
+
+        sLogFmt = '%.16Rhxs' if self.fIs128Bit else '%#RX64';
+        if self.sType == 'read':
+            asLines.append('    Log(("%s(%%#x)\\n", idSysReg));' % (self.sFuncPrefix, ));
+        else:
+            asLines.append('    Log(("%s(%%#x, %s)\\n", idSysReg, %s));'
+                           % (self.sFuncPrefix, sLogFmt, self.sParamName,));
+
         for oInfo in self.aoInfo:
             if oInfo.cInstrEssenceRefs:
                 asLines += [
@@ -1525,15 +1533,24 @@ class SysRegGeneratorBase(object):
         ];
         for oInfo in self.aoInfo:
             if oInfo.sEnc[0] == 'A': ## @todo better filtering out of non A64/whatever stuff.
-                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
-                    asLines.append('        case %s: %sreturn %s(pVCpu, %s_%s(pVCpu, %s%s));'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.kdRegsRequiringRecalcs[oInfo.sRegName],
-                                      self.sFuncPrefix, oInfo.sAsmValue,
-                                      self.sParamName, ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                asLines += [
+                    '        case %s:' % (oInfo.sEnc,),
+                    '        {',
+                    '            VBOXSTRICTRC const rcStrict = %s_%s(pVCpu, %s%s);'
+                    % (self.sFuncPrefix, oInfo.sAsmValue, self.sParamName,
+                       ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',),
+                ];
+                if self.sType == 'read':
+                    asLines.append('            LogFlow(("%s_%s -> %%Rrc & *%s=%s\\n", VBOXSTRICTRC_VAL(rcStrict), *%s));'
+                                   % (self.sFuncPrefix, oInfo.sAsmValue, self.sParamName, sLogFmt, self.sParamName,));
                 else:
-                    asLines.append('        case %s: %sreturn %s_%s(pVCpu, %s%s);'
-                                   % (oInfo.sEnc, ' ' * (45 - len(oInfo.sEnc)), self.sFuncPrefix, oInfo.sAsmValue,
-                                      self.sParamName,  ', uInstrEssence' if oInfo.cInstrEssenceRefs else '',));
+                    asLines.append('            LogFlow(("%s_%s(%s) -> %%Rrc\\n", VBOXSTRICTRC_VAL(rcStrict), %s));'
+                                   % (self.sFuncPrefix, oInfo.sAsmValue, sLogFmt, self.sParamName,));
+                if oInfo.sRegName in self.kdRegsRequiringRecalcs:
+                    asLines.append('            return %s(pVCpu, rcStrict);' % (self.kdRegsRequiringRecalcs[oInfo.sRegName],));
+                else:
+                    asLines.append('            return rcStrict;');
+                asLines.append('        }');
         asLines += [
             '    }',
             '    /* Fall back on handcoded handler. */',
