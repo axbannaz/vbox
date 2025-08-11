@@ -242,6 +242,10 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Linux host and guest: Introduced initial support for kernel 6.17</para>
+      </listitem>
+
+      <listitem>
         <para>Linux guest: Fixed handling of (long optional) vboxvideo kernel
           module in init script</para>
       </listitem>
