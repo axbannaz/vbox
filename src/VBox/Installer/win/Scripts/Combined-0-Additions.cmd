@@ -5,7 +5,7 @@ rem Windows NT batch script for attestation signing both amd64 and x86.
 rem
 
 rem
-rem Copyright (C) 2010-2024 Oracle and/or its affiliates.
+rem Copyright (C) 2010-2025 Oracle and/or its affiliates.
 rem
 rem This file is part of VirtualBox base platform packages, as
 rem available from https://www.virtualbox.org.
