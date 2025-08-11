@@ -191,7 +191,8 @@ struct GuestDnDMetaData
         if (cbSize == cbAllocated)
             return VINF_SUCCESS;
 
-        cbSize = RT_ALIGN_Z(cbSize, RTSystemGetPageSize());
+        size_t const cbPage = RTSystemGetPageSize();
+        cbSize = RT_ALIGN_Z(cbSize, cbPage);
 
         if (cbSize > _32M) /* Meta data can be up to 32MB. */
             return VERR_BUFFER_OVERFLOW;

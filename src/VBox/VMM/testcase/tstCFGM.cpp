@@ -113,7 +113,9 @@ static void doInVmmTests(RTTEST hTest)
     }
 
     PVM pVM;
-    RTTESTI_CHECK_RC_RETV(SUPR3PageAlloc(RT_ALIGN_Z(sizeof(*pVM), RTSystemGetPageSize()) >> RTSystemGetPageShift(), 0, (void **)&pVM),
+    size_t const cbPage = RTSystemGetPageSize();
+    size_t const cPages = RT_ALIGN_Z(sizeof(*pVM), cbPage) >> RTSystemGetPageShift();
+    RTTESTI_CHECK_RC_RETV(SUPR3PageAlloc(cPages, 0, (void **)&pVM),
                           VINF_SUCCESS);
 
 

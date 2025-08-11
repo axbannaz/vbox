@@ -125,7 +125,8 @@ static int dbgfR3TraceEnable(PVM pVM, uint32_t cbEntry, uint32_t cEntries)
      * Note! We ASSUME that the returned trace buffer handle has the same value
      *       as the heap block.
      */
-    cbBlock = RT_ALIGN_Z(cbBlock, RTSystemGetPageSize());
+    size_t const cbPage = RTSystemGetPageSize();
+    cbBlock = RT_ALIGN_Z(cbBlock, cbPage);
     RTR0PTR pvBlockR0 = NIL_RTR0PTR;
     void   *pvBlockR3 = NULL;
     rc = SUPR3PageAllocEx(cbBlock >> RTSystemGetPageShift(), 0, &pvBlockR3, &pvBlockR0, NULL);
