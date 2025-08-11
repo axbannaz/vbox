@@ -405,7 +405,10 @@ const char *vmsvgaR3FifoCmdToString(uint32_t u32Cmd)
 int vmsvgaR3GboAllocDescriptors(PVMSVGAGBO pGbo)
 {
     if (pGbo->cTotalPages == 0)
+    {
+        pGbo->pvDescriptors = NULL;
         return VINF_SUCCESS;
+    }
 
     pGbo->pvDescriptors = RTMemAlloc(pGbo->cTotalPages * (  sizeof(RTGCPHYS)
                                                           + sizeof(PGMPAGEMAPLOCK)
@@ -423,7 +426,8 @@ int vmsvgaR3GboAllocDescriptors(PVMSVGAGBO pGbo)
 
 void vmsvgaR3GboFreeDescriptors(PVMSVGAGBO pGbo)
 {
-    RTMemFree(pGbo->pvDescriptors);
+    if (pGbo->pvDescriptors)
+        RTMemFree(pGbo->pvDescriptors);
     pGbo->pvDescriptors = NULL;
     pGbo->paGCPhysPages = NULL;
     pGbo->paPageLocks   = NULL;
@@ -977,7 +981,7 @@ static int vmsvgaR3OTableSetOrGrow(PVMSVGAR3STATE pSvgaR3State, SVGAOTableType t
     if (sizeInBytes > 0)
     {
         /* Create a new guest backed object for the object table. */
-        VMSVGAGBO gbo;
+        VMSVGAGBO gbo; RT_ZERO(gbo);
         int rc = vmsvgaR3GboCreate(pSvgaR3State, ptDepth, baseAddress, sizeInBytes, &gbo);
         AssertRCReturn(rc, rc);
 
