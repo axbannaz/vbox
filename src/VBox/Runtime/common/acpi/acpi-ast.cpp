@@ -643,6 +643,8 @@ DECLHIDDEN(int) rtAcpiAstDumpToTbl(PCRTACPIASTNODE pAstNd, PRTACPINSROOT pNsRoot
                             rc = VERR_INTERNAL_ERROR);
 
             rc = RTAcpiTblBufferStart(hAcpiTbl);
+            if (RT_FAILURE(rc))
+                break;
 
             /* Try to gather the number of elements. */
             uint64_t cElems = 0;
@@ -694,7 +696,8 @@ DECLHIDDEN(int) rtAcpiAstDumpToTbl(PCRTACPIASTNODE pAstNd, PRTACPINSROOT pNsRoot
                     rc = VERR_NO_MEMORY;
             }
 
-            rc = RTAcpiTblBufferFinalize(hAcpiTbl);
+            if (RT_SUCCESS(rc))
+                rc = RTAcpiTblBufferFinalize(hAcpiTbl);
             break;
         }
         case kAcpiAstNodeOp_ToUuid:
