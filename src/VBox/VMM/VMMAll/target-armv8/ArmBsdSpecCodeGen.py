@@ -4139,6 +4139,7 @@ class IEMArmGenerator(object):
             # Main switch function.
             asLines += oGenerator.generateMainFunction();
 
+        asLines.append(''); # make SCM happy.
         return (True, asLines);
 
     def generateA64CImplSysRegInsCpp(self, sFilename, iPartNo):
