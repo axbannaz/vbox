@@ -29,7 +29,7 @@
 /*********************************************************************************************************************************
 *   Header Files                                                                                                                 *
 *********************************************************************************************************************************/
-#define LOG_GROUP   LOG_GROUP_IEM
+#define LOG_GROUP   LOG_GROUP_IEM_CIMPL
 #define VMCPU_INCL_CPUM_GST_CTX
 #include <VBox/vmm/iem.h>
 #include <VBox/vmm/cpum.h>
@@ -77,6 +77,30 @@ DECLHIDDEN(VBOXSTRICTRC)
 iemCImplA64_msr_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT
 {
     RT_NOREF(pVCpu, idSysReg, uValue, idxGprSrc);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC)
+iemCImplA64_sys_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, idSysReg, uValue, idxGprSrc);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC)
+iemCImplA64_sysp_fallback(PVMCPU pVCpu, uint32_t idSysReg, PCRTUINT128U puValue, uint32_t idxGprSrc) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, idSysReg, puValue, idxGprSrc);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC)
+iemCImplA64_sysl_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGprDst) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, idxGprDst, idSysReg);
     AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
 }
 
@@ -203,5 +227,332 @@ DECLHIDDEN(uint64_t)     iemCImplHlpGetPhysicalSystemTimerCount(PVMCPU pVCpu) RT
 {
     RT_NOREF(pVCpu);
     AssertFailedReturn(0);
+}
+
+
+DECLHIDDEN(kIemCImplA64SecurityState) iemCImplHlpGetSecurityStateAtEl(PVMCPU pVCpu, uint8_t bEl) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, bEl);
+    AssertFailed();
+    return kIemCImplA64SecurityState_NonSecure;
+}
+
+
+DECLHIDDEN(uint16_t)     iemCImplHlpGetCurrentVmId(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    AssertFailed();
+    return 0;
+}
+
+
+DECLHIDDEN(bool)         iemCImplHlpIsGcsEnabled(PVMCPU pVCpu, uint8_t bEl) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, bEl);
+    AssertFailed();
+    return false;
+}
+
+
+DECLHIDDEN(bool)         iemCImplHlpIsGcsEnabledAtCurrentEl(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    return iemCImplHlpIsGcsEnabled(pVCpu, IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec));
+}
+
+
+/*
+ * SYSL
+ */
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopM(PVMCPU pVCpu, uint64_t *puDst) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, puDst);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsSs2(PVMCPU pVCpu, uint64_t *puDst) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, puDst);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+/*
+ * SYS
+ */
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TrcIt(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64BrbIAll(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64BrbInj(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopCX(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopX(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPushM(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPushX(PVMCPU pVCpu) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsSs1(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysAt(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64TranslationStage enmStage, uint8_t bEl,
+                                             kIemCImplA64ATAccess enmAccess) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue, enmStage, bEl, enmAccess);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysDc(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheType enmCacheType,
+                                             kIemCImplA64CacheOp enmOp, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue, enmCacheType, enmOp, enmScope);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysIc(PVMCPU pVCpu, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmScope);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysIcWithArg(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue, enmScope);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64MemZero(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheType enmCacheType) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue, enmCacheType);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64RestrictPrediction(PVMCPU pVCpu, uint64_t uValue,
+                                                          kIemCImplA64RestrictType enmType) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uValue, enmType);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+
+/*
+ * TLB Invalidation.
+ */
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiAll(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, kIemCImplA64Broadcast enmBroadcast,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, enmBroadcast, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiAsid(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm, kIemCImplA64Broadcast enmBroadcast,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAll(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                 uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAllS12(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                    kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                    kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                    uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAllWs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                    kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                    kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                    uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                 kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                  kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                  kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                  kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRva(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRvaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                              kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                              kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                              kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, uValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                  kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                  kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                  kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                   kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                   kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                   kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRva(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRvaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                 kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipVa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+}
+
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipVaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, enmSectState, enmRegime, idVm, enmBroadcast, enmLevel, enmMemAttr, puValue);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
 }
 

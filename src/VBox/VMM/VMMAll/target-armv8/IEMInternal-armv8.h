@@ -173,6 +173,7 @@ IEM_RAISE_PROTOS(iemRaiseSpAlignmentCheck, PVMCPUCC pVCpu);
 #define IEM_CIMPL_SYSREG_INSTR_ESSENCE_IS_READ(a_uInstrEssence)     (!((a_uInstrEssence) & RT_BIT_32(24)))
 
 VBOXSTRICTRC iemRaiseSystemAccessTrap(PVMCPU pVCpu, uint32_t uEl, uint32_t uInstrEssence) RT_NOEXCEPT;
+VBOXSTRICTRC iemRaiseSystemAccessTrap128Bit(PVMCPU pVCpu, uint32_t uEl, uint32_t uInstrEssence) RT_NOEXCEPT;
 VBOXSTRICTRC iemRaiseSystemAccessTrapSve(PVMCPU pVCpu, uint32_t uEl) RT_NOEXCEPT;
 VBOXSTRICTRC iemRaiseSystemAccessTrapSme(PVMCPU pVCpu, uint32_t uEl) RT_NOEXCEPT;
 VBOXSTRICTRC iemRaiseSystemAccessTrapAdvSimdFpAccessA64(PVMCPU pVCpu, uint32_t uEl) RT_NOEXCEPT;
@@ -374,17 +375,138 @@ uint64_t        iemMemFetchStackU64SafeJmp(PVMCPUCC pVCpu, RTGCPTR GCPtrMem) IEM
  */
 IEM_CIMPL_PROTO_2(iemCImplA64_msr, uint32_t, idSysReg, uint32_t, idxGprSrc);
 IEM_CIMPL_PROTO_2(iemCImplA64_mrs, uint32_t, idSysReg, uint32_t, idxGprDst);
+IEM_CIMPL_PROTO_2(iemCImplA64_sys, uint32_t, idSysIns, uint32_t, idxGprSrc);
+IEM_CIMPL_PROTO_2(iemCImplA64_sysp, uint32_t, idSysIns, uint32_t, idxGprSrc);
+IEM_CIMPL_PROTO_2(iemCImplA64_sysl, uint32_t, idSysIns, uint32_t, idxGprDst);
 DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_mrs_novar(PVMCPU pVCpu, uint32_t idSysReg, const char *pszRegName,
                                                uint64_t *puDst, uint32_t idxGprDst) RT_NOEXCEPT;
 DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_msr_novar(PVMCPU pVCpu, uint32_t idSysReg, const char *pszRegName,
                                                uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT;
 DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_mrs_fallback(PVMCPU pVCpu, uint32_t idxGprDst, uint32_t idSysReg) RT_NOEXCEPT;
-DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_msr_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_msr_fallback(PVMCPU pVCpu, uint32_t idSysReg,
+                                                  uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sys_fallback(PVMCPU pVCpu, uint32_t idSysReg,
+                                                  uint64_t uValue, uint32_t idxGprSrc) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sysp_fallback(PVMCPU pVCpu, uint32_t idSysReg,
+                                                   PCRTUINT128U puValue, uint32_t idxGprSrc) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplA64_sysl_fallback(PVMCPU pVCpu, uint32_t idSysReg, uint32_t idxGprDst) RT_NOEXCEPT;
 
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlags(PVMCPU pVCpu, VBOXSTRICTRC rcStrict);
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl1(PVMCPU pVCpu, VBOXSTRICTRC rcStrict);
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl2(PVMCPU pVCpu, VBOXSTRICTRC rcStrict);
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpRecalcFlagsAndPgmModeEl3(PVMCPU pVCpu, VBOXSTRICTRC rcStrict);
+
+typedef enum kIemCImplA64TranslationStage
+{
+    kIemCImplA64TranslationStage_Invalid = 0,
+    kIemCImplA64TranslationStage_1,
+    kIemCImplA64TranslationStage_12,
+    kIemCImplA64TranslationStage_End
+} kIemCImplA64TranslationStage;
+
+typedef enum kIemCImplA64ATAccess
+{
+    kIemCImplA64ATAccess_Invalid = 0,
+    kIemCImplA64ATAccess_Read,
+    kIemCImplA64ATAccess_Write,
+    kIemCImplA64ATAccess_Any,
+    kIemCImplA64ATAccess_ReadPan,
+    kIemCImplA64ATAccess_WritePan,
+    kIemCImplA64ATAccess_End
+} kIemCImplA64ATAccess;
+
+typedef enum kIemCImplA64CacheType
+{
+    kIemCImplA64CacheType_Invalid = 0,
+    kIemCImplA64CacheType_Data,
+    kIemCImplA64CacheType_Tag,
+    kIemCImplA64CacheType_DataTag,
+    kIemCImplA64CacheType_Instruction,
+    kIemCImplA64CacheType_End
+} kIemCImplA64CacheType;
+
+typedef enum kIemCImplA64CacheOp
+{
+    kIemCImplA64CacheOp_Invalid = 0,
+    kIemCImplA64CacheOp_Clean,
+    kIemCImplA64CacheOp_Invalidate,
+    kIemCImplA64CacheOp_CleanInvalidate,
+    kIemCImplA64CacheOp_End
+} kIemCImplA64CacheOp;
+
+typedef enum kIemCImplA64CacheOpScope
+{
+    kIemCImplA64CacheOpScope_Invalid = 0,
+    kIemCImplA64CacheOpScope_SetWay,
+    kIemCImplA64CacheOpScope_PoU,
+    kIemCImplA64CacheOpScope_PoC,
+    kIemCImplA64CacheOpScope_PoE,
+    kIemCImplA64CacheOpScope_PoP,
+    kIemCImplA64CacheOpScope_PoDP,
+    kIemCImplA64CacheOpScope_PoPA,
+    kIemCImplA64CacheOpScope_PoPS,
+    kIemCImplA64CacheOpScope_AllU,
+    kIemCImplA64CacheOpScope_AllUIS,
+    kIemCImplA64CacheOpScope_OuterCache,
+    kIemCImplA64CacheOpScope_End
+} kIemCImplA64CacheOpScope;
+
+typedef enum kIemCImplA64RestrictType
+{
+    kIemCImplA64RestrictType_Invalid = 0,
+    kIemCImplA64RestrictType_CachePrefetch,
+    kIemCImplA64RestrictType_ControlFlow,
+    kIemCImplA64RestrictType_DataValue,
+    kIemCImplA64RestrictType_Other,
+    kIemCImplA64RestrictType_End
+} kIemCImplA64RestrictType;
+
+typedef enum kIemCImplA64Regime
+{
+    kIemCImplA64Regime_Invalid = 0,
+    kIemCImplA64Regime_El10,
+    kIemCImplA64Regime_El20,
+    kIemCImplA64Regime_El2,
+    kIemCImplA64Regime_El30,
+    kIemCImplA64Regime_El3,
+    kIemCImplA64Regime_End
+} kIemCImplA64Regime;
+
+typedef enum kIemCImplA64Broadcast
+{
+    kIemCImplA64Broadcast_Invalid = 0,
+    kIemCImplA64Broadcast_Ish,
+    kIemCImplA64Broadcast_ForcedIsh,
+    kIemCImplA64Broadcast_Osh,
+    kIemCImplA64Broadcast_Nsh,
+    kIemCImplA64Broadcast_End
+} kIemCImplA64Broadcast;
+
+typedef enum kIemCImplA64TlbiMemAttr
+{
+    kIemCImplA64TlbiMemAttr_Invalid = 0,
+    kIemCImplA64TlbiMemAttr_AllAttr,
+    kIemCImplA64TlbiMemAttr_ExcludeXs,
+    kIemCImplA64TlbiMemAttr_End
+} kIemCImplA64TlbiMemAttr;
+
+typedef enum kIemCImplA64TlbiLevel
+{
+    kIemCImplA64TlbiLevel_Invalid = 0,
+    kIemCImplA64TlbiLevel_Any,
+    kIemCImplA64TlbiLevel_Last,
+    kIemCImplA64TlbiLevel_End
+} kIemCImplA64TlbiLevel;
+
+typedef enum kIemCImplA64SecurityState
+{
+    kIemCImplA64SecurityState_Invalid = 0,
+    kIemCImplA64SecurityState_NonSecure,
+    kIemCImplA64SecurityState_Realm,
+    kIemCImplA64SecurityState_Secure,
+    kIemCImplA64SecurityState_Root,
+    kIemCImplA64SecurityState_End
+} kIemCImplA64SecurityState;
 
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpNVMemReadU64(PVMCPU pVCpu, uint32_t off, uint64_t *puDst) RT_NOEXCEPT;
 DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpNVMemWriteU64(PVMCPU pVCpu, uint32_t off, uint64_t uValue) RT_NOEXCEPT;
@@ -396,6 +518,102 @@ DECLHIDDEN(uint64_t)     iemCImplHlpGetPmUserEnrEl0(PVMCPU pVCpu) RT_NOEXCEPT;
 DECLHIDDEN(uint64_t)     iemCImplHlpGetPmSelrEl0(PVMCPU pVCpu) RT_NOEXCEPT;
 DECLHIDDEN(uint64_t)     iemCImplHlpGetPmUacrEl1(PVMCPU pVCpu) RT_NOEXCEPT;
 DECLHIDDEN(uint64_t)     iemCImplHlpGetPhysicalSystemTimerCount(PVMCPU pVCpu) RT_NOEXCEPT;
+
+DECLHIDDEN(kIemCImplA64SecurityState) iemCImplHlpGetSecurityStateAtEl(PVMCPU pVCpu, uint8_t bEl) RT_NOEXCEPT;
+DECLHIDDEN(uint16_t)     iemCImplHlpGetCurrentVmId(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(bool)         iemCImplHlpIsGcsEnabled(PVMCPU pVCpu, uint8_t bEl) RT_NOEXCEPT;
+DECLHIDDEN(bool)         iemCImplHlpIsGcsEnabledAtCurrentEl(PVMCPU pVCpu) RT_NOEXCEPT;
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopM(PVMCPU pVCpu, uint64_t *puDst) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsSs2(PVMCPU pVCpu, uint64_t *puDst) RT_NOEXCEPT;
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TrcIt(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64BrbIAll(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64BrbInj(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopCX(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPopX(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPushM(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsPushX(PVMCPU pVCpu) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64GcsSs1(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysAt(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64TranslationStage enmStage, uint8_t bEl,
+                                             kIemCImplA64ATAccess enmAccess) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysDc(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheType enmCacheType,
+                                             kIemCImplA64CacheOp enmOp, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysIc(PVMCPU pVCpu, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64SysIcWithArg(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheOpScope enmScope) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64MemZero(PVMCPU pVCpu, uint64_t uValue, kIemCImplA64CacheType enmCacheType) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64RestrictPrediction(PVMCPU pVCpu, uint64_t uValue,
+                                                          kIemCImplA64RestrictType enmType) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64RestrictPrediction(PVMCPU pVCpu, uint64_t uValue,
+                                                          kIemCImplA64RestrictType enmType) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiAll(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, kIemCImplA64Broadcast enmBroadcast,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiAsid(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm, kIemCImplA64Broadcast enmBroadcast,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAll(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                 uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAllS12(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                    kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                    kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                    uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVmAllWs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                    kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                    kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiMemAttr enmMemAttr,
+                                                    uint64_t uValue) RT_NOEXCEPT;
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                 kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                  kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                  kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                  kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRva(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiRvaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                              kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                              kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                              kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbiVaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, uint64_t uValue) RT_NOEXCEPT;
+
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                  kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                  kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                  kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRIpAs2(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                   kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                   kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                   kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRva(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipRvaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                 kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                 kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                 kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipVa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                               kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                               kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                               kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
+DECLHIDDEN(VBOXSTRICTRC) iemCImplHlpA64TlbipVaa(PVMCPU pVCpu, kIemCImplA64SecurityState enmSectState,
+                                                kIemCImplA64Regime enmRegime, uint16_t idVm,
+                                                kIemCImplA64Broadcast enmBroadcast, kIemCImplA64TlbiLevel enmLevel,
+                                                kIemCImplA64TlbiMemAttr enmMemAttr, PCRTUINT128U puValue) RT_NOEXCEPT;
 
 /** @} */
 

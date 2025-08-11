@@ -180,6 +180,13 @@ VBOXSTRICTRC iemRaiseSystemAccessTrap(PVMCPU pVCpu, uint32_t uEl, uint32_t uInst
 }
 
 
+VBOXSTRICTRC iemRaiseSystemAccessTrap128Bit(PVMCPU pVCpu, uint32_t uEl, uint32_t uInstrEssence) RT_NOEXCEPT
+{
+    RT_NOREF(pVCpu, uEl, uInstrEssence);
+    AssertFailedReturn(VERR_IEM_ASPECT_NOT_IMPLEMENTED);
+}
+
+
 VBOXSTRICTRC iemRaiseSystemAccessTrapSve(PVMCPU pVCpu, uint32_t uEl) RT_NOEXCEPT
 {
     RT_NOREF(pVCpu, uEl);

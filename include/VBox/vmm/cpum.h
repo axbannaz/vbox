@@ -1703,6 +1703,8 @@ typedef struct CPUMFEATURESARMV8
     uint32_t        fLsui : 1;
     /** Supports FEAT_PCDPHINT (FEAT_PCDPHINT). */
     uint32_t        fPCDPHint : 1;
+    /** Supports FEAT_PoPS (FEAT_PoPS). */
+    uint32_t        fPoPs : 1;
     /** Supports FEAT_SME2p2 (FEAT_SME2p2). */
     uint32_t        fSme2p2 : 1;
     /** Supports FEAT_SSVE_FEXPA (FEAT_SSVE_FEXPA). */
