@@ -1767,7 +1767,7 @@ static int usage(const char *pszArgv0)
     /*      0         1         2         3         4         5         6         7         8
             012345678901234567890123456789012345678901234567890123456789012345678901234567890 */
     printf("VBoxDef2LazyLoad - Lazy DLL/SO/DYLIB loader code generator.\n"
-           "Copyright (C) 2013-2016 Oracle Corporation\n"
+           "Copyright (C) 2013-2025 Oracle and/or its affiliates.\n"
            "\n"
            "Description:\n"
            "------------\n"

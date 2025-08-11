@@ -1,7 +1,7 @@
 /** @file
   Install Acpi tables for VirtualBox Hypervisor
 
-  Copyright (c) 2024, Oracle and/or its affiliates.<BR>
+  Copyright (c) 2024-2025, Oracle and/or its affiliates.
   Copyright (c) 2021, Arm Limited. All rights reserved.<BR>
 
   SPDX-License-Identifier: BSD-2-Clause-Patent

@@ -348,7 +348,7 @@ static void FileHeader(PRTSTREAM pOut, const char *pszFilename, const char *pszI
                  " */\n"
                  "\n"
                  "/*\n"
-                 " * Copyright (C) 2024 Oracle and/or its affiliates.\n"
+                 " * Copyright (C) 2024-2025 Oracle and/or its affiliates.\n"
                  " *\n"
                  " * This file is part of VirtualBox base platform packages, as\n"
                  " * available from https://www.virtualbox.org.\n"

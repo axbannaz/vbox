@@ -111,7 +111,7 @@
 /** @name Prefined strings for Windows resource files
  * @{ */
 #define VBOX_RC_COMPANY_NAME            VBOX_VENDOR
-#define VBOX_RC_LEGAL_COPYRIGHT         "Copyright (C) 2009-" VBOX_C_YEAR " Oracle Corporation\0"
+#define VBOX_RC_LEGAL_COPYRIGHT         "Copyright (C) 2009-" VBOX_C_YEAR " Oracle and/or its affiliates\0"
 #define VBOX_RC_PRODUCT_NAME                    VBOX_PRODUCT
 #define VBOX_RC_PRODUCT_NAME_GA                 VBOX_PRODUCT " Guest Additions"
 #define VBOX_RC_PRODUCT_NAME_PUEL_EXTPACK       VBOX_PRODUCT " Extension Pack"
