@@ -92,7 +92,21 @@ struct lwip_sock {
 };
 
 #ifndef set_errno
+# ifndef VBOX
 #define set_errno(err) do { if (err) { errno = (err); } } while(0)
+# else
+/*
+ * This avoids a bunch of "Repeated expansion of macro argument with side-effects" parfait warnings
+ * as this is used with err_to_errno() as the err argument, which doesn't has side effects but
+ * parfait can't grok this. In any case on non optimizing builds this avoids calling err_to_errno() twice.
+ */
+#  define set_errno(err) \
+    do { \
+        int const tmp_errno = (err); \
+        if (tmp_errno) \
+            errno = (tmp_errno); \
+    } while(0)
+# endif
 #endif
 
 #if !LWIP_TCPIP_CORE_LOCKING
