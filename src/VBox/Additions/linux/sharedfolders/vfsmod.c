@@ -913,7 +913,9 @@ static int vbsf_read_super_aux(struct super_block *sb, void *data, int flags)
         sb->s_time_gran = 1; /* This might be a little optimistic for windows hosts, where it should be 100. */
 #endif
         sb->s_op        = &g_vbsf_super_ops;
-#if RTLNX_VER_MIN(2,6,38)
+#if RTLNX_VER_MIN(6,17,0)
+        set_default_d_op(sb, &vbsf_dentry_ops);
+#elif RTLNX_VER_MIN(2,6,38)
         sb->s_d_op      = &vbsf_dentry_ops;
 #endif
 
