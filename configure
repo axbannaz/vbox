@@ -2158,7 +2158,15 @@ EOF
 check_java()
 {
   test_header "Java support"
-  log_success
+  if ! which_wrapper javac > /dev/null; then
+    echo "  javac not found, automatically disabling Java bindings!"
+    WITH_JAVA=0
+  elif ! which_wrapper wsimport > /dev/null; then
+    echo "  wsimport not found, automatically disabling Java bindings!"
+    WITH_JAVA=0
+  else
+    log_success
+  fi
 }
 
 
@@ -2168,10 +2176,6 @@ check_java()
 setup_wine()
 {
   test_header "Wine support"
-  if ! which_wrapper wine > /dev/null; then
-    echo "  wine binary not found"
-    fail
-  fi
   if ! which_wrapper wine > /dev/null; then
     echo "  wine not found"
     fail
