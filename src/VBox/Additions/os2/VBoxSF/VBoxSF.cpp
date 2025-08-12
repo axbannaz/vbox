@@ -2319,6 +2319,13 @@ FS32_PATHINFO(USHORT fFlags, PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszPath, LONG
      *       and FILESTATUS2 to FILESTATUS4 as needed.  We don't need to do this.
      *       It also has weird code for doubling the FILESTATUS2.cbList value
      *       for no apparent reason.
+     *
+     * Note! When setting, levels 2 (FI_LVL_STANDARD_EASIZE) and 12
+     *       (FI_LVL_STANDARD_EASIZE_64) are both taking an EAOP structure
+     *       instead of the respective FILESTATUS2 and FILESTATUS4L strucures
+     *       used by querying.  Given that the OpenJFS sources clearly doesn't
+     *       handle level 12 for setting, we probably won't ever see an app
+     *       trying to use it (DOSCALL1.DLL has conversion code for it though).
      */
     ULONG cbMinData;
     switch (uLevel)
@@ -2332,11 +2339,11 @@ FS32_PATHINFO(USHORT fFlags, PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszPath, LONG
             AssertCompileSize(FILESTATUS3L, 0x20); /* cbFile and cbFileAlloc are misaligned. */
             break;
         case FI_LVL_STANDARD_EASIZE:
-            cbMinData = sizeof(FILESTATUS2);
+            cbMinData = !(fFlags & PI_SET) ? sizeof(FILESTATUS2) : sizeof(EAOP);
             AssertCompileSize(FILESTATUS2, 0x1a);
             break;
         case FI_LVL_STANDARD_EASIZE_64:
-            cbMinData = sizeof(FILESTATUS4L);
+            cbMinData = !(fFlags & PI_SET) ? sizeof(FILESTATUS4L) : sizeof(EAOP);
             AssertCompileSize(FILESTATUS4L, 0x24); /* cbFile and cbFileAlloc are misaligned. */
             break;
         case FI_LVL_EAS_FROM_LIST:
@@ -2406,7 +2413,8 @@ FS32_PATHINFO(USHORT fFlags, PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszPath, LONG
                 else
                     rc = ERROR_NOT_ENOUGH_MEMORY;
             }
-            else if (uLevel == FI_LVL_STANDARD_EASIZE)
+            else if (   uLevel == FI_LVL_STANDARD_EASIZE
+                     || uLevel == FI_LVL_STANDARD_EASIZE_64)
                 rc = ERROR_EAS_NOT_SUPPORTED;
             else
                 rc = ERROR_INVALID_LEVEL;
