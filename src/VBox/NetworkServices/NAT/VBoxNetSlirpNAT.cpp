@@ -128,7 +128,15 @@ typedef struct NATSERVICEPORTFORWARDRULE
 typedef std::vector<NATSERVICEPORTFORWARDRULE> VECNATSERVICEPF;
 typedef VECNATSERVICEPF::iterator ITERATORNATSERVICEPF;
 typedef VECNATSERVICEPF::const_iterator CITERATORNATSERVICEPF;
+
+#if RT_CLANG_PREREQ(3, 4) /* Most of the defined functions are not used. */
+# pragma clang diagnostic push
+# pragma clang diagnostic ignored "-Wunused-function"
+#endif
 RTVEC_DECL(Nameserver4List, RTNETADDRIPV4)
+#if RT_CLANG_PREREQ(3, 4)
+# pragma clang diagnostic pop
+#endif
 
 /** Slirp Timer */
 typedef struct slirpTimer
