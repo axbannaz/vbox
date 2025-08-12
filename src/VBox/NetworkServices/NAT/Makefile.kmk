@@ -58,29 +58,22 @@ VBoxNetNAT_TEMPLATE := $(if-expr defined(VBOX_WITH_HARDENING),VBoxMainDll,VBoxMa
 VBoxNetNAT_NAME    := VBoxNetNAT
 VBoxNetNAT_DEFS     = \
 	IPv6 \
-	$(if $(VBOX_WITH_INTNET_SERVICE_IN_R3),VBOX_WITH_INTNET_SERVICE_IN_R3,) \
-	$(if $(VBOX_WITH_LWIP_NAT),VBOX_WITH_LWIP_NAT,)
-
- VBoxNetNAT_DEFS.win = VBOX_COM_OUTOFPROC_MODULE
-
- VBoxNetNAT_INCS += \
- 	$(PATH_ROOT)/src/libs/libslirp-4.9.1/include
-
- VBoxNetNAT_SOURCES = \
- 	VBoxNetSlirpNAT.cpp \
- 	../NetLib/IntNetIf.cpp \
- 	../NetLib/VBoxNetPortForwardString.cpp
-
- VBoxNetNAT_SOURCES.win += \
- 	RTWinPoll.cpp \
- 	RTWinSocketPair.cpp
-
- VBoxNetNAT_LIBS = \
- 	$(PATH_STAGE_LIB)/VBox-libslirp$(VBOX_SUFF_LIB) \
- 	$(LIB_RUNTIME)
- VBoxNetNAT_LIBS.solaris += socket nsl
- VBoxNetNAT_LIBS.darwin += resolv
-
+	$(if $(VBOX_WITH_INTNET_SERVICE_IN_R3),VBOX_WITH_INTNET_SERVICE_IN_R3,)
+VBoxNetNAT_DEFS.win = VBOX_COM_OUTOFPROC_MODULE
+VBoxNetNAT_INCS += \
+	$(PATH_ROOT)/src/libs/libslirp-4.9.1/include
+VBoxNetNAT_SOURCES = \
+	VBoxNetSlirpNAT.cpp \
+	../NetLib/IntNetIf.cpp \
+	../NetLib/VBoxNetPortForwardString.cpp
+VBoxNetNAT_SOURCES.win += \
+	RTWinPoll.cpp \
+	RTWinSocketPair.cpp
+VBoxNetNAT_LIBS = \
+	$(PATH_STAGE_LIB)/VBox-libslirp$(VBOX_SUFF_LIB) \
+	$(LIB_RUNTIME)
+VBoxNetNAT_LIBS.solaris += socket nsl
+VBoxNetNAT_LIBS.darwin += resolv
 VBoxNetNAT_LDFLAGS.win = /SUBSYSTEM:windows
 
 ifdef VBOX_WITH_HARDENING
