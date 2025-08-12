@@ -3068,8 +3068,6 @@ typedef const ARMV8SPSREL2 *PCXARMV8SPSREL2;
 #define ARMV8_AARCH64_SYSINS_FIXED_MASK             (  ARMV8_AARCH64_SYSINS_P_MASK | ARMV8_AARCH64_SYSINS_L_MASK \
                                                      | ARMV8_AARCH64_SYSREG_OP0_MASK )
 
-/** @} */
-
 /** Extract op0 from an IPRT system register ID value. */
 #define ARMV8_AARCH64_SYSINS_ID_GET_OP0(a_idSysReg) (((a_idSysReg) >> 14) & 0x3)
 /** Extract op1 from an IPRT system register ID value. */
