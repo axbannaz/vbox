@@ -48,10 +48,12 @@ RT_NOCRT_BEGINPROC wcslen
         mov     rdi, rcx
  %endif
 %else
-        mov     edx, edi                ; save edi
  %ifdef ASM_CALL32_WATCOM
+        push    edi
+        push    ecx
         mov     edi, eax
  %else
+        mov     edx, edi                ; save edi
         mov     edi, [esp + 4]
  %endif
 %endif
@@ -68,7 +70,12 @@ RT_NOCRT_BEGINPROC wcslen
 %ifdef ASM_CALL64_MSC
         mov     rdi, r9
 %elifdef RT_ARCH_X86
+ %ifdef ASM_CALL32_WATCOM
+        pop     ecx
+        pop     edi
+ %else
         mov     edi, edx
+ %endif
 %endif
         ret
 ENDPROC RT_NOCRT(wcslen)

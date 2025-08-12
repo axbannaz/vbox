@@ -64,6 +64,10 @@ RT_NOCRT_BEGINPROC memcmp
 %else
         push    edi
         push    esi
+ %ifdef ASM_CALL32_WATCOM
+        push    ecx
+        push    edx
+ %endif
 
  %ifdef ASM_CALL32_WATCOM
         mov     edi, eax
@@ -109,6 +113,10 @@ RT_NOCRT_BEGINPROC memcmp
         mov     rsi, r11
  %endif
 %else
+ %ifdef ASM_CALL32_WATCOM
+        pop     edx
+        pop     ecx
+ %endif
         pop     esi
         pop     edi
 %endif

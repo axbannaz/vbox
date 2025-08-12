@@ -99,9 +99,13 @@ RT_NOCRT_BEGINPROC memset
 
 %else ; X86
         push    edi
+ %ifdef ASM_CALL32_WATCOM
+        push    eax                     ; for return
+        push    ecx
+        push    edx
+ %endif
 
  %ifdef ASM_CALL32_WATCOM
-        push    eax
         mov     edi, eax
         mov     ecx, ebx
         movzx   eax, dl
@@ -129,6 +133,8 @@ RT_NOCRT_BEGINPROC memset
         rep stosb
 
  %ifdef ASM_CALL32_WATCOM
+        pop     edx
+        pop     ecx
         pop     eax
         pop     edi
  %else

@@ -63,10 +63,11 @@ RT_NOCRT_BEGINPROC strchr
  %endif
         or      dl, dl
         jz near .strlen
-        mov     ecx, esi                ; save esi
  %ifdef ASM_CALL32_WATCOM
+        push    esi
         mov     esi, eax
  %else
+        mov     ecx, esi                ; save esi
         mov     esi, [esp + 4]
  %endif
 %endif
@@ -104,7 +105,11 @@ RT_NOCRT_BEGINPROC strchr
         mov     rsi, r9
 %endif
 %ifdef RT_ARCH_X86
+ %ifdef ASM_CALL32_WATCOM
+        pop     esi
+ %else
         mov     esi, ecx
+ %endif
 %endif
         ret
 
@@ -113,7 +118,11 @@ RT_NOCRT_BEGINPROC strchr
         mov     rsi, r9
 %endif
 %ifdef RT_ARCH_X86
+ %ifdef ASM_CALL32_WATCOM
+        pop     esi
+ %else
         mov     esi, ecx
+ %endif
 %endif
         xor     eax, eax
         ret
@@ -129,10 +138,12 @@ align 16
         mov     rdi, rcx
  %endif
 %else
-        mov     edx, edi                ; save edi
  %ifdef ASM_CALL32_WATCOM
+        push    edi
+        push    ecx
         mov     edi, eax
  %else
+        mov     edx, edi                ; save edi
         mov     edi, [esp + 4]
  %endif
 %endif
@@ -145,7 +156,12 @@ align 16
         mov     rdi, r9
 %endif
 %ifdef RT_ARCH_X86
+ %ifdef ASM_CALL32_WATCOM
+        pop     ecx
+        pop     edi
+ %else
         mov     edi, edx
+ %endif
 %endif
         ret
 ENDPROC RT_NOCRT(strchr)

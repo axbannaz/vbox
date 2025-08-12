@@ -79,6 +79,10 @@ GLOBALNAME __bzero
         push    ebp
         mov     ebp, esp
         push    edi
+ %ifdef ASM_CALL32_WATCOM
+        push    ecx
+        push    edx
+ %endif
 
  %ifdef ASM_CALL32_WATCOM
         mov     ecx, edx
@@ -97,6 +101,10 @@ GLOBALNAME __bzero
         mov     ecx, edx
         rep stosb
 
+ %ifdef ASM_CALL32_WATCOM
+        pop     edx
+        pop     ecx
+ %endif
         pop     edi
         leave
 

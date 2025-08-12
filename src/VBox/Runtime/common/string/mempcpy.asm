@@ -63,6 +63,10 @@ RT_NOCRT_BEGINPROC mempcpy
  %ifdef ASM_CALL32_WATCOM
         xchg    eax, edi                ; saving edi in eax and loading it
         push    esi
+ %ifdef ASM_CALL32_WATCOM
+        push    ecx
+        push    edx
+ %endif
         mov     esi, edx
         mov     ecx, ebx
         mov     edx, ebx
@@ -102,6 +106,10 @@ RT_NOCRT_BEGINPROC mempcpy
         mov     rdi, r10
  %endif
 %else
+ %ifdef ASM_CALL32_WATCOM
+        pop     edx
+        pop     ecx
+ %endif
         pop     esi
         xchg    eax, edi
 %endif
