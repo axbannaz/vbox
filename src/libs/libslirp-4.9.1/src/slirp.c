@@ -708,6 +708,8 @@ Slirp *slirp_new(const SlirpConfig *cfg, const SlirpCb *callbacks, void *opaque)
 #ifdef VBOX
     slirp->fForwardBroadcast = cfg->fForwardBroadcast;
     slirp->iSoMaxConn = cfg->iSoMaxConn;
+    slirp->aRealNameservers = cfg->aRealNameservers;
+    slirp->cRealNameservers = cfg->cRealNameservers;
 #endif
 
     ip6_post_init(slirp);
@@ -1763,6 +1765,21 @@ void slirp_set_vnameserver(Slirp *pSlirp, struct in_addr uAddr)
 void slirp_set_disable_dns(Slirp *pSlirp, bool fDisableDNS)
 {
     pSlirp->disable_dns = !!fDisableDNS;
+}
+
+/*
+ * Sets the real nameserver array for VBox libslirp impl
+ * NOTE: This doens't free the old one. Freeing is the
+ * responsibility of the caller.
+ */
+void slirp_set_aRealNameservers(Slirp *pSlirp, struct in_addr *aRealNameservers)
+{
+    pSlirp->aRealNameservers = aRealNameservers;
+}
+
+void slirp_set_cRealNameservers(Slirp *pSlirp, size_t cRealNameservers)
+{
+    pSlirp->cRealNameservers = cRealNameservers;
 }
 
 #endif /* VBOX */

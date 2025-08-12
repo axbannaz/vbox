@@ -70,6 +70,7 @@
 #include <iprt/req.h>
 #include <iprt/file.h>
 #include <iprt/semaphore.h>
+#include <iprt/vector.h>
 #include <iprt/cpp/utils.h>
 #include <VBox/log.h>
 
@@ -127,7 +128,7 @@ typedef struct NATSERVICEPORTFORWARDRULE
 typedef std::vector<NATSERVICEPORTFORWARDRULE> VECNATSERVICEPF;
 typedef VECNATSERVICEPF::iterator ITERATORNATSERVICEPF;
 typedef VECNATSERVICEPF::const_iterator CITERATORNATSERVICEPF;
-
+RTVEC_DECL(Nameserver4List, RTNETADDRIPV4)
 
 /** Slirp Timer */
 typedef struct slirpTimer
@@ -258,7 +259,7 @@ private:
 
     HRESULT HandleEvent(VBoxEventType_T aEventType, IEvent *pEvent);
 
-    PCRTNETADDRIPV4 getHostNameservers();
+    struct Nameserver4List getHostNameservers();
 
     int slirpTimersAdjustTimeoutDown(int cMsTimeout);
     void slirpNotifyPollThread(const char *pszWho);
@@ -486,9 +487,6 @@ int VBoxNetSlirpNAT::init()
     if (RT_FAILURE(rc))
         return rc;
 
-    if (m_ProxyOptions.in6_enabled)
-
-
     if (m_strHome.isNotEmpty())
     {
         com::Utf8StrFmt strTftpRoot("%s%c%s", m_strHome.c_str(), RTPATH_DELIMITER, "TFTP");
@@ -692,38 +690,37 @@ int VBoxNetSlirpNAT::initIPv4()
     /*
      * IPv4 Nameservers
      */
-    PCRTNETADDRIPV4 acNameservers = getHostNameservers();
-    //populate only first entry
-    /** @todo r=jack: fix that in libslirp. */
-    if (acNameservers != NULL &&
-        !((acNameservers[0].u & RT_H2N_U32_C(IN_CLASSA_NET))
-          == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET)))
+    struct Nameserver4List vRealNameservers = getHostNameservers();
+    if (Nameserver4ListSize(&vRealNameservers) > 0)
     {
-        memcpy(&m_ProxyOptions.vnameserver, acNameservers, sizeof(RTNETADDRIPV4));
-        // m_ProxyOptions.disable_dns = true;
+        m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers));
+        if (!m_ProxyOptions.aRealNameservers)
+        {
+            reportError("Nameserver array allocation failed.\n");
+            return VERR_NO_MEMORY;
+        }
+
+        m_ProxyOptions.cRealNameservers = Nameserver4ListSize(&vRealNameservers);
+        RTNETADDRIPV4 *paDetachedRealNameservers = Nameserver4ListDetach(&vRealNameservers);
+        for (size_t i = 0; i < m_ProxyOptions.cRealNameservers; i++)
+            m_ProxyOptions.aRealNameservers[i].s_addr = RT_H2N_U32(paDetachedRealNameservers[i].u);
+
+        LogRel(("Transfered %d nameservers to NAT engine.\n", m_ProxyOptions.cRealNameservers));
     }
-    else
+    else /* (Nameserver4ListSize(&vRealNameservers) == 0) */
     {
-        if (   acNameservers
-            && (acNameservers[0].u & RT_H2N_U32_C(IN_CLASSA_NET)) == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET))
-            LogRel(("Nameserver is on 127/8 network."
-                    "Falling back to libslirp DNS proxy.\n"));
-        else
-            LogRel(("Failed to obtain IPv4 nameservers from host."
-                    "Falling back to libslirp DNS proxy.\n"));
+        LogRel(("Nameserver is either on 127/8 network or failed to obtain from host. "
+                "Falling back to libslirp DNS proxy.\n"));
 
         RTNETADDRIPV4 Nameserver4;
         Nameserver4.u = Net4.u | RT_H2N_U32_C(0x00000003);
 
         memcpy(&m_ProxyOptions.vnameserver, &Nameserver4, sizeof(in_addr));
-        LogRel(("nameserver: %u", Nameserver4.u));
+        m_ProxyOptions.cRealNameservers = 0; // Ensures libslirp uses fallback.
+        LogRel(("fallback virtual nameserver: %u", Nameserver4.u));
     }
 
-    if (acNameservers)
-    {
-        RTMemFree((PRTNETADDRIPV4)acNameservers);
-        acNameservers = NULL;
-    }
+    /** @todo r=jack: cleanup vRealNameserver */
 
     rc = fetchNatPortForwardRules(m_vecPortForwardRule4, /* :fIsIPv6 */ false);
     AssertLogRelRCReturn(rc, rc);
@@ -1315,42 +1312,44 @@ HRESULT VBoxNetSlirpNAT::HandleEvent(VBoxEventType_T aEventType, IEvent *pEvent)
 
         case VBoxEventType_OnHostNameResolutionConfigurationChange:
         {
-            PCRTNETADDRIPV4 acNameservers = getHostNameservers();
-            //populate only first entry
-            /** @todo r=jack: fix that in libslirp. */
-            if (acNameservers != NULL &&
-                !((acNameservers[0].u & RT_H2N_U32_C(IN_CLASSA_NET))
-                  == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET)))
+            struct Nameserver4List vRealNameservers = getHostNameservers();
+            if (Nameserver4ListSize(&vRealNameservers) > 0)
             {
-                memcpy(&m_ProxyOptions.vnameserver, acNameservers, sizeof(RTNETADDRIPV4));
-                slirp_set_vnameserver(m_pSlirp, m_ProxyOptions.vnameserver);
-                // m_ProxyOptions.disable_dns = true;
-                // slirp_set_disable_dns(m_pSlirp, m_ProxyOptions.disable_dns);
+                m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers));
+                if (!m_ProxyOptions.aRealNameservers)
+                {
+                    reportError("Nameserver array allocation failed.\n");
+                    return VERR_NO_MEMORY;
+                }
+
+                m_ProxyOptions.cRealNameservers = Nameserver4ListSize(&vRealNameservers);
+                slirp_set_cRealNameservers(m_pSlirp, m_ProxyOptions.cRealNameservers);
+
+                RTNETADDRIPV4 *paDetachedRealNameservers = Nameserver4ListDetach(&vRealNameservers);
+                for (size_t i = 0; i < m_ProxyOptions.cRealNameservers; i++)
+                    m_ProxyOptions.aRealNameservers[i].s_addr = RT_H2N_U32(paDetachedRealNameservers[i].u);
+
+                slirp_set_aRealNameservers(m_pSlirp, m_ProxyOptions.aRealNameservers);
+
+                LogRel(("Transfered %d nameservers to NAT engine.\n", m_ProxyOptions.cRealNameservers));
             }
-            else
+            else /* (Nameserver4ListSize(&vRealNameservers) == 0) */
             {
-                if((acNameservers[0].u & RT_H2N_U32_C(IN_CLASSA_NET))
-                    == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET))
-                    LogRel(("Nameserver is on 127/8 network."
-                            "Falling back to libslirp DNS proxy.\n"));
-                else
-                    LogRel(("Failed to obtain IPv4 nameservers from host."
-                            "Falling back to libslirp DNS proxy.\n"));
+                LogRel(("Nameserver is either on 127/8 network or failed to obtain from host. "
+                        "Falling back to libslirp DNS proxy.\n"));
 
                 RTNETADDRIPV4 Nameserver4;
                 Nameserver4.u = m_ProxyOptions.vnetwork.s_addr | RT_H2N_U32_C(0x00000003);
 
                 memcpy(&m_ProxyOptions.vnameserver, &Nameserver4, sizeof(in_addr));
+
+                // This ensures that any new DHCP requests use fallback.
+                slirp_set_cRealNameservers(m_pSlirp, 0);
+
                 slirp_set_vnameserver(m_pSlirp, m_ProxyOptions.vnameserver);
-                // m_ProxyOptions.disable_dns = false;
-                // slirp_set_disable_dns(m_pSlirp, m_ProxyOptions.disable_dns);
             }
 
-            if (acNameservers)
-            {
-                RTMemFree((PRTNETADDRIPV4)acNameservers);
-                acNameservers = NULL;
-            }
+            /** @todo r=jack: cleanup vRealNameserver */
 
             break;
         }
@@ -1392,25 +1391,27 @@ HRESULT VBoxNetSlirpNAT::HandleEvent(VBoxEventType_T aEventType, IEvent *pEvent)
  *
  * Called during initialization and in response to the
  * VBoxEventType_OnHostNameResolutionConfigurationChange event.
+ *
+ * @returns RTVEC_INITIALIZER on error (read: empty vector) and Nameserver4List vector otherwise.
+ *
+ * @note Can return a vector of size zero if only nameservers are
+ * in the 127.0.0.0/8 subnet.
  */
-PCRTNETADDRIPV4 VBoxNetSlirpNAT::getHostNameservers()
+struct Nameserver4List VBoxNetSlirpNAT::getHostNameservers()
 {
     if (m_host.isNull())
-        return NULL;
+        return RTVEC_INITIALIZER;
 
     com::SafeArray<BSTR> aRawNameservers;
     HRESULT hrc = m_host->COMGETTER(NameServers)(ComSafeArrayAsOutParam(aRawNameservers));
     if (FAILED(hrc))
-        return NULL;
+        return RTVEC_INITIALIZER;
 
     const size_t cNameservers = aRawNameservers.size();
     if (cNameservers == 0)
-        return NULL;
+        return RTVEC_INITIALIZER;
 
-    PRTNETADDRIPV4 aNameservers =
-        (PRTNETADDRIPV4)RTMemAllocZ(sizeof(RTNETADDRIPV4) * cNameservers);
-    if (aNameservers == NULL)
-        return NULL;
+    struct Nameserver4List vRealNameservers = RTVEC_INITIALIZER;
 
     size_t idx = 0;
     for (; idx < cNameservers; idx++)
@@ -1419,25 +1420,30 @@ PCRTNETADDRIPV4 VBoxNetSlirpNAT::getHostNameservers()
         int rc = RTNetStrToIPv4Addr(com::Utf8Str(aRawNameservers[idx]).c_str(), &tmpNameserver);
         if (RT_FAILURE(rc))
         {
-            LogRel(("Failed to parse IPv4 nameserver %ls\n", aNameservers[idx]));
-            return NULL;
+            LogRel(("Failed to parse IPv4 nameserver %ls\n", aRawNameservers[idx]));
+            return RTVEC_INITIALIZER;
         }
 
-        memcpy(&aNameservers[idx], &tmpNameserver, sizeof(RTNETADDRIPV4));
+        /*
+         * Checks to see if any nameservers are in 127.0.0.0/8 subnet.
+         * Skips any if found.
+         */
+        /** @todo r=jack: Make calls to loopback DNS work. */
+        if (!((tmpNameserver.u & RT_H2N_U32_C(IN_CLASSA_NET))
+            == RT_N2H_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET)))
+        {
+            PRTNETADDRIPV4 pNameserver = Nameserver4ListPushBack(&vRealNameservers);
+            if (!pNameserver)
+            {
+                reportError("Nameserver array construction failed. Out of memory.\n");
+                return RTVEC_INITIALIZER;
+            }
+
+            pNameserver->u = tmpNameserver.u;
+        }
     }
 
-    if (idx == 0)
-    {
-        RTMemFree(aNameservers);
-        return NULL;
-    }
-
-    /** @todo r=jack: fix this in libslirp. */
-    if (idx > 1)
-        LogRel(("NAT Network: More than one IPv4 nameserver detected. Due to current "
-                "libslirp limitations, only the first entry  will be provided to the guest.\n"));
-
-    return aNameservers;
+    return vRealNameservers;
 }
 
 

@@ -284,11 +284,27 @@ static void bootp_reply(Slirp *slirp,
             *q++ = 4;
             memcpy(q, &saddr.sin_addr, 4);
             q += 4;
-
+#ifdef VBOX
+            if (slirp->cRealNameservers == 0)
+            {
+                *q++ = RFC1533_DNS;
+                *q++ = 4;
+                memcpy(q, &slirp->vnameserver_addr, 4);
+                q += 4;
+            }
+            else
+            {
+                *q++ = RFC1533_DNS;
+                *q++ = 4 * slirp->cRealNameservers;
+                memcpy(q, slirp->aRealNameservers, 4 * slirp->cRealNameservers);
+                q += (4 * slirp->cRealNameservers);
+            }
+#else
             *q++ = RFC1533_DNS;
             *q++ = 4;
             memcpy(q, &slirp->vnameserver_addr, 4);
             q += 4;
+#endif
         }
 
         *q++ = RFC2132_LEASE_TIME;

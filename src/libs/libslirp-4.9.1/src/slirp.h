@@ -222,6 +222,8 @@ struct Slirp {
 #ifdef VBOX
     bool fForwardBroadcast;
     int iSoMaxConn;
+    struct in_addr *aRealNameservers;
+    size_t cRealNameservers;
 #endif
 };
 

@@ -72,6 +72,7 @@
 #include <iprt/stream.h>
 #include <iprt/time.h>
 #include <iprt/uuid.h>
+#include <iprt/vector.h>
 
 #include <iprt/asm.h>
 
@@ -95,6 +96,7 @@
 #define DRVNAT_DEFAULT_TIMEOUT (int)RT_MS_1HOUR
 #define MAX_IP_ADDRESS_STR_LEN_W_NULL 16
 #define BOOTP_FILE_MAX_LEN 127
+RTVEC_DECL(InAddrList, struct in_addr)
 
 
 /*********************************************************************************************************************************
@@ -1043,8 +1045,29 @@ static DECLCALLBACK(void) drvNATNotifyDnsChanged(PPDMINETWORKNATCONFIG pInterfac
         slirp_set_vdomainname(pNATState->pSlirp, pDnsConf->szDomainName);
 
     slirp_set_vdnssearch(pNATState->pSlirp, pDnsConf->papszSearchDomains);
-    /** @todo Convert the papszNameServers entries to IP address and tell about
-     *        the first IPv4 and IPv6 ones. */
+
+    if (pDnsConf->cNameServers > 0)
+    {
+        struct InAddrList vNameservers = RTVEC_INITIALIZER;
+        for (int i = 0; i < pDnsConf->cNameServers; i++)
+        {
+            struct in_addr *mNameserver = InAddrListPushBack(&vNameservers);
+            if (!mNameserver)
+                LogRel(("Nameserver array construction failed. Out of memory.\n"));
+
+            RTNETADDRIPV4 tmpNameserver;
+            RTNetStrToIPv4Addr(pDnsConf->papszNameServers[i], &tmpNameserver);
+            mNameserver->s_addr = tmpNameserver.u;
+        }
+
+        slirp_set_cRealNameservers(pNATState->pSlirp, InAddrListSize(&vNameservers));
+
+        struct in_addr *paDetachedNameservers = InAddrListDetach(&vNameservers);
+        // for (size_t i = 0; i < InAddrListSize(&vNameservers); i++)
+        //     paDetachedNameservers[i].s_addr = RT_H2N_U32(paDetachedNameservers[i].s_addr);
+
+        slirp_set_aRealNameservers(pNATState->pSlirp, paDetachedNameservers);
+    }
 }
 
 
@@ -1680,6 +1703,8 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
 
     slirpCfg.vdnssearch = NULL;
     slirpCfg.vdomainname = NULL;
+    slirpCfg.aRealNameservers = NULL;
+    slirpCfg.cRealNameservers = 0;
 
     /*
      * Slirp Callbacks

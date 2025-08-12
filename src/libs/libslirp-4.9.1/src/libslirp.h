@@ -211,6 +211,12 @@ typedef struct SlirpConfig {
     const char *bootfile;
     /* Start of the DHCP range */
     struct in_addr vdhcp_start;
+#ifdef VBOX
+    /* Real address(es) of nameserver(s) that will be given to guest via DHCP */
+    struct in_addr *aRealNameservers;
+    /* Count of the elements in the above array */
+    size_t cRealNameservers;
+#endif
     /* Virtual address for the DNS server exposed to the guest */
     struct in_addr vnameserver;
     /* Virtual IPv6 address for the DNS server exposed to the guest */
@@ -429,6 +435,8 @@ char *slirp_get_vdomainname(Slirp *);
 int slirp_set_vdnssearch(Slirp *, const char * const *);
 void slirp_set_vnameserver(Slirp *, struct in_addr);
 void slirp_set_disable_dns(Slirp *, bool);
+void slirp_set_aRealNameservers(Slirp *, struct in_addr *);
+void slirp_set_cRealNameservers(Slirp *, size_t);
 #endif
 
 /* Debugging support: There are two methods for enabling debugging
