@@ -383,7 +383,7 @@ static APIRET vboxSfOs2ReadDirEntries(PVBOXSFFOLDER pFolder, PVBOXSFFS pFsFsd, P
                     rc = KernCopyOut(pbData, pbToCopy, cbToCopy);
                     if (rc == NO_ERROR)
                     {
-                        Log4(("vboxSfOs2ReadDirEntries: match #%u LB %#x: '%s'\n", cMatches, cbToCopy, pEntry->name.String.utf8));
+                        Log4(("vboxSfOs2ReadDirEntries: match #%u LB %#x: '%ls'\n", cMatches, cbToCopy, &pEntry->name.String.utf16[0]));
                         Log4(("%.*Rhxd\n", cbToCopy, pbToCopy));
 
                         pbData += cbToCopy;
@@ -405,14 +405,14 @@ static APIRET vboxSfOs2ReadDirEntries(PVBOXSFFOLDER pFolder, PVBOXSFFS pFsFsd, P
             else
             {
                 /* Name conversion issue, just skip the entry. */
-                Log3(("vboxSfOs2ReadDirEntries: Skipping '%s' due to name conversion issue.\n", pEntry->name.String.utf8));
+                Log3(("vboxSfOs2ReadDirEntries: Skipping '%ls' due to name conversion issue.\n", &pEntry->name.String.utf16[0]));
                 cbData -= pbUserBufStart - pbData;
                 pbData  = pbUserBufStart;
             }
         }
         else
-            Log3(("vboxSfOs2ReadDirEntries: fMode=%#x filter out by %#x/%#x; '%s'\n",
-                  pEntry->Info.Attr.fMode, pDataBuf->fMustHaveAttribs, pDataBuf->fExcludedAttribs, pEntry->name.String.utf8));
+            Log3(("vboxSfOs2ReadDirEntries: fMode=%#x filter out by %#x/%#x; '%ls'\n",
+                  pEntry->Info.Attr.fMode, pDataBuf->fMustHaveAttribs, pDataBuf->fExcludedAttribs, &pEntry->name.String.utf16[0]));
 
         /*
          * Advance to the next directory entry from the host.

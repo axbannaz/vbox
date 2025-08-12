@@ -164,9 +164,10 @@ FS32_OPENCREATE(PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszName, LONG offCurDirEnd
                 PSFFSI pSfFsi, PVBOXSFSYFI pSfFsd, ULONG fOpenMode, USHORT fOpenFlags,
                 PUSHORT puAction, ULONG fAttribs, EAOP const *pEaOp, PUSHORT pfGenFlag)
 {
-    LogFlow(("FS32_OPENCREATE: pCdFsi=%p pCdFsd=%p pszName=%p:{%s} offCurDirEnd=%d pSfFsi=%p pSfFsd=%p fOpenMode=%#x fOpenFlags=%#x puAction=%p fAttribs=%#x pEaOp=%p pfGenFlag=%p\n",
-             pCdFsi, pCdFsd, pszName, pszName, offCurDirEnd, pSfFsi, pSfFsd, fOpenMode, fOpenFlags, puAction, fAttribs, pEaOp, pfGenFlag));
+    LogFlow(("FS32_OPENCREATE: pCdFsi=%p pCdFsd=%p pszName=%p:{%s} offCurDirEnd=%d pSfFsi=%p pSfFsd=%p fOpenMode=%#x fOpenFlags=%#x puAction=%p{%d} fAttribs=%#x pEaOp=%p pfGenFlag=%p{%d}\n",
+             pCdFsi, pCdFsd, pszName, pszName, offCurDirEnd, pSfFsi, pSfFsd, fOpenMode, fOpenFlags, puAction, *puAction, fAttribs, pEaOp, pfGenFlag, *pfGenFlag));
     RT_NOREF(pfGenFlag, pCdFsi);
+    *puAction = 0; /* set to invalid value to be on the safe side. */
 
     /*
      * Validate and convert parameters.
@@ -218,7 +219,7 @@ FS32_OPENCREATE(PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszName, LONG offCurDirEnd
     }
 
     /*
-     * Allocate request buffer and resovle the path to folder and folder relative path.
+     * Allocate request buffer and resolve the path to folder and folder relative path.
      */
     PVBOXSFFOLDER       pFolder;
     VBOXSFCREATEREQ    *pReq;
@@ -375,7 +376,7 @@ FS32_OPENCREATE(PCDFSI pCdFsi, PVBOXSFCD pCdFsd, PCSZ pszName, LONG offCurDirEnd
         rc = vboxSfOs2ConvertStatusToOs2(vrc, ERROR_PATH_NOT_FOUND);
     VbglR0PhysHeapFree(pReq);
     vboxSfOs2ReleaseFolder(pFolder);
-    LogFlow(("FS32_OPENCREATE: returns %u\n", rc));
+    LogFlow(("FS32_OPENCREATE: returns %u *puAction=%d\n", rc, *puAction));
     return rc;
 }
 
