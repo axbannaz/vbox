@@ -81,8 +81,7 @@ if   "$(SDK_VBoxLzf_INCS)" == "$(PATH_ROOT)/src/libs/liblzf-3.6" \
 endif
 
 # libslirp for NAT
-if   defined(VBOX_WITH_LIBSLIRP) \
-  && !defined(VBOX_ONLY_BUILD) \
+if   !defined(VBOX_ONLY_BUILD) \
   && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SUPPORTED_HOST_ARCHS))" != ""
  include $(PATH_SUB_CURRENT)/libslirp-4.9.1/Makefile.kmk
 endif
