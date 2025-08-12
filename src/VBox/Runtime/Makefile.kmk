@@ -3615,7 +3615,7 @@ RuntimeR0Drv_SOURCES    = \
 	common/checksum/ipv4.cpp \
 	common/checksum/ipv6.cpp \
 	common/err/RTErrConvertToErrno.cpp \
-	common/err/RTErrConvertFromErrno.cpp \
+	$(if-expr !defined(VBOX_USE_WATCOM_FOR_OS2) || "$(KBUILD_TARGET)" != "os2", common/err/RTErrConvertFromErrno.cpp,) \
 	common/err/errinfo.cpp \
 	common/log/log.cpp \
 	common/log/log-weak.cpp \
