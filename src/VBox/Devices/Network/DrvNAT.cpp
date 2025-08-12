@@ -1769,7 +1769,7 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
 /**
  * NAT network transport driver registration record.
  */
-const PDMDRVREG g_DrvNATlibslirp =
+const PDMDRVREG g_DrvNAT =
 {
     /* u32Version */
     PDM_DRVREG_VERSION,
@@ -1780,7 +1780,7 @@ const PDMDRVREG g_DrvNATlibslirp =
     /* szR0Mod */
     "",
     /* pszDescription */
-    "NATlibslrip Network Transport Driver",
+    "NAT Network Transport Driver",
     /* fFlags */
     PDM_DRVREG_FLAGS_HOST_BITS_DEFAULT,
     /* fClass. */

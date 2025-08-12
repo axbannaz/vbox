@@ -167,9 +167,6 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
  	build \
  	$(VBOX_GRAPHICS_INCS)
 
- ifndef VBOX_WITH_LIBSLIRP
-  VBoxDD_INCS           += Network/slirp
- endif
  VBoxDD_DEFS             = \
  	VBOX_HGCM_HOST_CODE \
  	$(if $(VBOX_WITH_HGCM),VBOX_WITH_HGCM,) \
@@ -573,7 +570,6 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
   	Network/DevVirtioNet.cpp
  endif
 
-
  ifdef VBOX_WITH_UDPTUNNEL
   VBoxDD_DEFS           += VBOX_WITH_UDPTUNNEL
   VBoxDD_SOURCES        += \
@@ -592,6 +588,16 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
   VBoxDD_SOURCES        += \
   	Network/DrvNetShaper.cpp
  endif
+
+ # NAT is always available
+ VBoxDD_SOURCES += \
+ 	Network/DrvNAT.cpp
+ VBoxDD_SOURCES.win += \
+ 	Network/RTWinSocketPair.cpp
+ VBoxDD_LIBS    += $(PATH_STAGE_LIB)/VBox-libslirp$(VBOX_SUFF_LIB)
+ VBoxDD_LIBS.darwin += resolv
+ Network/DrvNAT.cpp_INCS = \
+ 	$(PATH_ROOT)/src/libs/libslirp-4.9.1/include
 
  ifdef VBOX_WITH_VMNET
   VBoxDD_DEFS.darwin    += VBOX_WITH_VMNET
@@ -772,126 +778,6 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
   	Audio/DrvHostAudioPulseAudio.cpp \
   	Audio/DrvHostAudioPulseAudioStubs.cpp
  endif
-
- ifdef VBOX_WITH_LIBSLIRP
-  VBoxDD_DEFS    += VBOX_WITH_LIBSLIRP
-  VBoxDD_SOURCES += \
-  	Network/DrvNATlibslirp.cpp
-  VBoxDD_SOURCES.win += \
-  	Network/RTWinSocketPair.cpp
-  VBoxDD_LIBS    += $(PATH_STAGE_LIB)/VBox-libslirp$(VBOX_SUFF_LIB)
-  VBoxDD_LIBS.darwin += resolv
-  Network/DrvNATlibslirp.cpp_INCS = \
-  	$(PATH_ROOT)/src/libs/libslirp-4.9.1/include
-
- else  # !VBOX_WITH_LIBSLIRP
-
-  # --- WARNING! SLIRP MESS AHEAD! ;-) ---
-  VBOX_SLIRP_SOURCES = \
-  	Network/DrvNAT.cpp \
-  	Network/slirp/bootp.c \
-  	Network/slirp/debug.c \
-  	Network/slirp/ip_icmp.c \
-  	Network/slirp/ip_input.c \
-  	Network/slirp/ip_output.c \
-  	Network/slirp/misc.c \
-  	Network/slirp/sbuf.c \
-  	Network/slirp/slirp.c \
-  	Network/slirp/slirp_dns.c \
-  	Network/slirp/socket.c \
-  	Network/slirp/tcp_input.c \
-  	Network/slirp/tcp_output.c \
-  	Network/slirp/tcp_subr.c \
-  	Network/slirp/tcp_timer.c \
-  	Network/slirp/udp.c \
-  	Network/slirp/hostres.c \
-  	Network/slirp/dnsproxy/hash.c \
-  	Network/slirp/tftp.c \
-  	Network/slirp/dnsproxy/dnsproxy.c
-
-  ifeq ($(KBUILD_TARGET),win)
-   VBOX_SLIRP_SOURCES += Network/slirp/ip_icmpwin.c
-  else ifneq ($(KBUILD_TARGET),darwin)
-   # helper for debugging unprivileged
-   #  Network/slirp/ip_icmp.c_DEFS += VBOX_RAWSOCK_DEBUG_HELPER
-   #  VBOX_SLIRP_SOURCES += ../NetworkServices/NAT/getrawsock.c
-  endif
-
-  ifneq ($(KBUILD_TARGET),win)
-   VBOX_SLIRP_SOURCES += Network/slirp/resolv_conf_parser.c
-  endif
-
-  VBOX_SLIRP_BSD_ARCH = $(subst x86,i386,$(KBUILD_TARGET_ARCH))
-  VBOX_SLIRP_BSD_SOURCES += \
-  	Network/slirp/bsd/kern/kern_mbuf.c \
-  	Network/slirp/bsd/kern/uipc_mbuf.c \
-  	Network/slirp/bsd/kern/uipc_mbuf2.c \
-  	Network/slirp/bsd/$(VBOX_SLIRP_BSD_ARCH)/in_cksum.c
-  VBOX_SLIRP_ALIAS_SOURCES = \
-  	Network/slirp/libalias/alias.c \
-  	Network/slirp/libalias/alias_db.c \
-  	Network/slirp/libalias/alias_mod.c \
-  	Network/slirp/libalias/alias_proxy.c \
-  	Network/slirp/libalias/alias_ftp.c \
-  	Network/slirp/libalias/alias_nbt.c \
-  	Network/slirp/libalias/alias_util.c
-
-  # Enable VBOX_WITH_DNSMAPPING_IN_HOSTRESOLVER here for a while, then move to
-  # $(file)_DEFS or clean the code disabled with this definition.
-  VBOX_WITH_DNSMAPPING_IN_HOSTRESOLVER = 1
-
-  # dump memory related operations.
-  Network/slirp/misc.c_DEFS += $(if $(VBOX_NAT_MEM_DEBUG),VBOX_NAT_MEM_DEBUG,)
-
-  VBoxDD_SOURCES += $(VBOX_SLIRP_SOURCES)
-  define def_vbox_slirp_cflags
-   $(file)_DEFS += \
-   	$(if $(VBOX_WITH_SLIRP_MEMORY_CHECK),RTMEM_WRAP_TO_EF_APIS,) \
-   	$(if $(VBOX_WITH_DEBUG_NAT_SOCKETS),VBOX_WITH_DEBUG_NAT_SOCKETS,) \
-   	$(if $(VBOX_WITH_DNSMAPPING_IN_HOSTRESOLVER),VBOX_WITH_DNSMAPPING_IN_HOSTRESOLVER,) \
-   	$(if $(VBOX_WITH_NAT_SEND2HOME),VBOX_WITH_NAT_SEND2HOME,) \
-   	$(if $(VBOX_WITH_HIDDEN_TCPTEMPLATE),VBOX_WITH_HIDDEN_TCPTEMPLATE,) \
-   	$(if $(VBOX_WITH_SLIRP_MT),VBOX_WITH_SLIRP_MT,)
-   $(file)_INCS += \
-   	$(1)/slirp/bsd/sys \
-   	$(1)/slirp/bsd/sys/sys \
-   	$(1)/slirp/bsd/$(VBOX_SLIRP_BSD_ARCH)/include \
-   	$(1)/slirp/bsd/netinet \
-   	$(1)/slirp \
-   	$(1)/slirp/libalias
-   ifeq ($(KBUILD_TARGET),win)
-    $(file)_CFLAGS = -wd4018
-   else
-    $(file)_CFLAGS += -Wno-sign-compare -Wno-format -Wno-bad-function-cast
-   endif
-  endef
-
-  $(foreach file,$(VBOX_SLIRP_SOURCES),$(eval $(call def_vbox_slirp_cflags, Network)))
-
-  VBoxDD_SOURCES += $(VBOX_SLIRP_ALIAS_SOURCES)
-  define def_vbox_slirp_alias_cflags
-   $(file)_DEFS += VBOX_SLIRP_ALIAS \
-   	$(if $(VBOX_WITH_DEBUG_LIBALIAS),VBOX_WITH_DEBUG_LIBALIAS,)
-   $(file)_INCS += \
-   	$(1)/slirp/libalias \
-   	$(1)/slirp \
-   	$(1)/slirp/dnsproxy
-   ifneq ($(KBUILD_TARGET),win)
-    $(file)_CFLAGS += -Wno-shadow
-   endif
-  endef
-  $(foreach file,$(VBOX_SLIRP_ALIAS_SOURCES),$(eval $(call def_vbox_slirp_cflags, Network)))
-  $(foreach file,$(VBOX_SLIRP_ALIAS_SOURCES),$(eval $(call def_vbox_slirp_alias_cflags, Network)))
-
-  VBOX_SLIRP_BSD_SOURCES += $(VBOX_SLIRP_BSD_SOURCES.${KBUILD_TARGET_ARCH})
-  VBoxDD_SOURCES += $(VBOX_SLIRP_BSD_SOURCES)
-  define def_vbox_slirp_bsd_cflags
-   $(file)_DEFS += VBOX_SLIRP_BSD
-   $(file)_INCS += $(1)/slirp/dnsproxy
-  endef
-  $(foreach file,$(VBOX_SLIRP_BSD_SOURCES),$(eval $(call def_vbox_slirp_cflags, Network)))
-  $(foreach file,$(VBOX_SLIRP_BSD_SOURCES),$(eval $(call def_vbox_slirp_bsd_cflags, Network)))
- endif # !VBOX_WITH_LIBSLIRP
 
 
  # --- OS specific driver hacks. ---
