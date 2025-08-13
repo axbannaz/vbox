@@ -129,6 +129,7 @@ VBOXSTRICTRC iemMemPageTranslateAndCheckAccess(PVMCPUCC pVCpu, RTGCPTR GCPtrMem,
 }
 
 
+#ifdef IEM_WITH_DATA_TLB
 /**
  * Converts PGM_PTATTRS_XXX to IEMTLBE_F_XXX.
  */
@@ -208,6 +209,7 @@ iemMemArmPtAttrsToTlbeFlags(uint64_t const fEff, uint64_t const fInfo, uint64_t 
 
     return fTlbe;
 }
+#endif /* IEM_WITH_DATA_TLB */
 
 
 #ifdef IEM_WITH_DATA_TLB
