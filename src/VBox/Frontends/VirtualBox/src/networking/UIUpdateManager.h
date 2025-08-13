@@ -70,11 +70,11 @@ public slots:
     /** Performs forced new version check. */
     void sltForceCheck();
 
-private slots:
-
     /** Checks whether update is necessary.
       * @param  fForcedCall  Brings whether this customer has forced privelegies. */
     void sltCheckIfUpdateIsNecessary(bool fForcedCall = false);
+
+private slots:
 
     /** Handles update finishing. */
     void sltHandleUpdateFinishing();

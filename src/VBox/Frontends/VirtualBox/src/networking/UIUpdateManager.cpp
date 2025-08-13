@@ -272,12 +272,6 @@ UIUpdateManager::UIUpdateManager()
 
     /* Configure queue: */
     connect(m_pQueue, &UIExecutionQueue::sigQueueFinished, this, &UIUpdateManager::sltHandleUpdateFinishing);
-
-#ifdef VBOX_WITH_UPDATE_REQUEST
-    /* Ask updater to check for the first time, for Selector UI only: */
-    if (gEDataManager->applicationUpdateEnabled() && uiCommon().uiType() == UIType_ManagerUI)
-        QTimer::singleShot(0, this, SLOT(sltCheckIfUpdateIsNecessary()));
-#endif /* VBOX_WITH_UPDATE_REQUEST */
 }
 
 UIUpdateManager::~UIUpdateManager()

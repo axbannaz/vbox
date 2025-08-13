@@ -2438,6 +2438,12 @@ void UIVirtualBoxManager::prepare()
     if (uiCommon().argumentUrlsPresent())
         QMetaObject::invokeMethod(this, "sltHandleOpenUrlCall", Qt::QueuedConnection);
     QMetaObject::invokeMethod(this, "sltCheckUSBAccesibility", Qt::QueuedConnection);
+
+#if defined(VBOX_GUI_WITH_NETWORK_MANAGER) && defined(VBOX_WITH_UPDATE_REQUEST)
+    /* Ask updater to check for the first time: */
+    if (gEDataManager->applicationUpdateEnabled())
+        gUpdateManager->sltCheckIfUpdateIsNecessary();
+#endif /* VBOX_GUI_WITH_NETWORK_MANAGER && VBOX_WITH_UPDATE_REQUEST */
 }
 
 void UIVirtualBoxManager::prepareCloudMachineManager()
