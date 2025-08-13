@@ -210,6 +210,7 @@ iemMemArmPtAttrsToTlbeFlags(uint64_t const fEff, uint64_t const fInfo, uint64_t 
 }
 
 
+#ifdef IEM_WITH_DATA_TLB
 /**
  * Converts PGM_PTATTRS_XXX to IEMTLBE_GCPHYS_F_XXX.
  */
@@ -231,6 +232,7 @@ DECL_FORCE_INLINE(uint64_t) iemMemArmPtAttrsToGCPhysFlags(uint64_t const fEff)
 
     return fGCPhysFlags;
 }
+#endif /* IEM_WITH_DATA_TLB */
 
 
 /**
