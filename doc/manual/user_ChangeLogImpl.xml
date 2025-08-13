@@ -110,6 +110,11 @@ Rules for adding a changelog entry to make them look more uniform:
           3D acceleration is not supported on macOS hosts using Intel CPUs anymore.</para>
       </listitem>
 
+      <listitem>
+        <para>Storage: The NVMe storage controller emulation is now part of the
+          open source base package</para>
+      </listitem>
+
     </itemizedlist>
 
     <para>In addition, the following items were fixed or added:</para>
