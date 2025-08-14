@@ -333,7 +333,7 @@
     </message>
     <message>
         <source>Hold Indefinitely</source>
-        <translation>Αναμονή επί αορίστου</translation>
+        <translation>Αναμονή επ’ Αόριστον</translation>
     </message>
     <message>
         <source>Day (06:00 to 17:59)</source>
@@ -399,7 +399,7 @@
     <name>QFileDialog</name>
     <message>
         <source>Look in:</source>
-        <translation>Ψάξιμο σε :</translation>
+        <translation>Ψάξιμο σε:</translation>
     </message>
     <message>
         <source>Back</source>
@@ -427,11 +427,11 @@
     </message>
     <message>
         <source>Parent Directory</source>
-        <translation>Γονικός φάκελος</translation>
+        <translation>Γονικός Κατάλογος</translation>
     </message>
     <message>
         <source>Go to the parent directory</source>
-        <translation>Στο γονικό φάκελο</translation>
+        <translation>Μετάβαση στον γονικό κατάλογο</translation>
     </message>
     <message>
         <source>Alt+Up</source>
@@ -451,7 +451,7 @@
     </message>
     <message>
         <source>Change to list view mode</source>
-        <translation>Αλλαγή σε λειτουργία προβολής λίστα</translation>
+        <translation>Αλλαγή σε λειτουργία προβολής λίστας</translation>
     </message>
     <message>
         <source>Detail View</source>
@@ -483,7 +483,7 @@
     </message>
     <message>
         <source>Find Directory</source>
-        <translation>Εύρεση φακέλου</translation>
+        <translation>Εύρεση Καταλόγου</translation>
     </message>
     <message>
         <source>Open</source>
@@ -495,11 +495,11 @@
     </message>
     <message>
         <source>Directory:</source>
-        <translation>Φάκελος:</translation>
+        <translation>Κατάλογος:</translation>
     </message>
     <message>
         <source>File &amp;name:</source>
-        <translation>Όνομα &amp;αρχείου  :</translation>
+        <translation>Όνομα &amp;αρχείου:</translation>
     </message>
     <message>
         <source>&amp;Open</source>
@@ -515,7 +515,7 @@
     </message>
     <message>
         <source>Show </source>
-        <translation>Εμφάνιση</translation>
+        <translation>Εμφάνιση </translation>
     </message>
     <message>
         <source>&amp;Rename</source>
@@ -539,7 +539,7 @@
     </message>
     <message>
         <source>Directories</source>
-        <translation>Φάκελοι</translation>
+        <translation>Κατάλογοι</translation>
     </message>
     <message>
         <source>%1 already exists.
@@ -552,8 +552,8 @@ Do you want to replace it?</source>
 Directory not found.
 Please verify the correct directory name was given.</source>
         <translation>%1
-Αρχειοθήκη δεν βρέθηκε.
-Παρακαλώ επιβεβαιώστε οτι δόθηκε το σωστό όνομα αρχειοθήκης.</translation>
+Κατάλογος δεν βρέθηκε.
+Παρακαλώ επιβεβαιώστε οτι δόθηκε το σωστό όνομα καταλόγου.</translation>
     </message>
     <message>
         <source>%1
@@ -583,7 +583,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Could not delete directory.</source>
-        <translation>Δεν ήταν δυνατή η διαγραφή του φακέλου.</translation>
+        <translation>Δεν ήταν δυνατή η διαγραφή του καταλόγου.</translation>
     </message>
     <message>
         <source>Recent Places</source>
@@ -683,11 +683,11 @@ Do you want to delete it anyway?</source>
     <name>QIODevice</name>
     <message>
         <source>file to open is a directory</source>
-        <translation>Το αρχείο για άνοιγμα είναι αρχειοθήκη</translation>
+        <translation>Το αρχείο για άνοιγμα είναι κατάλογος</translation>
     </message>
     <message>
         <source>Unknown error</source>
-        <translation>Άγνωστο πρόβλημα</translation>
+        <translation>Άγνωστο λάθος</translation>
     </message>
     <message>
         <source>Permission denied</source>
@@ -699,7 +699,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>No such file or directory</source>
-        <translation>Δεν υπάρχει τέτοιο αρχείο ή φάκελος</translation>
+        <translation>Δεν υπάρχει τέτοιο αρχείο ή κατάλογος</translation>
     </message>
     <message>
         <source>No space left on device</source>
@@ -816,11 +816,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Temporary Directory</source>
-        <translation>Προσωρινή Αρχειοθήκη</translation>
+        <translation>Προσωρινός Κατάλογος</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>Φάκελος Χρήστη</translation>
+        <translation>Αρχικός Κατάλογος</translation>
     </message>
     <message>
         <source>Application Data</source>
@@ -1235,7 +1235,7 @@ Do you want to delete it anyway?</source>
     <name>QJsonParseError</name>
     <message>
         <source>no error occurred</source>
-        <translation>δεν δημιουργήθηκαν προβλήματα</translation>
+        <translation>δεν προέκυψε λάθος</translation>
     </message>
     <message>
         <source>unterminated object</source>
@@ -1442,7 +1442,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Invalid processing instruction name.</source>
-        <translation>άκυρο όνομα επεξεργασίας οδηγίας.</translation>
+        <translation>Άκυρο όνομα επεξεργασίας οδηγίας.</translation>
     </message>
     <message>
         <source>%1 is an invalid PUBLIC identifier.</source>
@@ -2592,19 +2592,19 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Scroll Left</source>
-        <translation>Κύλιση αριστερά</translation>
+        <translation>Κύλιση Αριστερά</translation>
     </message>
     <message>
         <source>Scroll Right</source>
-        <translation>Κύλιση δεξιά</translation>
+        <translation>Κύλιση Δεξιά</translation>
     </message>
     <message>
         <source>Scroll Up</source>
-        <translation>Κύλισε Πάνω</translation>
+        <translation>Κύλιση Πάνω</translation>
     </message>
     <message>
         <source>Scroll Down</source>
-        <translation>Κύλισε Κάτω</translation>
+        <translation>Κύλιση Κάτω</translation>
     </message>
     <message>
         <source>Previous Page</source>
@@ -2616,7 +2616,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Triggers the action</source>
-        <translation>Πυροδοτεί την δράση</translation>
+        <translation>Πυροδοτεί την ενέργεια</translation>
     </message>
     <message>
         <source>Increase the value</source>
@@ -2648,11 +2648,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Scrolls up</source>
-        <translation>Κύλισε Πάνω</translation>
+        <translation>Κύλιση πάνω</translation>
     </message>
     <message>
         <source>Scrolls down</source>
-        <translation>Κύλισε Κάτω</translation>
+        <translation>Κύλιση κάτω</translation>
     </message>
     <message>
         <source>Goes back a page</source>
@@ -2966,7 +2966,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Forward</source>
-        <translation>Επόμενο</translation>
+        <translation>Μπροστά</translation>
     </message>
     <message>
         <source>Stop</source>
@@ -3360,7 +3360,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Rotate Windows</source>
-        <translation>Εναλλαγή Windows</translation>
+        <translation>Εναλλαγή Παραθύρων</translation>
     </message>
     <message>
         <source>Rotation PB</source>
@@ -3380,7 +3380,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Spellchecker</source>
-        <translation>Ελεγκτής Ορθογραφίας</translation>
+        <translation>Ορθογραφικός Έλεγχος</translation>
     </message>
     <message>
         <source>Split Screen</source>
@@ -3508,7 +3508,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Power Down</source>
-        <translation>Τερματισμός λειτουργίας</translation>
+        <translation>Τερματισμός Λειτουργίας</translation>
     </message>
     <message>
         <source>Suspend</source>
@@ -3624,7 +3624,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>System Request</source>
-        <translation>Αίτηση συστήματος</translation>
+        <translation>Αίτηση Συστήματος</translation>
     </message>
     <message>
         <source>Select</source>
@@ -4463,7 +4463,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Close without Saving</source>
-        <translation>Κλείσιμο χωρίς αποθήκευση</translation>
+        <translation>Κλείσιμο χωρίς Αποθήκευση</translation>
     </message>
 </context>
 <context>
@@ -4731,15 +4731,15 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Proxy requires authentication</source>
-        <translation>Ο διαμεσολαβητής απαιτεί αυθεντικοποίηση</translation>
+        <translation>Ο διαμεσολαβητής απαιτεί επαλήθευση</translation>
     </message>
     <message>
         <source>Host requires authentication</source>
-        <translation>Ο διακομιστής απαιτεί αυθεντικοποίηση</translation>
+        <translation>Ο διακομιστής απαιτεί επαλήθευση</translation>
     </message>
     <message>
         <source>Data corrupted</source>
-        <translation>Διαβρωμένα δεδομένα</translation>
+        <translation>Κατεστραμμένα Δεδομένα</translation>
     </message>
     <message>
         <source>Unknown protocol specified</source>
@@ -4774,11 +4774,11 @@ Do you want to delete it anyway?</source>
     <name>QAbstractSocket</name>
     <message>
         <source>Socket operation timed out</source>
-        <translation>Η λειτουργία socket εξάντλησε το χρονικό περιθώριο</translation>
+        <translation>Η λειτουργία υποδοχής εξάντλησε το χρονικό περιθώριο</translation>
     </message>
     <message>
         <source>Operation on socket is not supported</source>
-        <translation>Η λειτουργία στο socket δεν υποστηρίζεται</translation>
+        <translation>Η λειτουργία στην υποδοχή δεν υποστηρίζεται</translation>
     </message>
     <message>
         <source>Host not found</source>
@@ -4798,7 +4798,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Socket is not connected</source>
-        <translation>Το socket δεν ειναι συνεδεμένο</translation>
+        <translation>Η υποδοχή δεν είναι συνδεδεμένη</translation>
     </message>
     <message>
         <source>Network unreachable</source>
@@ -4835,7 +4835,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Socket error on %1: %2</source>
-        <translation>Λάθος socket στο %1: %2</translation>
+        <translation>Λάθος υποδοχής στο %1: %2</translation>
     </message>
     <message>
         <source>Remote host closed the connection prematurely on %1</source>
@@ -5019,7 +5019,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Unknown error</source>
-        <translation>Άγνωστο πρόβλημα</translation>
+        <translation>Άγνωστο λάθος</translation>
     </message>
 </context>
 <context>
@@ -5034,7 +5034,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Authentication required</source>
-        <translation>Απαιτείται αυθεντικοποίηση</translation>
+        <translation>Απαιτείται επαλήθευση</translation>
     </message>
     <message>
         <source>Proxy denied connection</source>
@@ -5096,15 +5096,15 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>%1: Socket access error</source>
-        <translation>%1: Λάθος πρόσβασης socket</translation>
+        <translation>%1: Λάθος πρόσβασης υποδοχής</translation>
     </message>
     <message>
         <source>%1: Socket resource error</source>
-        <translation>%1: Λάθος πόρων socket</translation>
+        <translation>%1: Λάθος πόρων υποδοχής</translation>
     </message>
     <message>
         <source>%1: Socket operation timed out</source>
-        <translation>%1: Η λειτουργία socket εξάντλησε το χρονικό περιθώριο</translation>
+        <translation>%1: Η λειτουργία υποδοχής εξάντλησε το χρονικό περιθώριο</translation>
     </message>
     <message>
         <source>%1: Datagram too large</source>
@@ -5116,11 +5116,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>%1: The socket operation is not supported</source>
-        <translation>%1: Η λειτουργία socket δεν υποστηρίζεται</translation>
+        <translation>%1: Η λειτουργία υποδοχής δεν υποστηρίζεται</translation>
     </message>
     <message>
         <source>%1: Operation not permitted when socket is in this state</source>
-        <translation>%1: Λειτουργία δεν επιτρέπεται όταν το socket είναι σε αυτή την κατάσταση</translation>
+        <translation>%1: Λειτουργία δεν επιτρέπεται όταν η υποδοχή είναι σε αυτή την κατάσταση</translation>
     </message>
     <message>
         <source>%1: Unknown error</source>
@@ -5140,7 +5140,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Socket is not connected</source>
-        <translation>Το socket δεν ειναι συνεδεμένο</translation>
+        <translation>Η υποδοχή δεν ειναι συνεδεμένη</translation>
     </message>
     <message>
         <source>Remote closed</source>
@@ -5159,7 +5159,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Attempt to use IPv6 socket on a platform with no IPv6 support</source>
-        <translation>Προσπάθεια χρήσης IPv6 socket σε πλατφόρμα που δεν υποστηρίζει IPv6</translation>
+        <translation>Προσπάθεια χρήσης IPv6 υποδοχής σε πλατφόρμα που δεν υποστηρίζει IPv6</translation>
     </message>
     <message>
         <source>The remote host closed the connection</source>
@@ -5175,7 +5175,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Unsupported socket operation</source>
-        <translation>Μη υποστηριζόμενη εργασία socket</translation>
+        <translation>Μη υποστηριζόμενη εργασία υποδοχής</translation>
     </message>
     <message>
         <source>Protocol type not supported</source>
@@ -5183,7 +5183,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Invalid socket descriptor</source>
-        <translation>Μη έγκυρη οπεριγραφή socket</translation>
+        <translation>Μη έγκυρη περιγραφή υποδοχής</translation>
     </message>
     <message>
         <source>Host unreachable</source>
@@ -5239,7 +5239,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Another socket is already listening on the same port</source>
-        <translation>Ένα άλλο socket είναι ήδη σε κατάσταση αναμονής στη συγκεκριμένη πόρτα</translation>
+        <translation>Μία άλλη υποδοχή είναι ήδη σε κατάσταση αναμονής στη συγκεκριμένη πόρτα</translation>
     </message>
     <message>
         <source>Operation on non-socket</source>
@@ -5293,11 +5293,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Proxy authentication failed</source>
-        <translation>Η αυθεντικοποίηση στον διαμεσολαβητή απέτυχε</translation>
+        <translation>Η διαπίστευση στον διαμεσολαβητή απέτυχε</translation>
     </message>
     <message>
         <source>Proxy authentication failed: %1</source>
-        <translation>Η αυθεντικοποίηση στον διαμεσολαβητή απέτυχε: %1</translation>
+        <translation>Η διαπίστευση στον διαμεσολαβητή απέτυχε: %1</translation>
     </message>
     <message>
         <source>SOCKS version 5 protocol error</source>
@@ -5317,11 +5317,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>SOCKSv5 command not supported</source>
-        <translation>εντολή SOCKSv5 δεν υποστηρίζεται</translation>
+        <translation>Η εντολή SOCKSv5 δεν υποστηρίζεται</translation>
     </message>
     <message>
         <source>Address type not supported</source>
-        <translation>ο τύπος διεύθυνσης δεν υποστηρίζεται</translation>
+        <translation>Ο τύπος διεύθυνσης δεν υποστηρίζεται</translation>
     </message>
     <message>
         <source>Unknown SOCKSv5 proxy error code 0x%1</source>
@@ -5336,18 +5336,18 @@ Do you want to delete it anyway?</source>
     <name>QTcpServer</name>
     <message>
         <source>Operation on socket is not supported</source>
-        <translation>Η λειτουργία στο socket δεν υποστηρίζεται</translation>
+        <translation>Η λειτουργία στην υποδοχή δεν υποστηρίζεται</translation>
     </message>
 </context>
 <context>
     <name>QUdpSocket</name>
     <message>
         <source>Unable to send a datagram</source>
-        <translation>Αδυναμία αποστολής ενός datagram</translation>
+        <translation>Αδυναμία αποστολής ενός δεδομενογράμματος</translation>
     </message>
     <message>
         <source>No datagram available for reading</source>
-        <translation>Δεν υπάρχει διαθέσιμο datagram προς ανάγνωση</translation>
+        <translation>Δεν υπάρχει διαθέσιμο δεδομενόγραμμα προς ανάγνωση</translation>
     </message>
 </context>
 <context>
@@ -5378,7 +5378,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Invalid (nullptr) socket</source>
-        <translation>Μη έγκυρο (nullptr) socket</translation>
+        <translation>Μη έγκυρη (nullptr) υποδοχή</translation>
     </message>
     <message>
         <source>To start a handshake you must set peer&apos;s address and port first</source>
@@ -5386,7 +5386,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>To start a handshake, DTLS server requires non-empty datagram (client hello)</source>
-        <translation>Για την έναρξη μιας χειραψίας, ο διακομιστής DTLS απαιτεί μη-κενό datagram (hello πελάτη)</translation>
+        <translation>Για την έναρξη μιας χειραψίας, ο διακομιστής DTLS απαιτεί μη-κενό δεδομενόγραμμα (hello πελάτη)</translation>
     </message>
     <message>
         <source>Cannot start handshake, already done/in progress</source>
@@ -5394,7 +5394,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>A valid QUdpSocket and non-empty datagram are needed to continue the handshake</source>
-        <translation>Μία έγκυρη QUdpSocket και ένα μη-κενό datagram απαιτούνται για να συνεχιστεί η χειραψία</translation>
+        <translation>Μία έγκυρη QUdpSocket και ένα μη-κενό δεδομενόγραμμα απαιτούνται για να συνεχιστεί η χειραψία</translation>
     </message>
     <message>
         <source>Cannot continue handshake, not in InProgress state</source>
@@ -5414,11 +5414,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Cannot write a datagram, not in encrypted state</source>
-        <translation>Αδυναμία εγγραφής ενός datagram, όχι σε κρυπτογραφημένη κατάσταση</translation>
+        <translation>Αδυναμία εγγραφής ενός δεδομενογράμματος, όχι σε κρυπτογραφημένη κατάσταση</translation>
     </message>
     <message>
         <source>Cannot read a datagram, not in encrypted state</source>
-        <translation>Αδυναμία ανάγνωσης ενός datagram, όχι σε κρυπτογραφημένη κατάσταση</translation>
+        <translation>Αδυναμία ανάγνωσης ενός δεδομενογράμματος, όχι σε κρυπτογραφημένη κατάσταση</translation>
     </message>
     <message>
         <source>%1 failed</source>
@@ -5431,7 +5431,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Invalid protocol version, DTLS protocol expected</source>
-        <translation>Μή έγκυρη έκδοση πρωτόκολλου, DTLS πρωτόκολλο αναμένεται</translation>
+        <translation>Μη έγκυρη έκδοση πρωτόκολλου, DTLS πρωτόκολλο αναμένεται</translation>
     </message>
     <message>
         <source>BIO_ADD_new failed, cannot start handshake</source>
@@ -5560,7 +5560,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>The root CA certificate is not trusted for this purpose</source>
-        <translation>Το root πιστοποιητικό CA δεν είναι προς εμπιστοσύνη για αυτό τον σκοπό</translation>
+        <translation>Το root πιστοποιητικό CA δεν είναι προς εμπιστοσύνη για αυτόν τον σκοπό</translation>
     </message>
     <message>
         <source>The root CA certificate is marked to reject the specified purpose</source>
@@ -5652,7 +5652,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Error creating SSL context (%1)</source>
-        <translation>Πρόβλημα στη δημιουργία SSL περιεχομένου (%1)</translation>
+        <translation>Λάθος στη δημιουργία SSL περιεχομένου (%1)</translation>
     </message>
     <message>
         <source>unsupported protocol</source>
@@ -5676,11 +5676,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Error loading local certificate, %1</source>
-        <translation>Πρόβλημα κατά το φόρτωμα του πιστοποιητικού,%1</translation>
+        <translation>Λάθος κατά το φόρτωμα του πιστοποιητικού, %1</translation>
     </message>
     <message>
         <source>Error loading private key, %1</source>
-        <translation>Πρόβλημα κατά το φόρτωμα του ιδιωτικού κλειδιού,%1</translation>
+        <translation>Λάθος κατά το φόρτωμα του ιδιωτικού κλειδιού, %1</translation>
     </message>
     <message>
         <source>Private key does not certify public key, %1</source>
@@ -5724,7 +5724,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Unable to write data: %1</source>
-        <translation>Δεν ήταν δυνατή η εγγραφή των δεδομένων : %1</translation>
+        <translation>Δεν ήταν δυνατή η εγγραφή των δεδομένων: %1</translation>
     </message>
     <message>
         <source>Unable to decrypt data: %1</source>
@@ -5740,15 +5740,15 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Error while reading: %1</source>
-        <translation>Πρόβλημα στην ανάγνωση : %1</translation>
+        <translation>Πρόβλημα στην ανάγνωση: %1</translation>
     </message>
     <message>
         <source>Error creating SSL session, %1</source>
-        <translation>Πρόβλημα στη δημιουργία SSL συνεδρίας, %1</translation>
+        <translation>Λάθος στη δημιουργία SSL συνεδρίας, %1</translation>
     </message>
     <message>
         <source>Error creating SSL session: %1</source>
-        <translation>Πρόβλημα στη δημιουργία SSL συνεδρίας: %1</translation>
+        <translation>Λάθος στη δημιουργία SSL συνεδρίας: %1</translation>
     </message>
     <message>
         <source>Server-side QSslSocket does not support OCSP stapling</source>
@@ -5760,7 +5760,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Client-side sockets do not send OCSP responses</source>
-        <translation>Οι θύρες από την πλευρά του πελάτη δεν στέλνουν απαντήσεις OCSP</translation>
+        <translation>Οι υποδοχές από την πλευρά του πελάτη δεν στέλνουν απαντήσεις OCSP</translation>
     </message>
     <message>
         <source>Failed to decode OCSP response</source>
@@ -5784,7 +5784,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Error during SSL handshake: %1</source>
-        <translation>Πρόβλημα κατά την διαδικασία χειραψίας SSL : %1</translation>
+        <translation>Πρόβλημα κατά την διαδικασία χειραψίας SSL: %1</translation>
     </message>
     <message>
         <source>Insufficient memory</source>
@@ -5808,7 +5808,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>No authority could be contacted for authorization</source>
-        <translation>Δεν ήταν δυνατή επικοινωνία με καμία αρχή για πιστοποίηση</translation>
+        <translation>Δεν ήταν δυνατή η επικοινωνία με καμία αρχή για πιστοποίηση</translation>
     </message>
     <message>
         <source>No credentials</source>
@@ -5844,7 +5844,7 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>The credentials were not recognized / Invalid argument</source>
-        <translation>Τα διαπιστευτήρια δεν αναγνωρίστηκαν / Μη έγκυρο επιχείρημα</translation>
+        <translation>Τα διαπιστευτήρια δεν αναγνωρίστηκαν / Μη έγκυρες παράμετροι</translation>
     </message>
     <message>
         <source>The message was tampered with, damaged or out of sequence.</source>
@@ -5949,11 +5949,11 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>Hide Others</source>
-        <translation>Απόκρυψη άλλων</translation>
+        <translation>Απόκρυψη Άλλων</translation>
     </message>
     <message>
         <source>Show All</source>
-        <translation>Εμφάνιση όλων</translation>
+        <translation>Εμφάνιση Όλων</translation>
     </message>
     <message>
         <source>Quit %1</source>
@@ -5964,7 +5964,7 @@ Do you want to delete it anyway?</source>
     <name>QCocoaMenuItem</name>
     <message>
         <source>About</source>
-        <translation>Πληροφορίες</translation>
+        <translation>Σχετικά</translation>
     </message>
     <message>
         <source>Config</source>
@@ -6012,14 +6012,14 @@ Do you want to delete it anyway?</source>
     </message>
     <message>
         <source>About Qt</source>
-        <translation>Πληροφορίες για το Qt</translation>
+        <translation>Σχετικά με τη Qt</translation>
     </message>
 </context>
 <context>
     <name>QCocoaTheme</name>
     <message>
         <source>Don&apos;t Save</source>
-        <translation>Μην αποθηκεύσεις</translation>
+        <translation>Χωρίς Αποθήκευση</translation>
     </message>
 </context>
 <context>
@@ -6050,15 +6050,15 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     <name>QCupsPrinterSupport</name>
     <message>
         <source>Authentication Needed</source>
-        <translation>Απαιτείται αυθεντικοποίηση</translation>
+        <translation>Απαιτείται Διαπίστευση</translation>
     </message>
     <message>
         <source>Authentication needed to use %1.</source>
-        <translation>Απαιτείται αυθεντικοποίηση για τη χρήση %1.</translation>
+        <translation>Απαιτείται Διαπίστευση για τη χρήση %1.</translation>
     </message>
     <message>
         <source>Authentication needed to use %1 on %2.</source>
-        <translation>Απαιτείται αυθεντικοποίηση για τη χρήση %1 σε %2.</translation>
+        <translation>Απαιτείται Διαπίστευση για τη χρήση %1 σε %2.</translation>
     </message>
     <message>
         <source>Username:</source>
@@ -6143,11 +6143,11 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     <name>QDB2Driver</name>
     <message>
         <source>Unable to connect</source>
-        <translation>Δεν ήταν δυνατή η σύνδεση</translation>
+        <translation>Αδυναμία σύνδεσης</translation>
     </message>
     <message>
         <source>Unable to commit transaction</source>
-        <translation>Δεν ήταν δυνατή η εκτέλεση της συνδιαλλαγής</translation>
+        <translation>Αδυναμία εκτέλεσης της συνδιαλλαγής</translation>
     </message>
     <message>
         <source>Unable to rollback transaction</source>
@@ -6155,7 +6155,7 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     </message>
     <message>
         <source>Unable to set autocommit</source>
-        <translation>Δεν ήταν δυνατος ο ορισμός της αυτόματης αντιστοίχησης</translation>
+        <translation>Αδυναμία ορισμού αυτόματης εκτέλεσης συνδιαλλαγής</translation>
     </message>
 </context>
 <context>
@@ -6245,7 +6245,7 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     <name>QIBaseDriver</name>
     <message>
         <source>Error opening database</source>
-        <translation>Λάθος στο άνοιγμα της βάσης δεδομενων</translation>
+        <translation>Λάθος στο άνοιγμα της βάσης δεδομένων</translation>
     </message>
     <message>
         <source>Could not start transaction</source>
@@ -6613,7 +6613,7 @@ The minimum Direct2D version required is %1. The Direct2D version on this system
     </message>
     <message>
         <source>Unable to reset statement</source>
-        <translation>Δεν ήταν δυνατή η αρχικοποίηση της πρότασης</translation>
+        <translation>Δεν ήταν δυνατή η εκκίνηση της πρότασης</translation>
     </message>
     <message>
         <source>Unable to bind parameters</source>
@@ -6971,7 +6971,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Select Color</source>
-        <translation>Επιλέξτε χρώμα</translation>
+        <translation>Επιλογή Χρώματος</translation>
     </message>
     <message>
         <source>&amp;Basic colors</source>
@@ -6983,7 +6983,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>&amp;Add to Custom Colors</source>
-        <translation>&amp;Πρόσθεση σε ειδικά χρώματα</translation>
+        <translation>&amp;Προσθήκη στα Ειδικά Χρώματα</translation>
     </message>
     <message>
         <source>&amp;Pick Screen Color</source>
@@ -7005,7 +7005,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Debug Message:</source>
-        <translation>Μήνυμα αποσφαλμάτωσης:</translation>
+        <translation>Μήνυμα Αποσφαλμάτωσης:</translation>
     </message>
     <message>
         <source>Warning:</source>
@@ -7017,7 +7017,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Fatal Error:</source>
-        <translation>Κριτικό λάθος:</translation>
+        <translation>Θανάσιμο Λάθος:</translation>
     </message>
     <message>
         <source>Information:</source>
@@ -7036,7 +7036,7 @@ Press ESC to cancel</source>
     <name>QFontDialog</name>
     <message>
         <source>Select Font</source>
-        <translation>Επιλογή γραμματοσειράς</translation>
+        <translation>Επιλογή Γραμματοσειράς</translation>
     </message>
     <message>
         <source>&amp;Font</source>
@@ -7056,7 +7056,8 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Stri&amp;keout</source>
-        <translation>Γρά&amp;μμιση</translation>
+        <translatorcomment>Με τη χρήση γραμμής από πάνω</translatorcomment>
+        <translation>&amp;Διαγραφή</translation>
     </message>
     <message>
         <source>&amp;Underline</source>
@@ -7075,7 +7076,7 @@ Press ESC to cancel</source>
     <name>QInputDialog</name>
     <message>
         <source>Enter a value:</source>
-        <translation>Εισαγωγή τιμής:</translation>
+        <translation>Εισαγωγή μιας τιμής:</translation>
     </message>
 </context>
 <context>
@@ -7151,11 +7152,11 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Commit</source>
-        <translation>Διάπραξη</translation>
+        <translation>Εκτέλεση</translation>
     </message>
     <message>
         <source>Done</source>
-        <translation>Εντάξει</translation>
+        <translation>Έγινε</translation>
     </message>
     <message>
         <source>&amp;Finish</source>
@@ -7360,7 +7361,7 @@ Press ESC to cancel</source>
     <name>QScrollBar</name>
     <message>
         <source>Scroll here</source>
-        <translation>Κύλισε εδώ</translation>
+        <translation>Κύλιση εδώ</translation>
     </message>
     <message>
         <source>Left edge</source>
@@ -7396,37 +7397,37 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Scroll left</source>
-        <translation>Κύλισε αριστερά</translation>
+        <translation>Κύλιση αριστερά</translation>
     </message>
     <message>
         <source>Scroll up</source>
-        <translation>Κύλισε πάνω</translation>
+        <translation>Κύλιση πάνω</translation>
     </message>
     <message>
         <source>Scroll right</source>
-        <translation>Κύλισε δεξιά</translation>
+        <translation>Κύλιση δεξιά</translation>
     </message>
     <message>
         <source>Scroll down</source>
-        <translation>Κύλισε κάτω</translation>
+        <translation>Κύλιση κάτω</translation>
     </message>
 </context>
 <context>
     <name>QTabBar</name>
     <message>
         <source>Scroll Left</source>
-        <translation>Κύλιση αριστερά</translation>
+        <translation>Κύλιση Αριστερά</translation>
     </message>
     <message>
         <source>Scroll Right</source>
-        <translation>Κύλιση δεξιά</translation>
+        <translation>Κύλιση Δεξιά</translation>
     </message>
 </context>
 <context>
     <name>CloseButton</name>
     <message>
         <source>Close Tab</source>
-        <translation>Κλείσιμο καρτέλας</translation>
+        <translation>Κλείσιμο Kαρτέλας</translation>
     </message>
 </context>
 <context>
@@ -7512,15 +7513,15 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>RLI Right-to-left isolate</source>
-        <translation>RLI Δεξιά προς Αριστερά απομόνωση</translation>
+        <translation>RLI Δεξιά προς αριστερά απομόνωση</translation>
     </message>
     <message>
         <source>FSI First strong isolate</source>
-        <translation>FSI Πρώτο ισχυρό απομόνωση</translation>
+        <translation>FSI Πρώτο ισχυρή απομόνωση</translation>
     </message>
     <message>
         <source>PDI Pop directional isolate</source>
-        <translation>PDI Αναδυόμενο κατευθυντικά απομόνωση</translation>
+        <translation>PDI Αναδυόμενο κατευθυντική απομόνωση</translation>
     </message>
     <message>
         <source>Insert Unicode control character</source>
@@ -7539,7 +7540,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Error occurred while processing document type declaration</source>
-        <translation>Πρόκληση λάθους κατά την ανακοίνωση τύπου εγγράφου</translation>
+        <translation>Πρόκληση λάθους κατά την επεξεργασία του εγγράφου τύπου ανακοίνωσης</translation>
     </message>
     <message>
         <source>Error occurred while processing comment</source>
@@ -7555,7 +7556,7 @@ Press ESC to cancel</source>
     </message>
     <message>
         <source>Unexpected end element &apos;%1&apos;</source>
-        <translation>Απροσδόκητο τελικό στοιχείου &apos;%1&apos;</translation>
+        <translation>Απροσδόκητο τελικό στοιχείο &apos;%1&apos;</translation>
     </message>
     <message>
         <source>Error occurred while processing an end element</source>
