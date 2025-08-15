@@ -264,12 +264,15 @@ static void testSendPositionRel(RTTEST hTest)
     if (RT_SUCCESS(rc) && !g_drvTstMouse.pDrv)
         rc = VERR_PDM_MISSING_INTERFACE;
     RTTEST_CHECK_RC_OK(hTest, rc);
+
+    uint8_t abData[4];
     if (RT_SUCCESS(rc))
     {
         g_drvTstMouse.pDrv->pfnPutEvent(g_drvTstMouse.pDrv, 123, -16, 1, -1, 3);
         Urb.EndPt = 0x01;
         Urb.enmType = VUSBXFERTYPE_INTR;
-        Urb.cbData = 4;
+        Urb.cbData = sizeof(abData);
+        Urb.pbData = &abData[0];
         rc = g_UsbHidMou.pfnUrbQueue(pUsbIns, &Urb);
     }
     if (RT_SUCCESS(rc))
@@ -312,11 +315,13 @@ static void testSendPositionAbs(RTTEST hTest)
         else
             rc = VERR_PDM_MISSING_INTERFACE;
     }
+    uint8_t abData[8];
     if (RT_SUCCESS(rc))
     {
         Urb.EndPt = 0x01;
         Urb.enmType = VUSBXFERTYPE_INTR;
-        Urb.cbData = 8;
+        Urb.cbData = sizeof(abData);
+        Urb.pbData = &abData[0];
         rc = g_UsbHidMou.pfnUrbQueue(pUsbIns, &Urb);
     }
     if (RT_SUCCESS(rc))
