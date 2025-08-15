@@ -399,8 +399,8 @@ void UIVirtualBoxWidget::prepareWidgets()
         }
     }
 
-    /* Create notification-center: */
-    UINotificationCenter::create(this);
+    /* Reparent notification-center: */
+    gpNotificationCenter->setParent(this);
 
     /* Update toolbar finally: */
     updateToolbar();
@@ -746,8 +746,8 @@ void UIVirtualBoxWidget::cleanupConnections()
 
 void UIVirtualBoxWidget::cleanup()
 {
-    /* Destroy notification-center: */
-    UINotificationCenter::destroy();
+    /* Reparent notification-center: */
+    gpNotificationCenter->setParent(0);
 }
 
 UIGlobalToolsWidget *UIVirtualBoxWidget::globalToolsWidget() const

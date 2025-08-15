@@ -341,6 +341,8 @@ private:
       * @{ */
         /** Prepares window. */
         void prepare();
+        /** Prepares notification-center. */
+        void prepareNotificationCenter();
         /** Prepares cloud machine manager. */
         void prepareCloudMachineManager();
         /** Prepares icon. */
@@ -366,6 +368,8 @@ private:
         void cleanupMenuBar();
         /** Cleanups cloud machine manager. */
         void cleanupCloudMachineManager();
+        /** Cleanups notification-center. */
+        void cleanupNotificationCenter();
         /** Cleanups window. */
         void cleanup();
     /** @} */
