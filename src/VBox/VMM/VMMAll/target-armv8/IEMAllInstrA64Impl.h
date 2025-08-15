@@ -15120,11 +15120,25 @@
  */
 
 /* ADR  <Xd>, <label> (9f000000/10000000) */
-//#define IEM_INSTR_IMPL_A64__ADR_only_pcreladdr(Rd, immhi, immlo)
+#define IEM_INSTR_IMPL_A64__ADR_only_pcreladdr(Rd, immhi, immlo) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_PC_U64(uTmp); \
+    IEM_MC_ADD_LOCAL_U64(uTmp, (uint64_t)((int64_t)((immhi << 19) | immlo) << (64 - 20) >> (64 - 20))); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ADRP  <Xd>, <label> (9f000000/90000000) */
-//#define IEM_INSTR_IMPL_A64__ADRP_only_pcreladdr(Rd, immhi, immlo)
+#define IEM_INSTR_IMPL_A64__ADRP_only_pcreladdr(Rd, immhi, immlo) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_PC_U64(uTmp); \
+    IEM_MC_ADD_LOCAL_U64(uTmp, (uint64_t)((int64_t)((immhi << 19) | immlo) << (64 - 20) >> (64 - 20 - 12))); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 
