@@ -28,6 +28,7 @@
 /* Qt includes: */
 #include <QFileInfo>
 #include <QSet>
+#include <QStack>
 
 /* GUI includes: */
 #include "UICommon.h"
@@ -699,17 +700,34 @@ void UIMediumEnumerator::addMediaToMap(const CMediumVector &inputMedia, UIMedium
         if (uiCommon().isCleaningUp())
             break;
 
-        /* Insert UIMedium to the passed media map.
-         * Get existing one from the previous map if any.
-         * Create on the basis of comMedium otherwise. */
-        const QUuid uMediumID = comMedium.GetId();
-        const UIMedium guiMedium = m_media.contains(uMediumID)
-                                 ? m_media.value(uMediumID)
-                                 : UIMedium(comMedium, UIMediumDefs::mediumTypeToLocal(comMedium.GetDeviceType()));
-        outputMedia.insert(guiMedium.id(), guiMedium);
+        /* Compose a stack of media to enumerate: */
+        QStack<CMedium> mediaToEnumerate;
 
-        /* Insert comMedium children into map as well: */
-        addMediaToMap(comMedium.GetChildren(), outputMedia);
+        /* Initially push only iterated medium into that stack: */
+        mediaToEnumerate.push(comMedium);
+
+        /* While there are media to enumerate: */
+        while (!mediaToEnumerate.empty())
+        {
+            /* Take the top-most medium from the stack: */
+            const CMedium comMediumToEnumerate = mediaToEnumerate.pop();
+
+            /* Insert that top-most medium to the passed media map.
+             * Get existing one from the previous map if any.
+             * Create on the basis of medium being enumerated otherwise. */
+            const QUuid uMediumID = comMediumToEnumerate.GetId();
+            const UIMedium guiMedium = m_media.contains(uMediumID)
+                                     ? m_media.value(uMediumID)
+                                     : UIMedium(comMediumToEnumerate,
+                                                UIMediumDefs::mediumTypeToLocal(comMediumToEnumerate.GetDeviceType()));
+            outputMedia.insert(guiMedium.id(), guiMedium);
+
+            /* Push that top-most medium children to the stack in
+             * reverse order to process them in the correct order afterwards: */
+            const CMediumVector children = comMediumToEnumerate.GetChildren();
+            for (int i = children.size() - 1; i >= 0; --i)
+                mediaToEnumerate.push(children.at(i));
+        }
     }
 }
 
