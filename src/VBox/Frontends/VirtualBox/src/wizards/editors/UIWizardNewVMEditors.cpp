@@ -109,10 +109,10 @@ void UIUserNamePasswordGroupBox::setPassword(const QString &strPassword)
         m_pUserNamePasswordEditor->setPassword(strPassword);
 }
 
-bool UIUserNamePasswordGroupBox::isComplete()
+bool UIUserNamePasswordGroupBox::isComplete(const QString &strGuestOSFamilyId)
 {
     if (m_pUserNamePasswordEditor)
-        return m_pUserNamePasswordEditor->isComplete();
+        return m_pUserNamePasswordEditor->isComplete(strGuestOSFamilyId);
     return false;
 }
 

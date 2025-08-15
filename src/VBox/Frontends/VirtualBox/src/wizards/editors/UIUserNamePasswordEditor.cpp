@@ -29,6 +29,7 @@
 #include <QApplication>
 #include <QGridLayout>
 #include <QLabel>
+#include <QRegularExpression>
 #include <QStyle>
 #include <QVBoxLayout>
 #include <QWindow>
@@ -223,12 +224,58 @@ void UIUserNamePasswordEditor::setPassword(const QString &strPassword)
         m_pPasswordRepeatLineEdit->setText(strPassword);
 }
 
-bool UIUserNamePasswordEditor::isUserNameComplete()
+bool UIUserNamePasswordEditor::isUserNameComplete(const QString &strGuestOSFamilyId)
 {
-    bool fComplete = (m_pUserNameLineEdit && !m_pUserNameLineEdit->text().isEmpty());
-    if (m_pUserNameLineEdit)
-        m_pUserNameLineEdit->mark(!fComplete, UIUserNamePasswordEditor::tr("User name cannot be an empty string"),
+    if (!m_pUserNameLineEdit)
+        return false;
+
+    if (m_pUserNameLineEdit->text().isEmpty())
+    {
+        m_pUserNameLineEdit->mark(true, UIUserNamePasswordEditor::tr("User name cannot be an empty string"),
                                   UIUserNamePasswordEditor::tr("User name is valid"));
+        return false;
+    }
+    bool fComplete = true;
+    QString strError;
+    if (strGuestOSFamilyId.contains("windows", Qt::CaseInsensitive))
+    {
+        /* https://learn.microsoft.com/en-us/windows-hardware/customize/desktop/unattend/microsoft-windows-shell-setup-useraccounts-localaccounts-localaccount-name */
+        QRegularExpression re(R"([/\\\[\]:|<>+=;,?*%@])");
+        if (re.match(m_pUserNameLineEdit->text()).hasMatch())
+        {
+            strError = UIUserNamePasswordEditor::tr("The user name cannot contain following characters: / \\ [ ] : | < > + = ; , ? * % @");
+            fComplete = false;
+        }
+        if (m_pUserNameLineEdit->text() == "NONE")
+        {
+            strError = UIUserNamePasswordEditor::tr("The user name cannot be \'NONE\'");
+            fComplete = false;
+        }
+        /* https://learn.microsoft.com/en-us/windows/win32/adschema/a-samaccountname */
+        if (m_pUserNameLineEdit->text().length() > 20)
+        {
+            strError = UIUserNamePasswordEditor::tr("The user name cannot be longer than 20 characters");
+            fComplete = false;
+        }
+    }
+    else if (strGuestOSFamilyId.contains("linux", Qt::CaseInsensitive) ||
+             strGuestOSFamilyId.contains("mac", Qt::CaseInsensitive))
+    {
+        /* https://systemd.io/USER_NAMES/ */
+        QRegularExpression re(R"(^[a-z][a-z0-9._-]*$)");
+        if (!re.match(m_pUserNameLineEdit->text()).hasMatch())
+        {
+            strError = UIUserNamePasswordEditor::tr("The user name includes invalid characters");
+            fComplete = false;
+        }
+        if (m_pUserNameLineEdit->text().length() > 32)
+        {
+            strError = UIUserNamePasswordEditor::tr("The user name cannot be longer than 32 characters");
+            fComplete = false;
+        }
+    }
+
+    m_pUserNameLineEdit->mark(!fComplete, strError, UIUserNamePasswordEditor::tr("User name is valid"));
     return fComplete;
 }
 
@@ -247,9 +294,9 @@ bool UIUserNamePasswordEditor::isPasswordComplete()
     return fPasswordOK;
 }
 
-bool UIUserNamePasswordEditor::isComplete()
+bool UIUserNamePasswordEditor::isComplete(const QString &strGuestOSFamilyId)
 {
-    bool fUserNameField = isUserNameComplete();
+    bool fUserNameField = isUserNameComplete(strGuestOSFamilyId);
     bool fPasswordField = isPasswordComplete();
     return fUserNameField && fPasswordField;
 }
@@ -378,7 +425,6 @@ void UIUserNamePasswordEditor::sltHandlePasswordVisibility(bool fPasswordVisible
 
 void UIUserNamePasswordEditor::sltUserNameChanged()
 {
-    isUserNameComplete();
     emit sigUserNameChanged(m_pUserNameLineEdit->text());
 }
 

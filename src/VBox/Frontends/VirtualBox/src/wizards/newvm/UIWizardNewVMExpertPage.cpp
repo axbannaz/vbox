@@ -629,7 +629,7 @@ bool UIWizardNewVMExpertPage::isComplete() const
         }
         if (m_pUserNamePasswordGroupBox)
         {
-            if (!m_pUserNamePasswordGroupBox->isComplete())
+            if (!m_pUserNamePasswordGroupBox->isComplete(pWizard->guestOSFamilyId()))
             {
                 m_pToolBox->setPageTitleIcon(ExpertToolboxItems_Unattended,
                                              UIIconPool::iconSet(":/status_error_16px.png"),

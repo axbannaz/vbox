@@ -68,7 +68,7 @@ public:
 
         QString password() const;
         void setPassword(const QString &strPassword);
-        bool isComplete();
+        bool isComplete(const QString &strGuestOSFamilyId);
         void setLabelsVisible(bool fVisible);
     /** @} */
 

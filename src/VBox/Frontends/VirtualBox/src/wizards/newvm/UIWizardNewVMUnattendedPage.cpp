@@ -176,7 +176,7 @@ bool UIWizardNewVMUnattendedPage::isComplete() const
         m_pGAInstallationISOContainer &&
         !UIWizardNewVMUnattendedCommon::checkGAISOFile(m_pGAInstallationISOContainer->path()))
         return false;
-    if (m_pUserNamePasswordGroupBox && !m_pUserNamePasswordGroupBox->isComplete())
+    if (m_pUserNamePasswordGroupBox && !m_pUserNamePasswordGroupBox->isComplete(pWizard->guestOSFamilyId()))
         return false;
     if (m_pAdditionalOptionsContainer && !m_pAdditionalOptionsContainer->hostDomainNameComplete())
         return false;
