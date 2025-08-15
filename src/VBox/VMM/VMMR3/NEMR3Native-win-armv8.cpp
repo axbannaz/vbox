@@ -690,6 +690,13 @@ static int nemR3WinInitCheckCapabilities(PVM pVM, PRTERRINFO pErrInfo)
     pVM->nem.s.uCpuFeatures.u64 = Caps.ProcessorFeatures.AsUINT64;
     /** @todo RECHECK: WHV_PROCESSOR_FEATURES typedef. */
 
+    /* Check whether any variant of PAC is supported granting us access to the PAuth registers. */
+    pVM->nem.s.fPacSupported =    RT_BOOL(Caps.ProcessorFeatures.ApaBase)
+                               || RT_BOOL(Caps.ProcessorFeatures.ApaEp)
+                               || RT_BOOL(Caps.ProcessorFeatures.ApaEp2)
+                               || RT_BOOL(Caps.ProcessorFeatures.ApaEp2Fp)
+                               || RT_BOOL(Caps.ProcessorFeatures.ApaEp2Fpc);
+
     /*
      * The cache line flush size.
      */
@@ -1711,7 +1718,8 @@ NEM_TMPL_STATIC int nemHCWinCopyStateToHyperV(PVMCC pVM, PVMCPUCC pVCpu)
         ADD_SYSREG64(WHvArm64RegisterMdscrEl1, pVCpu->cpum.GstCtx.Mdscr);
     }
 
-    if (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS)
+    if (   pVM->nem.s.fPacSupported
+        && (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS))
     {
         /* PAuth registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumPAuthKeyRegs); i++)
@@ -1827,7 +1835,8 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
         aenmNames[iReg++] = WHvArm64RegisterMdscrEl1;
     }
 
-    if (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS)
+    if (   pVM->nem.s.fPacSupported
+        && (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS))
     {
         /* PAuth registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumPAuthKeyRegs); i++)
@@ -1934,7 +1943,8 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
         GET_SYSREG64(&pVCpu->cpum.GstCtx.Mdscr, WHvArm64RegisterMdscrEl1);
     }
 
-    if (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS)
+    if (   pVM->nem.s.fPacSupported
+        && (fWhat & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS))
     {
         /* PAuth registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumPAuthKeyRegs); i++)
