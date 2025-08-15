@@ -154,7 +154,7 @@ VMMR3_INT_DECL(int) HMR3Init(PVM pVM)
 
     if (fFallbackToIEM && rc == VERR_NEM_NOT_AVAILABLE)
     {
-        LogRel(("HM: HMR3Init: Falling back on IEM: NEM not available"));
+        LogRel(("HM: HMR3Init: Falling back on IEM: NEM not available\n"));
         VM_SET_MAIN_EXECUTION_ENGINE(pVM, VM_EXEC_ENGINE_IEM);
 #ifdef VBOX_WITH_PGM_NEM_MODE
         PGMR3EnableNemMode(pVM);
