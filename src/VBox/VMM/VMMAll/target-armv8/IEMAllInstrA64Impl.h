@@ -3380,27 +3380,181 @@
  */
 
 /* SBFM  <Wd>, <Wn>, #<immr>, #<imms> (ffc00000/13000000) */
-//#define IEM_INSTR_IMPL_A64__SBFM_32M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__SBFM_32M_bitfield(Rd, Rn, imms, immr) \
+    /* Same as UBFM, but the MSB of the field being moved is signed extended up. */ \
+    Assert(!(uOpcode & RT_BIT_32(22))); /* N == 1 is filtered out before we get here */ \
+    if (RT_LIKELY(((imms | immr) & RT_BIT(5)) == 0)) \
+    { \
+        uint32_t cLeftShift; \
+        uint32_t cSignedRightShift; \
+        if (imms >= immr) \
+        {   /* Move bits from imms:immr to pos 0. */ \
+            uint32_t const cBits = imms - immr + 1; \
+            cLeftShift        = 32 - immr; \
+            cSignedRightShift = 32 - cBits; \
+        } \
+        else \
+        {   /* Move bits from pos 0 to 32-immr. */ \
+            uint32_t const cBits = imms + 1; \
+            cLeftShift        = 32 - cBits; \
+            cSignedRightShift = immr - cBits; \
+        } \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint32_t, u32Tmp); \
+        IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+        IEM_MC_SHL_LOCAL_U32(u32Tmp, cLeftShift); \
+        IEM_MC_SAR_LOCAL_U32(u32Tmp, cSignedRightShift); \
+        IEM_MC_STORE_GREG_U32(Rd, u32Tmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+        IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* BFM  <Wd>, <Wn>, #<immr>, #<imms> (ffc00000/33000000) */
-//#define IEM_INSTR_IMPL_A64__BFM_32M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__BFM_32M_bitfield(Rd, Rn, imms, immr) \
+    /* Same as UBFM, but preserves destination bits. */ \
+    Assert(!(uOpcode & RT_BIT_32(22))); /* N == 1 is filtered out before we get here */ \
+    if (RT_LIKELY(((imms | immr) & RT_BIT(5)) == 0)) \
+    { \
+        uint32_t fMask; \
+        if (imms >= immr) \
+        {   /* Move bits from imms:immr to pos 0. */ \
+            uint32_t const cBits = imms - immr + 1; \
+            fMask = (uint32_t)(RT_BIT_64(cBits) - UINT64_C(1)); \
+        } \
+        else \
+        {   /* Move bits from pos 0 to 64-immr. */ \
+            fMask = RT_BIT_64(imms + 1) - UINT64_C(1); \
+            fMask = ASMRotateRightU32(fMask, immr); \
+        } \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint32_t, u32Tmp); \
+        IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+        IEM_MC_ROR_LOCAL_U32(u32Tmp, immr); \
+        IEM_MC_AND_LOCAL_U32(u32Tmp, fMask); \
+        IEM_MC_LOCAL(uint32_t, u32Tmp2); \
+        IEM_MC_FETCH_GREG_U32(u32Tmp2, Rd); \
+        IEM_MC_AND_LOCAL_U32(u32Tmp2, ~fMask); \
+        IEM_MC_OR_2LOCS_U32(u32Tmp2, u32Tmp); \
+        IEM_MC_STORE_GREG_U32(Rd, u32Tmp2); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+        IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* UBFM  <Wd>, <Wn>, #<immr>, #<imms> (ffc00000/53000000) */
-//#define IEM_INSTR_IMPL_A64__UBFM_32M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__UBFM_32M_bitfield(Rd, Rn, imms, immr) \
+    Assert(!(uOpcode & RT_BIT_32(22))); /* N == 1 is filtered out before we get here */ \
+    if (RT_LIKELY(((imms | immr) & RT_BIT(5)) == 0)) \
+    { \
+        uint32_t fMask; \
+        if (imms >= immr) \
+        {   /* Move bits from imms:immr to pos 0. */ \
+            uint32_t const cBits = imms - immr + 1; \
+            fMask = (uint32_t)(RT_BIT_64(cBits) - UINT64_C(1)); \
+        } \
+        else \
+        {   /* Move bits from pos 0 to 64-immr. */ \
+            fMask = RT_BIT_64(imms + 1) - UINT64_C(1); \
+            fMask = ASMRotateRightU32(fMask, immr); \
+        } \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint32_t, u32Tmp); \
+        IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+        IEM_MC_ROR_LOCAL_U32(u32Tmp, immr); \
+        IEM_MC_AND_LOCAL_U32(u32Tmp, fMask); \
+        IEM_MC_STORE_GREG_U32(Rd, u32Tmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+        IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* SBFM  <Xd>, <Xn>, #<immr>, #<imms> (ffc00000/93400000) */
-//#define IEM_INSTR_IMPL_A64__SBFM_64M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__SBFM_64M_bitfield(Rd, Rn, imms, immr) \
+    /* Same as UBFM, but the MSB of the field being moved is signed extended up. */ \
+    Assert(uOpcode & RT_BIT_32(22)); /* N == 0 is filtered out before we get here */ \
+    uint32_t cLeftShift; \
+    uint32_t cSignedRightShift; \
+    if (imms >= immr) \
+    {   /* Move bits from imms:immr to pos 0. */ \
+        uint32_t const cBits = imms - immr + 1; \
+        cLeftShift        = 64 - immr; \
+        cSignedRightShift = 64 - cBits; \
+    } \
+    else \
+    {   /* Move bits from pos 0 to 64-immr. */ \
+        uint32_t const cBits = imms + 1; \
+        cLeftShift        = 64 - cBits; \
+        cSignedRightShift = immr - cBits; \
+    } \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_SHL_LOCAL_U64(u64Tmp, cLeftShift); \
+    IEM_MC_SAR_LOCAL_U64(u64Tmp, cSignedRightShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* BFM  <Xd>, <Xn>, #<immr>, #<imms> (ffc00000/b3400000) */
-//#define IEM_INSTR_IMPL_A64__BFM_64M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__BFM_64M_bitfield(Rd, Rn, imms, immr) \
+    /* Same as UBFM, but preserves destination bits. */ \
+    Assert(uOpcode & RT_BIT_32(22)); /* N == 0 is filtered out before we get here */ \
+    uint64_t fMask; \
+    if (imms >= immr) \
+    {   /* Move bits from imms:immr to pos 0. */ \
+        uint32_t const cBits = imms - immr + 1; \
+        fMask = cBits >= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
+    } \
+    else \
+    {   /* Move bits from pos 0 to 64-immr. */ \
+        fMask = RT_BIT_64(imms + 1) - UINT64_C(1); \
+        fMask = ASMRotateRightU64(fMask, immr); \
+    } \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_ROR_LOCAL_U64(u64Tmp, immr); \
+    IEM_MC_AND_LOCAL_U64(u64Tmp, fMask); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp2); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp2, Rd); \
+    IEM_MC_AND_LOCAL_U64(u64Tmp2, ~fMask); \
+    IEM_MC_OR_2LOCS_U64(u64Tmp2, u64Tmp); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp2); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* UBFM  <Xd>, <Xn>, #<immr>, #<imms> (ffc00000/d3400000) */
-//#define IEM_INSTR_IMPL_A64__UBFM_64M_bitfield(Rd, Rn, imms, immr)
+#define IEM_INSTR_IMPL_A64__UBFM_64M_bitfield(Rd, Rn, imms, immr) \
+    Assert(uOpcode & RT_BIT_32(22)); /* N == 0 is filtered out before we get here */ \
+    uint64_t fMask; \
+    if (imms >= immr) \
+    {   /* Move bits from imms:immr to pos 0. */ \
+        uint32_t const cBits = imms - immr + 1; \
+        fMask = cBits >= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
+    } \
+    else \
+    {   /* Move bits from pos 0 to 64-immr. */ \
+        fMask = RT_BIT_64(imms + 1) - UINT64_C(1); \
+        fMask = ASMRotateRightU64(fMask, immr); \
+    } \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_ROR_LOCAL_U64(u64Tmp, immr); \
+    IEM_MC_AND_LOCAL_U64(u64Tmp, fMask); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
 
 
 
