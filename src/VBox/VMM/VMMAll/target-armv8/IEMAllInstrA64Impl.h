@@ -4695,19 +4695,59 @@
 
 
 /* LSLV  <Wd>, <Wn>, <Wm> (ffe0fc00/1ac02000) */
-//#define IEM_INSTR_IMPL_A64__LSLV_32_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__LSLV_32_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, u32Tmp); \
+    IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, cShift); \
+    IEM_MC_FETCH_GREG_U32(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U32(cShift, 0x1f); \
+    IEM_MC_SHL_2LOCS_U32(u32Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u32Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LSRV  <Wd>, <Wn>, <Wm> (ffe0fc00/1ac02400) */
-//#define IEM_INSTR_IMPL_A64__LSRV_32_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__LSRV_32_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, u32Tmp); \
+    IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, cShift); \
+    IEM_MC_FETCH_GREG_U32(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U32(cShift, 0x1f); \
+    IEM_MC_SHR_2LOCS_U32(u32Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u32Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ASRV  <Wd>, <Wn>, <Wm> (ffe0fc00/1ac02800) */
-//#define IEM_INSTR_IMPL_A64__ASRV_32_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__ASRV_32_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, u32Tmp); \
+    IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, cShift); \
+    IEM_MC_FETCH_GREG_U32(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U32(cShift, 0x1f); \
+    IEM_MC_SAR_2LOCS_U32(u32Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u32Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* RORV  <Wd>, <Wn>, <Wm> (ffe0fc00/1ac02c00) */
-//#define IEM_INSTR_IMPL_A64__RORV_32_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__RORV_32_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, u32Tmp); \
+    IEM_MC_FETCH_GREG_U32(u32Tmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, cShift); \
+    IEM_MC_FETCH_GREG_U32(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U32(cShift, 0x1f); \
+    IEM_MC_ROR_2LOCS_U32(u32Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u32Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CRC32B  <Wd>, <Wn>, <Wm> (ffe0fc00/1ac04000) */
@@ -4771,19 +4811,59 @@
 
 
 /* LSLV  <Xd>, <Xn>, <Xm> (ffe0fc00/9ac02000) */
-//#define IEM_INSTR_IMPL_A64__LSLV_64_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__LSLV_64_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, cShift); \
+    IEM_MC_FETCH_GREG_U64(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U64(cShift, 0x3f); \
+    IEM_MC_SHL_2LOCS_U64(u64Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LSRV  <Xd>, <Xn>, <Xm> (ffe0fc00/9ac02400) */
-//#define IEM_INSTR_IMPL_A64__LSRV_64_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__LSRV_64_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, cShift); \
+    IEM_MC_FETCH_GREG_U64(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U64(cShift, 0x3f); \
+    IEM_MC_SHR_2LOCS_U64(u64Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* ASRV  <Xd>, <Xn>, <Xm> (ffe0fc00/9ac02800) */
-//#define IEM_INSTR_IMPL_A64__ASRV_64_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__ASRV_64_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, cShift); \
+    IEM_MC_FETCH_GREG_U64(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U64(cShift, 0x3f); \
+    IEM_MC_SAR_2LOCS_U64(u64Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* RORV  <Xd>, <Xn>, <Xm> (ffe0fc00/9ac02c00) */
-//#define IEM_INSTR_IMPL_A64__RORV_64_dp_2src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__RORV_64_dp_2src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, u64Tmp); \
+    IEM_MC_FETCH_GREG_U64(u64Tmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, cShift); \
+    IEM_MC_FETCH_GREG_U64(cShift, Rm); \
+    IEM_MC_AND_LOCAL_U64(cShift, 0x3f); \
+    IEM_MC_ROR_2LOCS_U64(u64Tmp, cShift); \
+    IEM_MC_STORE_GREG_U64(Rd, u64Tmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* PACGA  <Xd>, <Xn>, <Xm|SP> (ffe0fc00/9ac03000) */
