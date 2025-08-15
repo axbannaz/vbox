@@ -343,7 +343,7 @@ DECL_FORCE_INLINE(void) iemRecalcExecDbgFlags(PVMCPUCC pVCpu)
  * @param   iReg    The register.
  * @param   fSp     Set if register 31 is SP, otherwise it's zero.
  */
-DECL_FORCE_INLINE(uint8_t) iemGRegFetchU8(PVMCPUCC pVCpu, uint8_t iReg, bool fSp) RT_NOEXCEPT
+DECL_FORCE_INLINE(uint8_t) iemGRegFetchU8(PVMCPUCC pVCpu, uint8_t iReg, bool fSp = false) RT_NOEXCEPT
 {
     Assert(iReg < 32);
     return iReg < 31 ? (uint8_t)pVCpu->cpum.GstCtx.aGRegs[iReg].w
@@ -360,7 +360,7 @@ DECL_FORCE_INLINE(uint8_t) iemGRegFetchU8(PVMCPUCC pVCpu, uint8_t iReg, bool fSp
  * @param   iReg    The register.
  * @param   fSp     Set if register 31 is SP, otherwise it's zero.
  */
-DECL_FORCE_INLINE(uint16_t) iemGRegFetchU16(PVMCPUCC pVCpu, uint8_t iReg, bool fSp) RT_NOEXCEPT
+DECL_FORCE_INLINE(uint16_t) iemGRegFetchU16(PVMCPUCC pVCpu, uint8_t iReg, bool fSp = false) RT_NOEXCEPT
 {
     Assert(iReg < 32);
     return iReg < 31 ? (uint16_t)pVCpu->cpum.GstCtx.aGRegs[iReg].w

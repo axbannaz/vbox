@@ -650,6 +650,31 @@ DECL_FORCE_INLINE(uint64_t) iemGRegFetchU64(PVMCPUCC pVCpu, uint8_t iReg) RT_NOE
 }
 
 
+#ifndef IEM_WITH_OPAQUE_DECODER_STATE
+/**
+ * Stores a 8-bit value to a general purpose register.
+ *
+ * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
+ * @param   iReg                The register.
+ * @param   bValue              The value to store.
+ */
+DECL_FORCE_INLINE(void) iemGRegStoreU8(PVMCPUCC pVCpu, uint8_t iReg, uint16_t bValue) RT_NOEXCEPT
+{
+    if (iReg < 4 || (pVCpu->iem.s.fPrefixes & (IEM_OP_PRF_REX | IEM_OP_PRF_VEX)))
+    {
+        Assert(iReg < 16);
+        pVCpu->cpum.GstCtx.aGRegs[iReg].u8 = bValue;
+    }
+    else
+    {
+        /* high 8-bit register. */
+        Assert(iReg < 8);
+        pVCpu->cpum.GstCtx.aGRegs[iReg & 3].bHi = bValue;
+    }
+}
+#endif
+
+
 /**
  * Stores a 16-bit value to a general purpose register.
  *

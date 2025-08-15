@@ -135,6 +135,11 @@
         (a_u128Dst).s.Hi = iemGRegFetchU64(pVCpu, (a_iGRegHi)); \
     } while(0)
 
+#define IEM_MC_STORE_GREG_U8(a_iGReg, a_u8Value)        iemGRegStoreU8( pVCpu, (a_iGReg), (a_u8Value))
+#define IEM_MC_STORE_GREG_U16(a_iGReg, a_u16Value)      iemGRegStoreU16(pVCpu, (a_iGReg), (a_u16Value))
+#define IEM_MC_STORE_GREG_U8_CONST                      IEM_MC_STORE_GREG_U8
+#define IEM_MC_STORE_GREG_U16_CONST                     IEM_MC_STORE_GREG_U16
+
 /** @todo these zero-extends the result, which can be a bit confusing for
  *        IEM_MC_STORE_GREG_I32... */
 #define IEM_MC_STORE_GREG_U32(a_iGReg, a_u32Value)      iemGRegStoreU32(pVCpu, (a_iGReg), (uint32_t)(a_u32Value)) /* clear high bits. */

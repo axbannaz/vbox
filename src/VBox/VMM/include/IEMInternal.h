@@ -2999,6 +2999,15 @@ typedef IEMCPU const *PCIEMCPU;
     } while (0)
 
 
+/** Helper for sign-extending an non-standard value to unsigned 32-bit. */
+#define IEM_SIGN_EXTEND_TO_U32(a_uValue, a_cSrcBits, a_cShiftLeft) \
+    ( (uint32_t)((int32_t)(a_uValue) << (32 - (a_cSrcBits)) >> (32 - (a_cSrcBits) - (a_cShiftLeft))) )
+
+/** Helper for sign-extending an non-standard value to unsigned 64-bit. */
+#define IEM_SIGN_EXTEND_TO_U64(a_uValue, a_cSrcBits, a_cShiftLeft) \
+    ( (uint64_t)((int64_t)(a_uValue) << (64 - (a_cSrcBits)) >> (64 - (a_cSrcBits) - (a_cShiftLeft))) )
+
+
 
 /** @def IEM_GET_TARGET_CPU
  * Gets the current IEMTARGETCPU value.

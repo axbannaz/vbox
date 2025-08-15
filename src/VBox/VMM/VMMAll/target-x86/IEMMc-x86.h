@@ -253,11 +253,6 @@ AssertCompile(X86_CR4_FSGSBASE > UINT8_MAX);
 #define IEM_MC_FETCH_FSW(a_u16Fsw)                      (a_u16Fsw) = pVCpu->cpum.GstCtx.XState.x87.FSW
 #define IEM_MC_FETCH_FCW(a_u16Fcw)                      (a_u16Fcw) = pVCpu->cpum.GstCtx.XState.x87.FCW
 
-#define IEM_MC_STORE_GREG_U8(a_iGReg, a_u8Value)        *iemGRegRefU8( pVCpu, (a_iGReg)) = (a_u8Value)
-#define IEM_MC_STORE_GREG_U16(a_iGReg, a_u16Value)      *iemGRegRefU16(pVCpu, (a_iGReg)) = (a_u16Value)
-#define IEM_MC_STORE_GREG_U8_CONST                      IEM_MC_STORE_GREG_U8
-#define IEM_MC_STORE_GREG_U16_CONST                     IEM_MC_STORE_GREG_U16
-
 /** @todo IEM_MC_STORE_SREG_BASE_U64 & IEM_MC_STORE_SREG_BASE_U32 aren't worth it... */
 #define IEM_MC_STORE_SREG_BASE_U64(a_iSReg, a_u64Value) do { \
         IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_SREG_FROM_IDX(a_iSReg)); \
