@@ -256,6 +256,18 @@ static int cpumR3CpuIdSanitize(PVM pVM, PCPUM pCpum, PCPUMCPUIDCONFIG pConfig, P
     {
         uint64_t uVal = pIdReg->uValue;
 
+        /* No EL3 support */
+        uVal &= ~ARMV8_ID_AA64PFR0_EL1_EL3_MASK;
+        AssertCompile(ARMV8_ID_AA64PFR0_EL1_EL3_NOT_IMPL == 0);
+
+        /* EL2 support is optional. */
+        if (pVM->cpum.s.bResetEl < ARMV8_AARCH64_EL_2)
+        {
+            uVal &= ~ARMV8_ID_AA64PFR0_EL1_EL2_MASK;
+            AssertCompile(ARMV8_ID_AA64PFR0_EL1_EL2_NOT_IMPL == 0);
+        }
+
+        /* GICv3/GICv4 */
         uint8_t uArchRev;
         int rc = CFGMR3QueryU8(pCpumCfg, "GicArchRev", &uArchRev);
         AssertRCReturn(rc, rc);
