@@ -666,7 +666,7 @@ AssertCompileSizeAlignment(VMCPU, 16384);
 /** High priority VMCPU pre-execution actions. */
 # if defined(VBOX_VMM_TARGET_ARMV8)
 #  define VMCPU_FF_HIGH_PRIORITY_PRE_MASK       (  VMCPU_FF_TIMER        | VMCPU_FF_INTERRUPT_IRQ     | VMCPU_FF_INTERRUPT_FIQ \
-                                                 | VMCPU_FF_DBGF )
+                                                 | VMCPU_FF_DBGF         | VMCPU_FF_VTIMER_ACTIVATED)
 # else
 #  define VMCPU_FF_HIGH_PRIORITY_PRE_MASK       (  VMCPU_FF_TIMER        | VMCPU_FF_INTERRUPT_APIC     | VMCPU_FF_INTERRUPT_PIC \
                                                  | VMCPU_FF_UPDATE_APIC  | VMCPU_FF_DBGF \
