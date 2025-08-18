@@ -45,12 +45,17 @@
 #include <iprt/mem.h>
 #include <iprt/ctype.h>
 #include <iprt/string.h>
+#if defined(VBOX_VMM_TARGET_ARMV8)
+# include <iprt/sort.h>
+#endif
 
 
 /*********************************************************************************************************************************
 *   Internal Functions                                                                                                           *
 *********************************************************************************************************************************/
+#ifdef VBOX_VMM_TARGET_X86
 static int cpumDbPopulateInfoFromEntry(PCPUMINFO pInfo, PCCPUMDBENTRY pEntryCore, bool fHost);
+#endif
 
 
 /*********************************************************************************************************************************
@@ -877,8 +882,10 @@ static bool cpumR3DbIsBetterIntelFam06Match(CPUMMICROARCH enmConsider, CPUMMICRO
  * X86 version of helper that picks a DB entry for the host and merges it with
  * available info in the @a pInfo structure.
  */
-static int cpumR3DbCreateHostEntry(PCPUMINFO pInfo)
+static int cpumR3DbCreateHostEntry(PVM pVM, PCPUMINFO pInfo)
 {
+    RT_NOREF(pVM);
+
     /*
      * Create a CPU database entry for the host CPU.  This means getting
      * the CPUID bits from the real CPU and grabbing the closest matching
@@ -982,16 +989,49 @@ static int cpumR3DbCreateHostEntry(PCPUMINFO pInfo)
 
 #endif /* VBOX_VMM_TARGET_X86 && (RT_ARCH_AMD64 || RT_ARCH_X86) */
 
-
+#if defined(VBOX_VMM_TARGET_ARMV8) && defined(RT_ARCH_ARM64)
 /**
- * Helper that populates the CPUMINFO structure from DB entry.
+ * ARMv8 version of helper that picks a DB entry for the host and merges it with
+ * available info in the @a pInfo structure.
+ */
+static int cpumR3DbCreateHostEntry(PVM pVM, PCPUMINFO pInfo)
+{
+    /*
+     * Iff there are no ID register values in the info structure, we ASSUME
+     * we're called before CPUMR3PopulateGuestFeaturesViaCallbacks(), so we
+     * try populate the array with info from the host.
+     */
+    if (!pInfo->paIdRegsR3)
+    {
+        /* If we've already harvested ID regs for the host, copy these. */
+        if (pVM->cpum.s.paHostIdRegsR3 && pVM->cpum.s.cHostIdRegs)
+        {
+            uint32_t const cIdRegs = pVM->cpum.s.cHostIdRegs;
+            pInfo->paIdRegsR3 = (PSUPARMSYSREGVAL)RTMemDup(pVM->cpum.s.paHostIdRegsR3, cIdRegs * sizeof(pInfo->paIdRegsR3[0]));
+            AssertLogRelReturn(pInfo->paIdRegsR3, VERR_NO_MEMORY);
+            pInfo->cIdRegs    = cIdRegs;
+        }
+        else
+        {
+            int rc = CPUMCpuIdCollectIdSysRegsFromArmV8Host(&pInfo->paIdRegsR3, &pInfo->cIdRegs);
+            AssertLogRelRCReturn(rc, rc);
+        }
+
+        /* Sort the register values to facilitate binary lookup and such. */
+        RTSortShell(pInfo->paIdRegsR3, pInfo->cIdRegs, sizeof(pInfo->paIdRegsR3[0]), cpumCpuIdSysRegValSortCmp, NULL);
+    }
+
+    return VINF_SUCCESS;
+}
+#endif /* VBOX_VMM_TARGET_ARMV8 && RT_ARCH_ARM64 */
+
+
+#ifdef VBOX_VMM_TARGET_X86
+/**
+ * X86 version of helper that populates the CPUMINFO structure from DB entry.
  */
 static int cpumDbPopulateInfoFromEntry(PCPUMINFO pInfo, PCCPUMDBENTRY pEntryCore, bool fHost)
 {
-#ifdef VBOX_VMM_TARGET_X86
-    /*
-     * X86.
-     */
     AssertReturn(pEntryCore->enmEntryType == CPUMDBENTRYTYPE_X86, VERR_INTERNAL_ERROR_3);
     PCCPUMDBENTRYX86 const pEntry = (PCCPUMDBENTRYX86)pEntryCore;
 
@@ -1051,23 +1091,57 @@ static int cpumDbPopulateInfoFromEntry(PCPUMINFO pInfo, PCCPUMDBENTRY pEntryCore
 
     pInfo->paMsrRangesR3   = paMsrs;
     pInfo->cMsrRanges      = cMsrs;
+    return VINF_SUCCESS;
+}
 
 #elif defined(VBOX_VMM_TARGET_ARMV8)
+/**
+ * ARMv8 version of helper that populates the CPUMINFO structure from DB entry.
+ */
+static int cpumDbPopulateInfoFromEntry(PCPUMINFO pInfo, PCCPUMDBENTRY pEntryCore, bool fHost, unsigned const idxVar = 0)
+{
     /*
      * ARM.
      */
     AssertReturn(pEntryCore->enmEntryType == CPUMDBENTRYTYPE_ARM, VERR_INTERNAL_ERROR_3);
     PCCPUMDBENTRYARM const pEntry = (PCCPUMDBENTRYARM)pEntryCore;
-    RT_NOREF(pInfo, pEntry, fHost);
+
+    /*
+     * Copy the CPU ID registers.
+     */
+    if (!fHost)
+    {
+        uint32_t const   cIdRegsVar = pEntry->aVariants[idxVar].cSysRegVals;
+        uint32_t const   cIdRegsCmn = pEntry->cSysRegCmnVals;
+        uint32_t const   cIdRegs    = cIdRegsCmn + cIdRegsVar;
+        PSUPARMSYSREGVAL paIdRegs   = (PSUPARMSYSREGVAL)RTMemAlloc(sizeof(paIdRegs[0]) * cIdRegs);
+        AssertReturn(paIdRegs, VERR_NO_MEMORY);
+        memcpy(&paIdRegs[0], pEntry->aVariants[idxVar].paSysRegVals, sizeof(paIdRegs[0]) * cIdRegsVar);
+        memcpy(&paIdRegs[cIdRegsVar], pEntry->paSysRegCmnVals, sizeof(paIdRegs[0]) * cIdRegsCmn);
+
+        /* Sort the register values to facilitate binary lookup and such. */
+        RTSortShell(paIdRegs, cIdRegs, sizeof(paIdRegs[0]), cpumCpuIdSysRegValSortCmp, NULL);
+
+        /*
+         * Install the raw array.
+         */
+        RTMemFree(pInfo->paIdRegsR3);
+        pInfo->paIdRegsR3 = paIdRegs;
+        pInfo->cIdRegs    = cIdRegs;
+        LogRel(("CPUM: Using CPU DB entry '%s' / '%s' (%s %s), %u ID registers\n",
+                pEntry->aVariants[idxVar].pszName, pEntry->Core.pszName, CPUMCpuVendorName(pEntry->Core.enmVendor),
+                CPUMMicroarchName(pEntry->Core.enmMicroarch), cIdRegs ));
+    }
+
+    return VINF_SUCCESS;
+}
 
 #else
 # error "port me"
 #endif
-    return VINF_SUCCESS;
-}
 
 
-int cpumR3DbGetCpuInfo(const char *pszName, PCPUMINFO pInfo)
+DECLHIDDEN(int) cpumR3DbGetCpuInfo(PVM pVM, const char *pszName, PCPUMINFO pInfo)
 {
 #ifdef VBOX_VMM_TARGET_X86
     CPUMDBENTRYTYPE const enmEntryType = CPUMDBENTRYTYPE_X86;
@@ -1086,11 +1160,11 @@ int cpumR3DbGetCpuInfo(const char *pszName, PCPUMINFO pInfo)
     if (!strcmp(pszName, "host"))
     {
 #if (defined(VBOX_VMM_TARGET_X86) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))) \
- || (defined(VBOX_VMM_TARGET_ARMV8) && defined(RT_ARCH_ARM64) && 0)
-        return cpumR3DbCreateHostEntry(pInfo);
+ || (defined(VBOX_VMM_TARGET_ARMV8) && defined(RT_ARCH_ARM64))
+        return cpumR3DbCreateHostEntry(pVM, pInfo);
 #else
         Assert(g_apCpumDbEntries[0]->enmEntryType == enmEntryType);
-        pszName = g_apCpumDbEntries[0]->pszName; /* Just pick the first entry for non-x86 hosts. */
+        pszName = g_apCpumDbEntries[0]->pszName; /* Just pick the first entry for hosts not matching the target. */
 #endif
     }
 
@@ -1098,9 +1172,20 @@ int cpumR3DbGetCpuInfo(const char *pszName, PCPUMINFO pInfo)
      * We're supposed to be emulating a specific CPU from the database.
      */
     for (unsigned i = 0; i < RT_ELEMENTS(g_apCpumDbEntries); i++)
-        if (   g_apCpumDbEntries[i]->enmEntryType == enmEntryType
-            && !strcmp(pszName, g_apCpumDbEntries[i]->pszName))
-            return cpumDbPopulateInfoFromEntry(pInfo, g_apCpumDbEntries[i], false /*fHost*/);
+        if (g_apCpumDbEntries[i]->enmEntryType == enmEntryType)
+        {
+            if (!strcmp(pszName, g_apCpumDbEntries[i]->pszName))
+                return cpumDbPopulateInfoFromEntry(pInfo, g_apCpumDbEntries[i], false /*fHost*/);
+
+#ifdef VBOX_VMM_TARGET_ARMV8
+            PCCPUMDBENTRYARM pEntryArm = (PCCPUMDBENTRYARM)g_apCpumDbEntries[i];
+            for (unsigned idxVar = 0; idxVar < pEntryArm->cVariants; idxVar++)
+                if (!strcmp(pszName, pEntryArm->aVariants[idxVar].pszName))
+                    return cpumDbPopulateInfoFromEntry(pInfo, &pEntryArm->Core, false /*fHost*/, idxVar);
+#endif
+        }
+
+    RT_NOREF(pVM);
     LogRel(("CPUM: Cannot locate any CPU by the name '%s'\n", pszName));
     return VERR_CPUM_DB_CPU_NOT_FOUND;
 }

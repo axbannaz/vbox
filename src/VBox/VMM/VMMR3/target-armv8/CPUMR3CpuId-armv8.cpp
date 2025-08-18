@@ -747,6 +747,7 @@ static int cpumCpuIdSetupMpIdr(PVM pVM)
 }
 
 
+#ifdef RT_ARCH_ARM64
 /**
  * Populate guest feature ID registers.
  *
@@ -841,45 +842,10 @@ VMMR3_INT_DECL(int) CPUMR3PopulateGuestFeaturesViaCallbacks(PVM pVM, PVMCPU pVCp
         pVM->cpum.s.GuestInfo.cIdRegs    = cIdRegs;
         LogRel(("CPUM: %u guest ID registers\n", cIdRegs));
 
-#if 0
         /*
-         * Get the guest CPU data from the database and/or the host.
-         *
-         * The CPUID and MSRs are currently living on the regular heap to avoid
-         * fragmenting the hyper heap (and because there isn't/wasn't any realloc
-         * API for the hyper heap).  This means special cleanup considerations.
+         * Do the common CPU ID register intialization.
          */
-        rc = cpumR3DbGetCpuInfo(Config.szCpuName, &pCpum->GuestInfo);
-        if (RT_FAILURE(rc))
-            return rc == VERR_CPUM_DB_CPU_NOT_FOUND
-                 ? VMSetError(pVM, rc, RT_SRC_POS,
-                              "Info on guest CPU '%s' could not be found. Please, select a different CPU.", Config.szCpuName)
-                 : rc;
-#endif
-
-        /*
-         * The multiprocessor affinity register, MPIDR_EL1, may need setup and
-         * extra per-CPU copies.
-         */
-        rc = cpumCpuIdSetupMpIdr(pVM);
-        AssertRCReturn(rc, rc);
-
-        /*
-         * Pre-explode the CPU ID register info (ignore errors).
-         */
-        CPUMCpuIdExplodeFeaturesArmV8(paIdRegs, cIdRegs, &pVM->cpum.s.GuestFeatures);
-
-        /*
-         * Sanitize the cpuid information passed on to the guest.
-         */
-        rc = cpumR3CpuIdSanitize(pVM, &pVM->cpum.s, &Config, pCpumCfg);
-        AssertLogRelRCReturn(rc, rc);
-
-        /*
-         * Explode the sanitized CPU ID register info.
-         */
-        rc = CPUMCpuIdExplodeFeaturesArmV8(pVM->cpum.s.GuestInfo.paIdRegsR3, pVM->cpum.s.GuestInfo.cIdRegs,
-                                           &pVM->cpum.s.GuestFeatures);
+        rc = cpumR3InitCpuId(pVM);
         AssertLogRelRCReturn(rc, rc);
     }
 
@@ -935,6 +901,69 @@ VMMR3_INT_DECL(int) CPUMR3PopulateGuestFeaturesViaCallbacks(PVM pVM, PVMCPU pVCp
             iOvrd += 1;
     }
     return rcRet;
+}
+#endif /* RT_ARCH_ARM64 */
+
+
+/**
+ * Initalies the ARM system ID registers and features.
+ *
+ * This is either called via cpumR3InitTarget (exec engine == IEM) or via
+ * CPUMR3PopulateGuestFeaturesViaCallbacks (exec engine == NEM).  In the former
+ * case, the paIdRegsR3/cIdRegs pair is NULL/0, while it should be non-zero in
+ * the latter.
+ *
+ * @returns VBox status code.
+ * @param   pVM         The cross context VM structure.
+ */
+DECLHIDDEN(int) cpumR3InitCpuId(PVM pVM)
+{
+    /*
+     * Read the configuration.
+     */
+    PCFGMNODE const pCpumCfg = CFGMR3GetChild(CFGMR3GetRoot(pVM), "CPUM");
+    CPUMCPUIDCONFIG Config;
+    RT_ZERO(Config);
+
+    int rc = cpumR3CpuIdReadConfig(pVM, &Config, pCpumCfg);
+    AssertRCReturn(rc, rc);
+
+    /*
+     * Get the guest CPU data from the database and/or the host.
+     */
+    rc = cpumR3DbGetCpuInfo(pVM, Config.szCpuName, &pVM->cpum.s.GuestInfo);
+    if (RT_FAILURE(rc))
+        return rc == VERR_CPUM_DB_CPU_NOT_FOUND
+             ? VMSetError(pVM, rc, RT_SRC_POS,
+                          "Info on guest CPU '%s' could not be found. Please, select a different CPU.", Config.szCpuName)
+             : rc;
+
+    /*
+     * The multiprocessor affinity register, MPIDR_EL1, may need setup and
+     * extra per-CPU copies.
+     */
+    rc = cpumCpuIdSetupMpIdr(pVM);
+    AssertRCReturn(rc, rc);
+
+    /*
+     * Pre-explode the CPU ID register info (ignore errors).
+     */
+    CPUMCpuIdExplodeFeaturesArmV8(pVM->cpum.s.GuestInfo.paIdRegsR3, pVM->cpum.s.GuestInfo.cIdRegs, &pVM->cpum.s.GuestFeatures);
+
+    /*
+     * Sanitize the cpuid information passed on to the guest.
+     */
+    rc = cpumR3CpuIdSanitize(pVM, &pVM->cpum.s, &Config, pCpumCfg);
+    AssertLogRelRCReturn(rc, rc);
+
+    /*
+     * Explode the sanitized CPU ID register info.
+     */
+    rc = CPUMCpuIdExplodeFeaturesArmV8(pVM->cpum.s.GuestInfo.paIdRegsR3, pVM->cpum.s.GuestInfo.cIdRegs,
+                                       &pVM->cpum.s.GuestFeatures);
+    AssertLogRelRCReturn(rc, rc);
+
+    return VINF_SUCCESS;
 }
 
 
