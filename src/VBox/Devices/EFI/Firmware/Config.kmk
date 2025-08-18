@@ -141,6 +141,7 @@ if "$(VBOX_VCC_TOOL_STEM)" >= "VCC143"
 endif
 
 TEMPLATE_VBoxEfiBldProg_CFLAGS.linux  = $(TEMPLATE_VBoxBldProg_CFLAGS.linux)
+TEMPLATE_VBoxEfiBldProg_CFLAGS.linux += -std=gnu11                     # Newer gcc versions default to C23 which the ancient code base doesn't support, so set to C11
 TEMPLATE_VBoxEfiBldProg_CFLAGS.linux += -Wno-misleading-indentation
 TEMPLATE_VBoxEfiBldProg_CFLAGS.linux += -Wno-error=stringop-truncation # VfrCompile/Pccts/antlr/mrhoist.c:2216:5: error: 'strncpy' specified bound 50 equals destination size
 
