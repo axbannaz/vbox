@@ -81,7 +81,8 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
-        <para></para>
+        <para>macOS host: Fixed internal networking, including NAT networks on macOS
+          (7.2.0 regression; issue github:gh-140)</para>
       </listitem>
 
     </itemizedlist>

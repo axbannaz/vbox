@@ -5813,7 +5813,6 @@ static void intnetR0TrunkIfDestroy(PINTNETTRUNKIF pThis, PINTNETNETWORK pNetwork
  */
 static int intnetR0NetworkCreateTrunkIf(PINTNETNETWORK pNetwork, PSUPDRVSESSION pSession)
 {
-#if defined(IN_RING0) || defined(LOG_ENABLED)
     const char *pszName;
     switch (pNetwork->enmTrunkType)
     {
@@ -5854,7 +5853,6 @@ static int intnetR0NetworkCreateTrunkIf(PINTNETNETWORK pNetwork, PSUPDRVSESSION 
             break;
 # endif
     }
-#endif /* IN_RING0 || LOG_ENABLED */
 
     /*
      * Allocate the trunk interface and associated destination tables.
