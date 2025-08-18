@@ -497,14 +497,17 @@ static void intnetR3RequestProcess(xpc_connection_t hCon, xpc_object_t hObj, PSU
                     rc = IntNetR0IfGetBufferPtrsReq(pSession, &ReqReply.IfGetBufferPtrsReq);
                     /* This is special as we need to return a shared memory segment. */
                     xpc_object_t hObjReply = xpc_dictionary_create_reply(hObj);
-                    xpc_object_t hObjShMem = xpc_shmem_create(ReqReply.IfGetBufferPtrsReq.pRing3Buf, ReqReply.IfGetBufferPtrsReq.pRing3Buf->cbBuf);
-                    if (hObjShMem)
+                    if (RT_SUCCESS(rc))
                     {
-                        xpc_dictionary_set_value(hObjReply, "buf-ptr", hObjShMem);
-                        xpc_release(hObjShMem);
+                        xpc_object_t hObjShMem = xpc_shmem_create(ReqReply.IfGetBufferPtrsReq.pRing3Buf, ReqReply.IfGetBufferPtrsReq.pRing3Buf->cbBuf);
+                        if (hObjShMem)
+                        {
+                            xpc_dictionary_set_value(hObjReply, "buf-ptr", hObjShMem);
+                            xpc_release(hObjShMem);
+                        }
+                        else
+                            rc = VERR_NO_MEMORY;
                     }
-                    else
-                        rc = VERR_NO_MEMORY;
 
                     xpc_dictionary_set_uint64(hObjReply, "rc", INTNET_R3_SVC_SET_RC(rc));
                     xpc_connection_send_message(hCon, hObjReply);
