@@ -475,6 +475,8 @@ static int vmR3HaltMethod12ReadConfigU(PUVM pUVM)
     pUVM->vm.s.Halt.Method12.u32StopSpinningCfg     =   2*1000000;
 #endif
 
+    pUVM->vm.s.Halt.Method12.cSemWaitNsMin          = RTSemEventGetResolution();
+
     /*
      * Query overrides.
      *
@@ -635,19 +637,19 @@ static DECLCALLBACK(int) vmR3HaltMethod1Halt(PUVMCPU pUVCpu, const uint64_t fMas
             const uint64_t Start = pUVCpu->vm.s.Halt.Method12.u64LastBlockTS = RTTimeNanoTS();
             VMMR3YieldStop(pVM);
 
-            uint32_t cMilliSecs = RT_MIN(u64NanoTS / RT_NS_1MS, 15);
-            if (cMilliSecs <= pUVCpu->vm.s.Halt.Method12.cNSBlockedTooLongAvg / RT_NS_1MS)
-                cMilliSecs = 1;
+            uint64_t cNanoSecs = u64NanoTS;
+            if (cNanoSecs <= pUVCpu->vm.s.Halt.Method12.cNSBlockedTooLongAvg)
+                cNanoSecs = pUVM->vm.s.Halt.Method12.cSemWaitNsMin;
             else
-                cMilliSecs -= pUVCpu->vm.s.Halt.Method12.cNSBlockedTooLongAvg / RT_NS_1MS;
+                cNanoSecs -= pUVCpu->vm.s.Halt.Method12.cNSBlockedTooLongAvg;
 
-            //RTLogRelPrintf("u64NanoTS=%RI64 cLoops=%3d sleep %02dms (%7RU64) ", u64NanoTS, cLoops, cMilliSecs, u64NanoTS);
+            //RTLogRelPrintf("u64NanoTS=%RI64 cLoops=%3d sleep %08dns (%7RU64) ", u64NanoTS, cLoops, cNanoSecs, u64NanoTS);
             uint64_t const u64StartSchedHalt   = RTTimeNanoTS();
-            rc = RTSemEventWait(pUVCpu->vm.s.EventSemWait, cMilliSecs);
+            rc = RTSemEventWaitEx(pUVCpu->vm.s.EventSemWait, RTSEMWAIT_FLAGS_RELATIVE | RTSEMWAIT_FLAGS_NANOSECS | RTSEMWAIT_FLAGS_NORESUME, cNanoSecs);
             uint64_t const cNsElapsedSchedHalt = RTTimeNanoTS() - u64StartSchedHalt;
             STAM_REL_PROFILE_ADD_PERIOD(&pUVCpu->vm.s.StatHaltBlock, cNsElapsedSchedHalt);
 
-            if (rc == VERR_TIMEOUT)
+            if (rc == VERR_TIMEOUT || rc == VERR_INTERRUPTED)
                 rc = VINF_SUCCESS;
             else if (RT_FAILURE(rc))
             {

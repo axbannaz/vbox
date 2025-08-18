@@ -2335,21 +2335,6 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
 
                 uint64_t cTicksVTimerToExpire = pVCpu->cpum.GstCtx.CntvCValEl0 - cTicksVTimer;
                 uint64_t cNanoSecsVTimerToExpire = ASMMultU64ByU32DivByU32(cTicksVTimerToExpire, RT_NS_1SEC, (uint32_t)pVM->nem.s.u64CntFrqHz);
-
-                /*
-                 * Our halt method doesn't work with sub millisecond granularity at the moment causing a huge slowdown
-                 * + scheduling overhead which would increase the wakeup latency.
-                 * So only halt when the threshold is exceeded (needs more experimentation but 5ms turned out to be a good compromise
-                 * between CPU load when the guest is idle and performance).
-                 */
-                if (cNanoSecsVTimerToExpire < 2 * RT_NS_1MS)
-                {
-                    LogFlowFunc(("Guest timer expiration < 2ms (cNanoSecsVTimerToExpire=%RU64) => VINF_SUCCESS\n",
-                                 cNanoSecsVTimerToExpire));
-                    pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
-                    return VINF_SUCCESS;
-                }
-
                 LogFlowFunc(("Set vTimer activation to cNanoSecsVTimerToExpire=%#RX64 (CntvCValEl0=%#RX64, u64VTimerOff=%#RX64 cTicksVTimer=%#RX64 u64CntFrqHz=%#RX64)\n",
                              cNanoSecsVTimerToExpire, pVCpu->cpum.GstCtx.CntvCValEl0, pVM->nem.s.u64VTimerOff, cTicksVTimer, pVM->nem.s.u64CntFrqHz));
                 TMCpuSetVTimerNextActivation(pVCpu, cNanoSecsVTimerToExpire);
