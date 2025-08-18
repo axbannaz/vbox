@@ -1065,15 +1065,33 @@ static DECLCALLBACK(void) drvNATNotifyDnsChanged(PPDMINETWORKNATCONFIG pInterfac
 
             RTNETADDRIPV4 tmpNameserver;
             RTNetStrToIPv4Addr(pDnsConf->papszNameServers[i], &tmpNameserver);
-            mNameserver->s_addr = tmpNameserver.u;
+
+            if (!((tmpNameserver.u & RT_H2N_U32_C(IN_CLASSA_NET))
+                == RT_H2N_U32_C(INADDR_LOOPBACK & IN_CLASSA_NET)))
+            {
+                mNameserver->s_addr = tmpNameserver.u;
+                LogRelMax(256, ("NAT DNS Update: Stored %u as nameserver #%u\n", tmpNameserver.u, i));
+            }
+        }
+
+        if (InAddrListSize(&vNameservers) == 0)
+        {
+            LogRel(("Nameserver is either on 127/8 network or failed to obtain from host. "
+                    "Falling back to libslirp DNS proxy.\n"));
+
+            struct in_addr mProxyNameserver;
+            mProxyNameserver.s_addr = slirp_get_vnetwork_addr(pNATState->pSlirp).s_addr | RT_H2N_U32_C(0x00000003);
+
+            slirp_set_vnameserver(pNATState->pSlirp, mProxyNameserver);
+            slirp_set_cRealNameservers(pNATState->pSlirp, 0); // Ensures libslirp uses fallback.
+
+            LogRel(("fallback virtual nameserver: %u", mProxyNameserver.s_addr));
         }
 
         slirp_set_cRealNameservers(pNATState->pSlirp, InAddrListSize(&vNameservers));
+        LogRelMax(256, ("NAT DNS Update: Stored %u total nameservers\n", InAddrListSize(&vNameservers)));
 
         struct in_addr *paDetachedNameservers = InAddrListDetach(&vNameservers);
-        // for (size_t i = 0; i < InAddrListSize(&vNameservers); i++)
-        //     paDetachedNameservers[i].s_addr = RT_H2N_U32(paDetachedNameservers[i].s_addr);
-
         slirp_set_aRealNameservers(pNATState->pSlirp, paDetachedNameservers);
     }
 }

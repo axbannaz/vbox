@@ -1741,6 +1741,11 @@ void slirp_send_packet_all(Slirp *slirp, const void *buf, size_t len)
 
 #ifdef VBOX
 
+struct in_addr slirp_get_vnetwork_addr(Slirp *pSlirp)
+{
+    return pSlirp->vnetwork_addr;
+}
+
 char *slirp_set_vdomainname(Slirp *pSlirp, const char *vdomainname)
 {
     pSlirp->vdomainname = g_strdup(vdomainname);

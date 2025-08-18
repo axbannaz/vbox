@@ -430,6 +430,7 @@ SLIRP_EXPORT
 const char *slirp_version_string(void);
 
 #ifdef VBOX
+struct in_addr slirp_get_vnetwork_addr(Slirp *);
 char *slirp_set_vdomainname(Slirp *, char const *);
 char *slirp_get_vdomainname(Slirp *);
 int slirp_set_vdnssearch(Slirp *, const char * const *);
