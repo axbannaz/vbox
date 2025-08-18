@@ -676,6 +676,16 @@ typedef struct NEMCPU
     STAMCOUNTER                 StatImportOnReturn;
     STAMCOUNTER                 StatImportOnReturnSkipped;
     STAMCOUNTER                 StatQueryCpuTick;
+# ifdef VBOX_VMM_TARGET_ARMV8
+    STAMCOUNTER                 StatExitCanceled;
+    STAMCOUNTER                 StatExitVTimerActivated;
+    STAMCOUNTER                 StatExitExcpDataAbort;
+    STAMCOUNTER                 StatExitExcpSysInsn;
+    STAMCOUNTER                 StatExitExcpHvcSmcInsn;
+    STAMCOUNTER                 StatExitExcpWfxInsn;
+    STAMCOUNTER                 StatExitExcpBrkInsn;
+    STAMCOUNTER                 StatExitExcpSsFromLowerEl;
+#endif
 # ifdef VBOX_WITH_STATISTICS
     STAMPROFILEADV              StatProfGstStateImport;
     STAMPROFILEADV              StatProfGstStateExport;

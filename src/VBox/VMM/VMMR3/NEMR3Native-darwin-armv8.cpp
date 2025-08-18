@@ -1321,7 +1321,15 @@ static int nemR3DarwinStatisticsRegister(PVM pVM, VMCPUID idCpu, PNEMCPU pNemCpu
            NEM_REG_STAT(a_pVar, STAMTYPE_PROFILE, STAMVISIBILITY_USED, STAMUNIT_TICKS_PER_CALL, a_szNmFmt, a_szDesc)
 #define NEM_REG_COUNTER(a, b, desc) NEM_REG_STAT(a, STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, b, desc)
 
-    NEM_REG_COUNTER(&pNemCpu->StatExitAll, "/NEM/CPU%u/Exit/All", "Total exits (including nested-guest exits).");
+    NEM_REG_COUNTER(&pNemCpu->StatExitAll,               "/NEM/CPU%u/Exit/All",             "Total exits (including nested-guest exits).");
+    NEM_REG_COUNTER(&pNemCpu->StatExitCanceled,          "/NEM/CPU%u/Exit/Canceled",        "Exits caused by poking EMT");
+    NEM_REG_COUNTER(&pNemCpu->StatExitVTimerActivated,   "/NEM/CPU%u/Exit/VTimerActivated", "The VTimer activated and an interrupt needs to be injected.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpDataAbort,     "/NEM/CPU%u/Exit/ExcpDataAbort",   "Exception - Data Abort (usually MMIO accesses)");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSysInsn,       "/NEM/CPU%u/Exit/ExcpSysInsn",     "Exception - system register read/write.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpHvcSmcInsn,    "/NEM/CPU%u/Exit/HvcSmcInsn",      "Exception - HVC/SMC instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpWfxInsn,       "/NEM/CPU%u/Exit/WFxInsn",         "Exception - WFx instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpBrkInsn,       "/NEM/CPU%u/Exit/BrkInsn",         "Exception - BRK instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSsFromLowerEl, "/NEM/CPU%u/Exit/SsFromLowerEl",   "Exception - Single Step exception from lower EL.");
 
     return VINF_SUCCESS;
 
@@ -1919,6 +1927,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
 
     RT_NOREF(fL2Fault, GCPtrDataAbrt);
 
+    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbort);
+
     if (fWrite)
     {
         /*
@@ -2116,6 +2126,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedSysInsn(PVM pVM, PVMCPU
     LogFlowFunc(("fRead=%RTbool uCRm=%u uReg=%u uCRn=%u uOp1=%u uOp2=%u uOp0=%u idSysReg=%#x\n",
                  fRead, uCRm, uReg, uCRn, uOp1, uOp2, uOp0, idSysReg));
 
+    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSysInsn);
+
     /** @todo EMEXITTYPE_MSR_READ/EMEXITTYPE_MSR_WRITE are misnomers. */
     EMHistoryAddExit(pVCpu,
                      fRead
@@ -2165,6 +2177,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedHvcInsn(PVM pVM, PVMCPU
 {
     uint16_t u16Imm = ARMV8_EC_ISS_AARCH64_TRAPPED_HVC_INSN_IMM_GET(uIss);
     LogFlowFunc(("u16Imm=%#RX16\n", u16Imm));
+
+    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpHvcSmcInsn);
 
 #if 0 /** @todo For later */
     EMHistoryAddExit(pVCpu,
@@ -2294,6 +2308,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
             return nemR3DarwinHandleExitExceptionTrappedHvcInsn(pVM, pVCpu, uIss, true);
         case ARMV8_ESR_EL2_EC_TRAPPED_WFX:
         {
+            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpWfxInsn);
+
             /* No need to halt if there is an interrupt pending already. */
             if (VMCPU_FF_IS_ANY_SET(pVCpu, (VMCPU_FF_INTERRUPT_IRQ | VMCPU_FF_INTERRUPT_FIQ)))
             {
@@ -2346,6 +2362,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
         }
         case ARMV8_ESR_EL2_EC_AARCH64_BRK_INSN:
         {
+            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpBrkInsn);
+
             VBOXSTRICTRC rcStrict = DBGFTrap03Handler(pVCpu->CTX_SUFF(pVM), pVCpu, &pVCpu->cpum.GstCtx);
             /** @todo Forward genuine guest traps to the guest by either single stepping instruction with debug exception trapping turned off
              * or create instruction interpreter and inject exception ourselves. */
@@ -2353,7 +2371,10 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
             return rcStrict;
         }
         case ARMV8_ESR_EL2_SS_EXCEPTION_FROM_LOWER_EL:
+        {
+            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSsFromLowerEl);
             return VINF_EM_DBG_STEPPED;
+        }
         case ARMV8_ESR_EL2_EC_UNKNOWN:
         default:
             LogRel(("NEM/Darwin: Unknown Exception Class in syndrome: uEc=%u{%s} uIss=%#RX32 fInsn32Bit=%RTbool\n",
@@ -2391,11 +2412,16 @@ static VBOXSTRICTRC nemR3DarwinHandleExit(PVM pVM, PVMCPU pVCpu)
     switch (pExit->reason)
     {
         case HV_EXIT_REASON_CANCELED:
+        {
+            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
             return VINF_EM_RAW_INTERRUPT;
+        }
         case HV_EXIT_REASON_EXCEPTION:
             return nemR3DarwinHandleExitException(pVM, pVCpu, pExit);
         case HV_EXIT_REASON_VTIMER_ACTIVATED:
         {
+            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitVTimerActivated);
+
             LogFlowFunc(("vTimer got activated\n"));
             TMCpuSetVTimerNextActivation(pVCpu, UINT64_MAX);
             pVCpu->nem.s.fVTimerActivated = true;
