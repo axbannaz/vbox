@@ -465,8 +465,14 @@ static int Usage(const char *argv0)
 "    The base address. Default: 0\n"
 "  --max-bytes|-b <bytes>\n"
 "    The maximum number of bytes to disassemble. Default: 1GB\n"
+"  --arch|-A <arch>\n"
+"    The CPU architecture to disassemble for:\n"
+"        - aarch64, arm64, a64:                64-bit ARM\n"
+"        - amd64, x86-64, x86_64:              64-bit x86\n"
+"        - x86, x86-32, 386, 80386:            32-bit x86 (default)\n"
+"        - x86-16, 8086, 8088, 80186, 80286:   16-bit x86\n"
 "  --cpumode|-c <16|32|64>\n"
-"    The cpu mode. Default: 32\n"
+"    The x86 cpu mode. Deprecated, use --arch instead. Default: 32\n"
 "  --listing|-l, --no-listing|-L\n"
 "    Enables or disables listing mode. Default: --no-listing\n"
 "  --offset|-o <offset>\n"
@@ -475,6 +481,10 @@ static int Usage(const char *argv0)
 "    The assembly output style. Default: default\n"
 "  --undef-op|-u <fail|all|db|32>\n"
 "    How to treat undefined opcodes. Default: fail\n"
+"\n"
+"Note! When in 64-bit ARM mode, it is possible to specify 32-bit instruction\n"
+"      words in the -x byte list when using the 0x prefix (must be followed\n"
+"      by at least 3 hex digits and no more than 8).\n"
              , argv0, argv0, argv0);
     return 1;
 }
@@ -533,7 +543,9 @@ int main(int argc, char **argv)
                          || strcmp(ValueUnion.psz, "x64") == 0)
                     enmCpuMode = DISCPUMODE_64BIT;
                 else if (   strcmp(ValueUnion.psz, "x86-32") == 0
-                         || strcmp(ValueUnion.psz, "x86") == 0)
+                         || strcmp(ValueUnion.psz, "x86") == 0
+                         || strcmp(ValueUnion.psz, "386") == 0
+                         || strcmp(ValueUnion.psz, "80386") == 0)
                     enmCpuMode = DISCPUMODE_32BIT;
                 else if (   strcmp(ValueUnion.psz, "x86-16") == 0
                          || strcmp(ValueUnion.psz, "80286") == 0
@@ -642,8 +654,11 @@ int main(int argc, char **argv)
          * Convert the remaining arguments from a hex byte string into
          * a buffer that we disassemble.
          */
-        size_t      cb = 0;
-        uint8_t    *pb = NULL;
+        bool const  fConsider32BitWords = enmCpuMode == DISCPUMODE_ARMV8_A64
+                                       || enmCpuMode == DISCPUMODE_ARMV8_A32;
+        size_t      cbAlloc = 0;
+        size_t      cb      = 0;
+        uint8_t    *pb      = NULL;
         for ( ; iArg < argc; iArg++)
         {
             char ch2;
@@ -663,6 +678,41 @@ int main(int argc, char **argv)
                 {
                     psz += 2;
                     ch2 = *psz;
+
+                    /* If the architecture is arm, we consider 0x12345678 a 32-bit word
+                       rather than the bytes 0x12, 0x34, 0x56 and 0x78.  Unfortunately,
+                       it's difficult to treat 12345678 as the same without causing
+                       confusion. */
+                    if (fConsider32BitWords)
+                    {
+                        uint32_t uValue   = 0;
+                        uint32_t cXDigits = 0;
+                        while (RT_C_IS_XDIGIT(psz[cXDigits]))
+                        {
+                            uValue <<= 4;
+                            uValue  |= HexDigitToNum(psz[cXDigits]);
+                            cXDigits++;
+                        }
+                        if (cXDigits > 2 && cXDigits <= 8)
+                        {
+                            if (cb + 4 > cbAlloc)
+                            {
+                                cbAlloc += 64;
+                                pb = (uint8_t *)RTMemRealloc(pb, cbAlloc);
+                                if (!pb)
+                                {
+                                    RTPrintf("%s: error: RTMemRealloc failed\n", argv[0]);
+                                    return 1;
+                                }
+                            }
+                            pb[cb++] = RT_BYTE1(uValue);
+                            pb[cb++] = RT_BYTE2(uValue);
+                            pb[cb++] = RT_BYTE3(uValue);
+                            pb[cb++] = RT_BYTE4(uValue);
+                            psz += cXDigits;
+                            continue;
+                        }
+                    }
                 }
 
                 if (!ch2)
@@ -681,9 +731,10 @@ int main(int argc, char **argv)
                 }
 
                 /* add the byte */
-                if (!(cb % 4 /*64*/))
+                if (cb + 1 > cbAlloc)
                 {
-                    pb = (uint8_t *)RTMemRealloc(pb, cb + 64);
+                    cbAlloc += 64;
+                    pb = (uint8_t *)RTMemRealloc(pb, cbAlloc);
                     if (!pb)
                     {
                         RTPrintf("%s: error: RTMemRealloc failed\n", argv[0]);
