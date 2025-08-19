@@ -111,7 +111,7 @@ endif
 
 # Note: en_US *must* come first for the dependency file generation.
 ifndef VBOX_INSTALLER_LANGUAGES
- VBOX_INSTALLER_LANGUAGES   = en_US de_DE el_GR fr_FR it_IT tr_TR zh_TW zh_CN
+ VBOX_INSTALLER_LANGUAGES   = en_US de_DE ru_RU el_GR fr_FR it_IT tr_TR zh_TW zh_CN
  VBOX_INSTALLER_LANGUAGES  += $(VBOX_INSTALLER_ADD_LANGUAGES)
 endif
 
@@ -153,6 +153,7 @@ endif
 #
 VBOX_BRAND_en_US_LANG_ID ?= 1033
 VBOX_BRAND_de_DE_LANG_ID ?= 1031
+VBOX_BRAND_ru_RU_LANG_ID ?= 1049
 VBOX_BRAND_el_GR_LANG_ID ?= 1032
 VBOX_BRAND_fa_IR_LANG_ID ?= 1065
 VBOX_BRAND_fr_FR_LANG_ID ?= 1036
