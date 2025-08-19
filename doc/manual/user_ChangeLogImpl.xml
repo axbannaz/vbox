@@ -82,15 +82,21 @@ Rules for adding a changelog entry to make them look more uniform:
 
       <listitem>
         <para>Arm hosts: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
+      </listitem>
 
+      <listitem>
         <para>macOS host: Fixed internal networking, including NAT networks on macOS
           (7.2.0 regression; issue github:gh-140)</para>
+      </listitem>
 
+      <listitem>
         <para>NAT DNS: Fixed potential issue where a nameserver in the 127/8 network
           could have been passed to the guest (issue github:gh:136)</para>
       </listitem>
 
-      <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
+      <listitem>
+        <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
+      </listitem>
 
     </itemizedlist>
   </sect1>
