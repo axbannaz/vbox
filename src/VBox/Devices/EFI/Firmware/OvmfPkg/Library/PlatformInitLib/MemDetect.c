@@ -1400,7 +1400,8 @@ PlatformQemuInitializeRam (
   IN EFI_HOB_PLATFORM_INFO  *PlatformInfoHob
   )
 {
-  UINT64                      UpperMemorySize;
+  UINT64 UpperMemorySize;
+  UINT64 TpmPpiBase;
 
   DEBUG ((EFI_D_INFO, "%a called\n", __FUNCTION__));
 
@@ -1449,6 +1450,22 @@ PlatformQemuInitializeRam (
     PlatformAddMemoryBaseSizeHob (BASE_4GB, UpperMemorySize);
 
     MtrrSetMemoryAttribute (BASE_4GB, UpperMemorySize, CacheWriteBack);
+  }
+
+  //
+  // Set the memory range for the TPM as uncacheable if existing or it might be added as a writeback range
+  // in Linux guests when parsing the OperationRegion() in vbox-tpm.dsl because there is no existing
+  // entry. This would upset the TPM driver trying to map the MMIO region as it expects an uncachable
+  // range.
+  //
+  GetVmVariable(EFI_INFO_INDEX_TPM_PPI_BASE, (CHAR8 *)&TpmPpiBase, sizeof(TpmPpiBase));
+  if (TpmPpiBase != 0)
+  {
+      EFI_STATUS Status;
+
+      // This ASSUMES that the TPM PPI base comes right after the TPM MMIO area
+      Status = MtrrSetMemoryAttribute (TpmPpiBase - 0x5000, 0x5000, CacheUncacheable);
+      ASSERT_EFI_ERROR (Status);
   }
 }
 #endif

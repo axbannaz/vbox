@@ -90,6 +90,8 @@ Rules for adding a changelog entry to make them look more uniform:
           could have been passed to the guest (issue github:gh:136)</para>
       </listitem>
 
+      <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
+
     </itemizedlist>
   </sect1>
 
