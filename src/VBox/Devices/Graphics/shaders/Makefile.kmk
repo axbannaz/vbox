@@ -35,6 +35,15 @@ OTHERS_CLEAN  += \
 	$(PATH_SUB_CURRENT)/d3d11blitter.hlsl.vs.h \
 	$(PATH_SUB_CURRENT)/d3d11blitter.hlsl.ps.h
 
+OTHERS        += \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.vs.h \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps.h \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps_SRGB.h
+OTHERS_CLEAN  += \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.vs.h \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps.h \
+	$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps_SRGB.h
+
 VBOX_FXC ?= $(PATH_SDK_$(VBOX_WINPSDK)_BIN)/fxc.exe
 
 $(PATH_SUB_CURRENT)/d3d11blitter.hlsl.vs.h: \
@@ -46,5 +55,20 @@ $(PATH_SUB_CURRENT)/d3d11blitter.hlsl.ps.h: \
 		$(PATH_SUB_CURRENT)/Makefile.kmk \
 		$(PATH_SUB_CURRENT)/d3d11blitter.hlsl
 	$(VBOX_FXC) /nologo /Fhd3d11blitter.hlsl.ps.h /Eps_blitter /Tps_5_0 d3d11blitter.hlsl
+
+$(PATH_SUB_CURRENT)/d3d11screen.hlsl.vs.h: \
+		$(PATH_SUB_CURRENT)/Makefile.kmk \
+		$(PATH_SUB_CURRENT)/d3d11screen.hlsl
+	$(VBOX_FXC) /nologo /Fhd3d11screen.hlsl.vs.h /Evs_screen /Tvs_5_0 d3d11screen.hlsl
+
+$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps.h: \
+		$(PATH_SUB_CURRENT)/Makefile.kmk \
+		$(PATH_SUB_CURRENT)/d3d11screen.hlsl
+	$(VBOX_FXC) /nologo /Fhd3d11screen.hlsl.ps.h /Eps_screen /Tps_5_0 d3d11screen.hlsl
+
+$(PATH_SUB_CURRENT)/d3d11screen.hlsl.ps_SRGB.h: \
+		$(PATH_SUB_CURRENT)/Makefile.kmk \
+		$(PATH_SUB_CURRENT)/d3d11screen.hlsl
+	$(VBOX_FXC) /nologo /Fhd3d11screen.hlsl.ps_SRGB.h /Eps_screen_SRGB /Tps_5_0 d3d11screen.hlsl
 
 include $(FILE_KBUILD_SUB_FOOTER)
