@@ -1452,16 +1452,16 @@ DIS_ARMV8_DECODE_MAP_DEFINE_BEGIN(DecodeL0)
     DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                             /* Unallocated */
     DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                             /** @todo SVE */
     DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                             /* Unallocated */
-    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo),                          /* Load/Stores. */
+    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo_Bit26_0),                  /* Load/Stores, op1=0 (bit 26, VR). */
     DIS_ARMV8_DECODE_MAP_ENTRY(LogicalAddSubReg),                   /* Data processing (register) (see op1 in C4.1.68). */
-    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo),                          /* Load/Stores. */
+    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo_Bit26_1),                  /* Load/Stores, op1=1 (bit 26, VR). */
     DIS_ARMV8_DECODE_MAP_ENTRY(DataProcSimdFpBit28_0),              /* Data processing (SIMD & FP) (op0<0> 0) */
     DIS_ARMV8_DECODE_MAP_ENTRY(DataProcessingImm),                  /* Data processing (immediate). */
     DIS_ARMV8_DECODE_MAP_ENTRY(DataProcessingImm),                  /* Data processing (immediate). */
     DIS_ARMV8_DECODE_MAP_ENTRY(BrExcpSys),                          /* Branches / Exception generation and system instructions. */
     DIS_ARMV8_DECODE_MAP_ENTRY(BrExcpSys),                          /* Branches / Exception generation and system instructions. */
-    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo),                          /* Load/Stores. */
+    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo_Bit26_0),                  /* Load/Stores, op1=0 (bit 26, VR). */
     DIS_ARMV8_DECODE_MAP_ENTRY(DataProcReg),                        /* Data processing (register) (see op1 in C4.1.68). */
-    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo),                          /* Load/Stores. */
+    DIS_ARMV8_DECODE_MAP_ENTRY(LdStOp0Lo_Bit26_1),                  /* Load/Stores, op1=1 (bit 26, VR). */
     DIS_ARMV8_DECODE_MAP_ENTRY(DataProcSimdFpBit28_1)               /* Data processing (SIMD & FP) (op0<0> 1). */
 DIS_ARMV8_DECODE_MAP_DEFINE_END_NON_STATIC(DecodeL0, RT_BIT_32(25) | RT_BIT_32(26) | RT_BIT_32(27) | RT_BIT_32(28), 25);
