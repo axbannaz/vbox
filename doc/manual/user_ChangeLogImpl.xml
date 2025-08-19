@@ -85,6 +85,9 @@ Rules for adding a changelog entry to make them look more uniform:
 
         <para>macOS host: Fixed internal networking, including NAT networks on macOS
           (7.2.0 regression; issue github:gh-140)</para>
+
+        <para>NAT DNS: Fixed potential issue where a nameserver in the 127/8 network
+          could have been passed to the guest (issue github:gh:136)</para>
       </listitem>
 
     </itemizedlist>
