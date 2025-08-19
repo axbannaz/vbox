@@ -107,6 +107,9 @@
 /** ASSUMES the source variable not used after this statement. */
 #define IEM_MC_ASSIGN_TO_SMALLER(a_VarDst, a_VarSrcEol) (a_VarDst) = (a_VarSrcEol)
 
+/*
+ * General purpose register accessors.
+ */
 #define IEM_MC_FETCH_GREG_U8(a_u8Dst, a_iGReg)          (a_u8Dst)  = iemGRegFetchU8(pVCpu, (a_iGReg))
 #define IEM_MC_FETCH_GREG_U8_ZX_U16(a_u16Dst, a_iGReg)  (a_u16Dst) = iemGRegFetchU8(pVCpu, (a_iGReg))
 #define IEM_MC_FETCH_GREG_U8_ZX_U32(a_u32Dst, a_iGReg)  (a_u32Dst) = iemGRegFetchU8(pVCpu, (a_iGReg))
@@ -189,6 +192,18 @@
         *pu64Reg = (uint32_t)((uint32_t)*pu64Reg - (a_u8Const)); \
     } while (0)
 #define IEM_MC_SUB_GREG_U64(a_iGReg, a_u8Const)          *iemGRegRefU64(pVCpu, (a_iGReg)) -= (a_u8Const)
+
+
+/*
+ * FPU/SIMD/++ register accessors.
+ */
+#define IEM_MC_FETCH_FREG_U8(  a_u8Dst, a_iFpReg)       (a_u8Dst)  = iemFRegFetchU16(pVCpu, (a_iFpReg))
+#define IEM_MC_FETCH_FREG_U16(a_u16Dst, a_iFpReg)       (a_u16Dst) = iemFRegFetchU16(pVCpu, (a_iFpReg))
+#define IEM_MC_FETCH_FREG_U32(a_u32Dst, a_iFpReg)       (a_u32Dst) = iemFRegFetchU32(pVCpu, (a_iFpReg))
+#define IEM_MC_FETCH_FREG_U64(a_u64Dst, a_iFpReg)       (a_u64Dst) = iemFRegFetchU64(pVCpu, (a_iFpReg))
+#define IEM_MC_FETCH_FREG_U128(a_u128Dst, a_iFpReg)     iemFRegFetchU128(pVCpu, (a_iFpReg), &(a_u128Dst))
+
+
 #define IEM_MC_SUB_LOCAL_U32(a_u32Value, a_u32Const)    do { (a_u32Value) -= (a_u32Const); } while (0)
 #define IEM_MC_SUB_LOCAL_U64(a_u64Value, a_u64Const)    do { (a_u64Value) -= (a_u64Const); } while (0)
 

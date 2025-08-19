@@ -1060,6 +1060,8 @@ static void *iemMemMapSafeJmp(PVMCPUCC pVCpu, uint8_t *pbUnmapInfo, size_t cbMem
 #define TMPL_MEM_FMT_DESC       "qword"
 #include "IEMAllMemRWTmpl-armv8.cpp.h"
 
+#define TMPL_MEM_BY_REF
+
 #define TMPL_MEM_TYPE           RTUINT128U
 #define TMPL_MEM_FN_SUFF        U128
 #define TMPL_MEM_FMT_TYPE       "%.16Rhxs"
@@ -1075,7 +1077,7 @@ static void *iemMemMapSafeJmp(PVMCPUCC pVCpu, uint8_t *pbUnmapInfo, size_t cbMem
 #include "IEMAllMemRWTmpl-armv8.cpp.h"
 
 #undef  TMPL_MEM_NO_PAIR
-
+#undef  TMPL_MEM_BY_REF
 
 #if 0 /** @todo ARM: more memory stuff... */
 /**

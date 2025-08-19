@@ -2752,7 +2752,6 @@ iemRegRipNearReturnAndFinishNoFlags(PVMCPUCC pVCpu, uint8_t cbInstr, uint16_t cb
 /** @}  */
 
 
-#if 0 /** @todo go over this later */
 
 /** @name   FPU access and helpers.
  *
@@ -2769,38 +2768,7 @@ iemRegRipNearReturnAndFinishNoFlags(PVMCPUCC pVCpu, uint8_t cbInstr, uint16_t cb
  */
 DECLINLINE(void) iemFpuPrepareUsage(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
-#ifdef IN_RING3
-    CPUMSetChangedFlags(pVCpu, CPUM_CHANGED_FPU_REM);
-#else
-    CPUMRZFpuStatePrepareHostCpuForUse(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
-}
-
-
-/**
- * Hook for preparing to use the host FPU for SSE.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuPrepareUsageSse(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-    iemFpuPrepareUsage(pVCpu);
-}
-
-
-/**
- * Hook for preparing to use the host FPU for AVX.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuPrepareUsageAvx(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-    iemFpuPrepareUsage(pVCpu);
+    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
 }
 
 
@@ -2813,12 +2781,7 @@ DECLINLINE(void) iemFpuPrepareUsageAvx(PVMCPUCC pVCpu) RT_NOEXCEPT
  */
 DECLINLINE(void) iemFpuActualizeStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
-#ifdef IN_RING3
-    NOREF(pVCpu);
-#else
-    CPUMRZFpuStateActualizeForRead(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
+    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
 }
 
 
@@ -2831,364 +2794,91 @@ DECLINLINE(void) iemFpuActualizeStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
  */
 DECLINLINE(void) iemFpuActualizeStateForChange(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
-#ifdef IN_RING3
-    CPUMSetChangedFlags(pVCpu, CPUM_CHANGED_FPU_REM);
+    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
+}
+
+
+/**
+ * Fetches a register from the extension (floating point, SIMD) register bank
+ * as 128-bit unsigned int.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   pu128Value  Where to store the value.
+ */
+DECL_FORCE_INLINE(void) iemFRegFetchU128(PVMCPUCC pVCpu, uint8_t iReg, PRTUINT128U pu128Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    *pu128Value = pVCpu->cpum.GstCtx.aVRegs[iReg].v;
+}
+
+
+/**
+ * Fetches a register from the extension (floating point, SIMD) register bank
+ * as 64-bit unsigned int.
+ *
+ * @returns The register value.
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ */
+DECL_FORCE_INLINE(uint64_t) iemFRegFetchU64(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.QWords.qw0;
+}
+
+
+/**
+ * Fetches a register from the extension (floating point, SIMD) register bank
+ * as 32-bit unsigned int.
+ *
+ * @returns The register value.
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ */
+DECL_FORCE_INLINE(uint32_t) iemFRegFetchU32(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.DWords.dw0;
+}
+
+
+/**
+ * Fetches a register from the extension (floating point, SIMD) register bank
+ * as 16-bit unsigned int.
+ *
+ * @returns The register value.
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ */
+DECL_FORCE_INLINE(uint16_t) iemFRegFetchU16(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.Words.w0;
+}
+
+
+/**
+ * Fetches a register from the extension (floating point, SIMD) register bank
+ * as 8-bit unsigned int.
+ *
+ * @returns The register value.
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ */
+DECL_FORCE_INLINE(uint8_t) iemFRegFetchU8(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+#ifdef RT_BIG_ENDIAN
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.au8[7];
 #else
-    CPUMRZFpuStateActualizeForChange(pVCpu);
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.au8[0];
 #endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
 }
 
-
-/**
- * Hook for actualizing the guest XMM0..15 and MXCSR register state for read
- * only.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuActualizeSseStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-#if defined(IN_RING3) || defined(VBOX_WITH_KERNEL_USING_XMM)
-    NOREF(pVCpu);
-#else
-    CPUMRZFpuStateActualizeSseForRead(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
-}
-
-
-/**
- * Hook for actualizing the guest XMM0..15 and MXCSR register state for
- * read+write.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuActualizeSseStateForChange(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-#if defined(IN_RING3) || defined(VBOX_WITH_KERNEL_USING_XMM)
-    CPUMSetChangedFlags(pVCpu, CPUM_CHANGED_FPU_REM);
-#else
-    CPUMRZFpuStateActualizeForChange(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
-
-    /* Make sure any changes are loaded the next time around. */
-    pVCpu->cpum.GstCtx.XState.Hdr.bmXState |= XSAVE_C_SSE;
-}
-
-
-/**
- * Hook for actualizing the guest YMM0..15 and MXCSR register state for read
- * only.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuActualizeAvxStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-#ifdef IN_RING3
-    NOREF(pVCpu);
-#else
-    CPUMRZFpuStateActualizeAvxForRead(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
-}
-
-
-/**
- * Hook for actualizing the guest YMM0..15 and MXCSR register state for
- * read+write.
- *
- * This is necessary in ring-0 and raw-mode context (nop in ring-3).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuActualizeAvxStateForChange(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-#ifdef IN_RING3
-    CPUMSetChangedFlags(pVCpu, CPUM_CHANGED_FPU_REM);
-#else
-    CPUMRZFpuStateActualizeForChange(pVCpu);
-#endif
-    IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_X87 | CPUMCTX_EXTRN_SSE_AVX | CPUMCTX_EXTRN_OTHER_XSAVE | CPUMCTX_EXTRN_XCRx);
-
-    /* Just assume we're going to make changes to the SSE and YMM_HI parts. */
-    pVCpu->cpum.GstCtx.XState.Hdr.bmXState |= XSAVE_C_YMM | XSAVE_C_SSE;
-}
-
-
-/**
- * Stores a QNaN value into a FPU register.
- *
- * @param   pReg                Pointer to the register.
- */
-DECLINLINE(void) iemFpuStoreQNan(PRTFLOAT80U pReg) RT_NOEXCEPT
-{
-    pReg->au32[0] = UINT32_C(0x00000000);
-    pReg->au32[1] = UINT32_C(0xc0000000);
-    pReg->au16[4] = UINT16_C(0xffff);
-}
-
-
-/**
- * Updates the FOP, FPU.CS and FPUIP registers, extended version.
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- * @param   pFpuCtx             The FPU context.
- * @param   uFpuOpcode          The FPU opcode value (see IEMCPU::uFpuOpcode).
- */
-DECLINLINE(void) iemFpuUpdateOpcodeAndIpWorkerEx(PVMCPUCC pVCpu, PX86FXSTATE pFpuCtx, uint16_t uFpuOpcode) RT_NOEXCEPT
-{
-    Assert(uFpuOpcode != UINT16_MAX);
-    pFpuCtx->FOP = uFpuOpcode;
-    /** @todo x87.CS and FPUIP needs to be kept separately. */
-    if (IEM_IS_REAL_OR_V86_MODE(pVCpu))
-    {
-        /** @todo Testcase: making assumptions about how FPUIP and FPUDP are handled
-         *        happens in real mode here based on the fnsave and fnstenv images. */
-        pFpuCtx->CS    = 0;
-        pFpuCtx->FPUIP = pVCpu->cpum.GstCtx.eip | ((uint32_t)pVCpu->cpum.GstCtx.cs.Sel << 4);
-    }
-    else if (!IEM_IS_LONG_MODE(pVCpu))
-    {
-        pFpuCtx->CS    = pVCpu->cpum.GstCtx.cs.Sel;
-        pFpuCtx->FPUIP = pVCpu->cpum.GstCtx.rip;
-    }
-    else
-        *(uint64_t *)&pFpuCtx->FPUIP = pVCpu->cpum.GstCtx.rip;
-}
-
-
-/**
- * Marks the specified stack register as free (for FFREE).
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- * @param   iStReg              The register to free.
- */
-DECLINLINE(void) iemFpuStackFree(PVMCPUCC pVCpu, uint8_t iStReg) RT_NOEXCEPT
-{
-    Assert(iStReg < 8);
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint8_t     iReg    = (X86_FSW_TOP_GET(pFpuCtx->FSW) + iStReg) & X86_FSW_TOP_SMASK;
-    pFpuCtx->FTW &= ~RT_BIT(iReg);
-}
-
-
-/**
- * Increments FSW.TOP, i.e. pops an item off the stack without freeing it.
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuStackIncTop(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    uFsw    = pFpuCtx->FSW;
-    uint16_t    uTop    = uFsw & X86_FSW_TOP_MASK;
-    uTop  = (uTop + (1 << X86_FSW_TOP_SHIFT)) & X86_FSW_TOP_MASK;
-    uFsw &= ~X86_FSW_TOP_MASK;
-    uFsw |= uTop;
-    pFpuCtx->FSW = uFsw;
-}
-
-
-/**
- * Decrements FSW.TOP, i.e. push an item off the stack without storing anything.
- *
- * @param   pVCpu               The cross context virtual CPU structure of the calling thread.
- */
-DECLINLINE(void) iemFpuStackDecTop(PVMCPUCC pVCpu) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    uFsw    = pFpuCtx->FSW;
-    uint16_t    uTop    = uFsw & X86_FSW_TOP_MASK;
-    uTop  = (uTop + (7 << X86_FSW_TOP_SHIFT)) & X86_FSW_TOP_MASK;
-    uFsw &= ~X86_FSW_TOP_MASK;
-    uFsw |= uTop;
-    pFpuCtx->FSW = uFsw;
-}
-
-
-
-
-DECLINLINE(int) iemFpuStRegNotEmpty(PVMCPUCC pVCpu, uint8_t iStReg) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    iReg    = (X86_FSW_TOP_GET(pFpuCtx->FSW) + iStReg) & X86_FSW_TOP_SMASK;
-    if (pFpuCtx->FTW & RT_BIT(iReg))
-        return VINF_SUCCESS;
-    return VERR_NOT_FOUND;
-}
-
-
-DECLINLINE(int) iemFpuStRegNotEmptyRef(PVMCPUCC pVCpu, uint8_t iStReg, PCRTFLOAT80U *ppRef) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    iReg    = (X86_FSW_TOP_GET(pFpuCtx->FSW) + iStReg) & X86_FSW_TOP_SMASK;
-    if (pFpuCtx->FTW & RT_BIT(iReg))
-    {
-        *ppRef = &pFpuCtx->aRegs[iStReg].r80;
-        return VINF_SUCCESS;
-    }
-    return VERR_NOT_FOUND;
-}
-
-
-DECLINLINE(int) iemFpu2StRegsNotEmptyRef(PVMCPUCC pVCpu, uint8_t iStReg0, PCRTFLOAT80U *ppRef0,
-                                        uint8_t iStReg1, PCRTFLOAT80U *ppRef1) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    iTop    = X86_FSW_TOP_GET(pFpuCtx->FSW);
-    uint16_t    iReg0   = (iTop + iStReg0) & X86_FSW_TOP_SMASK;
-    uint16_t    iReg1   = (iTop + iStReg1) & X86_FSW_TOP_SMASK;
-    if ((pFpuCtx->FTW & (RT_BIT(iReg0) | RT_BIT(iReg1))) == (RT_BIT(iReg0) | RT_BIT(iReg1)))
-    {
-        *ppRef0 = &pFpuCtx->aRegs[iStReg0].r80;
-        *ppRef1 = &pFpuCtx->aRegs[iStReg1].r80;
-        return VINF_SUCCESS;
-    }
-    return VERR_NOT_FOUND;
-}
-
-
-DECLINLINE(int) iemFpu2StRegsNotEmptyRefFirst(PVMCPUCC pVCpu, uint8_t iStReg0, PCRTFLOAT80U *ppRef0, uint8_t iStReg1) RT_NOEXCEPT
-{
-    PX86FXSTATE pFpuCtx = &pVCpu->cpum.GstCtx.XState.x87;
-    uint16_t    iTop    = X86_FSW_TOP_GET(pFpuCtx->FSW);
-    uint16_t    iReg0   = (iTop + iStReg0) & X86_FSW_TOP_SMASK;
-    uint16_t    iReg1   = (iTop + iStReg1) & X86_FSW_TOP_SMASK;
-    if ((pFpuCtx->FTW & (RT_BIT(iReg0) | RT_BIT(iReg1))) == (RT_BIT(iReg0) | RT_BIT(iReg1)))
-    {
-        *ppRef0 = &pFpuCtx->aRegs[iStReg0].r80;
-        return VINF_SUCCESS;
-    }
-    return VERR_NOT_FOUND;
-}
-
-
-/**
- * Rotates the stack registers when setting new TOS.
- *
- * @param   pFpuCtx             The FPU context.
- * @param   iNewTop             New TOS value.
- * @remarks We only do this to speed up fxsave/fxrstor which
- *          arrange the FP registers in stack order.
- *          MUST be done before writing the new TOS (FSW).
- */
-DECLINLINE(void) iemFpuRotateStackSetTop(PX86FXSTATE pFpuCtx, uint16_t iNewTop) RT_NOEXCEPT
-{
-    uint16_t iOldTop = X86_FSW_TOP_GET(pFpuCtx->FSW);
-    RTFLOAT80U ar80Temp[8];
-
-    if (iOldTop == iNewTop)
-        return;
-
-    /* Unscrew the stack and get it into 'native' order. */
-    ar80Temp[0] = pFpuCtx->aRegs[(8 - iOldTop + 0) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[1] = pFpuCtx->aRegs[(8 - iOldTop + 1) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[2] = pFpuCtx->aRegs[(8 - iOldTop + 2) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[3] = pFpuCtx->aRegs[(8 - iOldTop + 3) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[4] = pFpuCtx->aRegs[(8 - iOldTop + 4) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[5] = pFpuCtx->aRegs[(8 - iOldTop + 5) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[6] = pFpuCtx->aRegs[(8 - iOldTop + 6) & X86_FSW_TOP_SMASK].r80;
-    ar80Temp[7] = pFpuCtx->aRegs[(8 - iOldTop + 7) & X86_FSW_TOP_SMASK].r80;
-
-    /* Now rotate the stack to the new position. */
-    pFpuCtx->aRegs[0].r80 = ar80Temp[(iNewTop + 0) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[1].r80 = ar80Temp[(iNewTop + 1) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[2].r80 = ar80Temp[(iNewTop + 2) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[3].r80 = ar80Temp[(iNewTop + 3) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[4].r80 = ar80Temp[(iNewTop + 4) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[5].r80 = ar80Temp[(iNewTop + 5) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[6].r80 = ar80Temp[(iNewTop + 6) & X86_FSW_TOP_SMASK];
-    pFpuCtx->aRegs[7].r80 = ar80Temp[(iNewTop + 7) & X86_FSW_TOP_SMASK];
-}
-
-
-/**
- * Updates the FPU exception status after FCW is changed.
- *
- * @param   pFpuCtx             The FPU context.
- */
-DECLINLINE(void) iemFpuRecalcExceptionStatus(PX86FXSTATE pFpuCtx) RT_NOEXCEPT
-{
-    uint16_t u16Fsw = pFpuCtx->FSW;
-    if ((u16Fsw & X86_FSW_XCPT_MASK) & ~(pFpuCtx->FCW & X86_FCW_XCPT_MASK))
-        u16Fsw |= X86_FSW_ES | X86_FSW_B;
-    else
-        u16Fsw &= ~(X86_FSW_ES | X86_FSW_B);
-    pFpuCtx->FSW = u16Fsw;
-}
-
-
-/**
- * Calculates the full FTW (FPU tag word) for use in FNSTENV and FNSAVE.
- *
- * @returns The full FTW.
- * @param   pFpuCtx             The FPU context.
- */
-DECLINLINE(uint16_t) iemFpuCalcFullFtw(PCX86FXSTATE pFpuCtx) RT_NOEXCEPT
-{
-    uint8_t const   u8Ftw  = (uint8_t)pFpuCtx->FTW;
-    uint16_t        u16Ftw = 0;
-    unsigned const  iTop   = X86_FSW_TOP_GET(pFpuCtx->FSW);
-    for (unsigned iSt = 0; iSt < 8; iSt++)
-    {
-        unsigned const iReg = (iSt + iTop) & 7;
-        if (!(u8Ftw & RT_BIT(iReg)))
-            u16Ftw |= 3 << (iReg * 2); /* empty */
-        else
-        {
-            uint16_t uTag;
-            PCRTFLOAT80U const pr80Reg = &pFpuCtx->aRegs[iSt].r80;
-            if (pr80Reg->s.uExponent == 0x7fff)
-                uTag = 2; /* Exponent is all 1's => Special. */
-            else if (pr80Reg->s.uExponent == 0x0000)
-            {
-                if (pr80Reg->s.uMantissa == 0x0000)
-                    uTag = 1; /* All bits are zero => Zero. */
-                else
-                    uTag = 2; /* Must be special. */
-            }
-            else if (pr80Reg->s.uMantissa & RT_BIT_64(63)) /* The J bit. */
-                uTag = 0; /* Valid. */
-            else
-                uTag = 2; /* Must be special. */
-
-            u16Ftw |= uTag << (iReg * 2);
-        }
-    }
-
-    return u16Ftw;
-}
-
-
-/**
- * Converts a full FTW to a compressed one (for use in FLDENV and FRSTOR).
- *
- * @returns The compressed FTW.
- * @param   u16FullFtw      The full FTW to convert.
- */
-DECLINLINE(uint16_t) iemFpuCompressFtw(uint16_t u16FullFtw) RT_NOEXCEPT
-{
-    uint8_t u8Ftw = 0;
-    for (unsigned i = 0; i < 8; i++)
-    {
-        if ((u16FullFtw & 3) != 3 /*empty*/)
-            u8Ftw |= RT_BIT(i);
-        u16FullFtw >>= 2;
-    }
-
-    return u8Ftw;
-}
 
 /** @}  */
 
-#endif /* stuff to do later */
 
 
 /** @name Misc stuff

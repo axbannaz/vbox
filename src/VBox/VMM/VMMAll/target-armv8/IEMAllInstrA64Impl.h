@@ -7530,7 +7530,19 @@
 
 
 /* STP  <St1>, <St2>, [<Xn|SP>{, #<imm>}] (ffc00000/2d000000) */
-//#define IEM_INSTR_IMPL_A64__STP_S_ldstpair_off(Rt, Rn, Rt2, imm7)
+#define IEM_INSTR_IMPL_A64__STP_S_ldstpair_off(Rt, Rn, Rt2, imm7) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_ACTUALIZE_FPU_STATE_FOR_READ(); \
+    IEM_MC_LOCAL(uint32_t, uVal1); \
+    IEM_MC_FETCH_FREG_U32( uVal1, Rt); \
+    IEM_MC_LOCAL(uint32_t, uVal2); \
+    IEM_MC_FETCH_FREG_U32( uVal2, Rt2); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm7, 7, 2)); \
+    IEM_MC_STORE_MEM_FLAT_U32_PAIR(uAddr, uVal1, uVal2);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDP  <St1>, <St2>, [<Xn|SP>{, #<imm>}] (ffc00000/2d400000) */
@@ -7546,7 +7558,19 @@
 
 
 /* STP  <Dt1>, <Dt2>, [<Xn|SP>{, #<imm>}] (ffc00000/6d000000) */
-//#define IEM_INSTR_IMPL_A64__STP_D_ldstpair_off(Rt, Rn, Rt2, imm7)
+#define IEM_INSTR_IMPL_A64__STP_D_ldstpair_off(Rt, Rn, Rt2, imm7) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_ACTUALIZE_FPU_STATE_FOR_READ(); \
+    IEM_MC_LOCAL(uint64_t, uVal1); \
+    IEM_MC_FETCH_FREG_U64( uVal1, Rt); \
+    IEM_MC_LOCAL(uint64_t, uVal2); \
+    IEM_MC_FETCH_FREG_U64( uVal2, Rt2); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm7, 7, 3)); \
+    IEM_MC_STORE_MEM_FLAT_U64_PAIR(uAddr, uVal1, uVal2);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDP  <Dt1>, <Dt2>, [<Xn|SP>{, #<imm>}] (ffc00000/6d400000) */
@@ -7562,7 +7586,7 @@
     IEM_MC_FETCH_GREG_U64( uVal2, Rt2); \
     IEM_MC_LOCAL(uint64_t, uAddr); \
     IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
-    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (int64_t)imm7 << (64 - 7) >> (64 - 7 - 3)); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm7, 7, 3)); \
     IEM_MC_STORE_MEM_FLAT_U64_PAIR(uAddr, uVal1, uVal2);  /** @todo tagchecked=true */ \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
@@ -7573,7 +7597,19 @@
 
 
 /* STP  <Qt1>, <Qt2>, [<Xn|SP>{, #<imm>}] (ffc00000/ad000000) */
-//#define IEM_INSTR_IMPL_A64__STP_Q_ldstpair_off(Rt, Rn, Rt2, imm7)
+#define IEM_INSTR_IMPL_A64__STP_Q_ldstpair_off(Rt, Rn, Rt2, imm7) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_ACTUALIZE_FPU_STATE_FOR_READ(); \
+    IEM_MC_LOCAL(RTUINT128U, uVal1); \
+    IEM_MC_FETCH_FREG_U128(uVal1, Rt); \
+    IEM_MC_LOCAL(RTUINT128U, uVal2); \
+    IEM_MC_FETCH_FREG_U128(uVal2, Rt2); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm7, 7, 4)); \
+    IEM_MC_STORE_MEM_FLAT_U128_PAIR(uAddr, uVal1, uVal2);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDP  <Qt1>, <Qt2>, [<Xn|SP>{, #<imm>}] (ffc00000/ad400000) */

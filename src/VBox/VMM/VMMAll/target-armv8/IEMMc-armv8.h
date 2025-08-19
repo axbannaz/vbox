@@ -111,11 +111,6 @@
     } while (0)
 
 
-#define IEM_MC_STORE_MEM_FLAT_U32_PAIR(a_GCPtrMem, a_u32Value1, a_u32Value2) \
-    iemMemFlatStoreDataPairU32Jmp(pVCpu, (a_GCPtrMem), (a_u32Value1), (a_u32Value2))
-#define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
-    iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
-
 /** Fetched PC (for PC relative addressing). */
 #define IEM_MC_FETCH_PC_U64(a_GCPtrMem)  (a_GCPtrMem) = pVCpu->cpum.GstCtx.Pc.u64
 
@@ -126,6 +121,24 @@
         (a_EffAddr) += (uint64_t)(a_u64Const); \
         AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
     } while (0)
+
+
+/** Prepares for using the FPU state.
+ * Ensures that we can use the host FPU in the current context (RC+R0.
+ * Ensures the guest FPU state in the CPUMCTX is up to date. */
+#define IEM_MC_PREPARE_FPU_USAGE()              iemFpuPrepareUsage(pVCpu)
+/** Actualizes the guest FPU state so it can be accessed read-only fashion. */
+#define IEM_MC_ACTUALIZE_FPU_STATE_FOR_READ()   iemFpuActualizeStateForRead(pVCpu)
+/** Actualizes the guest FPU state so it can be accessed and modified. */
+#define IEM_MC_ACTUALIZE_FPU_STATE_FOR_CHANGE() iemFpuActualizeStateForChange(pVCpu)
+
+
+#define IEM_MC_STORE_MEM_FLAT_U32_PAIR(a_GCPtrMem, a_u32Value1, a_u32Value2) \
+    iemMemFlatStoreDataPairU32Jmp(pVCpu, (a_GCPtrMem), (a_u32Value1), (a_u32Value2))
+#define IEM_MC_STORE_MEM_FLAT_U64_PAIR(a_GCPtrMem, a_u64Value1, a_u64Value2) \
+    iemMemFlatStoreDataPairU64Jmp(pVCpu, (a_GCPtrMem), (a_u64Value1), (a_u64Value2))
+#define IEM_MC_STORE_MEM_FLAT_U128_PAIR(a_GCPtrMem, a_u128Value1, a_u128Value2) \
+    iemMemFlatStoreDataPairU128Jmp(pVCpu, (a_GCPtrMem), &(a_u128Value1), &(a_u128Value2))
 
 
 
