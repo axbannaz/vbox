@@ -4225,7 +4225,7 @@ DxgkDdiCommitVidPn(
     CONST DXGKARG_COMMITVIDPN* CONST  pCommitVidPnArg
     )
 {
-    LOG(("ENTER AffectedVidPnSourceId(%d) hAdapter(0x%x)", pCommitVidPnArg->AffectedVidPnSourceId, hAdapter));
+    LogRel2(("ENTER AffectedVidPnSourceId(%d) Flags(0x%x) conncheck(%d) hAdapter(0x%x)\n", pCommitVidPnArg->AffectedVidPnSourceId, pCommitVidPnArg->Flags, pCommitVidPnArg->MonitorConnectivityChecks, hAdapter));
 
     PVBOXMP_DEVEXT pDevExt = (PVBOXMP_DEVEXT)hAdapter;
     NTSTATUS Status;
@@ -4273,7 +4273,7 @@ DxgkDdiCommitVidPn(
                     pDevExt,
                     pCommitVidPnArg->hFunctionalVidPn, pVidPnInterface,
                     (PVBOXWDDM_ALLOCATION)pCommitVidPnArg->hPrimaryAllocation,
-                    pCommitVidPnArg->AffectedVidPnSourceId, paSources, paTargets, pCommitVidPnArg->Flags.PathPowerTransition);
+                    pCommitVidPnArg->AffectedVidPnSourceId, paSources, paTargets, pCommitVidPnArg->Flags);
             if (!NT_SUCCESS(Status))
             {
                 WARN(("VBoxVidPnCommitSourceModeForSrcId for current VidPn failed Status 0x%x", Status));
@@ -4284,7 +4284,7 @@ DxgkDdiCommitVidPn(
         {
             Status = VBoxVidPnCommitAll(pDevExt, pCommitVidPnArg->hFunctionalVidPn, pVidPnInterface,
                     (PVBOXWDDM_ALLOCATION)pCommitVidPnArg->hPrimaryAllocation,
-                    paSources, paTargets);
+                    paSources, paTargets, pCommitVidPnArg->Flags);
             if (!NT_SUCCESS(Status))
             {
                 WARN(("VBoxVidPnCommitAll for current VidPn failed Status 0x%x", Status));
@@ -4306,7 +4306,7 @@ DxgkDdiCommitVidPn(
             {
                 VBOXWDDM_SOURCE *pSource = &pDevExt->aSources[i];
 
-                LOG(("Source [%d]: visible %d, blanked %d", i, pSource->bVisible, pSource->bBlankedByPowerOff));
+                LogRel2(("Source [%d]: visible %d, blanked %d\n", i, pSource->bVisible, pSource->bBlankedByPowerOff));
 
                 /* Update positions of all screens. */
                 vboxWddmDisplaySettingsQueryPos(pDevExt, i, &pSource->VScreenPos);
@@ -4318,19 +4318,10 @@ DxgkDdiCommitVidPn(
             {
                 VBOXWDDM_TARGET *pTarget = &pDevExt->aTargets[i];
                 Assert(pTarget->u32Id == (unsigned)i);
-                if (pTarget->VidPnSourceId != D3DDDI_ID_UNINITIALIZED)
-                {
-                    continue;
-                }
 
-                LOG(("Target [%d]: blanked %d", i, pTarget->fBlankedByPowerOff));
-
-                if (pTarget->fBlankedByPowerOff)
+                if (pTarget->VidPnSourceId == D3DDDI_ID_UNINITIALIZED)
                 {
-                    GaScreenDefine(pDevExt->pGa, 0, pTarget->u32Id, 0, 0, 0, 0, true);
-                }
-                else
-                {
+                    pTarget->fBlankedByPowerOff = false;
                     GaScreenDestroy(pDevExt->pGa, pTarget->u32Id);
                 }
             }
@@ -4348,7 +4339,7 @@ DxgkDdiCommitVidPn(
     RTMemFree(paSources);
     RTMemFree(paTargets);
 
-    LOG(("LEAVE, status(0x%x), hAdapter(0x%x)", Status, hAdapter));
+    LogRel2(("LEAVE, status(0x%x), hAdapter(0x%x)\n", Status, hAdapter));
 
     return Status;
 }
