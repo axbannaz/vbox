@@ -2575,7 +2575,11 @@ static int dxbcCreateIOSGNBlob(DXShaderInfo const *pInfo, DXBCHeader *pHdr, uint
         }
         dst->idxSemantic      = srcSemantic->SemanticIndex;
         dst->enmSystemValue   = svga2dxSystemValue(srcEntry->semanticName);
+#ifndef VBOX_WITH_DXMT
         dst->enmComponentType = srcEntry->componentType;
+#else /** @todo DXMT/Metal asserts and aborts the VM process if it encounters enmComponentType == SVGADX_SIGNATURE_REGISTER_COMPONENT_UNKNOWN. */
+        dst->enmComponentType = srcEntry->componentType == SVGADX_SIGNATURE_REGISTER_COMPONENT_UNKNOWN ? 1 : srcEntry->componentType;
+#endif
         dst->idxRegister      = srcEntry->registerIndex;
         dst->u.mask           = srcEntry->mask;
         /* Set 'Used' mask equal to 'Mask'. Dxvk needs this. */
