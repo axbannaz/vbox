@@ -3287,7 +3287,7 @@ CProgress UINotificationProgressCloudMachineClone::createProgress(COMResult &com
     CCloudMachine comCloneMachine;
     CProgress comProgress = m_comClient.CloneInstance(m_strId, m_strCloneName, comCloneMachine);
     /* Store COM result: */
-    comResult = m_comMachine;
+    comResult = m_comClient;
     /* Return progress-wrapper: */
     return comProgress;
 }
@@ -3794,7 +3794,7 @@ CProgress UINotificationProgressSnapshotTake::createProgress(COMResult &comResul
                                                     m_strSnapshotDescription,
                                                     true, m_uSnapshotId);
     /* Store COM result: */
-    comResult = m_comMachine;
+    comResult = comMachine;
     /* Return progress-wrapper: */
     return comProgress;
 }
@@ -4019,7 +4019,7 @@ CProgress UINotificationProgressSnapshotDelete::createProgress(COMResult &comRes
     /* Initialize progress-wrapper: */
     CProgress comProgress = comMachine.DeleteSnapshot(m_uSnapshotId);
     /* Store COM result: */
-    comResult = m_comMachine;
+    comResult = comMachine;
     /* Return progress-wrapper: */
     return comProgress;
 }
