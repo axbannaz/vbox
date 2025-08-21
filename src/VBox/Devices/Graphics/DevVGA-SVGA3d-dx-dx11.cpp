@@ -6334,25 +6334,42 @@ static DECLCALLBACK(int) vmsvga3dBackDXSetSingleConstantBuffer(PVGASTATECC pThis
 #endif
     }
 
-    D3D11_BUFFER_DESC bd;
-    RT_ZERO(bd);
-    bd.ByteWidth           = sizeInBytes;
-    bd.Usage               = D3D11_USAGE_DEFAULT;
-    bd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
-    bd.CPUAccessFlags      = 0;
-    bd.MiscFlags           = 0;
-    bd.StructureByteStride = 0;
+    uint32_t const idxShaderState = type - SVGA3D_SHADERTYPE_MIN;
+    ID3D11Buffer **ppCurrentBuffer = &pDXContext->pBackendDXContext->resources.shaderState[idxShaderState].constantBuffers[slot];
 
-    ID3D11Buffer *pBuffer = 0;
-    HRESULT hr = pDevice->pDevice->CreateBuffer(&bd, pInitialData, &pBuffer);
-    if (SUCCEEDED(hr))
+    LogFunc(("constant buffer: [%u][%u]: sid = %u, %u, %u\n",
+             idxShaderState, slot, sid, offsetInBytes, sizeInBytes));
+
+    D3D11_BUFFER_DESC bd;
+
+    if (*ppCurrentBuffer)
     {
-        uint32_t const idxShaderState = type - SVGA3D_SHADERTYPE_MIN;
-        ID3D11Buffer **ppOldBuffer = &pDXContext->pBackendDXContext->resources.shaderState[idxShaderState].constantBuffers[slot];
-        LogFunc(("constant buffer: [%u][%u]: sid = %u, %u, %u (%p -> %p)\n",
-                 idxShaderState, slot, sid, offsetInBytes, sizeInBytes, *ppOldBuffer, pBuffer));
-        D3D_RELEASE(*ppOldBuffer);
-        *ppOldBuffer = pBuffer;
+        RT_ZERO(bd);
+        (*ppCurrentBuffer)->GetDesc(&bd);
+        if (bd.ByteWidth != sizeInBytes)
+        {
+            /* Have to create a new one. */
+            D3D_RELEASE(*ppCurrentBuffer); /* This will set the pointer to NULL. */
+        }
+    }
+
+    if (!(*ppCurrentBuffer))
+    {
+        RT_ZERO(bd);
+        bd.ByteWidth           = sizeInBytes;
+        bd.Usage               = D3D11_USAGE_DEFAULT;
+        bd.BindFlags           = D3D11_BIND_CONSTANT_BUFFER;
+        //bd.CPUAccessFlags      = 0;
+        //bd.MiscFlags           = 0;
+        //bd.StructureByteStride = 0;
+
+        HRESULT hr = pDevice->pDevice->CreateBuffer(&bd, pInitialData, ppCurrentBuffer);
+        AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+    }
+    else
+    {
+        if (pInitialData)
+            pDevice->pImmediateContext->UpdateSubresource(*ppCurrentBuffer, 0, 0, pInitialData->pSysMem, 0, 0);
     }
 
     return VINF_SUCCESS;
