@@ -364,26 +364,26 @@ AssertCompileSizeAlignment(CPUMCTX, 8);
 #define CPUMCTX_EXTRN_GPRS_MASK                 UINT64_C(0x0000000000007f00)
 
 /** The NEON SIMD & FP registers V0 through V31 are kept externally. */
-#define CPUMCTX_EXTRN_V0_V31                    UINT64_C(0x0000000000002000)
+#define CPUMCTX_EXTRN_V0_V31                    UINT64_C(0x0000000000020000)
 /** The FPCR (Floating Point Control Register) is kept externally. */
-#define CPUMCTX_EXTRN_FPCR                      UINT64_C(0x0000000000004000)
+#define CPUMCTX_EXTRN_FPCR                      UINT64_C(0x0000000000040000)
 /** The FPSR (Floating Point Status Register) is kept externally. */
-#define CPUMCTX_EXTRN_FPSR                      UINT64_C(0x0000000000008000)
+#define CPUMCTX_EXTRN_FPSR                      UINT64_C(0x0000000000080000)
 
 /** Debug system registers are kept externally. */
-#define CPUMCTX_EXTRN_SYSREG_DEBUG              UINT64_C(0x0000000000010000)
+#define CPUMCTX_EXTRN_SYSREG_DEBUG              UINT64_C(0x0000000000100000)
 /** PAuth key system registers are kept externally. */
-#define CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS         UINT64_C(0x0000000000020000)
+#define CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS         UINT64_C(0x0000000000200000)
 /** EL2 system registers are kept externally. */
-#define CPUMCTX_EXTRN_SYSREG_EL2                UINT64_C(0x0000000000040000)
+#define CPUMCTX_EXTRN_SYSREG_EL2                UINT64_C(0x0000000000400000)
 /** Various system registers (rarely accessed) are kept externally. */
-#define CPUMCTX_EXTRN_SYSREG_MISC               UINT64_C(0x0000000000080000)
+#define CPUMCTX_EXTRN_SYSREG_MISC               UINT64_C(0x0000000000800000)
 
 /** Mask of bits the keepers can use for state tracking. */
 #define CPUMCTX_EXTRN_KEEPER_STATE_MASK         UINT64_C(0xffff000000000000)
 
 /** All CPUM state bits, not including keeper specific ones. */
-#define CPUMCTX_EXTRN_ALL                       UINT64_C(0x00000ffffffffffc)
+#define CPUMCTX_EXTRN_ALL                       UINT64_C(0x0000000000fe7ffc)
 /** All CPUM state bits, including keeper specific ones. */
 #define CPUMCTX_EXTRN_ABSOLUTELY_ALL            UINT64_C(0xfffffffffffffffc)
 /** @} */
