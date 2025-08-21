@@ -434,205 +434,205 @@
     <String Id="Error1935" Value="Произошла ошибка во время установки сборочной компоненты [2]. HRESULT: [3]. {{сборочный интерфейс: [4], функция: [5], имя сборки: [6]}}" />
 
     <!-- Own / special errors -->
-    <String Id="Error25001" Value="The application &quot;[2]&quot; needs to be closed for the installation to continue." />
+    <String Id="Error25001" Value="Чтобы продолжить установку необходимо закрыть приложение &quot;[2]&quot;." />
 
-    <String Id="ProgressTextInstallValidate" Value="Validating install" />
-    <String Id="ProgressTextInstallFiles" Value="Copying new files" />
-    <String Id="ProgressTextInstallFilesTemplate" Value="File: [1],  Directory: [9],  Size: [6]" />
-    <String Id="ProgressTextInstallAdminPackage" Value="Copying network install files" />
-    <String Id="ProgressTextInstallAdminPackageTemplate" Value="File: [1], Directory: [9], Size: [6]" />
-    <String Id="ProgressTextFileCost" Value="Computing space requirements" />
-    <String Id="ProgressTextCostInitialize" Value="Computing space requirements" />
-    <String Id="ProgressTextCostFinalize" Value="Computing space requirements" />
-    <String Id="ProgressTextCreateShortcuts" Value="Creating shortcuts" />
-    <String Id="ProgressTextCreateShortcutsTemplate" Value="Shortcut: [1]" />
-    <String Id="ProgressTextPublishComponents" Value="Publishing Qualified Components" />
-    <String Id="ProgressTextPublishComponentsTemplate" Value="Component ID: [1], Qualifier: [2]" />
-    <String Id="ProgressTextPublishFeatures" Value="Publishing Product Features" />
-    <String Id="ProgressTextPublishFeaturesTemplate" Value="Feature: [1]" />
-    <String Id="ProgressTextPublishProduct" Value="Publishing product information" />
-    <String Id="ProgressTextRegisterClassInfo" Value="Registering Class servers" />
-    <String Id="ProgressTextRegisterClassInfoTemplate" Value="Class Id: [1]" />
-    <String Id="ProgressTextRegisterExtensionInfo" Value="Registering extension servers" />
-    <String Id="ProgressTextRegisterExtensionInfoTemplate" Value="Extension: [1]" />
-    <String Id="ProgressTextRegisterMIMEInfo" Value="Registering MIME info" />
-    <String Id="ProgressTextRegisterMIMEInfoTemplate" Value="MIME Content Type: [1], Extension: [2]" />
-    <String Id="ProgressTextRegisterProgIdInfo" Value="Registering program identifiers" />
-    <String Id="ProgressTextRegisterProgIdInfoTemplate" Value="ProgId: [1]" />
-    <String Id="ProgressTextAllocateRegistrySpace" Value="Allocating registry space" />
-    <String Id="ProgressTextAllocateRegistrySpaceTemplate" Value="Free space: [1]" />
-    <String Id="ProgressTextAppSearch" Value="Searching for installed applications" />
-    <String Id="ProgressTextAppSearchTemplate" Value="Property: [1], Signature: [2]" />
-    <String Id="ProgressTextBindImage" Value="Binding executables" />
-    <String Id="ProgressTextBindImageTemplate" Value="File: [1]" />
-    <String Id="ProgressTextCCPSearch" Value="Searching for qualifying products" />
-    <String Id="ProgressTextCreateFolders" Value="Creating folders" />
-    <String Id="ProgressTextCreateFoldersTemplate" Value="Folder: [1]" />
-    <String Id="ProgressTextDeleteServices" Value="Deleting services" />
-    <String Id="ProgressTextDeleteServicesTemplate" Value="Service: [1]" />
-    <String Id="ProgressTextDuplicateFiles" Value="Creating duplicate files" />
-    <String Id="ProgressTextDuplicateFilesTemplate" Value="File: [1],  Directory: [9],  Size: [6]" />
-    <String Id="ProgressTextFindRelatedProducts" Value="Searching for related applications" />
-    <String Id="ProgressTextFindRelatedProductsTemplate" Value="Found application: [1]" />
-    <String Id="ProgressTextInstallODBC" Value="Installing ODBC components" />
-    <String Id="ProgressTextInstallServices" Value="Installing new services" />
-    <String Id="ProgressTextInstallServicesTemplate" Value="Service: [2]" />
-    <String Id="ProgressTextLaunchConditions" Value="Evaluating launch conditions" />
-    <String Id="ProgressTextMigrateFeatureStates" Value="Migrating feature states from related applications" />
-    <String Id="ProgressTextMigrateFeatureStatesTemplate" Value="Application: [1]" />
-    <String Id="ProgressTextMoveFiles" Value="Moving files" />
-    <String Id="ProgressTextMoveFilesTemplate" Value="File: [1],  Directory: [9],  Size: [6]" />
-    <String Id="ProgressTextPatchFiles" Value="Patching files" />
-    <String Id="ProgressTextPatchFilesTemplate" Value="File: [1],  Directory: [2],  Size: [3]" />
-    <String Id="ProgressTextProcessComponents" Value="Updating component registration" />
-    <String Id="ProgressTextRegisterComPlus" Value="Registering COM+ Applications and Components" />
-    <String Id="ProgressTextRegisterComPlusTemplate" Value="AppId: [1]{{, AppType: [2], Users: [3], RSN: [4]}}" />
-    <String Id="ProgressTextRegisterFonts" Value="Registering fonts" />
-    <String Id="ProgressTextRegisterFontsTemplate" Value="Font: [1]" />
-    <String Id="ProgressTextRegisterProduct" Value="Registering product" />
+    <String Id="ProgressTextInstallValidate" Value="Проверка установки" />
+    <String Id="ProgressTextInstallFiles" Value="Копирование новых файлов" />
+    <String Id="ProgressTextInstallFilesTemplate" Value="Файл: [1],  Директория: [9],  Размер: [6]" />
+    <String Id="ProgressTextInstallAdminPackage" Value="Копирование файлов сетевой установки" />
+    <String Id="ProgressTextInstallAdminPackageTemplate" Value="Файл: [1], Директория: [9], Размер: [6]" />
+    <String Id="ProgressTextFileCost" Value="Расчёт необходимого пространства" />
+    <String Id="ProgressTextCostInitialize" Value="Расчёт необходимого пространства" />
+    <String Id="ProgressTextCostFinalize" Value="Расчёт необходимого пространства" />
+    <String Id="ProgressTextCreateShortcuts" Value="Создание ярлыков" />
+    <String Id="ProgressTextCreateShortcutsTemplate" Value="Ярлык: [1]" />
+    <String Id="ProgressTextPublishComponents" Value="Объявление квалифицированных компонент" />
+    <String Id="ProgressTextPublishComponentsTemplate" Value="ИД компоненты: [1], Квалификатор: [2]" />
+    <String Id="ProgressTextPublishFeatures" Value="Объявление функций продукта" />
+    <String Id="ProgressTextPublishFeaturesTemplate" Value="Фукнция: [1]" />
+    <String Id="ProgressTextPublishProduct" Value="Объявление информации о продукте" />
+    <String Id="ProgressTextRegisterClassInfo" Value="Регистрация серверов классов" />
+    <String Id="ProgressTextRegisterClassInfoTemplate" Value="ИД класса: [1]" />
+    <String Id="ProgressTextRegisterExtensionInfo" Value="Регистрация серверов расширений" />
+    <String Id="ProgressTextRegisterExtensionInfoTemplate" Value="Расширение: [1]" />
+    <String Id="ProgressTextRegisterMIMEInfo" Value="Регистрация информации MIME" />
+    <String Id="ProgressTextRegisterMIMEInfoTemplate" Value="Тип содержимого MIME: [1], Расширение: [2]" />
+    <String Id="ProgressTextRegisterProgIdInfo" Value="Регистрация программных идентификаторов" />
+    <String Id="ProgressTextRegisterProgIdInfoTemplate" Value="ПрогИД: [1]" />
+    <String Id="ProgressTextAllocateRegistrySpace" Value="Выделения места в реестре" />
+    <String Id="ProgressTextAllocateRegistrySpaceTemplate" Value="Свободное место: [1]" />
+    <String Id="ProgressTextAppSearch" Value="Поиск установленных приложений" />
+    <String Id="ProgressTextAppSearchTemplate" Value="Свойство: [1], Подпись: [2]" />
+    <String Id="ProgressTextBindImage" Value="Привязка исполняемых файлов" />
+    <String Id="ProgressTextBindImageTemplate" Value="Файл: [1]" />
+    <String Id="ProgressTextCCPSearch" Value="Поиск квалифицированных продуктов" />
+    <String Id="ProgressTextCreateFolders" Value="Создание папок" />
+    <String Id="ProgressTextCreateFoldersTemplate" Value="Папка: [1]" />
+    <String Id="ProgressTextDeleteServices" Value="Удаление сервисов" />
+    <String Id="ProgressTextDeleteServicesTemplate" Value="Сервис: [1]" />
+    <String Id="ProgressTextDuplicateFiles" Value="Создание файлов дубликатов" />
+    <String Id="ProgressTextDuplicateFilesTemplate" Value="Файл: [1],  Директория: [9],  Размер: [6]" />
+    <String Id="ProgressTextFindRelatedProducts" Value="Поиск связанных приложений" />
+    <String Id="ProgressTextFindRelatedProductsTemplate" Value="Найдено приложение: [1]" />
+    <String Id="ProgressTextInstallODBC" Value="Установка ODBC компонент" />
+    <String Id="ProgressTextInstallServices" Value="Установка новых сервисов" />
+    <String Id="ProgressTextInstallServicesTemplate" Value="Сервис: [2]" />
+    <String Id="ProgressTextLaunchConditions" Value="Расчёт условий запуска" />
+    <String Id="ProgressTextMigrateFeatureStates" Value="Перенос состояний из связных приложений" />
+    <String Id="ProgressTextMigrateFeatureStatesTemplate" Value="Приложение: [1]" />
+    <String Id="ProgressTextMoveFiles" Value="Перенос файлов" />
+    <String Id="ProgressTextMoveFilesTemplate" Value="Файл: [1],  Директория: [9],  Размер: [6]" />
+    <String Id="ProgressTextPatchFiles" Value="Применение изменений к файлам" />
+    <String Id="ProgressTextPatchFilesTemplate" Value="Файл: [1],  Директория: [2],  Размер: [3]" />
+    <String Id="ProgressTextProcessComponents" Value="Обновление регистрации компонент" />
+    <String Id="ProgressTextRegisterComPlus" Value="Регистрация COM+ приложений и компонент" />
+    <String Id="ProgressTextRegisterComPlusTemplate" Value="ПрилИД: [1]{{, ПрилТип: [2], Пользователи: [3], RSN: [4]}}" />
+    <String Id="ProgressTextRegisterFonts" Value="Регистрация шрифтов" />
+    <String Id="ProgressTextRegisterFontsTemplate" Value="Шрифт: [1]" />
+    <String Id="ProgressTextRegisterProduct" Value="Регистрация продуктов" />
     <String Id="ProgressTextRegisterProductTemplate" Value="[1]" />
-    <String Id="ProgressTextRegisterTypeLibraries" Value="Registering type libraries" />
-    <String Id="ProgressTextRegisterTypeLibrariesTemplate" Value="LibID: [1]" />
-    <String Id="ProgressTextRegisterUser" Value="Registering user" />
+    <String Id="ProgressTextRegisterTypeLibraries" Value="Регистрация библиотек типов" />
+    <String Id="ProgressTextRegisterTypeLibrariesTemplate" Value="БиблИД: [1]" />
+    <String Id="ProgressTextRegisterUser" Value="Регистрация пользователей" />
     <String Id="ProgressTextRegisterUserTemplate" Value="[1]" />
-    <String Id="ProgressTextRemoveDuplicateFiles" Value="Removing duplicated files" />
-    <String Id="ProgressTextRemoveDuplicateFilesTemplate" Value="File: [1], Directory: [9]" />
-    <String Id="ProgressTextRemoveEnvironmentStrings" Value="Updating environment strings" />
-    <String Id="ProgressTextRemoveEnvironmentStringsTemplate" Value="Name: [1], Value: [2], Action [3]" />
-    <String Id="ProgressTextRemoveExistingProducts" Value="Removing applications" />
-    <String Id="ProgressTextRemoveExistingProductsTemplate" Value="Application: [1], Command line: [2]" />
-    <String Id="ProgressTextRemoveFiles" Value="Removing files" />
-    <String Id="ProgressTextRemoveFilesTemplate" Value="File: [1], Directory: [9]" />
-    <String Id="ProgressTextRemoveFolders" Value="Removing folders" />
-    <String Id="ProgressTextRemoveFoldersTemplate" Value="Folder: [1]" />
-    <String Id="ProgressTextRemoveIniValues" Value="Removing INI files entries" />
-    <String Id="ProgressTextRemoveIniValuesTemplate" Value="File: [1],  Section: [2],  Key: [3], Value: [4]" />
-    <String Id="ProgressTextRemoveODBC" Value="Removing ODBC components" />
-    <String Id="ProgressTextRemoveRegistryValues" Value="Removing system registry values" />
-    <String Id="ProgressTextRemoveRegistryValuesTemplate" Value="Key: [1], Name: [2]" />
-    <String Id="ProgressTextRemoveShortcuts" Value="Removing shortcuts" />
-    <String Id="ProgressTextRemoveShortcutsTemplate" Value="Shortcut: [1]" />
-    <String Id="ProgressTextRMCCPSearch" Value="Searching for qualifying products" />
-    <String Id="ProgressTextSelfRegModules" Value="Registering modules" />
-    <String Id="ProgressTextSelfRegModulesTemplate" Value="File: [1], Folder: [2]" />
-    <String Id="ProgressTextSelfUnregModules" Value="Unregistering modules" />
-    <String Id="ProgressTextSelfUnregModulesTemplate" Value="File: [1], Folder: [2]" />
-    <String Id="ProgressTextSetODBCFolders" Value="Initializing ODBC directories" />
-    <String Id="ProgressTextStartServices" Value="Starting services" />
-    <String Id="ProgressTextStartServicesTemplate" Value="Service: [1]" />
-    <String Id="ProgressTextStopServices" Value="Stopping services" />
-    <String Id="ProgressTextStopServicesTemplate" Value="Service: [1]" />
-    <String Id="ProgressTextUnpublishComponents" Value="Unpublishing Qualified Components" />
-    <String Id="ProgressTextUnpublishComponentsTemplate" Value="Component ID: [1], Qualifier: [2]" />
-    <String Id="ProgressTextUnpublishFeatures" Value="Unpublishing Product Features" />
-    <String Id="ProgressTextUnpublishFeaturesTemplate" Value="Feature: [1]" />
-    <String Id="ProgressTextUnregisterClassInfo" Value="Unregister Class servers" />
-    <String Id="ProgressTextUnregisterClassInfoTemplate" Value="Class Id: [1]" />
-    <String Id="ProgressTextUnregisterComPlus" Value="Unregistering COM+ Applications and Components" />
-    <String Id="ProgressTextUnregisterComPlusTemplate" Value="AppId: [1]{{, AppType: [2]}}" />
-    <String Id="ProgressTextUnregisterExtensionInfo" Value="Unregistering extension servers" />
-    <String Id="ProgressTextUnregisterExtensionInfoTemplate" Value="Extension: [1]" />
-    <String Id="ProgressTextUnregisterFonts" Value="Unregistering fonts" />
-    <String Id="ProgressTextUnregisterFontsTemplate" Value="Font: [1]" />
-    <String Id="ProgressTextUnregisterMIMEInfo" Value="Unregistering MIME info" />
-    <String Id="ProgressTextUnregisterMIMEInfoTemplate" Value="MIME Content Type: [1], Extension: [2]" />
-    <String Id="ProgressTextUnregisterProgIdInfo" Value="Unregistering program identifiers" />
-    <String Id="ProgressTextUnregisterProgIdInfoTemplate" Value="ProgId: [1]" />
-    <String Id="ProgressTextUnregisterTypeLibraries" Value="Unregistering type libraries" />
-    <String Id="ProgressTextUnregisterTypeLibrariesTemplate" Value="LibID: [1]" />
-    <String Id="ProgressTextWriteEnvironmentStrings" Value="Updating environment strings" />
-    <String Id="ProgressTextWriteEnvironmentStringsTemplate" Value="Name: [1], Value: [2], Action [3]" />
-    <String Id="ProgressTextWriteIniValues" Value="Writing INI files values" />
-    <String Id="ProgressTextWriteIniValuesTemplate" Value="File: [1],  Section: [2],  Key: [3], Value: [4]" />
-    <String Id="ProgressTextWriteRegistryValues" Value="Writing system registry values" />
-    <String Id="ProgressTextWriteRegistryValuesTemplate" Value="Key: [1], Name: [2], Value: [3]" />
-    <String Id="ProgressTextAdvertise" Value="Advertising application" />
-    <String Id="ProgressTextGenerateScript" Value="Generating script operations for action:" />
+    <String Id="ProgressTextRemoveDuplicateFiles" Value="Удаление дублированных файлов" />
+    <String Id="ProgressTextRemoveDuplicateFilesTemplate" Value="Файл: [1], Директория: [9]" />
+    <String Id="ProgressTextRemoveEnvironmentStrings" Value="Обновление строк окружения" />
+    <String Id="ProgressTextRemoveEnvironmentStringsTemplate" Value="Имя: [1], Значение: [2], Действие [3]" />
+    <String Id="ProgressTextRemoveExistingProducts" Value="Удаление приложений" />
+    <String Id="ProgressTextRemoveExistingProductsTemplate" Value="Приложение: [1], Командная строка: [2]" />
+    <String Id="ProgressTextRemoveFiles" Value="Удаление файлов" />
+    <String Id="ProgressTextRemoveFilesTemplate" Value="Файл: [1], Диретория: [9]" />
+    <String Id="ProgressTextRemoveFolders" Value="Удаление папок" />
+    <String Id="ProgressTextRemoveFoldersTemplate" Value="Папка: [1]" />
+    <String Id="ProgressTextRemoveIniValues" Value="Удаление записей INI файлов" />
+    <String Id="ProgressTextRemoveIniValuesTemplate" Value="Файл: [1],  Секция: [2],  Ключ: [3], Значение: [4]" />
+    <String Id="ProgressTextRemoveODBC" Value="Удаление ODBC компонент" />
+    <String Id="ProgressTextRemoveRegistryValues" Value="Удаление значений системного реестра" />
+    <String Id="ProgressTextRemoveRegistryValuesTemplate" Value="Ключ: [1], Имя: [2]" />
+    <String Id="ProgressTextRemoveShortcuts" Value="Удаление ярлыков" />
+    <String Id="ProgressTextRemoveShortcutsTemplate" Value="Ярлык: [1]" />
+    <String Id="ProgressTextRMCCPSearch" Value="Поиск квалифицированных продуктов" />
+    <String Id="ProgressTextSelfRegModules" Value="Регистрация модулей" />
+    <String Id="ProgressTextSelfRegModulesTemplate" Value="Файл: [1], Папка: [2]" />
+    <String Id="ProgressTextSelfUnregModules" Value="Дерегистрация модулей" />
+    <String Id="ProgressTextSelfUnregModulesTemplate" Value="Файл: [1], Папка: [2]" />
+    <String Id="ProgressTextSetODBCFolders" Value="Инициализация ODBC директорий" />
+    <String Id="ProgressTextStartServices" Value="Запуск сервисов" />
+    <String Id="ProgressTextStartServicesTemplate" Value="Сервис: [1]" />
+    <String Id="ProgressTextStopServices" Value="Остановка сервисов" />
+    <String Id="ProgressTextStopServicesTemplate" Value="Сервис: [1]" />
+    <String Id="ProgressTextUnpublishComponents" Value="Скрытие квалифицированных компонент" />
+    <String Id="ProgressTextUnpublishComponentsTemplate" Value="ID компоненты: [1], Квалификатор: [2]" />
+    <String Id="ProgressTextUnpublishFeatures" Value="Скрытие функций продукта" />
+    <String Id="ProgressTextUnpublishFeaturesTemplate" Value="Функция: [1]" />
+    <String Id="ProgressTextUnregisterClassInfo" Value="Дерегистрация серверов классов" />
+    <String Id="ProgressTextUnregisterClassInfoTemplate" Value="ИД класса: [1]" />
+    <String Id="ProgressTextUnregisterComPlus" Value="Дерегистрация COM+ приложений и компонент" />
+    <String Id="ProgressTextUnregisterComPlusTemplate" Value="ПрилИД: [1]{{, ПрилТип: [2]}}" />
+    <String Id="ProgressTextUnregisterExtensionInfo" Value="Дерегистрация серверов расширений" />
+    <String Id="ProgressTextUnregisterExtensionInfoTemplate" Value="Расширение: [1]" />
+    <String Id="ProgressTextUnregisterFonts" Value="Дерегистрация шрифтов" />
+    <String Id="ProgressTextUnregisterFontsTemplate" Value="Шрифт: [1]" />
+    <String Id="ProgressTextUnregisterMIMEInfo" Value="Дерегистрация информации MIME" />
+    <String Id="ProgressTextUnregisterMIMEInfoTemplate" Value="Тип содержимого MIME: [1], Расширение: [2]" />
+    <String Id="ProgressTextUnregisterProgIdInfo" Value="Дерегистрация программных идентификаторов" />
+    <String Id="ProgressTextUnregisterProgIdInfoTemplate" Value="ПрогИД: [1]" />
+    <String Id="ProgressTextUnregisterTypeLibraries" Value="Дерегистрация библиотек типов" />
+    <String Id="ProgressTextUnregisterTypeLibrariesTemplate" Value="БиблИД: [1]" />
+    <String Id="ProgressTextWriteEnvironmentStrings" Value="Обновление строк окружения" />
+    <String Id="ProgressTextWriteEnvironmentStringsTemplate" Value="Имя: [1], Значение: [2], Действие [3]" />
+    <String Id="ProgressTextWriteIniValues" Value="Запись значений INI файлов" />
+    <String Id="ProgressTextWriteIniValuesTemplate" Value="Файл: [1],  Секция: [2],  Ключ: [3], Зачение: [4]" />
+    <String Id="ProgressTextWriteRegistryValues" Value="Запись значений системного реестра" />
+    <String Id="ProgressTextWriteRegistryValuesTemplate" Value="Ключ: [1], Имя: [2], Значение: [3]" />
+    <String Id="ProgressTextAdvertise" Value="Объявление приложения" />
+    <String Id="ProgressTextGenerateScript" Value="Генерация скриптовых операций для действия:" />
     <String Id="ProgressTextGenerateScriptTemplate" Value="[1]" />
-    <String Id="ProgressTextInstallSFPCatalogFile" Value="Installing system catalog" />
-    <String Id="ProgressTextInstallSFPCatalogFileTemplate" Value="File: [1],  Dependencies: [2]" />
-    <String Id="ProgressTextMsiPublishAssemblies" Value="Publishing assembly information" />
-    <String Id="ProgressTextMsiPublishAssembliesTemplate" Value="Application Context:[1], Assembly Name:[2]" />
-    <String Id="ProgressTextMsiUnpublishAssemblies" Value="Unpublishing assembly information" />
-    <String Id="ProgressTextMsiUnpublishAssembliesTemplate" Value="Application Context:[1], Assembly Name:[2]" />
-    <String Id="ProgressTextRollback" Value="Rolling back action:" />
+    <String Id="ProgressTextInstallSFPCatalogFile" Value="Установка системного каталога" />
+    <String Id="ProgressTextInstallSFPCatalogFileTemplate" Value="Файл: [1],  Зависимости: [2]" />
+    <String Id="ProgressTextMsiPublishAssemblies" Value="Публикация сборочной информации" />
+    <String Id="ProgressTextMsiPublishAssembliesTemplate" Value="Контекст приложения:[1], Имя сборки:[2]" />
+    <String Id="ProgressTextMsiUnpublishAssemblies" Value="Скрытие сборочной информации" />
+    <String Id="ProgressTextMsiUnpublishAssembliesTemplate" Value="Контекст приложения:[1], Имя сборки:[2]" />
+    <String Id="ProgressTextRollback" Value="Откат действия:" />
     <String Id="ProgressTextRollbackTemplate" Value="[1]" />
-    <String Id="ProgressTextRollbackCleanup" Value="Removing backup files" />
-    <String Id="ProgressTextRollbackCleanupTemplate" Value="File: [1]" />
-    <String Id="ProgressTextUnmoveFiles" Value="Removing moved files" />
-    <String Id="ProgressTextUnmoveFilesTemplate" Value="File: [1], Directory: [9]" />
-    <String Id="ProgressTextUnpublishProduct" Value="Unpublishing product information" />
+    <String Id="ProgressTextRollbackCleanup" Value="Удаление бэкап файлов" />
+    <String Id="ProgressTextRollbackCleanupTemplate" Value="Файл: [1]" />
+    <String Id="ProgressTextUnmoveFiles" Value="Удаление перемещённых файлов" />
+    <String Id="ProgressTextUnmoveFilesTemplate" Value="Файл: [1], Директория: [9]" />
+    <String Id="ProgressTextUnpublishProduct" Value="Скрытие информации о продукте" />
 
-    <String Id="ProgressTextCheckTargetDir" Value="Checking target directory ..." />
+    <String Id="ProgressTextCheckTargetDir" Value="Проверка целевой директории ..." />
 
-    <String Id="ProgressTextSupDrvInt" Value="Installing support driver ..." />
-    <String Id="ProgressTextSupDrvStart" Value="Starting support driver ..." />
-    <String Id="ProgressTextSupDrvUninst" Value="Uninstalling support driver ..." />
+    <String Id="ProgressTextSupDrvInt" Value="Установка драйвера поддержки ..." />
+    <String Id="ProgressTextSupDrvStart" Value="Запуск драйвера поддержки ..." />
+    <String Id="ProgressTextSupDrvUninst" Value="Удаление драйвера поддержки ..." />
 
-    <String Id="ProgressTextUSBDevDrvInst" Value="Installing USB device driver ..." />
-    <String Id="ProgressTextUSBDevDrvUninst" Value="Uninstalling USB device driver ..." />
-    <String Id="ProgressTextUSBMonDrvInst" Value="Installing USB monitor driver ..." />
-    <String Id="ProgressTextUSBMonDrvStart" Value="Starting USB monitor driver ..." />
-    <String Id="ProgressTextUSBMonDrvUninst" Value="Uninstalling USB monitor driver ..." />
+    <String Id="ProgressTextUSBDevDrvInst" Value="Установка драйвера USB устройств ..." />
+    <String Id="ProgressTextUSBDevDrvUninst" Value="Удаление драйвера USB устройств ..." />
+    <String Id="ProgressTextUSBMonDrvInst" Value="Установка драйвера монитора USB ..." />
+    <String Id="ProgressTextUSBMonDrvStart" Value="Запуск драйвера монитора USB ..." />
+    <String Id="ProgressTextUSBMonDrvUninst" Value="Удаление драйвера монитора USB ..." />
 
-    <String Id="ProgressTextNetAdp6Create" Value="Creating network adapter ..." />
-    <String Id="ProgressTextNetAdp6Remove" Value="Removing network adapter ..." />
-    <String Id="ProgressTextNetAdp6Update" Value="Updating network adapter ..." />
-    <String Id="ProgressTextNetAdp6Uninst" Value="Uninstalling network adapter ..." />
+    <String Id="ProgressTextNetAdp6Create" Value="Создание сетевого адаптера ..." />
+    <String Id="ProgressTextNetAdp6Remove" Value="Удаление сетевого адаптера ..." />
+    <String Id="ProgressTextNetAdp6Update" Value="Обновление сетевого адаптера ..." />
+    <String Id="ProgressTextNetAdp6Uninst" Value="Удаление сетевого адаптера ..." />
 
-    <String Id="ProgressTextNetLwfInst" Value="Installing network filter ..." />
-    <String Id="ProgressTextNetLwfRollbackInst" Value="Rolling back installation of network filter ..." />
-    <String Id="ProgressTextNetLwfUninst" Value="Uninstalling network filter ..." />
-    <String Id="ProgressTextNetLwfRollbackUninst" Value="Rolling back uninstallation of network filter ..." />
+    <String Id="ProgressTextNetLwfInst" Value="Установка сетевого фильтра ..." />
+    <String Id="ProgressTextNetLwfRollbackInst" Value="Откат установки сетевого фильтра ..." />
+    <String Id="ProgressTextNetLwfUninst" Value="Удаление сетевого фильтра ..." />
+    <String Id="ProgressTextNetLwfRollbackUninst" Value="Откат удаления сетевого фильтра ..." />
 
-    <String Id="UITextbytes" Value="bytes" />
-    <String Id="UITextGB" Value="GB" />
-    <String Id="UITextKB" Value="KB" />
-    <String Id="UITextMB" Value="MB" />
-    <String Id="UITextMenuAbsent" Value="Don't install" />
-    <String Id="UITextMenuAdvertise" Value="Feature will be installed when required" />
-    <String Id="UITextMenuAllCD" Value="Entire feature will be installed to run from CD" />
-    <String Id="UITextMenuAllLocal" Value="Entire feature will be installed on local hard drive" />
-    <String Id="UITextMenuAllNetwork" Value="Entire feature will be installed to run from network" />
-    <String Id="UITextMenuCD" Value="Will be installed to run from CD" />
-    <String Id="UITextMenuLocal" Value="Will be installed on local hard drive" />
-    <String Id="UITextMenuNetwork" Value="Will be installed to run from network" />
-    <String Id="UITextScriptInProgress" Value="Gathering required information..." />
-    <String Id="UITextSelAbsentAbsent" Value="This feature will remain uninstalled" />
-    <String Id="UITextSelAbsentAdvertise" Value="This feature will be set to be installed when required" />
-    <String Id="UITextSelAbsentCD" Value="This feature will be installed to run from CD" />
-    <String Id="UITextSelAbsentLocal" Value="This feature will be installed on the local hard drive" />
-    <String Id="UITextSelAbsentNetwork" Value="This feature will be installed to run from the network" />
-    <String Id="UITextSelAdvertiseAbsent" Value="This feature will become unavailable" />
-    <String Id="UITextSelAdvertiseAdvertise" Value="Will be installed when required" />
-    <String Id="UITextSelAdvertiseCD" Value="This feature will be available to run from CD" />
-    <String Id="UITextSelAdvertiseLocal" Value="This feature will be installed on your local hard drive" />
-    <String Id="UITextSelAdvertiseNetwork" Value="This feature will be available to run from the network" />
-    <String Id="UITextSelCDAbsent" Value="This feature will be uninstalled completely, you won't be able to run it from CD" />
-    <String Id="UITextSelCDAdvertise" Value="This feature will change from run from CD state to set to be installed when required" />
-    <String Id="UITextSelCDCD" Value="This feature will remain to be run from CD" />
-    <String Id="UITextSelCDLocal" Value="This feature will change from run from CD state to be installed on the local hard drive" />
-    <String Id="UITextSelChildCostNeg" Value="This feature frees up [1] on your hard drive." />
-    <String Id="UITextSelChildCostPos" Value="This feature requires [1] on your hard drive." />
-    <String Id="UITextSelCostPending" Value="Compiling cost for this feature..." />
-    <String Id="UITextSelLocalAbsent" Value="This feature will be completely removed" />
-    <String Id="UITextSelLocalAdvertise" Value="This feature will be removed from your local hard drive, but will be set to be installed when required" />
-    <String Id="UITextSelLocalCD" Value="This feature will be removed from your local hard drive, but will be still available to run from CD" />
-    <String Id="UITextSelLocalLocal" Value="This feature will remain on you local hard drive" />
-    <String Id="UITextSelLocalNetwork" Value="This feature will be removed from your local hard drive, but will be still available to run from the network" />
-    <String Id="UITextSelNetworkAbsent" Value="This feature will be uninstalled completely, you won't be able to run it from the network" />
-    <String Id="UITextSelNetworkAdvertise" Value="This feature will change from run from network state to set to be installed when required" />
-    <String Id="UITextSelNetworkLocal" Value="This feature will change from run from network state to be installed on the local hard drive" />
-    <String Id="UITextSelNetworkNetwork" Value="This feature will remain to be run from the network" />
-    <String Id="UITextSelParentCostNegNeg" Value="This feature frees up [1] on your hard drive. It has [2] of [3] subfeatures selected. The subfeatures free up [4] on your hard drive." />
-    <String Id="UITextSelParentCostNegPos" Value="This feature frees up [1] on your hard drive. It has [2] of [3] subfeatures selected. The subfeatures require [4] on your hard drive." />
-    <String Id="UITextSelParentCostPosNeg" Value="This feature requires [1] on your hard drive. It has [2] of [3] subfeatures selected. The subfeatures free up [4] on your hard drive." />
-    <String Id="UITextSelParentCostPosPos" Value="This feature requires [1] on your hard drive. It has [2] of [3] subfeatures selected. The subfeatures require [4] on your hard drive." />
-    <String Id="UITextTimeRemaining" Value="Time remaining: {[1] minutes }{[2] seconds}" />
-    <String Id="UITextVolumeCostAvailable" Value="Available" />
-    <String Id="UITextVolumeCostDifference" Value="Difference" />
-    <String Id="UITextVolumeCostRequired" Value="Required" />
-    <String Id="UITextVolumeCostSize" Value="Disk Size" />
-    <String Id="UITextVolumeCostVolume" Value="Volume" />
+    <String Id="UITextbytes" Value="байт" />
+    <String Id="UITextGB" Value="ГБ" />
+    <String Id="UITextKB" Value="КБ" />
+    <String Id="UITextMB" Value="МБ" />
+    <String Id="UITextMenuAbsent" Value="Не устанавливать" />
+    <String Id="UITextMenuAdvertise" Value="Функция будет установлена при необходимости" />
+    <String Id="UITextMenuAllCD" Value="Вся функция будет установлена для запуска с компакт-диска" />
+    <String Id="UITextMenuAllLocal" Value="Вся функция будет установлена на локальный жёсткий диск" />
+    <String Id="UITextMenuAllNetwork" Value="Вся функция будет установлена для запуска из сети" />
+    <String Id="UITextMenuCD" Value="Будет установлена для запуска с компакт-диска" />
+    <String Id="UITextMenuLocal" Value="Будет установлена на локальный жёсткий диск" />
+    <String Id="UITextMenuNetwork" Value="Будет установлена для запуска из сети" />
+    <String Id="UITextScriptInProgress" Value="Сбор необходимой информации..." />
+    <String Id="UITextSelAbsentAbsent" Value="Функция останется не установлена" />
+    <String Id="UITextSelAbsentAdvertise" Value="Функция будет установлена при необходимости" />
+    <String Id="UITextSelAbsentCD" Value="Функция будет установлена для запуска с компакт-диска" />
+    <String Id="UITextSelAbsentLocal" Value="Функция будет установлена на локальный жёсткий диск" />
+    <String Id="UITextSelAbsentNetwork" Value="Функция будет установлена для запуска из сети" />
+    <String Id="UITextSelAdvertiseAbsent" Value="Функция будет недоступна" />
+    <String Id="UITextSelAdvertiseAdvertise" Value="Будет установлена при необходимости" />
+    <String Id="UITextSelAdvertiseCD" Value="Функция будет установлена для запуска с компакт-диска" />
+    <String Id="UITextSelAdvertiseLocal" Value="Функция будет установлена на локальный жёсткий диск" />
+    <String Id="UITextSelAdvertiseNetwork" Value="Функция будет установлена для запуска из сети" />
+    <String Id="UITextSelCDAbsent" Value="Функция будет полностью удалена, вы не сможете запускать её с компакт-диска" />
+    <String Id="UITextSelCDAdvertise" Value="Функция будет заменена с запуска с компакт-диска на установку при необходимости" />
+    <String Id="UITextSelCDCD" Value="Функция останется установлена для запуска с компакт-диска" />
+    <String Id="UITextSelCDLocal" Value="Функция будет заменена с запуска с компакт-диска на установку на локальный жёсткий диск" />
+    <String Id="UITextSelChildCostNeg" Value="Функция освободит [1] на вашем жёстком диске." />
+    <String Id="UITextSelChildCostPos" Value="Функция потребует [1] на вашем жёстком диске." />
+    <String Id="UITextSelCostPending" Value="Вычисляем размер данной функции..." />
+    <String Id="UITextSelLocalAbsent" Value="Функция будет полностью удалена" />
+    <String Id="UITextSelLocalAdvertise" Value="Функция будет удалена с локального жёсткого диска, но будет установлена при необходимости" />
+    <String Id="UITextSelLocalCD" Value="Функция будет удалена с локального жёсткого диска, но будет установлена для запуска с компакт-диска" />
+    <String Id="UITextSelLocalLocal" Value="Функция останется установлена на локальный жёсткий диск" />
+    <String Id="UITextSelLocalNetwork" Value="Функция будет удалена с локального жёсткого диска, но будет установлена для запуска из сети" />
+    <String Id="UITextSelNetworkAbsent" Value="Функция будет полностью удалена, вы не сможете запускать её из сети" />
+    <String Id="UITextSelNetworkAdvertise" Value="Функция будет заменена с запуска из сети на установку при необходимости" />
+    <String Id="UITextSelNetworkLocal" Value="Функция будет заменена с запуска из сети на установку на локальный жёсткий диск" />
+    <String Id="UITextSelNetworkNetwork" Value="Функция останется установлена для запуска из сети" />
+    <String Id="UITextSelParentCostNegNeg" Value="Функция освободит [1] на вашем жёстком диске. У неё [2] из [3] опций выбрано. Опции освободят [4] на вашем жёстком диске." />
+    <String Id="UITextSelParentCostNegPos" Value="Функция освободит [1] на вашем жёстком диске. У неё [2] из [3] опций выбрано. Опции потребуют [4] на вашем жёстком диске." />
+    <String Id="UITextSelParentCostPosNeg" Value="Функция потребует [1] на вашем жёстком диске. У неё [2] из [3] опций выбрано. Опции освободят [4] на вашем жёстком диске." />
+    <String Id="UITextSelParentCostPosPos" Value="Функция потребует [1] на вашем жёстком диске. У неё [2] из [3] опций выбрано. Опции потребуют [4] на вашем жёстком диске." />
+    <String Id="UITextTimeRemaining" Value="Оставшееся время: {[1] минут }{[2] секунд}" />
+    <String Id="UITextVolumeCostAvailable" Value="Доступно" />
+    <String Id="UITextVolumeCostDifference" Value="Разница" />
+    <String Id="UITextVolumeCostRequired" Value="Требуется" />
+    <String Id="UITextVolumeCostSize" Value="Размер диска" />
+    <String Id="UITextVolumeCostVolume" Value="Диск" />
 
 </WixLocalization>
