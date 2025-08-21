@@ -2388,7 +2388,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
  */
 static VBOXSTRICTRC nemR3DarwinHandleExit(PVM pVM, PVMCPU pVCpu)
 {
-    int rc = nemR3DarwinCopyStateFromHv(pVM, pVCpu, CPUMCTX_EXTRN_ALL);
+    int rc = nemR3DarwinCopyStateFromHv(pVM, pVCpu, NEM_DARWIN_CPUMCTX_EXTRN_MASK_FOR_IEM);
     if (RT_FAILURE(rc))
         return rc;
 
