@@ -1757,7 +1757,7 @@ static DECLCALLBACK(int) qemuFwCfgR3RamfbPortUpdateDisplay(PPDMIDISPLAYPORT pInt
             if (RT_UNLIKELY(!pThis->Ramfb.cPgLocks))
             {
                 size_t const cbFb = pThis->RamfbCfg.cbStride * pThis->RamfbCfg.cHeight;
-                uint32_t const cPages = (cbFb + GUEST_PAGE_SIZE - 1) >> GUEST_PAGE_SHIFT;
+                uint32_t const cPages = (uint32_t)((cbFb + GUEST_PAGE_SIZE - 1) >> GUEST_PAGE_SHIFT);
                 RTGCPHYS GCPhysStart = pThis->RamfbCfg.GCPhysRamfbBase & ~(RTGCPHYS)GUEST_PAGE_OFFSET_MASK;
                 RTGCPHYS const offPage = pThis->RamfbCfg.GCPhysRamfbBase & (RTGCPHYS)GUEST_PAGE_OFFSET_MASK;
 
