@@ -214,6 +214,26 @@ typedef const QEMURAMFBCONFIG *PCQEMURAMFBCONFIG;
 
 
 /**
+ * RAM based framebuffer data.
+ */
+typedef struct QEMURAMFB
+{
+    /** Number of entries in the page mapping lock array. */
+    uint32_t                    cPgLocks;
+    /** Pointer to the PGM page mapping lock array. */
+    PPGMPAGEMAPLOCK             paPgLocks;
+    /** Pointer to the array of page pointers. */
+    const void                  **papvPages;
+    /** Pointer to the final segments. */
+    PRTSGSEG                    paSegs;
+    /** S/G buffer. */
+    RTSGBUF                     SgBuf;
+} QEMURAMFB;
+/** Pointer to the RAM based framebuffer data. */
+typedef QEMURAMFB *PQEMURAMFB;
+
+
+/**
  * QEMU firmware config DMA descriptor.
  */
 typedef struct QEMUFWDMADESC
@@ -408,6 +428,8 @@ typedef struct DEVQEMUFWCFG
     TMTIMERHANDLE                       hRamfbRefreshTimer;
     /** The current rambuffer config if enabled. */
     QEMURAMFBCONFIG                     RamfbCfg;
+    /** The RAM based framebuffer data. */
+    QEMURAMFB                           Ramfb;
     /** Flag whether rendering the VRAM is enabled currently. */
     bool                                fRenderVRam;
     /** Flag whether the RAM based framebuffer device is enabled. */
@@ -1676,6 +1698,16 @@ static DECLCALLBACK(int) qemuFwCfgR3RamfbCfgWrite(PDEVQEMUFWCFG pThis, PCQEMUFWC
     int const rcLock = PDMDevHlpCritSectEnter(pThis->pDevIns, &pThis->CritSectRamfb, VERR_SEM_BUSY);
     PDM_CRITSECT_RELEASE_ASSERT_RC_DEV(pThis->pDevIns, &pThis->CritSectRamfb, rcLock);
 
+    if (pThis->Ramfb.cPgLocks)
+    {
+        PDMDevHlpPhysBulkReleasePageMappingLocks(pThis->pDevIns, pThis->Ramfb.cPgLocks, pThis->Ramfb.paPgLocks);
+        RTMemFree(pThis->Ramfb.paPgLocks);
+        pThis->Ramfb.paPgLocks = NULL;
+        pThis->Ramfb.papvPages = NULL;
+        pThis->Ramfb.paSegs    = NULL;
+        pThis->Ramfb.cPgLocks  = 0;
+    }
+
     pThis->RamfbCfg.GCPhysRamfbBase = RT_BE2H_U64(pRamfbCfg->GCPhysRamfbBase);
     pThis->RamfbCfg.cbStride        = RT_BE2H_U32(pRamfbCfg->cbStride);
     pThis->RamfbCfg.cWidth          = RT_BE2H_U32(pRamfbCfg->cWidth);
@@ -1706,11 +1738,12 @@ static DECLCALLBACK(int) qemuFwCfgR3RamfbCfgWrite(PDEVQEMUFWCFG pThis, PCQEMUFWC
 static DECLCALLBACK(int) qemuFwCfgR3RamfbPortUpdateDisplay(PPDMIDISPLAYPORT pInterface)
 {
     PDEVQEMUFWCFG pThis = RT_FROM_MEMBER(pInterface, DEVQEMUFWCFG, IPortRamfb);
+    PPDMDEVINS pDevIns = pThis->pDevIns;
 
     LogFlowFunc(("\n"));
 
-    int const rcLock = PDMDevHlpCritSectEnter(pThis->pDevIns, &pThis->CritSectRamfb, VERR_SEM_BUSY);
-    PDM_CRITSECT_RELEASE_ASSERT_RC_DEV(pThis->pDevIns, &pThis->CritSectRamfb, rcLock);
+    int const rcLock = PDMDevHlpCritSectEnter(pDevIns, &pThis->CritSectRamfb, VERR_SEM_BUSY);
+    PDM_CRITSECT_RELEASE_ASSERT_RC_DEV(pDevIns, &pThis->CritSectRamfb, rcLock);
 
     if (   pThis->fRenderVRam
         && pThis->RamfbCfg.GCPhysRamfbBase)
@@ -1720,7 +1753,72 @@ static DECLCALLBACK(int) qemuFwCfgR3RamfbPortUpdateDisplay(PPDMIDISPLAYPORT pInt
             && pThis->RamfbCfg.cbStride == pThis->pDrvL0->cbScanline
             && pThis->pDrvL0->pbData)
         {
-            PDMDevHlpPhysReadUser(pThis->pDevIns, pThis->RamfbCfg.GCPhysRamfbBase, pThis->pDrvL0->pbData, pThis->RamfbCfg.cbStride * pThis->RamfbCfg.cHeight);
+            /* Try map the pages. */
+            if (RT_UNLIKELY(!pThis->Ramfb.cPgLocks))
+            {
+                size_t const cbFb = pThis->RamfbCfg.cbStride * pThis->RamfbCfg.cHeight;
+                uint32_t const cPages = (cbFb + GUEST_PAGE_SIZE - 1) >> GUEST_PAGE_SHIFT;
+                RTGCPHYS GCPhysStart = pThis->RamfbCfg.GCPhysRamfbBase & ~(RTGCPHYS)GUEST_PAGE_OFFSET_MASK;
+                RTGCPHYS const offPage = pThis->RamfbCfg.GCPhysRamfbBase & (RTGCPHYS)GUEST_PAGE_OFFSET_MASK;
+
+                pThis->Ramfb.paPgLocks = (PPGMPAGEMAPLOCK)RTMemAllocZ(cPages * (  sizeof(PGMPAGEMAPLOCK)
+                                                                                + sizeof(void *)
+                                                                                + sizeof(RTGCPHYS)
+                                                                                + sizeof(RTSGSEG)));
+                if (!pThis->Ramfb.paPgLocks)
+                    return VERR_NO_MEMORY;
+
+                pThis->Ramfb.cPgLocks  = cPages;
+                pThis->Ramfb.papvPages = (const void **)&pThis->Ramfb.paPgLocks[cPages];
+                pThis->Ramfb.paSegs    = (PRTSGSEG)&pThis->Ramfb.papvPages[cPages];
+                PRTGCPHYS paGCPhysPages = (PRTGCPHYS)&pThis->Ramfb.papvPages[cPages];
+
+                for (uint32_t i = 0; i < cPages; i++)
+                {
+                    paGCPhysPages[i] = GCPhysStart;
+                    GCPhysStart += GUEST_PAGE_SIZE;
+                }
+
+                int rc = PDMDevHlpPhysBulkGCPhys2CCPtrReadOnly(pDevIns, cPages, paGCPhysPages, 0 /*fFlags*/,
+                                                               pThis->Ramfb.papvPages, pThis->Ramfb.paPgLocks);
+                if (RT_FAILURE(rc))
+                {
+                    RTMemFree(pThis->Ramfb.paPgLocks);
+                    pThis->Ramfb.paPgLocks = NULL;
+                    pThis->Ramfb.papvPages = NULL;
+                    pThis->Ramfb.paSegs    = NULL;
+                    pThis->Ramfb.cPgLocks  = 0;
+                    return rc;
+                }
+
+                /* Compress the segment pointers. */
+                uint32_t iSeg = 0;
+
+                pThis->Ramfb.paSegs[0].pvSeg = (void *)((const uint8_t *)pThis->Ramfb.papvPages[0] + offPage);
+                pThis->Ramfb.paSegs[0].cbSeg = GUEST_PAGE_SIZE - offPage;
+
+                for (uint32_t i = 1; i < pThis->Ramfb.cPgLocks; ++i)
+                {
+                    /* Contiguous memory mapping? */
+                    if ((uintptr_t)pThis->Ramfb.papvPages[i] == (uintptr_t)pThis->Ramfb.paSegs[iSeg].pvSeg + pThis->Ramfb.paSegs[iSeg].cbSeg)
+                    {
+                        Assert(pThis->Ramfb.paSegs[iSeg].cbSeg);
+                        pThis->Ramfb.paSegs[iSeg].cbSeg += GUEST_PAGE_SIZE;
+                    }
+                    else
+                    {
+                        iSeg++;
+                        pThis->Ramfb.paSegs[iSeg].pvSeg = (void *)pThis->Ramfb.papvPages[i];
+                        pThis->Ramfb.paSegs[iSeg].cbSeg = GUEST_PAGE_SIZE;
+                    }
+                }
+
+                RTSgBufInit(&pThis->Ramfb.SgBuf, pThis->Ramfb.paSegs, iSeg + 1);
+            }
+
+            RTSgBufReset(&pThis->Ramfb.SgBuf);
+            size_t cbCopied = RTSgBufCopyToBuf(&pThis->Ramfb.SgBuf, pThis->pDrvL0->pbData, pThis->RamfbCfg.cbStride * pThis->RamfbCfg.cHeight);
+            Assert(cbCopied == pThis->RamfbCfg.cbStride * pThis->RamfbCfg.cHeight); RT_NOREF(cbCopied);
             AssertPtr(pThis->pDrvL0);
             pThis->pDrvL0->pfnUpdateRect(pThis->pDrvL0, 0, 0, pThis->RamfbCfg.cWidth, pThis->RamfbCfg.cHeight);
         }
@@ -1732,7 +1830,7 @@ static DECLCALLBACK(int) qemuFwCfgR3RamfbPortUpdateDisplay(PPDMIDISPLAYPORT pInt
     else
         LogFlowFunc(("Rendering disabled or no RAM framebuffer set up\n"));
 
-    PDMDevHlpCritSectLeave(pThis->pDevIns, &pThis->CritSectRamfb);
+    PDMDevHlpCritSectLeave(pDevIns, &pThis->CritSectRamfb);
     return VINF_SUCCESS;
 }
 
@@ -2092,6 +2190,15 @@ static DECLCALLBACK(int) qemuFwCfgDestruct(PPDMDEVINS pDevIns)
     if (pThis->hVfsFileInitrd != NIL_RTVFSFILE)
         RTVfsFileRelease(pThis->hVfsFileInitrd);
     pThis->hVfsFileInitrd = NIL_RTVFSFILE;
+
+    if (pThis->Ramfb.paPgLocks)
+    {
+        RTMemFree(pThis->Ramfb.paPgLocks);
+        pThis->Ramfb.paPgLocks = NULL;
+        pThis->Ramfb.papvPages = NULL;
+        pThis->Ramfb.paSegs    = NULL;
+        pThis->Ramfb.cPgLocks  = 0;
+    }
 
     return VINF_SUCCESS;
 }
