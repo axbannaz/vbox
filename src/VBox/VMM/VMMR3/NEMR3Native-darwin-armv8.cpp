@@ -930,6 +930,10 @@ static int nemR3DarwinCopyStateFromHv(PVMCC pVM, PVMCPUCC pVCpu, uint64_t fWhat)
 {
     RT_NOREF(pVM);
 
+    fWhat &= pVCpu->cpum.GstCtx.fExtrn; /* Exclude state we might have fetched (and modified) already. */
+    if (!fWhat)
+        return VINF_SUCCESS;
+
     hv_return_t hrc = hv_vcpu_get_sys_reg(pVCpu->nem.s.hVCpu, HV_SYS_REG_CNTV_CTL_EL0, &pVCpu->cpum.GstCtx.CntvCtlEl0);
     if (hrc == HV_SUCCESS)
         hrc = hv_vcpu_get_sys_reg(pVCpu->nem.s.hVCpu, HV_SYS_REG_CNTV_CVAL_EL0, &pVCpu->cpum.GstCtx.CntvCValEl0);
