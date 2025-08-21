@@ -3188,8 +3188,13 @@ static DECLCALLBACK(int) vmsvga3dBackTerminate(PVGASTATECC pThisCC)
     AssertReturn(pState, VERR_INVALID_STATE);
 
     if (pState->pBackend)
+    {
         dxDeviceDestroy(pState->pBackend, &pState->pBackend->dxDevice);
 
+#if defined(VBOX_DX_LIBRARY)
+        RTLdrClose(pState->pBackend->hD3D11);
+#endif
+    }
     return VINF_SUCCESS;
 }
 
