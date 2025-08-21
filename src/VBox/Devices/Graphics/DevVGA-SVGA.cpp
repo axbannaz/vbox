@@ -4483,7 +4483,7 @@ static void vmsvgaR3FifoHandleExtCmd(PPDMDEVINS pDevIns, PVGASTATE pThis, PVGAST
 
 # ifdef VBOX_WITH_VMSVGA3D
             /* The 3d subsystem must be shut down from the fifo thread. */
-            if (pThis->svga.f3DEnabled)
+            if (pThis->svga.f3DEnabled || pThis->svga.fVMSVGA2dGBO)
                 vmsvga3dTerminate(pThisCC);
 # endif
             vmsvgaR3TerminateSvgaState(pThis, pThisCC);
