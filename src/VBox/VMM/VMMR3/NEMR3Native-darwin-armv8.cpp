@@ -1086,8 +1086,10 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     RT_NOREF(pVM);
     hv_return_t hrc = HV_SUCCESS;
 
-    if (   (pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_GPRS_MASK | CPUMCTX_EXTRN_PC | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR))
-        !=                              (CPUMCTX_EXTRN_GPRS_MASK | CPUMCTX_EXTRN_PC | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR))
+    uint64_t const fExtrn = pVCpu->cpum.GstCtx.fExtrn;
+
+    if (   (fExtrn & (CPUMCTX_EXTRN_GPRS_MASK | CPUMCTX_EXTRN_PC | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR))
+        !=           (CPUMCTX_EXTRN_GPRS_MASK | CPUMCTX_EXTRN_PC | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR))
     {
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumRegs); i++)
         {
@@ -1100,7 +1102,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_V0_V31))
+        && !(fExtrn & CPUMCTX_EXTRN_V0_V31))
     {
         /* SIMD/FP registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumFpRegs); i++)
@@ -1111,7 +1113,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_SYSREG_DEBUG))
+        && !(fExtrn & CPUMCTX_EXTRN_SYSREG_DEBUG))
     {
         /* Debug registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumDbgRegs); i++)
@@ -1122,7 +1124,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS))
+        && !(fExtrn & CPUMCTX_EXTRN_SYSREG_PAUTH_KEYS))
     {
         /* Debug registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumPAuthKeyRegs); i++)
@@ -1133,8 +1135,8 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        &&     (pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_SPSR | CPUMCTX_EXTRN_ELR | CPUMCTX_EXTRN_SP | CPUMCTX_EXTRN_SYSREG_MISC))
-            !=                              (CPUMCTX_EXTRN_SPSR | CPUMCTX_EXTRN_ELR | CPUMCTX_EXTRN_SP | CPUMCTX_EXTRN_SYSREG_MISC))
+        &&     (fExtrn & (CPUMCTX_EXTRN_SPSR | CPUMCTX_EXTRN_ELR | CPUMCTX_EXTRN_SP | CPUMCTX_EXTRN_SYSREG_MISC))
+            !=           (CPUMCTX_EXTRN_SPSR | CPUMCTX_EXTRN_ELR | CPUMCTX_EXTRN_SP | CPUMCTX_EXTRN_SYSREG_MISC))
     {
         /* System registers. */
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumSysRegs); i++)
@@ -1148,7 +1150,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_SCTLR_TCR_TTBR))
+        && !(fExtrn & CPUMCTX_EXTRN_SCTLR_TCR_TTBR))
     {
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumSysRegsPg); i++)
         {
@@ -1159,7 +1161,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
 
     if (   hrc == HV_SUCCESS
         && pVM->nem.s.fMacOsSequia
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_SYSREG_MISC))
+        && !(fExtrn & CPUMCTX_EXTRN_SYSREG_MISC))
     {
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumSysRegsSequioa); i++)
         {
@@ -1170,7 +1172,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_SYSREG_EL2)
+        && !(fExtrn & CPUMCTX_EXTRN_SYSREG_EL2)
         && pVM->nem.s.fEl2Enabled)
     {
         for (uint32_t i = 0; i < RT_ELEMENTS(s_aCpumEl2SysRegs); i++)
@@ -1182,7 +1184,7 @@ static int nemR3DarwinExportGuestState(PVMCC pVM, PVMCPUCC pVCpu)
     }
 
     if (   hrc == HV_SUCCESS
-        && !(pVCpu->cpum.GstCtx.fExtrn & CPUMCTX_EXTRN_PSTATE))
+        && !(fExtrn & CPUMCTX_EXTRN_PSTATE))
         hrc = hv_vcpu_set_reg(pVCpu->nem.s.hVCpu, HV_REG_CPSR, pVCpu->cpum.GstCtx.fPState);
 
     pVCpu->cpum.GstCtx.fExtrn |= CPUMCTX_EXTRN_ALL | CPUMCTX_EXTRN_KEEPER_NEM;
