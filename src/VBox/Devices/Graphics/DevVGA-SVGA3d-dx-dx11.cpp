@@ -204,16 +204,59 @@ typedef struct VMSVGA3DBACKENDSURFACE
     /* Render target views, depth stencil views and shader resource views created for this texture or buffer. */
     RTLISTANCHOR listView;                        /* DXVIEW */
 
+#ifdef DX_NEW_HWSCREEN
+    /* Screen targets are blitted to the screen. */
+    ID3D11ShaderResourceView *pScreenTargetSRV;        /* Shader resource view with same same format as the texture. */
+    bool                      fScreenTargetSRGB;       /* Whether the surface format is one of *_SRGB formats. */
+#endif
+
 } VMSVGA3DBACKENDSURFACE;
 
 
 typedef struct VMSVGAHWSCREEN
 {
+#ifndef DX_NEW_HWSCREEN
     ID3D11Texture2D            *pTexture;         /* Shared texture for the screen content. Only used as CopyResource target. */
     IDXGIResource              *pDxgiResource;    /* Interface of the texture. */
     IDXGIKeyedMutex            *pDXGIKeyedMutex;  /* Synchronization interface for the render device. */
     HANDLE                      SharedHandle;     /* The shared handle of this structure. */
     uint32_t                    sidScreenTarget;  /* The source surface for this screen. */
+#else
+    uint32_t                    cHwScreenWidth;        /* Width of pScreenTexture. */
+    uint32_t                    cHwScreenHeight;       /* Height of pScreenTexture. */
+
+    ID3D11Texture2D            *pScreenTexture;        /* Texture for the screen content. Possibly scaled. */
+    ID3D11RenderTargetView     *pScreenTextureRTV;     /* Render target view of pScreenTexture. */
+    ID3D11Texture2D            *pStagingTexture;       /* Same resolution as pScreenTexture for async copy to system memory. */
+
+    ID3D11Texture2D            *pScreenObjectTextureBGRA; /* Target texture for a screen object BlitToScreen.
+                                                           * NULL if a screen target is used by the guest (rather than screen object). */
+    ID3D11Texture2D            *pScreenObjectTextureRGBA; /* Target texture for a screen object BlitToScreen.
+                                                           * NULL if a screen target is used by the guest (rather than screen object). */
+    ID3D11ShaderResourceView   *pScreenTargetSrvBGRA;  /* Shader resource view of pScreenObjectTextureBGRA. */
+    ID3D11ShaderResourceView   *pScreenTargetSrvRGBA;  /* Shader resource view of pScreenObjectTextureRGBA. */
+
+    uint32_t                    sidScreenTarget;       /* The bound screen target surface for this screen or SVGA3D_INVALID_ID. */
+
+    ID3D11Buffer               *pVSConstantBuffer;
+    ID3D11VertexShader         *pVertexShader;
+    ID3D11PixelShader          *pPixelShaderPassthrough;
+    ID3D11PixelShader          *pPixelShaderSRGB;
+    ID3D11SamplerState         *pSamplerState;
+    ID3D11RasterizerState1     *pRasterizerState;
+    ID3D11BlendState1          *pBlendState;
+
+    ID3D11Query                *pScreenReadbackQuery;
+    bool                        fReadingBack;
+    uint64_t                    u64ReadbackFence;      /* Incremented on each readback. */
+    uint32_t                    idxLastUpdate;         /* Index in aUpdates where last updates start. */
+    uint32_t                    cUpdates;              /* Number of pending updates in aUpdates. */
+    struct
+    {
+        SVGASignedRect          rect;                  /* Rectangle to be updated. */
+        uint64_t                u64ReadbackFence;      /* Rectangle must be updated if a readback with a greater fence has been completed. */
+    } aUpdates[8];                                     /* Usually there is a small number (up to 4) of pending updates. */
+#endif
 } VMSVGAHWSCREEN;
 
 
@@ -2447,6 +2490,11 @@ static UINT dxBindFlags(SVGA3dSurfaceAllFlags surfaceFlags)
     if (surfaceFlags & SVGA3D_SURFACE_BIND_UAVIEW)          BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
     if (surfaceFlags & SVGA3D_SURFACE_RESERVED1)            BindFlags |= D3D11_BIND_DECODER;
 
+#ifdef DX_NEW_HWSCREEN
+    /* Screen target texture is used as a shader resource for blitting to the screen. */
+    if (surfaceFlags & SVGA3D_SURFACE_SCREENTARGET)         BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+#endif
+
     return BindFlags;
 }
 
@@ -2961,6 +3009,29 @@ static int vmsvga3dBackSurfaceCreateResource(PVGASTATECC pThisCC, PVMSVGA3DSURFA
                              dxgiFormat, Usage, BindFlags, CPUAccessFlags, MiscFlags,
                              &pBackendSurface->u.pResource, &pBackendSurface->enmResType);
         Assert(SUCCEEDED(hr));
+#ifdef DX_NEW_HWSCREEN
+        if (SUCCEEDED(hr))
+        {
+            /* Screen target texture is used as a shader resource for blitting to the screen. */
+            if (pSurface->f.surfaceFlags & SVGA3D_SURFACE_SCREENTARGET)
+            {
+                Assert(pBackendSurface->enmResType == VMSVGA3D_RESTYPE_TEXTURE_2D);
+                if (pBackendSurface->enmResType == VMSVGA3D_RESTYPE_TEXTURE_2D)
+                {
+                    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+                    srvDesc.Format                    = dxgiFormat;
+                    srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+                    srvDesc.Texture2D.MostDetailedMip = 0;
+                    srvDesc.Texture2D.MipLevels       = 1;
+                    hr = pDXDevice->pDevice->CreateShaderResourceView(pBackendSurface->u.pTexture2D, &srvDesc, &pBackendSurface->pScreenTargetSRV);
+                    Assert(SUCCEEDED(hr));
+                    pBackendSurface->fScreenTargetSRGB = dxgiFormat == DXGI_FORMAT_R8G8B8A8_UNORM_SRGB
+                                                      || dxgiFormat == DXGI_FORMAT_B8G8R8A8_UNORM_SRGB
+                                                      || dxgiFormat == DXGI_FORMAT_B8G8R8X8_UNORM_SRGB;
+                }
+            }
+        }
+#endif
         if (SUCCEEDED(hr))
         {
             LogFunc(("sid = %u\n", pSurface->id));
@@ -3123,6 +3194,7 @@ static DECLCALLBACK(int) vmsvga3dBackTerminate(PVGASTATECC pThisCC)
 }
 
 
+#ifndef DX_NEW_HWSCREEN
 /** @todo Such structures must be in VBoxVideo3D.h */
 typedef struct VBOX3DNOTIFYDEFINESCREEN
 {
@@ -3207,14 +3279,52 @@ static int vmsvga3dDrvNotifyUpdate(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScr
 
     return pThisCC->pDrv->pfn3DNotifyProcess(pThisCC->pDrv, &n.Core);
 }
+#endif /* !DX_NEW_HWSCREEN */
 
+
+#ifdef DX_NEW_HWSCREEN
+#include "shaders/d3d11screen.hlsl.vs.h"
+#include "shaders/d3d11screen.hlsl.ps.h"
+#include "shaders/d3d11screen.hlsl.ps_SRGB.h"
+
+struct HwScreenUpdateVSConstants
+{
+    /* Normalized texture coordinates of the source rectangle are computed
+     * from auto-generated (0,0)-(1,1) rectangle:
+     *   u = x * srcTexcoordScaleX + srcTexcoordOffsetX
+     *   v = y * srcTexcoordScaleY + srcTexcoordOffsetY
+     * where x and y are from the generated (0,0), (1,0), (0,1), (1,1) points.
+     */
+    float srcTexcoordScaleX;
+    float srcTexcoordScaleY;
+    float srcTexcoordOffsetX;
+    float srcTexcoordOffsetY;
+
+    /* Normalized target coordinates of the destination rectangle are computed
+     * from auto-generated (-1,-1)-(1,1) rectangle:
+     *   u = x * dstCoordScaleX + dstCoordOffsetX
+     *   v = y * dstCoordScaleY + dstCoordOffsetY
+     * where x and y are from the generated (-1,1), (1,1), (-1,-1), (1,-1) points.
+     */
+    float dstCoordScaleX;
+    float dstCoordScaleY;
+    float dstCoordOffsetX;
+    float dstCoordOffsetY;
+};
+#endif
+
+#ifndef DX_NEW_HWSCREEN
 static int vmsvga3dHwScreenCreate(PVMSVGA3DSTATE pState, uint32_t cWidth, uint32_t cHeight, VMSVGAHWSCREEN *p)
+#else
+static int vmsvga3dHwScreenCreate(PVMSVGA3DSTATE pState, uint32_t cWidth, uint32_t cHeight, bool fScreenTarget, VMSVGAHWSCREEN *p)
+#endif
 {
     PVMSVGA3DBACKEND pBackend = pState->pBackend;
 
     DXDEVICE *pDXDevice = &pBackend->dxDevice;
     AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
 
+#ifndef DX_NEW_HWSCREEN
     D3D11_TEXTURE2D_DESC td;
     RT_ZERO(td);
     td.Width              = cWidth;
@@ -3247,17 +3357,226 @@ static int vmsvga3dHwScreenCreate(PVMSVGA3DSTATE pState, uint32_t cWidth, uint32
 
     AssertFailed();
     return VERR_NOT_SUPPORTED;
+#else /* DX_NEW_HWSCREEN */
+    /* Dimensions of the final screen output, optionally with scaling. */
+    /** @todo Apply scaling factor: HwWidth = (Width * a) / b. */
+    p->cHwScreenWidth = cWidth;
+    p->cHwScreenHeight = cHeight;
+
+    p->sidScreenTarget = SVGA3D_INVALID_ID;
+
+    HRESULT hr;
+    D3D11_TEXTURE2D_DESC td;
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDesc;
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    D3D11_BUFFER_DESC bd;
+    D3D11_SAMPLER_DESC samplerDesc;
+    D3D11_RASTERIZER_DESC1 rasterizerDesc;
+    D3D11_BLEND_DESC1 blendDesc;
+    D3D11_QUERY_DESC qd;
+
+    /* Create the screen texture. */
+    RT_ZERO(td);
+    td.Width              = p->cHwScreenWidth;
+    td.Height             = p->cHwScreenHeight;
+    td.MipLevels          = 1;
+    td.ArraySize          = 1;
+    td.Format             = DXGI_FORMAT_B8G8R8A8_UNORM;
+    td.SampleDesc.Count   = 1;
+    td.SampleDesc.Quality = 0;
+    td.Usage              = D3D11_USAGE_DEFAULT;
+    td.BindFlags          = D3D11_BIND_RENDER_TARGET;
+    td.CPUAccessFlags     = 0;
+    td.MiscFlags          = 0;
+
+    hr = pDXDevice->pDevice->CreateTexture2D(&td, 0, &p->pScreenTexture);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    /* Staging texture for downloading the screen content to the system memory. */
+    td.Usage              = D3D11_USAGE_STAGING;
+    td.BindFlags          = 0;
+    td.CPUAccessFlags     = D3D11_CPU_ACCESS_READ;
+
+    hr = pDXDevice->pDevice->CreateTexture2D(&td, 0, &p->pStagingTexture);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    /* Render target view for the screen texture. */
+    RT_ZERO(rtvDesc);
+    rtvDesc.Format             = td.Format;
+    rtvDesc.ViewDimension      = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvDesc.Texture2D.MipSlice = 0;
+    hr = pDXDevice->pDevice->CreateRenderTargetView(p->pScreenTexture, &rtvDesc, &p->pScreenTextureRTV);
+
+    if (!fScreenTarget)
+    {
+        /* Create an intermediate texture which will be a destination for CopySubresourceRegion
+         * from a surface in vmsvga3dBackSurfaceBlitToScreen for screen objects.
+         * Screen targets do not need this because a screen target surface always have a shader resource view.
+         */
+        RT_ZERO(td);
+        td.Width              = cWidth; /* Same size as the guest resolution. */
+        td.Height             = cHeight;
+        td.MipLevels          = 1;
+        td.ArraySize          = 1;
+        td.Format             = DXGI_FORMAT_B8G8R8A8_TYPELESS;
+        td.SampleDesc.Count   = 1;
+        td.SampleDesc.Quality = 0;
+        td.Usage              = D3D11_USAGE_DEFAULT;
+        td.BindFlags          = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+        td.CPUAccessFlags     = 0;
+        td.MiscFlags          = 0;
+
+        hr = pDXDevice->pDevice->CreateTexture2D(&td, 0, &p->pScreenObjectTextureBGRA);
+        AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+        td.Format             = DXGI_FORMAT_R8G8B8A8_TYPELESS;
+
+        hr = pDXDevice->pDevice->CreateTexture2D(&td, 0, &p->pScreenObjectTextureRGBA);
+        AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+        if (p->pScreenObjectTextureBGRA)
+        {
+            /* If a screen object is in use (rather than a screen target) then immediately create
+             * a shader resource view for the screen object texture.
+             */
+            RT_ZERO(srvDesc);
+            srvDesc.Format                    = DXGI_FORMAT_B8G8R8A8_UNORM;
+            srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MostDetailedMip = 0;
+            srvDesc.Texture2D.MipLevels       = 1;
+            hr = pDXDevice->pDevice->CreateShaderResourceView(p->pScreenObjectTextureBGRA, &srvDesc, &p->pScreenTargetSrvBGRA);
+            AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+        }
+
+        if (p->pScreenObjectTextureRGBA)
+        {
+            /* If a screen object is in use (rather than a screen target) then immediately create
+             * a shader resource view for the screen object texture.
+             */
+            RT_ZERO(srvDesc);
+            srvDesc.Format                    = DXGI_FORMAT_R8G8B8A8_UNORM;
+            srvDesc.ViewDimension             = D3D11_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MostDetailedMip = 0;
+            srvDesc.Texture2D.MipLevels       = 1;
+            hr = pDXDevice->pDevice->CreateShaderResourceView(p->pScreenObjectTextureRGBA, &srvDesc, &p->pScreenTargetSrvRGBA);
+            AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+        }
+    }
+
+    /* Vertex shader constant buffer. */
+    RT_ZERO(bd);
+    bd.ByteWidth             = sizeof(HwScreenUpdateVSConstants);
+    bd.Usage                 = D3D11_USAGE_DYNAMIC;
+    bd.BindFlags             = D3D11_BIND_CONSTANT_BUFFER;
+    bd.CPUAccessFlags        = D3D11_CPU_ACCESS_WRITE;
+    //bd.MiscFlags           = 0;
+    //bd.StructureByteStride = 0;
+
+    hr = pDXDevice->pDevice->CreateBuffer(&bd, NULL, &p->pVSConstantBuffer);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    /* Shaders */
+    hr = pDXDevice->pDevice->CreateVertexShader(g_vs_screen, sizeof(g_vs_screen), NULL, &p->pVertexShader);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    hr = pDXDevice->pDevice->CreatePixelShader(g_ps_screen, sizeof(g_ps_screen), NULL, &p->pPixelShaderPassthrough);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    hr = pDXDevice->pDevice->CreatePixelShader(g_ps_screen_SRGB, sizeof(g_ps_screen_SRGB), NULL, &p->pPixelShaderSRGB);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    /* State objects. */
+    samplerDesc.Filter         = D3D11_FILTER_MIN_MAG_MIP_POINT;
+    samplerDesc.AddressU       = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressV       = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.AddressW       = D3D11_TEXTURE_ADDRESS_WRAP;
+    samplerDesc.MipLODBias     = 0.0f;
+    samplerDesc.MaxAnisotropy  = 1;
+    samplerDesc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+    samplerDesc.BorderColor[0] = 0.0f;
+    samplerDesc.BorderColor[1] = 0.0f;
+    samplerDesc.BorderColor[2] = 0.0f;
+    samplerDesc.BorderColor[3] = 0.0f;
+    samplerDesc.MinLOD         = 0.0f;
+    samplerDesc.MaxLOD         = 0.0f;
+    hr = pDXDevice->pDevice->CreateSamplerState(&samplerDesc, &p->pSamplerState);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    rasterizerDesc.FillMode              = D3D11_FILL_SOLID;
+    rasterizerDesc.CullMode              = D3D11_CULL_NONE;
+    rasterizerDesc.FrontCounterClockwise = FALSE;
+    rasterizerDesc.DepthBias             = 0;
+    rasterizerDesc.DepthBiasClamp        = 0.0f;
+    rasterizerDesc.SlopeScaledDepthBias  = 0.0f;
+    rasterizerDesc.DepthClipEnable       = FALSE;
+    rasterizerDesc.ScissorEnable         = FALSE;
+    rasterizerDesc.MultisampleEnable     = FALSE;
+    rasterizerDesc.AntialiasedLineEnable = FALSE;
+    rasterizerDesc.ForcedSampleCount     = 0;
+    hr = pDXDevice->pDevice->CreateRasterizerState1(&rasterizerDesc, &p->pRasterizerState);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    blendDesc.AlphaToCoverageEnable = FALSE;
+    blendDesc.IndependentBlendEnable = FALSE;
+    for (unsigned i = 0; i < RT_ELEMENTS(blendDesc.RenderTarget); ++i)
+    {
+        blendDesc.RenderTarget[i].BlendEnable           = FALSE;
+        blendDesc.RenderTarget[i].LogicOpEnable         = FALSE;
+        blendDesc.RenderTarget[i].SrcBlend              = D3D11_BLEND_SRC_COLOR;
+        blendDesc.RenderTarget[i].DestBlend             = D3D11_BLEND_ZERO;
+        blendDesc.RenderTarget[i].BlendOp               = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[i].SrcBlendAlpha         = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[i].DestBlendAlpha        = D3D11_BLEND_ZERO;
+        blendDesc.RenderTarget[i].BlendOpAlpha          = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[i].LogicOp               = D3D11_LOGIC_OP_CLEAR;
+        blendDesc.RenderTarget[i].RenderTargetWriteMask = 0xF;
+    }
+    hr = pDXDevice->pDevice->CreateBlendState1(&blendDesc, &p->pBlendState);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    RT_ZERO(qd);
+    qd.Query = D3D11_QUERY_EVENT;
+
+    hr = pDXDevice->pDevice->CreateQuery(&qd, &p->pScreenReadbackQuery);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+
+    p->fReadingBack = false;
+    p->u64ReadbackFence = 1;
+    p->idxLastUpdate = 0;
+    p->cUpdates = 0;
+    RT_ZERO(p->aUpdates);
+
+    return VINF_SUCCESS;
+#endif /* DX_NEW_HWSCREEN */
 }
 
 
 static void vmsvga3dHwScreenDestroy(PVMSVGA3DSTATE pState, VMSVGAHWSCREEN *p)
 {
     RT_NOREF(pState);
+#ifndef DX_NEW_HWSCREEN
     D3D_RELEASE(p->pDXGIKeyedMutex);
     D3D_RELEASE(p->pDxgiResource);
     D3D_RELEASE(p->pTexture);
     p->SharedHandle = 0;
     p->sidScreenTarget = SVGA_ID_INVALID;
+#else /* DX_NEW_HWSCREEN */
+    D3D_RELEASE(p->pBlendState);
+    D3D_RELEASE(p->pRasterizerState);
+    D3D_RELEASE(p->pSamplerState);
+    D3D_RELEASE(p->pPixelShaderPassthrough);
+    D3D_RELEASE(p->pPixelShaderSRGB);
+    D3D_RELEASE(p->pVertexShader);
+    D3D_RELEASE(p->pVSConstantBuffer);
+    D3D_RELEASE(p->pScreenTargetSrvRGBA);
+    D3D_RELEASE(p->pScreenTargetSrvBGRA);
+    D3D_RELEASE(p->pScreenObjectTextureRGBA);
+    D3D_RELEASE(p->pScreenObjectTextureBGRA);
+    D3D_RELEASE(p->pScreenTextureRTV);
+    D3D_RELEASE(p->pStagingTexture);
+    D3D_RELEASE(p->pScreenTexture);
+    D3D_RELEASE(p->pScreenReadbackQuery);
+#endif /* DX_NEW_HWSCREEN */
 }
 
 
@@ -3278,6 +3597,7 @@ static DECLCALLBACK(int) vmsvga3dBackDefineScreen(PVGASTATE pThis, PVGASTATECC p
     VMSVGAHWSCREEN *p = (VMSVGAHWSCREEN *)RTMemAllocZ(sizeof(VMSVGAHWSCREEN));
     AssertPtrReturn(p, VERR_NO_MEMORY);
 
+#ifndef DX_NEW_HWSCREEN
     p->sidScreenTarget = SVGA_ID_INVALID;
 
     int rc = vmsvga3dDrvNotifyDefineScreen(pThisCC, pScreen);
@@ -3288,6 +3608,10 @@ static DECLCALLBACK(int) vmsvga3dBackDefineScreen(PVGASTATE pThis, PVGASTATECC p
         if (RT_SUCCESS(rc))
             LogRel4(("VMSVGA: vmsvga3dBackDefineScreen: created\n"));
     }
+#else /* DX_NEW_HWSCREEN */
+    int rc = vmsvga3dHwScreenCreate(pState, pScreen->cWidth, pScreen->cHeight,
+                                    pScreen->offVRAM == VMSVGA_VRAM_OFFSET_SCREEN_TARGET, p);
+#endif /* DX_NEW_HWSCREEN */
 
     if (RT_SUCCESS(rc))
     {
@@ -3310,7 +3634,9 @@ static DECLCALLBACK(int) vmsvga3dBackDestroyScreen(PVGASTATECC pThisCC, VMSVGASC
     PVMSVGA3DSTATE pState = pThisCC->svga.p3dState;
     AssertReturn(pState, VERR_INVALID_STATE);
 
+#ifndef DX_NEW_HWSCREEN
     vmsvga3dDrvNotifyDestroyScreen(pThisCC, pScreen);
+#endif
 
     if (pScreen->pHwScreen)
     {
@@ -3321,6 +3647,358 @@ static DECLCALLBACK(int) vmsvga3dBackDestroyScreen(PVGASTATECC pThisCC, VMSVGASC
 
     return VINF_SUCCESS;
 }
+
+
+#ifdef DX_NEW_HWSCREEN
+typedef struct DXPIPELINESTATE
+{
+    D3D11_PRIMITIVE_TOPOLOGY    Topology;
+    ID3D11InputLayout          *pInputLayout;
+    ID3D11Buffer               *pConstantBuffer;
+    ID3D11VertexShader         *pVertexShader;
+    ID3D11HullShader           *pHullShader;
+    ID3D11DomainShader         *pDomainShader;
+    ID3D11GeometryShader       *pGeometryShader;
+    ID3D11ShaderResourceView   *pShaderResourceView;
+    ID3D11PixelShader          *pPixelShader;
+    ID3D11SamplerState         *pSamplerState;
+    ID3D11RasterizerState      *pRasterizerState;
+    ID3D11BlendState           *pBlendState;
+    FLOAT                       BlendFactor[4];
+    UINT                        SampleMask;
+    ID3D11RenderTargetView     *apRenderTargetView[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];
+    ID3D11DepthStencilView     *pDepthStencilView;
+    UINT                        NumViewports;
+    D3D11_VIEWPORT              aViewport[D3D11_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE];
+} DXPIPELINESTATE;
+
+
+static void dxSavePipelineState(DXDEVICE *pDXDevice, DXPIPELINESTATE *pSavedState)
+{
+    pDXDevice->pImmediateContext->IAGetPrimitiveTopology(&pSavedState->Topology);
+    pDXDevice->pImmediateContext->IAGetInputLayout(&pSavedState->pInputLayout);
+    pDXDevice->pImmediateContext->VSGetConstantBuffers(0, 1, &pSavedState->pConstantBuffer);
+    pDXDevice->pImmediateContext->VSGetShader(&pSavedState->pVertexShader, NULL, NULL);
+    pDXDevice->pImmediateContext->HSGetShader(&pSavedState->pHullShader, NULL, NULL);
+    pDXDevice->pImmediateContext->DSGetShader(&pSavedState->pDomainShader, NULL, NULL);
+    pDXDevice->pImmediateContext->GSGetShader(&pSavedState->pGeometryShader, NULL, NULL);
+    pDXDevice->pImmediateContext->PSGetShaderResources(0, 1, &pSavedState->pShaderResourceView);
+    pDXDevice->pImmediateContext->PSGetShader(&pSavedState->pPixelShader, NULL, NULL);
+    pDXDevice->pImmediateContext->PSGetSamplers(0, 1, &pSavedState->pSamplerState);
+    pDXDevice->pImmediateContext->RSGetState(&pSavedState->pRasterizerState);
+    pDXDevice->pImmediateContext->OMGetBlendState(&pSavedState->pBlendState, pSavedState->BlendFactor, &pSavedState->SampleMask);
+    pDXDevice->pImmediateContext->OMGetRenderTargets(RT_ELEMENTS(pSavedState->apRenderTargetView), pSavedState->apRenderTargetView, &pSavedState->pDepthStencilView);
+    pSavedState->NumViewports = RT_ELEMENTS(pSavedState->aViewport);
+    pDXDevice->pImmediateContext->RSGetViewports(&pSavedState->NumViewports, &pSavedState->aViewport[0]);
+}
+
+
+static void dxRestorePipelineState(DXDEVICE *pDXDevice, DXPIPELINESTATE &SavedState)
+{
+    pDXDevice->pImmediateContext->IASetPrimitiveTopology(SavedState.Topology);
+    pDXDevice->pImmediateContext->IASetInputLayout(SavedState.pInputLayout);
+    D3D_RELEASE(SavedState.pInputLayout);
+    pDXDevice->pImmediateContext->VSSetConstantBuffers(0, 1, &SavedState.pConstantBuffer);
+    D3D_RELEASE(SavedState.pConstantBuffer);
+    pDXDevice->pImmediateContext->VSSetShader(SavedState.pVertexShader, NULL, 0);
+    D3D_RELEASE(SavedState.pVertexShader);
+
+    pDXDevice->pImmediateContext->HSSetShader(SavedState.pHullShader, NULL, 0);
+    D3D_RELEASE(SavedState.pHullShader);
+    pDXDevice->pImmediateContext->DSSetShader(SavedState.pDomainShader, NULL, 0);
+    D3D_RELEASE(SavedState.pDomainShader);
+    pDXDevice->pImmediateContext->GSSetShader(SavedState.pGeometryShader, NULL, 0);
+    D3D_RELEASE(SavedState.pGeometryShader);
+
+    pDXDevice->pImmediateContext->PSSetShaderResources(0, 1, &SavedState.pShaderResourceView);
+    D3D_RELEASE(SavedState.pShaderResourceView);
+    pDXDevice->pImmediateContext->PSSetShader(SavedState.pPixelShader, NULL, 0);
+    D3D_RELEASE(SavedState.pPixelShader);
+    pDXDevice->pImmediateContext->PSSetSamplers(0, 1, &SavedState.pSamplerState);
+    D3D_RELEASE(SavedState.pSamplerState);
+    pDXDevice->pImmediateContext->RSSetState(SavedState.pRasterizerState);
+    D3D_RELEASE(SavedState.pRasterizerState);
+    pDXDevice->pImmediateContext->OMSetBlendState(SavedState.pBlendState, SavedState.BlendFactor, SavedState.SampleMask);
+    D3D_RELEASE(SavedState.pBlendState);
+    pDXDevice->pImmediateContext->OMSetRenderTargets(RT_ELEMENTS(SavedState.apRenderTargetView), SavedState.apRenderTargetView, SavedState.pDepthStencilView);
+    D3D_RELEASE_ARRAY(RT_ELEMENTS(SavedState.apRenderTargetView), SavedState.apRenderTargetView);
+    D3D_RELEASE(SavedState.pDepthStencilView);
+    pDXDevice->pImmediateContext->RSSetViewports(SavedState.NumViewports, &SavedState.aViewport[0]);
+}
+
+
+static void dxUpdateScreenBegin(DXDEVICE *pDXDevice, VMSVGAHWSCREEN *pHwScreen,
+                                ID3D11ShaderResourceView *pScreenTargetSrv, bool fScreenTargetSRGB, DXPIPELINESTATE *pSavedState)
+{
+    /*
+     * Prepare pipeline for blits from pScreenTargetSrv to pScreenTextureRTV with scaling and format conversion.
+     */
+    dxSavePipelineState(pDXDevice, pSavedState);
+
+    /*
+     * Setup pipeline.
+     */
+    pDXDevice->pImmediateContext->VSSetConstantBuffers(0, 1, &pHwScreen->pVSConstantBuffer);
+
+    /* Render target is the screen texture. */
+    pDXDevice->pImmediateContext->OMSetRenderTargets(1, &pHwScreen->pScreenTextureRTV, NULL);
+
+    /* Input assembler uses SV_VertexId to generate vertices. */
+    pDXDevice->pImmediateContext->IASetInputLayout(NULL);
+    pDXDevice->pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+    /* Vertex shader. */
+    pDXDevice->pImmediateContext->VSSetShader(pHwScreen->pVertexShader, NULL, 0);
+
+    /* Unused shaders. */
+    pDXDevice->pImmediateContext->HSSetShader(NULL, NULL, 0);
+    pDXDevice->pImmediateContext->DSSetShader(NULL, NULL, 0);
+    pDXDevice->pImmediateContext->GSSetShader(NULL, NULL, 0);
+
+    /* Shader resource is either a screen target texture or a screen object texture. */
+    pDXDevice->pImmediateContext->PSSetShaderResources(0, 1, &pScreenTargetSrv);
+
+    /* Pixel shader. The blitter must copy the data unmodified, however Sample operation in the pixel shader
+     * converts SRGB values to linear. Use a special shader to undo that for _SRGB textures.
+     */
+    if (fScreenTargetSRGB)
+        pDXDevice->pImmediateContext->PSSetShader(pHwScreen->pPixelShaderSRGB, NULL, 0);
+    else
+        pDXDevice->pImmediateContext->PSSetShader(pHwScreen->pPixelShaderPassthrough, NULL, 0);
+
+    /* Sampler. */
+    pDXDevice->pImmediateContext->PSSetSamplers(0, 1, &pHwScreen->pSamplerState);
+
+    /* Rasterizer. */
+    pDXDevice->pImmediateContext->RSSetState(pHwScreen->pRasterizerState);
+
+    /* Blend state. */
+    static FLOAT const BlendFactor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    pDXDevice->pImmediateContext->OMSetBlendState(pHwScreen->pBlendState, BlendFactor, 0xffffffff);
+
+    /* Viewport. */
+    D3D11_VIEWPORT Viewport;
+    Viewport.TopLeftX = 0;
+    Viewport.TopLeftY = 0;
+    Viewport.Width    = pHwScreen->cHwScreenWidth;
+    Viewport.Height   = pHwScreen->cHwScreenHeight;
+    Viewport.MinDepth = 0.0f;
+    Viewport.MaxDepth = 1.0f;
+    pDXDevice->pImmediateContext->RSSetViewports(1, &Viewport);
+}
+
+
+static HRESULT dxUpdateScreenRect(DXDEVICE *pDXDevice, VMSVGAHWSCREEN *pHwScreen,
+                                  SVGASignedRect const &dstRect, uint32_t cDstSurfaceWidth, uint32_t cDstSurfaceHeight,
+                                  SVGASignedRect const &srcRect, uint32_t cSrcSurfaceWidth, uint32_t cSrcSurfaceHeight)
+{
+    HRESULT hr;
+
+    /* Update vertex shader constants. */
+    D3D11_MAPPED_SUBRESOURCE map;
+    RT_ZERO(map);
+
+    hr = pDXDevice->pImmediateContext->Map(pHwScreen->pVSConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &map);
+    AssertReturn(SUCCEEDED(hr), hr);
+
+    HwScreenUpdateVSConstants *pVSConstants = (HwScreenUpdateVSConstants *)map.pData;
+
+    pVSConstants->srcTexcoordScaleX  = (float)(srcRect.right - srcRect.left) / (float)cSrcSurfaceWidth;
+    pVSConstants->srcTexcoordScaleY  = (float)(srcRect.bottom - srcRect.top) / (float)cSrcSurfaceHeight;
+    pVSConstants->srcTexcoordOffsetX = (float)srcRect.left / (float)cSrcSurfaceWidth;
+    pVSConstants->srcTexcoordOffsetY = (float)srcRect.top / (float)cSrcSurfaceHeight;
+
+    pVSConstants->dstCoordScaleX  = (float)(dstRect.right - dstRect.left) / (float)cDstSurfaceWidth;
+    pVSConstants->dstCoordScaleY  = (float)(dstRect.bottom - dstRect.top) / (float)cDstSurfaceHeight;
+    pVSConstants->dstCoordOffsetX = (float)(dstRect.right + dstRect.left) / (float)cDstSurfaceWidth - 1.0f;
+    pVSConstants->dstCoordOffsetY = -((float)(dstRect.bottom + dstRect.top) / (float)cDstSurfaceHeight - 1.0f);
+
+    pDXDevice->pImmediateContext->Unmap(pHwScreen->pVSConstantBuffer, 0);
+
+    /* Draw. */
+    pDXDevice->pImmediateContext->Draw(4, 0);
+    return S_OK;
+}
+
+
+static void dxUpdateScreenEnd(DXDEVICE *pDXDevice, DXPIPELINESTATE &SavedState)
+{
+    dxRestorePipelineState(pDXDevice, SavedState);
+}
+
+
+static void dxCopyStagingTextureToScreenBitmap(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen, DXDEVICE *pDXDevice,
+                                               SVGASignedRect const &updateRect)
+{
+    AssertReturnVoid(pScreen->pvScreenBitmap || pScreen->offVRAM != VMSVGA_VRAM_OFFSET_SCREEN_TARGET);
+    AssertReturnVoid(pScreen->cBpp == 32);
+    const uint32_t cbPixel = 4;
+
+    VMSVGAHWSCREEN *p = pScreen->pHwScreen;
+
+    /* Copy data from staging resource to the system memory. */
+    D3D11_MAPPED_SUBRESOURCE map;
+    RT_ZERO(map);
+
+    HRESULT hr = pDXDevice->pImmediateContext->Map(p->pStagingTexture, 0, D3D11_MAP_READ, 0, &map);
+    AssertReturnVoid(SUCCEEDED(hr));
+
+    uint8_t const *pu8Src = (uint8_t *)map.pData;
+    uint8_t *pu8Dst;
+    if (pScreen->pvScreenBitmap)
+        pu8Dst = (uint8_t *)pScreen->pvScreenBitmap;
+    else
+        pu8Dst = (uint8_t *)pThisCC->pbVRam + pScreen->offVRAM;
+
+    if (   updateRect.left == 0
+        && updateRect.top == 0
+        && updateRect.right == (int32_t)p->cHwScreenWidth
+        && updateRect.bottom == (int32_t)p->cHwScreenHeight
+        && p->cHwScreenWidth * cbPixel == map.RowPitch)
+    {
+        memcpy(pu8Dst, pu8Src, map.RowPitch * p->cHwScreenHeight);
+    }
+    else
+    {
+        /* 'pu8Src' points to the mapped 'srcRect'. Take the clipping box into account. */
+        uint8_t const *pu8SrcBox = pu8Src
+            + updateRect.left * cbPixel + updateRect.top * map.RowPitch;
+
+        uint8_t *pu8DstBox = pu8Dst
+            + updateRect.left * cbPixel + updateRect.top * cbPixel * p->cHwScreenWidth;
+
+        uint32_t const cbWidth = cbPixel * (updateRect.right - updateRect.left);
+        for (int32_t iRow = 0; iRow < updateRect.bottom - updateRect.top; ++iRow)
+        {
+            memcpy(pu8DstBox, pu8SrcBox, cbWidth);
+
+            pu8SrcBox += map.RowPitch;
+            pu8DstBox += cbPixel * p->cHwScreenWidth;
+        }
+    }
+
+    pDXDevice->pImmediateContext->Unmap(p->pStagingTexture, 0);
+}
+
+
+DECLINLINE(int) dxFenceCmp64(uint64_t u64FenceA, uint64_t u64FenceB)
+{
+     if (   u64FenceA < u64FenceB
+         || u64FenceA - u64FenceB > UINT64_MAX / 2)
+     {
+         return -1; /* A < B */
+     }
+     else if (u64FenceA == u64FenceB)
+     {
+         return 0; /* A == B */
+     }
+
+     return 1; /* A > B */
+}
+
+
+static void dxStartScreenReadback(VMSVGASCREENOBJECT *pScreen, DXDEVICE *pDXDevice)
+{
+    /* Get the screen data to the system memory. */
+    VMSVGAHWSCREEN *p = pScreen->pHwScreen;
+
+    pDXDevice->pImmediateContext->CopySubresourceRegion(p->pStagingTexture, 0, 0, 0, 0, p->pScreenTexture, 0, NULL);
+
+    pDXDevice->pImmediateContext->Flush();
+
+    /* Issue a query in order to be able to know when the transfer to the system memory will complete. */
+    pDXDevice->pImmediateContext->End(p->pScreenReadbackQuery);
+
+    ++p->u64ReadbackFence; /* vmsvga3dBackProcessPendingTasks will update rectangles with lower u64ReadbackFences. */
+    if (p->u64ReadbackFence == 0) /* 0 is a special "no fence" value. */
+        ++p->u64ReadbackFence;
+}
+
+
+static void dxProcessPendingUpdates(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen)
+{
+    PVMSVGA3DSTATE pState = pThisCC->svga.p3dState;
+    AssertReturnVoid(pState);
+
+    DXDEVICE *pDXDevice = dxDeviceGet(pState);
+    AssertReturnVoid(pDXDevice->pDevice);
+
+    VMSVGAHWSCREEN *p = pScreen->pHwScreen;
+
+    if (p->fReadingBack)
+    {
+        BOOL queryData;
+        HRESULT hr = pDXDevice->pImmediateContext->GetData(p->pScreenReadbackQuery, &queryData, sizeof(queryData), 0);
+        AssertReturnVoid(SUCCEEDED(hr));
+        if (hr == S_OK)
+        {
+            /* Query has completed. Copy already updated rectangles. */
+            Assert(p->cUpdates);
+            while (p->cUpdates)
+            {
+                if (dxFenceCmp64(p->aUpdates[p->idxLastUpdate].u64ReadbackFence, p->u64ReadbackFence) >= 0)
+                    break;
+
+                SVGASignedRect const &updateRect = p->aUpdates[p->idxLastUpdate].rect;
+                dxCopyStagingTextureToScreenBitmap(pThisCC, pScreen, pDXDevice, updateRect);
+                p->aUpdates[p->idxLastUpdate].u64ReadbackFence = 0;
+
+                vmsvgaR3UpdateScreen(pThisCC, pScreen,
+                                     updateRect.left, updateRect.top,
+                                     updateRect.right - updateRect.left, updateRect.bottom - updateRect.top);
+
+                /* Next update. */
+                p->idxLastUpdate = (p->idxLastUpdate + 1) % RT_ELEMENTS(p->aUpdates);
+                --p->cUpdates;
+            }
+
+            if (p->cUpdates > 0)
+                dxStartScreenReadback(pScreen, pDXDevice); /* There were screen updates since the last readback. */
+            else
+                p->fReadingBack = false;
+        }
+    }
+}
+
+
+static void dxStoreScreenUpdate(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen, SVGASignedRect const &updateRect)
+{
+    VMSVGAHWSCREEN *p = pScreen->pHwScreen;
+
+    if (p->cUpdates >= RT_ELEMENTS(p->aUpdates))
+    {
+        /* Overflow, usually should not happen. Wait for previous updates to complete. */
+        if (!p->fReadingBack)
+        {
+            DXDEVICE *pDXDevice = dxDeviceGet(pThisCC->svga.p3dState);
+            AssertReturnVoid(pDXDevice->pDevice);
+
+            dxStartScreenReadback(pScreen, pDXDevice);
+            p->fReadingBack = true;
+        }
+
+        int iIterations = 0;
+        while (p->cUpdates >= RT_ELEMENTS(p->aUpdates))
+        {
+            ++iIterations; /* Avoid infinite wait. */
+            if (iIterations > 1000)
+            {
+                LogRel(("VMSVGA: pending screen updates stalled\n"));
+                AssertFailedReturnVoid();
+            }
+
+            RTThreadSleep(1);
+
+            dxProcessPendingUpdates(pThisCC, pScreen);
+        }
+    }
+
+    uint32_t const idxUpdate = (p->idxLastUpdate + p->cUpdates) % RT_ELEMENTS(p->aUpdates);
+    p->aUpdates[idxUpdate].u64ReadbackFence = p->u64ReadbackFence;
+    p->aUpdates[idxUpdate].rect = updateRect;
+    ++p->cUpdates;
+}
+#endif /* DX_NEW_HWSCREEN */
 
 
 static DECLCALLBACK(int) vmsvga3dBackSurfaceBlitToScreen(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen,
@@ -3335,17 +4013,167 @@ static DECLCALLBACK(int) vmsvga3dBackSurfaceBlitToScreen(PVGASTATECC pThisCC, VM
     PVMSVGA3DBACKEND pBackend = pState->pBackend;
     AssertReturn(pBackend, VERR_INVALID_STATE);
 
+    DXDEVICE *pDXDevice = dxDeviceGet(pState);
+    AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
+
     VMSVGAHWSCREEN *p = pScreen->pHwScreen;
     AssertReturn(p, VERR_NOT_SUPPORTED);
 
     PVMSVGA3DSURFACE pSurface;
-    int rc = vmsvga3dSurfaceFromSid(pState, srcImage.sid, &pSurface);
+    ID3D11Resource *pSrcResource;
+    int rc = dxEnsureResource(pThisCC, srcImage.sid, &pSurface, &pSrcResource);
     AssertRCReturn(rc, rc);
 
+    ASSERT_GUEST_RETURN(srcImage.mipmap == 0 && srcImage.face == 0, VERR_NOT_IMPLEMENTED);
+
+    PVMSVGA3DMIPMAPLEVEL pMipLevel;
+    rc = vmsvga3dMipmapLevel(pSurface, srcImage.face, srcImage.mipmap, &pMipLevel);
+    ASSERT_GUEST_RETURN(RT_SUCCESS(rc), rc);
+
+#ifndef DX_NEW_HWSCREEN
     /** @todo Implement. */
     AssertFailed();
     return VERR_NOT_IMPLEMENTED;
+#else /* DX_NEW_HWSCREEN */
+
+    ID3D11ShaderResourceView *pScreenTargetSrv;
+    bool fScreenTargetSRGB;
+    if (pSurface->pBackendSurface->pScreenTargetSRV)
+    {
+        pScreenTargetSrv = pSurface->pBackendSurface->pScreenTargetSRV;
+        fScreenTargetSRGB = pSurface->pBackendSurface->fScreenTargetSRGB;
+    }
+    else
+    {
+        fScreenTargetSRGB = false;
+
+        bool fRGBAConversion = pSurface->format == SVGA3D_R8G8B8A8_UNORM
+                            || pSurface->format == SVGA3D_R8G8B8A8_UNORM_SRGB;
+
+        ID3D11Texture2D *pScreenObjectTexture;
+        if (fRGBAConversion)
+        {
+            pScreenObjectTexture = p->pScreenObjectTextureRGBA;
+            pScreenTargetSrv = p->pScreenTargetSrvRGBA;
+        }
+        else
+        {
+            pScreenObjectTexture = p->pScreenObjectTextureBGRA;
+            pScreenTargetSrv = p->pScreenTargetSrvBGRA;
+        }
+        AssertReturn(pScreenObjectTexture && pScreenTargetSrv, VERR_INVALID_STATE);
+
+        if (pScreenObjectTexture)
+        {
+            /* Copy the surface to the screen object texture.
+             * This is necessary because the surface might not have a BIND_SHADER_RESOURCE flag.
+             */
+            UINT DstSubresource = 0;
+            UINT DstX = 0;
+            UINT DstY = 0;
+            UINT DstZ = 0;
+
+            UINT SrcSubresource = 0;
+            D3D11_BOX SrcBox;
+            SrcBox.left   = 0;
+            SrcBox.top    = 0;
+            SrcBox.front  = 0;
+            SrcBox.right  = pMipLevel->mipmapSize.width;
+            SrcBox.bottom = pMipLevel->mipmapSize.height;
+            SrcBox.back   = 1;
+
+            ID3D11Resource *pDstResource = pScreenObjectTexture;
+
+            pDXDevice->pImmediateContext->CopySubresourceRegion(pDstResource, DstSubresource, DstX, DstY, DstZ,
+                                                                pSrcResource, SrcSubresource, &SrcBox);
+        }
+    }
+
+    SVGASignedRect rect;
+    if (cRects == 0)
+    {
+        rect.left = 0;
+        rect.top = 0;
+        rect.right = destRect.right - destRect.left;
+        rect.bottom = destRect.bottom - destRect.top;
+
+        paRects = &rect;
+        cRects = 1;
+    }
+
+    SVGASignedRect boundRect;
+    boundRect.left   = 0;
+    boundRect.top    = 0;
+    boundRect.right  = pMipLevel->mipmapSize.width;
+    boundRect.bottom = pMipLevel->mipmapSize.height;
+
+    DXPIPELINESTATE SavedState;
+    dxUpdateScreenBegin(pDXDevice, p, pScreenTargetSrv, fScreenTargetSRGB, &SavedState);
+
+    for (uint32_t i = 0; i < cRects; ++i)
+    {
+        SVGASignedRect clippedDestRect;
+        clippedDestRect.left   = destRect.left + paRects[i].left;
+        clippedDestRect.right  = destRect.left + paRects[i].right;
+        clippedDestRect.top    = destRect.top + paRects[i].top;
+        clippedDestRect.bottom = destRect.top + paRects[i].bottom;
+
+        vmsvgaR3ClipRect(&boundRect, &clippedDestRect);
+        ASSERT_GUEST_CONTINUE(   clippedDestRect.left < clippedDestRect.right
+                              && clippedDestRect.top < clippedDestRect.bottom);
+
+        SVGASignedRect clippedSrcRect;
+        clippedSrcRect.left   = srcRect.left + paRects[i].left;
+        clippedSrcRect.right  = srcRect.left + paRects[i].right;
+        clippedSrcRect.top    = srcRect.top + paRects[i].top;
+        clippedSrcRect.bottom = srcRect.top + paRects[i].bottom;
+
+        vmsvgaR3ClipRect(&boundRect, &clippedSrcRect);
+        ASSERT_GUEST_CONTINUE(   clippedSrcRect.left < clippedSrcRect.right
+                              && clippedSrcRect.top < clippedSrcRect.bottom);
+
+        /* Blit the screen target or screen object texture to the screen texture. */
+        dxUpdateScreenRect(pDXDevice, p,
+                           clippedDestRect, pScreen->cWidth, pScreen->cHeight,
+                           clippedSrcRect, pMipLevel->mipmapSize.width, pMipLevel->mipmapSize.height);
+
+        /* Remember the updated rectangle. vmsvga3dBackProcessPendingTasks will use it. */
+        dxStoreScreenUpdate(pThisCC, pScreen, clippedDestRect);
+    }
+
+    dxUpdateScreenEnd(pDXDevice, SavedState);
+
+    if (!p->fReadingBack)
+    {
+        /* Get the screen data to the system memory. */
+        dxStartScreenReadback(pScreen, pDXDevice);
+        p->fReadingBack = true;
+    }
+
+    return VINF_SUCCESS;
+#endif /* DX_NEW_HWSCREEN */
 }
+
+
+#ifdef DX_NEW_HWSCREEN
+static DECLCALLBACK(void) vmsvga3dBackProcessPendingTasks(PVGASTATE pThis, PVGASTATECC pThisCC)
+{
+    PVMSVGA3DSTATE pState = pThisCC->svga.p3dState;
+    AssertReturnVoid(pState);
+
+    DXDEVICE *pDXDevice = dxDeviceGet(pState);
+    AssertReturnVoid(pDXDevice->pDevice);
+
+    for (unsigned iScreen = 0; iScreen < pThis->cMonitors; ++iScreen)
+    {
+        VMSVGASCREENOBJECT *pScreen = vmsvgaR3GetScreenObject(pThisCC, iScreen);
+        if (!pScreen || !pScreen->pHwScreen)
+            continue;
+
+        dxProcessPendingUpdates(pThisCC, pScreen);
+    }
+}
+#endif /* DX_NEW_HWSCREEN */
 
 
 static DECLCALLBACK(int) vmsvga3dBackSurfaceMap(PVGASTATECC pThisCC, SVGA3dSurfaceImageId const *pImage, SVGA3dBox const *pBox,
@@ -3774,6 +4602,7 @@ static DECLCALLBACK(int) vmsvga3dScreenTargetBind(PVGASTATECC pThisCC, VMSVGASCR
     else
         pSurface = NULL;
 
+#ifndef DX_NEW_HWSCREEN
     /* Notify the HW accelerated screen if it is used. */
     VMSVGAHWSCREEN *pHwScreen = pScreen->pHwScreen;
     if (!pHwScreen)
@@ -3797,6 +4626,22 @@ static DECLCALLBACK(int) vmsvga3dScreenTargetBind(PVGASTATECC pThisCC, VMSVGASCR
     {
         pHwScreen->sidScreenTarget = sid;
     }
+#else
+    VMSVGAHWSCREEN *pHwScreen = pScreen->pHwScreen;
+    if (!pHwScreen)
+        return VINF_SUCCESS;
+
+    /* Same surface -> do nothing. */
+    if (pHwScreen->sidScreenTarget == sid)
+        return VINF_SUCCESS;
+
+    if (sid != SVGA_ID_INVALID)
+        AssertReturn(   pSurface->pBackendSurface
+                     && pSurface->pBackendSurface->enmResType == VMSVGA3D_RESTYPE_TEXTURE_2D
+                     && RT_BOOL(pSurface->f.surfaceFlags & SVGA3D_SURFACE_SCREENTARGET), VERR_INVALID_PARAMETER);
+
+    pHwScreen->sidScreenTarget = sid;
+#endif
 
     return rc;
 }
@@ -3835,6 +4680,7 @@ static DECLCALLBACK(int) vmsvga3dScreenTargetUpdate(PVGASTATECC pThisCC, VMSVGAS
     vmsvgaR3Clip3dRect(&boundRect, &clipRect);
     ASSERT_GUEST_RETURN(clipRect.w && clipRect.h, VERR_INVALID_PARAMETER);
 
+#ifndef DX_NEW_HWSCREEN
     /* Copy the screen texture to the shared surface. */
     DWORD result = pHwScreen->pDXGIKeyedMutex->AcquireSync(0, 10000);
     if (result == S_OK)
@@ -3850,6 +4696,40 @@ static DECLCALLBACK(int) vmsvga3dScreenTargetUpdate(PVGASTATECC pThisCC, VMSVGAS
 
     rc = vmsvga3dDrvNotifyUpdate(pThisCC, pScreen, pRect->x, pRect->y, pRect->w, pRect->h);
     return rc;
+#else
+    DXDEVICE *pDXDevice = dxDeviceGet(pState);
+    AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
+
+    AssertReturn(pBackendSurface->pScreenTargetSRV, VERR_INVALID_STATE);
+
+    /* Blit the screen target texture to the screen texture. */
+    SVGASignedRect updateRect;
+    updateRect.left   = clipRect.x;
+    updateRect.top    = clipRect.y;
+    updateRect.right  = clipRect.x + clipRect.w;
+    updateRect.bottom = clipRect.y + clipRect.h;
+
+    DXPIPELINESTATE SavedState;
+    dxUpdateScreenBegin(pDXDevice, pHwScreen,
+                        pBackendSurface->pScreenTargetSRV, pBackendSurface->fScreenTargetSRGB, &SavedState);
+
+    dxUpdateScreenRect(pDXDevice, pHwScreen,
+                       updateRect, pScreen->cWidth, pScreen->cHeight,
+                       updateRect, boundRect.w, boundRect.h);
+
+    dxUpdateScreenEnd(pDXDevice, SavedState);
+
+    dxStoreScreenUpdate(pThisCC, pScreen, updateRect);
+
+    if (!pHwScreen->fReadingBack)
+    {
+        /* Get the screen data to the system memory. */
+        dxStartScreenReadback(pScreen, pDXDevice);
+        pHwScreen->fReadingBack = true;
+    }
+
+    return VINF_SUCCESS;
+#endif
 }
 
 
@@ -4985,6 +5865,9 @@ static DECLCALLBACK(void) vmsvga3dBackSurfaceDestroy(PVGASTATECC pThisCC, bool f
         || pBackendSurface->enmResType == VMSVGA3D_RESTYPE_TEXTURE_CUBE
         || pBackendSurface->enmResType == VMSVGA3D_RESTYPE_TEXTURE_3D)
     {
+#ifdef DX_NEW_HWSCREEN
+        D3D_RELEASE(pBackendSurface->pScreenTargetSRV);
+#endif
         D3D_RELEASE(pBackendSurface->staging.pResource);
         D3D_RELEASE(pBackendSurface->dynamic.pResource);
         D3D_RELEASE(pBackendSurface->u.pResource);
@@ -11719,6 +12602,9 @@ static DECLCALLBACK(int) vmsvga3dBackQueryInterface(PVGASTATECC pThisCC, char co
                 p->pfnSurfaceBlitToScreen      = vmsvga3dBackSurfaceBlitToScreen;
                 p->pfnSurfaceUpdateHeapBuffers = vmsvga3dBackSurfaceUpdateHeapBuffers;
                 p->pfnFlush                    = vmsvga3dBackFlush;
+#ifdef DX_NEW_HWSCREEN
+                p->pfnProcessPendingTasks      = vmsvga3dBackProcessPendingTasks;
+#endif
             }
         }
         else

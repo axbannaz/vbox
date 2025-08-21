@@ -956,6 +956,7 @@ int vmsvga3dSurfaceBlitToScreen(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t i
     src.face = 0;
 
     PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
+#ifndef DX_NEW_HWSCREEN
     if (pScreen->pHwScreen)
     {
         /* Use the backend accelerated method, if available. */
@@ -971,6 +972,15 @@ int vmsvga3dSurfaceBlitToScreen(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t i
 
     if (pSvgaR3State->pFuncsMap)
         return vmsvga3dScreenUpdate(pThisCC, idDstScreen, destRect, src, srcRect, cRects, pRect);
+#else
+    if (pSvgaR3State->pFuncsMap)
+        return vmsvga3dScreenUpdateFromSurface(pThisCC, pScreen, destRect, src, srcRect, cRects, pRect);
+
+    /* Screens which are associated with screen targets should be handled by vmsvga3dScreenUpdateFromSurface
+     * because the code below updates the guest VRAM and screen targets have a separate memory buffer for the
+     * screen content. */
+    AssertReturn(pScreen->offVRAM != VMSVGA_VRAM_OFFSET_SCREEN_TARGET, VERR_NOT_IMPLEMENTED);
+#endif
 
     /** @todo scaling */
     AssertReturn(destRect.right - destRect.left == srcRect.right - srcRect.left && destRect.bottom - destRect.top == srcRect.bottom - srcRect.top, VERR_INVALID_PARAMETER);
@@ -1043,14 +1053,24 @@ int vmsvga3dSurfaceBlitToScreen(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t i
     return VINF_SUCCESS;
 }
 
+
+#ifndef DX_NEW_HWSCREEN
 int vmsvga3dScreenUpdate(PVGASTATECC pThisCC, uint32_t idDstScreen, SVGASignedRect const &dstRect,
                          SVGA3dSurfaceImageId const &srcImage, SVGASignedRect const &srcRect,
                          uint32_t cDstClipRects, SVGASignedRect *paDstClipRect)
+#else
+static int vmsvga3dScreenUpdate(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen, SVGASignedRect const &dstRect,
+                                SVGA3dSurfaceImageId const &srcImage, SVGASignedRect const &srcRect,
+                                uint32_t cDstClipRects, SVGASignedRect *paDstClipRect)
+#endif
 {
     //DEBUG_BREAKPOINT_TEST();
     PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
 
 #ifdef LOG_ENABLED
+# ifdef DX_NEW_HWSCREEN
+    uint32_t const idDstScreen = pScreen->idScreen;
+# endif
     LogFunc(("[%u] %d,%d %d,%d (%dx%d) -> %d,%d %d,%d (%dx%d), %u clip rects\n",
              idDstScreen, srcRect.left, srcRect.top, srcRect.right, srcRect.bottom,
              srcRect.right - srcRect.left, srcRect.bottom - srcRect.top,
@@ -1069,10 +1089,16 @@ int vmsvga3dScreenUpdate(PVGASTATECC pThisCC, uint32_t idDstScreen, SVGASignedRe
     AssertRCReturn(rc, rc);
 
     /* Update the screen from a surface. */
+#ifndef DX_NEW_HWSCREEN
     ASSERT_GUEST_RETURN(idDstScreen < RT_ELEMENTS(pSvgaR3State->aScreens), VERR_INVALID_PARAMETER);
     RT_UNTRUSTED_VALIDATED_FENCE();
 
     VMSVGASCREENOBJECT *pScreen = &pSvgaR3State->aScreens[idDstScreen];
+#else
+    /* Screen which is associated with a screen target must have a system buffer, because this function
+     * writes to system memory. */
+    AssertReturn(pScreen->pvScreenBitmap || pScreen->offVRAM != VMSVGA_VRAM_OFFSET_SCREEN_TARGET, VERR_INVALID_PARAMETER);
+#endif
 
     uint32_t const cbScreenPixel = (pScreen->cBpp + 7) / 8;
     ASSERT_GUEST_RETURN(cbScreenPixel == pSurface->cbBlock,
@@ -1235,6 +1261,73 @@ int vmsvga3dScreenUpdate(PVGASTATECC pThisCC, uint32_t idDstScreen, SVGASignedRe
 
     return rc;
 }
+
+
+#ifdef DX_NEW_HWSCREEN
+int vmsvga3dScreenUpdateFromScreenTarget(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen, SVGA3dRect const &rect,
+                                         SVGA3dSurfaceImageId const &srcImage)
+{
+    PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
+
+    if (pScreen->pHwScreen)
+    {
+        /* Use the backend accelerated method, if available. */
+        if (pSvgaR3State->pFuncs3D)
+        {
+            int rc = pSvgaR3State->pFuncsGBO->pfnScreenTargetUpdate(pThisCC, pScreen, &rect);
+            if (rc == VINF_SUCCESS)
+            {
+                vmsvgaR3UpdateScreen(pThisCC, pScreen,
+                                     rect.x, rect.y, rect.w, rect.h);
+                return VINF_SUCCESS;
+            }
+        }
+    }
+
+    SVGASignedRect r;
+    r.left   = rect.x;
+    r.top    = rect.y;
+    r.right  = rect.x + rect.w;
+    r.bottom = rect.y + rect.h;
+
+    return vmsvga3dScreenUpdate(pThisCC, pScreen, r, srcImage, r, 0, NULL);
+}
+
+
+int vmsvga3dScreenUpdateFromSurface(PVGASTATECC pThisCC, VMSVGASCREENOBJECT *pScreen, SVGASignedRect const &dstRect,
+                                    SVGA3dSurfaceImageId const &srcImage, SVGASignedRect const &srcRect,
+                                    uint32_t cDstClipRects, SVGASignedRect *paDstClipRect)
+{
+    PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
+
+    if (pScreen->pHwScreen)
+    {
+        /* Use the backend accelerated method, if available. */
+        if (pSvgaR3State->pFuncs3D)
+        {
+            int rc = pSvgaR3State->pFuncs3D->pfnSurfaceBlitToScreen(pThisCC, pScreen, dstRect, srcImage, srcRect, cDstClipRects, paDstClipRect);
+            if (rc == VINF_SUCCESS)
+            {
+                vmsvgaR3UpdateScreen(pThisCC, pScreen,
+                                     dstRect.left, dstRect.top,
+                                     dstRect.right - dstRect.left, dstRect.bottom - dstRect.top);
+                return VINF_SUCCESS;
+            }
+        }
+    }
+
+    return vmsvga3dScreenUpdate(pThisCC, pScreen, dstRect, srcImage, srcRect, cDstClipRects, paDstClipRect);
+}
+
+
+void vmsvga3dProcessPendingTasks(PVGASTATE pThis, PVGASTATECC pThisCC)
+{
+    PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
+
+    if (pSvgaR3State->pFuncs3D && pSvgaR3State->pFuncs3D->pfnProcessPendingTasks)
+        pSvgaR3State->pFuncs3D->pfnProcessPendingTasks(pThis, pThisCC);
+}
+#endif /* DX_NEW_HWSCREEN */
 
 int vmsvga3dCommandPresent(PVGASTATE pThis, PVGASTATECC pThisCC, uint32_t sid, uint32_t cRects, SVGA3dCopyRect *pRect)
 {

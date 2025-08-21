@@ -2148,7 +2148,11 @@ static void vmsvga3dCmdDefineGBScreenTarget(PVGASTATE pThis, PVGASTATECC pThisCC
         pScreen->yOrigin = pCmd->yRoot;
         pScreen->cWidth  = pCmd->width;
         pScreen->cHeight = pCmd->height;
+#ifndef DX_NEW_HWSCREEN
         pScreen->offVRAM = 0; /* Not applicable for screen targets, they use either a separate memory buffer or a host window. */
+#else
+        pScreen->offVRAM = VMSVGA_VRAM_OFFSET_SCREEN_TARGET; /* Special value for screen targets, they use either a separate memory buffer or a host window. */
+#endif
         pScreen->cbPitch = pCmd->width * 4;
         pScreen->cBpp    = 32;
         pScreen->cDpi    = pCmd->dpi;
@@ -2160,11 +2164,21 @@ static void vmsvga3dCmdDefineGBScreenTarget(PVGASTATE pThis, PVGASTATECC pThisCC
         if (RT_LIKELY(pThis->svga.f3DEnabled))
             vmsvga3dDefineScreen(pThis, pThisCC, pScreen);
 
+#ifndef DX_NEW_HWSCREEN
         if (!pScreen->pHwScreen)
         {
             /* System memory buffer. */
             pScreen->pvScreenBitmap = RTMemAllocZ(pScreen->cHeight * pScreen->cbPitch);
         }
+#else
+        /* Always allocate a system memory buffer for screen targets.
+         * D3D11 backend copies the screen target surface content to this buffer asynchronously.
+         */
+        pScreen->pvScreenBitmap = RTMemAllocZ(pScreen->cHeight * pScreen->cbPitch);
+        AssertLogRelMsg(pScreen->pvScreenBitmap,
+            ("VMSVGA3D: failed to allocate memory buffer for screen target %u (%ux%u)\n",
+             pCmd->stid, pCmd->width, pCmd->height));
+#endif
 
         pThis->svga.fGFBRegisters = false;
         vmsvgaR3ChangeMode(pThis, pThisCC);
@@ -2230,6 +2244,17 @@ static void vmsvga3dCmdBindGBScreenTarget(PVGASTATECC pThisCC, SVGA3dCmdBindGBSc
                 VMSVGASCREENOBJECT *pScreen = &pSvgaR3State->aScreens[pCmd->stid];
                 rc = pSvgaR3State->pFuncsGBO->pfnScreenTargetBind(pThisCC, pScreen, pCmd->image.sid);
                 AssertRC(rc);
+#ifdef DX_NEW_HWSCREEN
+                if (RT_SUCCESS(rc))
+                {
+                    SVGA3dRect rect;
+                    rect.x = 0;
+                    rect.y = 0;
+                    rect.w = entry.width;
+                    rect.h = entry.height;
+                    vmsvga3dScreenUpdateFromScreenTarget(pThisCC, pScreen, rect, entry.image);
+                }
+#endif
             }
         }
     }
@@ -2266,6 +2291,7 @@ static void vmsvga3dCmdUpdateGBScreenTarget(PVGASTATECC pThisCC, SVGA3dCmdUpdate
                 if (entrySurface.mobid != SVGA_ID_INVALID)
                 {
                     RT_UNTRUSTED_VALIDATED_FENCE();
+#ifndef DX_NEW_HWSCREEN
                     SVGA3dRect targetRect = pCmd->rect;
 
                     VMSVGASCREENOBJECT *pScreen = &pSvgaR3State->aScreens[pCmd->stid];
@@ -2283,6 +2309,10 @@ static void vmsvga3dCmdUpdateGBScreenTarget(PVGASTATECC pThisCC, SVGA3dCmdUpdate
                         r.bottom = pCmd->rect.y + pCmd->rect.h;
                         vmsvga3dScreenUpdate(pThisCC, pCmd->stid, r, entryScreenTarget.image, r, 0, NULL);
                     }
+#else /* DX_NEW_HWSCREEN */
+                    VMSVGASCREENOBJECT *pScreen = &pSvgaR3State->aScreens[pCmd->stid];
+                    vmsvga3dScreenUpdateFromScreenTarget(pThisCC, pScreen, pCmd->rect, entryScreenTarget.image);
+#endif /* DX_NEW_HWSCREEN */
                 }
             }
         }
@@ -8082,6 +8112,9 @@ void vmsvgaR3CmdBlitGMRFBToScreen(PVGASTATE pThis, PVGASTATECC pThisCC, SVGAFifo
 
     /** @todo Support GMRFB.format.s.bitsPerPixel != pThis->svga.uBpp ?  */
     AssertReturnVoid(pSvgaR3State->GMRFB.format.bitsPerPixel == pScreen->cBpp);
+#ifdef DX_NEW_HWSCREEN
+    AssertReturnVoid(pScreen->offVRAM != VMSVGA_VRAM_OFFSET_SCREEN_TARGET);
+#endif
 
     /* Clip destRect to the screen dimensions. */
     SVGASignedRect screenRect;
@@ -8154,6 +8187,9 @@ void vmsvgaR3CmdBlitScreenToGMRFB(PVGASTATE pThis, PVGASTATECC pThisCC, SVGAFifo
 
     /** @todo Support GMRFB.format.bitsPerPixel != pThis->svga.uBpp ? */
     AssertReturnVoid(pSvgaR3State->GMRFB.format.bitsPerPixel == pScreen->cBpp);
+#ifdef DX_NEW_HWSCREEN
+    AssertReturnVoid(pScreen->offVRAM != VMSVGA_VRAM_OFFSET_SCREEN_TARGET);
+#endif
 
     /* Clip destRect to the screen dimensions. */
     SVGASignedRect screenRect;
