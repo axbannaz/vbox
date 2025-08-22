@@ -455,7 +455,7 @@ class Arm64No1CodeGen(object):
             A64No1CodeGenShiftedReg('orn',  A64No1CodeGenShiftedReg.calcOrn, fWithRor = True),
             A64No1CodeGenShiftedReg('eor',  A64No1CodeGenShiftedReg.calcEor, fWithRor = True),
             A64No1CodeGenShiftedReg('eon',  A64No1CodeGenShiftedReg.calcEon, fWithRor = True),
-        ]
+        ];
 
 
         #

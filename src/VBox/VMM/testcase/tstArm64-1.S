@@ -41,7 +41,7 @@ BEGINPROC_EXPORTED  MainEntrypoint
         stp     x27, x28, [sp, #0x40]
         stp     x29, x30, [sp, #0x50]       /* top */
 
-        bl      NAME(HandcodedTests1)
+        /*bl      NAME(HandcodedTests1)*/
         bl      NAME(GeneratedTests)
 
         ldp     x29, x30, [sp, #0x50]
@@ -53,6 +53,16 @@ BEGINPROC_EXPORTED  MainEntrypoint
         movz    x0, #0
         ret
 ENDPROC             MainEntrypoint
+
+/**
+ * Where MainEntrypoint returns to when running in a VM (see IEMR3.cpp).
+ */
+BEGINPROC_EXPORTED  PowerOffVm
+        /** @todo figure out how to shut down the VM! */
+.loop:
+        brk     #0xfffe
+        b       .loop
+ENDPROC             PowerOffVm
 
 
 BEGINPROC_EXPORTED  HandcodedTests1

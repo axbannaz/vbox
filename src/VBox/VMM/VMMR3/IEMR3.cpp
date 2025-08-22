@@ -1137,13 +1137,23 @@ VMMR3_INT_DECL(int) IEMR3Init(PVM pVM)
                                 rc = RTLdrGetSymbolEx(hLdrMod, pvBits, uLoadAddr, UINT32_MAX, pszEntrypoint, &uEntrypoint);
                                 if (RT_SUCCESS(rc))
                                 {
-                                    LogRel(("IEM: Successfully loaded '%s' at %#x LB %#zx\n", pszTestImageFile, uLoadAddr, cbImage));
-                                    PCPUMCTX pCtx = CPUMQueryGuestCtxPtr(pVM->apCpusR3[0]);
-                                    pCtx->Pc.u64 = uEntrypoint;
-                                    pCtx->aSpReg[0].u64 = uLoadAddr - _1M*3;
-                                    pCtx->aSpReg[1].u64 = uLoadAddr - _1M*2;
-                                    pCtx->aSpReg[2].u64 = uLoadAddr - _1M*1;
-                                    pCtx->aSpReg[3].u64 = uLoadAddr - _128K;
+                                    const char * const pszPowerOffVm = "PowerOffVm";
+                                    RTLDRADDR          uPowerOffVm   = 0;
+                                    rc = RTLdrGetSymbolEx(hLdrMod, pvBits, uLoadAddr, UINT32_MAX, pszPowerOffVm, &uPowerOffVm);
+                                    if (RT_SUCCESS(rc))
+                                    {
+                                        LogRel(("IEM: Successfully loaded '%s' at %#x LB %#zx\n", pszTestImageFile, uLoadAddr, cbImage));
+                                        PCPUMCTX pCtx = CPUMQueryGuestCtxPtr(pVM->apCpusR3[0]);
+                                        pCtx->Pc.u64        = uEntrypoint;
+                                        pCtx->aGRegs[30].x  = uPowerOffVm;
+                                        pCtx->aSpReg[0].u64 = uLoadAddr - _1M*3;
+                                        pCtx->aSpReg[1].u64 = uLoadAddr - _1M*2;
+                                        pCtx->aSpReg[2].u64 = uLoadAddr - _1M*1;
+                                        pCtx->aSpReg[3].u64 = uLoadAddr - _128K;
+                                    }
+                                    else
+                                        rc = VMR3SetError(pUVM, rc, RT_SRC_POS, "Failed to get the address of '%s' in '%s': %Rrc",
+                                                          pszPowerOffVm, pszTestImageFile, rc);
                                 }
                                 else
                                     rc = VMR3SetError(pUVM, rc, RT_SRC_POS, "Failed to get the address of '%s' in '%s': %Rrc",
