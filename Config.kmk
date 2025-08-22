@@ -8107,7 +8107,7 @@ if defined(VBOX_WITH_QTGUI) || defined(VBOX_WITH_NLS)
     VBOX_QT_PLUGINS += \
     	plugins/platformthemes/libqgtk2$(VBOX_QT_POSTFIX).so \
     	plugins/styles/libqgtk2style$(VBOX_QT_POSTFIX).so \
-			plugins/platformthemes/libqxdgdesktopportal$(VBOX_QT_POSTFIX).so
+    	plugins/platformthemes/libqxdgdesktopportal$(VBOX_QT_POSTFIX).so
    endif
    ifeq ($(KBUILD_TARGET),linux)
     VBOX_QT_PLUGINS += \
