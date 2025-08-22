@@ -46,9 +46,8 @@
 
 #include <iprt/assert.h>
 #include <iprt/getopt.h>
-#ifdef IEM_WITH_TLB_TRACE
-# include <iprt/mem.h>
-#endif
+#include <iprt/mem.h>
+#include <iprt/ldr.h>
 #include <iprt/string.h>
 
 #if defined(VBOX_WITH_IEM_RECOMPILER) && !defined(VBOX_VMM_TARGET_ARMV8)
@@ -118,10 +117,9 @@ VMMR3_INT_DECL(int) IEMR3Init(PVM pVM)
     /*
      * Read configuration.
      */
-#if (!defined(VBOX_VMM_TARGET_ARMV8) && !defined(VBOX_WITHOUT_CPUID_HOST_CALL)) || defined(VBOX_WITH_IEM_RECOMPILER)
     PCFGMNODE const pIem = CFGMR3GetChild(CFGMR3GetRoot(pVM), "IEM");
     int rc;
-#endif
+    RT_NOREF(pIem, rc);
 
 #if defined(VBOX_VMM_TARGET_X86) && !defined(VBOX_WITHOUT_CPUID_HOST_CALL)
     /** @cfgm{/IEM/CpuIdHostCall, boolean, false}
@@ -1097,6 +1095,88 @@ VMMR3_INT_DECL(int) IEMR3Init(PVM pVM)
 #endif
 #ifdef VBOX_WITH_DEBUGGER
     iemR3RegisterDebuggerCommands();
+#endif
+
+#if defined(VBOX_VMM_TARGET_ARMV8)
+    /*
+     * Load a test a test binary like tstArm64-1[.exe] if configured
+     * and execute it instead of the firmware.
+     */
+    char *pszTestImageFile = NULL;
+    rc = CFGMR3QueryStringAlloc(pIem, "TestImageFile", &pszTestImageFile);
+    if (RT_SUCCESS(rc))
+    {
+        if (*pszTestImageFile)
+        {
+            PUVM const pUVM = pVM->pUVM;
+
+            /* Open it. */
+            RTERRINFOSTATIC ErrInfo;
+            RTLDRMOD        hLdrMod = NIL_RTLDRMOD;
+            rc = RTLdrOpenEx(pszTestImageFile, 0, RTLDRARCH_ARM64, &hLdrMod, RTErrInfoInitStatic(&ErrInfo));
+            if (RT_SUCCESS(rc))
+            {
+                /* Allocates memory for the bits and get the bits. */
+                size_t cbImage = RTLdrSize(hLdrMod);
+                if (cbImage >= 16 && cbImage < _4G)
+                {
+                    void *pvBits = RTMemAlloc(cbImage);
+                    if (pvBits)
+                    {
+                        uint32_t const uLoadAddr = _128M;
+                        rc = RTLdrGetBits(hLdrMod, pvBits, uLoadAddr, NULL, NULL);
+                        if (RT_SUCCESS(rc))
+                        {
+                            /* Write the image to guest RAM. */
+                            rc = PGMPhysSimpleWriteGCPhys(pVM, uLoadAddr, pvBits, cbImage);
+                            if (RT_SUCCESS(rc))
+                            {
+                                /* Get the entrypoint address. */
+                                const char * const pszEntrypoint = "MainEntrypoint";
+                                RTLDRADDR          uEntrypoint = 0;
+                                rc = RTLdrGetSymbolEx(hLdrMod, pvBits, uLoadAddr, UINT32_MAX, pszEntrypoint, &uEntrypoint);
+                                if (RT_SUCCESS(rc))
+                                {
+                                    LogRel(("IEM: Successfully loaded '%s' at %#x LB %#zx\n", pszTestImageFile, uLoadAddr, cbImage));
+                                    PCPUMCTX pCtx = CPUMQueryGuestCtxPtr(pVM->apCpusR3[0]);
+                                    pCtx->Pc.u64 = uEntrypoint;
+                                }
+                                else
+                                    rc = VMR3SetError(pUVM, rc, RT_SRC_POS, "Failed to get the address of '%s' in '%s': %Rrc",
+                                                      pszEntrypoint, pszTestImageFile, rc);
+                            }
+                            else
+                                rc = VMR3SetError(pUVM, rc, RT_SRC_POS,
+                                                  "Failed to write image bits from '%s' to RAM failed: %Rrc",
+                                                  pszTestImageFile, rc);
+                        }
+                        else
+                            rc = VMR3SetError(pUVM, rc, RT_SRC_POS, "RTLdrGetBits failed on '%s': %Rrc", pszTestImageFile, rc);
+
+                        RTMemFree(pvBits);
+                    }
+                    else
+                        rc = VMR3SetError(pUVM, VERR_NO_MEMORY, RT_SRC_POS,
+                                          "Failed to allocate %#zx bytes for '%s'", cbImage, pszTestImageFile);
+                }
+                else if (cbImage == ~(size_t)0)
+                    rc = VMR3SetError(pUVM, VERR_OUT_OF_RANGE, RT_SRC_POS, "RTLdrSize failed on '%s'", pszTestImageFile);
+                else
+                    rc = VMR3SetError(pUVM, VERR_OUT_OF_RANGE, RT_SRC_POS,
+                                      "RTLdrSize returned %#zx (%zu) for '%s', valid range 16..2GiB",
+                                      cbImage, cbImage, pszTestImageFile);
+
+                RTLdrClose(hLdrMod);
+            }
+            else
+                rc = VMR3SetError(pUVM, rc, RT_SRC_POS, "Failed to open '%s': %Rrc%#RTeim",
+                                  pszTestImageFile, rc, &ErrInfo.Core);
+        }
+        if (RT_FAILURE(rc))
+            return rc;
+    }
+    else
+        AssertLogRelReturn(rc == VERR_CFGM_NO_PARENT || rc == VERR_CFGM_VALUE_NOT_FOUND, rc);
 #endif
 
     return VINF_SUCCESS;
