@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # $Id$
+# pylint: disable=invalid-name
 
 """
 tstArm64-1 code generator.
@@ -32,7 +33,7 @@ SPDX-License-Identifier: GPL-3.0-only
 """
 __version__ = "$Revision$"
 
-# pylint: disable=too-many-lines
+# pylint: enable=invalid-name
 
 # Standard python imports.
 import argparse;
@@ -208,7 +209,7 @@ class A64No1CodeGenBase(object):
     def emitLabel(self, sLabel):
         self.asCode.append('%s:' % (sLabel,));
 
-    def emitRegValCheck(self, iRegToCheck, uExpectedValue, cBits = 64, iRegTmp = -1):
+    def emitRegValCheck(self, iRegToCheck, uExpectedValue, iRegTmp = -1):
         """ Emits a register check value. """
         global g_iBrkNo, g_iLabel;
         if uExpectedValue == 0:
@@ -331,9 +332,9 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
                 iRegTmp = self.oGprAllocator.alloc();
                 if self.fWithFlags:
                     self.emitInstr('mrs',   'x%u, NZCV' % (iRegTmp,));
-                    self.emitRegValCheck(iRegTmp, fNzcv, cBits);
+                    self.emitRegValCheck(iRegTmp, fNzcv);
                 if iRegDst != 31:
-                    self.emitRegValCheck(iRegDst, uRes, cBits, iRegTmp);
+                    self.emitRegValCheck(iRegDst, uRes, iRegTmp);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst, iRegTmp,));
 
@@ -462,7 +463,8 @@ class Arm64No1CodeGen(object):
         #
         oFile = sys.stdout;
         if self.oOptions.sFileOut:
-            oFile = open(self.oOptions.sFileOut, 'wt');
+            oFile = open(self.oOptions.sFileOut, 'wt', encoding = 'utf-8', # pylint: disable=consider-using-with
+                         errors = 'strict');
 
         oFile.write('/* Automatically Generated. Do not edit! Seed: %#x */\n' % (oOptions.iRandSeed,));
         oFile.write('#include <iprt/asmdefs-arm.h>\n');
