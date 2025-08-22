@@ -149,20 +149,45 @@
 
 
 
-#define IEM_MC_A64_SUBS_U64(a_uDifference, a_uMinuend, a_uSubtrahend) \
-    (a_uDifference) = iemMcA64SubsU64(a_uMinuend, a_uSubtrahend, &pVCpu->cpum.GstCtx.fPState)
+#define IEM_MC_A64_ADDS_U32(a_uSum, a_uAddend1, a_uAddend2) \
+    (a_uSum) = iemMcA64Adds<uint32_t, 32>(a_uAddend1, a_uAddend2, &pVCpu->cpum.GstCtx.fPState)
+#define IEM_MC_A64_ADDS_U64(a_uSum, a_uAddend1, a_uAddend2) \
+    (a_uSum) = iemMcA64Adds<uint64_t, 64>(a_uAddend1, a_uAddend2, &pVCpu->cpum.GstCtx.fPState)
 
-/** Helper that implements IEM_MC_A64_SUBS_U64. */
-DECL_FORCE_INLINE(uint64_t) iemMcA64SubsU64(uint64_t uMinuend, uint64_t uSubtrahend, uint64_t *pfPState)
+/** Helper that implements IEM_MC_A64_ADDS_U32 & IEM_MC_A64_ADDS_U64. */
+template<typename a_Type, unsigned const a_cBits>
+DECL_FORCE_INLINE(a_Type) iemMcA64Adds(a_Type uAddend1, a_Type uAddend2, uint64_t *pfPState)
 {
-    uint64_t const uDiff     = uMinuend - uSubtrahend;
-    uint64_t const fNewFlags = ((uDiff >> (63 - ARMV8_SPSR_EL2_AARCH64_N_BIT)) & ARMV8_SPSR_EL2_AARCH64_N)
+    a_Type const   uSum      = uAddend1 + uAddend2;
+    uint64_t const fNewFlags = ((uSum >> (a_cBits - 1 - ARMV8_SPSR_EL2_AARCH64_N_BIT)) & ARMV8_SPSR_EL2_AARCH64_N)
+                             | (uSum             ? 0 : ARMV8_SPSR_EL2_AARCH64_Z)
+                             | (uSum >= uAddend2 ? 0 : ARMV8_SPSR_EL2_AARCH64_C)
+                             | (   (((~(uAddend1 ^ uAddend2) & (uSum ^ uAddend1)) >> (a_cBits - 1)) & 1)
+                                << ARMV8_SPSR_EL2_AARCH64_V_BIT);
+    *pfPState = (*pfPState & ~ARMV8_SPSR_EL2_AARCH64_NZCV) | fNewFlags;
+    return uSum;
+}
+
+
+#define IEM_MC_A64_SUBS_U32(a_uDifference, a_uMinuend, a_uSubtrahend) \
+    (a_uDifference) = iemMcA64Subs<uint32_t, 32>(a_uMinuend, a_uSubtrahend, &pVCpu->cpum.GstCtx.fPState)
+#define IEM_MC_A64_SUBS_U64(a_uDifference, a_uMinuend, a_uSubtrahend) \
+    (a_uDifference) = iemMcA64Subs<uint64_t, 64>(a_uMinuend, a_uSubtrahend, &pVCpu->cpum.GstCtx.fPState)
+
+/** Helper that implements IEM_MC_A64_SUBS_U32 & IEM_MC_A64_SUBS_U64. */
+template<typename a_Type, unsigned const a_cBits>
+DECL_FORCE_INLINE(a_Type) iemMcA64Subs(a_Type uMinuend, a_Type uSubtrahend, uint64_t *pfPState)
+{
+    a_Type const   uDiff     = uMinuend - uSubtrahend;
+    uint64_t const fNewFlags = ((uDiff >> (a_cBits - 1 - ARMV8_SPSR_EL2_AARCH64_N_BIT)) & ARMV8_SPSR_EL2_AARCH64_N)
                              | (uDiff                  ? 0 : ARMV8_SPSR_EL2_AARCH64_Z)
                              | (uMinuend < uSubtrahend ? 0 : ARMV8_SPSR_EL2_AARCH64_C) /* inverted for subtractions */
-                             | (((((uMinuend ^ uSubtrahend) & (uDiff ^ uMinuend)) >> 63) & 1) << ARMV8_SPSR_EL2_AARCH64_V_BIT);
+                             | (   ((((uMinuend ^ uSubtrahend) & (uDiff ^ uMinuend)) >> (a_cBits - 1)) & 1)
+                                << ARMV8_SPSR_EL2_AARCH64_V_BIT);
     *pfPState = (*pfPState & ~ARMV8_SPSR_EL2_AARCH64_NZCV) | fNewFlags;
     return uDiff;
 }
+
 
 #define IEM_MC_A64_ANDS_U32(a_uDst, a_fMask) (a_uDst) = iemMcA64Ands<uint32_t>(a_uDst, a_fMask, &pVCpu->cpum.GstCtx.fPState)
 #define IEM_MC_A64_ANDS_U64(a_uDst, a_fMask) (a_uDst) = iemMcA64Ands<uint64_t>(a_uDst, a_fMask, &pVCpu->cpum.GstCtx.fPState)
