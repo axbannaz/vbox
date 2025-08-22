@@ -57,6 +57,11 @@
 #define BOOL PRBool
 #include <dlfcn.h>
 
+bool NativeWindowSubsystem::hasXdgDesktopPortal()
+{
+    return QDBusConnection::sessionBus().interface()->isServiceRegistered("org.freedesktop.portal.Desktop");
+}
+
 VBGHDISPLAYSERVERTYPE NativeWindowSubsystem::displayServerType()
 {
     if (!qApp)

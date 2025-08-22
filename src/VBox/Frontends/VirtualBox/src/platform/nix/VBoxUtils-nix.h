@@ -94,6 +94,7 @@ struct _XDisplay;
 /* Namespace for native window sub-system functions: */
 namespace NativeWindowSubsystem
 {
+    SHARED_LIBRARY_STUFF bool hasXdgDesktopPortal();
     /** Determines display sever type by looking at QGuiApplication::nativeInterface() return  type: */
     SHARED_LIBRARY_STUFF VBGHDISPLAYSERVERTYPE displayServerType();
     /** Wrapper function for X11IsCompositingManagerRunning and WaylandIsCompositingManagerRunning. */

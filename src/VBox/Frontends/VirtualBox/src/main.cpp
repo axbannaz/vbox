@@ -31,6 +31,7 @@
 #ifdef VBOX_WS_NIX
 # ifndef Q_OS_SOLARIS
 #  include <QFontDatabase>
+#  include "VBoxUtils.h"
 # endif
 #endif
 
@@ -419,6 +420,13 @@ extern "C" DECLEXPORT(int) TrustedMain(int argc, char **argv, char ** /*envp*/)
             RTStrmPrintf(g_pStdErr, "No active display server, X11 or Wayland, detected. Exiting.\n");
             break;
         }
+# ifndef Q_OS_SOLARIS
+        /* If XdgDesktopPortal service available via DBus then load xdgdesktopportal QPA theme. As far as
+           I can infer from my research it is one of two way Qt 6.8 achieves desktop theme integration, the other
+           way being qt6ct which is not practical for our purposes: */
+        if (NativeWindowSubsystem::hasXdgDesktopPortal())
+            RTEnvSet("QT_QPA_PLATFORMTHEME", "xdgdesktopportal");
+#endif
         if (VBGHDisplayServerTypeIsXAvailable(enmDisplayServerType))
             /* Force using Qt platform plugin 'xcb', we have X11 specific code: */
             RTEnvSet("QT_QPA_PLATFORM", "xcb");
