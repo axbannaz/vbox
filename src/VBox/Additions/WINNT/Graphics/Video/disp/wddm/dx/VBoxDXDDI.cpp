@@ -125,8 +125,6 @@ static HRESULT vboxDXAdapterInit(D3D10DDIARG_OPENADAPTER const* pOpenData, VBOXW
     return S_OK;
 }
 
-//#define DX_STATS
-
 #ifdef DX_STATS
 #include <iprt/avl.h>
 #include <iprt/time.h>
@@ -136,6 +134,7 @@ struct DxDdiFnStats {
     const char *pszFunctionName;
 
     uint64_t u64NsBegin;
+    uint64_t u64NsTotal;
     uint64_t au64NsDelayHistogram[6];
 };
 
@@ -147,31 +146,35 @@ static struct {
 
 static int histogramIndex(uint64_t u64NsTimeDiff)
 {
-    uint64_t const u64MsTimeDiff = u64NsTimeDiff / 1000 / 1000;
-    if (u64MsTimeDiff <   5) return 0; //    5 millisecond
-    if (u64MsTimeDiff <  10) return 1; //   10 milliseconds
-    if (u64MsTimeDiff <  50) return 2; //   50 milliseconds
-    if (u64MsTimeDiff < 100) return 3; //  100 milliseconds
-    if (u64MsTimeDiff < 500) return 4; //  500 milliseconds
-    return 5;
+    uint64_t const u64TimeDiff = u64NsTimeDiff / 1000; /* microseconds */
+    if (u64TimeDiff <   100) return 0; //  100 microseconds
+    if (u64TimeDiff <   500) return 1; //  500 microseconds
+    if (u64TimeDiff <  1000) return 2; //    1 millisecond
+    if (u64TimeDiff <  5000) return 3; //    5 milliseconds
+    if (u64TimeDiff < 10000) return 4; //   10 milliseconds
+    return 5;                          // > 10 milliseconds
 }
 
 static DECLCALLBACK(int) dxDdiCb(PAVLU64NODECORE pNode, void *pvUser)
 {
-    RT_NOREF(pvUser);
     DxDdiFnStats *p = (DxDdiFnStats *)pNode;
+    uint64_t *pu64NsTotal = (uint64_t *)pvUser;
 
-    LogRel(("[%52s] %6RU64 %6RU64 %6RU64 %6RU64 %6RU64 %6RU64\n",
+    *pu64NsTotal += p->u64NsTotal;
+
+    LogRel(("[%52s] %6RU64 %6RU64 %6RU64 %6RU64 %6RU64 %6RU64, total %10RU64ns\n",
         p->pszFunctionName,
         p->au64NsDelayHistogram[0],
         p->au64NsDelayHistogram[1],
         p->au64NsDelayHistogram[2],
         p->au64NsDelayHistogram[3],
         p->au64NsDelayHistogram[4],
-        p->au64NsDelayHistogram[5]
+        p->au64NsDelayHistogram[5],
+        p->u64NsTotal
         ));
 
     p->u64NsBegin = 0;
+    p->u64NsTotal = 0;
     RT_ZERO(p->au64NsDelayHistogram);
     return 0;
 }
@@ -180,8 +183,10 @@ static void dxDdiStatsLogRelAndReset(void)
 {
     LogRel(("DxDdiStats begin\n"));
 
-    RTAvlU64DoWithAll(&g_DxDdiStats.treeFnStats, 0, dxDdiCb, NULL);
+    uint64_t u64NsTotal = 0;
+    RTAvlU64DoWithAll(&g_DxDdiStats.treeFnStats, 0, dxDdiCb, &u64NsTotal);
 
+    LogRel(("Total: %RU64ns\n", u64NsTotal));
     LogRel(("DxDdiStats end\n"));
 }
 
@@ -216,6 +221,7 @@ static void dxDdiStatsEnd(const char *pszFunctionName)
     {
         uint64_t const u64Delta = u64Now - p->u64NsBegin;
 
+        p->u64NsTotal += u64Delta;
         p->au64NsDelayHistogram[histogramIndex(u64Delta)] += 1;
     }
 

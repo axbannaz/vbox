@@ -31,6 +31,11 @@
 # pragma once
 #endif
 
+/* Write statistics to the host release log: execution time of DDI entry points, etc.
+ * Requires g_VBoxLogUm = VBOXWDDM_CFG_LOG_UM_BACKDOOR in a release build in the miniport driver.
+ */
+//#define DX_STATS
+
 #include <iprt/assert.h>
 #include <iprt/handletable.h>
 
