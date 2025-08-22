@@ -841,7 +841,8 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                 case kDisArmv8OpParmImmRel:
                 /*case kDisParmParseImmAdr:*/
                 {
-                    int32_t offDisplacement;
+                    RTUINTPTR uTrgAddr = pDis->uInstrAddr;
+                    int64_t offDisplacement;
 
                     PUT_C('#');
                     if (pParam->fUse & DISUSE_IMMEDIATE8_REL)
@@ -856,16 +857,26 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                         if (fFlags & DIS_FMT_FLAGS_RELATIVE_BRANCH)
                             PUT_NUM_S16(offDisplacement);
                     }
-                    else
+                    else if (pParam->fUse & (DISUSE_IMMEDIATE32_REL | DISUSE_IMMEDIATE32 /*adr*/))
                     {
                         offDisplacement = (int32_t)pParam->uValue;
                         if (fFlags & DIS_FMT_FLAGS_RELATIVE_BRANCH)
                             PUT_NUM_S32(offDisplacement);
                     }
+                    else
+                    {
+                        Assert(pParam->fUse & DISUSE_IMMEDIATE64);
+                        Assert(pOp->uOpcode == OP_ARMV8_A64_ADRP);
+                        offDisplacement = (int64_t)pParam->uValue;
+                        if (fFlags & DIS_FMT_FLAGS_RELATIVE_BRANCH)
+                            PUT_NUM_S64(offDisplacement);
+                        /** @todo ADRP representation is too hackish! */
+                        uTrgAddr &= ~(RTUINTPTR)0xfff;
+                    }
                     if (fFlags & DIS_FMT_FLAGS_RELATIVE_BRANCH)
                         PUT_SZ(" ; (");
 
-                    RTUINTPTR uTrgAddr = pDis->uInstrAddr + offDisplacement;
+                    uTrgAddr += offDisplacement;
                     if (   pDis->uCpuMode == DISCPUMODE_ARMV8_A32
                         || pDis->uCpuMode == DISCPUMODE_ARMV8_T32)
                         PUT_NUM_32(uTrgAddr);
