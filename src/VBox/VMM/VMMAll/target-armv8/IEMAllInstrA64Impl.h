@@ -107,7 +107,6 @@
 
 /* SUBS  <Xd>, <Xn|SP>, <R><m>{, <extend>{ #<amount>}} (ffe00000/eb200000) */
 #define IEM_INSTR_IMPL_A64__SUBS_64S_addsub_ext(Rd, Rn, imm3, option, Rm) \
-    RT_BREAKPOINT();  /** @todo untested */ \
     if (imm3 > 4) return iemDecodeA64_Invalid(pVCpu, uOpcode); \
     IEM_MC_BEGIN(0, IEM_CIMPL_F_STATUS_FLAGS); \
     IEM_MC_LOCAL(uint64_t, uMinuend); \
