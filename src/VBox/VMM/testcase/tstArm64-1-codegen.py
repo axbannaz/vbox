@@ -79,7 +79,7 @@ g_dBitsToLast = {
     64: 1<<64,
 }
 def randUBits(cBits):
-    return g_oRandom.randrange(0, 1<<cBits);
+    return g_oRandom.randrange(0, 1 << cBits);
 
 
 #
@@ -451,6 +451,79 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
 
 
+class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
+    """
+    C4.1.94.5 addsub_ext
+
+    All variants take SP as input register, but only the non-flag variants
+    can use SP a the target register (the flag ones targets XZR in order to
+    implement CMP and such).
+    """
+    def __init__(self, sInstr, fnCalc, fWithFlags = False):
+        A64No1CodeGenBase.__init__(self, sInstr + '_shifted_reg', sInstr, Arm64GprAllocator(), fMayUseSp = True);
+        self.fnCalc      = fnCalc;
+        self.fWithFlags  = fWithFlags;
+        self.fWithSpDst  = not fWithFlags;
+
+    kdOp = { 0: 'UXTB', 1: 'UXTH', 2: 'UXTW', 3: 'UXTX', 4: 'SXTB', 5: 'SXTH', 6: 'SXTW', 7: 'SXTX', };
+
+    @staticmethod
+    def extendAndShift(uValue, bOpType, cShift, cBits):
+        if   bOpType == 0:  # UXTB
+            uValue &= 0xff;
+        elif bOpType == 1:  # UXTH
+            uValue &= 0xffff;
+        elif bOpType == 2:  # UXTW
+            uValue &= 0xffffffff;
+        elif bOpType == 3:  # UXTX
+            pass;
+        elif bOpType == 4:  # SXTB
+            uValue &= 0xff;
+            if uValue & 0x80:
+                uValue |= 0xffffffffffffff00;
+        elif bOpType == 5:  # SXTH
+            uValue &= 0xffff;
+            if uValue & 0x8000:
+                uValue |= 0xffffffffffff0000;
+        elif bOpType == 6:  # SXTW
+            uValue &= 0xffffffff;
+            if uValue & 0x80000000:
+                uValue |= 0xffffffff00000000;
+        elif bOpType == 7:  # SXTX
+            pass;
+        else:
+            assert False, str(bOpType);
+        uValue <<= cShift;
+        return uValue & ((1 << cBits) - 1);
+
+    def generateBody(self, oOptions):
+        for cBits in (32, 64,):
+            for i in range(oOptions.cTestsPerInstruction):
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True, fReg31IsSp = True);
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True, fReg31IsSp = False);
+                iRegDst = self.oGprAllocator.alloc(fIncludingReg31 = True);
+
+                bOpType = randUBits(3);
+                cShift  = randUBits(2) if i & 1 else 0;
+                uVal2Shifted = self.extendAndShift(uVal2, bOpType, cShift, cBits);
+                cBitsRegIn2  = cBits;
+                if cBits == 64 and bOpType not in (3, 7):
+                    cBitsRegIn2 = 32;
+
+                uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
+
+                self.emitInstr(self.sInstr, '%s, %s, %s, %s #%u'
+                               % (g_dddGprNamesBySpAndBits[self.fWithSpDst][cBits][iRegDst], g_ddGprNamesSpByBits[cBits][iRegIn1],
+                                  g_ddGprNamesZrByBits[cBitsRegIn2][iRegIn2], self.kdOp[bOpType], cShift,));
+                if self.fWithFlags:
+                    self.emitFlagsCheck(fNzcv);
+                if iRegDst != 31 or self.fWithSpDst:
+                    self.emitRegValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
+
+                self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
+
+
+
 #
 # Result calculation functions.
 #
@@ -555,24 +628,29 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         aoGenerators = [
             # addsub_imm:
-            A64No1CodeGenAddSubImm( 'add',  calcAdd),
-            A64No1CodeGenAddSubImm( 'adds', calcAdd, fWithFlags = True),
-            A64No1CodeGenAddSubImm( 'sub',  calcSub),
-            A64No1CodeGenAddSubImm( 'subs', calcSub, fWithFlags = True),
+            A64No1CodeGenAddSubImm(  'add',  calcAdd),
+            A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
+            A64No1CodeGenAddSubImm(  'sub',  calcSub),
+            A64No1CodeGenAddSubImm(  'subs', calcSub, fWithFlags = True),
             # addsub_shift:
-            A64No1CodeGenShiftedReg('add',  calcAdd),
-            A64No1CodeGenShiftedReg('adds', calcAdd, fWithFlags = True),
-            A64No1CodeGenShiftedReg('sub',  calcSub),
-            A64No1CodeGenShiftedReg('subs', calcSub, fWithFlags = True),
+            A64No1CodeGenShiftedReg( 'add',  calcAdd),
+            A64No1CodeGenShiftedReg( 'adds', calcAdd, fWithFlags = True),
+            A64No1CodeGenShiftedReg( 'sub',  calcSub),
+            A64No1CodeGenShiftedReg( 'subs', calcSub, fWithFlags = True),
+            # addsub_ext
+            A64No1CodeGenExtendedReg('add',  calcAdd),
+            A64No1CodeGenExtendedReg('adds', calcAdd, fWithFlags = True),
+            A64No1CodeGenExtendedReg('sub',  calcSub),
+            A64No1CodeGenExtendedReg('subs', calcSub, fWithFlags = True),
             # log_shift:
-            A64No1CodeGenShiftedReg('and',  calcAnd, fWithRor = True),
-            A64No1CodeGenShiftedReg('ands', calcAnd, fWithRor = True, fWithFlags = True),
-            A64No1CodeGenShiftedReg('bic',  calcBic, fWithRor = True),
-            A64No1CodeGenShiftedReg('bics', calcBic, fWithRor = True, fWithFlags = True),
-            A64No1CodeGenShiftedReg('orr',  calcOrr, fWithRor = True),
-            A64No1CodeGenShiftedReg('orn',  calcOrn, fWithRor = True),
-            A64No1CodeGenShiftedReg('eor',  calcEor, fWithRor = True),
-            A64No1CodeGenShiftedReg('eon',  calcEon, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'and',  calcAnd, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'ands', calcAnd, fWithRor = True, fWithFlags = True),
+            A64No1CodeGenShiftedReg( 'bic',  calcBic, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'bics', calcBic, fWithRor = True, fWithFlags = True),
+            A64No1CodeGenShiftedReg( 'orr',  calcOrr, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'orn',  calcOrn, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'eor',  calcEor, fWithRor = True),
+            A64No1CodeGenShiftedReg( 'eon',  calcEon, fWithRor = True),
         ];
 
 
