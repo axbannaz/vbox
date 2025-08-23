@@ -71,13 +71,6 @@ def randU64():
 def randUx(iLast):
     return g_oRandom.randrange(0, iLast+1);
 
-g_dBitsToLast = {
-    8:  1<<8,
-    12: 1<<12,
-    16: 1<<16,
-    32: 1<<32,
-    64: 1<<64,
-}
 def randUBits(cBits):
     return g_oRandom.randrange(0, 1 << cBits);
 
@@ -91,10 +84,17 @@ class Arm64RegAllocator(object):
     def __init__(self, oParent = None, cMax = 32):
         self.cMax        = cMax;
         self.bmAllocated = 0;
+        self.auValues    = [None for _ in range(cMax)];
         if oParent:
             self.bmAllocated |= oParent.bmAllocated;
+            # Note! Value tracking in the parent will be broken ...
+            for i, uValue in enumerate(oParent.auValues):
+                if uValue is not None:
+                    if i < cMax:
+                        self.auValues[i] = uValue;
+                    oParent.auValues[i] = None;
 
-    def alloc(self, fIncludingReg31 = False):
+    def alloc(self, uValue = None, fIncludingReg31 = False):
         """ Allocates a random register. """
         iReg      = randUx(self.cMax - 1);
         fRegMask  = 1 << iReg;
@@ -104,16 +104,24 @@ class Arm64RegAllocator(object):
             assert iReg != iStartReg;
             fRegMask = 1 << iReg;
 
-        self.bmAllocated |= fRegMask;
+        self.bmAllocated   |= fRegMask;
+        self.auValues[iReg] = uValue;
         return iReg;
 
-    def allocFixed(self, iReg):
+    def allocFixed(self, iReg, uValue = None):
         """ Allocates a specific register. """
         assert 0 <= iReg < self.cMax;
         fRegMask = 1 << iReg;
         assert not (self.bmAllocated & fRegMask);
-        self.bmAllocated |= fRegMask;
+        self.bmAllocated   |= fRegMask;
+        self.auValues[iReg] = uValue;
         return iReg;
+
+    def updateValue(self, iReg, uValue):
+        """ Updates the value of an allocated register. """
+        assert self.bmAllocated & (1 << iReg);
+        self.auValues[iReg] = uValue;
+        return uValue;
 
     def free(self, iReg):
         """ Frees a previously allocated register. """
@@ -281,7 +289,7 @@ class A64No1CodeGenBase(object):
                 self.genGprLoad(iRegTmp, uExpectedValue);
                 self.emitInstr('cmp',   '%s, x%u%s' % (sRegToCheck, iRegTmp, sCmpForceExtended,));
             else:
-                iRegTmp = self.oGprAllocator.alloc();
+                iRegTmp = self.oGprAllocator.alloc(uExpectedValue);
                 self.genGprLoad(iRegTmp, uExpectedValue);
                 self.emitInstr('cmp',   '%s, x%u%s' % (sRegToCheck, iRegTmp, sCmpForceExtended,));
                 self.oGprAllocator.free(iRegTmp);
@@ -295,12 +303,32 @@ class A64No1CodeGenBase(object):
     def emitFlagsCheck(self, fExpectedNzcv, iRegTmp = -1):
         """ Emits a NZCV flags check. """
         assert iRegTmp != 31; # 0x06b53736 + #0xe40 => 0x0000000006b54576 + flags=0x20001000
-        iRegTmpToUse = iRegTmp if iRegTmp >= 0 else self.oGprAllocator.alloc();
+        iRegTmpToUse = iRegTmp if iRegTmp >= 0 else self.oGprAllocator.alloc(fExpectedNzcv);
         self.emitInstr('mrs',   'x%u, NZCV' % (iRegTmpToUse,));
         self.emitRegValCheck(iRegTmpToUse, fExpectedNzcv);
         if iRegTmpToUse != iRegTmp:
             self.oGprAllocator.free(iRegTmpToUse);
         return None;
+
+    def emitAllGprChecks(self):
+        """ Check the content of all GPRs with a known value. """
+        self.asCode.append('        /* Start all GPR check: */');
+        iRegTmp  = self.oGprAllocator.alloc();
+        cChecked = 0;
+        for iReg, uValue in enumerate(self.oGprAllocator.auValues):
+            if uValue is not None and iReg != 31:
+                self.emitRegValCheck(iReg, uValue, iRegTmp = iRegTmp);
+                cChecked += 1;
+        self.oGprAllocator.free(iRegTmp);
+        self.asCode.append('        /* End all GPR check (%u regs checked) */' % (cChecked,));
+        return None;
+
+    def maybeEmitAllGprChecks(self, cLeft, oOptions):
+        if cLeft > 0:
+            return cLeft - 1;
+        self.emitAllGprChecks();
+        return oOptions.cCheckAllRegsInterval;
+
 
     def genGprLoad(self, iReg, uValue, fReg31IsSp = True):
         """
@@ -313,7 +341,7 @@ class A64No1CodeGenBase(object):
         # Allocate temp register if we're loading SP as it's difficult to do in a generic manner.
         iRegToLoad = iReg;
         if iReg == 31 and fReg31IsSp:
-            iRegToLoad = self.oGprAllocator.alloc();
+            iRegToLoad = self.oGprAllocator.alloc(uValue);
 
         ## @todo this can be compacted more!              0xffffffffffffffff
         if 0 <= uValue <= 0xffff:
@@ -341,16 +369,18 @@ class A64No1CodeGenBase(object):
         if iReg != iRegToLoad:
             self.emitInstr('mov', 'sp, %s' % (g_dGpr64NamesZr[iRegToLoad],));
             self.oGprAllocator.free(iRegToLoad);
+
+        self.oGprAllocator.updateValue(iReg, uValue);
         return iReg;
 
-    def allocGprAndLoadRandUBits(self, cBits, fIncludingReg31 = True, fReg31IsSp = False):
+    def allocGprAndLoadRandUBits(self, cBits = 64, fIncludingReg31 = True, fReg31IsSp = False):
         """
         Allocates a register and load a random value into them.
         return (uValue, iReg)
         """
-        iReg = self.oGprAllocator.alloc(fIncludingReg31);
+        uValue = randUBits(cBits);
+        iReg = self.oGprAllocator.alloc(uValue, fIncludingReg31 = fIncludingReg31);
         if iReg != 31 or fReg31IsSp:
-            uValue = randUBits(cBits);
             self.genGprLoad(iReg, uValue, fReg31IsSp = fReg31IsSp);
         else:
             uValue = 0;
@@ -373,16 +403,17 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
         self.fWithSpDst  = not fWithFlags;
 
     def generateBody(self, oOptions):
+        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True, fReg31IsSp = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
                 uVal2   = randUBits(12);
-                iRegDst = self.oGprAllocator.alloc(fIncludingReg31 = True);
 
                 fShift = randBool();
                 uVal2Shifted = uVal2 << 12 if fShift else uVal2;
 
                 uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
 
                 self.emitInstr(self.sInstr,
                                '%s, %s, #0x%x%s' % (g_dddGprNamesBySpAndBits[self.fWithSpDst][cBits][iRegDst],
@@ -393,6 +424,7 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
                     self.emitRegValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
 class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
@@ -412,33 +444,38 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
 
     @staticmethod
     def shiftRegValue(uValue, bShiftType, cShift, cBits):
+        fMask = (1 << cBits) - 1;
         if bShiftType == 0:     # LSL
             uValue <<= cShift;
         elif bShiftType == 1:   # LSR
+            uValue  &= fMask;
             uValue >>= cShift;
         elif bShiftType == 2:   # ASR
-            fOrMask = 0;
+            fOrMask  = 0;
             if (uValue >> (cBits - 1)) & 1:
                 fOrMask = 0xffffffffffffffff << (cBits - cShift);
+            uValue  &= fMask;
             uValue >>= cShift;
             uValue  |= fOrMask;
         else:                   # ROR
             assert bShiftType == 3;
-            uValue = (uValue >> cShift) | (uValue << (cBits - cShift));
-        return uValue & ((1 << cBits) - 1);
+            uValue  &= fMask;
+            uValue   = (uValue >> cShift) | (uValue << (cBits - cShift));
+        return uValue & fMask;
 
     def generateBody(self, oOptions):
+        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True);
-                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True);
-                iRegDst = self.oGprAllocator.alloc(fIncludingReg31 = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
 
                 bShiftType = randU8() % self.cShiftTypes;
                 cShift     = randU8() % cBits if i & 1 else 0;
                 uVal2Shifted = self.shiftRegValue(uVal2, bShiftType, cShift, cBits);
 
                 uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
 
                 self.emitInstr(self.sInstr, '%s, %s, %s, %s #%u'
                                % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
@@ -449,6 +486,7 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
                     self.emitRegValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
 class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
@@ -497,11 +535,11 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
         return uValue & ((1 << cBits) - 1);
 
     def generateBody(self, oOptions):
+        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True, fReg31IsSp = True);
-                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(cBits, fIncludingReg31 = True, fReg31IsSp = False);
-                iRegDst = self.oGprAllocator.alloc(fIncludingReg31 = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
 
                 bOpType = randUBits(3);
                 cShift  = randUBits(2) if i & 1 else 0;
@@ -511,6 +549,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
                     cBitsRegIn2 = 32;
 
                 uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
 
                 self.emitInstr(self.sInstr, '%s, %s, %s, %s #%u'
                                % (g_dddGprNamesBySpAndBits[self.fWithSpDst][cBits][iRegDst], g_ddGprNamesSpByBits[cBits][iRegIn1],
@@ -521,6 +560,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
                     self.emitRegValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
 
@@ -536,8 +576,13 @@ def flagsToMask(fNegative, fZero, fCarry, fOverflow):
 
 # calc result of addition and subtraction:
 def calcAdd(cBits, uVal1, uVal2, fCarry):
+    fMask      = (1 << cBits) - 1;
+    uVal1     &= fMask;
+    uVal2     &= fMask;
+
     uResultRaw = uVal1 + uVal2 + fCarry;
-    uResult    = uResultRaw & ((1<<cBits) - 1);
+    uResult    = uResultRaw & fMask;
+
     fNeg       = (uResult >> (cBits - 1)) & 1;
     fZero      = 0 if uResult else 1;
     fCarry     = 1 if uResultRaw > uResult else 0;
@@ -545,8 +590,13 @@ def calcAdd(cBits, uVal1, uVal2, fCarry):
     return (uResult, flagsToMask(fNeg, fZero, fCarry, fOverflow));
 
 def calcSub(cBits, uVal1, uVal2, fBorrow):
+    fMask      = (1 << cBits) - 1;
+    uVal1     &= fMask;
+    uVal2     &= fMask;
+
     uResultRaw = uVal1 - uVal2 - fBorrow;
-    uResult    = uResultRaw & ((1<<cBits) - 1);
+    uResult    = uResultRaw & fMask;
+
     fNeg       = (uResult >> (cBits - 1)) & 1;
     fZero      = 0 if uResult else 1;
     fCarry     = 0 if uVal1 < uVal2 + fBorrow else 1;
@@ -556,7 +606,7 @@ def calcSub(cBits, uVal1, uVal2, fBorrow):
 
 # Calc result of logical/bitwise operation:
 def calcBitwiseCommon(cBits, uResult):
-    uResult &= ((1<<cBits) - 1);
+    uResult &= (1 << cBits) - 1;
     return (uResult, flagsToMask((uResult >> (cBits - 1)) & 1, 0 if uResult else 1, 0, 0));
 
 def calcAnd(cBits, uVal1, uVal2, _):
@@ -613,11 +663,26 @@ class Arm64No1CodeGen(object):
                                 action  = 'store',
                                 default = 128,
                                 type    = lambda s: int(s, 0),
+                                choices = range(1, 16384),
                                 help    = 'Number of tests per instruction.');
+
+        oArgParser.add_argument('--check-all-regs-interval',
+                                metavar = 'value',
+                                dest    = 'cCheckAllRegsInterval',
+                                action  = 'store',
+                                default = None,
+                                type    = lambda s: int(s, 0),
+                                choices = range(1, 16384),
+                                help    = 'Number of tests between checking all registers. Zero to disable. '
+                                          'Defaults to 1/4 of --tests-per-instruction with a minimum of 8.');
+
+
 
         # Do it!
         oOptions = oArgParser.parse_args(asArgs[1:]);
         self.oOptions = oOptions;
+        if oOptions.cCheckAllRegsInterval is None:
+            oOptions.cCheckAllRegsInterval = min(max(oOptions.cTestsPerInstruction / 4, 8), oOptions.cTestsPerInstruction);
 
         # See random.
         if oOptions.iRandSeed in (None, 0):
