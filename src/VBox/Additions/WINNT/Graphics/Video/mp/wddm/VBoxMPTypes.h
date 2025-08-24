@@ -50,9 +50,7 @@ typedef struct VBOXWDDM_ALLOCATION *PVBOXWDDM_ALLOCATION;
 #define DEBUG_BREAKPOINT_TEST() do { } while (0)
 #endif
 
-#if 0
 #include <iprt/avl.h>
-#endif
 
 #define VBOXWDDM_DEFAULT_REFRESH_RATE 60
 
@@ -170,15 +168,16 @@ typedef struct VBOXWDDM_TARGET
 
 #ifdef VBOX_WITH_VMSVGA3D_DX
 # ifdef DX_RENAME_ALLOCATION
-/** @todo Implement unlimited renaming list: an AVL tree instead of aInstances array. */
-#  define DX_MAX_RENAMING_LIST_LENGTH 16
+/* 0 means that "memory manager can increase the size of the renaming list to whatever size is necessary
+ * to improve performance", which, in practice, is 63 on Windows 10. */
+#  define DX_MAX_RENAMING_LIST_LENGTH 0
 
 struct DX_ALLOCATION_INSTANCE
 {
-    uint32_t            mobid;                      /* For surfaces and shaders. */
-    SIZE_T              OffsetInPages;              /* Address of the allocation within segment.
-                                                     * DXGK believes that the allocation is here. */
+    AVLU32NODECORE      Core;                       /* Key is offset within segment (OffsetInPages).
+                                                     * DXGK believes that the allocation is at this offset. */
     struct VMSVGAGBO   *pGbo;                       /* Guest memory for this allocation. */
+    uint32_t            mobid;                      /* For surfaces and shaders. */
 };
 # endif /* DX_RENAME_ALLOCATION */
 #endif /* VBOX_WITH_VMSVGA3D_DX */
@@ -224,8 +223,7 @@ typedef struct VBOXWDDM_ALLOCATION
         struct VMSVGAGBO       *pGbo;                       /* Guest memory for this allocation. */
 #else
         uint32_t                SegmentId;                  /* Segment of the allocation. */
-        int32_t                 idxLastCreatedInstance;     /* Index of last created instance in aInstances. */
-        DX_ALLOCATION_INSTANCE  aInstances[DX_MAX_RENAMING_LIST_LENGTH];
+        AVLU32TREE              treeInstances;              /* DX_ALLOCATION_INSTANCE */
 #endif
     } dx;
 #endif /* VBOX_WITH_VMSVGA3D_DX */
