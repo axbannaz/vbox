@@ -701,7 +701,7 @@ int VBoxNetSlirpNAT::initIPv4()
     struct Nameserver4List vRealNameservers = getHostNameservers();
     if (Nameserver4ListSize(&vRealNameservers) > 0)
     {
-        m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers));
+        m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers) * sizeof(struct in_addr));
         if (!m_ProxyOptions.aRealNameservers)
         {
             reportError("Nameserver array allocation failed.\n");
@@ -1323,7 +1323,7 @@ HRESULT VBoxNetSlirpNAT::HandleEvent(VBoxEventType_T aEventType, IEvent *pEvent)
             struct Nameserver4List vRealNameservers = getHostNameservers();
             if (Nameserver4ListSize(&vRealNameservers) > 0)
             {
-                m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers));
+                m_ProxyOptions.aRealNameservers = (struct in_addr *)RTMemAlloc(Nameserver4ListSize(&vRealNameservers) * sizeof(struct in_addr));
                 if (!m_ProxyOptions.aRealNameservers)
                 {
                     reportError("Nameserver array allocation failed.\n");
