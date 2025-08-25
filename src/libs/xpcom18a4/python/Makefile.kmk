@@ -658,6 +658,48 @@ ifndef VBOX_ONLY_SDK
    endif
   endif
 
+  ifdef VBOX_PYTHON313_INC
+   #
+   # Python 3.13 version (implicitly with pymalloc)
+   #
+   DLLS += VBoxPython3_13
+   VBoxPython3_13_EXTENDS = VBoxPythonBase
+   VBoxPython3_13_EXTENDS_BY = appending
+   VBoxPython3_13_INCS    = $(VBOX_PYTHON313_INC)
+   VBoxPython3_13_LIBS    = $(VBOX_PYTHON313_LIB)
+
+   ifdef VBOX_WITH_32_ON_64_MAIN_API
+    ifdef VBOX_PYTHON313_LIB_X86
+     DLLS += VBoxPython3_13_x86
+     VBoxPython3_13_x86_EXTENDS = VBoxPythonBase_x86
+     VBoxPython3_13_x86_EXTENDS_BY = appending
+     VBoxPython3_13_x86_INCS  = $(VBOX_PYTHON313_INC)
+     VBoxPython3_13_x86_LIBS  = $(VBOX_PYTHON313_LIB_X86)
+    endif
+   endif
+  endif
+
+  ifdef VBOX_PYTHON314_INC
+   #
+   # Python 3.14 version (implicitly with pymalloc)
+   #
+   DLLS += VBoxPython3_14
+   VBoxPython3_14_EXTENDS = VBoxPythonBase
+   VBoxPython3_14_EXTENDS_BY = appending
+   VBoxPython3_14_INCS    = $(VBOX_PYTHON314_INC)
+   VBoxPython3_14_LIBS    = $(VBOX_PYTHON314_LIB)
+
+   ifdef VBOX_WITH_32_ON_64_MAIN_API
+    ifdef VBOX_PYTHON314_LIB_X86
+     DLLS += VBoxPython3_14_x86
+     VBoxPython3_14_x86_EXTENDS = VBoxPythonBase_x86
+     VBoxPython3_14_x86_EXTENDS_BY = appending
+     VBoxPython3_14_x86_INCS  = $(VBOX_PYTHON314_INC)
+     VBoxPython3_14_x86_LIBS  = $(VBOX_PYTHON314_LIB_X86)
+    endif
+   endif
+  endif
+
   ifdef VBOX_PYTHONDEF_INC
    #
    # Python without versioning
@@ -700,7 +742,7 @@ ifndef VBOX_ONLY_SDK
   # TODO: ASSUMING that we don't need a different headers for pymalloc
   #       ('m' builds < 3.8) and CRT malloc.
   #
-  VBOX_PYTHON_LIMITED_API_VER := $(firstword $(foreach ver, 35 36 37 38 39 310 311 312   34 33 \
+  VBOX_PYTHON_LIMITED_API_VER := $(firstword $(foreach ver, 35 36 37 38 39 310 311 312 313 314   34 33 \
   			,$(if-expr defined(VBOX_PYTHON$(ver)_INC),$(ver),)$(if-expr defined(VBOX_PYTHON$(ver)M_INC),$(ver)M,)))
   ifneq ($(VBOX_PYTHON_LIMITED_API_VER),)
    DLLS += VBoxPython3
