@@ -46,6 +46,7 @@ import sys;
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'VMMAll'));
 import PyCommonVmm as pycmn;    # pylint: disable=import-error
 
+
 #
 # Utility functions.
 #
@@ -563,6 +564,61 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
+class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
+    """
+    C4.1.94.? addsub_carry
+
+    None of these instructions operates of SP.
+    """
+    def __init__(self, sInstr, fnCalc, fWithFlags = False):
+        A64No1CodeGenBase.__init__(self, sInstr + '_carry', sInstr, Arm64GprAllocator());
+        self.fnCalc      = fnCalc;
+        self.fWithFlags  = fWithFlags;
+
+    def generateBody(self, oOptions):
+        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
+        for cBits in (32, 64,):
+            fSignMax = (1 << (cBits - 1)) - 1
+            aFixed = (
+                (0, fSignMax, 1),
+                (0, fSignMax, 0),
+                (fSignMax, 0, 1),
+                (fSignMax, 0, 0),
+                (fSignMax, fSignMax, 1),
+                (fSignMax, fSignMax, 0),
+                (0, 0, 1),
+                (0, 0, 0)
+            );
+            for i in range(oOptions.cTestsPerInstruction + len(aFixed)):
+                if i < len(aFixed):
+                    (uVal1, uVal2, fCarry) = aFixed[i];
+                    iRegIn1 = self.genGprLoad(self.oGprAllocator.alloc(uVal1, fIncludingReg31 = False), uVal1);
+                    iRegIn2 = self.genGprLoad(self.oGprAllocator.alloc(uVal2, fIncludingReg31 = False), uVal2);
+                else:
+                    (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                    (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                    fCarry           = randUBits(1);
+
+                if fCarry:
+                    self.emitInstr('subs', 'wzr, wzr, wzr', 'clears carry'); # N=0, Z=1, C=1, V=0
+                else:
+                    self.emitInstr('adds', 'wzr, wzr, wzr', 'sets carry');   # N=0, Z=1, C=0, V=0
+
+                uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2, fCarry);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+
+                self.emitInstr(self.sInstr, '%s, %s, %s'
+                               % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
+                                  g_ddGprNamesZrByBits[cBits][iRegIn2],));
+                if self.fWithFlags:
+                    self.emitFlagsCheck(fNzcv);
+                if iRegDst != 31:
+                    self.emitRegValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+
 
 #
 # Result calculation functions.
@@ -589,7 +645,22 @@ def calcAdd(cBits, uVal1, uVal2, fCarry):
     fOverflow  = ((~(uVal1 ^ uVal2) & (uResult ^ uVal1)) >> (cBits - 1)) & 1;
     return (uResult, flagsToMask(fNeg, fZero, fCarry, fOverflow));
 
-def calcSub(cBits, uVal1, uVal2, fBorrow):
+def calcSub(cBits, uVal1, uVal2, _):
+    fMask      = (1 << cBits) - 1;
+    uVal1     &= fMask;
+    uVal2     &= fMask;
+
+    uResultRaw = uVal1 - uVal2;
+    uResult    = uResultRaw & fMask;
+
+    fNeg       = (uResult >> (cBits - 1)) & 1;
+    fZero      = 0 if uResult else 1;
+    fCarry     = 0 if uVal1 < uVal2 else 1;
+    fOverflow  = (((uVal1 ^ uVal2) & (uResult ^ uVal1)) >> (cBits - 1)) & 1;
+    return (uResult, flagsToMask(fNeg, fZero, fCarry, fOverflow));
+
+def calcSubBorrow(cBits, uVal1, uVal2, fCarry):
+    fBorrow    = 0 if fCarry else 1;
     fMask      = (1 << cBits) - 1;
     uVal1     &= fMask;
     uVal2     &= fMask;
@@ -692,6 +763,10 @@ class Arm64No1CodeGen(object):
 
         # Instantiate the generators.
         aoGenerators = [
+            A64No1CodeGenAddSubCarry('adc',  calcAdd),
+            A64No1CodeGenAddSubCarry('adcs', calcAdd, fWithFlags = True),
+            A64No1CodeGenAddSubCarry('sbc',  calcSubBorrow),
+            A64No1CodeGenAddSubCarry('sbcs', calcSubBorrow, fWithFlags = True),
             # addsub_imm:
             A64No1CodeGenAddSubImm(  'add',  calcAdd),
             A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),

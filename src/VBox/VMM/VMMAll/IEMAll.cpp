@@ -413,6 +413,8 @@ static void iemLogCurInstr(PVMCPUCC pVCpu, const char *pszFunction) RT_NOEXCEPT
               pFpuCtx->FSW, pFpuCtx->FCW, pFpuCtx->FTW, pFpuCtx->MXCSR, pFpuCtx->MXCSR_MASK,
               szInstr));
 #  elif defined(VBOX_VMM_TARGET_ARMV8)
+        char szPState[160];
+        DBGFR3RegFormatArmV8PState(szPState, pVCpu->cpum.GstCtx.fPState);
         Log2(("**** %s fExec=%x\n"
               "  x0=%016RX64  x1=%016RX64  x2=%016RX64  x3=%016RX64\n"
               "  x4=%016RX64  x5=%016RX64  x6=%016RX64  x7=%016RX64\n"
@@ -422,7 +424,7 @@ static void iemLogCurInstr(PVMCPUCC pVCpu, const char *pszFunction) RT_NOEXCEPT
               " x20=%016RX64 x21=%016RX64 x22=%016RX64 x23=%016RX64\n"
               " x24=%016RX64 x25=%016RX64 x26=%016RX64 x27=%016RX64\n"
               " x28=%016RX64  bp=%016RX64  lr=%016RX64  sp=%016RX64\n"
-              "  pc=%016RX64 psr=%012RX64 EL%u\n"
+              "  pc=%016RX64 psr=%012RX64 %s\n"
               " %s\n"
               , pszFunction, pVCpu->iem.s.fExec,
               pVCpu->cpum.GstCtx.aGRegs[0],  pVCpu->cpum.GstCtx.aGRegs[1],  pVCpu->cpum.GstCtx.aGRegs[2],  pVCpu->cpum.GstCtx.aGRegs[3],
@@ -434,7 +436,7 @@ static void iemLogCurInstr(PVMCPUCC pVCpu, const char *pszFunction) RT_NOEXCEPT
               pVCpu->cpum.GstCtx.aGRegs[24], pVCpu->cpum.GstCtx.aGRegs[25], pVCpu->cpum.GstCtx.aGRegs[26], pVCpu->cpum.GstCtx.aGRegs[27],
               pVCpu->cpum.GstCtx.aGRegs[28], pVCpu->cpum.GstCtx.aGRegs[29], pVCpu->cpum.GstCtx.aGRegs[30],
               pVCpu->cpum.GstCtx.aSpReg[IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) > 0],
-              pVCpu->cpum.GstCtx.Pc, pVCpu->cpum.GstCtx.fPState, IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec),
+              pVCpu->cpum.GstCtx.Pc, pVCpu->cpum.GstCtx.fPState, szPState,
               szInstr));
 #  else
 #   error "port me"
