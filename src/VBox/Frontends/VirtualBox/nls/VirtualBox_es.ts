@@ -28368,6 +28368,26 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <source>Password must match</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>The user name cannot contain following characters: / \ [ ] : | &lt; &gt; + = ; , ? * % @</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The user name cannot be &apos;NONE&apos;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The user name cannot be longer than 20 characters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The user name includes invalid characters</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The user name cannot be longer than 32 characters</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIVMActivityMonitorPaneContainer</name>
