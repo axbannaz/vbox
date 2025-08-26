@@ -1,4 +1,5 @@
-_Debian_sid      = DEBIAN_12_0
+_Debian_sid      = DEBIAN_14_0
+_Debian_trixie   = DEBIAN_13_0
 _Debian_bookworm = DEBIAN_12_0
 _Debian_bullseye = DEBIAN_11_0
 _Debian_buster   = DEBIAN_10_0
