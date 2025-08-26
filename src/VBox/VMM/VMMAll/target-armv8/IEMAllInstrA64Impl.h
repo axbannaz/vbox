@@ -3611,7 +3611,7 @@
         if (imms >= immr) \
         {   /* Move bits from imms:immr to pos 0. */ \
             uint32_t const cBits = imms - immr + 1; \
-            cLeftShift        = 32 - immr; \
+            cLeftShift        = 32 - imms - 1; \
             cSignedRightShift = 32 - cBits; \
         } \
         else \
@@ -3705,7 +3705,7 @@
     if (imms >= immr) \
     {   /* Move bits from imms:immr to pos 0. */ \
         uint32_t const cBits = imms - immr + 1; \
-        cLeftShift        = 64 - immr; \
+        cLeftShift        = 64 - imms - 1; \
         cSignedRightShift = 64 - cBits; \
     } \
     else \
@@ -3732,7 +3732,7 @@
     if (imms >= immr) \
     {   /* Move bits from imms:immr to pos 0. */ \
         uint32_t const cBits = imms - immr + 1; \
-        fMask = cBits >= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
+        fMask = cBits <= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
     } \
     else \
     {   /* Move bits from pos 0 to 64-immr. */ \
@@ -3760,7 +3760,7 @@
     if (imms >= immr) \
     {   /* Move bits from imms:immr to pos 0. */ \
         uint32_t const cBits = imms - immr + 1; \
-        fMask = cBits >= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
+        fMask = cBits <= 63 ? RT_BIT_64(cBits) - UINT64_C(1) : UINT64_MAX; \
     } \
     else \
     {   /* Move bits from pos 0 to 64-immr. */ \

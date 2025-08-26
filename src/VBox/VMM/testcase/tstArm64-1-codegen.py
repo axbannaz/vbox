@@ -51,6 +51,30 @@ import PyCommonVmm as pycmn;    # pylint: disable=import-error
 # Utility functions.
 #
 
+def isPowerOfTwo(uValue):
+    """ Check if 'uValue' is a power of two. """
+    return (uValue & (uValue - 1)) == 0 and uValue != 0;
+
+def bitsOnes(cBits):
+    """ Returns a value with 'cBits' ones in it. """
+    return (1<<cBits) - 1;
+
+def bitsReplicate(cBits, uValue, cTimes):
+    """ Return the 'uValue' ('cBits' wide) replicated 'cTimes' times. """
+    uRet = uValue;
+    while cTimes > 1:
+        cTimes -= 1;
+        uRet <<= cBits;
+        uRet  |= uValue;
+    return uRet;
+
+def bitsRor(cBits, uValue, cShift):
+    """ Rotates 'uValue' ('cBits' wide) 'cShift' times to the right. """
+    assert isPowerOfTwo(cBits);
+    cShift &= cBits - 1;
+    fMask   = bitsOnes(cBits);
+    return ((uValue & fMask) >> cShift) | ((uValue << (cBits - cShift)) & fMask);
+
 ## The random number generator we use.
 g_oRandom = random.Random();
 
@@ -246,7 +270,7 @@ class A64No1CodeGenBase(object):
         self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_DataStart_%s)' % (self.iRegDataPtr, self.iRegDataPtr, self.sLabel,));
         self.asCode.append('');
 
-        self.generateBody(oOptions);
+        self.generateBody(oOptions, oOptions.cCheckAllRegsInterval);
 
         self.asCode.append('');
         if self.fMayUseSp:
@@ -261,8 +285,8 @@ class A64No1CodeGenBase(object):
         self.asCode.append('ENDPROC %s' % (self.sLabel,));
 
 
-    def generateBody(self, oOptions):
-        _ = oOptions;
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        _ = oOptions; _ = cLeftToAllCheck;
         return None;
 
     def emitInstr(self, sInstr, sOperands, sComment = None):
@@ -389,6 +413,10 @@ class A64No1CodeGenBase(object):
         return (uValue, iReg);
 
 
+#
+# The code generators for specific instructions.
+#
+
 class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
     """
     C4.1.92.3 addsub_imm
@@ -403,8 +431,7 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
         self.fWithFlags  = fWithFlags;
         self.fWithSpDst  = not fWithFlags;
 
-    def generateBody(self, oOptions):
-        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
+    def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
                 (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
@@ -464,8 +491,7 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
             uValue   = (uValue >> cShift) | (uValue << (cBits - cShift));
         return uValue & fMask;
 
-    def generateBody(self, oOptions):
-        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
+    def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
                 (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
@@ -535,8 +561,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
         uValue <<= cShift;
         return uValue & ((1 << cBits) - 1);
 
-    def generateBody(self, oOptions):
-        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
+    def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
                 (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
@@ -566,7 +591,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
 
 class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
     """
-    C4.1.94.? addsub_carry
+    C4.1.94.6 addsub_carry
 
     None of these instructions operates of SP.
     """
@@ -575,11 +600,10 @@ class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
         self.fnCalc      = fnCalc;
         self.fWithFlags  = fWithFlags;
 
-    def generateBody(self, oOptions):
-        cLeftToAllCheck = oOptions.cCheckAllRegsInterval;
+    def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             fSignMax = (1 << (cBits - 1)) - 1
-            aFixed = (
+            aFixed   = (
                 (0, fSignMax, 1),
                 (0, fSignMax, 0),
                 (fSignMax, 0, 1),
@@ -618,6 +642,74 @@ class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
+
+class A64No1CodeGenBitfieldMove(A64No1CodeGenBase):
+    """
+    C4.1.92.8 bitfield
+
+    None of these instructions operates of SP.
+    """
+    def __init__(self, sInstr, fnCalc):
+        A64No1CodeGenBase.__init__(self, sInstr + '_carry', sInstr, Arm64GprAllocator());
+        self.fnCalc      = fnCalc;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in (32, 64,):
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uDst, iRegDst) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                uImmR           = randUBits(5 if cBits == 32 else 6);
+                uImmS           = randUBits(5 if cBits == 32 else 6);
+
+                uRes = self.fnCalc(cBits, uDst, uSrc, uImmR, uImmS);
+
+                self.emitInstr(self.sInstr, '%s, %s, #0x%x, #0x%x'
+                               % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn],
+                                  uImmR, uImmS,));
+                if iRegDst != 31:
+                    self.oGprAllocator.updateValue(iRegDst, uRes);
+                    self.emitRegValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.freeList((iRegIn, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+def decodeBitMasks(uImmR, fN, uImmS, cBits, fImmediate = False): # pylint:disable=invalid-name
+    uTmp = ((fN & 1) << 6) | (~uImmS & 0x3f);
+    cBitsLength = uTmp.bit_length() - 1;
+    assert cBitsLength >= 0;
+
+    cLevels = bitsOnes(cBitsLength);
+    assert cLevels < cBits, 'r=%#x N=%u s=%#x bits=%u uTmp=%#x: cLevels=%u' % (uImmR, fN, uImmS, cBits, uTmp, cLevels,);
+    assert not fImmediate or (uImmS & cLevels) != cLevels;
+
+    uImmS &= cLevels;
+    uImmR &= cLevels;
+    uDiff  = (uImmS - uImmR) & cLevels;
+
+    cBitsElement = 1 << cBitsLength;
+
+    fWElem   = bitsOnes(uImmS + 1);
+    fTopElem = bitsOnes(uDiff + 1);
+
+    fWMask   = bitsReplicate(cBitsElement, bitsRor(cBitsElement, fWElem, uImmR), cBits // cBitsElement);
+    fTopMask = bitsReplicate(cBitsElement, fTopElem,                             cBits // cBitsElement);
+    return (fWMask, fTopMask)
+
+def calcBfm(cBits, uDst, uSrc, uImmR, uImmS):
+    (fWMask, fTopMask) = decodeBitMasks(uImmR, 1 if cBits == 64 else 0,  uImmS, cBits);
+    fBottom = (uDst & ~fWMask) | (bitsRor(cBits, uSrc, uImmR) & fWMask);
+    return (uDst & ~fTopMask & bitsOnes(cBits)) | (fBottom & fTopMask);
+
+def calcSbfm(cBits, _, uSrc, uImmR, uImmS):
+    (fWMask, fTopMask) = decodeBitMasks(uImmR, 1 if cBits == 64 else 0,  uImmS, cBits);
+    fBottom = bitsRor(cBits, uSrc, uImmR) & fWMask;
+    fTop    = bitsReplicate(1, (uSrc >> uImmS) & 1, cBits);
+    return (fTop & ~fTopMask) | (fBottom & fTopMask);
+
+def calcUbfm(cBits, _, uSrc, uImmR, uImmS):
+    (fWMask, fTopMask) = decodeBitMasks(uImmR, 1 if cBits == 64 else 0,  uImmS, cBits);
+    fBottom = bitsRor(cBits, uSrc, uImmR) & fWMask;
+    return fBottom & fTopMask;
 
 
 #
@@ -732,7 +824,7 @@ class Arm64No1CodeGen(object):
                                 metavar = 'value',
                                 dest    = 'cTestsPerInstruction',
                                 action  = 'store',
-                                default = 128,
+                                default = 256,
                                 type    = lambda s: int(s, 0),
                                 choices = range(1, 16384),
                                 help    = 'Number of tests per instruction.');
@@ -763,10 +855,6 @@ class Arm64No1CodeGen(object):
 
         # Instantiate the generators.
         aoGenerators = [
-            A64No1CodeGenAddSubCarry('adc',  calcAdd),
-            A64No1CodeGenAddSubCarry('adcs', calcAdd, fWithFlags = True),
-            A64No1CodeGenAddSubCarry('sbc',  calcSubBorrow),
-            A64No1CodeGenAddSubCarry('sbcs', calcSubBorrow, fWithFlags = True),
             # addsub_imm:
             A64No1CodeGenAddSubImm(  'add',  calcAdd),
             A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
@@ -782,6 +870,11 @@ class Arm64No1CodeGen(object):
             A64No1CodeGenExtendedReg('adds', calcAdd, fWithFlags = True),
             A64No1CodeGenExtendedReg('sub',  calcSub),
             A64No1CodeGenExtendedReg('subs', calcSub, fWithFlags = True),
+            # addsub_carry:
+            A64No1CodeGenAddSubCarry('adc',  calcAdd),
+            A64No1CodeGenAddSubCarry('adcs', calcAdd, fWithFlags = True),
+            A64No1CodeGenAddSubCarry('sbc',  calcSubBorrow),
+            A64No1CodeGenAddSubCarry('sbcs', calcSubBorrow, fWithFlags = True),
             # log_shift:
             A64No1CodeGenShiftedReg( 'and',  calcAnd, fWithRor = True),
             A64No1CodeGenShiftedReg( 'ands', calcAnd, fWithRor = True, fWithFlags = True),
@@ -791,6 +884,10 @@ class Arm64No1CodeGen(object):
             A64No1CodeGenShiftedReg( 'orn',  calcOrn, fWithRor = True),
             A64No1CodeGenShiftedReg( 'eor',  calcEor, fWithRor = True),
             A64No1CodeGenShiftedReg( 'eon',  calcEon, fWithRor = True),
+            # bitfield:
+            A64No1CodeGenBitfieldMove('bfm',  calcBfm),
+            A64No1CodeGenBitfieldMove('sbfm', calcSbfm),
+            A64No1CodeGenBitfieldMove('ubfm', calcUbfm),
         ];
 
 
