@@ -1184,7 +1184,9 @@ static int hmR3InitFinalizeR0(PVM pVM)
     /*
      * Report ring-0 init errors.
      */
-    if (RT_FAILURE(pVM->hm.s.ForR3.rcInit))
+    if (   RT_FAILURE(pVM->hm.s.ForR3.rcInit)
+        || (  !pVM->hm.s.vmx.fSupported
+           && !pVM->hm.s.svm.fSupported))
     {
         LogRel(("HM: Failed to initialize %s: %Rrc\n", pVM->hm.s.vmx.fSupported ? "VT-x" : "AMD-V", pVM->hm.s.ForR3.rcInit));
         switch (pVM->hm.s.ForR3.rcInit)
