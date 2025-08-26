@@ -552,9 +552,13 @@ VMMR3_INT_DECL(int) HMR3Init(PVM pVM)
 
     /*
      * Check if VT-x or AMD-v support according to the users wishes.
+     *
+     * NOTE! SUPR3QueryVTCaps won't catch VERR_VMX_IN_VMX_ROOT_MODE or VERR_SVM_IN_USE
+     * errors because it is intended to merely query capability and not usability. We
+     * go ahead assuming VT-x/AMD-V is usable which might not be the case. This will
+     * eventually be resolved in hmR3InitFinalizeR0 when checking for "ForR3.rcInit"
+     * which stored any usability shortcomings from ring-0 (see HMR0).
      */
-    /** @todo SUPR3QueryVTCaps won't catch VERR_VMX_IN_VMX_ROOT_MODE or
-     *        VERR_SVM_IN_USE. */
     if (pVM->fHMEnabled)
     {
         uint32_t fCaps;
@@ -1174,14 +1178,15 @@ static int hmR3InitFinalizeR0(PVM pVM)
         pVM->hm.s.ForR3.rcInit = VINF_SUCCESS;
     }
 
+    if (pVM->hm.s.vmx.fSupported)
+        LogRel(("HM: Host MSR_IA32_FEATURE_CONTROL = %#RX64\n", pVM->hm.s.ForR3.vmx.u64HostFeatCtrl));
+
     /*
      * Report ring-0 init errors.
      */
-    if (   !pVM->hm.s.vmx.fSupported
-        && !pVM->hm.s.svm.fSupported)
+    if (RT_FAILURE(pVM->hm.s.ForR3.rcInit))
     {
-        LogRel(("HM: Failed to initialize VT-x / AMD-V: %Rrc\n", pVM->hm.s.ForR3.rcInit));
-        LogRel(("HM: VMX MSR_IA32_FEATURE_CONTROL=%RX64\n", pVM->hm.s.ForR3.vmx.u64HostFeatCtrl));
+        LogRel(("HM: Failed to initialize %s: %Rrc\n", pVM->hm.s.vmx.fSupported ? "VT-x" : "AMD-V", pVM->hm.s.ForR3.rcInit));
         switch (pVM->hm.s.ForR3.rcInit)
         {
             case VERR_VMX_IN_VMX_ROOT_MODE:
