@@ -2577,6 +2577,9 @@ VBOX_VBOXCPP    ?= $(PATH_OBJ)/VBoxCPP/VBoxCPP$(HOSTSUFF_EXE)
 # VBoxTpG (tracepoint generator)
 VBOX_VBOXTPG    ?= $(PATH_OBJ)/VBoxTpG/VBoxTpG$(HOSTSUFF_EXE)
 
+# VBoxPeSetVersion (changes the minimum OS version of an image)
+VBOX_PE_SET_VERSION ?= $(PATH_OBJ)/VBoxPeSetVersion/VBoxPeSetVersion$(HOSTSUFF_EXE)
+
 # Visual C++ EditBin.exe.
 VBOX_VCC_EDITBIN = $(if $(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN_QSH),$(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN_QSH)/,$(if $(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN),$(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN)/,))editbin.exe /NoLogo
 
