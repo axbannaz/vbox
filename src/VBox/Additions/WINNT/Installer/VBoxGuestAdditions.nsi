@@ -570,9 +570,9 @@ force_extract_unsupported_os:
     Call W2K_CallbackExtractFiles
     Call Vista_CallbackExtractFiles
     goto extract_common ; Needed for force_extract_unsupported_os label.
-!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWin2000}
     Call W2K_CallbackExtractFiles
+!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWinNT4}
     Call NT4_CallbackExtractFiles
 !endif
