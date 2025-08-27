@@ -750,7 +750,7 @@ Function ${un}W2K_CallbackUninstall
   Delete /REBOOTOK "$g_strSystemDir\VBoxMRXNP.dll" ; The network provider DLL will be locked.
   !if $%KBUILD_TARGET_ARCH% == "amd64"
     ; Only 64-bit installer: Also remove 32-bit DLLs on 64-bit target arch in Wow64 node.
-    Delete /REBOOTOK "$g_strSysWow64\VBoxMRXNP.dll"
+    Delete /REBOOTOK "$g_strSysWow64\VBoxMRXNP-x86.dll"
   !endif ; amd64
   Delete /REBOOTOK "$g_strSystemDir\drivers\VBoxSF.sys"
 
