@@ -100,7 +100,7 @@ ifdef VBOX_SIGNING_MODE
  bldAddSignedDummy_TEMPLATE := VBoxBldProg
  bldAddSignedDummy_SOURCES  := bldAddSignedDummy.cpp
  bldAddSignedDummy_ORDERDEPS = $(VBOX_SIGN_IMAGE_ORDERDEPS)
- bldAddSignedDummy_POST_CMDS = $(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+ bldAddSignedDummy_POST_CMDS.win = $(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 
  # The certificate include files.
  $$(VBoxWindowsAdditions_0_OUTDIR)/BuildCerts.h: $(VBOX_RTSIGNTOOL) $$(bldAddSignedDummy_1_TARGET) | $$(dir $$@)
