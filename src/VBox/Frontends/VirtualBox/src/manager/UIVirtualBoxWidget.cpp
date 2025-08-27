@@ -319,7 +319,7 @@ void UIVirtualBoxWidget::sltHandleCommitData()
 void UIVirtualBoxWidget::sltHandleMachineStateChange(const QUuid &uId)
 {
     /* Update toolbar to show/hide corresponding actions: */
-    if (currentItem()->id() == uId)
+    if (currentItem() && currentItem()->id() == uId)
         updateToolbar();
 }
 
