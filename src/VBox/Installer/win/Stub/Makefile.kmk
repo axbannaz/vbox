@@ -34,7 +34,7 @@ include $(KBUILD_PATH)/subheader.kmk
 #
 TEMPLATE_VBoxStubTemplate          := Drop the signing, we will sign it later.
 TEMPLATE_VBoxStubTemplate_EXTENDS  := VBoxR3Static
-TEMPLATE_VBoxStubTemplate_POST_CMDS = $(NO_SUCH_VARIABLE)
+TEMPLATE_VBoxStubTemplate_POST_CMDS.win = $(NO_SUCH_VARIABLE)
 
 
 #
