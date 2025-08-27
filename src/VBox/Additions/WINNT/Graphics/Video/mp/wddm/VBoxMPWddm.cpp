@@ -1251,7 +1251,8 @@ NTSTATUS DxgkDdiStartDevice(
                         }
                     }
 
-                    pDevExt->dwDrvCfgFlags = dwVal;
+                    /* The flag is enforced assuming that Windows itself preserves a displays settings across reboot. */
+                    pDevExt->dwDrvCfgFlags = dwVal | VBOXWDDM_CFG_DRV_SECONDARY_TARGETS_CONNECTED;
 
                     for (UINT i = 0; i < (UINT)VBoxCommonFromDeviceExt(pDevExt)->cDisplays; ++i)
                     {
