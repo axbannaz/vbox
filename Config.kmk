@@ -2577,9 +2577,6 @@ VBOX_VBOXCPP    ?= $(PATH_OBJ)/VBoxCPP/VBoxCPP$(HOSTSUFF_EXE)
 # VBoxTpG (tracepoint generator)
 VBOX_VBOXTPG    ?= $(PATH_OBJ)/VBoxTpG/VBoxTpG$(HOSTSUFF_EXE)
 
-# VBoxPeSetVersion (changes the minimum OS version of an image)
-VBOX_PE_SET_VERSION ?= $(PATH_OBJ)/VBoxPeSetVersion/VBoxPeSetVersion$(HOSTSUFF_EXE)
-
 # Visual C++ EditBin.exe.
 VBOX_VCC_EDITBIN = $(if $(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN_QSH),$(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN_QSH)/,$(if $(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN),$(PATH_TOOL_$(VBOX_VCC_TOOL)_BIN)/,))editbin.exe /NoLogo
 
@@ -6495,11 +6492,9 @@ ifeq ($(KBUILD_TARGET),win)
   	$(PATH_TOOL_$(TEMPLATE_VBoxR3Exe_TOOL.win.amd64)_LIB)/oldnames.lib
  endif
 
- TEMPLATE_VBoxR3Exe_POST_CMDS          = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
+ TEMPLATE_VBoxR3Exe_POST_CMDS.win      = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
  TEMPLATE_VBoxR3Exe_ORDERDEPS          = $(VBOX_SIGN_IMAGE_CMDS_ORDERDEPS)
  if defined(VBOX_WITH_MORE_NT4_COMPAT_BINARIES) && "$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH)" == "win.x86"
-  TEMPLATE_VBoxR3Exe_POST_CMDS.win.x86 = $(if $(eq $(tool_do),LINK_LIBRARY),,$(VBOX_PE_SET_VERSION) $(out)$(NLTAB)$(TEMPLATE_VBoxR3Exe_POST_CMDS))
-  TEMPLATE_VBoxR3Exe_LNK_DEPS.win.x86  = $(if $(eq $(tool_do),LINK_LIBRARY),,$(VBOX_PE_SET_VERSION))
   TEMPLATE_VBoxR3Exe_LDFLAGS.win.x86  += \
   	-Include:_vcc100_kernel32_fakes_cpp \
   	-Include:_vcc100_kernel32_fakes_asm
@@ -6642,7 +6637,7 @@ endif
 TEMPLATE_VBoxR3SignedExe               = VBox Ring 3 Exe, signed on windows for VBoxSup.sys use.
 TEMPLATE_VBoxR3SignedExe_EXTENDS       = VBoxR3Exe
 if "$(KBUILD_TARGET)" == "win" && "$(VBOX_SIGNING_MODE)" == "test"
- TEMPLATE_VBoxR3SignedExe_POST_CMDS    = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+ TEMPLATE_VBoxR3SignedExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 endif
 
 #
@@ -6949,7 +6944,7 @@ endif
 TEMPLATE_VBoxR3StaticSignedExe           := VBoxR3Static with test signing
 TEMPLATE_VBoxR3StaticSignedExe_EXTENDS   := VBoxR3Static
 if "$(KBUILD_TARGET)" == "win" && "$(VBOX_SIGNING_MODE)" == "test"
- TEMPLATE_VBoxR3StaticSignedExe_POST_CMDS = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+ TEMPLATE_VBoxR3StaticSignedExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 endif
 
 #
@@ -7150,6 +7145,7 @@ TEMPLATE_VBoxR3HardenedLib_LATE_LIBS = $(NO_SUCH_VARIABLE)
 TEMPLATE_VBoxR3HardenedLib_LIBS      = $(NO_SUCH_VARIABLE)
 TEMPLATE_VBoxR3HardenedLib_USES.win  = $(NO_SUCH_VARIABLE)
 TEMPLATE_VBoxR3HardenedLib_POST_CMDS = $(NO_SUCH_VARIABLE)
+TEMPLATE_VBoxR3HardenedLib_POST_CMDS.win = $(NO_SUCH_VARIABLE)
 
 #
 # Template for building hardened Ring-3 testcase executables.
@@ -7238,7 +7234,7 @@ ifeq ($(KBUILD_TARGET),win)
  endif
  ifdef VBOX_SIGNING_MODE
   TEMPLATE_VBoxR3AutoTest_LDFLAGS   = $(filter-out -IntegrityCheck, $(TEMPLATE_$(TEMPLATE_VBoxR3AutoTest_EXTENDS)_LDFLAGS))
-  TEMPLATE_VBoxR3AutoTest_POST_CMDS = $(NO_SUCH_VARIABLE)
+  TEMPLATE_VBoxR3AutoTest_POST_CMDS.win = $(NO_SUCH_VARIABLE)
  endif
 endif
 TEMPLATE_VBoxR3AutoTest_INST        = $(INST_TESTCASE)
@@ -7263,11 +7259,10 @@ else ifdef VBOX_WITH_RELATIVE_RUNPATH
  TEMPLATE_VBoxR3TstExe_LDFLAGS  = '$(VBOX_GCC_RPATH_OPT)$(VBOX_WITH_RELATIVE_RUNPATH)/..' $(TEMPLATE_VBoxR3Exe_LDFLAGS)
 endif
 if "$(KBUILD_TARGET)" == "win" && defined(VBOX_SIGNING_MODE)
- TEMPLATE_VBoxR3TstExe_POST_CMDS =
+ TEMPLATE_VBoxR3TstExe_POST_CMDS.win =
  TEMPLATE_VBoxR3TstExe_LDFLAGS = $(filter-out -IntegrityCheck, $(TEMPLATE_VBoxR3Exe_LDFLAGS))
 endif
 if defined(VBOX_WITH_MORE_NT4_COMPAT_BINARIES) && "$(KBUILD_TARGET).$(KBUILD_TARGET_ARCH)" == "win.x86"
- TEMPLATE_VBoxR3TstExe_POST_CMDS.win.x86 = $(if $(eq $(tool_do),LINK_LIBRARY),,$(VBOX_PE_SET_VERSION) $(out))
  TEMPLATE_VBoxR3TstExe_LATE_LIBS.x86 = \
  	$(PATH_STAGE_LIB)/RuntimeR3VccTricks2$(VBOX_SUFF_LIB) \
  	$(PATH_TOOL_$(TEMPLATE_VBoxR3Exe_TOOL.win.x86)_LIB)/oldnames.lib
@@ -7286,7 +7281,7 @@ TEMPLATE_VBoxR3TstExe-x86_LATE_LIBS     = $(LIB_RUNTIME_X86) $(TEMPLATE_VBoxR3Ex
 TEMPLATE_VBoxR3SignedTstExe             = VBox Ring 3 Test Exe, signed on windows for VBoxSup.sys use.
 TEMPLATE_VBoxR3SignedTstExe_EXTENDS    = VBoxR3TstExe
 if "$(KBUILD_TARGET)" == "win" && "$(VBOX_SIGNING_MODE)" == "test"
- TEMPLATE_VBoxR3SignedTstExe_POST_CMDS = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+ TEMPLATE_VBoxR3SignedTstExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 endif
 
 #
@@ -7559,7 +7554,7 @@ ifeq ($(KBUILD_TARGET),win)
   	$(PATH_TOOL_$(TEMPLATE_VBoxMainExe_TOOL.win.amd64)_LIB)/msvcprt$(VBOX_VCC_CRT_TYPE).lib \
   	$(PATH_TOOL_$(TEMPLATE_VBoxMainExe_TOOL.win.amd64)_LIB)/oldnames.lib
  endif
- TEMPLATE_VBoxMainExe_POST_CMDS          = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
+ TEMPLATE_VBoxMainExe_POST_CMDS.win      = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
  TEMPLATE_VBoxMainExe_ORDERDEPS          = $(VBOX_SIGN_IMAGE_CMDS_ORDERDEPS)
 
 else # the GCC guys:
@@ -7793,7 +7788,7 @@ else ifdef VBOX_WITH_RELATIVE_RUNPATH
  TEMPLATE_VBoxMainTstExe_LDFLAGS = '$(VBOX_GCC_RPATH_OPT)$(VBOX_WITH_RELATIVE_RUNPATH)/..' $(TEMPLATE_VBoxMainExe_LDFLAGS)
 endif
 if "$(KBUILD_TARGET)" == "win" && defined(VBOX_SIGNING_MODE)
- TEMPLATE_VBoxMainTstExe_POST_CMDS =
+ TEMPLATE_VBoxMainTstExe_POST_CMDS.win =
 endif
 
 #
@@ -7826,7 +7821,7 @@ endif
 TEMPLATE_VBoxMainClientSignedExe           = VBox Main Client VM (executable), signed on Windows for using VBoxSup.sys.
 TEMPLATE_VBoxMainClientSignedExe_EXTENDS   = VBoxMainClientExe
 if "$(KBUILD_TARGET)" == "win" && "$(VBOX_SIGNING_MODE)" == "test"
- TEMPLATE_VBoxMainClientSignedExe_POST_CMDS = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+ TEMPLATE_VBoxMainClientSignedExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 else if "$(KBUILD_TARGET)" == "darwin" && ("$(VBOX_SIGNING_MODE)" == "test" || "$(VBOX_SIGNING_MODE)" == "adhoc")
  TEMPLATE_VBoxMainClientSignedExe_POST_CMDS = $(call VBOX_SIGN_IMAGE_FN,$(out),,2)
 endif
@@ -7872,7 +7867,7 @@ else ifdef VBOX_WITH_RELATIVE_RUNPATH
  TEMPLATE_VBoxMainClientTstExe_LDFLAGS = '$(VBOX_GCC_RPATH_OPT)$(VBOX_WITH_RELATIVE_RUNPATH)/..' $(TEMPLATE_VBoxMainClientExe_LDFLAGS)
 endif
 if "$(KBUILD_TARGET)" == "win" && defined(VBOX_SIGNING_MODE)
- TEMPLATE_VBoxMainClientTstExe_POST_CMDS =
+ TEMPLATE_VBoxMainClientTstExe_POST_CMDS.win =
 endif
 
 
@@ -8269,7 +8264,7 @@ ifdef VBOX_WITH_QTGUI
    	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/oldnames.lib \
    	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/delayimp.lib
   endif
-  TEMPLATE_VBoxQtGuiExe_POST_CMDS     = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
+  TEMPLATE_VBoxQtGuiExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(VBOX_SIGN_IMAGE_CMDS)
   TEMPLATE_VBoxQtGuiExe_ORDERDEPS     = $(VBOX_SIGN_IMAGE_CMDS_ORDERDEPS)
 
  else # the gcc guys:
@@ -8423,7 +8418,7 @@ ifdef VBOX_WITH_QTGUI
  TEMPLATE_VBoxQtGuiSignedExe            = VBox Qt GUI VM Executable, signed on windows for using VBoxSup.sys.
  TEMPLATE_VBoxQtGuiSignedExe_EXTENDS    = VBoxQtGuiExe
  if "$(KBUILD_TARGET)" == "win" && "$(VBOX_SIGNING_MODE)" == "test"
-  TEMPLATE_VBoxQtGuiSignedExe_POST_CMDS = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
+  TEMPLATE_VBoxQtGuiSignedExe_POST_CMDS.win = $(VBOX_UTF8_MANIFEST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
  else if "$(KBUILD_TARGET)" == "darwin" && ("$(VBOX_SIGNING_MODE)" == "test" || "$(VBOX_SIGNING_MODE)" == "adhoc")
   TEMPLATE_VBoxQtGuiSignedExe_POST_CMDS = $(TEMPLATE_VBoxQtGuiExe_POST_CMDS)$(NLTAB)$(call VBOX_SIGN_IMAGE_FN,$(out),,2)
  endif
