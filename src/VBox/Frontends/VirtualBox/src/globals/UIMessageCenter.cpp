@@ -100,7 +100,6 @@
 #include "CSystemProperties.h"
 #include "CUnattended.h"
 #include "CVFSExplorer.h"
-#include "CVirtualBoxErrorInfo.h"
 #include "CVirtualSystemDescription.h"
 #include "CVirtualSystemDescriptionForm.h"
 #ifdef VBOX_WITH_DRAG_AND_DROP

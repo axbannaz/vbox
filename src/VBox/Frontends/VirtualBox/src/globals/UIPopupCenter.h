@@ -49,7 +49,6 @@ class CEmulatedUSB;
 class CMachine;
 class CNetworkAdapter;
 class CVirtualBox;
-class CVirtualBoxErrorInfo;
 class CVRDEServer;
 
 

@@ -40,7 +40,6 @@
 #include "CProgress.h"
 #include "CStringArray.h"
 #include "CVirtualBox.h"
-#include "CVirtualBoxErrorInfo.h"
 #include "CVirtualSystemDescription.h"
 
 
