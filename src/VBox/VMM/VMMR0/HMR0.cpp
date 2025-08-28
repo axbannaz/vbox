@@ -632,6 +632,8 @@ static int hmR0InitAmd(void)
             g_rcHmInit = rc;
             if (rc == VERR_SVM_DISABLED || rc == VERR_SVM_IN_USE)
                 rc = VINF_SUCCESS; /* Don't fail if AMD-V is disabled or in use. */
+            else
+                SVMR0GlobalTerm();
         }
     }
     else
