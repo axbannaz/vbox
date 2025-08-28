@@ -68,6 +68,13 @@ def bitsReplicate(cBits, uValue, cTimes):
         uRet  |= uValue;
     return uRet;
 
+def bitsSignedToInt(cBits, uValue):
+    """ Returns a signed integer value. """
+    fSignFlag = 1 << (cBits - 1);
+    if uValue & fSignFlag:
+        return -(~uValue & (fSignFlag - 1));
+    return uValue;
+
 def bitsRor(cBits, uValue, cShift):
     """ Rotates 'uValue' ('cBits' wide) 'cShift' times to the right. """
     assert isPowerOfTwo(cBits);
@@ -98,6 +105,9 @@ def randUx(iLast):
 
 def randUBits(cBits):
     return g_oRandom.randrange(0, 1 << cBits);
+
+def randURange(uFirst, uEnd): # uEnd is exclusive
+    return g_oRandom.randrange(uFirst, uEnd);
 
 
 #
@@ -712,6 +722,92 @@ def calcUbfm(cBits, _, uSrc, uImmR, uImmS):
     return fBottom & fTopMask;
 
 
+class A64No1CodeGenLdImm9(A64No1CodeGenBase):
+    """
+    LDR w/ 9-bit signed immediate and either post-index or pre-index adding.
+
+    Note! SP can be used as base register (but not destination).
+    """
+
+    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = 64, fPreIdx = True):
+        A64No1CodeGenBase.__init__(self, sInstr + ('_preidx' if fPreIdx else '_postidx'),
+                                   sInstr, Arm64GprAllocator(), fMayUseSp = True);
+        self.fnCalc  = fnCalc;
+        self.cbMem   = cbMem;
+        self.cBits   = cBits;
+        self.fPreIdx = fPreIdx;
+
+    @staticmethod
+    def getSlotValue(iSlot, cbMem):
+        uRet = iSlot;
+        off  = 1;
+        while off < cbMem:
+            uRet |= (iSlot + off) << (off * 8);
+            off  += 1;
+        return uRet;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        # Load a pointer to the first slot into a register.
+        iRegSlot0Ptr = self.oGprAllocator.alloc();
+        self.emitInstr('adrp',  'x%u, PAGE(NAME(g_ReadArea))' % (iRegSlot0Ptr,));
+        self.emitInstr('add',   'x%u, x%u, PAGEOFF(NAME(g_ReadArea))' % (iRegSlot0Ptr, iRegSlot0Ptr,));
+
+        # Generate loads from different loads with various immediate values.
+        for _ in range(oOptions.cTestsPerInstruction):
+            uImm9      = randUBits(9);                  # (signed)
+            iOffset    = bitsSignedToInt(9, uImm9);
+            idxMemSlot = randURange(0, 256 - self.cbMem);
+            idxPreSlot = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+
+            iRegBase   = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            sRegBase   = g_dGpr64NamesSp[iRegBase];
+            if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
+                idxPreSlotOld = idxPreSlot; idxMemSlotOld = idxMemSlot;
+                idxMemSlot -= idxPreSlot & 15
+                if idxMemSlot < 0:
+                    idxMemSlot += 16;
+                idxPreSlot = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+                assert (abs(idxPreSlot) & 15) == 0;
+
+            uSrc       = self.getSlotValue(idxMemSlot, self.cbMem);
+            uRes       = self.fnCalc(self.cBits, uSrc, self.cbMem);
+            iRegDst    = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+
+            # Calculate the base address and perform the load instruction.
+            self.emitInstr('add' if idxPreSlot >= 0 else 'sub', '%s, x%u, #%u' % (sRegBase, iRegSlot0Ptr, abs(idxPreSlot),));
+            if self.fPreIdx:
+                self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, iOffset,));
+                u64PostSlot = idxMemSlot;
+            else:
+                self.emitInstr(self.sInstr, '%s, [%s], #%d' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, iOffset,));
+                u64PostSlot = (idxMemSlot + iOffset) & 0xffffffffffffffff
+
+            # Check the offset.
+            iRegTmp = self.oGprAllocator.alloc(u64PostSlot);
+            self.emitInstr('sub', 'x%u, %s, x%u' % (iRegTmp, sRegBase, iRegSlot0Ptr,)); # iRegTmp == idxEffSlot
+            self.emitRegValCheck(iRegTmp, u64PostSlot);
+
+            # Check the value.
+            if iRegDst != 31:
+                self.emitRegValCheck(iRegDst, uRes, iRegTmp = iRegTmp);
+
+            self.oGprAllocator.freeList((iRegDst, iRegBase, iRegTmp,));
+            cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+        self.oGprAllocator.free(iRegSlot0Ptr);
+
+def calcLdUnsigned(cBits, uSrc, cbMem):
+    _ = cBits; _ = cbMem;
+    return uSrc;
+
+def calcLdSigned(cBits, uSrc, cbMem):
+    cSrcBits = cbMem * 8;
+    assert cSrcBits < cBits;
+    if uSrc & (1 << (cSrcBits - 1)):
+        uSrc |= ((1 << (cBits - cSrcBits)) - 1) << cSrcBits;
+    return uSrc;
+
+
 #
 # Result calculation functions.
 #
@@ -855,6 +951,25 @@ class Arm64No1CodeGen(object):
 
         # Instantiate the generators.
         aoGenerators = [
+            # Load with unscaled 9-bit signed immediate:
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem = 8, cBits = 64, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem = 8, cBits = 64, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem = 4, cBits = 32, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem = 4, cBits = 32, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem = 2, cBits = 32, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem = 2, cBits = 32, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem = 1, cBits = 32, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem = 1, cBits = 32, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem = 4, cBits = 64, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem = 4, cBits = 64, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem = 2, cBits = 32, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem = 2, cBits = 32, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem = 2, cBits = 64, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem = 2, cBits = 64, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem = 1, cBits = 32, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem = 1, cBits = 32, fPreIdx = True),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem = 1, cBits = 64, fPreIdx = False),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem = 1, cBits = 64, fPreIdx = True),
             # addsub_imm:
             A64No1CodeGenAddSubImm(  'add',  calcAdd),
             A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
