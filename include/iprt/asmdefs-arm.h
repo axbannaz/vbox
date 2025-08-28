@@ -198,6 +198,36 @@
 
 
 /**
+ * Global marker which is DECLASM() compatible.
+ */
+.macro GLOBALNAME, a_Name
+        .globl          NAME(\a_Name)
+NAME(\a_Name):
+.endm
+
+
+/**
+ * Global exported marker which is DECLASM() compatible.
+ */
+.macro EXPORTEDNAME, a_Name
+#ifdef ASM_FORMAT_MACHO
+        //.private_extern NAME(\a_Name)
+#elif defined(ASM_FORMAT_ELF)
+        //.hidden         NAME(\a_Name)
+#elif defined(ASM_FORMAT_PE)
+        .pushsection    .drectve
+        .string         "-export:\a_Name"
+        .popsection
+        .def            NAME(\a_Name)
+        .scl            IMAGE_SYM_CLASS_EXTERNAL
+        .endef
+#endif
+        .globl          NAME(\a_Name)
+NAME(\a_Name):
+.endm
+
+
+/**
  * Starts an externally visible procedure.
  *
  * @param   a_Name      The unmangled symbol name.
@@ -247,7 +277,7 @@ NAME(\a_Name):
         //.hidden         NAME(\a_Name)
 #elif defined(ASM_FORMAT_PE)
         .pushsection    .drectve
-        .string "-export:\a_Name"
+        .string         "-export:\a_Name"
         .popsection
         .def            NAME(\a_Name)
         .scl            IMAGE_SYM_CLASS_EXTERNAL
