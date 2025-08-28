@@ -55,6 +55,10 @@ protected:
 
     bool eventFilter(QObject *pObject, QEvent *pEvent) RT_OVERRIDE RT_FINAL;
 
+private slots:
+
+    void sltRetranslateUI() { emit sigRetranslateUI(); }
+
 private:
 
     UITranslationEventListener(QObject *pParent = 0);

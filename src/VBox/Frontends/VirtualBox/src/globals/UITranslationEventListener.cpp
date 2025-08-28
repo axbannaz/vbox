@@ -81,7 +81,8 @@ bool UITranslationEventListener::eventFilter(QObject *pObject, QEvent *pEvent)
            && pEvent->type() == QEvent::LanguageChange
            && pObject == qApp)
     {
-        emit sigRetranslateUI();
+        /* Send translation signal asynchronously: */
+        QMetaObject::invokeMethod(this, "sltRetranslateUI", Qt::QueuedConnection);
     }
     /* Call to base-class: */
     return QObject::eventFilter(pObject, pEvent);
