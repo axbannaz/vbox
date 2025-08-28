@@ -561,6 +561,9 @@ int main(int argc, char **argv)
                 g_fShowArmFeatures = false;
                 break;
 
+            case 'h':
+                return cmdHelp();
+
             case VINF_GETOPT_NOT_OPTION:
             {
                 if (g_hModVMM == NIL_RTLDRMOD)
