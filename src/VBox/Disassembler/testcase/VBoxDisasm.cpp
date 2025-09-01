@@ -36,6 +36,7 @@
 #include <iprt/initterm.h>
 #include <iprt/getopt.h>
 #include <iprt/file.h>
+#include <iprt/message.h>
 #include <iprt/path.h>
 #include <iprt/stream.h>
 #include <iprt/string.h>
@@ -234,7 +235,6 @@ static DECLCALLBACK(int) MyDisasInstrRead(PDISSTATE pDis, uint8_t offInstr, uint
  * Disassembles a block of memory.
  *
  * @returns VBox status code.
- * @param   argv0           Program name (for errors and warnings).
  * @param   enmCpuMode      The cpu mode to disassemble in.
  * @param   uAddress        The address we're starting to disassemble at.
  * @param   uHighlightAddr  The address of the instruction that should be
@@ -245,7 +245,7 @@ static DECLCALLBACK(int) MyDisasInstrRead(PDISSTATE pDis, uint8_t offInstr, uint
  * @param   fListing        Whether to print in a listing like mode.
  * @param   enmUndefOp      How to deal with undefined opcodes.
  */
-static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAddress,
+static int MyDisasmBlock(DISCPUMODE enmCpuMode, uint64_t uAddress,
                          uint64_t uHighlightAddr, uint8_t *pbFile, size_t cbFile,
                          ASMSTYLE enmStyle, bool fListing, UNDEFOPHANDLING enmUndefOp)
 {
@@ -337,13 +337,13 @@ static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAdd
             }
             else if (!State.fUndefOp && State.enmUndefOp == kUndefOp_All)
             {
-                RTPrintf("%s: error at %#RX64: unexpected valid instruction (op=%d)\n", argv0, State.uAddress, State.Dis.pCurInstr->uOpcode);
+                RTMsgError("at %#RX64: unexpected valid instruction (op=%d)\n", State.uAddress, State.Dis.pCurInstr->uOpcode);
                 pfnFormatter(&State);
                 rcRet = VERR_GENERAL_FAILURE;
             }
             else if (State.fUndefOp && State.enmUndefOp == kUndefOp_Fail)
             {
-                RTPrintf("%s: error at %#RX64: undefined opcode (op=%d)\n", argv0, State.uAddress, State.Dis.pCurInstr->uOpcode);
+                RTMsgError("at %#RX64: undefined opcode (op=%d)\n", State.uAddress, State.Dis.pCurInstr->uOpcode);
                 pfnFormatter(&State);
                 rcRet = VERR_GENERAL_FAILURE;
             }
@@ -366,12 +366,13 @@ static int MyDisasmBlock(const char *argv0, DISCPUMODE enmCpuMode, uint64_t uAdd
         {
             State.cbInstr = State.pbNext - State.pbInstr;
             if (!State.cbLeft)
-                RTPrintf("%s: error at %#RX64: read beyond the end (%Rrc)\n", argv0, State.uAddress, rc);
+                RTMsgError("at %#RX64: read beyond the end (%Rrc)\n", State.uAddress, rc);
             else if (State.cbInstr)
-                RTPrintf("%s: error at %#RX64: %Rrc cbInstr=%d\n", argv0, State.uAddress, rc, State.cbInstr);
+                RTMsgError("at %#RX64: %Rrc cbInstr=%d: %.*Rhxs\n",
+                           State.uAddress, rc, State.cbInstr, State.cbInstr, &pbFile[State.uAddress - uAddress]);
             else
             {
-                RTPrintf("%s: error at %#RX64: %Rrc cbInstr=%d!\n", argv0, State.uAddress, rc, State.cbInstr);
+                RTMsgError("at %#RX64: %Rrc cbInstr=%d!\n", State.uAddress, rc, State.cbInstr);
                 if (rcRet == VINF_SUCCESS)
                     rcRet = rc;
                 break;
@@ -748,7 +749,7 @@ int main(int argc, char **argv)
         /*
          * Disassemble it.
          */
-        rc = MyDisasmBlock(argv0, enmCpuMode, uAddress, uHighlightAddr, pb, cb, enmStyle, fListing, enmUndefOp);
+        rc = MyDisasmBlock(enmCpuMode, uAddress, uHighlightAddr, pb, cb, enmStyle, fListing, enmUndefOp);
     }
     else
     {
@@ -772,7 +773,7 @@ int main(int argc, char **argv)
             /*
              * Disassemble it.
              */
-            rc = MyDisasmBlock(argv0, enmCpuMode, uAddress, uHighlightAddr, (uint8_t *)pvFile, cbFile, enmStyle, fListing, enmUndefOp);
+            rc = MyDisasmBlock(enmCpuMode, uAddress, uHighlightAddr, (uint8_t *)pvFile, cbFile, enmStyle, fListing, enmUndefOp);
             RTFileReadAllFree(pvFile, cbFile);
             if (RT_FAILURE(rc))
                 break;
