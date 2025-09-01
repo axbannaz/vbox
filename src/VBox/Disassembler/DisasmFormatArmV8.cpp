@@ -104,17 +104,51 @@ static const char *g_apszArmV8PState[] =
     /* kDisArmv8InstrPState_SVCRSMZA */ "svcrsmza",
     /* kDisArmv8InstrPState_TCO      */ "tco"
 };
-static const char g_aszArmV8VecRegType[9][4] =
+static struct { char sz[7]; unsigned char cch; } g_aArmV8VecRegTypes[] =
 {
-    /* kDisOpParamArmV8VecRegType_None */ "\0\0\0",
-    /* kDisOpParamArmV8VecRegType_8B   */ "8B\0",
-    /* kDisOpParamArmV8VecRegType_16B  */ "16B",
-    /* kDisOpParamArmV8VecRegType_4H   */ "4H\0",
-    /* kDisOpParamArmV8VecRegType_8H   */ "8H\0",
-    /* kDisOpParamArmV8VecRegType_2S   */ "2S\0",
-    /* kDisOpParamArmV8VecRegType_4S   */ "4S\0",
-    /* kDisOpParamArmV8VecRegType_1D   */ "1D\0",
-    /* kDisOpParamArmV8VecRegType_2D   */ "2D\0"
+    /* kDisOpParamArmV8VecRegType_None    */ { RT_STR_TUPLE("") },
+    /* kDisOpParamArmV8VecRegType_8B      */ { RT_STR_TUPLE("8B") },
+    /* kDisOpParamArmV8VecRegType_16B     */ { RT_STR_TUPLE("16B") },
+    /* kDisOpParamArmV8VecRegType_4H      */ { RT_STR_TUPLE("4H") },
+    /* kDisOpParamArmV8VecRegType_8H      */ { RT_STR_TUPLE("8H") },
+    /* kDisOpParamArmV8VecRegType_2S      */ { RT_STR_TUPLE("2S") },
+    /* kDisOpParamArmV8VecRegType_4S      */ { RT_STR_TUPLE("4S") },
+    /* kDisOpParamArmV8VecRegType_1D      */ { RT_STR_TUPLE("1D") },
+    /* kDisOpParamArmV8VecRegType_2D      */ { RT_STR_TUPLE("2D") },
+
+    /* kDisOpParamArmV8VecRegType_D_Elem0 */ { RT_STR_TUPLE("D[0]") },
+    /* kDisOpParamArmV8VecRegType_D_Elem1 */ { RT_STR_TUPLE("D[1]") },
+
+    /* kDisOpParamArmV8VecRegType_S_Elem0 */ { RT_STR_TUPLE("S[0]") },
+    /* kDisOpParamArmV8VecRegType_S_Elem1 */ { RT_STR_TUPLE("S[1]") },
+    /* kDisOpParamArmV8VecRegType_S_Elem2 */ { RT_STR_TUPLE("S[2]") },
+    /* kDisOpParamArmV8VecRegType_S_Elem3 */ { RT_STR_TUPLE("S[3]") },
+
+    /* kDisOpParamArmV8VecRegType_H_Elem0 */ { RT_STR_TUPLE("H[0]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem1 */ { RT_STR_TUPLE("H[1]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem2 */ { RT_STR_TUPLE("H[2]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem3 */ { RT_STR_TUPLE("H[3]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem4 */ { RT_STR_TUPLE("H[4]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem5 */ { RT_STR_TUPLE("H[5]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem6 */ { RT_STR_TUPLE("H[6]") },
+    /* kDisOpParamArmV8VecRegType_H_Elem7 */ { RT_STR_TUPLE("H[7]") },
+
+    /* kDisOpParamArmV8VecRegType_B_Elem0 */ { RT_STR_TUPLE("B[0]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem1 */ { RT_STR_TUPLE("B[1]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem2 */ { RT_STR_TUPLE("B[2]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem3 */ { RT_STR_TUPLE("B[3]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem4 */ { RT_STR_TUPLE("B[4]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem5 */ { RT_STR_TUPLE("B[5]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem6 */ { RT_STR_TUPLE("B[6]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem7 */ { RT_STR_TUPLE("B[7]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem8 */ { RT_STR_TUPLE("B[8]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem9 */ { RT_STR_TUPLE("B[9]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem10*/ { RT_STR_TUPLE("B[10]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem11*/ { RT_STR_TUPLE("B[11]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem12*/ { RT_STR_TUPLE("B[12]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem13*/ { RT_STR_TUPLE("B[13]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem14*/ { RT_STR_TUPLE("B[14]") },
+    /* kDisOpParamArmV8VecRegType_B_Elem15*/ { RT_STR_TUPLE("B[15]") },
 };
 
 
@@ -474,12 +508,11 @@ DECLINLINE(const char *) disasmFormatArmV8Reg(PCDISSTATE pDis, uint8_t enmRegTyp
  */
 DECLINLINE(const char *) disasmFormatArmV8VecRegType(uint8_t enmVecType, size_t *pcchType)
 {
-    Assert(   enmVecType != kDisOpParamArmV8VecRegType_None
-           && enmVecType < RT_ELEMENTS(g_aszArmV8VecRegType));
+    Assert(enmVecType > kDisOpParamArmV8VecRegType_None);
+    AssertStmt((unsigned)enmVecType < RT_ELEMENTS(g_aArmV8VecRegTypes), enmVecType = kDisOpParamArmV8VecRegType_None);
 
-    const char *psz = g_aszArmV8VecRegType[enmVecType];
-    *pcchType = 2 + !!psz[2];
-    return psz;
+    *pcchType = g_aArmV8VecRegTypes[enmVecType].cch;
+    return g_aArmV8VecRegTypes[enmVecType].sz;
 }
 
 

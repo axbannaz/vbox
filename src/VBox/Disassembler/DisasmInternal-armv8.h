@@ -84,10 +84,12 @@ typedef enum DISPARMPARSEIDX
     kDisParmParseSetPreIndexed,
     kDisParmParseSetPostIndexed,
     kDisParmParseFpType,
+    kDisParmParseFpTypeFixed,
     kDisParmParseFpReg,
     kDisParmParseFpScale,
     kDisParmParseFpFixupFCvt,
     kDisParmParseSimdRegSize,
+    kDisParmParseSimdRegSizeHSD,
     kDisParmParseSimdRegSize32,
     kDisParmParseSimdRegSize64,
     kDisParmParseSimdRegSize128,
@@ -99,6 +101,7 @@ typedef enum DISPARMPARSEIDX
     kDisParmParseLdrPacImm,
     kDisParmParseLdrPacW,
     kDisParmParseVecRegElemSize,
+    kDisParmParseVecRegTypeFixed,
     kDisParmParseVecQ,
     kDisParmParseVecGrp,
     kDisParmParseSimdLdStPostIndexImm,
@@ -185,6 +188,13 @@ typedef struct DISARMV8DECODEHDR
     /** Number of entries in the next decoder stage or
      * opcodes in the instruction class. */
     uint32_t                    cDecode;
+#ifdef DEBUG
+    /** Table name for simplifying debugging. */
+    const char                 *pszName;
+# define DISARMV8DECODEHDR_DEBUG(a_Name)    , #a_Name
+#else
+# define DISARMV8DECODEHDR_DEBUG(a_Name)
+#endif
 } DISARMV8DECODEHDR;
 /** Pointer to a decode header. */
 typedef DISARMV8DECODEHDR *PDISARMV8DECODEHDR;
@@ -236,11 +246,13 @@ typedef const DISARMV8INSNCLASS *PCDISARMV8INSNCLASS;
     static const DISARMV8OPCODE g_aArmV8A64Insn ## a_Name ## Opcodes[] = {
 #define DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(a_Name, a_fFixedInsn, a_enmOpcDecode, a_fMask, a_cShift) \
     }; \
-    static const DISARMV8INSNCLASS g_aArmV8A64Insn ## a_Name = { { kDisArmV8DecodeType_InsnClass, \
-                                                                   RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## Opcodes) }, \
-                                                                 & g_aArmV8A64Insn ## a_Name ## Opcodes[0], \
-                                                                 a_fFixedInsn, a_enmOpcDecode, a_fMask, a_cShift, \
-                                                                 & g_aArmV8A64Insn ## a_Name ## Decode[0] }
+    static const DISARMV8INSNCLASS g_aArmV8A64Insn ## a_Name = \
+    { \
+        { kDisArmV8DecodeType_InsnClass, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## Opcodes) DISARMV8DECODEHDR_DEBUG(a_Name) }, \
+        & g_aArmV8A64Insn ## a_Name ## Opcodes[0], \
+        a_fFixedInsn, a_enmOpcDecode, a_fMask, a_cShift, \
+        & g_aArmV8A64Insn ## a_Name ## Decode[0] \
+    }
 
 /**
  * Decoder lookup table entry.
@@ -281,8 +293,11 @@ typedef const struct DISARMV8DECODETBL *PCDISARMV8DECODETBL;
 
 #define DIS_ARMV8_DECODE_TBL_DEFINE_END(a_Name) \
     }; \
-    static const DISARMV8DECODETBL g_aArmV8A64Insn ## a_Name = { { kDisArmV8DecodeType_Table, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## TblEnt) }, \
-                                                                 & g_aArmV8A64Insn ## a_Name ## TblEnt[0] }
+    static const DISARMV8DECODETBL g_aArmV8A64Insn ## a_Name = \
+    { \
+        { kDisArmV8DecodeType_Table, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## TblEnt) DISARMV8DECODEHDR_DEBUG(a_Name) }, \
+        & g_aArmV8A64Insn ## a_Name ## TblEnt[0] \
+    }
 
 
 /**
@@ -307,19 +322,28 @@ typedef const struct DISARMV8DECODEMAP *PCDISARMV8DECODEMAP;
 
 #define DIS_ARMV8_DECODE_MAP_DEFINE_END(a_Name, a_fMask, a_cShift) \
     }; \
-    static const DISARMV8DECODEMAP g_aArmV8A64Insn ## a_Name = { { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) }, \
-                                                                 a_fMask, a_cShift, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] }
+    static const DISARMV8DECODEMAP g_aArmV8A64Insn ## a_Name = \
+    { \
+        { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) DISARMV8DECODEHDR_DEBUG(a_Name) }, \
+        a_fMask, a_cShift, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] \
+    }
 
 #define DIS_ARMV8_DECODE_MAP_DEFINE_END_SINGLE_BIT(a_Name, a_idxBit) \
     }; \
-    static const DISARMV8DECODEMAP g_aArmV8A64Insn ## a_Name = { { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) }, \
-                                                                 RT_BIT_32(a_idxBit), a_idxBit, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] }
+    static const DISARMV8DECODEMAP g_aArmV8A64Insn ## a_Name = \
+    { \
+        { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) DISARMV8DECODEHDR_DEBUG(a_Name) }, \
+        RT_BIT_32(a_idxBit), a_idxBit, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] \
+    }
 
 
 #define DIS_ARMV8_DECODE_MAP_DEFINE_END_NON_STATIC(a_Name, a_fMask, a_cShift) \
     }; \
-    DECL_HIDDEN_CONST(DISARMV8DECODEMAP) g_aArmV8A64Insn ## a_Name = { { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) }, \
-                                                                       a_fMask, a_cShift, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] }
+    DECL_HIDDEN_CONST(DISARMV8DECODEMAP) g_aArmV8A64Insn ## a_Name = \
+    { \
+        { kDisArmV8DecodeType_Map, RT_ELEMENTS(g_aArmV8A64Insn ## a_Name ## MapHdrs) DISARMV8DECODEHDR_DEBUG(a_Name) }, \
+        a_fMask, a_cShift, & g_aArmV8A64Insn ## a_Name ## MapHdrs[0] \
+    }
 
 #define DIS_ARMV8_DECODE_MAP_INVALID_ENTRY NULL
 #define DIS_ARMV8_DECODE_MAP_ENTRY(a_Next) & g_aArmV8A64Insn ## a_Next.Hdr
