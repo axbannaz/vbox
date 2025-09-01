@@ -60,6 +60,71 @@ static uint32_t vboxDXGetSubresourceOffset(VBOXDXALLOCATIONDESC const *pAllocati
 }
 
 
+DECLINLINE(uint32_t) dxClampedMul(uint32_t a, uint32_t b)
+{
+    uint64_t const u64Tmp = (uint64_t)a * (uint64_t)b;
+    if (RT_LIKELY(u64Tmp <= UINT64_C(0xFFFFFFFF)))
+        return (uint32_t)u64Tmp;
+    return UINT32_C(0xFFFFFFFF);
+}
+
+
+DECLINLINE(uint32_t) dxClampedAddDiv(uint32_t a, uint32_t b, uint32_t d)
+{
+    uint64_t const u64Tmp = (uint64_t)a + (uint64_t)b;
+    if (RT_LIKELY(u64Tmp <= UINT64_C(0xFFFFFFFF) && d > 0))
+        return u64Tmp / d;
+    return UINT32_C(0xFFFFFFFF);
+}
+
+
+DECLINLINE(const struct svga3d_surface_desc *)vboxDXGetSurfaceDesc(SVGA3dSurfaceFormat format)
+{
+    AssertReturn(format < RT_ELEMENTS(svga3d_surface_descs), &svga3d_surface_descs[SVGA3D_FORMAT_INVALID]);
+    return &svga3d_surface_descs[format];
+}
+
+
+/* Description of a tightly packed box. */
+typedef struct VBOXDXRESOURCEBOXDESC
+{
+    uint32_t cxBlocks;     /* Width in blocks. */
+    uint32_t cyBlocks;     /* Height in blocks. */
+    uint32_t czBlocks;     /* Depth in blocks. */
+    uint32_t cbRowPitch;   /* Scanline size for non-planar formats, 0 for planar formats. */
+    uint32_t cbDepthPitch; /* Slice size for non-planar formats, 0 for planar formats. */
+    uint32_t cbBox;        /* Size of the box in bytes. */
+} VBOXDXRESOURCEBOXDESC;
+
+
+static void vboxDXGetResourceBoxDesc(VBOXDXALLOCATIONDESC const *pAllocationDesc, const SVGA3dBox &box,
+                                     VBOXDXRESOURCEBOXDESC *pBoxDesc)
+{
+    const struct svga3d_surface_desc *desc = vboxDXGetSurfaceDesc(pAllocationDesc->surfaceInfo.format);
+
+    /* Size in blocks. */
+    pBoxDesc->cxBlocks = dxClampedAddDiv(box.w, desc->block_size.width - 1, desc->block_size.width);
+    pBoxDesc->cyBlocks = dxClampedAddDiv(box.h, desc->block_size.height - 1, desc->block_size.height);
+    pBoxDesc->czBlocks = dxClampedAddDiv(box.d, desc->block_size.depth - 1, desc->block_size.depth);
+
+    if (RT_LIKELY((desc->block_desc & SVGA3DBLOCKDESC_PLANAR_YUV) == 0))
+    {
+        pBoxDesc->cbRowPitch = dxClampedMul(pBoxDesc->cxBlocks, desc->pitch_bytes_per_block);
+        pBoxDesc->cbDepthPitch = dxClampedMul(pBoxDesc->cbRowPitch, pBoxDesc->cyBlocks);
+        pBoxDesc->cbBox = dxClampedMul(dxClampedMul(pBoxDesc->cbRowPitch, pBoxDesc->cyBlocks),
+                                       pBoxDesc->czBlocks);
+        return;
+    }
+
+    /* Planar format. */
+    pBoxDesc->cbRowPitch = 0;
+    pBoxDesc->cbDepthPitch = 0;
+    pBoxDesc->cbBox = dxClampedMul(dxClampedMul(dxClampedMul(pBoxDesc->cxBlocks, pBoxDesc->cyBlocks),
+                                                             pBoxDesc->czBlocks),
+                                                             desc->bytes_per_block);
+}
+
+
 static uint32_t vboxDXGetSubresourceSize(VBOXDXALLOCATIONDESC const *pAllocationDesc, UINT Subresource)
 {
     surf_size_struct baseLevelSize;
@@ -168,7 +233,44 @@ static void vboxDXGetSubresourceBox(VBOXDXALLOCATIONDESC const *pAllocationDesc,
 }
 
 
-HRESULT vboxDXDeviceFlushCommands(PVBOXDX_DEVICE pDevice)
+static VBOXDXUPLOADBATCH *dxUploadBatchAllocate(PVBOXDX_DEVICE pDevice)
+{
+    VBOXDXUPLOADBATCH *pBatch = (VBOXDXUPLOADBATCH *)RTMemAllocZ(sizeof(VBOXDXUPLOADBATCH));
+    AssertReturnStmt(pBatch, vboxDXDeviceSetError(pDevice, E_OUTOFMEMORY), NULL);
+
+    vboxDXCreateQuery(pDevice, &pBatch->queryBatchCompleted, D3D10DDI_QUERY_EVENT, 0);
+    return pBatch;
+}
+
+
+static void dxUploadBatchDeallocate(PVBOXDX_DEVICE pDevice, VBOXDXUPLOADBATCH *pBatch)
+{
+    vboxDXDestroyQuery(pDevice, &pBatch->queryBatchCompleted);
+    RTMemFree(pBatch);
+}
+
+
+static VBOXDXUPLOADBATCH *dxUploadBatchGet(PVBOXDX_DEVICE pDevice)
+{
+    VBOXDXUPLOADBATCH *pBatch = RTListRemoveFirst(&pDevice->upload.listLookasideBatches,
+                                                  VBOXDXUPLOADBATCH, nodeUploadBatch);
+    if (!pBatch)
+        pBatch = dxUploadBatchAllocate(pDevice);
+    else
+        pBatch->cbBatch = 0;
+
+    return pBatch;
+}
+
+
+static void dxUploadBatchRetire(PVBOXDX_DEVICE pDevice, VBOXDXUPLOADBATCH *pBatch)
+{
+    RTListNodeRemove(&pBatch->nodeUploadBatch);
+    RTListAppend(&pDevice->upload.listLookasideBatches, &pBatch->nodeUploadBatch);
+}
+
+
+static HRESULT vboxDXDeviceRender(PVBOXDX_DEVICE pDevice)
 {
     LogFlowFunc(("pDevice %p, cbCommandBuffer %d\n", pDevice, pDevice->cbCommandBuffer));
 
@@ -210,7 +312,7 @@ void *vboxDXCommandBufferReserve(PVBOXDX_DEVICE pDevice, SVGAFifo3dCmdId enmCmd,
         || pDevice->PatchLocationListSize - pDevice->cPatchLocations < cPatchLocations
         || pDevice->AllocationListSize - pDevice->cAllocations < cPatchLocations)
     {
-        HRESULT hr = vboxDXDeviceFlushCommands(pDevice);
+        HRESULT hr = vboxDXDeviceRender(pDevice);
         if (FAILED(hr))
             return NULL;
         cbAvail = pDevice->CommandBufferSize - pDevice->cbCommandBuffer;
@@ -305,6 +407,39 @@ static bool dxIsAllocationInUse(PVBOXDX_DEVICE pDevice, D3DKMT_HANDLE hAllocatio
     }
 
     return idxAllocation >= 0;
+}
+
+
+HRESULT vboxDXDeviceFlushCommands(PVBOXDX_DEVICE pDevice)
+{
+    /* Check which upload batches have been processed by the host. */
+    VBOXDXUPLOADBATCH *pBatch, *pNext;
+    RTListForEachSafe(&pDevice->upload.listUploadBatches, pBatch, pNext, VBOXDXUPLOADBATCH, nodeUploadBatch)
+    {
+        BOOL fCompleted = FALSE;
+        vboxDXQueryGetData(pDevice, &pBatch->queryBatchCompleted,
+                           &fCompleted, sizeof(fCompleted), D3D10_DDI_GET_DATA_DO_NOT_FLUSH);
+        if (!fCompleted)
+            break; /* Queries are completed in order, so if this one is still running, then the next queries are too. */
+
+        /* Reclaim the space which was used by this batch. */
+        pDevice->upload.cbFree += pBatch->cbBatch;
+
+        dxUploadBatchRetire(pDevice, pBatch);
+    }
+
+    /* Submit the current upload batch query on flush. */
+    pBatch = pDevice->upload.pCurrentBatch;
+    if (pBatch && pBatch->cbBatch)
+    {
+        vboxDXQueryEnd(pDevice, &pBatch->queryBatchCompleted);
+
+        RTListAppend(&pDevice->upload.listUploadBatches, &pBatch->nodeUploadBatch);
+
+        pDevice->upload.pCurrentBatch = dxUploadBatchGet(pDevice);
+    }
+
+    return vboxDXDeviceRender(pDevice);
 }
 
 
@@ -2614,6 +2749,113 @@ static HRESULT dxOfferStagingAllocation(PVBOXDX_DEVICE pDevice, PVBOXDXKMRESOURC
 }
 
 
+static bool dxUploadViaBuffer(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pDstResource,
+                              UINT DstSubresource, const SVGA3dBox &destBox,
+                              const VOID *pSysMemUP, UINT RowPitch, UINT DepthPitch, UINT CopyFlags)
+{
+    RT_NOREF(CopyFlags);
+
+    VBOXDXALLOCATIONDESC const *pBufferAllocationDesc = vboxDXGetAllocationDesc(pDevice->upload.pUploadBuffer);
+    VBOXDXALLOCATIONDESC const *pDstAllocationDesc = vboxDXGetAllocationDesc(pDstResource);
+
+    /* Calculate size of destBox in bytes. */
+    VBOXDXRESOURCEBOXDESC boxDesc;
+    vboxDXGetResourceBoxDesc(pDstAllocationDesc, destBox, &boxDesc);
+
+    uint32_t const cbTransfer = boxDesc.cbBox;
+
+    if (cbTransfer > pDevice->upload.cbFree)
+        return false;
+
+    uint32_t offTransfer;
+    uint32_t cbConsumed = cbTransfer;
+
+    /* See if this amount of bytes can be placed contiguously in the upload ring buffer. */
+    uint32_t const cbBeforeBoundary = pBufferAllocationDesc->cbAllocation - pDevice->upload.offFree;
+
+    if (cbBeforeBoundary >= pDevice->upload.cbFree)
+    {
+        /* The free space is one chunk which does not cross the buffer boundary. */
+        if (cbTransfer <= pDevice->upload.cbFree)
+            offTransfer = pDevice->upload.offFree;
+        else
+            return false;
+    }
+    else
+    {
+        /* Two free chunks: before boundary and from offset 0. */
+        if (cbTransfer <= cbBeforeBoundary)
+            offTransfer = pDevice->upload.offFree;
+        else
+        {
+            /* Check the second chunk. */
+            if (cbTransfer <= pDevice->upload.cbFree - cbBeforeBoundary)
+            {
+                cbConsumed += cbBeforeBoundary;
+                offTransfer = 0;
+            }
+            else
+                return false;
+        }
+    }
+
+    Assert(   pBufferAllocationDesc->cbAllocation > offTransfer
+           && pBufferAllocationDesc->cbAllocation - offTransfer >= cbTransfer);
+
+    /* Copy data to the ring buffer.
+     * Scanlines of the destination box data are tightly packed in the buffer. */
+    uint8_t *pu8Dst = (uint8_t *)pDevice->upload.pvUploadBufferMapped + offTransfer;
+
+    if (RT_LIKELY(boxDesc.cbRowPitch > 0))
+    {
+        for (unsigned z = 0; z < boxDesc.czBlocks; ++z)
+        {
+            uint8_t const *pu8Src = (uint8_t *)pSysMemUP + z * DepthPitch;
+            for (unsigned y = 0; y < boxDesc.cyBlocks; ++y)
+            {
+                memcpy(pu8Dst, pu8Src, boxDesc.cbRowPitch);
+                pu8Src += RowPitch;
+                pu8Dst += boxDesc.cbRowPitch;
+            }
+        }
+    }
+    else
+    {
+        /* Planar format. */
+        uint8_t const *pu8Src = (uint8_t *)pSysMemUP;
+        memcpy(pu8Dst, pu8Src, boxDesc.cbBox);
+    }
+
+    /* Update the free space description. */
+    pDevice->upload.offFree = (pDevice->upload.offFree + cbConsumed) % VBOXDX_UPLOAD_BUFFER_SIZE;
+    pDevice->upload.cbFree -= cbConsumed;
+
+    /* Inform the host that the upload buffer has been updated. */
+    SVGA3dBox box;
+    box.x = offTransfer;
+    box.y = 0;
+    box.z = 0;
+    box.w = cbTransfer;
+    box.h = 1;
+    box.d = 1;
+    vgpu10UpdateSubResource(pDevice, vboxDXGetKMResource(pDevice->upload.pUploadBuffer), 0, &box);
+
+    /* Issue SVGA_3D_CMD_DX_TRANSFER_FROM_BUFFER */
+    uint32 const srcOffset = offTransfer;
+    uint32 const srcPitch = boxDesc.cbRowPitch;
+    uint32 const srcSlicePitch = boxDesc.cbDepthPitch;
+    vgpu10TransferFromBuffer(pDevice,
+                             vboxDXGetKMResource(pDevice->upload.pUploadBuffer), srcOffset, srcPitch, srcSlicePitch,
+                             vboxDXGetKMResource(pDstResource), DstSubresource, destBox);
+
+    Assert(pDevice->upload.pCurrentBatch);
+    Assert(pDevice->upload.pCurrentBatch->cbBatch <= pBufferAllocationDesc->cbAllocation - cbConsumed);
+    pDevice->upload.pCurrentBatch->cbBatch += cbConsumed;
+
+    return true;
+}
+
+
 void vboxDXResourceUpdateSubresourceUP(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pDstResource,
                                        UINT DstSubresource, const D3D10_DDI_BOX *pDstBox,
                                        const VOID *pSysMemUP, UINT RowPitch, UINT DepthPitch, UINT CopyFlags)
@@ -2628,24 +2870,9 @@ void vboxDXResourceUpdateSubresourceUP(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE 
 
     /* DEFAULT resources are updated via a staging buffer. */
 
-    /*
-     * A simple approach for now: allocate a staging buffer for each upload and delete the buffers after a flush.
-     */
-
     VBOXDXALLOCATIONDESC const *pDstAllocationDesc = vboxDXGetAllocationDesc(pDstResource);
-    AssertReturnVoid(pDstAllocationDesc);
+    AssertReturnVoidStmt(pDstAllocationDesc, vboxDXDeviceSetError(pDevice, E_INVALIDARG));
 
-    /*
-     * Allocate a staging buffer big enough to hold the entire subresource.
-     */
-    uint32_t const cbStagingBuffer = vboxDXGetSubresourceSize(pDstAllocationDesc, DstSubresource);
-    PVBOXDX_RESOURCE pStagingBuffer = vboxDXCreateStagingBuffer(pDevice, cbStagingBuffer);
-    if (!pStagingBuffer)
-        return;
-
-    /*
-     * Copy data to staging via map/unmap.
-     */
     SVGA3dBox destBox;
     if (pDstBox)
     {
@@ -2658,6 +2885,29 @@ void vboxDXResourceUpdateSubresourceUP(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE 
     }
     else
         vboxDXGetSubresourceBox(pDstAllocationDesc, DstSubresource, &destBox);
+
+    /*
+     * Try to use the upload buffer.
+     */
+    if (dxUploadViaBuffer(pDevice, pDstResource, DstSubresource, destBox,
+                          pSysMemUP, RowPitch, DepthPitch, CopyFlags))
+        return;
+
+    /*
+     * Fallback: allocate a staging buffer for the upload and delete the buffers after a flush.
+     */
+
+    /*
+     * Allocate a staging buffer big enough to hold the entire subresource.
+     */
+    uint32_t const cbStagingBuffer = vboxDXGetSubresourceSize(pDstAllocationDesc, DstSubresource);
+    PVBOXDX_RESOURCE pStagingBuffer = vboxDXCreateStagingBuffer(pDevice, cbStagingBuffer);
+    if (!pStagingBuffer)
+        return;
+
+    /*
+     * Copy data to staging via map/unmap.
+     */
 
     uint32_t offPixel;
     uint32_t cbRow;
@@ -4002,7 +4252,29 @@ static int vboxDXDeviceCreateObjects(PVBOXDX_DEVICE pDevice)
 
     pDevice->u64MobFenceValue = 0;
 
-    return rc;
+    /* The upload buffer. */
+    pDevice->upload.pUploadBuffer = vboxDXCreateStagingBuffer(pDevice, VBOXDX_UPLOAD_BUFFER_SIZE);
+    AssertReturn(pDevice->upload.pUploadBuffer, VERR_NO_MEMORY);
+
+    D3DDDICB_LOCK ddiLock;
+    RT_ZERO(ddiLock);
+    ddiLock.hAllocation = vboxDXGetAllocation(pDevice->upload.pUploadBuffer);
+    ddiLock.Flags.WriteOnly = 1;
+    ddiLock.Flags.IgnoreSync = 1;
+    ddiLock.Flags.DonotWait = 1;
+    HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+    pDevice->upload.pvUploadBufferMapped = ddiLock.pData;
+
+    pDevice->upload.offFree = 0;
+    pDevice->upload.cbFree = VBOXDX_UPLOAD_BUFFER_SIZE;
+
+    pDevice->upload.pCurrentBatch = dxUploadBatchAllocate(pDevice);
+
+    RTListInit(&pDevice->upload.listUploadBatches);
+    RTListInit(&pDevice->upload.listLookasideBatches);
+
+    return VINF_SUCCESS;
 }
 
 
@@ -4127,8 +4399,43 @@ HRESULT vboxDXDeviceInit(PVBOXDX_DEVICE pDevice)
 
 void vboxDXDestroyDevice(PVBOXDX_DEVICE pDevice)
 {
+    HRESULT hr;
+
     /* Flush will deallocate staging resources. */
     vboxDXFlush(pDevice, true);
+
+    if (pDevice->upload.pvUploadBufferMapped)
+    {
+        D3DKMT_HANDLE const hAllocation = vboxDXGetAllocation(pDevice->upload.pUploadBuffer);
+
+        D3DDDICB_UNLOCK ddiUnlock;
+        ddiUnlock.NumAllocations = 1;
+        ddiUnlock.phAllocations = &hAllocation;
+        hr = pDevice->pRTCallbacks->pfnUnlockCb(pDevice->hRTDevice.handle, &ddiUnlock);
+        Assert(SUCCEEDED(hr)); RT_NOREF(hr);
+        pDevice->upload.pvUploadBufferMapped = NULL;
+    }
+
+    /* pDevice->upload.pUploadBuffer will be deleted as part of pDevice->listResources cleanup below. */
+
+    if (pDevice->upload.pCurrentBatch)
+    {
+        Assert(pDevice->upload.pCurrentBatch->cbBatch == 0); /* Flush submitted all pending uploads. */
+        dxUploadBatchDeallocate(pDevice, pDevice->upload.pCurrentBatch);
+        pDevice->upload.pCurrentBatch = NULL;
+    }
+
+    if (!RTListIsEmpty(&pDevice->upload.listUploadBatches))
+    {
+        /// @todo This should not happen. Wait for the last query.
+        DEBUG_BREAKPOINT_TEST();
+    }
+
+    VBOXDXUPLOADBATCH *pBatch, *pNext;
+    RTListForEachSafe(&pDevice->upload.listLookasideBatches, pBatch, pNext, VBOXDXUPLOADBATCH, nodeUploadBatch)
+    {
+        dxUploadBatchDeallocate(pDevice, pBatch);
+    }
 
     PVBOXDXKMRESOURCE pKMResource, pNextKMResource;
     RTListForEachSafe(&pDevice->listResources, pKMResource, pNextKMResource, VBOXDXKMRESOURCE, nodeResource)
@@ -4162,7 +4469,7 @@ void vboxDXDestroyDevice(PVBOXDX_DEVICE pDevice)
     D3DDDICB_DESTROYCONTEXT ddiDestroyContext;
     ddiDestroyContext.hContext = pDevice->hContext;
 
-    HRESULT hr = pDevice->pRTCallbacks->pfnDestroyContextCb(pDevice->hRTDevice.handle, &ddiDestroyContext);
+    hr = pDevice->pRTCallbacks->pfnDestroyContextCb(pDevice->hRTDevice.handle, &ddiDestroyContext);
     LogFlowFunc(("hr %d, hContext 0x%p",  hr, pDevice->hContext)); RT_NOREF(hr);
 
     vboxDXDeviceDeleteObjects(pDevice);
