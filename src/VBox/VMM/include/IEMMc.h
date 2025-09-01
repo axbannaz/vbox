@@ -107,6 +107,9 @@
 /** ASSUMES the source variable not used after this statement. */
 #define IEM_MC_ASSIGN_TO_SMALLER(a_VarDst, a_VarSrcEol) (a_VarDst) = (a_VarSrcEol)
 
+#define IEM_MC_LOCAL_ASSIGN_CONST_U64(a_VarDst, a_Value)    (a_VarDst) = (a_Value)
+#define IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_VarDst, a_VarSrc)   (a_VarDst) = (a_VarSrc)
+
 /*
  * General purpose register accessors.
  */
@@ -203,6 +206,12 @@
 #define IEM_MC_FETCH_FREG_U64(a_u64Dst, a_iFpReg)       (a_u64Dst) = iemFRegFetchU64(pVCpu, (a_iFpReg))
 #define IEM_MC_FETCH_FREG_U128(a_u128Dst, a_iFpReg)     iemFRegFetchU128(pVCpu, (a_iFpReg), &(a_u128Dst))
 
+#define IEM_MC_STORE_FREG_U8( a_iFpReg, a_u8Value)      iemFRegStoreU16(pVCpu, (a_iFpReg), (a_u8Value))
+#define IEM_MC_STORE_FREG_U16(a_iFpReg, a_u16Value)     iemFRegStoreU16(pVCpu, (a_iFpReg), (a_u16Value))
+#define IEM_MC_STORE_FREG_U32(a_iFpReg, a_u32Value)     iemFRegStoreU32(pVCpu, (a_iFpReg), (a_u32Value))
+#define IEM_MC_STORE_FREG_U64(a_iFpReg, a_u64Value)     iemFRegStoreU64(pVCpu, (a_iFpReg), (a_u64Value))
+#define IEM_MC_STORE_FREG_U128(a_iFpReg, a_u128Value)   iemFRegStoreU128(pVCpu, (a_iFpReg), &(a_u128Value))
+
 
 #define IEM_MC_SUB_LOCAL_U32(a_u32Value, a_u32Const)    do { (a_u32Value) -= (a_u32Const); } while (0)
 #define IEM_MC_SUB_LOCAL_U64(a_u64Value, a_u64Const)    do { (a_u64Value) -= (a_u64Const); } while (0)
@@ -239,6 +248,7 @@
 #define IEM_MC_SAR_LOCAL_U64(a_u64Local, a_cShift)      do { (a_u64Local) = (uint64_t)((int64_t)(a_u64Local) >>(a_cShift));  } while (0)
 
 #define IEM_MC_SHR_LOCAL_U8(a_u8Local, a_cShift)        do { (a_u8Local)  >>= (a_cShift);  } while (0)
+#define IEM_MC_SHR_LOCAL_U64(a_u64Local, a_cShift)      do { (a_u64Local) >>= (a_cShift);  } while (0)
 
 #define IEM_MC_SHL_LOCAL_S16(a_i16Local, a_cShift)      do { (a_i16Local) <<= (a_cShift);  } while (0)
 #define IEM_MC_SHL_LOCAL_S32(a_i32Local, a_cShift)      do { (a_i32Local) <<= (a_cShift);  } while (0)
@@ -1602,6 +1612,9 @@
         || !(IEM_MC_IF_FLAGS_EXPR & (a_fBit2))) {
 
 #define IEM_MC_IF_LOCAL_IS_Z(a_Local)                   if ((a_Local) == 0) {
+#define IEM_MC_IF_2LOCS_MASK_EQ_U64(a_Local1, a_Local2, a_f64Mask) \
+                                                        if (((a_Local1) & (a_f64Mask)) == ((a_Local2) & (a_f64Mask))) {
+#define IEM_MC_IF_2LOCS_GT_U64(a_Local1, a_Local2)      if ((a_Local1) >= (a_Local2)) { /* unsigned compare */
 #define IEM_MC_IF_GREG_BIT_SET(a_iGReg, a_iBitNo)       if (iemGRegFetchU64(pVCpu, (a_iGReg)) & RT_BIT_64(a_iBitNo)) {
 
 #define IEM_MC_ELSE()                                   } else {

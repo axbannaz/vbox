@@ -132,6 +132,9 @@
 /** Actualizes the guest FPU state so it can be accessed and modified. */
 #define IEM_MC_ACTUALIZE_FPU_STATE_FOR_CHANGE() iemFpuActualizeStateForChange(pVCpu)
 
+#define IEM_MC_FETCH_FREG_HI_U64(a_u64Dst, a_iFpReg)    (a_u64Dst) = iemFRegFetchHiU64(pVCpu, (a_iFpReg))
+#define IEM_MC_STORE_FREG_HI_U64(a_iFpReg, a_u64Value)  iemFRegStoreHiU64(pVCpu, (a_iFpReg), (a_u64Value))
+
 
 #define IEM_MC_FETCH_MEM_FLAT_U32_PAIR(a_u32Value1, a_u32Value2, a_GCPtrMem) \
     (a_u32Value1) = iemMemFlatFetchDataPairU32Jmp(pVCpu, (a_GCPtrMem), &(a_u32Value2))

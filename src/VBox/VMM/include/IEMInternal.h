@@ -2429,12 +2429,14 @@ typedef struct IEMCPU
     CPUMCPUVENDOR           enmCpuVendor;
     /** @} */
 
+    /** Number of iemLogCurInstr() calls that should output FPU state. */
+    uint8_t                 cLogFpuCountdown;
     /** Counts RDMSR \#GP(0) LogRel(). */
     uint8_t                 cLogRelRdMsr;
     /** Counts WRMSR \#GP(0) LogRel(). */
     uint8_t                 cLogRelWrMsr;
     /** Alignment padding. */
-    uint8_t                 abAlignment9[50];
+    uint8_t                 abAlignment9[49];
 
 
     /** @name Recompiled Exection

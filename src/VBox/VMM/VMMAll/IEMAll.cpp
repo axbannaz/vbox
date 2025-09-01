@@ -415,29 +415,106 @@ static void iemLogCurInstr(PVMCPUCC pVCpu, const char *pszFunction) RT_NOEXCEPT
 #  elif defined(VBOX_VMM_TARGET_ARMV8)
         char szPState[160];
         DBGFR3RegFormatArmV8PState(szPState, pVCpu->cpum.GstCtx.fPState);
-        Log2(("**** %s fExec=%x\n"
-              "  x0=%016RX64  x1=%016RX64  x2=%016RX64  x3=%016RX64\n"
-              "  x4=%016RX64  x5=%016RX64  x6=%016RX64  x7=%016RX64\n"
-              "  x8=%016RX64  x9=%016RX64 x10=%016RX64 x11=%016RX64\n"
-              " x12=%016RX64 x13=%016RX64 x14=%016RX64 x15=%016RX64\n"
-              " x16=%016RX64 x17=%016RX64 x18=%016RX64 x19=%016RX64\n"
-              " x20=%016RX64 x21=%016RX64 x22=%016RX64 x23=%016RX64\n"
-              " x24=%016RX64 x25=%016RX64 x26=%016RX64 x27=%016RX64\n"
-              " x28=%016RX64  bp=%016RX64  lr=%016RX64  sp=%016RX64\n"
-              "  pc=%016RX64 psr=%012RX64 %s\n"
-              " %s\n"
-              , pszFunction, pVCpu->iem.s.fExec,
-              pVCpu->cpum.GstCtx.aGRegs[0],  pVCpu->cpum.GstCtx.aGRegs[1],  pVCpu->cpum.GstCtx.aGRegs[2],  pVCpu->cpum.GstCtx.aGRegs[3],
-              pVCpu->cpum.GstCtx.aGRegs[4],  pVCpu->cpum.GstCtx.aGRegs[5],  pVCpu->cpum.GstCtx.aGRegs[6],  pVCpu->cpum.GstCtx.aGRegs[7],
-              pVCpu->cpum.GstCtx.aGRegs[8],  pVCpu->cpum.GstCtx.aGRegs[9],  pVCpu->cpum.GstCtx.aGRegs[10], pVCpu->cpum.GstCtx.aGRegs[11],
-              pVCpu->cpum.GstCtx.aGRegs[12], pVCpu->cpum.GstCtx.aGRegs[13], pVCpu->cpum.GstCtx.aGRegs[14], pVCpu->cpum.GstCtx.aGRegs[15],
-              pVCpu->cpum.GstCtx.aGRegs[16], pVCpu->cpum.GstCtx.aGRegs[17], pVCpu->cpum.GstCtx.aGRegs[18], pVCpu->cpum.GstCtx.aGRegs[19],
-              pVCpu->cpum.GstCtx.aGRegs[20], pVCpu->cpum.GstCtx.aGRegs[21], pVCpu->cpum.GstCtx.aGRegs[22], pVCpu->cpum.GstCtx.aGRegs[23],
-              pVCpu->cpum.GstCtx.aGRegs[24], pVCpu->cpum.GstCtx.aGRegs[25], pVCpu->cpum.GstCtx.aGRegs[26], pVCpu->cpum.GstCtx.aGRegs[27],
-              pVCpu->cpum.GstCtx.aGRegs[28], pVCpu->cpum.GstCtx.aGRegs[29], pVCpu->cpum.GstCtx.aGRegs[30],
-              pVCpu->cpum.GstCtx.aSpReg[IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) > 0],
-              pVCpu->cpum.GstCtx.Pc, pVCpu->cpum.GstCtx.fPState, szPState,
-              szInstr));
+        if (pVCpu->iem.s.cLogFpuCountdown == 0)
+            Log2(("**** %s fExec=%x\n"
+                  "  x0=%016RX64  x1=%016RX64  x2=%016RX64  x3=%016RX64\n"
+                  "  x4=%016RX64  x5=%016RX64  x6=%016RX64  x7=%016RX64\n"
+                  "  x8=%016RX64  x9=%016RX64 x10=%016RX64 x11=%016RX64\n"
+                  " x12=%016RX64 x13=%016RX64 x14=%016RX64 x15=%016RX64\n"
+                  " x16=%016RX64 x17=%016RX64 x18=%016RX64 x19=%016RX64\n"
+                  " x20=%016RX64 x21=%016RX64 x22=%016RX64 x23=%016RX64\n"
+                  " x24=%016RX64 x25=%016RX64 x26=%016RX64 x27=%016RX64\n"
+                  " x28=%016RX64  bp=%016RX64  lr=%016RX64  sp=%016RX64\n"
+                  "  pc=%016RX64 psr=%012RX64 %s\n"
+                  " %s\n"
+                  , pszFunction, pVCpu->iem.s.fExec,
+                  pVCpu->cpum.GstCtx.aGRegs[0],  pVCpu->cpum.GstCtx.aGRegs[1],  pVCpu->cpum.GstCtx.aGRegs[2],  pVCpu->cpum.GstCtx.aGRegs[3],
+                  pVCpu->cpum.GstCtx.aGRegs[4],  pVCpu->cpum.GstCtx.aGRegs[5],  pVCpu->cpum.GstCtx.aGRegs[6],  pVCpu->cpum.GstCtx.aGRegs[7],
+                  pVCpu->cpum.GstCtx.aGRegs[8],  pVCpu->cpum.GstCtx.aGRegs[9],  pVCpu->cpum.GstCtx.aGRegs[10], pVCpu->cpum.GstCtx.aGRegs[11],
+                  pVCpu->cpum.GstCtx.aGRegs[12], pVCpu->cpum.GstCtx.aGRegs[13], pVCpu->cpum.GstCtx.aGRegs[14], pVCpu->cpum.GstCtx.aGRegs[15],
+                  pVCpu->cpum.GstCtx.aGRegs[16], pVCpu->cpum.GstCtx.aGRegs[17], pVCpu->cpum.GstCtx.aGRegs[18], pVCpu->cpum.GstCtx.aGRegs[19],
+                  pVCpu->cpum.GstCtx.aGRegs[20], pVCpu->cpum.GstCtx.aGRegs[21], pVCpu->cpum.GstCtx.aGRegs[22], pVCpu->cpum.GstCtx.aGRegs[23],
+                  pVCpu->cpum.GstCtx.aGRegs[24], pVCpu->cpum.GstCtx.aGRegs[25], pVCpu->cpum.GstCtx.aGRegs[26], pVCpu->cpum.GstCtx.aGRegs[27],
+                  pVCpu->cpum.GstCtx.aGRegs[28], pVCpu->cpum.GstCtx.aGRegs[29], pVCpu->cpum.GstCtx.aGRegs[30],
+                  pVCpu->cpum.GstCtx.aSpReg[IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) > 0],
+                  pVCpu->cpum.GstCtx.Pc, pVCpu->cpum.GstCtx.fPState, szPState,
+                  szInstr));
+        else
+        {
+            pVCpu->iem.s.cLogFpuCountdown -= 1;
+            Log2(("**** %s fExec=%x\n"
+                  "  x0=%016RX64  x1=%016RX64  x2=%016RX64  x3=%016RX64\n"
+                  "  x4=%016RX64  x5=%016RX64  x6=%016RX64  x7=%016RX64\n"
+                  "  x8=%016RX64  x9=%016RX64 x10=%016RX64 x11=%016RX64\n"
+                  " x12=%016RX64 x13=%016RX64 x14=%016RX64 x15=%016RX64\n"
+                  " x16=%016RX64 x17=%016RX64 x18=%016RX64 x19=%016RX64\n"
+                  " x20=%016RX64 x21=%016RX64 x22=%016RX64 x23=%016RX64\n"
+                  " x24=%016RX64 x25=%016RX64 x26=%016RX64 x27=%016RX64\n"
+                  " x28=%016RX64  bp=%016RX64  lr=%016RX64  sp=%016RX64\n"
+                  "  pc=%016RX64 psr=%012RX64 %s\n"
+                  "  v0=%016RX64'%016RX64  v1=%016RX64'%016RX64\n"
+                  "  v2=%016RX64'%016RX64  v3=%016RX64'%016RX64\n"
+                  "  v4=%016RX64'%016RX64  v5=%016RX64'%016RX64\n"
+                  "  v6=%016RX64'%016RX64  v7=%016RX64'%016RX64\n"
+                  "  v8=%016RX64'%016RX64  v9=%016RX64'%016RX64\n"
+                  " v10=%016RX64'%016RX64 v11=%016RX64'%016RX64\n"
+                  " v12=%016RX64'%016RX64 v13=%016RX64'%016RX64\n"
+                  " v14=%016RX64'%016RX64 v15=%016RX64'%016RX64\n"
+                  " v16=%016RX64'%016RX64 v17=%016RX64'%016RX64\n"
+                  " v18=%016RX64'%016RX64 v19=%016RX64'%016RX64\n"
+                  " v20=%016RX64'%016RX64 v21=%016RX64'%016RX64\n"
+                  " v22=%016RX64'%016RX64 v23=%016RX64'%016RX64\n"
+                  " v24=%016RX64'%016RX64 v25=%016RX64'%016RX64\n"
+                  " v26=%016RX64'%016RX64 v27=%016RX64'%016RX64\n"
+                  " v28=%016RX64'%016RX64 v29=%016RX64'%016RX64\n"
+                  " v30=%016RX64'%016RX64 v31=%016RX64'%016RX64\n"
+                  " %s\n"
+                  , pszFunction, pVCpu->iem.s.fExec,
+                  pVCpu->cpum.GstCtx.aGRegs[0],  pVCpu->cpum.GstCtx.aGRegs[1],  pVCpu->cpum.GstCtx.aGRegs[2],  pVCpu->cpum.GstCtx.aGRegs[3],
+                  pVCpu->cpum.GstCtx.aGRegs[4],  pVCpu->cpum.GstCtx.aGRegs[5],  pVCpu->cpum.GstCtx.aGRegs[6],  pVCpu->cpum.GstCtx.aGRegs[7],
+                  pVCpu->cpum.GstCtx.aGRegs[8],  pVCpu->cpum.GstCtx.aGRegs[9],  pVCpu->cpum.GstCtx.aGRegs[10], pVCpu->cpum.GstCtx.aGRegs[11],
+                  pVCpu->cpum.GstCtx.aGRegs[12], pVCpu->cpum.GstCtx.aGRegs[13], pVCpu->cpum.GstCtx.aGRegs[14], pVCpu->cpum.GstCtx.aGRegs[15],
+                  pVCpu->cpum.GstCtx.aGRegs[16], pVCpu->cpum.GstCtx.aGRegs[17], pVCpu->cpum.GstCtx.aGRegs[18], pVCpu->cpum.GstCtx.aGRegs[19],
+                  pVCpu->cpum.GstCtx.aGRegs[20], pVCpu->cpum.GstCtx.aGRegs[21], pVCpu->cpum.GstCtx.aGRegs[22], pVCpu->cpum.GstCtx.aGRegs[23],
+                  pVCpu->cpum.GstCtx.aGRegs[24], pVCpu->cpum.GstCtx.aGRegs[25], pVCpu->cpum.GstCtx.aGRegs[26], pVCpu->cpum.GstCtx.aGRegs[27],
+                  pVCpu->cpum.GstCtx.aGRegs[28], pVCpu->cpum.GstCtx.aGRegs[29], pVCpu->cpum.GstCtx.aGRegs[30],
+                  pVCpu->cpum.GstCtx.aSpReg[IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) > 0],
+                  pVCpu->cpum.GstCtx.Pc, pVCpu->cpum.GstCtx.fPState, szPState,
+                  pVCpu->cpum.GstCtx.aVRegs[ 0].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 0].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 1].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 1].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 2].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 2].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 3].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 3].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 4].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 4].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 5].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 5].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 6].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 6].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 7].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 7].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 8].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 8].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[ 9].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[ 9].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[10].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[10].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[11].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[11].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[12].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[12].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[13].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[13].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[14].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[14].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[15].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[15].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[16].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[16].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[17].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[17].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[18].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[18].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[19].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[19].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[20].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[20].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[21].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[21].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[22].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[22].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[23].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[23].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[24].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[24].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[25].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[25].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[26].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[26].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[27].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[27].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[28].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[28].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[29].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[29].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[30].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[30].v.s.Lo,
+                  pVCpu->cpum.GstCtx.aVRegs[31].v.s.Hi, pVCpu->cpum.GstCtx.aVRegs[31].v.s.Lo,
+                  /** @todo more.    */
+                  szInstr));
+        }
 #  else
 #   error "port me"
 #  endif

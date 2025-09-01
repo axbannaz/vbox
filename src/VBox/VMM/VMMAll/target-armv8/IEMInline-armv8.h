@@ -2769,6 +2769,9 @@ iemRegRipNearReturnAndFinishNoFlags(PVMCPUCC pVCpu, uint8_t cbInstr, uint16_t cb
 DECLINLINE(void) iemFpuPrepareUsage(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
     IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
+#ifdef LOG_ENABLED
+    pVCpu->iem.s.cLogFpuCountdown = RT_MAX(pVCpu->iem.s.cLogFpuCountdown, 4);
+#endif
 }
 
 
@@ -2782,6 +2785,9 @@ DECLINLINE(void) iemFpuPrepareUsage(PVMCPUCC pVCpu) RT_NOEXCEPT
 DECLINLINE(void) iemFpuActualizeStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
     IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
+#ifdef LOG_ENABLED
+    pVCpu->iem.s.cLogFpuCountdown = RT_MAX(pVCpu->iem.s.cLogFpuCountdown, 2);
+#endif
 }
 
 
@@ -2795,6 +2801,9 @@ DECLINLINE(void) iemFpuActualizeStateForRead(PVMCPUCC pVCpu) RT_NOEXCEPT
 DECLINLINE(void) iemFpuActualizeStateForChange(PVMCPUCC pVCpu) RT_NOEXCEPT
 {
     IEM_CTX_IMPORT_NORET(pVCpu, CPUMCTX_EXTRN_V0_V31 | CPUMCTX_EXTRN_FPCR | CPUMCTX_EXTRN_FPSR);
+#ifdef LOG_ENABLED
+    pVCpu->iem.s.cLogFpuCountdown = RT_MAX(pVCpu->iem.s.cLogFpuCountdown, 3);
+#endif
 }
 
 
@@ -2825,6 +2834,21 @@ DECL_FORCE_INLINE(uint64_t) iemFRegFetchU64(PVMCPUCC pVCpu, uint8_t iReg) RT_NOE
 {
     Assert(iReg < 32);
     return pVCpu->cpum.GstCtx.aVRegs[iReg].v.QWords.qw0;
+}
+
+
+/**
+ * Fetches the high 64-bits from a register in the extension (floating point,
+ * SIMD) register bank as 64-bit unsigned int.
+ *
+ * @returns The register value.
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ */
+DECL_FORCE_INLINE(uint64_t) iemFRegFetchHiU64(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    return pVCpu->cpum.GstCtx.aVRegs[iReg].v.QWords.qw1;
 }
 
 
@@ -2876,6 +2900,104 @@ DECL_FORCE_INLINE(uint8_t) iemFRegFetchU8(PVMCPUCC pVCpu, uint8_t iReg) RT_NOEXC
 #endif
 }
 
+
+/**
+ * Store a 128-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   pu128Value  The value to store.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreU128(PVMCPUCC pVCpu, uint8_t iReg, PCRTUINT128U pu128Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v = *pu128Value;
+}
+
+
+/**
+ * Store a 64-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   u64Value    The value to store.
+ * @note    Clears the upper bits.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreU64(PVMCPUCC pVCpu, uint8_t iReg, uint64_t u64Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Lo = u64Value;
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Hi = 0;
+}
+
+
+/**
+ * Store a 64-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   u64Value    The value to store.
+ * @note    Preserves the lower bits.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreHiU64(PVMCPUCC pVCpu, uint8_t iReg, uint64_t u64Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Hi = u64Value;
+}
+
+
+/**
+ * Store a 32-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   u32Value    The value to store.
+ * @note    Clears the upper bits.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreU32(PVMCPUCC pVCpu, uint8_t iReg, uint32_t u32Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Lo = u32Value;
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Hi = 0;
+}
+
+
+/**
+ * Store a 16-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   u16Value    The value to store.
+ * @note    Clears the upper bits.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreU16(PVMCPUCC pVCpu, uint8_t iReg, uint16_t u16Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Lo = u16Value;
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Hi = 0;
+}
+
+
+/**
+ * Store a 8-bit unsigned value in a register from the extension (floating
+ * point, SIMD) register bank.
+ *
+ * @param   pVCpu       The cross context virtual CPU structure of the calling thread.
+ * @param   iReg        The register.
+ * @param   u8Value     The value to store.
+ * @note    Clears the upper bits.
+ */
+DECL_FORCE_INLINE(void) iemFRegStoreU8(PVMCPUCC pVCpu, uint8_t iReg, uint8_t u8Value) RT_NOEXCEPT
+{
+    Assert(iReg < 32);
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Lo = u8Value;
+    pVCpu->cpum.GstCtx.aVRegs[iReg].v.s.Hi = 0;
+}
 
 /** @}  */
 
