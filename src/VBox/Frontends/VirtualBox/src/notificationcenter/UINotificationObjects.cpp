@@ -738,10 +738,10 @@ void UINotificationMessage::cannotAcquireSessionParameter(const CSession &comSes
 /* static */
 void UINotificationMessage::cannotAcquireMachineParameter(const CMachine &comMachine)
 {
-    /* Do not show error for the NS_ERROR_NOT_IMPLEMENTED case, just add it to the log: */
-    if (comMachine.lastRC() == NS_ERROR_NOT_IMPLEMENTED)
+    /* Do not show error for the E_NOTIMPL case, just add it to the log: */
+    if (comMachine.lastRC() == E_NOTIMPL)
     {
-        LogRel(("GUI: IMachine getter lastRC == NS_ERROR_NOT_IMPLEMENTED, skipping ...\n"));
+        LogRel(("GUI: IMachine getter lastRC == E_NOTIMPL, skipping ...\n"));
         return;
     }
 
