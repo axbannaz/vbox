@@ -92,7 +92,7 @@ private:
                          com::Utf8Str &aLicenseText);
     HRESULT install(BOOL aReplace,
                     const com::Utf8Str &aDisplayInfo,
-                    ComPtr<IProgress> &aProgess);
+                    ComPtr<IProgress> &aProgress);
 
     struct Data;
     /** Pointer to the private instance. */
@@ -298,7 +298,7 @@ private:
     HRESULT uninstall(const com::Utf8Str &aName,
                       BOOL aForcedRemoval,
                       const com::Utf8Str &aDisplayInfo,
-                      ComPtr<IProgress> &aProgess);
+                      ComPtr<IProgress> &aProgress);
     HRESULT cleanup();
     HRESULT queryAllPlugInsForFrontend(const com::Utf8Str &aFrontendName,
                                        std::vector<com::Utf8Str> &aPlugInModules);
