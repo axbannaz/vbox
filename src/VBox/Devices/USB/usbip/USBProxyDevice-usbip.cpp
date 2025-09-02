@@ -1167,7 +1167,7 @@ static int usbProxyUsbIpUrbQueueWorker(PUSBPROXYDEVUSBIP pProxyDevUsbIp, PUSBPRO
     switch (pUrb->enmType)
     {
         case VUSBXFERTYPE_MSG:
-            memcpy(&ReqSubmit.Setup, &pUrb->pbData, sizeof(ReqSubmit.Setup));
+            memcpy(&ReqSubmit.Setup, pUrb->pbData, sizeof(ReqSubmit.Setup));
             ReqSubmit.u32TransferBufferLength -= sizeof(VUSBSETUP);
             if (pUrb->enmDir == VUSBDIRECTION_OUT)
             {

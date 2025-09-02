@@ -95,6 +95,10 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>USB: Fixed passing through USB devices exposed over USB/IP (issue github:gh-192)</para>
+      </listitem>
+
+      <listitem>
         <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
       </listitem>
 
