@@ -624,33 +624,123 @@ EXPORTEDNAME g_WriteAreaPost
 BEGINCODE
 
 
+/**
+ * This checks that the write area is pristine.
+ *
+ * Note! SP is busted. We can trash x0-x5 and NZCV, but nothing else here.
+ */
+BEGINPROC_EXPORTED  CheckWriteArea
+        adrp    x3, PAGE(NAME(g_WriteAreaPre))
+        add     x3, x3, PAGEOFF(NAME(g_WriteAreaPre))
+
+        /*
+         * Check the first 32 bytes of the pre-area (0xfeedface).
+         */
+        movz    x0, #0xface
+        movk    x0, #0xfeed, LSL #16
+        movk    x0, #0xface, LSL #32
+        movk    x0, #0xfeed, LSL #48
+
+        movz    x1, #4
+
+.Lcheck_loop_pre:
+        ldp     x4, x5, [x3], #16
+        cmp     x4, x0
+        b.eq    .Lcheck_loop_pre_t1
+        brk     #0xffd0
+.Lcheck_loop_pre_t1:
+        cmp     x5, x0
+        b.eq    .Lcheck_loop_pre_t2
+        brk     #0xffd1
+.Lcheck_loop_pre_t2:
+        subs    x1, x1, #1
+        b.ne    .Lcheck_loop_pre
+
+        /*
+         * The main body.
+         */
+        movz    x0, #0x0100
+        movk    x0, #0x0302, LSL #16
+        movk    x0, #0x0504, LSL #32
+        movk    x0, #0x0706, LSL #48
+
+        movz    x1, #0x0908
+        movk    x1, #0x0b0a, LSL #16
+        movk    x1, #0x0d0c, LSL #32
+        movk    x1, #0x0f0e, LSL #48
+
+        movz    x2, #0x1010
+        movk    x2, #0x1010, LSL #16
+        movk    x2, #0x1010, LSL #32
+        movk    x2, #0x1010, LSL #48
+
+.Lcheck_loop:
+        ldp     x4, x5, [x3], #16
+        cmp     x4, x0
+        b.eq    .Lcheck_loop_t1
+        brk     #0xffd4
+.Lcheck_loop_t1:
+        cmp     x5, x1
+        b.eq    .Lcheck_loop_t2
+        brk     #0xffd5
+.Lcheck_loop_t2:
+        add     x0, x0, x2
+        add     x1, x1, x2
+        tst     x0, #0xff
+        b.ne    .Lcheck_loop
+
+        /*
+         * Check the post-area (0x8badf00d).
+         */
+        movz    x0, #0xf00d
+        movk    x0, #0x8bad, LSL #16
+        movk    x0, #0xf00d, LSL #32
+        movk    x0, #0x8bad, LSL #48
+
+        movz    x1, #4
+
+.Lcheck_loop_post:
+        ldp     x4, x5, [x3], #16
+        cmp     x4, x0
+        b.eq    .Lcheck_loop_post_t1
+        brk     #0xffd8
+.Lcheck_loop_post_t1:
+        cmp     x5, x0
+        b.eq    .Lcheck_loop_post_t2
+        brk     #0xffd8
+.Lcheck_loop_post_t2:
+        subs    x1, x1, #1
+        b.ne    .Lcheck_loop_post
+
+        ret
+ENDPROC             CheckWriteArea
+
+
 BEGINPROC_EXPORTED  ReInitWriteArea
-        movz     x0, #0x0100
-        movk     x0, #0x0302, LSL #16
-        movk     x0, #0x0504, LSL #32
-        movk     x0, #0x0706, LSL #48
+        movz    x0, #0x0100
+        movk    x0, #0x0302, LSL #16
+        movk    x0, #0x0504, LSL #32
+        movk    x0, #0x0706, LSL #48
 
-        movz     x1, #0x0908
-        movk     x1, #0x0b0a, LSL #16
-        movk     x1, #0x0d0c, LSL #32
-        movk     x1, #0x0f0e, LSL #48
+        movz    x1, #0x0908
+        movk    x1, #0x0b0a, LSL #16
+        movk    x1, #0x0d0c, LSL #32
+        movk    x1, #0x0f0e, LSL #48
 
-        movz     x2, #0x1010
-        movk     x2, #0x1010, LSL #16
-        movk     x2, #0x1010, LSL #32
-        movk     x2, #0x1010, LSL #48
+        movz    x2, #0x1010
+        movk    x2, #0x1010, LSL #16
+        movk    x2, #0x1010, LSL #32
+        movk    x2, #0x1010, LSL #48
 
-        movz     x3, #0x100/8
-
-        adrp     x4, PAGE(NAME(g_WriteArea))
-        add      x4, x4, PAGEOFF(NAME(g_WriteArea))
+        adrp    x3, PAGE(NAME(g_WriteArea))
+        add     x3, x3, PAGEOFF(NAME(g_WriteArea))
 
 .Lreinit_loop:
-        stp      x0, x1, [x4], #16
-        add      x0, x0, x2
-        add      x1, x1, x2
-        subs     x3, x3, #1
-        b.ne     .Lreinit_loop
+        stp     x0, x1, [x3], #16
+        add     x0, x0, x2
+        add     x1, x1, x2
+        tst     x0, #0xff
+        b.ne    .Lreinit_loop
 
         ret
 ENDPROC             ReInitWriteArea

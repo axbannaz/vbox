@@ -116,9 +116,9 @@ def randURange(uFirst, uEnd): # uEnd is exclusive
 
 class Arm64RegAllocator(object):
     """ This is mainly for random register allocating. """
-    def __init__(self, oParent = None, cMax = 32):
+    def __init__(self, oParent = None, cMax = 32, bmPreallocated = 0):
         self.cMax        = cMax;
-        self.bmAllocated = 0;
+        self.bmAllocated = bmPreallocated;
         self.auValues    = [None for _ in range(cMax)];
         if oParent:
             self.bmAllocated |= oParent.bmAllocated;
@@ -176,8 +176,8 @@ class Arm64RegAllocator(object):
 class Arm64GprAllocator(Arm64RegAllocator):
     """ GPR allocator.  This excludes the SP/XZR register. """
 
-    def __init__(self, oParent = None):
-        Arm64RegAllocator.__init__(self, oParent = oParent, cMax = 32);
+    def __init__(self, oParent = None, bmPreallocated = 0):
+        Arm64RegAllocator.__init__(self, oParent = oParent, cMax = 32, bmPreallocated = bmPreallocated);
         #self.bmAllocated |= 1 << 31; # SP/XZR
         self.bmAllocated |= 1 << 18; # PR - platform register.
 
@@ -301,14 +301,28 @@ class A64No1CodeGenBase(object):
         _ = oOptions; _ = cLeftToAllCheck;
         return None;
 
+    def emitCommentLine(self, sComment):
+        self.asCode.append('        /* %s */' % (sComment,));
+
     def emitInstr(self, sInstr, sOperands, sComment = None):
         sTmp = '        %-8s %s' % (sInstr, sOperands,);
         if sComment:
             sTmp = '%-47s /* %s */' % (sTmp, sComment,);
         self.asCode.append(sTmp);
 
+    def localLabel(self):
+        global g_iLabel;
+        sRet = '.L%u' % (g_iLabel,);
+        g_iLabel += 1;
+        return sRet;
+
     def emitLabel(self, sLabel):
         self.asCode.append('%s:' % (sLabel,));
+
+    def emitBrk(self):
+        global g_iBrkNo;
+        self.emitInstr('brk', '#0x%x' % (g_iBrkNo & 0xffff,));
+        g_iBrkNo += 1;
 
     def emitGprLoad(self, iReg, uValue, fReg31IsSp = True):
         """
@@ -355,13 +369,12 @@ class A64No1CodeGenBase(object):
 
     def emitGprValCheck(self, iRegToCheck, uExpectedValue, iRegTmp = -1, fReg31IsSp = False):
         """ Emits a register value check. """
-        global g_iBrkNo, g_iLabel;
-
         sRegToCheck = g_dddGprNamesBySpAndBits[fReg31IsSp][64][iRegToCheck];
         sCmpForceExtended = ', UXTX' if iRegToCheck == 31 and fReg31IsSp else '';
 
+        sLabel = self.localLabel();
         if uExpectedValue == 0 and not fReg31IsSp:
-            self.emitInstr('cbz',   '%s, L%s' % (sRegToCheck, g_iLabel,));
+            self.emitInstr('cbz',   '%s, %s' % (sRegToCheck, sLabel,));
         else:
             if uExpectedValue < 0x1000:
                 self.emitInstr('cmp',   '%s, #0x%x' % (sRegToCheck, uExpectedValue,));
@@ -373,11 +386,9 @@ class A64No1CodeGenBase(object):
                 self.emitGprLoad(iRegTmp, uExpectedValue);
                 self.emitInstr('cmp',   '%s, x%u%s' % (sRegToCheck, iRegTmp, sCmpForceExtended,));
                 self.oGprAllocator.free(iRegTmp);
-            self.emitInstr('b.eq',  'L%s' % (g_iLabel, ));
-        self.emitInstr('brk',   '#%#x' % (g_iBrkNo & 0xffff, ));
-        self.emitLabel('L%s' % (g_iLabel, ));
-        g_iLabel += 1;
-        g_iBrkNo += 1;
+            self.emitInstr('b.eq',  sLabel);
+        self.emitBrk();
+        self.emitLabel(sLabel);
         return None;
 
     def emitAllGprChecks(self):
@@ -467,8 +478,6 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
 
     def emitFprValCheck(self, iRegToCheck, uExpectedValue, iRegTmp = -1):
         """ Emits a register value check. """
-        global g_iBrkNo, g_iLabel;
-
         iRegTmpFree = -1;
         if iRegTmp < 0:
             iRegTmp = self.oFprAllocator.alloc();
@@ -479,11 +488,10 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
         self.emitInstr('uminv', 'b%u, v%u.16b' % (iRegTmp, iRegTmp,));
         iGprTmp = self.oGprAllocator.alloc();
         self.emitInstr('fmov',  'w%u, s%u' % (iGprTmp, iRegTmp,));
-        self.emitInstr('cbnz',  'w%u, L%s' % (iGprTmp, g_iLabel,));
-        self.emitInstr('brk',   '#%#x' % (g_iBrkNo & 0xffff, ));
-        self.emitLabel('L%s' % (g_iLabel, ));
-        g_iLabel += 1;
-        g_iBrkNo += 1;
+        sLabel = self.localLabel();
+        self.emitInstr('cbnz',  'w%u, %s' % (iGprTmp, sLabel,));
+        self.emitBrk();
+        self.emitLabel(sLabel);
 
         self.oGprAllocator.free(iGprTmp);
         self.oFprAllocator.free(iRegTmpFree);
@@ -929,6 +937,189 @@ class A64No1CodeGenLdImm9Fp(A64No1CodeGenFprBase, A64No1CodeGenLdImm9):
         self.oFprAllocator.free(iRegDst);
 
 
+#
+# Store generators.
+#
+
+class A64No1CodeGenStBase(A64No1CodeGenBase):
+    """ Base class for store tests. """
+    def __init__(self, sName, sInstr, cbMem = 1, cBits = 64, oGprAllocator = None):
+        A64No1CodeGenBase.__init__(self, sName, sInstr, oGprAllocator or Arm64GprAllocator(), fMayUseSp = True);
+        self.cbMem   = cbMem;
+        self.cBits   = cBits;
+
+    @staticmethod
+    def getSlotValue(iSlot, cbMem):
+        """ Returns the values from slots 'iSlot' thru 'iSlot + cbMem - '. """
+        uRet = iSlot;
+        off  = 1;
+        while off < cbMem:
+            uRet |= (iSlot + off) << (off * 8);
+            off  += 1;
+        return uRet;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        # Load a pointer to the first slot into a register.
+        iRegSlot0Ptr = self.oGprAllocator.alloc();
+        self.emitInstr('adrp',  'x%u, PAGE(NAME(g_WriteArea))' % (iRegSlot0Ptr,));
+        self.emitInstr('add',   'x%u, x%u, PAGEOFF(NAME(g_WriteArea))' % (iRegSlot0Ptr, iRegSlot0Ptr,));
+
+        self.generateBodySt(oOptions, iRegSlot0Ptr)
+
+        self.emitAllGprChecks();
+        self.oGprAllocator.free(iRegSlot0Ptr);
+        _ = cLeftToAllCheck;
+
+    def generateBodySt(self, oOptions, iRegSlot0Ptr):
+        """ Inner body generator. """
+        _ = oOptions;
+        _ = iRegSlot0Ptr;
+        assert False;
+
+
+class A64No1CodeGenStImm9(A64No1CodeGenStBase):
+    """
+    STR w/ 9-bit signed immediate and either post-index or pre-index adding.
+
+    Note! SP can be used as base register (but not destination).
+    """
+
+    def __init__(self, sInstr, cbMem = 1, cBits = 64, fPreIdx = True, sBaseName = None):
+        oGprAllocator = Arm64GprAllocator(bmPreallocated = 0x4000003f); # Reserved regs used by CheckWriteArea().
+        A64No1CodeGenStBase.__init__(self, (sBaseName or sInstr) + ('_preidx' if fPreIdx else '_postidx'),
+                                     sInstr, cbMem, cBits, oGprAllocator = oGprAllocator);
+        self.fPreIdx = fPreIdx;
+
+
+    def generateBodySt(self, oOptions, iRegSlot0Ptr):
+        self.emitInstr('bl', 'NAME(CheckWriteArea)');
+
+        # Generate loads from different loads with various immediate values.
+        for i in range(oOptions.cTestsPerInstruction):
+            uImm9       = randUBits(9);                 # (signed)
+            iOffset     = bitsSignedToInt(9, uImm9);
+            idxMemSlot  = randURange(0, 256 - self.cbMem);
+            idxPreSlot  = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            sRegBase    = g_dGpr64NamesSp[iRegBase];
+            if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
+                idxMemSlot -= idxPreSlot & 15
+                if idxMemSlot < 0:
+                    idxMemSlot += 16;
+                idxPreSlot = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+                assert (abs(idxPreSlot) & 15) == 0;
+            self.emitCommentLine('i=%u idxMemSlot=%#x' % (i, idxMemSlot,));
+
+            # Calculate the base address, allocate and load the source register, then perform the store instruction.
+            self.emitInstr('add' if idxPreSlot >= 0 else 'sub', '%s, x%u, #%u' % (sRegBase, iRegSlot0Ptr, abs(idxPreSlot),));
+            uValue      = self.emitStInstrAndRandValue(sRegBase, iOffset);
+
+            # Check the offset.
+            u64PostSlot = idxMemSlot if self.fPreIdx else (idxMemSlot + iOffset) & 0xffffffffffffffff;
+            iRegTmp     = self.oGprAllocator.alloc(u64PostSlot);
+            self.emitInstr('sub', 'x%u, %s, x%u' % (iRegTmp, sRegBase, iRegSlot0Ptr,)); # iRegTmp == idxEffSlot
+            self.emitGprValCheck(iRegTmp, u64PostSlot);
+            self.oGprAllocator.free(iRegTmp);
+
+            # Check the value we stored and a few adjacent bytes.
+            self.emitStValCheck(idxMemSlot, uValue, iRegSlot0Ptr);
+
+            # Restore the original value using the same instruction.
+            self.emitCommentLine('restoring idxMemSlot=%#x LB %u' % (idxMemSlot, self.cbMem,));
+            if self.fPreIdx and (iRegBase != 31 or (idxMemSlot & 15) == 0):
+                self.emitStInstrForRestore(sRegBase, 0, self.getSlotValue(idxMemSlot, self.cbMem));
+            else:
+                self.emitInstr('add' if idxPreSlot >= 0 else 'sub', '%s, x%u, #%u' % (sRegBase, iRegSlot0Ptr, abs(idxPreSlot),));
+                self.emitStInstrForRestore(sRegBase, iOffset, self.getSlotValue(idxMemSlot, self.cbMem));
+
+            self.oGprAllocator.free(iRegBase);
+
+            # Check that the write area is okay.
+            self.emitInstr('bl', 'NAME(CheckWriteArea)');
+
+
+    def emitStInstrAndRandValue(self, sRegBase, iOffset):
+        (uValue, iRegSrc) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
+        if self.fPreIdx:
+            self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
+        else:
+            self.emitInstr(self.sInstr, '%s, [%s], #%d'  % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
+        self.oGprAllocator.free(iRegSrc);
+        return uValue & bitsOnes(self.cbMem * 8);
+
+    def emitStInstrForRestore(self, sRegBase, iOffset, uValue):
+        iRegSrc = self.emitGprLoad(self.oGprAllocator.alloc(), uValue);
+        if self.fPreIdx:
+            self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
+        else:
+            self.emitInstr(self.sInstr, '%s, [%s], #%d'  % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
+        self.oGprAllocator.free(iRegSrc);
+        return None;
+
+    def emitStValCheck(self, idxMemSlot, uValue, iRegSlot0Ptr):
+        #
+        # We must check bytes both before and after. Figure out how much exact.
+        #
+        cbToCheck = self.cbMem;
+
+        cbBefore  = idxMemSlot & 3;
+        if cbBefore == 0:
+            cbBefore = 2;
+        cbBefore = min(cbBefore, idxMemSlot);
+        cbToCheck += cbBefore;
+        for _ in range(cbBefore):
+            idxMemSlot -= 1;
+            uValue    <<= 8;
+            uValue     |= idxMemSlot;
+
+        cbAfter   = ((cbToCheck + 3) & ~3) - cbToCheck;
+        if cbAfter == 0:
+            cbAfter = 2;
+        cbAfter = min(256 - cbToCheck + idxMemSlot, cbAfter);
+        for _ in range(cbAfter):
+            uValue    |= (idxMemSlot + cbToCheck) << (cbToCheck * 8);
+            cbToCheck += 1;
+
+        #
+        # Do the checking.
+        #
+        self.emitCommentLine('checking: idxMemSlot=%#x LB %u (cbBefore=%u cbMem=%u cbAfter=%u) == %#x'
+                             % (idxMemSlot, cbToCheck, cbBefore, self.cbMem, cbAfter, uValue,));
+        iRegLoad   = self.oGprAllocator.alloc();
+        iRegExpect = self.oGprAllocator.alloc();
+        while cbToCheck > 0:
+            if (idxMemSlot & 7) == 0 and cbToCheck >= 8:
+                self.emitGprLoad(iRegExpect, uValue & bitsOnes(64));
+                self.emitInstr('ldr', '%s, [%s, #%d]' % (g_dGpr64NamesZr[iRegLoad], g_dGpr64NamesSp[iRegSlot0Ptr], idxMemSlot,));
+                uValue    >>= 64;
+                idxMemSlot += 8;
+                cbToCheck  -= 8;
+            elif (idxMemSlot & 3) == 0 and cbToCheck >= 4:
+                self.emitGprLoad(iRegExpect, uValue & bitsOnes(32));
+                self.emitInstr('ldr', '%s, [%s, #%d]' % (g_dGpr32NamesZr[iRegLoad], g_dGpr64NamesSp[iRegSlot0Ptr], idxMemSlot,));
+                uValue    >>= 32;
+                idxMemSlot += 4;
+                cbToCheck  -= 4;
+            else:
+                assert (idxMemSlot & 1) == 0 and cbToCheck >= 2, 'idxMemSlot=%#x cbToCheck=%u' % (idxMemSlot, cbToCheck,);
+                self.emitGprLoad(iRegExpect, uValue & bitsOnes(16));
+                self.emitInstr('ldrh', '%s, [%s, #%d]' % (g_dGpr32NamesZr[iRegLoad], g_dGpr64NamesSp[iRegSlot0Ptr], idxMemSlot,));
+                uValue    >>= 16;
+                idxMemSlot += 2;
+                cbToCheck  -= 2;
+            self.emitInstr('cmp', '%s, %s' % (g_dGpr64NamesZr[iRegLoad], g_dGpr64NamesZr[iRegExpect],));
+            sLabel = self.localLabel();
+            self.emitInstr('b.eq', sLabel);
+            self.emitBrk();
+            self.emitLabel(sLabel);
+
+        self.oGprAllocator.free(iRegExpect);
+        self.oGprAllocator.free(iRegLoad);
+
+
+
+
 
 #
 # Result calculation functions.
@@ -1073,7 +1264,15 @@ class Arm64No1CodeGen(object):
 
         # Instantiate the generators.
         aoGenerators = [
-            # Load with unscaled 9-bit signed immediates:
+            # Loads and stores with unscaled 9-bit signed immediates:
+            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, fPreIdx = False),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, fPreIdx = True),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, fPreIdx = False),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, fPreIdx = True),
+            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, fPreIdx = False),
+            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, fPreIdx = True),
+            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, fPreIdx = False),
+            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, fPreIdx = True),
             A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = False),
             A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = True),
             A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, fPreIdx = False),
