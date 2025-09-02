@@ -58,7 +58,8 @@
    The layout-switching keys on Japanese and Korean keyboards are
    dealt with elsewhere. */
 
-/** @todo r=aeichner Someone needs to check whether the warnings are indeed valid. */
+/* The tables concatenate strings to avoid mis-concatenating hex
+   constants; e.g. `` "\x3""1" '' to generate bytes 0x03 0x31. */
 #ifdef __clang__
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wstring-concatenation"
