@@ -81,10 +81,10 @@ private:
     /** Prepares all. */
     void prepare();
 
-    /** Updates text labels. */
-    void updateTextLabels();
     /** Updates pixmap. */
     void updatePixmap();
+    /** Updates text labels. */
+    void updateTextLabels();
 
     /** Holds the icon instance. */
     QIcon  m_icon;
