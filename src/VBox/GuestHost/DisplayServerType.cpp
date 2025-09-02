@@ -63,37 +63,6 @@ const char *VBGHDisplayServerTypeToStr(VBGHDISPLAYSERVERTYPE enmType)
     AssertFailedReturn("<invalid>");
 }
 
-/**
- * Tries to load a (system) library via a set of different names / versions.
- *
- * @returns VBox status code.
- * @returns VERR_NOT_FOUND if the library was not found.
- *
- * @param   apszLibs            Array of library (version) names to search for.
- *                              Descending order (e.g. "libfoo.so", "libfoo.so.2", "libfoo.so.2.6").
- * @param   cLibs               Number of library names in \a apszLibs.
- * @param   phLdrMod            Where to return the library handle on success.
- *
- * @note    Will print loading statuses to verbose release log.
- */
-static int vbghDisplayServerTryLoadLib(const char **apszLibs, size_t cLibs, PRTLDRMOD phLdrMod)
-{
-    for (size_t i = 0; i < cLibs; i++)
-    {
-        const char *pszLib = apszLibs[i];
-        int rc2 = RTLdrLoadSystem(pszLib, /* fNoUnload = */ true, phLdrMod);
-        if (RT_SUCCESS(rc2))
-        {
-            LogRel2(("Loaded display server system library '%s'\n", pszLib));
-            return VINF_SUCCESS;
-        }
-        else
-            LogRel2(("Unable to load display server system library '%s': %Rrc\n", pszLib, rc2));
-    }
-
-    return VERR_NOT_FOUND;
-}
-
 
 #define GET_SYMBOL(a_Mod, a_Name, a_Fn) \
     if (RT_SUCCESS(rc)) \
@@ -122,15 +91,7 @@ VBGHDISPLAYSERVERTYPE VBGHDisplayServerTypeDetect(void)
     bool     fHasWayland    = false;
     RTLDRMOD hWaylandClient = NIL_RTLDRMOD;
 
-    /* Array of libwayland-client.so versions to search for.
-     * Descending precedence. */
-    const char* aLibsWayland[] =
-    {
-        "libwayland-client.so",
-        "libwayland-client.so.0" /* Needed for Ubuntu */
-    };
-
-    int rc = vbghDisplayServerTryLoadLib(aLibsWayland, RT_ELEMENTS(aLibsWayland), &hWaylandClient);
+    int rc = RTLdrLoadSystem("libwayland-client.so.0", true /*fNoUnload*/, &hWaylandClient);
     if (RT_SUCCESS(rc))
     {
         void * (*pWaylandDisplayConnect)(const char *) = NULL;
@@ -153,18 +114,10 @@ VBGHDISPLAYSERVERTYPE VBGHDisplayServerTypeDetect(void)
         RTLdrClose(hWaylandClient);
     }
 
-    /* Array of libX11.so versions to search for.
-     * Descending precedence. */
-    const char* aLibsX11[] =
-    {
-        "libX11.so",
-        "libX11.so.6"
-    };
-
     /* Also try to connect to the default X11 display to determine if Xserver is running: */
     bool     fHasX = false;
     RTLDRMOD hX11  = NIL_RTLDRMOD;
-    rc = vbghDisplayServerTryLoadLib(aLibsX11, RT_ELEMENTS(aLibsX11), &hX11);
+    rc = RTLdrLoadSystem("libX11.so.6", true /*fNoUnload*/, &hX11);
     if (RT_SUCCESS(rc))
     {
         void * (*pfnOpenDisplay)(const char *) = NULL;
@@ -209,20 +162,10 @@ VBGHDISPLAYSERVERTYPE VBGHDisplayServerTypeDetect(void)
  */
 bool VBGHDisplayServerTypeIsGtkAvailable(void)
 {
-    int rc;
-
-    /* Array of libGtk.so versions to search for.
-     * Descending precedence. */
-    const char* aLibsGtk[] =
-    {
-        "libgtk-3.so",
-        "libgtk-3.so.0"
-    };
-
     RTLDRMOD hGtk = NIL_RTLDRMOD;
     void * (*pfnGtkInit)(const char *) = NULL;
 
-    rc = vbghDisplayServerTryLoadLib(aLibsGtk, RT_ELEMENTS(aLibsGtk), &hGtk);
+    int rc = RTLdrLoadSystem("libgtk-3.so.0", true /*fNoUnload*/, &hGtk);
     if (RT_SUCCESS(rc))
     {
         GET_SYMBOL(hGtk, "gtk_init", pfnGtkInit);
