@@ -8008,7 +8008,16 @@
  */
 
 /* STRB  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/39000000) */
-//#define IEM_INSTR_IMPL_A64__STRB_32_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STRB_32_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12); \
+    IEM_MC_LOCAL(uint8_t, uValue); \
+    IEM_MC_FETCH_GREG_U8(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U8(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDRB  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/39400000) */
@@ -8051,7 +8060,16 @@
 
 
 /* STR  <Bt>, [<Xn|SP>{, #<pimm>}] (ffc00000/3d000000) */
-//#define IEM_INSTR_IMPL_A64__STR_B_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_B_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12); \
+    IEM_MC_LOCAL(uint8_t, uValue); \
+    IEM_MC_FETCH_FREG_U8(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U8(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Bt>, [<Xn|SP>{, #<pimm>}] (ffc00000/3d400000) */
@@ -8068,7 +8086,16 @@
 
 
 /* STR  <Qt>, [<Xn|SP>{, #<pimm>}] (ffc00000/3d800000) */
-//#define IEM_INSTR_IMPL_A64__STR_Q_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_Q_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 4); \
+    IEM_MC_LOCAL(RTUINT128U, uValue); \
+    IEM_MC_FETCH_FREG_U128(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U128(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Qt>, [<Xn|SP>{, #<pimm>}] (ffc00000/3dc00000) */
@@ -8085,7 +8112,16 @@
 
 
 /* STRH  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/79000000) */
-//#define IEM_INSTR_IMPL_A64__STRH_32_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STRH_32_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 1); \
+    IEM_MC_LOCAL(uint16_t, uValue); \
+    IEM_MC_FETCH_GREG_U16(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U16(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDRH  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/79400000) */
@@ -8128,7 +8164,16 @@
 
 
 /* STR  <Ht>, [<Xn|SP>{, #<pimm>}] (ffc00000/7d000000) */
-//#define IEM_INSTR_IMPL_A64__STR_H_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_H_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 1); \
+    IEM_MC_LOCAL(uint16_t, uValue); \
+    IEM_MC_FETCH_FREG_U16(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U16(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Ht>, [<Xn|SP>{, #<pimm>}] (ffc00000/7d400000) */
@@ -8145,7 +8190,16 @@
 
 
 /* STR  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/b9000000) */
-//#define IEM_INSTR_IMPL_A64__STR_32_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_32_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 2); \
+    IEM_MC_LOCAL(uint32_t, uValue); \
+    IEM_MC_FETCH_GREG_U32(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U32(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Wt>, [<Xn|SP>{, #<pimm>}] (ffc00000/b9400000) */
@@ -8175,7 +8229,16 @@
 
 
 /* STR  <St>, [<Xn|SP>{, #<pimm>}] (ffc00000/bd000000) */
-//#define IEM_INSTR_IMPL_A64__STR_S_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_S_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 2); \
+    IEM_MC_LOCAL(uint32_t, uValue); \
+    IEM_MC_FETCH_FREG_U32(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U32(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <St>, [<Xn|SP>{, #<pimm>}] (ffc00000/bd400000) */
@@ -8226,7 +8289,16 @@
 
 
 /* STR  <Dt>, [<Xn|SP>{, #<pimm>}] (ffc00000/fd000000) */
-//#define IEM_INSTR_IMPL_A64__STR_D_ldst_pos(Rt, Rn, imm12)
+#define IEM_INSTR_IMPL_A64__STR_D_ldst_pos(Rt, Rn, imm12) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, (uint64_t)imm12 << 3); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_FETCH_FREG_U64(uValue, Rt); \
+    IEM_MC_STORE_MEM_FLAT_U64(uAddr, uValue);  /** @todo tagchecked=true */ \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDR  <Dt>, [<Xn|SP>{, #<pimm>}] (ffc00000/fd400000) */
