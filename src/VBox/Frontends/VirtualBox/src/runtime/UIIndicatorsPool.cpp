@@ -598,6 +598,8 @@ public:
                 this, &UIIndicatorNetwork::updateAppearance);
         connect(m_pMachine, &UIMachine::sigNetworkAdapterChange,
                 this, &UIIndicatorNetwork::updateAppearance);
+        connect(m_pMachine, &UIMachine::sigAdditionsStateActualChange,
+                this, &UIIndicatorNetwork::updateAppearance);
         /* Update & translate finally: */
         updateAppearance();
     }
