@@ -37,6 +37,16 @@
 
 #include <VBox/GuestHost/DisplayServerType.h>
 
+#ifdef RT_OS_SOLARIS
+/*
+ * For some unknown reason there is no libX11.so.6 on Solaris but
+ * libX11.so/libX11.so.5 which both link to libX11.so.4...
+ */
+# define X11_LIBRARY_NAME "libX11.so"
+#else
+# define X11_LIBRARY_NAME "libX11.so.6"
+#endif
+
 
 /*********************************************************************************************************************************
 *   Implementation                                                                                                               *
@@ -117,7 +127,7 @@ VBGHDISPLAYSERVERTYPE VBGHDisplayServerTypeDetect(void)
     /* Also try to connect to the default X11 display to determine if Xserver is running: */
     bool     fHasX = false;
     RTLDRMOD hX11  = NIL_RTLDRMOD;
-    rc = RTLdrLoadSystem("libX11.so.6", true /*fNoUnload*/, &hX11);
+    rc = RTLdrLoadSystem(X11_LIBRARY_NAME, true /*fNoUnload*/, &hX11);
     if (RT_SUCCESS(rc))
     {
         void * (*pfnOpenDisplay)(const char *) = NULL;
