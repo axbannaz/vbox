@@ -1052,7 +1052,6 @@ static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *
 
     for (;;)
     {
-        
         rc = RTJsonIteratorNext(hJsonIt);
         if (rc == VERR_JSON_ITERATOR_END)
             break;

@@ -85,7 +85,7 @@ if !defined(VBOX_ONLY_BUILD) || defined(VBOX_ONLY_EXTPACKS)
  	VBoxEditElf.cpp \
  	../VBox/Runtime/common/misc/json.cpp
  VBoxEditElf_INCS = \
-	$(PATH_ROOT)/src/VBox/Runtime/include
+ 	$(PATH_ROOT)/src/VBox/Runtime/include
  #VBoxEditElf_LDFLAGS  =  $(VBOX_GCC_SANITIZER_FLAGS) $(VBOX_GCC_SANITIZER_LDFLAGS)
  #VBoxEditElf_CXXFLAGS =  $(VBOX_GCC_SANITIZER_FLAGS)
 endif
