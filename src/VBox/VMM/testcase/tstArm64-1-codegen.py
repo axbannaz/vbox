@@ -893,10 +893,10 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
     Note! SP can be used as base register (but not destination).
     """
 
-    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = 64, fPreIdx = True, sBaseName = None):
-        A64No1CodeGenLdBase.__init__(self, (sBaseName or sInstr) + ('_preidx' if fPreIdx else '_postidx'),
-                                     sInstr, fnCalc, cbMem, cBits);
-        self.fPreIdx = fPreIdx;
+    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = 64, sType = None, sBaseName = None):
+        assert sType in { 'preidx', 'postidx', 'unscaled' };
+        A64No1CodeGenLdBase.__init__(self, (sBaseName or sInstr) + '_' + sType, sInstr, fnCalc, cbMem, cBits);
+        self.sType = sType;
 
     def generateBodyLd(self, oOptions, cLeftToAllCheck, iRegSlot0Ptr):
         # Generate loads from different loads with various immediate values.
@@ -904,7 +904,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
             uImm9       = randUBits(9);                  # (signed)
             iOffset     = bitsSignedToInt(9, uImm9);
             idxMemSlot  = randURange(0, 256 - self.cbMem);
-            idxPreSlot  = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+            idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
             iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
@@ -912,7 +912,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
                 idxMemSlot -= idxPreSlot & 15
                 if idxMemSlot < 0:
                     idxMemSlot += 16;
-                idxPreSlot = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+                idxPreSlot = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
                 assert (abs(idxPreSlot) & 15) == 0;
 
             uSrc        = self.getSlotValue(idxMemSlot, self.cbMem);
@@ -923,7 +923,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
             iRegDst     = self.emitLdInstrAndAllocDst(sRegBase, iOffset, uRes);
 
             # Check the offset.
-            u64PostSlot = idxMemSlot if self.fPreIdx else (idxMemSlot + iOffset) & 0xffffffffffffffff;
+            u64PostSlot = idxMemSlot if self.sType != 'postidx' else (idxMemSlot + iOffset) & 0xffffffffffffffff;
             iRegTmp     = self.oGprAllocator.alloc(u64PostSlot);
             self.emitInstr('sub', 'x%u, %s, x%u' % (iRegTmp, sRegBase, iRegSlot0Ptr,)); # iRegTmp == idxEffSlot
             self.emitGprValCheck(iRegTmp, u64PostSlot);
@@ -937,8 +937,10 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
 
     def emitLdInstrAndAllocDst(self, sRegBase, iOffset, uExpected):
         iRegDst = self.oGprAllocator.alloc(uExpected, fIncludingReg31 = True);
-        if self.fPreIdx:
+        if self.sType == 'preidx':
             self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, iOffset,));
+        elif self.sType == 'unscaled':
+            self.emitInstr(self.sInstr, '%s, [%s, #%d]'  % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, iOffset,));
         else:
             self.emitInstr(self.sInstr, '%s, [%s], #%d'  % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, iOffset,));
         return iRegDst;
@@ -951,15 +953,17 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
 
 class A64No1CodeGenLdImm9Fp(A64No1CodeGenFprBase, A64No1CodeGenLdImm9):
 
-    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = 64, fPreIdx = True):
+    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = 64, sType = None):
         sBaseName = sInstr + '_' + g_kdFprBytesToInfix[cbMem];
         A64No1CodeGenFprBase.__init__(self, sBaseName, sInstr, cbMem);
-        A64No1CodeGenLdImm9.__init__(self, sInstr, fnCalc, cbMem, cBits, fPreIdx, sBaseName = sBaseName);
+        A64No1CodeGenLdImm9.__init__(self, sInstr, fnCalc, cbMem, cBits, sType, sBaseName = sBaseName);
 
     def emitLdInstrAndAllocDst(self, sRegBase, iOffset, uExpected):
         iRegDst = self.oFprAllocator.alloc(uExpected);
-        if self.fPreIdx:
+        if self.sType == 'preidx':
             self.emitInstr(self.sInstr, '%s%u, [%s, #%d]!' % (self.sPrefix, iRegDst, sRegBase, iOffset,));
+        elif self.sType == 'unscaled':
+            self.emitInstr(self.sInstr, '%s%u, [%s, #%d]'  % (self.sPrefix, iRegDst, sRegBase, iOffset,));
         else:
             self.emitInstr(self.sInstr, '%s%u, [%s], #%d'  % (self.sPrefix, iRegDst, sRegBase, iOffset,));
         return iRegDst;
@@ -1152,9 +1156,10 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
     Note! SP can be used as base register (but not destination).
     """
 
-    def __init__(self, sInstr, cbMem = 1, cBits = 64, fPreIdx = True, sBaseName = None):
-        A64No1CodeGenStBase.__init__(self, (sBaseName or sInstr) + ('_preidx' if fPreIdx else '_postidx'), sInstr, cbMem, cBits);
-        self.fPreIdx = fPreIdx;
+    def __init__(self, sInstr, cbMem = 1, cBits = 64, sType = None, sBaseName = None):
+        assert sType in { 'preidx', 'postidx', 'unscaled' };
+        A64No1CodeGenStBase.__init__(self, (sBaseName or sInstr) + '_' + sType, sInstr, cbMem, cBits);
+        self.sType = sType;
 
     def generateBodySt(self, oOptions, iRegSlot0Ptr):
         self.emitInstr('bl', 'NAME(CheckWriteArea)');
@@ -1164,7 +1169,7 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
             uImm9       = randUBits(9);                 # (signed)
             iOffset     = bitsSignedToInt(9, uImm9);
             idxMemSlot  = randURange(0, 256 - self.cbMem);
-            idxPreSlot  = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+            idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
             iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
@@ -1172,7 +1177,7 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
                 idxMemSlot -= idxPreSlot & 15
                 if idxMemSlot < 0:
                     idxMemSlot += 16;
-                idxPreSlot = idxMemSlot - iOffset if self.fPreIdx else idxMemSlot;
+                idxPreSlot = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
                 assert (abs(idxPreSlot) & 15) == 0;
             self.emitCommentLine('i=%u idxMemSlot=%#x' % (i, idxMemSlot,));
 
@@ -1181,7 +1186,7 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
             uValue      = self.emitStInstrAndRandValue(sRegBase, iOffset);
 
             # Check the offset.
-            u64PostSlot = idxMemSlot if self.fPreIdx else (idxMemSlot + iOffset) & 0xffffffffffffffff;
+            u64PostSlot = idxMemSlot if self.sType != 'postidx' else (idxMemSlot + iOffset) & 0xffffffffffffffff;
             iRegTmp     = self.oGprAllocator.alloc(u64PostSlot);
             self.emitInstr('sub', 'x%u, %s, x%u' % (iRegTmp, sRegBase, iRegSlot0Ptr,)); # iRegTmp == idxEffSlot
             self.emitGprValCheck(iRegTmp, u64PostSlot);
@@ -1192,10 +1197,12 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
 
             # Restore the original value using the same instruction.
             self.emitCommentLine('restoring idxMemSlot=%#x LB %u' % (idxMemSlot, self.cbMem,));
-            if self.fPreIdx and (iRegBase != 31 or (idxMemSlot & 15) == 0):
+            if self.sType == 'preidx' and (iRegBase != 31 or (idxMemSlot & 15) == 0):
                 self.emitStInstrForRestore(sRegBase, 0, self.getSlotValue(idxMemSlot, self.cbMem));
             else:
-                self.emitInstr('add' if idxPreSlot >= 0 else 'sub', '%s, x%u, #%u' % (sRegBase, iRegSlot0Ptr, abs(idxPreSlot),));
+                if self.sType != 'unscaled':
+                    self.emitInstr('add' if idxPreSlot >= 0 else 'sub', '%s, x%u, #%u'
+                                                                         % (sRegBase, iRegSlot0Ptr, abs(idxPreSlot),));
                 self.emitStInstrForRestore(sRegBase, iOffset, self.getSlotValue(idxMemSlot, self.cbMem));
 
             self.oGprAllocator.free(iRegBase);
@@ -1203,30 +1210,31 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
             # Check that the write area is okay.
             self.emitInstr('bl', 'NAME(CheckWriteArea)');
 
-    def emitStInstrAndRandValue(self, sRegBase, iOffset):
-        (uValue, iRegSrc) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
-        if self.fPreIdx:
+    def emitStInstrAndFree(self, iRegSrc, sRegBase, iOffset):
+        if self.sType == 'preidx':
             self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
-        else:
-            self.emitInstr(self.sInstr, '%s, [%s], #%d'  % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
-        self.oGprAllocator.free(iRegSrc);
-        return uValue & bitsOnes(self.cbMem * 8);
-
-    def emitStInstrForRestore(self, sRegBase, iOffset, uValue):
-        iRegSrc = self.emitGprLoad(self.oGprAllocator.alloc(), uValue);
-        if self.fPreIdx:
-            self.emitInstr(self.sInstr, '%s, [%s, #%d]!' % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
+        elif self.sType == 'unscaled':
+            self.emitInstr(self.sInstr, '%s, [%s, #%d]'  % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
         else:
             self.emitInstr(self.sInstr, '%s, [%s], #%d'  % (g_ddGprNamesZrByBits[self.cBits][iRegSrc], sRegBase, iOffset,));
         self.oGprAllocator.free(iRegSrc);
         return None;
 
+    def emitStInstrAndRandValue(self, sRegBase, iOffset):
+        (uValue, iRegSrc) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
+        self.emitStInstrAndFree(iRegSrc, sRegBase, iOffset);
+        return uValue & bitsOnes(self.cbMem * 8);
+
+    def emitStInstrForRestore(self, sRegBase, iOffset, uValue):
+        iRegSrc = self.emitGprLoad(self.oGprAllocator.alloc(), uValue);
+        return self.emitStInstrAndFree(iRegSrc, sRegBase, iOffset);
+
 
 class A64No1CodeGenStImm9Fp(A64No1CodeGenFprBase, A64No1CodeGenStImm9):
-    def __init__(self, sInstr, cbMem = 1, cBits = 64, fPreIdx = True):
+    def __init__(self, sInstr, cbMem = 1, cBits = 64, sType = None):
         sBaseName = sInstr + '_' + g_kdFprBytesToInfix[cbMem];
         A64No1CodeGenFprBase.__init__(self, sBaseName, sInstr, cbMem);
-        A64No1CodeGenStImm9.__init__(self, sInstr, cbMem, cBits, fPreIdx, sBaseName = sBaseName);
+        A64No1CodeGenStImm9.__init__(self, sInstr, cbMem, cBits, sType, sBaseName = sBaseName);
 
     def emitStInstrAndRandValue(self, sRegBase, iOffset):
         uValue = randUBits(128);
@@ -1235,8 +1243,10 @@ class A64No1CodeGenStImm9Fp(A64No1CodeGenFprBase, A64No1CodeGenStImm9):
 
     def emitStInstrForRestore(self, sRegBase, iOffset, uValue):
         iRegSrc = self.emitFprLoad(self.oFprAllocator.alloc(uValue), uValue);
-        if self.fPreIdx:
+        if self.sType == 'preidx':
             self.emitInstr(self.sInstr, '%s%u, [%s, #%d]!' % (self.sPrefix, iRegSrc, sRegBase, iOffset,));
+        elif self.sType == 'unscaled':
+            self.emitInstr(self.sInstr, '%s%u, [%s, #%d]'  % (self.sPrefix, iRegSrc, sRegBase, iOffset,));
         else:
             self.emitInstr(self.sInstr, '%s%u, [%s], #%d'  % (self.sPrefix, iRegSrc, sRegBase, iOffset,));
         self.oFprAllocator.free(iRegSrc);
@@ -1493,52 +1503,52 @@ class Arm64No1CodeGen(object):
             A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  1),
 
             # Loads and stores with unscaled 9-bit signed immediates:
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16, cBits = 128, fPreIdx = False),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16, cBits = 128, fPreIdx = True),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8, cBits =  64, fPreIdx = False),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8, cBits =  64, fPreIdx = True),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4, cBits =  32, fPreIdx = False),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4, cBits =  32, fPreIdx = True),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2, cBits =  16, fPreIdx = False),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2, cBits =  16, fPreIdx = True),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1, cBits =   8, fPreIdx = False),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1, cBits =   8, fPreIdx = True),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, fPreIdx = False),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, fPreIdx = True),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, fPreIdx = False),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, fPreIdx = True),
-            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, fPreIdx = False),
-            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, fPreIdx = True),
-            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, fPreIdx = False),
-            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, fPreIdx = False),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, fPreIdx = True),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16, cBits = 128, fPreIdx = False),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16, cBits = 128, fPreIdx = True),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = False),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, fPreIdx = True),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, fPreIdx = False),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, fPreIdx = True),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2, cBits =  16, fPreIdx = False),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2, cBits =  16, fPreIdx = True),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1, cBits =   8, fPreIdx = False),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1, cBits =   8, fPreIdx = True),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16, cBits = 128, sType = 'postidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16, cBits = 128, sType = 'preidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2, cBits =  16, sType = 'postidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2, cBits =  16, sType = 'preidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1, cBits =   8, sType = 'postidx'),
+            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1, cBits =   8, sType = 'preidx'),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  8, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenStImm9(     'str',                   cbMem =  4, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenStImm9(     'strh',                  cbMem =  2, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenStImm9(     'strb',                  cbMem =  1, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16, cBits = 128, sType = 'postidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16, cBits = 128, sType = 'preidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, sType = 'postidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8, cBits =  64, sType = 'preidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, sType = 'postidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4, cBits =  32, sType = 'preidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2, cBits =  16, sType = 'postidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2, cBits =  16, sType = 'preidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1, cBits =   8, sType = 'postidx'),
+            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1, cBits =   8, sType = 'preidx'),
             # addsub_imm:
             A64No1CodeGenAddSubImm(  'add',  calcAdd),
             A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
