@@ -114,11 +114,19 @@
 /** Fetched PC (for PC relative addressing). */
 #define IEM_MC_FETCH_PC_U64(a_GCPtrMem)  (a_GCPtrMem) = pVCpu->cpum.GstCtx.Pc.u64
 
-/** Adds a constant to an address (64-bit), applying checked
+/** Adds a constant offset to an address (64-bit), applying checked
  *  pointer arithmetic at the current EL. */
 #define IEM_MC_ADD_CONST_U64_TO_ADDR(a_EffAddr, a_u64Const) do { \
         /*uint64_t const OldEffAddr = (a_EffAddr);*/ \
         (a_EffAddr) += (uint64_t)(a_u64Const); \
+        AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
+    } while (0)
+
+/** Adds an offset from a local to an address (64-bit), applying checked
+ *  pointer arithmetic at the current EL. */
+#define IEM_MC_ADD_LOCAL_U64_TO_ADDR(a_EffAddr, a_u64Local) do { \
+        /*uint64_t const OldEffAddr = (a_EffAddr);*/ \
+        (a_EffAddr) += a_u64Local; \
         AssertReturn(!IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fCpa2, VERR_IEM_ASPECT_NOT_IMPLEMENTED); /** @todo CPA2 */ \
     } while (0)
 

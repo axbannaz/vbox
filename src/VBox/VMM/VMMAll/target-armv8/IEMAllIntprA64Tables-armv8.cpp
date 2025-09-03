@@ -102328,10 +102328,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00206400_1, uint32_t, uOpcode)
    ffe0fc00/38207800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_38206800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38200800))
-        return iemDecodeA64_STRB_32B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x38206800))
         return iemDecodeA64_STRB_32BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38200800))
+        return iemDecodeA64_STRB_32B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
@@ -107152,10 +107152,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00606400_1, uint32_t, uOpcode)
    ffe0fc00/38607800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_38606800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38600800))
-        return iemDecodeA64_LDRB_32B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x38606800))
         return iemDecodeA64_LDRB_32BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38600800))
+        return iemDecodeA64_LDRB_32B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
@@ -110159,10 +110159,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00a06000_1, uint32_t, uOpcode)
    ffe0fc00/38a07800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_38a06800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38a00800))
-        return iemDecodeA64_LDRSB_64B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x38a06800))
         return iemDecodeA64_LDRSB_64BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38a00800))
+        return iemDecodeA64_LDRSB_64B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
@@ -113081,10 +113081,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00e06000_1, uint32_t, uOpcode)
    ffe0fc00/38e07800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_38e06800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38e00800))
-        return iemDecodeA64_LDRSB_32B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x38e06800))
         return iemDecodeA64_LDRSB_32BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x38e00800))
+        return iemDecodeA64_LDRSB_32B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
@@ -147918,10 +147918,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04206400_1, uint32_t, uOpcode)
    ffe0fc00/3c207800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_3c206800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x3c200800))
-        return iemDecodeA64_STR_B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x3c206800))
         return iemDecodeA64_STR_BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x3c200800))
+        return iemDecodeA64_STR_B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
@@ -154512,10 +154512,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04606400_1, uint32_t, uOpcode)
    ffe0fc00/3c607800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_3c606800_2, uint32_t, uOpcode)
 {
-    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x3c600800))
-        return iemDecodeA64_LDR_B_ldst_regoff(pVCpu, uOpcode);
     if ((uOpcode & UINT32_C(0xffe0ec00)) == UINT32_C(0x3c606800))
         return iemDecodeA64_LDR_BL_ldst_regoff(pVCpu, uOpcode);
+    if ((uOpcode & UINT32_C(0xffe00c00)) == UINT32_C(0x3c600800))
+        return iemDecodeA64_LDR_B_ldst_regoff(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
 
