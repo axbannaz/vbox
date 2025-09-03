@@ -30,18 +30,20 @@
 *   Header Files                                                                                                                 *
 *********************************************************************************************************************************/
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 
 #include <iprt/assert.h>
 #include <iprt/file.h>
 #include <iprt/getopt.h>
 #include <iprt/initterm.h>
+#include <iprt/json.h>
+#include <iprt/ldr.h>
 #include <iprt/mem.h>
 #include <iprt/message.h>
 #include <iprt/stream.h>
 #include <iprt/string.h>
 #include <iprt/types.h>
+#include <iprt/formats/elf32.h>
 #include <iprt/formats/elf64.h>
 
 
@@ -49,34 +51,122 @@
 *   Structures and Typedefs                                                                                                      *
 *********************************************************************************************************************************/
 
-typedef struct
+/**
+ * Symbol type.
+ */
+typedef enum ELDEDITSYMTYPE
 {
-    Elf64_Half      vd_version;
-    Elf64_Half      vd_flags;
-    Elf64_Half      vd_ndx;
-    Elf64_Half      vd_cnt;
-    Elf64_Word      vd_hash;
-    Elf64_Word      vd_aux;
-    Elf64_Word      vd_next;
-} Elf64_Verdef;
+    kElfEditSymType_Invalid = 0,
+    kElfEditSymType_Function,
+    kElfEditSymType_Object,
+    kElfEditSymType_Tls,
+    kElfEditSymType_GnuIndFunc,
+    kElfEditSymType_NoType,
+    kElfEditSymType_32Bit_Hack = 0x7fffffff
+} ELDEDITSYMTYPE;
 
 
-typedef struct
+/**
+ * Symbol visbility.
+ */
+typedef enum ELDEDITSYMVISIBILITY
 {
-    Elf64_Word      vda_name;
-    Elf64_Word      vda_next;
-} Elf64_Verdaux;
+    kElfEditSymVisbility_Invalid = 0,
+    kElfEditSymVisbility_Default,
+    kElfEditSymVisbility_Hidden,
+    kElfEditSymVisbility_Internal,
+    kElfEditSymVisbility_Protected,
+    kElfEditSymVisbility_32Bit_Hack = 0x7fffffff
+} ELDEDITSYMVISIBILITY;
 
 
-#define SHT_GNU_versym   UINT32_C(0x6fffffff)
-#define SHT_GNU_verdef   UINT32_C(0x6ffffffd)
-#define SHT_GNU_verneed  UINT32_C(0x6ffffffe)
+/**
+ * A symbol version.
+ */
+typedef struct ELFEDITSTUBVERSION
+{
+    /** The version name. */
+    const char              *pszVersion;
+    /** The parent version name, optional. */
+    const char              *pszParent;
+    /** The version index. */
+    uint32_t                idxVersion;
+} ELFEDITSTUBVERSION;
+typedef ELFEDITSTUBVERSION *PELFEDITSTUBVERSION;
+typedef const ELFEDITSTUBVERSION *PCELFEDITSTUBVERSION;
 
-#define DT_VERDEF        UINT32_C(0x6ffffffc)
-#define DT_VERDEFNUM     UINT32_C(0x6ffffffd)
-#define DT_VERNEED       UINT32_C(0x6ffffffe)
-#define DT_VERNEEDNUM    UINT32_C(0x6fffffff)
-#define DT_VERSYM        UINT32_C(0x6ffffff0)
+
+/**
+ * A symbol.
+ */
+typedef struct ELFEDITSTUBSYM
+{
+    /** The name of the symbol. */
+    const char              *pszName;
+    /** The symbol type */
+    ELDEDITSYMTYPE          enmType;
+    /** The symbol visbility. */
+    ELDEDITSYMVISIBILITY    enmVisibility;
+    /** Size of the symbol in bytes. */
+    size_t                  cbSym;
+    /** Flag whether this is a weak symbol. */
+    bool                    fWeak;
+    /** The version assigned for this symbol, NULL if no versioning. */
+    PCELFEDITSTUBVERSION    pVersion;
+    /** Flag whether this is the default version of the symbol, only valid if versioning is set. */
+    bool                    fDefaultVersion;
+} ELFEDITSTUBSYM;
+/** Pointer to a symbol. */
+typedef ELFEDITSTUBSYM *PELFEDITSTUBSYM;
+/** Pointer to a constant symbol. */
+typedef const ELFEDITSTUBSYM *PCELFEDITSTUBSYM;
+
+
+/**
+ * Entry in the string table.
+ */
+typedef struct ELFEDITSTR
+{
+    RTSTRSPACECORE          StrCore;
+    /** The offset in the final string table. */
+    size_t                  offStrTab;
+} ELFEDITSTR;
+typedef ELFEDITSTR *PELFEDITSTR;
+typedef const ELFEDITSTR *PCELFEDITSTR;
+
+
+/**
+ * Stub image state
+ */
+typedef struct ELFEDITSTUBIMG
+{
+    /** The architecture of the image. */
+    RTLDRARCH           enmArch;
+    /** The string space. */
+    RTSTRSPACE          StrSpace;
+    /** Current length of the string table. */
+    size_t              cbStrTab;
+    /** The image name. */
+    const char          *pszName;
+    /** Array of neded libraries this image depends on. */
+    const char          **papszNeeded;
+    /** Number of entries in the needed libraries array. */
+    size_t              cNeeded;
+    /** Maximum number of entries the needed libraries array can hold. */
+    size_t              cNeededMax;
+    /** The symbol table. */
+    PELFEDITSTUBSYM     paSyms;
+    /** Number of entries in the symbol table. */
+    size_t              cSyms;
+    /** The version table. */
+    PELFEDITSTUBVERSION paVersions;
+    /** Number of entries in the version table. */
+    size_t              cVersions;
+} ELFEDITSTUBIMG;
+/** Pointer to a stub image state. */
+typedef ELFEDITSTUBIMG *PELFEDITSTUBIMG;
+/** Pointer to a const stub image state. */
+typedef const ELFEDITSTUBIMG *PCELFEDITSTUBIMG;
 
 
 /*********************************************************************************************************************************
@@ -89,7 +179,8 @@ static enum
     kVBoxEditElfAction_Nothing,
     kVBoxEditElfAction_DeleteRunpath,
     kVBoxEditElfAction_ChangeRunpath,
-    kVBoxEditElfAction_CreateLinkerStub
+    kVBoxEditElfAction_CreateLinkerStub,
+    kVBoxEditElfAction_CreateJsonStub
 }                 g_enmAction = kVBoxEditElfAction_Nothing;
 static const char *g_pszInput = NULL;
 /** Verbosity level. */
@@ -115,10 +206,40 @@ static void verbose(const char *pszFmt, ...)
 }
 
 
+static const char *elfEditImgAddString(PELFEDITSTUBIMG pStubImg, const char *pszString)
+{
+    PELFEDITSTR pStr = (PELFEDITSTR)RTStrSpaceGet(&pStubImg->StrSpace, pszString);
+    if (pStr)
+        return pStr->StrCore.pszString;
+
+    /* Allocate and insert. */
+    size_t const cchStr = strlen(pszString);
+    pStr = (PELFEDITSTR)RTMemAlloc(sizeof(*pStr) + cchStr + 1);
+    if (!pStr)
+        return NULL;
+
+    pStr->StrCore.cchString = cchStr;
+    pStr->StrCore.pszString = (char *)memcpy(pStr + 1, pszString, cchStr + 1);
+    pStr->offStrTab         = 0;
+    if (!RTStrSpaceInsert(&pStubImg->StrSpace, &pStr->StrCore))
+        AssertFailed();
+
+    return pStr->StrCore.pszString;
+}
+
+
+/* Select ELF mode and include the template. */
+#define ELF_MODE            32
+#include "VBoxEditElf-template.cpp.h"
+#undef ELF_MODE
+
+
+#define ELF_MODE            64
+#include "VBoxEditElf-template.cpp.h"
+#undef ELF_MODE
+
 static RTEXITCODE deleteRunpath(const char *pszInput)
 {
-    RT_NOREF(pszInput);
-
     RTFILE hFileElf = NIL_RTFILE;
     int rc = RTFileOpen(&hFileElf, pszInput, RTFILE_O_OPEN | RTFILE_O_READWRITE | RTFILE_O_DENY_NONE);
     if (RT_FAILURE(rc))
@@ -381,7 +502,7 @@ static RTEXITCODE changeRunpath(const char *pszInput, const char *pszRunpath)
 static RTEXITCODE createLinkerStubFrom(const char *pszInput, const char *pszStubPath)
 {
     RTFILE hFileElf = NIL_RTFILE;
-    int rc = RTFileOpen(&hFileElf, pszInput, RTFILE_O_OPEN | RTFILE_O_READWRITE | RTFILE_O_DENY_NONE);
+    int rc = RTFileOpen(&hFileElf, pszInput, RTFILE_O_OPEN | RTFILE_O_READ | RTFILE_O_DENY_NONE);
     if (RT_FAILURE(rc))
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Filed to open file '%s': %Rrc\n", pszInput, rc);
 
@@ -880,6 +1001,232 @@ static RTEXITCODE createLinkerStubFrom(const char *pszInput, const char *pszStub
 }
 
 
+static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *pszInput)
+{
+    RTERRINFOSTATIC ErrInfo;
+    RTErrInfoInitStatic(&ErrInfo);
+
+    RTJSONVAL hJsonRoot = NIL_RTJSONVAL;
+    int rc = RTJsonParseFromFile(&hJsonRoot, RTJSON_PARSE_F_JSON5, pszInput, &ErrInfo);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to load JSON stub '%s': %Rrc (%s)\n", pszInput, rc, ErrInfo.Core.pszMsg);
+
+    char *pszTmp;
+    rc = RTJsonValueQueryStringByName(hJsonRoot, "Target", &pszTmp);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Target' from JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    if (!RTStrICmp(pszTmp, "arm64"))
+        pStubImg->enmArch = RTLDRARCH_ARM64;
+    else if (!RTStrICmp(pszTmp, "amd64"))
+        pStubImg->enmArch = RTLDRARCH_AMD64;
+    else if (!RTStrICmp(pszTmp, "x86"))
+        pStubImg->enmArch = RTLDRARCH_X86_32;
+    else
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'%s' is not a valid target in JSON stub '%s'\n", pszTmp, pszInput);
+
+    RTStrFree(pszTmp);
+
+    rc = RTJsonValueQueryStringByName(hJsonRoot, "SoName", &pszTmp);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'SoName' from JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    pStubImg->pszName = elfEditImgAddString(pStubImg, pszTmp);
+    if (!pStubImg->pszName)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to add '%s' to string table\n", pszTmp);
+    RTStrFree(pszTmp);
+
+    RTJSONVAL hJsonNeeded = NIL_RTJSONVAL;
+    rc = RTJsonValueQueryByName(hJsonRoot, "Needed", &hJsonNeeded);
+    if (RT_FAILURE(rc) && rc != VERR_NOT_FOUND)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Needed' from JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    if (RTJsonValueGetType(hJsonNeeded) != RTJSONVALTYPE_ARRAY)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Needed' in JSON stub '%s' is not an array\n", pszInput);
+
+    RTJSONIT hJsonIt = NIL_RTJSONIT;
+    rc = RTJsonIteratorBeginArray(hJsonNeeded, &hJsonIt);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to process 'Needed' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    for (;;)
+    {
+        
+        rc = RTJsonIteratorNext(hJsonIt);
+        if (rc == VERR_JSON_ITERATOR_END)
+            break;
+    }
+
+    RTJsonIteratorFree(hJsonIt);
+
+    RTJsonValueRelease(hJsonRoot);
+    return RTEXITCODE_SUCCESS;
+}
+
+
+static RTEXITCODE elfEditStubDumpToJson(PELFEDITSTUBIMG pStubImg, const char *pszOutput)
+{
+    PRTSTREAM pStrm = NULL;
+    int rc = RTStrmOpen(pszOutput, "wt", &pStrm);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to create file '%s': %Rrc\n", pszOutput, rc);
+
+    rc = RTStrmPutStr(pStrm, "{\n");
+
+    const char *pszTarget = NULL;
+    switch (pStubImg->enmArch)
+    {
+        case RTLDRARCH_ARM64:  pszTarget = "arm64"; break;
+        case RTLDRARCH_AMD64:  pszTarget = "amd64"; break;
+        case RTLDRARCH_X86_32: pszTarget = "x86";   break;
+        default: RTMsgErrorExit(RTEXITCODE_FAILURE,
+                                "Unsupported architecture %u\n", pStubImg->enmArch);
+    }
+
+    rc |= RTStrmPrintf(pStrm, "    Target: '%s',\n", pszTarget);
+    rc |= RTStrmPrintf(pStrm, "    SoName: '%s',\n", pStubImg->pszName);
+
+    if (pStubImg->papszNeeded)
+    {
+        /* Find needed libraries. */
+        rc |= RTStrmPutStr(pStrm, "    Needed:\n    [\n");
+        for (uint32_t i = 0; i < pStubImg->cNeeded; i++)
+            rc |= RTStrmPrintf(pStrm, "        '%s',\n", pStubImg->papszNeeded[i]);
+        rc |= RTStrmPutStr(pStrm, "    ],\n");
+    }
+
+    /* Dump versions */
+    if (pStubImg->paVersions)
+    {
+        rc |= RTStrmPutStr(pStrm, "    Versions:\n    [\n");
+        for (uint32_t i = 0; i < pStubImg->cVersions; i++)
+        {
+            PCELFEDITSTUBVERSION pVersion = &pStubImg->paVersions[i];
+            Assert(i == pVersion->idxVersion);
+
+            if (!pVersion->pszVersion)
+                rc |= RTStrmPutStr(pStrm, "        null,\n");
+            else
+            {
+                rc |= RTStrmPrintf(pStrm, "        { Version: '%s'", pVersion->pszVersion);
+                if (pVersion->pszParent)
+                    rc |= RTStrmPrintf(pStrm, ", Parent: '%s'", pVersion->pszParent);
+                rc |= RTStrmPutStr(pStrm, " },\n");
+            }
+        }
+        rc |= RTStrmPutStr(pStrm, "    ],\n");
+    }
+
+    /* Dump symbols. */
+    rc |= RTStrmPutStr(pStrm, "    Symbols:\n    [\n");
+
+    for (uint32_t i = 0; i < pStubImg->cSyms; i++)
+    {
+        PELFEDITSTUBSYM pSym = &pStubImg->paSyms[i];
+        const char *pszType = NULL;
+        switch (pSym->enmType)
+        {
+            case kElfEditSymType_NoType:     pszType = "NoType";      break;
+            case kElfEditSymType_Object:     pszType = "Object";      break;
+            case kElfEditSymType_Function:   pszType = "Function";    break;
+            case kElfEditSymType_Tls:        pszType = "Tls";         break;
+            case kElfEditSymType_GnuIndFunc: pszType = "GnuIFunc";    break;
+            default:                         pszType = "UNSUPPORTED"; break;
+        }
+
+        const char *pszVisibilty = NULL;
+        switch (pSym->enmVisibility)
+        {
+            case kElfEditSymVisbility_Default:   pszVisibilty = "Default";     break;
+            case kElfEditSymVisbility_Internal:  pszVisibilty = "Internal";    break;
+            case kElfEditSymVisbility_Hidden:    pszVisibilty = "Hidden";      break;
+            case kElfEditSymVisbility_Protected: pszVisibilty = "Protected";   break;
+            default:                             pszVisibilty = "UNSUPPORTED"; break;
+        }
+
+        RTStrmPrintf(pStrm,
+                     "        { Name: '%s', Type: '%s', Visibilty: '%s', Weak: %RTbool, Size: %RU64",
+                     pSym->pszName, pszType, pszVisibilty, pSym->fWeak, pSym->cbSym);
+
+        if (pSym->pVersion)
+        {
+            RTStrmPrintf(pStrm, ", Version: %RU16, Default: %RTbool",
+                         pSym->pVersion->idxVersion, pSym->fDefaultVersion);
+        }
+
+        rc |= RTStrmPutStr(pStrm, " },\n");
+    }
+    rc |= RTStrmPutStr(pStrm, "    ],\n");
+
+    rc |= RTStrmPutStr(pStrm, "}\n");
+    rc |= RTStrmClose(pStrm);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write file '%s': %Rrc\n", pszOutput, rc);
+
+    return RTEXITCODE_SUCCESS;
+}
+
+
+static RTEXITCODE elfEditCreateStub(const char *pszInput, bool fJsonInput, const char *pszOutput, bool fJsonOutput)
+{
+    ELFEDITSTUBIMG StubImg; RT_ZERO(StubImg);
+
+    RTFILE hFileInput = NIL_RTFILE;
+    int rc = RTFileOpen(&hFileInput, pszInput, RTFILE_O_OPEN | RTFILE_O_READ | RTFILE_O_DENY_NONE);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Filed to open file '%s': %Rrc\n", pszInput, rc);
+
+    RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
+    if (!fJsonInput)
+    {
+        /*
+         * Read the ident to decide if this is 32-bit or 64-bit
+         * and worth dealing with.
+         */
+        uint8_t e_ident[EI_NIDENT];
+        rc = RTFileReadAt(hFileInput, 0, &e_ident, sizeof(e_ident), NULL);
+        if (RT_FAILURE(rc))
+        {
+            RTFileClose(hFileInput);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to read ELF header from '%s': %Rrc\n", pszInput, rc);
+        }
+
+        if (    e_ident[EI_MAG0] != ELFMAG0
+            ||  e_ident[EI_MAG1] != ELFMAG1
+            ||  e_ident[EI_MAG2] != ELFMAG2
+            ||  e_ident[EI_MAG3] != ELFMAG3
+            ||  (   e_ident[EI_CLASS] != ELFCLASS32
+                 && e_ident[EI_CLASS] != ELFCLASS64)
+           )
+            return RTMsgErrorExit(RTEXITCODE_FAILURE,
+                                  "%s: Unsupported/invalid ident %.*Rhxs", pszInput, sizeof(e_ident), e_ident);
+
+        if (e_ident[EI_DATA] != ELFDATA2LSB)
+            return RTMsgErrorExit(RTEXITCODE_FAILURE,
+                                  "%s: ELF endian %x is unsupported", pszInput, e_ident[EI_DATA]);
+
+        if (e_ident[EI_CLASS] == ELFCLASS32)
+            rcExit = elfEditElf32Parse(&StubImg, hFileInput);
+        else
+            rcExit = elfEditElf64Parse(&StubImg, hFileInput);
+
+        RTFileClose(hFileInput);
+    }
+    else
+        AssertReleaseFailed();
+
+    if (rcExit != RTEXITCODE_SUCCESS)
+        return rcExit;
+
+    if (fJsonOutput)
+        rcExit = elfEditStubDumpToJson(&StubImg, pszOutput);
+    else
+        AssertReleaseFailed();
+
+    return rcExit;
+}
+
+
 /**
  * Display usage
  *
@@ -896,6 +1243,7 @@ static RTEXITCODE usage(FILE *pOut, const char *argv0)
             "  --delete-runpath                         Deletes all DT_RUNPATH entries.\n"
             "  --change-runpath <new runpath>           Changes the first DT_RUNPATH entry to the new one.\n"
             "  --create-stub-library <path/to/stub>     Creates a stub library used for linking.\n"
+            "  --create-stub-json <path/to/stub>.       Creates a stub JSON file which can be edited and turned into a linker stub.\n"
             , argv0);
     return pOut == stdout ? RTEXITCODE_SUCCESS : RTEXITCODE_SYNTAX;
 }
@@ -916,6 +1264,7 @@ static RTEXITCODE parseArguments(int argc,  char **argv)
         { "--delete-runpath",                   'd', RTGETOPT_REQ_NOTHING },
         { "--change-runpath",                   'c', RTGETOPT_REQ_STRING  },
         { "--create-stub-library",              's', RTGETOPT_REQ_STRING  },
+        { "--create-stub-json",                 'j', RTGETOPT_REQ_STRING  },
     };
 
     RTGETOPTUNION   ValueUnion;
@@ -954,6 +1303,11 @@ static RTEXITCODE parseArguments(int argc,  char **argv)
 
             case 's':
                 g_enmAction = kVBoxEditElfAction_CreateLinkerStub;
+                g_pszLinkerStub = ValueUnion.psz;
+                break;
+
+            case 'j':
+                g_enmAction = kVBoxEditElfAction_CreateJsonStub;
                 g_pszLinkerStub = ValueUnion.psz;
                 break;
 
@@ -1004,6 +1358,8 @@ int main(int argc, char **argv)
             rcExit = changeRunpath(g_pszInput, g_pszRunpath);
         else if (g_enmAction == kVBoxEditElfAction_CreateLinkerStub)
             rcExit = createLinkerStubFrom(g_pszInput, g_pszLinkerStub);
+        else if (g_enmAction == kVBoxEditElfAction_CreateJsonStub)
+            rcExit = elfEditCreateStub(g_pszInput, false, g_pszLinkerStub, true);
     }
 
     return rcExit;

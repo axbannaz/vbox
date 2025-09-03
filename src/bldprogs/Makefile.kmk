@@ -82,6 +82,8 @@ if !defined(VBOX_ONLY_BUILD) || defined(VBOX_ONLY_EXTPACKS)
  BLDPROGS += VBoxEditElf
  VBoxEditElf_TEMPLATE = VBoxAdvBldProg
  VBoxEditElf_SOURCES  = VBoxEditElf.cpp
+ #VBoxEditElf_LDFLAGS  =  $(VBOX_GCC_SANITIZER_FLAGS) $(VBOX_GCC_SANITIZER_LDFLAGS)
+ #VBoxEditElf_CXXFLAGS =  $(VBOX_GCC_SANITIZER_FLAGS)
 endif
 
 ifeq ($(KBUILD_TARGET),win)

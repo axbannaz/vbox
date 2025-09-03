@@ -177,6 +177,32 @@ typedef struct
     } d_un;
 } Elf64_Dyn;
 
+/**
+ * Symbol versioning definition.
+ */
+typedef struct
+{
+    Elf64_Half      vd_version;     /* version indicator (always 1). */
+    Elf64_Half      vd_flags;       /* flags. */
+    Elf64_Half      vd_ndx;         /* Index of the version definition matching .gnu.version. */
+    Elf64_Half      vd_cnt;         /* Number of auxiliary version entries (Elf64_Verdaux). */
+    Elf64_Word      vd_hash;        /* GNU hash of the name pointed to by the first Elf64_Verdaux entry. */
+    Elf64_Word      vd_aux;         /* Offset in bytes from the beginning of this structure to the first Elf64_Verdaux entry. */
+    Elf64_Word      vd_next;        /* Offset in bytes from the beginning of this structure to the next version entry (Elf64_Verdef),
+                                     * 0 if the last entry. */
+} Elf64_Verdef;
+
+
+/**
+ * Symbol versioning definition auxiliary entry.
+ */
+typedef struct
+{
+    Elf64_Word      vda_name;       /* Offset into the string table containing the version name. */
+    Elf64_Word      vda_next;       /* Offset in bytes from the beginning of this structure to the next auxiliary entry (Elf64_Verdaux),
+                                     * 0 if the last entry. */
+} Elf64_Verdaux;
+
 /*
  * Helper macros.
  */
@@ -194,6 +220,10 @@ typedef struct
 /** Make r_info given the symbol index and type.  */
 #define ELF64_R_INFO(sym, type)     (((sym) << 32) + (unsigned char)(type))
 
+/** The symbol's visibility. */
+#define ELF64_ST_VISIBILITY(other)  ((other) & 0x03)
+/** Make st_other given the visbility. */
+#define ELF64_ST_OTHER(visbility)   ((visbility) & 0x03)
 
 #endif /* !IPRT_INCLUDED_formats_elf64_h */
 

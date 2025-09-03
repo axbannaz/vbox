@@ -51,6 +51,34 @@ typedef struct {
         uint32_t        n_type;         /* Type of this note. */
 } Elf_Note;
 
+
+/**
+ * Symbol versioning definition.
+ */
+typedef struct
+{
+    uint16_t      vd_version;     /* version indicator (always 1). */
+    uint16_t      vd_flags;       /* flags. */
+    uint16_t      vd_ndx;         /* Index of the version definition matching .gnu.version. */
+    uint16_t      vd_cnt;         /* Number of auxiliary version entries (Elf_Verdaux). */
+    uint32_t      vd_hash;        /* GNU hash of the name pointed to by the first Elf_Verdaux entry. */
+    uint32_t      vd_aux;         /* Offset in bytes from the beginning of this structure to the first Elf_Verdaux entry. */
+    uint32_t      vd_next;        /* Offset in bytes from the beginning of this structure to the next version entry (Elf_Verdef),
+                                   * 0 if the last entry. */
+} Elf_Verdef;
+
+
+/**
+ * Symbol versioning definition auxiliary entry.
+ */
+typedef struct
+{
+    uint32_t      vda_name;       /* Offset into the string table containing the version name. */
+    uint32_t      vda_next;       /* Offset in bytes from the beginning of this structure to the next auxiliary entry (Elf_Verdaux),
+                                   * 0 if the last entry. */
+} Elf_Verdaux;
+
+
 /* Indexes into the e_ident array.  Keep synced with
    http://www.sco.com/developer/gabi/ch4.eheader.html */
 #define EI_MAG0         0       /* Magic number, byte 0. */
@@ -175,6 +203,10 @@ typedef struct {
 #define SHT_LOUSER      0x80000000      /* reserved range for application */
 #define SHT_HIUSER      0xffffffff      /* specific indexes */
 
+#define SHT_GNU_versym  UINT32_C(0x6fffffff) /* .gnu.version table */
+#define SHT_GNU_verdef  UINT32_C(0x6ffffffd) /* .gnu.version_d table */
+#define SHT_GNU_verneed UINT32_C(0x6ffffffe) /* .gnu.version_r table */
+
 /* Flags for sh_flags. */
 #define SHF_WRITE       0x1             /* Section contains writable data. */
 #define SHF_ALLOC       0x2             /* Section occupies memory. */
@@ -269,6 +301,13 @@ typedef struct {
 
 #define DT_FLAGS_1      0x6ffffffb
 
+#define DT_VERDEF       UINT32_C(0x6ffffffc) /* Symbol versioning definitions. */
+#define DT_VERDEFNUM    UINT32_C(0x6ffffffd) /* Symbol versioning definitions count. */
+#define DT_VERNEED      UINT32_C(0x6ffffffe) /* Symbol version requirements. */
+#define DT_VERNEEDNUM   UINT32_C(0x6fffffff) /* Symbol version requirements count. */
+#define DT_VERSYM       UINT32_C(0x6ffffff0) /* Section containing the version information. */
+
+
 /* Values for DT_FLAGS */
 #define DF_ORIGIN       0x0001  /* Indicates that the object being loaded may
                                    make reference to the $ORIGIN substitution
@@ -343,9 +382,41 @@ typedef struct {
 #define STT_NUM         7       /* Number of generic symbol types. */
 #define STT_LOPROC      13      /* reserved range for processor */
 #define STT_HIPROC      15      /*  specific symbol types */
+#define STT_GNU_IFUNC   10      /* GNU indirect function (ifunc) */
 
 /* Special symbol table indexes. */
 #define STN_UNDEF       0       /* Undefined symbol index. */
+
+/* Symbol visibility - ELFNN_ST_VISBILITY - st_other */
+#define STV_DEFAULT     0x00    /* Default visbility. */
+#define STV_INTERNAL    0x01    /* Processor specific hidden class. */
+#define STV_HIDDEN      0x02    /* Symbol is not available for reference in other modules. */
+#define STV_PROTECTED   0x03    /* Protected symbol. */
+
+/* Flags for the 16 bit entries in .gnu.version. section. */
+#define GNU_VERSYM_HIDDEN UINT16_C(0x8000) /* Symbol is not the default entry. */
+
+
+/**
+ * ELF hashing function for symbols.
+ *
+ * @returns The hash for the given input.
+ * @param   pszName    The null terminated string to hash.
+ */
+DECLINLINE(uint32_t) elfHash(const char *pszName)
+{
+    uint32_t u32Hash = 0;
+    while (*pszName)
+    {
+        u32Hash = (u32Hash << 4) + *pszName++;
+
+        uint32_t const u32High = u32Hash & UINT32_C(0xf0000000);
+        u32Hash ^= u32High >> 24;
+        u32Hash &= ~u32High;
+    }
+
+    return u32Hash;
+}
 
 #endif /* !IPRT_INCLUDED_formats_elf_common_h */
 
