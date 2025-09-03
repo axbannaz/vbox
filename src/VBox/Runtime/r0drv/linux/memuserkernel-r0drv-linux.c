@@ -150,9 +150,7 @@ static int rtR0MemKernelCopyLnxWorker(void *pvDst, void const *pvSrc, size_t cb)
         return VINF_SUCCESS;
 
     __asm__ __volatile__ (
-/* Do not call CLD instruction for recent kernels since it triggers objtool
-   warning, but play safe with older ones. */
-#  if RTLNX_VER_MAX(6,0,0)
+#  if RTLNX_VER_MAX(6,0,0) /* Do not call CLD for recent kernels since it triggers objtool warning. */
                           "cld\n"
 #  endif
                           "1:\n\t"
