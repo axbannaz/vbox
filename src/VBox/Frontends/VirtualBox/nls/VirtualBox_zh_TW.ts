@@ -1068,7 +1068,7 @@
     </message>
     <message>
         <source>Take Sn&amp;apshot...</source>
-        <translation>取得螢幕快照(&amp;A)...</translation>
+        <translation>取得快照(&amp;A)...</translation>
     </message>
     <message>
         <source>Take a snapshot of the virtual machine</source>
@@ -2784,7 +2784,7 @@
     </message>
     <message>
         <source>Storage Controller (NVMe)</source>
-        <translation type="unfinished"></translation>
+        <translation>存儲裝置控制器 (NVMe)</translation>
     </message>
 </context>
 <context>
@@ -6775,11 +6775,11 @@
     </message>
     <message>
         <source>File manager cannot work since no guest additions were detected.</source>
-        <translation type="unfinished"></translation>
+        <translation>檔案管理員無法工作，因為沒有偵測到客體附加元件。</translation>
     </message>
     <message>
         <source>File manager cannot work. The guest additions need to be updated.</source>
-        <translation type="unfinished"></translation>
+        <translation>檔案管理員無法工作。客體附加元件需要更新。</translation>
     </message>
     <message>
         <source>Preferences</source>
