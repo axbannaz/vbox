@@ -403,14 +403,14 @@ static RTEXITCODE ELFEDIT_NAME(Parse)(PELFEDITSTUBIMG pStubImg, RTFILE hFileElf)
     }
 
     /* Process exported symbols. */
-    uint32_t const cSyms = cbDynSyms / sizeof(*paDynSyms);
+    size_t const cSyms = cbDynSyms / sizeof(*paDynSyms);
 
     pStubImg->paSyms = (PELFEDITSTUBSYM)RTMemAllocZ(cSyms * sizeof(*pStubImg->paSyms));
     if (!pStubImg->paSyms)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %u entries for the symbol table\n", cSyms);
 
     uint32_t idxSym = 0;
-    for (uint32_t i = 0; i < cSyms; i++)
+    for (size_t i = 0; i < cSyms; i++)
     {
         PELFEDITSTUBSYM pSym = &pStubImg->paSyms[idxSym];
 
