@@ -81,7 +81,11 @@ if !defined(VBOX_ONLY_BUILD) || defined(VBOX_ONLY_EXTPACKS)
 
  BLDPROGS += VBoxEditElf
  VBoxEditElf_TEMPLATE = VBoxAdvBldProg
- VBoxEditElf_SOURCES  = VBoxEditElf.cpp
+ VBoxEditElf_SOURCES  = \
+ 	VBoxEditElf.cpp \
+ 	../VBox/Runtime/common/misc/json.cpp
+ VBoxEditElf_INCS = \
+	$(PATH_ROOT)/src/VBox/Runtime/include
  #VBoxEditElf_LDFLAGS  =  $(VBOX_GCC_SANITIZER_FLAGS) $(VBOX_GCC_SANITIZER_LDFLAGS)
  #VBoxEditElf_CXXFLAGS =  $(VBOX_GCC_SANITIZER_FLAGS)
 endif

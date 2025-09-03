@@ -33,6 +33,7 @@
 #include <stdlib.h>
 
 #include <iprt/assert.h>
+#include <iprt/err.h>
 #include <iprt/file.h>
 #include <iprt/getopt.h>
 #include <iprt/initterm.h>
@@ -1000,14 +1001,14 @@ static RTEXITCODE createLinkerStubFrom(const char *pszInput, const char *pszStub
     return RTEXITCODE_SUCCESS;
 }
 
-
+#if 0
 static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *pszInput)
 {
     RTERRINFOSTATIC ErrInfo;
     RTErrInfoInitStatic(&ErrInfo);
 
     RTJSONVAL hJsonRoot = NIL_RTJSONVAL;
-    int rc = RTJsonParseFromFile(&hJsonRoot, RTJSON_PARSE_F_JSON5, pszInput, &ErrInfo);
+    int rc = RTJsonParseFromFile(&hJsonRoot, RTJSON_PARSE_F_JSON5, pszInput, &ErrInfo.Core);
     if (RT_FAILURE(rc))
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to load JSON stub '%s': %Rrc (%s)\n", pszInput, rc, ErrInfo.Core.pszMsg);
 
@@ -1062,7 +1063,7 @@ static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *
     RTJsonValueRelease(hJsonRoot);
     return RTEXITCODE_SUCCESS;
 }
-
+#endif
 
 static RTEXITCODE elfEditStubDumpToJson(PELFEDITSTUBIMG pStubImg, const char *pszOutput)
 {
