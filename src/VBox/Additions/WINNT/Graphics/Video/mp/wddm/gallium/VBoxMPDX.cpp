@@ -531,6 +531,7 @@ static DECLCALLBACK(int) svgaDestroyAllocationCb(PAVLU32NODECORE pNode, void *pv
     VBOXWDDM_EXT_VMSVGA *pSvga = (VBOXWDDM_EXT_VMSVGA *)pvUser;
 
     SvgaGboUnreference(pSvga, &pInstance->pGbo);
+    GaMemFree(pInstance);
     return 0;
 }
 
