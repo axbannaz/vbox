@@ -1651,6 +1651,8 @@ static int hmR3InitFinalizeR0Intel(PVM pVM)
     AssertLogRelReturn(pVM->hm.s.ForR3.vmx.u64HostFeatCtrl != 0, VERR_HM_IPE_4);
 
     LogRel(("HM: Using VT-x implementation 3.0\n"));
+    LogRel(("HM: VT-x init method                  = %s\n",
+            pVM->hm.s.ForR3.vmx.fUsingSUPR0EnableVTx ? "Host Kernel API" : "Manual"));
     LogRel(("HM: Max resume loops                  = %u\n",     pVM->hm.s.cMaxResumeLoopsCfg));
     LogRel(("HM: Host CR0                          = %#RX64\n", pVM->hm.s.ForR3.vmx.u64HostCr0));
     LogRel(("HM: Host CR4                          = %#RX64\n", pVM->hm.s.ForR3.vmx.u64HostCr4));

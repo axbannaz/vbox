@@ -370,6 +370,10 @@ typedef struct HM
             /** Whether MOV DRx is always intercepted or not (set by ring-0 VMX init, for
              * logging). */
             bool                        fAlwaysInterceptMovDRx;
+            /** Whether SUPR0EnableVTx is being used (set by ring-0 VMX init, for logging). */
+            bool                        fUsingSUPR0EnableVTx;
+            /** Padding.*/
+            bool                        afPadding[3];
 
             /** Host CR0 value (set by ring-0 VMX init, for logging). */
             uint64_t                    u64HostCr0;
