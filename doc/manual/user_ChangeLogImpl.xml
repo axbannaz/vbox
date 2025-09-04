@@ -81,6 +81,35 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>GUI: Fixing VBox Manager crash when some VM has a lot of snapshots
+          (issue github:gh-119)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixing VBox Manager crash while attempting to show error notifications too early
+          (issues github:gh-135 and github:gh-171)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixing VBox Manager crash while removing all VMs from VM list</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixing VBox Manager freeze on Linux hosts at startup or while attempting to
+          add a VM (issues github:gh-70 and github:gh-168)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixing VBox Manager layout bug with too strict size constraints
+          (issue github:gh-87)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Update VBox VM network status-bar indicator tooltip (IP address) on guest additions
+          change (issue github:gh-179)</para>
+      </listitem>
+
+      <listitem>
         <para>Arm hosts: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
       </listitem>
 
