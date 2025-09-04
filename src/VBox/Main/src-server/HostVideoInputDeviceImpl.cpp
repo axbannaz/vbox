@@ -225,7 +225,7 @@ static bool hwcLinuxVideoCaptureDevice(struct v4l2_capability_3_4_0 *pCaps)
 
 static int hwcOpen(const char *pszPath, int *pHandle)
 {
-    int rc = VINF_SUCCESS;
+    int vrc = VINF_SUCCESS;
 
     struct stat st;
     int ret = stat(pszPath, &st);
@@ -237,12 +237,12 @@ static int hwcOpen(const char *pszPath, int *pHandle)
         if (h != -1)
             *pHandle = h;
         else
-            rc = VERR_OPEN_FAILED;
+            vrc = VERR_OPEN_FAILED;
     }
     else
-        rc = VERR_NOT_FOUND;
+        vrc = VERR_NOT_FOUND;
 
-    return rc;
+    return vrc;
 }
 
 static void hwcClose(int handle)
@@ -271,7 +271,7 @@ static int hwcIoctl(int handle, unsigned fn, void *pv)
 
 static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult)
 {
-    int rc = VINF_SUCCESS;
+    int vrc = VINF_SUCCESS;
 
     int iDevice = 0;
     while (iDevice < HWC_V4L2_MAX_DEVICES)
@@ -283,8 +283,8 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
         if (pszPath)
         {
             int handle = -1;
-            int rc2 = hwcOpen(pszPath, &handle);
-            if (RT_SUCCESS(rc2))
+            int vrc2 = hwcOpen(pszPath, &handle);
+            if (RT_SUCCESS(vrc2))
             {
 #if defined(RT_OS_LINUX)
                 struct v4l2_capability_3_4_0 caps;
@@ -292,8 +292,8 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
                 struct v4l2_capability caps;
 #endif
                 RT_ZERO(caps);
-                rc2 = hwcIoctl(handle, VIDIOC_QUERYCAP, &caps);
-                if (RT_SUCCESS(rc2))
+                vrc2 = hwcIoctl(handle, VIDIOC_QUERYCAP, &caps);
+                if (RT_SUCCESS(vrc2))
                 {
                     if (
 #if defined(RT_OS_LINUX)
@@ -308,13 +308,13 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
                         char *pszAlias = NULL;
                         RTStrAPrintf(&pszAlias, ".%d", iDevice);
                         if (pszAlias)
-                            rc = pfnWebcamAdd(pvUser,
-                                              (char *)caps.card,
-                                              pszPath,
-                                              pszAlias,
-                                              pu64WebcamAddResult);
+                            vrc = pfnWebcamAdd(pvUser,
+                                               (char *)caps.card,
+                                               pszPath,
+                                               pszAlias,
+                                               pu64WebcamAddResult);
                         else
-                            rc = VERR_NO_MEMORY;
+                            vrc = VERR_NO_MEMORY;
 
                         RTStrFree(pszAlias);
                     }
@@ -327,14 +327,14 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
         }
         else
         {
-            rc = VERR_NO_MEMORY;
+            vrc = VERR_NO_MEMORY;
         }
 
-        if (RT_FAILURE(rc))
+        if (RT_FAILURE(vrc))
             break;
     }
 
-    return rc;
+    return vrc;
 }
 #elif defined(RT_OS_WINDOWS)
 /*
