@@ -1351,6 +1351,49 @@ class DecoderNode(object):
 # System Register Code Morphing.
 #
 
+class VBoxAstCppField(ArmAstCppExpr):
+    """ For converted ArmAstField so we optimize them later when processing
+    an ArmAstBinaryOp or ArmAstUnaryOp parent node. """
+    def __init__(self, sExpr, cBitsWidth, sNoShiftExpr = None, cBitsWidthNoShift = None):
+        ArmAstCppExpr.__init__(self, sExpr, cBitsWidth);
+        self.sNoShiftExpr      = sNoShiftExpr;
+        self.cBitsWidthNoShift = cBitsWidthNoShift;
+
+    def dropShift(self):
+        if self.sNoShiftExpr:
+            self.sExpr      = self.sNoShiftExpr;
+            self.cBitsWidth = self.cBitsWidthNoShift;
+        return self;
+
+    def dropExtraParenthesis(self):
+        if self.sExpr[0] == '(' and self.sExpr[-1] == ')':
+            self.sExpr = self.sExpr[1:-1];
+        return self;
+
+    @staticmethod
+    def fromFieldDetailsAndAccessExprOrInt(iFirstBit, cBitsWidth, sName, oAccessExprOrInt):
+        """
+        Returns an instance that accesses the given field.
+        The oAccessExprOrInt parameter is either a string or integer. If it
+        is an integer an ArmAstInteger instance is return instead.
+        """
+        if isinstance(oAccessExprOrInt, int):
+            iValue  = oAccessExprOrInt >> iFirstBit;
+            iValue &= (1 << cBitsWidth) - 1;
+            return ArmAstInteger(iValue, cBitsWidth); ## @todo annotate
+
+        if cBitsWidth == 1:
+            sExpr = '(%s & RT_BIT_%u(%d)/*%s*/)' \
+                  % (oAccessExprOrInt, 64 if iFirstBit >= 32 else 32, iFirstBit, sName,);
+        else:
+            sExpr = '(%s & UINT%u_C(%#x)/*%s*/)' \
+                  % (oAccessExprOrInt, 64 if iFirstBit + cBitsWidth >= 32 else 32, ((1 << cBitsWidth) - 1) << iFirstBit, sName,);
+        if iFirstBit == 0:
+            return VBoxAstCppField(sExpr, cBitsWidth);
+        return VBoxAstCppField('((%s) >> %u)' % (sExpr, iFirstBit,), cBitsWidth, sExpr, cBitsWidth + iFirstBit);
+
+
+
 class SysRegAccessorInfo(object):
     """ Info about an accessor we're emitting code for. """
     def __init__(self, oAccessor, oReg, sEnc, sAsmValue = None):
@@ -2673,53 +2716,18 @@ class SysRegGeneratorBase(object):
         assert False, str(oNode);
         return oNode;
 
-
-    class VBoxAstCppField(ArmAstCppExpr):
-        """ For converted ArmAstField so we optimize them later when processing
-        an ArmAstBinaryOp or ArmAstUnaryOp parent node. """
-        def __init__(self, sExpr, cBitsWidth, sNoShiftExpr = None, cBitsWidthNoShift = None):
-            ArmAstCppExpr.__init__(self, sExpr, cBitsWidth);
-            self.sNoShiftExpr      = sNoShiftExpr;
-            self.cBitsWidthNoShift = cBitsWidthNoShift;
-
-        def dropShift(self):
-            if self.sNoShiftExpr:
-                self.sExpr      = self.sNoShiftExpr;
-                self.cBitsWidth = self.cBitsWidthNoShift;
-            return self;
-
-        def dropExtraParenthesis(self):
-            if self.sExpr[0] == '(' and self.sExpr[-1] == ')':
-                self.sExpr = self.sExpr[1:-1];
-            return self;
-
     def transformCodePass2_Field(self, oNode): # (ArmAstField) -> ArmAstBase
         """ Pass2: Deal with field accesses (except for AST.Concat). """
         # Most fields can be mapped directly to a CPUMCTX field.
         (_, oField, oAccessExprOrInt) = self.lookupRegisterField(oNode.sState, oNode.sName, oNode.sField, 'Generic field',
                                                                  fWarnOnly = True);
-        if not oField:
-            return oNode;
-        assert len(oField.aoRanges) == 1;
-
-        cBitsWidth = oField.aoRanges[0].cBitsWidth;
-        iFirstBit  = oField.aoRanges[0].iFirstBit;
-
-        if isinstance(oAccessExprOrInt, int):
-            iValue  = oAccessExprOrInt >> iFirstBit;
-            iValue &= (1 << cBitsWidth) - 1;
-            return ArmAstInteger(iValue, cBitsWidth); ## @todo annotate
-
-        if cBitsWidth == 1:
-            sExpr = '(%s & RT_BIT_%u(%d)/*%s*/)' \
-                  % (oAccessExprOrInt, 64 if iFirstBit >= 32 else 32, iFirstBit, oField.sName,);
-        else:
-            sExpr = '(%s & UINT%u_C(%#x)/*%s*/)' \
-                  % (oAccessExprOrInt, 64 if iFirstBit + cBitsWidth >= 32 else 32,
-                     ((1 << cBitsWidth) - 1) << iFirstBit, oField.sName,);
-        if iFirstBit == 0:
-            return self.VBoxAstCppField(sExpr, cBitsWidth);
-        return self.VBoxAstCppField('((%s) >> %u)' % (sExpr, iFirstBit,), cBitsWidth, sExpr, cBitsWidth + iFirstBit);
+        if oField:
+            assert len(oField.aoRanges) == 1;
+            return VBoxAstCppField.fromFieldDetailsAndAccessExprOrInt(oField.aoRanges[0].iFirstBit,
+                                                                      oField.aoRanges[0].cBitsWidth,
+                                                                      oField.sName,
+                                                                      oAccessExprOrInt);
+        return oNode;
 
     def transformCodePass2_Identifier(self, oNode): # type: (ArmAstIdentifier, SysRegAccessorInfo)
         """ Pass 2: Deal with register identifiers during assignments. """
@@ -2978,7 +2986,7 @@ class SysRegGeneratorBase(object):
                 return self.transformCodePass2_BinaryOp_InSet(oNode);
 
             # Drop unnecessary field shifting when and compares for non-zero field checks.
-            if isinstance(oNode.oLeft, self.VBoxAstCppField):
+            if isinstance(oNode.oLeft, VBoxAstCppField):
                 if (   (oNode.sOp == '==' and oNode.oRight.isMatchingIntegerOrValue(1) and oNode.oLeft.cBitsWidth == 1)
                     or (oNode.sOp == '!=' and oNode.oRight.isMatchingIntegerOrValue(0))):
                     return oNode.oLeft.dropShift();
@@ -2986,7 +2994,7 @@ class SysRegGeneratorBase(object):
                     return ArmAstUnaryOp('!', oNode.oLeft.dropShift());
                 if ArmAstBinaryOp.kdOps[oNode.sOp] == ArmAstBinaryOp.ksOpTypeLogical:
                     oNode.oLeft = oNode.oLeft.dropShift();
-            elif isinstance(oNode.oRight, self.VBoxAstCppField):
+            elif isinstance(oNode.oRight, VBoxAstCppField):
                 if ArmAstBinaryOp.kdOps[oNode.sOp] == ArmAstBinaryOp.ksOpTypeLogical:
                     oNode.oRight = oNode.oRight.dropShift();
 
@@ -3010,7 +3018,7 @@ class SysRegGeneratorBase(object):
         elif isinstance(oNode, ArmAstIfList):
             # Drop double parentheses around field extraction expressions when they are the sole if condition.
             for idxIfCond, oIfCond in enumerate(oNode.aoIfConditions):
-                if isinstance(oIfCond, self.VBoxAstCppField):
+                if isinstance(oIfCond, VBoxAstCppField):
                     oNode.aoIfConditions[idxIfCond] = oIfCond.dropExtraParenthesis();
 
         elif isinstance(oNode, ArmAstSquareOp):
@@ -3522,6 +3530,126 @@ class IEMArmGenerator(object):
         _ = sFilename; _ = iPartNo;
         return self.generateImplementationStubHdr('A64');
 
+    #
+    # AST to C transformation.
+    #
+
+    class XformArg(object):
+        def __init__(self, oInstr, oNode, fInLeafFn):
+            self.oInstr    = oInstr;        # ArmInstruction
+            self.oNode     = oNode;         # DecoderNode
+            self.fInLeafFn = fInLeafFn;
+
+    @staticmethod
+    def xformToC_Identifier(oIdentifier, oInstr, fInLeafFn, oNode):
+        """ Converts an identifier to appropriate C field expression. """
+        if oIdentifier.sName == 'uOpcode':
+            return ArmAstCppExpr('uOpcode', 32);
+        oField = oInstr.getFieldByName(oIdentifier.sName, False); # ArmEncodesetField
+        if not oField:
+            for oParent in oInstr.oParent.getUpIterator():
+                oField = oParent.getFieldByName(oIdentifier.sName, False);
+                if oField:
+                    break;
+            if not oField:
+                raise Exception('Identifier not found for instruction %s: %s' % (oInstr.sName, oIdentifier,));
+        elif fInLeafFn:
+            return ArmAstCppExpr(oIdentifier.sName, oField.cBitsWidth);
+
+        # If the field is entirely within the fixed mask, return a constant integer value.
+        fFieldOpMask = oField.getShiftedMask();
+        if fInLeafFn:
+            if (oInstr.fFixedMask & fFieldOpMask) == fFieldOpMask:
+                return ArmAstInteger((oInstr.fFixedValue & fFieldOpMask) >> oField.iFirstBit, oField.cBitsWidth);
+        elif (oNode.fCheckedMask & fFieldOpMask) == fFieldOpMask:
+            return ArmAstInteger((oNode.fCheckedValue & fFieldOpMask) >> oField.iFirstBit, oField.cBitsWidth);
+
+        return VBoxAstCppField.fromFieldDetailsAndAccessExprOrInt(oField.iFirstBit, oField.cBitsWidth,
+                                                                  oIdentifier.sName, 'uOpcode');
+
+    @staticmethod
+    def xformToC_Value(oValue, aoStack):
+        """ Converts the value to an integer. """
+        (fValue, _, fWildcard, cBitsWidth) = oValue.getValueDetails();
+        if not fWildcard:
+            return ArmAstInteger(fValue, cBitsWidth);
+        _ = aoStack;
+        return oValue;
+
+    @staticmethod
+    def xformToC_InSet(oBinOp):
+        """ Converts the value to an integer. """
+        # Check & fix the input.
+        assert oBinOp.sOp == 'IN';
+        oSet = oBinOp.oRight;
+        if isinstance(oSet, ArmAstSet):
+            for iValue, oValue in enumerate(oSet.aoValues):
+                if not isinstance(oValue, (ArmAstValue, ArmAstInteger)):
+                    raise Exception('Set value #%u is not an Values.Value node: %s' % (iValue, oBinOp.toString(),));
+        elif isinstance(oSet, ArmAstValue):
+            oSet = ArmAstSet([oBinOp.oRight,]);
+        else:
+            raise Exception('Unexpected use of operator "IN": %s' % (oBinOp.toString(),));
+
+        # Create an OR list for matching each set value.
+        asOrList = [];
+        for oValue in oSet.aoValues:
+            (fValue, fFixed, fWildcard, cBitsWidth) = oValue.getValueDetails();
+            if fFixed == 0:
+                raise Exception('Bogus wildcard set expression: %s' % (oBinOp.toString(),));
+
+            oCurOp = ArmAstBinaryOp(oBinOp.oLeft.clone(), '==', ArmAstInteger(fValue, cBitsWidth))
+            if fWildcard != 0:
+                oCurOp.oLeft = ArmAstBinaryOp(oCurOp.oLeft, 'AND', ArmAstInteger(fFixed, cBitsWidth))
+            asOrList.append(oCurOp);
+
+        # Turn the list into a tree.
+        return ArmAstBinaryOp.orListToTree(asOrList);
+
+    @staticmethod
+    def xformToC_IsFeatureImplemented(oCall):
+        """ Converts a IsFeatureImplemented(FEAT_XXXX) call """
+        if len(oCall.aoArgs) == 1:
+            sFeatureNm = oCall.aoArgs[0].getIdentifierName();
+            if sFeatureNm is not None:
+                sCpumFeature = g_dSpecFeatToCpumFeat.get(sFeatureNm, None);
+                if sCpumFeature is None:
+                    raise Exception('Unknown IsFeatureImplemented parameter: %s (see g_dSpecFeatToCpumFeat)' % (sFeatureNm));
+                if isinstance(sCpumFeature, str):
+                    return ArmAstCppExpr('IEM_GET_GUEST_CPU_FEATURES(pVCpu)->%s /*%s*/' % (sCpumFeature, sFeatureNm,), 1);
+                if sCpumFeature is True:
+                    return ArmAstCppExpr('true /*%s*/'  % (sFeatureNm,), 1);
+                if sCpumFeature is False:
+                    return ArmAstCppExpr('false /*%s*/' % (sFeatureNm,), 1);
+                return ArmAstCppExpr('false /** @todo IEM_GET_GUEST_CPU_FEATURES(pVCpu)->%s */' % (sFeatureNm,), 1);
+        raise Exception('Expected call: %s' % (oCall,));
+
+    @staticmethod
+    def xformToC_Field(oField, oXformArg):
+        """ Converts a sub-field reference. """
+        # We don't support field references here.
+        raise Exception('Expected field reference: %s' % (oField,));
+
+    @staticmethod
+    def callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack):
+        """ Generic callback for transforming condition expressions to C. """
+        if isinstance(oNode, ArmAstIdentifier):
+            if aoStack and isinstance(aoStack[-1], (ArmAstBinaryOp, ArmAstUnaryOp)):
+                return IEMArmGenerator.xformToC_Identifier(oNode, oXformArg.oInstr, oXformArg.fInLeafFn, oXformArg.oNode);
+        elif isinstance(oNode, ArmAstValue):
+            return IEMArmGenerator.xformToC_Value(oNode, aoStack);
+        elif isinstance(oNode, ArmAstField):
+            return IEMArmGenerator.xformToC_Field(oNode, oXformArg);
+        elif isinstance(oNode, ArmAstFunction):
+            if oNode.sName == 'IsFeatureImplemented':
+                return IEMArmGenerator.xformToC_IsFeatureImplemented(oNode);
+            raise Exception('Call to unsupported function: %s (%s)' % (oNode.sName, oNode.aoArgs,));
+        elif isinstance(oNode, ArmAstBinaryOp):
+            if oNode.sOp == 'IN':
+                return IEMArmGenerator.xformToC_InSet(oNode);
+        _ = fEliminationAllowed; _ = aoStack;
+        return oNode;
+
 
     #
     # Decoder.
@@ -3622,7 +3750,7 @@ class IEMArmGenerator(object):
                 ];
 
                 asTail = [
-                    sIndent + '    Log(("Invalid instruction %%#x at %%x (cond)\\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));',
+                    sIndent + '    Log(("Invalid instruction %#x at %x (cond)\\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));',
                     sIndent + '    IEMOP_RAISE_INVALID_OPCODE_RET();',
                     sIndent + '}',
                 ] + asTail;
@@ -3679,17 +3807,123 @@ class IEMArmGenerator(object):
         def __init__(self, sInstrSet, oNode, uDepth):
             IEMArmGenerator.DecoderCodeBlock.__init__(self, sInstrSet, oNode.getFuncName(sInstrSet, uDepth),
                                                       '%08x/%08x level %u' % (oNode.fCheckedMask, oNode.fCheckedValue, uDepth,) );
-            self.asBody = [];
+            #
+            # Check if the instructions have the same mask and all different values.
+            # If the masks differs or if some have the same value, we have to include
+            # any conditionals assoicated with the instructions and more carefully
+            # order the tests.
+            #
+            # See LDRB_32BL_ldst_regoff vs LDRB_32B_ldst_regoff, and
+            #     iemDecodeA64_RPRFM_R_ldst_regoff vs iemDecodeA64_PRFM_P_ldst_regoff.
+            #
+            dFixedMasks      = {};
+            cDuplicateValues = 0;
             for oInstr in oNode.aoInstructions:
-                self.asBody += [
-                    '    if ((uOpcode & UINT32_C(%#010x)) == UINT32_C(%#010x))' % (oInstr.fFixedMask, oInstr.fFixedValue,),
-                    '        return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),),
+                fFixedMask  = oInstr.fFixedMask  & ~oNode.fCheckedMask
+                fFixedValue = oInstr.fFixedValue & ~oNode.fCheckedMask
+                if fFixedMask not in dFixedMasks:
+                    dFixedMasks[fFixedMask] = { fFixedValue: 1 };
+                else:
+                    dValues = dFixedMasks[fFixedMask];
+                    if fFixedValue not in dValues:
+                        dValues[fFixedValue]  = 1;
+                    else:
+                        dValues[fFixedValue] += 1;
+                        cDuplicateValues += 1;
+            if len(dFixedMasks) == 1 and cDuplicateValues == 0:
+                #
+                # One mask and no duplicate values: Switch on the fixed mask bits left to us.
+                #
+                (fFixedMask, dValues) = next(iter(dFixedMasks.items()));
+                assert (1 << fFixedMask.bit_count()) >= len(dValues);
+
+                self.asBody = [
+                    '    switch (uOpcode & UINT32_C(%#010x))' % (fFixedMask,),
+                    '    {',
                 ];
-            ## @todo check if the masks are restricted to a few bit differences at
-            ## this point and we can skip the iemDecodeA64_Invalid call.
-            self.asBody += [
-                '    return iemDecode%s_Invalid(pVCpu, uOpcode);' % (sInstrSet,),
-            ];
+                for oInstr in oNode.aoInstructions:
+                    self.asBody += [
+                        '        case UINT32_C(%#010x):' % (oInstr.fFixedValue & ~oNode.fCheckedMask,),
+                        '            return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),),
+                    ];
+                if len(dValues) != (1 << fFixedMask.bit_count()):
+                    self.asBody += [
+                        '        default:',
+                        '            return iemDecode%s_Invalid(pVCpu, uOpcode);' % (sInstrSet,),
+                    ];
+                else:
+                    # This is a hack to shut up the Visual C++ warning "C4715: not all control paths return a value"
+                    # and the gcc warning 'control reaches end of non-void function [-Werror=return-type]' (v13.3.0).
+                    asLastCase = self.asBody[-2:];
+                    self.asBody = self.asBody[:-2];
+                    self.asBody.append('        default:');
+                    self.asBody += asLastCase;
+
+                self.asBody += [ '    }' ];
+            else:
+                #
+                # Do the multiple-if stuff with any extra conditions.
+                #
+                # Just to be extra cautious, we sort instruction in reverse mask population
+                # order, so that the more detailed masks are checked before the wider ones.
+                # (The LDRB_32BL_ldst_regoff vs LDRB_32B_ldst_regoff issue could be solved
+                # by this sorting trick alone, if required.)
+                #
+                def callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack):
+                    # Remove all IsFeatureImplemented calls, as these aren't for selecting which
+                    # instruction something decodes as, just between the assigned instruction
+                    # and invalid opcode. (ASSUMES no opcode redefinitions.)
+                    if oNode.isMatchingFunctionCall('IsFeatureImplemented', str):
+                        return ArmAstBool(True);
+                    return IEMArmGenerator.callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack);
+
+                # Assemble list of branches w/ conditions.
+                atIfList = []
+                for oInstr in sorted(oNode.aoInstructions,
+                                     key = lambda o: ( (o.fFixedMask & ~oNode.fCheckedMask).bit_count(),
+                                                       o.fFixedMask, fFixedValue ),
+                                     reverse = True):
+                    fFixedMask  = oInstr.fFixedMask  & ~oNode.fCheckedMask;
+                    fFixedValue = oInstr.fFixedValue & ~oNode.fCheckedMask;
+                    oCode = ArmAstBinaryOp(ArmAstBinaryOp(ArmAstIdentifier('uOpcode'), 'AND', ArmAstInteger(fFixedMask, 32)),
+                                           '==', ArmAstInteger(fFixedValue, 32));
+                    if oInstr.oCondition:
+                        oCode = ArmAstBinaryOp(oCode, '&&', oInstr.oCondition.clone());
+                    oOptCode = oCode.clone().transform(callbackTransformToC, True,
+                                                       IEMArmGenerator.XformArg(oInstr, oNode, False), []);
+
+                    atIfList.append((oInstr, oOptCode, oCode,
+                                     'return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),)));
+
+                # Add invalid opcode as the default.
+                atIfList.append((None, ArmAstBool(True), None, 'return iemDecode%s_Invalid(pVCpu, uOpcode);' % (sInstrSet,)));
+
+                # Output them.
+                self.asBody = [];
+                fDone       = False;
+                ## @todo We have a few cases where the first two entries uses a single bit mask
+                ##       and anything beyond that is unreachable.
+                for oInstr, oOptCode, oCode, sRetStmt in atIfList:
+                    if not fDone and oOptCode and not oOptCode.isBoolAndFalse():
+                        if oInstr:
+                            self.asBody.append('    /* %#08x/%#08x%s%s */'
+                                               % (oInstr.fFixedMask, oInstr.fFixedValue,
+                                                  ' org expr: ' if oCode else '', oCode.toString() if oCode else '',));
+                        fDone = oOptCode.isBoolAndTrue();
+                        if fDone:
+                            self.asBody.append('    ' + sRetStmt);
+                        else:
+                            sPrefix = '    if ('
+                            for sLine in oOptCode.toStringEx(sLang = 'C', cchMaxWidth = 120 - len(sPrefix)).split('\n'):
+                                self.asBody.append(sPrefix + sLine);
+                                sPrefix = '        ';
+                            self.asBody[-1] += ')';
+                            self.asBody.append('        ' + sRetStmt);
+                    elif oInstr:
+                        self.asBody.append('    /* skipping %#08x/%#08x %s%s%s */'
+                                           % (oInstr.fFixedMask, oInstr.fFixedValue, oInstr.getCName(),
+                                              ': ' if oCode else '', oCode.toString() if oCode else '',));
+
             self._addLinesToHash(self.asBody);
 
         def getLines(self):
