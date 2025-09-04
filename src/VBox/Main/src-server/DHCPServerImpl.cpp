@@ -331,7 +331,6 @@ HRESULT DHCPServer::i_saveSettings(settings::DHCPServer &rData)
 
     AutoReadLock alock(this COMMA_LOCKVAL_SRC_POS);
 
-    Assert(!RTStrCmp(m->strName.c_str(), "0.0.0.0"));
     rData.strNetworkName = m->strName;
     rData.strIPAddress   = m->IPAddress;
     rData.fEnabled       = m->enabled != FALSE;
