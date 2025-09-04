@@ -507,14 +507,14 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
 
   if defined(VBOX_WITH_USB_VIDEO_IMPL)
     VBoxDD_DEFS          += VBOX_WITH_USB_VIDEO_IMPL
+    VBoxDD_INCS += \
+    	$(VBOX_JPEG_INCS)
     VBoxDD_SOURCES       += \
     	Video/UsbWebcam.cpp \
     	Video/UsbWebcamDesc.cpp \
     	Video/jpggen.cpp \
     	Video/DrvHostWebcam.cpp \
     	Video/JPEGEnc.cpp
-    $(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/DrvHostWebcam/JPEGEnc.cpp_INCS = \
-    	$(VBOX_JPEG_INCS)
     VBoxDD_SOURCES.darwin += \
     	Video/HostWebcam-darwin.mm
     VBoxDD_SOURCES.linux += \
