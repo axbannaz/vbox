@@ -679,6 +679,9 @@ class ArmAstBinaryOp(ArmAstBase):
                     return fnCallback(self._transformEnsureBool(self.oRight), fEliminationAllowed, oCallbackArg, aoStack);
                 if self.oRight.isBoolAndFalse() or self.oRight.isMatchingIntegerOrValue(0):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
+                # Simplify: sameexpr || sameexpr => sameexpr
+                if self.oRight.isSame(self.oLeft):
+                    return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
 
             elif self.sOp == '&&':
                 if (   self.oLeft.isBoolAndFalse()
@@ -692,7 +695,9 @@ class ArmAstBinaryOp(ArmAstBase):
                     return fnCallback(self._transformEnsureBool(self.oRight), fEliminationAllowed, oCallbackArg, aoStack);
                 if self.oRight.isBoolAndTrue() or self.oRight.getIntegerOrValue() not in (None, 0):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
-
+                # Simplify: sameexpr && sameexpr => sameexpr
+                if self.oRight.isSame(self.oLeft):
+                    return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
             else:
                 iLeft = self.oLeft.getIntegerOrValue();
                 if iLeft is None and isinstance(self.oLeft, ArmAstBool):
@@ -741,6 +746,22 @@ class ArmAstBinaryOp(ArmAstBase):
                         return fnCallback(ArmAstInteger(iResult, cBitsWidth), fEliminationAllowed, oCallbackArg, aoStack);
 
                     ## @todo we could do +, -, div, mod, mult here, but need to consider the width of the result...
+
+                if iLeft is not None and self.sOp == 'IN' and isinstance(self.oRight, ArmAstSet):
+                    # Simplification: int IN (val, val) -> true/false
+                    aoValues = self.oRight.aoValues;
+                    idxValue = 0;
+                    while idxValue < len(aoValues):
+                        oValue = aoValues[idxValue];
+                        if isinstance(oValue, (ArmAstValue, ArmAstInteger)):
+                            (fValue, _, fWildcard, _) = oValue.getValueDetails();
+                            if (iLeft & ~fWildcard) == fValue:
+                                return fnCallback(ArmAstBool(True), fEliminationAllowed, oCallbackArg, aoStack);
+                        else:
+                            break;
+                        idxValue += 1;
+                    if idxValue == len(aoValues):
+                        return fnCallback(ArmAstBool(False), fEliminationAllowed, oCallbackArg, aoStack);
 
             return fnCallback(self, fEliminationAllowed, oCallbackArg, aoStack);
 
