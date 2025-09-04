@@ -607,7 +607,8 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  	socket
 
  VBoxSVC_LIBS.win += \
- 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dnsapi.lib
+ 	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/dnsapi.lib \
+ 	strmiids.lib
 
  VBoxSVC_INTERMEDIATES = \
  	$(VBOX_MAIN_PREREQS) \

@@ -95,6 +95,11 @@ struct v4l2_capability_3_4_0
  */
 #  define VBOX_WITH_V4L2_CAP_META_CAPTURE KERNEL_VERSION(4,12,0)
 # endif
+#elif defined(RT_OS_WINDOWS)
+# include <iprt/win/windows.h>
+# include <iprt/win/dshow.h>
+# include <Dbt.h>
+# include <iprt/win/ks.h>
 #endif
 
 /*
@@ -330,6 +335,136 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
     }
 
     return rc;
+}
+#elif defined(RT_OS_WINDOWS)
+/*
+ * Device emumeration entry point.
+ */
+
+static HRESULT hwcCreateEnumerator(IEnumMoniker **ppEnumMoniker)
+{
+    ICreateDevEnum *pCreateDevEnum = NULL;
+    HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER,
+                                  IID_PPV_ARGS(&pCreateDevEnum));
+    if (SUCCEEDED(hr))
+    {
+        hr = pCreateDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, ppEnumMoniker, 0);
+        pCreateDevEnum->Release();
+    }
+    return hr;
+}
+
+static HRESULT hwcFillList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
+                           void *pvUser,
+                           uint64_t *pu64WebcamAddResult,
+                           IEnumMoniker *pEnumMoniker)
+{
+    int iDevice = 0; /* Count devices 1..N. */
+    IMoniker *pMoniker = NULL;
+    while (pEnumMoniker->Next(1, &pMoniker, NULL) == S_OK)
+    {
+        /* Device index must be the same as in hwcFindDevice */
+        ++iDevice;
+
+        IPropertyBag *pPropBag = NULL;
+        HRESULT hr = pMoniker->BindToStorage(0, 0, IID_PPV_ARGS(&pPropBag));
+        if (FAILED(hr))
+        {
+            pMoniker->Release();
+            continue;
+        }
+
+        VARIANT var;
+        VariantInit(&var);
+
+        hr = pPropBag->Read(L"DevicePath", &var, 0);
+        if (FAILED(hr))
+        {
+            /* Can't use a device without path. */
+            pMoniker->Release();
+            continue;
+        }
+
+        char *pszPath = NULL;
+        int rc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszPath);
+        if (RT_FAILURE(rc))
+            pszPath = NULL;
+
+        VariantClear(&var);
+
+        hr = pPropBag->Read(L"FriendlyName", &var, 0);
+        if (FAILED(hr))
+        {
+            hr = pPropBag->Read(L"Description", &var, 0);
+        }
+
+        char *pszName = NULL;
+        if (SUCCEEDED(hr))
+        {
+            rc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszName);
+            if (RT_FAILURE(rc))
+                pszName = NULL;
+            VariantClear(&var);
+        }
+        else
+        {
+            RTStrAPrintf(&pszName, "Video Input Device #%d", iDevice);
+        }
+
+        char *pszAlias = NULL;
+        RTStrAPrintf(&pszAlias, ".%d", iDevice);
+
+        if (pszName && pszPath && pszAlias)
+        {
+            rc = pfnWebcamAdd(pvUser, pszName, pszPath, pszAlias, pu64WebcamAddResult);
+            if (RT_FAILURE(rc))
+                hr = E_FAIL;
+        }
+        else
+        {
+            hr = E_OUTOFMEMORY;
+        }
+
+        RTStrFree(pszPath);
+        RTStrFree(pszName);
+        RTStrFree(pszAlias);
+
+        pPropBag->Release();
+        pMoniker->Release();
+
+        if (FAILED(hr))
+            return hr;
+    }
+
+    return S_OK;
+}
+
+static HRESULT hwcDeviceList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
+                             void *pvUser,
+                             uint64_t *pu64WebcamAddResult)
+{
+    IEnumMoniker *pEnumMoniker = NULL;
+    HRESULT hr = hwcCreateEnumerator(&pEnumMoniker);
+    if (SUCCEEDED(hr))
+    {
+        if (hr != S_FALSE)
+        {
+            /* List not empty */
+            hr = hwcFillList(pfnWebcamAdd, pvUser, pu64WebcamAddResult, pEnumMoniker);
+            pEnumMoniker->Release();
+        }
+        else
+            hr = S_OK; /* Return empty list. */
+    }
+    return hr;
+}
+
+static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult)
+{
+    HRESULT hr = hwcDeviceList(pfnWebcamAdd, pvUser, pu64WebcamAddResult);
+    if (FAILED(hr))
+        return VERR_NOT_SUPPORTED;
+    return VINF_SUCCESS;
 }
 #else
 /** @todo The other hosts. */
