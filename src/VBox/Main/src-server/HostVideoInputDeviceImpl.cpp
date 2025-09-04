@@ -466,6 +466,9 @@ static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint6
         return VERR_NOT_SUPPORTED;
     return VINF_SUCCESS;
 }
+#elif defined(RT_OS_DARWIN)
+DECLHIDDEN(int) DarwinHostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult);
+# define hostWebcamList DarwinHostWebcamList
 #else
 /** @todo The other hosts. */
 static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult)

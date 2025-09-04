@@ -743,7 +743,8 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
  VBoxSVC_SOURCES.darwin = \
  	src-server/darwin/iokit.cpp \
  	src-server/darwin/HostPowerDarwin.cpp \
- 	src-server/darwin/HostDnsServiceDarwin.cpp
+ 	src-server/darwin/HostDnsServiceDarwin.cpp \
+ 	src-server/darwin/HostGetWebcamDarwin.mm
  ifdef VBOX_WITH_VMNET
   VBoxSVC_SOURCES.darwin += \
   	src-server/HostOnlyNetworkImpl.cpp
@@ -804,7 +805,11 @@ if !defined(VBOX_ONLY_SDK) && !defined(VBOX_ONLY_EXTPACKS) # Note this goes on f
   	$(PATH_TOOL_$(VBOX_VCC_TOOL)_LIB)/comsupp.lib \
   	$(PATH_SDK_$(VBOX_WINPSDK)_LIB)/WbemUuid.Lib
  endif
- VBoxSVC_LDFLAGS.darwin   = -framework IOKit -framework SystemConfiguration
+ VBoxSVC_LDFLAGS.darwin   = \
+ 	-framework IOKit \
+ 	-framework SystemConfiguration \
+ 	-framework AVFoundation \
+ 	-framework Foundation
 
  ifdef VBOX_WITH_3D_ACCELERATION
   VBoxSVC_DEFS += VBOX_WITH_3D_ACCELERATION
