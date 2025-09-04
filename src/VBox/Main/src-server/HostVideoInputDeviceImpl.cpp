@@ -386,8 +386,8 @@ static HRESULT hwcFillList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
         }
 
         char *pszPath = NULL;
-        int rc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszPath);
-        if (RT_FAILURE(rc))
+        int vrc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszPath);
+        if (RT_FAILURE(vrc))
             pszPath = NULL;
 
         VariantClear(&var);
@@ -401,8 +401,8 @@ static HRESULT hwcFillList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
         char *pszName = NULL;
         if (SUCCEEDED(hr))
         {
-            rc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszName);
-            if (RT_FAILURE(rc))
+            vrc = RTUtf16ToUtf8((PRTUTF16)var.bstrVal, &pszName);
+            if (RT_FAILURE(vrc))
                 pszName = NULL;
             VariantClear(&var);
         }
