@@ -79,6 +79,13 @@
 # include <iprt/asm-amd64-x86.h>
 #endif
 
+#if (RTLNX_VER_MIN(6,16,0)) && defined(CONFIG_KVM_GENERIC_HARDWARE_ENABLING) && defined(VBOX_WITH_HOST_VMX)
+# if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+#  include <linux/kvm_host.h>
+#  define SUPDRV_LINUX_HAS_KVM_VMX_API
+# endif
+#endif
+
 
 /*********************************************************************************************************************************
 *   Defined Constants And Macros                                                                                                 *
@@ -1639,6 +1646,53 @@ int VBOXCALL    supdrvOSMsrProberModify(RTCPUID idCpu, PSUPMSRPROBER pReq)
 }
 
 #endif /* SUPDRV_WITH_MSR_PROBER */
+
+
+/**
+ * @copydoc SUPR0EnableVTx
+ */
+int VBOXCALL supdrvOSEnableVTx(bool fEnable)
+{
+#ifdef SUPDRV_LINUX_HAS_KVM_VMX_API
+    if (fEnable)
+    {
+        /* kvm_enable_virtualization() is guarded by kvm_usage_count reference counter inside a mutex. */
+        int const rc = kvm_enable_virtualization();
+        if (!rc)
+            return VINF_SUCCESS;
+        printk(KERN_ERR "vboxdrv: Failed to enable the KVM kernel API for acquiring VT-x. rc=%d\n", rc);
+        return VERR_NOT_AVAILABLE;
+    }
+
+    kvm_disable_virtualization();
+    return VINF_SUCCESS;
+#endif
+    return VERR_NOT_SUPPORTED;
+}
+
+
+/**
+ * @copydoc SUPR0SuspendVTxOnCpu
+ */
+bool VBOXCALL supdrvOSSuspendVTxOnCpu(void)
+{
+# ifdef SUPDRV_LINUX_HAS_KVM_VMX_API
+    /* The KVM kernel API registers and handles suspend/resume callbacks by itself. */
+    return true;
+# else
+    return false;
+# endif
+}
+
+
+/**
+ * @copydoc SUPR0ResumeVTxOnCpu
+ */
+void VBOXCALL supdrvOSResumeVTxOnCpu(bool fSuspended)
+{
+    /* The KVM kernel API registers and handles suspend/resume callbacks by itself. */
+    NOREF(fSuspended);
+}
 
 
 /**

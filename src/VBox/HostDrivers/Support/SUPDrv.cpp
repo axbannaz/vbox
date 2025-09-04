@@ -4315,6 +4315,8 @@ SUPR0DECL(int) SUPR0EnableVTx(bool fEnable)
 {
 # if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
     return supdrvOSEnableVTx(fEnable);
+# elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
+    return supdrvOSEnableVTx(fEnable);
 # else
     RT_NOREF1(fEnable);
     return VERR_NOT_SUPPORTED;
@@ -4334,6 +4336,8 @@ SUPR0DECL(bool) SUPR0SuspendVTxOnCpu(void)
 {
 # if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
     return supdrvOSSuspendVTxOnCpu();
+# elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
+    return supdrvOSSuspendVTxOnCpu();
 # else
     return false;
 # endif
@@ -4351,6 +4355,8 @@ SUPR0_EXPORT_SYMBOL(SUPR0SuspendVTxOnCpu);
 SUPR0DECL(void) SUPR0ResumeVTxOnCpu(bool fSuspended)
 {
 # if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
+    supdrvOSResumeVTxOnCpu(fSuspended);
+# elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
     supdrvOSResumeVTxOnCpu(fSuspended);
 # else
     RT_NOREF1(fSuspended);

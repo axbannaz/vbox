@@ -734,6 +734,7 @@ if   !defined(VBOX_ONLY_DOCS) \
   endif
   VBoxDrv_DEFS           += VBOX_PERMIT_MORE VBOX_PERMIT_EVEN_MORE
   #VBoxDrv_DEFS.debug      += DEBUG_DARWIN_GIP
+  VBoxDrv_DEFS.linux     := VBOX_WITH_HOST_VMX
   VBoxDrv_DEFS.darwin    := VBOX_WITH_HOST_VMX
   ifdef VBOX_WITH_RAW_MODE
    VBoxDrv_DEFS.darwin   += VBOX_WITH_RAW_MODE
