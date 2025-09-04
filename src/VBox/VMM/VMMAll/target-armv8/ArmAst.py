@@ -697,25 +697,50 @@ class ArmAstBinaryOp(ArmAstBase):
                 iLeft = self.oLeft.getIntegerOrValue();
                 if iLeft is None and isinstance(self.oLeft, ArmAstBool):
                     iLeft = 1 if self.oLeft.fValue else 0;
-                if iLeft is not None:
 
-                    iRight = self.oRight.getIntegerOrValue();
-                    if iRight is None and isinstance(self.oRight, ArmAstBool):
-                        iRight = 1 if self.oRight.fValue else 0;
-                    if iRight is not None:
-                        if self.sOp == '==':
-                            return fnCallback(ArmAstBool(iLeft == iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        if self.sOp == '!=':
-                            return fnCallback(ArmAstBool(iLeft != iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        if self.sOp == '>':
-                            return fnCallback(ArmAstBool(iLeft >  iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        if self.sOp == '>=':
-                            return fnCallback(ArmAstBool(iLeft >= iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        if self.sOp == '<':
-                            return fnCallback(ArmAstBool(iLeft <  iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        if self.sOp == '<=':
-                            return fnCallback(ArmAstBool(iLeft <= iRight), fEliminationAllowed, oCallbackArg, aoStack);
-                        ## @todo we could do +, -, div, mod, mult here, but need to consider the width of the result...
+                iRight = self.oRight.getIntegerOrValue();
+                if iRight is None and isinstance(self.oRight, ArmAstBool):
+                    iRight = 1 if self.oRight.fValue else 0;
+
+                fLeftIs0  = iLeft  is not None and iLeft  == 0; # pylint & python 3.13 both complains about iLeft is 0. Sigh.
+                fRightIs0 = iRight is not None and iRight == 0;
+                if fLeftIs0 or fRightIs0:
+                    # Simplify: something & 0 => 0
+                    if self.sOp == 'AND':
+                        return fnCallback(self.oLeft if fLeftIs0 else self.oRight, fEliminationAllowed, oCallbackArg, aoStack);
+                    # Simplification: something + 0 => something;  0 + something => something
+                    if self.sOp == '+':
+                        return fnCallback(self.oRight if fLeftIs0 else self.oLeft, fEliminationAllowed, oCallbackArg, aoStack);
+                    # Simplification: something - 0 => something.
+                    if self.sOp == '-' and fRightIs0:
+                        return fnCallback(self.oLeft, fEliminationAllowed, oCallbackArg, aoStack);
+
+                if iLeft is not None and iRight is not None:
+                    # Simplication: int comp-op int -> bool result.
+                    if self.sOp == '==':
+                        return fnCallback(ArmAstBool(iLeft == iRight), fEliminationAllowed, oCallbackArg, aoStack);
+                    if self.sOp == '!=':
+                        return fnCallback(ArmAstBool(iLeft != iRight), fEliminationAllowed, oCallbackArg, aoStack);
+                    if self.sOp == '>':
+                        return fnCallback(ArmAstBool(iLeft >  iRight), fEliminationAllowed, oCallbackArg, aoStack);
+                    if self.sOp == '>=':
+                        return fnCallback(ArmAstBool(iLeft >= iRight), fEliminationAllowed, oCallbackArg, aoStack);
+                    if self.sOp == '<':
+                        return fnCallback(ArmAstBool(iLeft <  iRight), fEliminationAllowed, oCallbackArg, aoStack);
+                    if self.sOp == '<=':
+                        return fnCallback(ArmAstBool(iLeft <= iRight), fEliminationAllowed, oCallbackArg, aoStack);
+
+                    # Simplication: int <AND|OR> int -> int result.
+                    if self.sOp in {'AND', 'OR' }:
+                        cBitsWidth = max(self.oLeft.getWidth(), self.oRight.getWidth());
+                        if self.sOp == 'AND':
+                            iResult = iLeft & iRight;
+                        else:
+                            iResult = iLeft | iRight;
+                        cBitsWidth = max(cBitsWidth, iResult.bit_length())
+                        return fnCallback(ArmAstInteger(iResult, cBitsWidth), fEliminationAllowed, oCallbackArg, aoStack);
+
+                    ## @todo we could do +, -, div, mod, mult here, but need to consider the width of the result...
 
             return fnCallback(self, fEliminationAllowed, oCallbackArg, aoStack);
 
