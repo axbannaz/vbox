@@ -29,15 +29,73 @@
 #include "HostVideoInputDeviceImpl.h"
 #include "LoggingNew.h"
 #include "VirtualBoxImpl.h"
-#ifdef VBOX_WITH_EXTPACK
-# include "ExtPackManagerImpl.h"
-#endif
 
 #include <iprt/err.h>
 #include <iprt/ldr.h>
 #include <iprt/path.h>
 
-#include <VBox/sup.h>
+#if defined(RT_OS_LINUX) || defined(RT_OS_SOLARIS)
+# include <errno.h>
+# include <fcntl.h>
+# include <unistd.h>
+# include <sys/mman.h>
+# include <sys/poll.h>
+# include <sys/stat.h>
+
+# if defined(RT_OS_SOLARIS)
+#  include <stropts.h>
+#  include <sys/videodev2.h>
+# else
+#  include <sys/ioctl.h>
+#  include <linux/videodev2.h>
+# endif
+
+/* According to V4L2 API spec: 4.1. Video Capture Interface */
+# define HWC_V4L2_MAX_DEVICES 64
+
+# if defined RT_OS_LINUX
+#  ifndef V4L2_CAP_META_CAPTURE /* Since kernel 4.12.0. */
+#   define V4L2_CAP_META_CAPTURE (0x00800000)
+#  endif
+
+#  ifndef KERNEL_VERSION
+#   define KERNEL_VERSION(a,b,c) (((a) << 16) + ((b) << 8) + (c))
+#  endif
+
+/* In kernel 4.12.0, V4L stack introduced V4L2_CAP_META_CAPTURE marco.
+ * Devices which report this capability do not provide actual image data.
+ * Therefore, such devices need to be filtered out when discovering all
+ * the available V4L devices in system.
+ *
+ * Original struct @v4l2_capability was extended with field @device_caps
+ * in kernel 3.4.0. This field reflects actual capabilities of /dev/videoX
+ * and required to skip V4L META devices when iterating over the list.
+ *
+ * To filter META devices, we only use @device_caps if device reports
+ * V4L API version >= 4.12.0 in @version field. According to kernel
+ * documentation, starting from kernel 3.1 @version field
+ * in struct v4l2_capability should generally match to kernel version.
+ *
+ * https://www.kernel.org/doc/html/latest/userspace-api/media/v4l/querycap.html.
+ */
+struct v4l2_capability_3_4_0
+{
+    uint8_t    driver[16];
+    uint8_t    card[32];
+    uint8_t    bus_info[32];
+    uint32_t   version;
+    uint32_t   capabilities;
+    uint32_t   device_caps;
+    uint32_t   reserved[3];
+};
+
+/* This macro represents LINUX_VERSION_CODE macro which corresponds
+ * to 4.12.0 kernel. Field @device_caps of struct v4l2_capability_3_4 should
+ * only be used if its @version >= VBOX_WITH_V4L2_CAP_META_CAPTURE.
+ */
+#  define VBOX_WITH_V4L2_CAP_META_CAPTURE KERNEL_VERSION(4,12,0)
+# endif
+#endif
 
 /*
  * HostVideoInputDevice implementation.
@@ -135,103 +193,168 @@ typedef DECLCALLBACKTYPE(int, FNVBOXHOSTWEBCAMADD,(void *pvUser,
                                                    uint64_t *pu64Result));
 typedef FNVBOXHOSTWEBCAMADD *PFNVBOXHOSTWEBCAMADD;
 
-typedef DECLCALLBACKTYPE(int, FNVBOXHOSTWEBCAMLIST,(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
-                                                    void *pvUser,
-                                                    uint64_t *pu64WebcamAddResult));
-typedef FNVBOXHOSTWEBCAMLIST *PFNVBOXHOSTWEBCAMLIST;
+/** @todo This needs to go into the respective host specific sub directories. */
+#if defined(RT_OS_LINUX) || defined(RT_OS_SOLARIS)
 
-
-/*
- * Work around clang being unhappy about PFNVBOXHOSTWEBCAMLIST
- * ("exception specifications are not allowed beyond a single level of
- * indirection").  The original comment for 13.0 check said: "assuming
- * this issue will be fixed eventually".  Well, 13.0 is now out, and
- * it was not.
- */
-#define CLANG_EXCEPTION_SPEC_HACK (RT_CLANG_PREREQ(11, 0) /* && !RT_CLANG_PREREQ(13, 0) */)
-
-#if CLANG_EXCEPTION_SPEC_HACK
-static int loadHostWebcamLibrary(const char *pszPath, RTLDRMOD *phmod, void **ppfn)
-#else
-static int loadHostWebcamLibrary(const char *pszPath, RTLDRMOD *phmod, PFNVBOXHOSTWEBCAMLIST *ppfn)
-#endif
+# if defined(RT_OS_LINUX)
+static bool hwcLinuxVideoCaptureDevice(struct v4l2_capability_3_4_0 *pCaps)
 {
-    int vrc;
-    if (RTPathHavePath(pszPath))
+    if (pCaps)
     {
-        RTLDRMOD hmod = NIL_RTLDRMOD;
-        RTERRINFOSTATIC ErrInfo;
-        vrc = SUPR3HardenedLdrLoadPlugIn(pszPath, &hmod, RTErrInfoInitStatic(&ErrInfo));
-        if (RT_SUCCESS(vrc))
+        /* Starting from kernel version 4.12.0, V4L2_CAP_META_CAPTURE was introduced.
+         * We filter out devices that report this capability because they do not provide
+         * actual image data. The way to exclude such devices is to look into @device_caps
+         * field instead of @capabilities. Field @device_caps was introduced in
+         * kernel 3.1.0. We detect if we can use @device_caps in runtime in order to
+         * support build on older platforms. */
+        uint32_t caps = (pCaps->version >= VBOX_WITH_V4L2_CAP_META_CAPTURE) ?
+            pCaps->device_caps : pCaps->capabilities;
+
+        return ((caps & V4L2_CAP_VIDEO_CAPTURE) != 0
+            && (caps & V4L2_CAP_STREAMING) != 0);
+    }
+
+    return false;
+}
+# endif
+
+static int hwcOpen(const char *pszPath, int *pHandle)
+{
+    int rc = VINF_SUCCESS;
+
+    struct stat st;
+    int ret = stat(pszPath, &st);
+    if (   ret == 0
+        && S_ISCHR(st.st_mode))
+    {
+        /* V4L device must be opened with these flags. */
+        int h = open(pszPath, O_RDWR | O_NONBLOCK);
+        if (h != -1)
+            *pHandle = h;
+        else
+            rc = VERR_OPEN_FAILED;
+    }
+    else
+        rc = VERR_NOT_FOUND;
+
+    return rc;
+}
+
+static void hwcClose(int handle)
+{
+    if (handle != -1)
+        close(handle);
+}
+
+static int hwcIoctl(int handle, unsigned fn, void *pv)
+{
+    int ret;
+    do
+    {
+        ret = ioctl(handle, (int)fn, pv);
+    } while (ret == -1 && errno == EINTR);
+
+#ifdef RT_OS_SOLARIS
+    if (ret == 0)
+        return VINF_SUCCESS;
+    Assert(ret == -1 && errno > 0);
+    return RTErrConvertFromErrno((unsigned)errno);
+#else
+    return ret == 0 ? VINF_SUCCESS : VERR_FILE_IO_ERROR;
+#endif
+}
+
+static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult)
+{
+    int rc = VINF_SUCCESS;
+
+    int iDevice = 0;
+    while (iDevice < HWC_V4L2_MAX_DEVICES)
+    {
+        iDevice++;
+
+        char *pszPath = NULL;
+        RTStrAPrintf(&pszPath, "/dev/video%d", iDevice - 1); /* First device is /dev/video0 */
+        if (pszPath)
         {
-            static const char s_szSymbol[] = "VBoxHostWebcamList";
-            vrc = RTLdrGetSymbol(hmod, s_szSymbol, (void **)ppfn);
-            if (RT_SUCCESS(vrc))
-                *phmod = hmod;
-            else
+            int handle = -1;
+            int rc2 = hwcOpen(pszPath, &handle);
+            if (RT_SUCCESS(rc2))
             {
-                if (vrc != VERR_SYMBOL_NOT_FOUND)
-                    LogRel(("Resolving symbol '%s': %Rrc\n", s_szSymbol, vrc));
-                RTLdrClose(hmod);
-                hmod = NIL_RTLDRMOD;
+#if defined(RT_OS_LINUX)
+                struct v4l2_capability_3_4_0 caps;
+#else
+                struct v4l2_capability caps;
+#endif
+                RT_ZERO(caps);
+                rc2 = hwcIoctl(handle, VIDIOC_QUERYCAP, &caps);
+                if (RT_SUCCESS(rc2))
+                {
+                    if (
+#if defined(RT_OS_LINUX)
+                        /* On Linux host make sure that actual device has required
+                         * capabilities. Filter out meta devices (V4L2_CAP_META_CAPTURE). */
+                        hwcLinuxVideoCaptureDevice(&caps))
+#else
+                           (caps.capabilities & V4L2_CAP_VIDEO_CAPTURE) != 0
+                        && (caps.capabilities & V4L2_CAP_STREAMING) != 0)
+#endif
+                    {
+                        char *pszAlias = NULL;
+                        RTStrAPrintf(&pszAlias, ".%d", iDevice);
+                        if (pszAlias)
+                            rc = pfnWebcamAdd(pvUser,
+                                              (char *)caps.card,
+                                              pszPath,
+                                              pszAlias,
+                                              pu64WebcamAddResult);
+                        else
+                            rc = VERR_NO_MEMORY;
+
+                        RTStrFree(pszAlias);
+                    }
+                }
+
+                hwcClose(handle);
             }
+
+            RTStrFree(pszPath);
         }
         else
         {
-            LogRel(("Loading the library '%s': %Rrc\n", pszPath, vrc));
-            if (RTErrInfoIsSet(&ErrInfo.Core))
-                LogRel(("  %s\n", ErrInfo.Core.pszMsg));
+            rc = VERR_NO_MEMORY;
         }
-    }
-    else
-    {
-        LogRel(("Loading the library '%s': No path! Refusing to try loading it!\n", pszPath));
-        vrc = VERR_INVALID_PARAMETER;
-    }
-    return vrc;
-}
 
+        if (RT_FAILURE(rc))
+            break;
+    }
+
+    return rc;
+}
+#else
+/** @todo The other hosts. */
+static int hostWebcamList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd, void *pvUser, uint64_t *pu64WebcamAddResult)
+{
+    RT_NOREF(pfnWebcamAdd, pvUser);
+    *pu64WebcamAddResult = (uint64_t)E_FAIL;
+    return VERR_NOT_SUPPORTED;
+}
+#endif
 
 static HRESULT fillDeviceList(VirtualBox *pVirtualBox, HostVideoInputDeviceList *pList)
 {
-    Utf8Str strLibrary;
-#ifdef VBOX_WITH_EXTPACK
-    ExtPackManager *pExtPackMgr = pVirtualBox->i_getExtPackManager();
-    HRESULT hrc = pExtPackMgr->i_getLibraryPathForExtPack("VBoxHostWebcam", ORACLE_PUEL_EXTPACK_NAME, &strLibrary);
-#else
-    HRESULT hrc = E_NOTIMPL;
-#endif
+    uint64_t u64Result = S_OK;
+    HRESULT hrc = S_OK;
+    int vrc = hostWebcamList(hostWebcamAdd, pList, &u64Result);
+    Log(("VBoxHostWebcamList vrc %Rrc, result 0x%08RX64\n", vrc, u64Result));
+    if (RT_FAILURE(vrc))
+        hrc = (HRESULT)u64Result;
 
     if (SUCCEEDED(hrc))
     {
-        PFNVBOXHOSTWEBCAMLIST pfn = NULL;
-        RTLDRMOD hmod = NIL_RTLDRMOD;
-#if CLANG_EXCEPTION_SPEC_HACK
-        int vrc = loadHostWebcamLibrary(strLibrary.c_str(), &hmod, (void **)&pfn);
-#else
-        int vrc = loadHostWebcamLibrary(strLibrary.c_str(), &hmod, &pfn);
-#endif
-
-        LogRel(("Load [%s] vrc=%Rrc\n", strLibrary.c_str(), vrc));
-
-        if (RT_SUCCESS(vrc))
-        {
-            uint64_t u64Result = S_OK;
-            vrc = pfn(hostWebcamAdd, pList, &u64Result);
-            Log(("VBoxHostWebcamList vrc %Rrc, result 0x%08RX64\n", vrc, u64Result));
-            if (RT_FAILURE(vrc))
-                hrc = (HRESULT)u64Result;
-
-            RTLdrClose(hmod);
-            hmod = NIL_RTLDRMOD;
-        }
-
-        if (SUCCEEDED(hrc))
-        {
-            if (RT_FAILURE(vrc))
-                hrc = pVirtualBox->setErrorBoth(VBOX_E_IPRT_ERROR, vrc,
-                                                HostVideoInputDevice::tr("Failed to get webcam list: %Rrc"), vrc);
-        }
+        if (RT_FAILURE(vrc))
+            hrc = pVirtualBox->setErrorBoth(VBOX_E_IPRT_ERROR, vrc,
+                                            HostVideoInputDevice::tr("Failed to get webcam list: %Rrc"), vrc);
     }
 
     return hrc;

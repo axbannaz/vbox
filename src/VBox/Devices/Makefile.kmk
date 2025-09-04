@@ -505,24 +505,37 @@ if !defined(VBOX_ONLY_EXTPACKS) && "$(intersects $(KBUILD_TARGET_ARCH),$(VBOX_SU
    	USB/DevXHCI.cpp
   endif
 
-  if defined(VBOX_WITH_USB_VIDEO_IMPL) && !defined(VBOX_WITH_EXTPACK_PUEL)
-   if1of ($(KBUILD_TARGET), linux)
+  if defined(VBOX_WITH_USB_VIDEO_IMPL)
     VBoxDD_DEFS          += VBOX_WITH_USB_VIDEO_IMPL
     VBoxDD_SOURCES       += \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/UsbWebcam.cpp \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/UsbWebcamDesc.cpp \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/jpggen.cpp \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/DrvHostWebcam/DrvHostWebcam.cpp \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/DrvHostWebcam/JPEGEnc.cpp
+    	Video/UsbWebcam.cpp \
+    	Video/UsbWebcamDesc.cpp \
+    	Video/jpggen.cpp \
+    	Video/DrvHostWebcam.cpp \
+    	Video/JPEGEnc.cpp
     $(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/DrvHostWebcam/JPEGEnc.cpp_INCS = \
     	$(VBOX_JPEG_INCS)
+    VBoxDD_SOURCES.darwin += \
+    	Video/HostWebcam-darwin.mm
     VBoxDD_SOURCES.linux += \
-    	$(PATH_ROOT)/src/VBox/ExtPacks/Puel/UsbWebcam/DrvHostWebcam/HostWebcam-v4l2.cpp
+    	Video/HostWebcam-v4l2.cpp
+    VBoxDD_SOURCES.solaris += \
+    	Video/HostWebcam-v4l2.cpp
+    VBoxDD_SOURCES.win += \
+    	Video/HostWebcam-win.cpp
     VBoxDD_LIBS += \
     	$(PATH_STAGE_LIB)/VBox-libjpeg$(VBOX_SUFF_LIB) \
     	$(PATH_STAGE_LIB)/VBox-libjpeg12$(VBOX_SUFF_LIB) \
     	$(PATH_STAGE_LIB)/VBox-libjpeg16$(VBOX_SUFF_LIB)
-   endif
+    VBoxDD_LIBS.win += \
+    	strmiids.lib
+    VBoxDD_LDFLAGS.darwin += \
+    	-framework AVFoundation \
+    	-framework CoreFoundation \
+    	-framework ApplicationServices \
+    	-framework CoreMedia \
+    	-framework CoreVideo \
+    	-framework Foundation
   endif
 
  endif # VBOX_WITH_USB
