@@ -416,8 +416,8 @@ static HRESULT hwcFillList(PFNVBOXHOSTWEBCAMADD pfnWebcamAdd,
 
         if (pszName && pszPath && pszAlias)
         {
-            rc = pfnWebcamAdd(pvUser, pszName, pszPath, pszAlias, pu64WebcamAddResult);
-            if (RT_FAILURE(rc))
+            vrc = pfnWebcamAdd(pvUser, pszName, pszPath, pszAlias, pu64WebcamAddResult);
+            if (RT_FAILURE(vrc))
                 hr = E_FAIL;
         }
         else
