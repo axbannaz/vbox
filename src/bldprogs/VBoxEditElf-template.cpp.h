@@ -551,7 +551,7 @@ static RTEXITCODE ELFEDIT_NAME(Parse)(PELFEDITSTUBIMG pStubImg, RTFILE hFileElf)
                 if (pStubImg->cNeeded == pStubImg->cNeededMax)
                 {
                     const char **papszNeededNew = (const char **)RTMemRealloc(pStubImg->papszNeeded,
-                                                                              (pStubImg->cNeededMax + 10) * sizeof(const char **));
+                                                                              (pStubImg->cNeededMax + 10) * sizeof(const char *));
                     if (!papszNeededNew)
                         return RTMsgErrorExit(RTEXITCODE_FAILURE,
                                               "Failed to allocate more entries for the needed array\n",

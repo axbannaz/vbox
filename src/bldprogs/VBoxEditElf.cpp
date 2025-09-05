@@ -55,7 +55,7 @@
 /**
  * Symbol type.
  */
-typedef enum ELDEDITSYMTYPE
+typedef enum ELFEDITSYMTYPE
 {
     kElfEditSymType_Invalid = 0,
     kElfEditSymType_Function,
@@ -64,13 +64,13 @@ typedef enum ELDEDITSYMTYPE
     kElfEditSymType_GnuIndFunc,
     kElfEditSymType_NoType,
     kElfEditSymType_32Bit_Hack = 0x7fffffff
-} ELDEDITSYMTYPE;
+} ELFEDITSYMTYPE;
 
 
 /**
  * Symbol visbility.
  */
-typedef enum ELDEDITSYMVISIBILITY
+typedef enum ELFEDITSYMVISIBILITY
 {
     kElfEditSymVisbility_Invalid = 0,
     kElfEditSymVisbility_Default,
@@ -78,7 +78,7 @@ typedef enum ELDEDITSYMVISIBILITY
     kElfEditSymVisbility_Internal,
     kElfEditSymVisbility_Protected,
     kElfEditSymVisbility_32Bit_Hack = 0x7fffffff
-} ELDEDITSYMVISIBILITY;
+} ELFEDITSYMVISIBILITY;
 
 
 /**
@@ -105,9 +105,9 @@ typedef struct ELFEDITSTUBSYM
     /** The name of the symbol. */
     const char              *pszName;
     /** The symbol type */
-    ELDEDITSYMTYPE          enmType;
+    ELFEDITSYMTYPE          enmType;
     /** The symbol visbility. */
-    ELDEDITSYMVISIBILITY    enmVisibility;
+    ELFEDITSYMVISIBILITY    enmVisibility;
     /** Size of the symbol in bytes. */
     size_t                  cbSym;
     /** Flag whether this is a weak symbol. */
@@ -181,7 +181,8 @@ static enum
     kVBoxEditElfAction_DeleteRunpath,
     kVBoxEditElfAction_ChangeRunpath,
     kVBoxEditElfAction_CreateLinkerStub,
-    kVBoxEditElfAction_CreateJsonStub
+    kVBoxEditElfAction_CreateJsonStub,
+    kVBoxEditElfAction_CreateLinkerStubFromJson
 }                 g_enmAction = kVBoxEditElfAction_Nothing;
 static const char *g_pszInput = NULL;
 /** Verbosity level. */
@@ -826,7 +827,336 @@ static RTEXITCODE createLinkerStubFrom(const char *pszInput, const char *pszStub
     return RTEXITCODE_SUCCESS;
 }
 
-#if 0
+
+static RTEXITCODE elfEditStubLoadFromJsonNeeded(PELFEDITSTUBIMG pStubImg, RTJSONVAL hJsonNeeded, const char *pszInput)
+{
+    if (RTJsonValueGetType(hJsonNeeded) != RTJSONVALTYPE_ARRAY)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Needed' in JSON stub '%s' is not an array\n", pszInput);
+
+    uint32_t cNeeded = 0;
+    int rc = RTJsonValueQueryArraySize(hJsonNeeded, &cNeeded);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query number of items in 'Needed' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    pStubImg->papszNeeded = (const char **)RTMemAllocZ(cNeeded * sizeof(const char *));
+    if (!pStubImg->papszNeeded)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %u entries for the 'Needed' array\n", cNeeded);
+    pStubImg->cNeeded = cNeeded;
+
+    RTJSONIT hJsonIt = NIL_RTJSONIT;
+    rc = RTJsonIteratorBeginArray(hJsonNeeded, &hJsonIt);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to process 'Needed' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    for (uint32_t i = 0; i < cNeeded; i++)
+    {
+        RTJSONVAL hJsonValNeeded = NIL_RTJSONVAL;
+
+        rc = RTJsonIteratorQueryValue(hJsonIt, &hJsonValNeeded, NULL /*ppszName*/);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to get entry %u in 'Needed' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+
+        const char *pszNeeded = RTJsonValueGetString(hJsonValNeeded);
+        if (!pszNeeded)
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Entry %u in 'Needed' array in JSON stub '%s' is not a string\n",
+                                  i, pszInput);
+
+        pStubImg->papszNeeded[i] = elfEditImgAddString(pStubImg, pszNeeded);
+        if (!pStubImg->papszNeeded[i])
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to clone entry %u in 'Needed' array in JSON stub '%s'\n",
+                                  i, pszInput);
+
+        RTJsonValueRelease(hJsonValNeeded);
+
+        rc = RTJsonIteratorNext(hJsonIt);
+        if (rc == VERR_JSON_ITERATOR_END)
+        {
+            Assert(i == cNeeded - 1);
+            break;
+        }
+    }
+
+    RTJsonIteratorFree(hJsonIt);
+    return RTEXITCODE_SUCCESS;
+}
+
+
+static int elfEditStubLoadFromJsonAddToStrSpace(PELFEDITSTUBIMG pStubImg, RTJSONVAL hJsonObj, const char *pszMember, const char **ppsz)
+{
+    RTJSONVAL hJsonVal = NIL_RTJSONVAL;
+    int rc = RTJsonValueQueryByName(hJsonObj, pszMember, &hJsonVal);
+    if (RT_FAILURE(rc))
+        return rc;
+
+    const char *pszVal = RTJsonValueGetString(hJsonVal);
+    if (!pszVal)
+        return VERR_JSON_VALUE_INVALID_TYPE;
+
+    *ppsz = elfEditImgAddString(pStubImg, pszVal);
+    RTJsonValueRelease(hJsonVal);
+    return *ppsz ? VINF_SUCCESS : VERR_NO_MEMORY;
+}
+
+
+static RTEXITCODE elfEditStubLoadFromJsonVersions(PELFEDITSTUBIMG pStubImg, RTJSONVAL hJsonVersions, const char *pszInput)
+{
+    if (RTJsonValueGetType(hJsonVersions) != RTJSONVALTYPE_ARRAY)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Versions' in JSON stub '%s' is not an array\n", pszInput);
+
+    uint32_t cVersions = 0;
+    int rc = RTJsonValueQueryArraySize(hJsonVersions, &cVersions);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query number of items in 'Versions' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    pStubImg->paVersions = (PELFEDITSTUBVERSION)RTMemAllocZ(cVersions * sizeof(*pStubImg->paVersions));
+    if (!pStubImg->papszNeeded)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %u entries for the 'Needed' array\n", cVersions);
+    pStubImg->cVersions = cVersions;
+
+    RTJSONIT hJsonIt = NIL_RTJSONIT;
+    rc = RTJsonIteratorBeginArray(hJsonVersions, &hJsonIt);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to process 'Versions' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    for (uint32_t i = 0; i < cVersions; i++)
+    {
+        PELFEDITSTUBVERSION pVersion = &pStubImg->paVersions[i];
+        RTJSONVAL hJsonVal = NIL_RTJSONVAL;
+
+        rc = RTJsonIteratorQueryValue(hJsonIt, &hJsonVal, NULL /*ppszName*/);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to get entry %u in 'Versions' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+
+        RTJSONVALTYPE enmType = RTJsonValueGetType(hJsonVal);
+        if (   enmType != RTJSONVALTYPE_NULL
+            && enmType != RTJSONVALTYPE_OBJECT)
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Entry %u in 'Versions' array in JSON stub '%s' is not an object or null\n",
+                                  i, pszInput);
+        }
+
+        pVersion->idxVersion = i;
+        if (enmType == RTJSONVALTYPE_NULL)
+        {
+            pVersion->pszVersion = NULL;
+            pVersion->pszParent  = NULL;
+        }
+        else
+        {
+            rc = elfEditStubLoadFromJsonAddToStrSpace(pStubImg, hJsonVal, "Version", &pVersion->pszVersion);
+            if (RT_FAILURE(rc))
+            {
+                RTJsonValueRelease(hJsonVal);
+                return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Version' field in entry %u in 'Versions' array in JSON stub '%s': %Rrc\n",
+                                      i, pszInput, rc);
+            }
+
+            rc = elfEditStubLoadFromJsonAddToStrSpace(pStubImg, hJsonVal, "Parent", &pVersion->pszParent);
+            if (RT_FAILURE(rc) && rc != VERR_NOT_FOUND)
+            {
+                RTJsonValueRelease(hJsonVal);
+                return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Parent' field in entry %u in 'Versions' array in JSON stub '%s': %Rrc\n",
+                                      i, pszInput, rc);
+            }
+        }
+
+        RTJsonValueRelease(hJsonVal);
+
+        rc = RTJsonIteratorNext(hJsonIt);
+        if (rc == VERR_JSON_ITERATOR_END)
+        {
+            Assert(i == cVersions - 1);
+            break;
+        }
+    }
+
+    RTJsonIteratorFree(hJsonIt);
+    return RTEXITCODE_SUCCESS;
+}
+
+
+static RTEXITCODE elfEditStubLoadFromJsonSymType(RTJSONVAL hJsonObj, ELFEDITSYMTYPE *penmType)
+{
+    RTJSONVAL hJsonVal = NIL_RTJSONVAL;
+    int rc = RTJsonValueQueryByName(hJsonObj, "Type", &hJsonVal);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Type' for symbol in 'Symbols' array in JSON stub: %Rrc\n", rc);
+
+    RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
+    const char *psz = RTJsonValueGetString(hJsonVal);
+    if (psz)
+    {
+        if (!RTStrCmp(psz, "Function"))
+            *penmType = kElfEditSymType_Function;
+        else if (!RTStrCmp(psz, "Object"))
+            *penmType = kElfEditSymType_Object;
+        else if (!RTStrCmp(psz, "Tls"))
+            *penmType = kElfEditSymType_Tls;
+        else if (!RTStrCmp(psz, "GnuIFunc"))
+            *penmType = kElfEditSymType_GnuIndFunc;
+        else if (!RTStrCmp(psz, "NoType"))
+            *penmType = kElfEditSymType_NoType;
+        else
+            rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "'%s' is not a valid type for 'Type' for symbol in 'Symbols' array in JSON stub\n", psz);
+    }
+    else
+        rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "'Type' for symbol in 'Symbols' array in JSON stub is not a string\n");
+
+    RTJsonValueRelease(hJsonVal);
+    return rcExit;
+}
+
+
+static RTEXITCODE elfEditStubLoadFromJsonSymVisibility(RTJSONVAL hJsonObj, ELFEDITSYMVISIBILITY *penmVisibility)
+{
+    RTJSONVAL hJsonVal = NIL_RTJSONVAL;
+    int rc = RTJsonValueQueryByName(hJsonObj, "Visibility", &hJsonVal);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Visibility' for symbol in 'Symbols' array in JSON stub: %Rrc\n", rc);
+
+    RTEXITCODE rcExit = RTEXITCODE_SUCCESS;
+    const char *psz = RTJsonValueGetString(hJsonVal);
+    if (psz)
+    {
+        if (!RTStrCmp(psz, "Default"))
+            *penmVisibility = kElfEditSymVisbility_Default;
+        else if (!RTStrCmp(psz, "Hidden"))
+            *penmVisibility = kElfEditSymVisbility_Hidden;
+        else if (!RTStrCmp(psz, "Internal"))
+            *penmVisibility = kElfEditSymVisbility_Internal;
+        else if (!RTStrCmp(psz, "Protected"))
+            *penmVisibility = kElfEditSymVisbility_Protected;
+        else
+            rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "'%s' is not a valid visbility for 'Visibility' for symbol in 'Symbols' array in JSON stub\n", psz);
+    }
+    else
+        rcExit = RTMsgErrorExit(RTEXITCODE_FAILURE, "'Visibility' for symbol in 'Symbols' array in JSON stub is not a string\n");
+
+    RTJsonValueRelease(hJsonVal);
+    return rcExit;
+}
+
+
+static RTEXITCODE elfEditStubLoadFromJsonSymbols(PELFEDITSTUBIMG pStubImg, RTJSONVAL hJsonSyms, const char *pszInput)
+{
+    if (RTJsonValueGetType(hJsonSyms) != RTJSONVALTYPE_ARRAY)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Symbols' in JSON stub '%s' is not an array\n", pszInput);
+
+    uint32_t cSyms = 0;
+    int rc = RTJsonValueQueryArraySize(hJsonSyms, &cSyms);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query number of items in 'Symbols' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    pStubImg->paSyms = (PELFEDITSTUBSYM)RTMemAllocZ(cSyms * sizeof(*pStubImg->paSyms));
+    if (!pStubImg->paSyms)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %u entries for the symbol table\n", cSyms);
+    pStubImg->cSyms = cSyms;
+
+    RTJSONIT hJsonIt = NIL_RTJSONIT;
+    rc = RTJsonIteratorBeginArray(hJsonSyms, &hJsonIt);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to process 'Symbols' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    for (uint32_t i = 0; i < cSyms; i++)
+    {
+        PELFEDITSTUBSYM pSym = &pStubImg->paSyms[i];
+        RTJSONVAL hJsonVal = NIL_RTJSONVAL;
+
+        rc = RTJsonIteratorQueryValue(hJsonIt, &hJsonVal, NULL /*ppszName*/);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to get entry %u in 'Versions' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+
+        RTJSONVALTYPE enmType = RTJsonValueGetType(hJsonVal);
+        if (enmType != RTJSONVALTYPE_OBJECT)
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Entry %u in 'Versions' array in JSON stub '%s' is not an object or null\n",
+                                  i, pszInput);
+        }
+
+        rc = elfEditStubLoadFromJsonAddToStrSpace(pStubImg, hJsonVal, "Name", &pSym->pszName);
+        if (RT_FAILURE(rc))
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Name' field in entry %u in 'Symbols' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+        }
+
+        RTEXITCODE rcExit = elfEditStubLoadFromJsonSymType(hJsonVal, &pSym->enmType);
+        if (rcExit != RTEXITCODE_SUCCESS)
+        {
+            RTJsonValueRelease(hJsonVal);
+            return rcExit;
+        }
+
+        rcExit = elfEditStubLoadFromJsonSymVisibility(hJsonVal, &pSym->enmVisibility);
+        if (rcExit != RTEXITCODE_SUCCESS)
+        {
+            RTJsonValueRelease(hJsonVal);
+            return rcExit;
+        }
+
+        int64_t cbSym = 0;
+        rc = RTJsonValueQueryIntegerByName(hJsonVal, "Size", &cbSym);
+        if (RT_FAILURE(rc))
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Size' field in entry %u in 'Symbols' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+        }
+        pSym->cbSym = (size_t)cbSym;
+
+        rc = RTJsonValueQueryBooleanByName(hJsonVal, "Weak", &pSym->fWeak);
+        if (RT_FAILURE(rc))
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Weak' field in entry %u in 'Symbols' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+        }
+
+        int64_t idxVersion = 0;
+        rc = RTJsonValueQueryIntegerByName(hJsonVal, "Version", &idxVersion);
+        if (RT_FAILURE(rc))
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Version' field in entry %u in 'Symbols' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+        }
+        if (idxVersion < 0 || idxVersion >= (int64_t)pStubImg->cVersions)
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Version' %RI64 in entry %u in 'Symbols' array in JSON stub '%s' is out of bounds [0, %u[\n",
+                                  idxVersion, i, pszInput, pStubImg->cVersions);
+        }
+        pSym->pVersion = &pStubImg->paVersions[idxVersion];
+
+        rc = RTJsonValueQueryBooleanByName(hJsonVal, "Default", &pSym->fDefaultVersion);
+        if (RT_FAILURE(rc))
+        {
+            RTJsonValueRelease(hJsonVal);
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Default' field in entry %u in 'Symbols' array in JSON stub '%s': %Rrc\n",
+                                  i, pszInput, rc);
+        }
+
+        RTJsonValueRelease(hJsonVal);
+
+        rc = RTJsonIteratorNext(hJsonIt);
+        if (rc == VERR_JSON_ITERATOR_END)
+        {
+            Assert(i == cSyms - 1);
+            break;
+        }
+    }
+
+    RTJsonIteratorFree(hJsonIt);
+    return RTEXITCODE_SUCCESS;
+}
+
+
 static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *pszInput)
 {
     RTERRINFOSTATIC ErrInfo;
@@ -862,32 +1192,38 @@ static RTEXITCODE elfEditStubLoadFromJson(PELFEDITSTUBIMG pStubImg, const char *
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to add '%s' to string table\n", pszTmp);
     RTStrFree(pszTmp);
 
-    RTJSONVAL hJsonNeeded = NIL_RTJSONVAL;
-    rc = RTJsonValueQueryByName(hJsonRoot, "Needed", &hJsonNeeded);
+    RTJSONVAL hJsonArr = NIL_RTJSONVAL;
+    rc = RTJsonValueQueryByName(hJsonRoot, "Needed", &hJsonArr);
     if (RT_FAILURE(rc) && rc != VERR_NOT_FOUND)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Needed' from JSON stub '%s': %Rrc\n", pszInput, rc);
 
-    if (RTJsonValueGetType(hJsonNeeded) != RTJSONVALTYPE_ARRAY)
-        return RTMsgErrorExit(RTEXITCODE_FAILURE, "'Needed' in JSON stub '%s' is not an array\n", pszInput);
+    RTEXITCODE rcExit = elfEditStubLoadFromJsonNeeded(pStubImg, hJsonArr, pszInput);
+    RTJsonValueRelease(hJsonArr);
+    if (rcExit != RTEXITCODE_SUCCESS)
+        return rcExit;
 
-    RTJSONIT hJsonIt = NIL_RTJSONIT;
-    rc = RTJsonIteratorBeginArray(hJsonNeeded, &hJsonIt);
-    if (RT_FAILURE(rc))
-        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to process 'Needed' array in JSON stub '%s': %Rrc\n", pszInput, rc);
+    rc = RTJsonValueQueryByName(hJsonRoot, "Versions", &hJsonArr);
+    if (RT_FAILURE(rc) && rc != VERR_NOT_FOUND)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Versions' from JSON stub '%s': %Rrc\n", pszInput, rc);
 
-    for (;;)
-    {
-        rc = RTJsonIteratorNext(hJsonIt);
-        if (rc == VERR_JSON_ITERATOR_END)
-            break;
-    }
+    rcExit = elfEditStubLoadFromJsonVersions(pStubImg, hJsonArr, pszInput);
+    RTJsonValueRelease(hJsonArr);
+    if (rcExit != RTEXITCODE_SUCCESS)
+        return rcExit;
 
-    RTJsonIteratorFree(hJsonIt);
+    rc = RTJsonValueQueryByName(hJsonRoot, "Symbols", &hJsonArr);
+    if (RT_FAILURE(rc) && rc != VERR_NOT_FOUND)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to query 'Symbols' from JSON stub '%s': %Rrc\n", pszInput, rc);
+
+    rcExit = elfEditStubLoadFromJsonSymbols(pStubImg, hJsonArr, pszInput);
+    RTJsonValueRelease(hJsonArr);
+    if (rcExit != RTEXITCODE_SUCCESS)
+        return rcExit;
 
     RTJsonValueRelease(hJsonRoot);
     return RTEXITCODE_SUCCESS;
 }
-#endif
+
 
 static RTEXITCODE elfEditStubDumpToJson(PELFEDITSTUBIMG pStubImg, const char *pszOutput)
 {
@@ -970,7 +1306,7 @@ static RTEXITCODE elfEditStubDumpToJson(PELFEDITSTUBIMG pStubImg, const char *ps
         }
 
         RTStrmPrintf(pStrm,
-                     "        { Name: '%s', Type: '%s', Visibilty: '%s', Weak: %RTbool, Size: %RU64",
+                     "        { Name: '%s', Type: '%s', Visibility: '%s', Weak: %RTbool, Size: %RU64",
                      pSym->pszName, pszType, pszVisibilty, pSym->fWeak, pSym->cbSym);
 
         if (pSym->pVersion)
@@ -1012,7 +1348,7 @@ static RTEXITCODE elfEditCreateStub(const char *pszInput, bool fJsonInput, const
         }
     }
     else
-        AssertReleaseFailed();
+        rcExit = elfEditStubLoadFromJson(&StubImg, pszInput);
 
     if (rcExit != RTEXITCODE_SUCCESS)
         return rcExit;
@@ -1037,12 +1373,13 @@ static RTEXITCODE usage(FILE *pOut, const char *argv0)
             "usage: %s --input <input binary> [options and operations]\n"
             "\n"
             "Operations and Options (processed in place):\n"
-            "  --verbose                                Noisier.\n"
-            "  --quiet                                  Quiet execution.\n"
-            "  --delete-runpath                         Deletes all DT_RUNPATH entries.\n"
-            "  --change-runpath <new runpath>           Changes the first DT_RUNPATH entry to the new one.\n"
-            "  --create-stub-library <path/to/stub>     Creates a stub library used for linking.\n"
-            "  --create-stub-json <path/to/stub>.       Creates a stub JSON file which can be edited and turned into a linker stub.\n"
+            "  --verbose                                        Noisier.\n"
+            "  --quiet                                          Quiet execution.\n"
+            "  --delete-runpath                                 Deletes all DT_RUNPATH entries.\n"
+            "  --change-runpath <new runpath>                   Changes the first DT_RUNPATH entry to the new one.\n"
+            "  --create-stub-library <path/to/stub>             Creates a stub library used for linking.\n"
+            "  --create-stub-json <path/to/stub>                Creates a stub JSON file which can be edited and turned into a linker stub.\n"
+            "  --create-linker-stub-from-json <path/to/stub>    Creates an ELF shared object linker stub from JSON file.\n"
             , argv0);
     return pOut == stdout ? RTEXITCODE_SUCCESS : RTEXITCODE_SYNTAX;
 }
@@ -1064,6 +1401,7 @@ static RTEXITCODE parseArguments(int argc,  char **argv)
         { "--change-runpath",                   'c', RTGETOPT_REQ_STRING  },
         { "--create-stub-library",              's', RTGETOPT_REQ_STRING  },
         { "--create-stub-json",                 'j', RTGETOPT_REQ_STRING  },
+        { "--create-linker-stub-from-json",     'l', RTGETOPT_REQ_STRING}
     };
 
     RTGETOPTUNION   ValueUnion;
@@ -1107,6 +1445,11 @@ static RTEXITCODE parseArguments(int argc,  char **argv)
 
             case 'j':
                 g_enmAction = kVBoxEditElfAction_CreateJsonStub;
+                g_pszLinkerStub = ValueUnion.psz;
+                break;
+
+            case 'l':
+                g_enmAction = kVBoxEditElfAction_CreateLinkerStubFromJson;
                 g_pszLinkerStub = ValueUnion.psz;
                 break;
 
@@ -1159,6 +1502,8 @@ int main(int argc, char **argv)
             rcExit = createLinkerStubFrom(g_pszInput, g_pszLinkerStub);
         else if (g_enmAction == kVBoxEditElfAction_CreateJsonStub)
             rcExit = elfEditCreateStub(g_pszInput, false, g_pszLinkerStub, true);
+        else if (g_enmAction == kVBoxEditElfAction_CreateLinkerStubFromJson)
+            rcExit = elfEditCreateStub(g_pszInput, true, g_pszLinkerStub, true);
     }
 
     return rcExit;
