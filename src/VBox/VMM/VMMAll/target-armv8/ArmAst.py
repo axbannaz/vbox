@@ -375,12 +375,13 @@ class ArmAstBase(object):
         return dResult['ret'];
 
     @staticmethod
-    def formatInExprComment(sComment, sLang = None, cchMaxWidth = 120):
+    def formatInExprComment(sExpr, sComment, sLang = None, cchMaxWidth = 120):
         if sComment:
             if sLang in ('C', None):
-                return ' /* %s */' % (sComment,);
+                ## @todo Wrap comment and deal with newlines.
+                return sExpr + ' /* %s */' % (sComment,);
             _ = cchMaxWidth;
-        return '';
+        return sExpr;
 
 
 
@@ -891,7 +892,7 @@ class ArmAstBinaryOp(ArmAstBase):
 
         # Add comment.
         if self.sComment:
-            sComment = self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sComment = self.formatInExprComment('', self.sComment, sLang, cchMaxWidth); ## @todo this is a bit crude...
             if sComment:
                 sRetSameLine  += sComment;
                 sRetMultiLine += sComment;
@@ -1073,7 +1074,7 @@ class ArmAstUnaryOp(ArmAstBase):
         else:
             sRet = '%s%s' % (self.getOpForLang(self.sOp, sLang, True), self.oExpr.toStringEx(sLang, cchMaxWidth),);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1115,8 +1116,10 @@ class ArmAstSlice(ArmAstBase):
         return fnCallback(self, fEliminationAllowed, oCallbackArg, aoStack);
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
-        return '[%s:%s]%s' % (self.oFrom.toStringEx(sLang, cchMaxWidth), self.oTo.toStringEx(sLang, cchMaxWidth),
-                              self.formatInExprComment(self.sComment, sLang, cchMaxWidth), );
+        sRet = '[%s:%s]' % (self.oFrom.toStringEx(sLang, cchMaxWidth), self.oTo.toStringEx(sLang, cchMaxWidth),);
+        if self.sComment:
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
+        return sRet;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
@@ -1169,7 +1172,7 @@ class ArmAstSquareOp(ArmAstBase):
             sVar = '(%s)' % (sVar);
         sRet = '%s<%s>' % (sVar, ','.join([oValue.toStringEx(sLang, cchMaxWidth) for oValue in self.aoValues]),);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1212,7 +1215,7 @@ class ArmAstTuple(ArmAstValuesBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = '(%s)' % (','.join([oValue.toStringEx(sLang, cchMaxWidth) for oValue in self.aoValues]),);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1234,7 +1237,7 @@ class ArmAstDotAtom(ArmAstValuesBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = '.'.join([oValue.toStringEx(sLang, cchMaxWidth) for oValue in self.aoValues]);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1276,7 +1279,7 @@ class ArmAstConcat(ArmAstValuesBase):
             else:
                 sRet += '(%s)' % (oValue.toStringEx(sLang, cchMaxWidth));
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1346,7 +1349,7 @@ class ArmAstFunctionCallBase(ArmAstBase):
                 sArgList += sArg.replace('\n', sNlIndent);
         sRet = '%s(%s)' % (self.sName, sArgList,);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1422,7 +1425,7 @@ class ArmAstIdentifier(ArmAstLeafBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = self.sName;
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
 
@@ -1461,12 +1464,12 @@ class ArmAstBool(ArmAstLeafBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = 'true' if self.fValue is True else 'false';
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
-        return 'true' if self.fValue is True else 'false';
+        return self.toStringEx('C');
 
     def getWidth(self, oHelper = None):
         _ = oHelper;
@@ -1501,17 +1504,15 @@ class ArmAstInteger(ArmAstLeafBase):
             sRet = '%u' % (self.iValue,);
         else:
             sRet = '%#x' % (self.iValue,);
+        if sLang == 'C' and self.iValue >= 0x80000000: # ASSUMES unsigned integer type
+            sRet = 'UINT%u_C(%s)' % (64 if self.iValue >= 0x100000000 else 32, sRet,);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
-        if self.iValue < 10:
-            return '%u' % (self.iValue,);
-        if self.iValue & (1<<31):
-            return 'UINT32_C(%#x)' % (self.iValue,);
-        return '%#x' % (self.iValue,);
+        return self.toStringEx('C');
 
     def getWidth(self, oHelper = None):
         _ = oHelper;
@@ -1550,7 +1551,7 @@ class ArmAstSet(ArmAstValuesBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = '(%s)' % (', '.join([oValue.toStringEx(sLang, cchMaxWidth) for oValue in self.aoValues]),);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1581,20 +1582,25 @@ class ArmAstValue(ArmAstLeafBase):
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = self.sValue;
+        if sLang == 'C':
+            (fValue, _, fWildcard, cBitsWidth) = ArmAstValue.parseValue(self.sValue, 0);
+            if fWildcard == 0:
+                if cBitsWidth  >= 31:
+                    sRet = 'UINT%u_C(%#x)' % (64 if cBitsWidth > 32 else 32, fValue,);
+                elif fValue >= 10:
+                    sRet = '%#x' % (fValue,);
+                else:
+                    sRet = '%u' % (fValue,);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
-        (fValue, _, fWildcard, _) = ArmAstValue.parseValue(self.sValue, 0);
+        (_, _, fWildcard, _) = ArmAstValue.parseValue(self.sValue, 0);
         if fWildcard:
             raise Exception('Value contains wildcard elements: %s' % (self.sValue,));
-        if fValue < 10:
-            return '%u' % (fValue,);
-        if fValue & (1<<31):
-            return 'UINT32_C(%#x)' % (fValue,);
-        return '%#x' % (fValue,);
+        return self.toStringEx('C');
 
     def getWidth(self, oHelper = None):
         _ = oHelper;
@@ -1667,7 +1673,7 @@ class ArmAstEquationValue(ArmAstLeafBase):
         else:
             sRet = '(%s)[%u:%u]' % (self.sValue, self.iFirstBit, self.iFirstBit + self.cBitsWidth - 1,);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1743,7 +1749,7 @@ class ArmAstValuesGroup(ArmAstBase):
         ## @todo deal width cchMaxWidth.
         sRet = ':'.join([oValue.toStringEx(sLang, cchMaxWidth) for oValue in self.aoValues]);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1774,7 +1780,7 @@ class ArmAstString(ArmAstLeafBase):
         else:
             sRet = '"' + self.sValue + '"';
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1811,7 +1817,10 @@ class ArmAstField(ArmAstLeafBase):
         return False;
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
-        return '%s.%s.%s%s' % (self.sState, self.sName, self.sField, self.formatInExprComment(self.sComment, sLang, cchMaxWidth));
+        sRet = '%s.%s.%s' % (self.sState, self.sName, self.sField,);
+        if self.sComment:
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
+        return sRet;
 
     def toCExpr(self, oHelper):
         (sCName, _) = oHelper.getFieldInfo(self.sField, self.sName, self.sState);
@@ -1855,7 +1864,10 @@ class ArmAstRegisterType(ArmAstLeafBase):
         return False;
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
-        return '%s.%s%s' % (self.sState, self.sName, self.formatInExprComment(self.sComment, sLang, cchMaxWidth));
+        sRet = '%s.%s' % (self.sState, self.sName,);
+        if self.sComment:
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
+        return sRet;
 
     def toCExpr(self, oHelper):
         #(sCName, _) = oHelper.getFieldInfo(None, self.sName, self.sState);
@@ -1896,7 +1908,7 @@ class ArmAstType(ArmAstBase):
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet = self.oName.toStringEx(sLang, cchMaxWidth);
         if self.sComment:
-            sRet += self.formatInExprComment(self.sComment, sLang, cchMaxWidth);
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
         return sRet;
 
     def toCExpr(self, oHelper):
@@ -1937,8 +1949,10 @@ class ArmAstTypeAnnotation(ArmAstBase):
         return fnCallback(self, fEliminationAllowed, oCallbackArg, aoStack);
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
-        return '(%s) %s%s' % (self.oType.toStringEx(sLang, cchMaxWidth), self.oVar.toStringEx(sLang, cchMaxWidth),
-                              self.formatInExprComment(self.sComment, sLang, cchMaxWidth),);
+        sRet = '(%s) %s' % (self.oType.toStringEx(sLang, cchMaxWidth), self.oVar.toStringEx(sLang, cchMaxWidth),);
+        if self.sComment:
+            sRet = self.formatInExprComment(sRet, self.sComment, sLang, cchMaxWidth);
+        return sRet;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
@@ -2437,14 +2451,13 @@ class ArmAstCppExpr(ArmAstLeafBase, ArmAstCppExprBase):
         return False;
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
-        _ = sLang; _ = cchMaxWidth;
-        if not self.sComment:
-            return self.sExpr;
-        return '%s /* %s */' % (self.sExpr, self.sComment,);
+        if self.sComment:
+            return self.formatInExprComment(self.sExpr, self.sComment, sLang, cchMaxWidth);
+        return self.sExpr;
 
     def toCExpr(self, oHelper):
         _ = oHelper;
-        return self.sExpr;
+        return self.toStringEx(sLang = 'C');
 
     def getWidth(self, oHelper = None):
         _ = oHelper;
