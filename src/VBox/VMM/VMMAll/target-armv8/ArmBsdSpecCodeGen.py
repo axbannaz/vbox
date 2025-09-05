@@ -68,6 +68,7 @@ from ArmAst import ArmAstString;
 from ArmAst import ArmAstTypeAnnotation;
 from ArmAst import ArmAstUnaryOp;
 from ArmAst import ArmAstValue;
+import ArmAst;
 import ArmBsdSpec as spec;
 
 # Imports from the parent directory.
@@ -3535,9 +3536,9 @@ class IEMArmGenerator(object):
     #
 
     class XformArg(object):
-        def __init__(self, oInstr, oNode, fInLeafFn):
+        def __init__(self, oInstr, fInLeafFn = True, oNode = None):
             self.oInstr    = oInstr;        # ArmInstruction
-            self.oNode     = oNode;         # DecoderNode
+            self.oNode     = oNode;         # DecoderNode || None
             self.fInLeafFn = fInLeafFn;
 
     @staticmethod
@@ -3561,7 +3562,7 @@ class IEMArmGenerator(object):
         if fInLeafFn:
             if (oInstr.fFixedMask & fFieldOpMask) == fFieldOpMask:
                 return ArmAstInteger((oInstr.fFixedValue & fFieldOpMask) >> oField.iFirstBit, oField.cBitsWidth);
-        elif (oNode.fCheckedMask & fFieldOpMask) == fFieldOpMask:
+        elif oNode and (oNode.fCheckedMask & fFieldOpMask) == fFieldOpMask:
             return ArmAstInteger((oNode.fCheckedValue & fFieldOpMask) >> oField.iFirstBit, oField.cBitsWidth);
 
         return VBoxAstCppField.fromFieldDetailsAndAccessExprOrInt(oField.iFirstBit, oField.cBitsWidth,
@@ -3631,7 +3632,7 @@ class IEMArmGenerator(object):
         raise Exception('Expected field reference: %s' % (oField,));
 
     @staticmethod
-    def callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack):
+    def xformToCCallback(oNode, fEliminationAllowed, oXformArg, aoStack):
         """ Generic callback for transforming condition expressions to C. """
         if isinstance(oNode, ArmAstIdentifier):
             if aoStack and isinstance(aoStack[-1], (ArmAstBinaryOp, ArmAstUnaryOp)):
@@ -3659,47 +3660,6 @@ class IEMArmGenerator(object):
         """
         Generates the leaf decoder functions.
         """
-
-        class CExprHelper(object):
-            def __init__(self, oInstr):
-                self.oInstr = oInstr;
-
-            def getFieldInfo(self, sName, sVar = '', sNamespace = ''):
-                if not sVar and not sNamespace:
-                    oInstr = self.oInstr;
-                    oField = oInstr.getFieldByName(sName, False);
-                    if oField:
-                        return (sName, oField.cBitsWidth);
-                    # Look for the field in groups and sets and generate a name that extracts it from uOpcode:
-                    for oParent in oInstr.oParent.getUpIterator():
-                        oField = oParent.getFieldByName(sName, False);
-                        if oField:
-                            fFieldOpMask = oField.getShiftedMask();
-                            if (oInstr.fFixedMask & fFieldOpMask) == fFieldOpMask:
-                                return ('%#x /*%s@%u*/'
-                                        % ((oInstr.fFixedValue & fFieldOpMask) >> oField.iFirstBit, sName, oField.iFirstBit),
-                                        oField.cBitsWidth);
-                            return ('((uOpcode >> %u) & %#x)' % (oField.iFirstBit, oField.getMask()), oField.cBitsWidth);
-                raise Exception('Field (%s.%s.)%s was not found for instruction %s'
-                                % (sNamespace, sVar, sName, oInstr.sName,));
-
-            def convertFunctionCall(self, oCall):
-                if oCall.sName == 'IsFeatureImplemented':
-                    if len(oCall.aoArgs) != 1:
-                        raise Exception('Unexpected argument count for IsFeatureImplemented call: %s' % (oCall.aoArgs,));
-                    if not isinstance(oCall.aoArgs[0], ArmAstIdentifier):
-                        raise Exception('Argument to IsFeatureImplemented is not an identifier: %s (%s)'
-                                        % (oCall.aoArgs[0].sType, oCall.aoArgs[0]));
-                    sFeatureNm = oCall.aoArgs[0].sName;
-                    sCpumFeature = g_dSpecFeatToCpumFeat.get(sFeatureNm, None);
-                    if sCpumFeature is None:
-                        raise Exception('Unknown IsFeatureImplemented parameter: %s (see g_dSpecFeatToCpumFeat)' % (sFeatureNm));
-                    if isinstance(sCpumFeature, str):
-                        return 'IEM_GET_GUEST_CPU_FEATURES(pVCpu)->%s /*%s*/' % (sCpumFeature, sFeatureNm,)
-                    if sCpumFeature is True:  return 'true /*%s*/' % (sFeatureNm,);
-                    if sCpumFeature is False: return 'false /*%s*/' % (sFeatureNm,);
-                    return 'false /** @todo IEM_GET_GUEST_CPU_FEATURES(pVCpu)->%s */' % (sFeatureNm,);
-                raise Exception('Call to unsupported function: %s (%s)' % (oCall.sName, oCall.aoArgs,));
 
         asLines = [];
         for oInstr in sorted(spec.g_dArmInstructionSets[sInstrSet].aoAllInstructions,
@@ -3743,11 +3703,12 @@ class IEMArmGenerator(object):
                                % (sIndent, oField.sName, oField.iFirstBit, (1 << oField.cBitsWidth) - 1,));
 
             # Any additional conditions for the instructions.
-            if not oInstr.oCondition.isBoolAndTrue():
-                asLines += [
-                    sIndent + '    if (' + oInstr.oCondition.toCExpr(CExprHelper(oInstr)) + ')',
-                    sIndent + '    {',
-                ];
+            oCondCode = oInstr.oCondition.clone().transform(IEMArmGenerator.xformToCCallback, True,
+                                                            IEMArmGenerator.XformArg(oInstr), [])
+            if oCondCode and not oCondCode.isBoolAndTrue():
+                for i, sLine, fFinal in ArmAst.enumerateWithLookahead(oCondCode.toStringEx(sLang = 'C').split('\n')):
+                    asLines.append('%s%s%s%s' % (sIndent, '    if (' if i == 0 else '        ', sLine, ')' if fFinal else ''));
+                asLines.append(sIndent + '    {');
 
                 asTail = [
                     sIndent + '    Log(("Invalid instruction %#x at %x (cond)\\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));',
@@ -3869,13 +3830,13 @@ class IEMArmGenerator(object):
                 # (The LDRB_32BL_ldst_regoff vs LDRB_32B_ldst_regoff issue could be solved
                 # by this sorting trick alone, if required.)
                 #
-                def callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack):
+                def xformToCCallback(oNode, fEliminationAllowed, oXformArg, aoStack):
                     # Remove all IsFeatureImplemented calls, as these aren't for selecting which
                     # instruction something decodes as, just between the assigned instruction
                     # and invalid opcode. (ASSUMES no opcode redefinitions.)
                     if oNode.isMatchingFunctionCall('IsFeatureImplemented', str):
                         return ArmAstBool(True);
-                    return IEMArmGenerator.callbackTransformToC(oNode, fEliminationAllowed, oXformArg, aoStack);
+                    return IEMArmGenerator.xformToCCallback(oNode, fEliminationAllowed, oXformArg, aoStack);
 
                 # Assemble list of branches w/ conditions.
                 atIfList = []
@@ -3889,8 +3850,8 @@ class IEMArmGenerator(object):
                                            '==', ArmAstInteger(fFixedValue, 32));
                     if oInstr.oCondition:
                         oCode = ArmAstBinaryOp(oCode, '&&', oInstr.oCondition.clone());
-                    oOptCode = oCode.clone().transform(callbackTransformToC, True,
-                                                       IEMArmGenerator.XformArg(oInstr, oNode, False), []);
+                    oOptCode = oCode.clone().transform(xformToCCallback, True,
+                                                       IEMArmGenerator.XformArg(oInstr, False, oNode), []);
 
                     atIfList.append((oInstr, oOptCode, oCode,
                                      'return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),)));
