@@ -193,7 +193,7 @@ static const char *g_pszRunpath = NULL;
 static const char *g_pszLinkerStub = NULL;
 /** @} */
 
-static const char s_achShStrTab[] = "\0.shstrtab\0.dynsym\0.dynstr\0.gnu.version\0.gnu.version_d\0.gnu.version_r\0.dynamic";
+static const char s_achShStrTab[] = "\0.shstrtab\0.dynsym\0.dynstr\0.gnu.version\0.gnu.version_d\0.dynamic";
 
 
 static void verbose(const char *pszFmt, ...)
@@ -225,8 +225,114 @@ static const char *elfEditImgAddString(PELFEDITSTUBIMG pStubImg, const char *psz
     pStr->offStrTab         = 0;
     if (!RTStrSpaceInsert(&pStubImg->StrSpace, &pStr->StrCore))
         AssertFailed();
+    pStubImg->cbStrTab     += cchStr + 1; /* Include zero terminator. */
 
     return pStr->StrCore.pszString;
+}
+
+
+static uint32_t elfEditImgGetStrIdxInStrTab(PELFEDITSTUBIMG pStubImg, const char *pszString)
+{
+    PELFEDITSTR pStr = (PELFEDITSTR)RTStrSpaceGet(&pStubImg->StrSpace, pszString);
+    AssertRelease(pStr && pStr->offStrTab > 0);
+
+    return pStr->offStrTab;
+}
+
+
+typedef struct ELFEDITSTRTABCTX
+{
+    /* Current offset. */
+    size_t          off;
+    /** Pointer to the base of the string table. */
+    char           *pachStrTab;
+} ELFEDITSTRTABCTX, *PELFEDITSTRTABCTX;
+
+
+static DECLCALLBACK(int) elfEditImgStrTabWorker(PRTSTRSPACECORE pStr, void *pvUser)
+{
+    PELFEDITSTRTABCTX pCtx = (PELFEDITSTRTABCTX)pvUser;
+    PELFEDITSTR pElfStr    = (PELFEDITSTR)pStr;
+
+    memcpy(&pCtx->pachStrTab[pCtx->off], pStr->pszString, pStr->cchString + 1);
+    pElfStr->offStrTab = pCtx->off;
+    pCtx->off += pStr->cchString + 1;
+    return VINF_SUCCESS;
+}
+
+
+static int elfEditImgStrTabGenerate(PELFEDITSTUBIMG pStubImg, void **ppvStrTab, size_t *pcbStrTab)
+{
+    /* Go over all strings and generate the offsets. */
+    char *pachStrTab = (char *)RTMemAllocZ(pStubImg->cbStrTab + 1); /* First entry containing an empty string. */
+    if (!pachStrTab)
+        return VERR_NO_MEMORY;
+
+    ELFEDITSTRTABCTX Ctx;
+
+    Ctx.off        = 1;
+    Ctx.pachStrTab = pachStrTab;
+    pachStrTab[0] = '\0';
+    RTStrSpaceEnumerate(&pStubImg->StrSpace, elfEditImgStrTabWorker, &Ctx);
+    AssertRelease(Ctx.off == pStubImg->cbStrTab + 1);
+    *ppvStrTab = pachStrTab;
+    *pcbStrTab = pStubImg->cbStrTab + 1;
+    return VINF_SUCCESS;
+}
+
+
+static int elfEditImgVerdefGenerate(PELFEDITSTUBIMG pStubImg, void **ppvVerdef, size_t *pcbVerdef)
+{
+    /* Allocate maximum possible amount. */
+    uint8_t *pbVerdef = (uint8_t *)RTMemAllocZ(pStubImg->cVersions * (sizeof(Elf_Verdef) + 2 * sizeof(Elf_Verdaux))); /* 2 Parents maximum supported right now. */
+    if (!pbVerdef)
+        return VERR_NO_MEMORY;
+
+    uint8_t *pbCur = pbVerdef;
+    size_t offVerdef = 0;
+
+    AssertRelease(!pStubImg->paVersions[0].pszVersion);
+    for (uint32_t i = 1; i < pStubImg->cVersions; i++)
+    {
+        PCELFEDITSTUBVERSION pVersion = &pStubImg->paVersions[i];
+        Elf_Verdef *pVerdef = (Elf_Verdef *)pbCur;
+
+        AssertRelease(pVersion->pszVersion);
+
+        pVerdef->vd_version = 1;
+        pVerdef->vd_flags   = 0; /** @todo 1 for BASE */
+        pVerdef->vd_ndx     = pVersion->idxVersion;
+        pVerdef->vd_cnt     = pVersion->pszParent ? 2 : 1;
+        pVerdef->vd_hash    = elfHash(pVersion->pszVersion);
+        pVerdef->vd_aux     = sizeof(*pVerdef);
+        pVerdef->vd_next    =   i == pStubImg->cVersions - 1
+                              ? 0 /* No further entry if this is the last version being processed. */
+                              : pVerdef->vd_aux + pVerdef->vd_cnt * sizeof(Elf_Verdaux);
+
+        offVerdef += sizeof(*pVerdef);
+        pbCur     += sizeof(*pVerdef);
+
+        Elf_Verdaux *pVerdaux = (Elf_Verdaux *)pbCur;
+        pVerdaux->vda_name = elfEditImgGetStrIdxInStrTab(pStubImg, pVersion->pszVersion);
+        pVerdaux->vda_next = pVersion->pszParent ? sizeof(*pVerdaux) : 0; /* No parent, jsut a single entry. */
+
+        offVerdef += sizeof(*pVerdaux);
+        pbCur     += sizeof(*pVerdaux);
+
+        if (pVersion->pszParent)
+        {
+            pVerdaux = (Elf_Verdaux *)pbCur;
+            pVerdaux->vda_name = elfEditImgGetStrIdxInStrTab(pStubImg, pVersion->pszParent);
+            pVerdaux->vda_next = 0; /* Last entry. */
+
+            offVerdef += sizeof(*pVerdaux);
+            pbCur     += sizeof(*pVerdaux);
+        }
+    }
+
+    *ppvVerdef = pbVerdef;
+    *pcbVerdef = offVerdef;
+    return VINF_SUCCESS;
 }
 
 
@@ -1356,7 +1462,12 @@ static RTEXITCODE elfEditCreateStub(const char *pszInput, bool fJsonInput, const
     if (fJsonOutput)
         rcExit = elfEditStubDumpToJson(&StubImg, pszOutput);
     else
-        AssertReleaseFailed();
+    {
+        if (StubImg.enmArch == RTLDRARCH_X86_32)
+            rcExit = elfEditElf32GenerateStub(&StubImg, pszOutput);
+        else
+            rcExit = elfEditElf64GenerateStub(&StubImg, pszOutput);
+    }
 
     return rcExit;
 }
@@ -1503,7 +1614,7 @@ int main(int argc, char **argv)
         else if (g_enmAction == kVBoxEditElfAction_CreateJsonStub)
             rcExit = elfEditCreateStub(g_pszInput, false, g_pszLinkerStub, true);
         else if (g_enmAction == kVBoxEditElfAction_CreateLinkerStubFromJson)
-            rcExit = elfEditCreateStub(g_pszInput, true, g_pszLinkerStub, true);
+            rcExit = elfEditCreateStub(g_pszInput, true, g_pszLinkerStub, false);
     }
 
     return rcExit;

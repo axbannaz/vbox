@@ -99,7 +99,7 @@ static RTEXITCODE ELFEDIT_NAME(DeleteRunpath)(RTFILE hFileElf, const char *pszIn
         ||  Hdr.e_ident[EI_MAG2] != ELFMAG2
         ||  Hdr.e_ident[EI_MAG3] != ELFMAG3)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Invalid ELF magic (%.*Rhxs)", sizeof(Hdr.e_ident), Hdr.e_ident);
-    if (Hdr.e_ident[EI_CLASS] != ELFCLASS64)
+    if (Hdr.e_ident[EI_CLASS] != ELFEDIT_SUFF(ELFCLASS))
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Invalid ELF class (%.*Rhxs)", sizeof(Hdr.e_ident), Hdr.e_ident);
     if (Hdr.e_ident[EI_DATA] != ELFDATA2LSB)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "ELF endian %x is unsupported", Hdr.e_ident[EI_DATA]);
@@ -256,7 +256,7 @@ static RTEXITCODE ELFEDIT_NAME(ChangeRunpath)(RTFILE hFileElf, const char *pszIn
         ||  Hdr.e_ident[EI_MAG2] != ELFMAG2
         ||  Hdr.e_ident[EI_MAG3] != ELFMAG3)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Invalid ELF magic (%.*Rhxs)", sizeof(Hdr.e_ident), Hdr.e_ident);
-    if (Hdr.e_ident[EI_CLASS] != ELFCLASS64)
+    if (Hdr.e_ident[EI_CLASS] != ELFEDIT_SUFF(ELFCLASS))
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "Invalid ELF class (%.*Rhxs)", sizeof(Hdr.e_ident), Hdr.e_ident);
     if (Hdr.e_ident[EI_DATA] != ELFDATA2LSB)
         return RTMsgErrorExit(RTEXITCODE_FAILURE, "ELF endian %x is unsupported", Hdr.e_ident[EI_DATA]);
@@ -695,6 +695,324 @@ static RTEXITCODE ELFEDIT_NAME(Parse)(PELFEDITSTUBIMG pStubImg, RTFILE hFileElf)
     }
 
     pStubImg->cSyms = idxSym;
+    return RTEXITCODE_SUCCESS;
+}
+
+
+static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const char *pszOutput)
+{
+    /* Generate the string table first. */
+    void *pvStrTab = NULL;
+    size_t cbStrTab = 0;
+    int rc = elfEditImgStrTabGenerate(pStubImg, &pvStrTab, &cbStrTab);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to generate string table for stub '%s': %Rrc\n", pszOutput, rc);
+
+    /* Generate the version definitions. */
+    void *pvVerdef = NULL;
+    size_t cbVerdef = 0;
+    uint16_t *pu16GnuVerSym = NULL;
+    size_t cbGnuVerSym = 0;
+    if (pStubImg->cVersions)
+    {
+        rc = elfEditImgVerdefGenerate(pStubImg, &pvVerdef, &cbVerdef);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to generate versions definition for stub '%s': %Rrc\n", pszOutput, rc);
+
+        cbGnuVerSym   = pStubImg->cSyms * sizeof(uint16_t);
+        pu16GnuVerSym = (uint16_t *)RTMemAllocZ(cbGnuVerSym);
+        if (!pu16GnuVerSym)
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %zu bytes for .gnu.version table in '%s'\n", cbGnuVerSym, pszOutput);
+    }
+
+    /* Generate the symbol table now .*/
+    size_t const cbSyms = pStubImg->cSyms * sizeof(Elf_Sym);
+    Elf_Sym *paSyms = (Elf_Sym *)RTMemAllocZ(cbSyms);
+    if (!paSyms)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %zu bytes for symbol table in '%s'\n", cbSyms, pszOutput);
+
+    for (uint32_t i = 0; i < pStubImg->cSyms; i++)
+    {
+        PCELFEDITSTUBSYM pSym = &pStubImg->paSyms[i];
+        Elf_Sym *pElfSym = &paSyms[i];
+
+        uint8_t bBind = pSym->fWeak ? STB_WEAK : STB_GLOBAL;
+        uint8_t bType = 0;
+        switch (pSym->enmType)
+        {
+            case kElfEditSymType_Function:   bType = STT_FUNC;      break;
+            case kElfEditSymType_Object:     bType = STT_OBJECT;    break;
+            case kElfEditSymType_Tls:        bType = STT_TLS;       break;
+            case kElfEditSymType_GnuIndFunc: bType = STT_GNU_IFUNC; break;
+            case kElfEditSymType_NoType:     bType = STT_NOTYPE;    break;
+            case kElfEditSymType_Invalid:
+            default:
+                AssertReleaseFailed();
+        }
+
+        uint8_t bVisibility = 0;
+        switch (pSym->enmVisibility)
+        {
+            case kElfEditSymVisbility_Default:   bVisibility = STV_DEFAULT;   break;
+            case kElfEditSymVisbility_Hidden:    bVisibility = STV_HIDDEN;    break;
+            case kElfEditSymVisbility_Internal:  bVisibility = STV_INTERNAL;  break;
+            case kElfEditSymVisbility_Protected: bVisibility = STV_PROTECTED; break;
+            case kElfEditSymVisbility_Invalid:
+            default:
+                AssertReleaseFailed();
+        }
+
+        pElfSym->st_name  = elfEditImgGetStrIdxInStrTab(pStubImg, pSym->pszName);
+        pElfSym->st_shndx = 1; /** @todo Generate a simple.text section containing only breakpoints. */
+        pElfSym->st_value = 0;
+        pElfSym->st_size  = (Elf_Xword)pSym->cbSym;
+        pElfSym->st_info  = ELF64_ST_INFO(bBind, bType);
+        pElfSym->st_other = ELF64_ST_OTHER(bVisibility);
+
+        if (pu16GnuVerSym)
+            pu16GnuVerSym[i] = pSym->pVersion->idxVersion | (pSym->fDefaultVersion ? 0 : GNU_VERSYM_HIDDEN);
+    }
+
+    /* Generate the .dynamic section. */
+    size_t const cbDyn = (9 + pStubImg->cNeeded) * sizeof(Elf_Dyn);
+    Elf_Dyn *paDyn = (Elf_Dyn *)RTMemAllocZ(cbDyn);
+    if (!paDyn)
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to allocate %zu bytes for .dynamic section in '%s'\n", cbDyn, pszOutput);
+
+    RTFILE hFileOut = NIL_RTFILE;
+    rc = RTFileOpen(&hFileOut, pszOutput, RTFILE_O_CREATE_REPLACE | RTFILE_O_WRITE | RTFILE_O_DENY_NONE);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to create file '%s': %Rrc\n", pszOutput, rc);
+
+    /* Program headers. */
+    Elf_Phdr aPhdrs[4]; RT_ZERO(aPhdrs);
+    Elf_Shdr aShdrs[8]; RT_ZERO(aShdrs);
+
+    /* Fill in the header. */
+    Elf_Ehdr Hdr; RT_ZERO(Hdr);
+    Hdr.e_ident[EI_MAG0]       = ELFMAG0;
+    Hdr.e_ident[EI_MAG1]       = ELFMAG1;
+    Hdr.e_ident[EI_MAG2]       = ELFMAG2;
+    Hdr.e_ident[EI_MAG3]       = ELFMAG3;
+    Hdr.e_ident[EI_CLASS]      = ELFEDIT_SUFF(ELFCLASS);
+    Hdr.e_ident[EI_DATA]       = ELFDATA2LSB;
+    Hdr.e_ident[EI_VERSION]    = EV_CURRENT;
+    Hdr.e_ident[EI_OSABI]      = ELFOSABI_LINUX;
+    Hdr.e_ident[EI_ABIVERSION] = 0;
+
+    Hdr.e_type = ET_DYN;
+    switch (pStubImg->enmArch)
+    {
+        case RTLDRARCH_X86_32: Hdr.e_machine = EM_486;     break;
+        case RTLDRARCH_AMD64:  Hdr.e_machine = EM_X86_64;  break;
+        case RTLDRARCH_ARM64:  Hdr.e_machine = EM_AARCH64; break;
+        default: AssertReleaseFailed(); break;
+    }
+
+    Hdr.e_version   = 1;
+    Hdr.e_entry     = 0;
+    Hdr.e_phoff     = sizeof(Hdr);
+    Hdr.e_shoff     = Hdr.e_phoff + sizeof(aPhdrs);
+    Hdr.e_flags     = 0;
+    Hdr.e_ehsize    = sizeof(Hdr);
+    Hdr.e_phentsize = sizeof(aPhdrs[0]);
+    Hdr.e_phnum     = RT_ELEMENTS(aPhdrs);
+    Hdr.e_shentsize = sizeof(aShdrs[0]);
+    Hdr.e_shnum     = pvVerdef ? 7 : 5; /** @todo */
+    Hdr.e_shstrndx  = pvVerdef ? 6 : 4; /** @todo */
+
+    uint32_t idx = 1;
+    /* NULL header */
+    /* .dynsym */
+    aShdrs[idx].sh_name      = 11;
+    aShdrs[idx].sh_type      = SHT_DYNSYM;
+    aShdrs[idx].sh_flags     = SHF_ALLOC;
+    aShdrs[idx].sh_addr      = 0;
+    aShdrs[idx].sh_offset    = Hdr.e_shoff + Hdr.e_shnum * sizeof(aShdrs[0]);
+    aShdrs[idx].sh_size      = cbSyms;
+    aShdrs[idx].sh_link      = 2; /* .dynstr */
+    aShdrs[idx].sh_info      = 1;
+    aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
+    aShdrs[idx].sh_entsize   = sizeof(*paSyms);
+    uint32_t const idxDynSym = idx++;
+
+    /* .dynstr */
+    aShdrs[idx].sh_name      = 19;
+    aShdrs[idx].sh_type      = SHT_STRTAB;
+    aShdrs[idx].sh_flags     = SHF_ALLOC;
+    aShdrs[idx].sh_addr      = 0;
+    aShdrs[idx].sh_offset    = aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size;
+    aShdrs[idx].sh_size      = cbStrTab;
+    aShdrs[idx].sh_link      = 0;
+    aShdrs[idx].sh_info      = 0;
+    aShdrs[idx].sh_addralign = sizeof(uint8_t);
+    aShdrs[idx].sh_entsize   = 0;
+    uint32_t const idxDynStr = idx++;
+
+    uint32_t idxGnuVerSym = 0;
+    uint32_t idxGnuVerDef = 0;
+    if (pvVerdef)
+    {
+        /* .gnu.version */
+        aShdrs[idx].sh_name      = 27;
+        aShdrs[idx].sh_type      = SHT_GNU_versym;
+        aShdrs[idx].sh_flags     = SHF_ALLOC;
+        aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(uint16_t));
+        aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(uint16_t));
+        aShdrs[idx].sh_size      = cbGnuVerSym;
+        aShdrs[idx].sh_link      = 1; /* .dynsym */
+        aShdrs[idx].sh_info      = 0;
+        aShdrs[idx].sh_addralign = sizeof(uint16_t);
+        aShdrs[idx].sh_entsize   = sizeof(uint16_t);
+        idxGnuVerSym = idx++;
+
+        /* .gnu.version_d */
+        aShdrs[idx].sh_name      = 40;
+        aShdrs[idx].sh_type      = SHT_GNU_verdef;
+        aShdrs[idx].sh_flags     = SHF_ALLOC;
+        aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
+        aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
+        aShdrs[idx].sh_size      = cbVerdef;
+        aShdrs[idx].sh_link      = 2; /* .dynstr */
+        aShdrs[idx].sh_info      = pStubImg->cVersions - 1;
+        aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
+        aShdrs[idx].sh_entsize   = 0;
+        idxGnuVerDef = idx++;
+    }
+
+    /* Build the .dynamic section. */
+    uint32_t idxDyn = 0;
+    paDyn[idxDyn].d_tag        = DT_SONAME;
+    paDyn[idxDyn++].d_un.d_val = elfEditImgGetStrIdxInStrTab(pStubImg, pStubImg->pszName);
+
+    for (uint32_t i = 0; i < pStubImg->cNeeded; i++)
+    {
+        paDyn[idxDyn].d_tag        = DT_SONAME;
+        paDyn[idxDyn++].d_un.d_val = elfEditImgGetStrIdxInStrTab(pStubImg, pStubImg->papszNeeded[i]);
+    }
+
+    paDyn[idxDyn].d_tag        = DT_STRSZ;
+    paDyn[idxDyn++].d_un.d_val = cbStrTab;
+    paDyn[idxDyn].d_tag        = DT_SYMENT;
+    paDyn[idxDyn++].d_un.d_val = sizeof(Elf_Sym);
+    paDyn[idxDyn].d_tag        = DT_VERDEFNUM;
+    paDyn[idxDyn++].d_un.d_val = pStubImg->cVersions - 1;
+    paDyn[idxDyn].d_tag        = DT_VERDEF;
+    paDyn[idxDyn++].d_un.d_val = aShdrs[idxGnuVerDef].sh_offset;
+    paDyn[idxDyn].d_tag        = DT_VERSYM;
+    paDyn[idxDyn++].d_un.d_val = aShdrs[idxGnuVerSym].sh_offset;
+    paDyn[idxDyn].d_tag        = DT_STRTAB;
+    paDyn[idxDyn++].d_un.d_val = aShdrs[idxDynStr].sh_offset;
+    paDyn[idxDyn].d_tag        = DT_SYMTAB;
+    paDyn[idxDyn++].d_un.d_val = aShdrs[idxDynSym].sh_offset;
+    paDyn[idxDyn].d_tag        = DT_NULL;
+    paDyn[idxDyn++].d_un.d_val = 0;
+
+    /* .dynamic */
+    aShdrs[idx].sh_name      = 55;
+    aShdrs[idx].sh_type      = SHT_DYNAMIC;
+    aShdrs[idx].sh_flags     = SHF_ALLOC | SHF_WRITE;
+    aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
+    aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
+    aShdrs[idx].sh_size      = cbDyn;
+    aShdrs[idx].sh_link      = 2; /* .dynstr */
+    aShdrs[idx].sh_info      = 0;
+    aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
+    aShdrs[idx].sh_entsize   = sizeof(Elf_Dyn);
+
+    /* Build the program headers. */
+    aPhdrs[0].p_type    = PT_PHDR;
+    aPhdrs[0].p_flags   = PF_R;
+    aPhdrs[0].p_offset  = Hdr.e_phoff;
+    aPhdrs[0].p_vaddr   = Hdr.e_phoff;
+    aPhdrs[0].p_paddr   = Hdr.e_phoff;
+    aPhdrs[0].p_filesz  = sizeof(aPhdrs);
+    aPhdrs[0].p_memsz   = sizeof(aPhdrs);
+    aPhdrs[0].p_align   = sizeof(Elf_Addr);
+
+    aPhdrs[1].p_type    = PT_LOAD;
+    aPhdrs[1].p_flags   = PF_R | PF_X;
+    aPhdrs[1].p_offset  = 0;
+    aPhdrs[1].p_vaddr   = 0;
+    aPhdrs[1].p_paddr   = 0;
+    aPhdrs[1].p_filesz  = aShdrs[idx].sh_offset;
+    aPhdrs[1].p_memsz   = aShdrs[idx].sh_offset;
+    aPhdrs[1].p_align   = 0x10000;
+
+    aPhdrs[2].p_type    = PT_LOAD;
+    aPhdrs[2].p_flags   = PF_R | PF_W;
+    aPhdrs[2].p_offset  = aShdrs[idx].sh_offset;
+    aPhdrs[2].p_vaddr   = aShdrs[idx].sh_offset;
+    aPhdrs[2].p_paddr   = aShdrs[idx].sh_offset;
+    aPhdrs[2].p_filesz  = aShdrs[idx].sh_size;
+    aPhdrs[2].p_memsz   = aShdrs[idx].sh_size;
+    aPhdrs[2].p_align   = 0x10000;
+
+    aPhdrs[3].p_type    = PT_DYNAMIC;
+    aPhdrs[3].p_flags   = PF_R | PF_W;
+    aPhdrs[3].p_offset  = aShdrs[idx].sh_offset;
+    aPhdrs[3].p_vaddr   = aShdrs[idx].sh_offset;
+    aPhdrs[3].p_paddr   = aShdrs[idx].sh_offset;
+    aPhdrs[3].p_filesz  = aShdrs[idx].sh_size;
+    aPhdrs[3].p_memsz   = aShdrs[idx].sh_size;
+    aPhdrs[3].p_align   = sizeof(uint64_t);
+
+    idx++;
+
+    /* .shstrtab */
+    aShdrs[idx].sh_name      = 1;
+    aShdrs[idx].sh_type      = SHT_STRTAB;
+    aShdrs[idx].sh_flags     = SHF_ALLOC;
+    aShdrs[idx].sh_addr      = 0;
+    aShdrs[idx].sh_offset    = aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size;
+    aShdrs[idx].sh_size      = sizeof(s_achShStrTab);
+    aShdrs[idx].sh_link      = 0;
+    aShdrs[idx].sh_info      = 0;
+    aShdrs[idx].sh_addralign = sizeof(uint8_t);
+    aShdrs[idx].sh_entsize   = 0;
+    idx++;
+
+    rc = RTFileWriteAt(hFileOut, 0, &Hdr, sizeof(Hdr), NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write ELF header to '%s': %Rrc\n", pszOutput, rc);
+
+    rc = RTFileWriteAt(hFileOut, Hdr.e_phoff, &aPhdrs[0], sizeof(aPhdrs), NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write section headers to '%s': %Rrc\n", pszOutput, rc);
+
+    rc = RTFileWriteAt(hFileOut, Hdr.e_shoff, &aShdrs[0], idx * sizeof(aShdrs[0]), NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write section headers to '%s': %Rrc\n", pszOutput, rc);
+
+    idx = 1;
+    rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, paSyms, cbSyms, NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .dynsym section to '%s': %Rrc\n", pszOutput, rc);
+
+    rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, pvStrTab, cbStrTab, NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .dynstr section to '%s': %Rrc\n", pszOutput, rc);
+
+    if (pvVerdef)
+    {
+        rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, pu16GnuVerSym, cbGnuVerSym, NULL /*pcbWritten*/);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .gnu.version section to '%s': %Rrc\n", pszOutput, rc);
+
+        rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, pvVerdef, cbVerdef, NULL /*pcbWritten*/);
+        if (RT_FAILURE(rc))
+            return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .gnu.version section to '%s': %Rrc\n", pszOutput, rc);
+    }
+
+    rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, paDyn, cbDyn, NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .dynamic section to '%s': %Rrc\n", pszOutput, rc);
+
+    rc = RTFileWriteAt(hFileOut, aShdrs[idx++].sh_offset, s_achShStrTab, sizeof(s_achShStrTab), NULL /*pcbWritten*/);
+    if (RT_FAILURE(rc))
+        return RTMsgErrorExit(RTEXITCODE_FAILURE, "Failed to write .shstrtab section to '%s': %Rrc\n", pszOutput, rc);
+
+    RTFileClose(hFileOut);
     return RTEXITCODE_SUCCESS;
 }
 
