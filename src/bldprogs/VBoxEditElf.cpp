@@ -236,7 +236,7 @@ static uint32_t elfEditImgGetStrIdxInStrTab(PELFEDITSTUBIMG pStubImg, const char
     PELFEDITSTR pStr = (PELFEDITSTR)RTStrSpaceGet(&pStubImg->StrSpace, pszString);
     AssertRelease(pStr && pStr->offStrTab > 0);
 
-    return pStr->offStrTab;
+    return (uint32_t)pStr->offStrTab;
 }
 
 

@@ -829,7 +829,7 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
     aShdrs[idx].sh_flags     = SHF_ALLOC;
     aShdrs[idx].sh_addr      = 0;
     aShdrs[idx].sh_offset    = Hdr.e_shoff + Hdr.e_shnum * sizeof(aShdrs[0]);
-    aShdrs[idx].sh_size      = cbSyms;
+    aShdrs[idx].sh_size      = (Elf_Word)cbSyms;
     aShdrs[idx].sh_link      = 2; /* .dynstr */
     aShdrs[idx].sh_info      = 1;
     aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
@@ -859,7 +859,7 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
         aShdrs[idx].sh_flags     = SHF_ALLOC;
         aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(uint16_t));
         aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(uint16_t));
-        aShdrs[idx].sh_size      = cbGnuVerSym;
+        aShdrs[idx].sh_size      = (Elf_Word)cbGnuVerSym;
         aShdrs[idx].sh_link      = 1; /* .dynsym */
         aShdrs[idx].sh_info      = 0;
         aShdrs[idx].sh_addralign = sizeof(uint16_t);
@@ -872,9 +872,9 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
         aShdrs[idx].sh_flags     = SHF_ALLOC;
         aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
         aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
-        aShdrs[idx].sh_size      = cbVerdef;
+        aShdrs[idx].sh_size      = (Elf_Word)cbVerdef;
         aShdrs[idx].sh_link      = 2; /* .dynstr */
-        aShdrs[idx].sh_info      = pStubImg->cVersions - 1;
+        aShdrs[idx].sh_info      = (Elf_Word)(pStubImg->cVersions - 1);
         aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
         aShdrs[idx].sh_entsize   = 0;
         idxGnuVerDef = idx++;
@@ -892,11 +892,11 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
     }
 
     paDyn[idxDyn].d_tag        = DT_STRSZ;
-    paDyn[idxDyn++].d_un.d_val = cbStrTab;
+    paDyn[idxDyn++].d_un.d_val = (Elf_Word)cbStrTab;
     paDyn[idxDyn].d_tag        = DT_SYMENT;
     paDyn[idxDyn++].d_un.d_val = sizeof(Elf_Sym);
     paDyn[idxDyn].d_tag        = DT_VERDEFNUM;
-    paDyn[idxDyn++].d_un.d_val = pStubImg->cVersions - 1;
+    paDyn[idxDyn++].d_un.d_val = (Elf_Word)(pStubImg->cVersions - 1);
     paDyn[idxDyn].d_tag        = DT_VERDEF;
     paDyn[idxDyn++].d_un.d_val = aShdrs[idxGnuVerDef].sh_offset;
     paDyn[idxDyn].d_tag        = DT_VERSYM;
@@ -914,7 +914,7 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
     aShdrs[idx].sh_flags     = SHF_ALLOC | SHF_WRITE;
     aShdrs[idx].sh_addr      = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
     aShdrs[idx].sh_offset    = RT_ALIGN_64(aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size, sizeof(Elf_Addr));
-    aShdrs[idx].sh_size      = cbDyn;
+    aShdrs[idx].sh_size      = (Elf_Word)cbDyn;
     aShdrs[idx].sh_link      = 2; /* .dynstr */
     aShdrs[idx].sh_info      = 0;
     aShdrs[idx].sh_addralign = sizeof(Elf_Addr);
