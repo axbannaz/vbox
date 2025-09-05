@@ -842,7 +842,7 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
     aShdrs[idx].sh_flags     = SHF_ALLOC;
     aShdrs[idx].sh_addr      = 0;
     aShdrs[idx].sh_offset    = aShdrs[idx - 1].sh_offset + aShdrs[idx - 1].sh_size;
-    aShdrs[idx].sh_size      = cbStrTab;
+    aShdrs[idx].sh_size      = (Elf_Word)cbStrTab;
     aShdrs[idx].sh_link      = 0;
     aShdrs[idx].sh_info      = 0;
     aShdrs[idx].sh_addralign = sizeof(uint8_t);
