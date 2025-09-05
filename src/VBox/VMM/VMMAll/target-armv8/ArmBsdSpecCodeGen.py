@@ -4370,7 +4370,7 @@ class IEMArmGenerator(object):
         #
         aoFeatures = [oFeature for oFeature in spec.g_aoAllArmFeatures
                       if    oFeature.sName.startswith('FEAT_')
-                        and oFeature.sName not in ('FEAT_EL0', 'FEAT_EL1', 'FEAT_EL2', 'FEAT_EL3') # removed in 2025
+                        #and oFeature.sName not in ('FEAT_EL0', 'FEAT_EL1', 'FEAT_EL2', 'FEAT_EL3') # removed in 2025
                         and oFeature.oSupportExpr
                         and oFeature.asSupportExprVars[0].split('.')[0] not in ('AArch32', 'PMU', 'AMU', 'ext', 'uext') ];
         aoFeatures = sorted(aoFeatures, key = lambda oFeature: (len(oFeature.asSupportExprVars), oFeature.asSupportExprVars));
@@ -4470,13 +4470,14 @@ class IEMArmGenerator(object):
         oHelper = CExprHelperFeatures();
         for oHelper.idxFeatures, oFeature in enumerate(aoFeatures):
             sFeatureMemberNm = g_dSpecFeatToCpumFeat.get(oFeature.sName, oFeature.sName);
-            if sFeatureMemberNm is oFeature.sName:
-                asTodo.append(oFeature.sName);
+            if not isinstance(sFeatureMemberNm, bool): # Skip fixed items.
+                if sFeatureMemberNm is oFeature.sName:
+                    asTodo.append(oFeature.sName);
 
-            print('debug: %s/%s <-> %s' % (oFeature.sName, sFeatureMemberNm, oFeature.oSupportExpr.toString()))
-            sLine = '    pFeatures->%-22s = %s;' % (sFeatureMemberNm, oFeature.oSupportExpr.toCExpr(oHelper),)
-            sLine = '%-116s /* %s */' % (sLine, oFeature.sName,);
-            asLines.append(sLine);
+                print('debug: %s/%s <-> %s' % (oFeature.sName, sFeatureMemberNm, oFeature.oSupportExpr.toString()))
+                sLine = '    pFeatures->%-22s = %s;' % (sFeatureMemberNm, oFeature.oSupportExpr.toCExpr(oHelper),)
+                sLine = '%-116s /* %s */' % (sLine, oFeature.sName,);
+                asLines.append(sLine);
         if asTodo:
             print('Error! Please add the features: %s' % (', '.join(asTodo),));
             for sFeature in asTodo:
@@ -4487,7 +4488,8 @@ class IEMArmGenerator(object):
 
         # Did we miss any features in CPUMFEATURESARMV8?
         asMissing = [];
-        hsMissingFeatures = set(g_dSpecFeatToCpumFeat) - set({oFeature.sName for oFeature in aoFeatures});
+        hsMissingFeatures = (  set({sNm for sNm, oMemb in g_dSpecFeatToCpumFeat.items() if not isinstance(oMemb, bool)} )
+                             - set({oFeature.sName for oFeature in aoFeatures}) );
         if hsMissingFeatures:
             print('Error! The following CPUMFEATURESARMV8 members have not been initialized: %s'
                   % (', '.join(hsMissingFeatures),));
@@ -4568,7 +4570,8 @@ class IEMArmGenerator(object):
         ];
 
         asLines.extend(['    PRINT_FEATURE(%-*s %s);' % (cchMaxFeatNm + 1, sFeature + ',', g_dSpecFeatToCpumFeat[sFeature])
-                        for sFeature in sorted(g_dSpecFeatToCpumFeat.keys())]);
+                        for sFeature in sorted(g_dSpecFeatToCpumFeat.keys())
+                        if not isinstance(g_dSpecFeatToCpumFeat[sFeature], bool)]);
         asLines += [
             '}',
             '#endif /* IN_RING3 */',
