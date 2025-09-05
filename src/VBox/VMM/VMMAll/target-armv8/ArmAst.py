@@ -685,6 +685,19 @@ class ArmAstBinaryOp(ArmAstBase):
         # Just wrap it in double boolean negation for now.
         return ArmAstUnaryOp('!', ArmAstUnaryOp('!', oNode));
 
+    @staticmethod
+    def isSameExprInBranch(oExpr, oSubTree, sOp, fSkipImmediate = False):
+        """
+        Helper for checking whether oExpr is in the oSubTree sub-tree at the
+        equal level (thus sOp).
+        This will recurse.
+        """
+        if not fSkipImmediate and oExpr.isSame(oSubTree):
+            return True;
+        if isinstance(oSubTree, ArmAstBinaryOp) and oSubTree.sOp == sOp:
+            return (   ArmAstBinaryOp.isSameExprInBranch(oExpr, oSubTree.oLeft,  sOp)
+                    or ArmAstBinaryOp.isSameExprInBranch(oExpr, oSubTree.oRight, sOp) );
+        return False;
 
     def transform(self, fnCallback, fEliminationAllowed, oCallbackArg, aoStack):
         # Recurse first.
@@ -710,7 +723,9 @@ class ArmAstBinaryOp(ArmAstBase):
                 if self.oRight.isBoolAndFalse() or self.oRight.isMatchingIntegerOrValue(0):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
                 # Simplify: sameexpr || sameexpr => sameexpr
-                if self.oRight.isSame(self.oLeft):
+                if self.isSameExprInBranch(self.oLeft, self.oRight, self.sOp):
+                    return fnCallback(self._transformEnsureBool(self.oRight), fEliminationAllowed, oCallbackArg, aoStack);
+                if self.isSameExprInBranch(self.oRight, self.oLeft, self.sOp, fSkipImmediate = True):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
 
             elif self.sOp == '&&':
@@ -726,8 +741,12 @@ class ArmAstBinaryOp(ArmAstBase):
                 if self.oRight.isBoolAndTrue() or self.oRight.getIntegerOrValue() not in (None, 0):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
                 # Simplify: sameexpr && sameexpr => sameexpr
-                if self.oRight.isSame(self.oLeft):
+                if self.isSameExprInBranch(self.oLeft, self.oRight, self.sOp):
+                    return fnCallback(self._transformEnsureBool(self.oRight), fEliminationAllowed, oCallbackArg, aoStack);
+                if self.isSameExprInBranch(self.oRight, self.oLeft, self.sOp, fSkipImmediate = True):
                     return fnCallback(self._transformEnsureBool(self.oLeft), fEliminationAllowed, oCallbackArg, aoStack);
+
+
             else:
                 iLeft = self.oLeft.getIntegerOrValue();
                 if iLeft is None and isinstance(self.oLeft, ArmAstBool):
