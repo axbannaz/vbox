@@ -887,7 +887,7 @@ static RTEXITCODE ELFEDIT_NAME(GenerateStub)(PELFEDITSTUBIMG pStubImg, const cha
 
     for (uint32_t i = 0; i < pStubImg->cNeeded; i++)
     {
-        paDyn[idxDyn].d_tag        = DT_SONAME;
+        paDyn[idxDyn].d_tag        = DT_NEEDED;
         paDyn[idxDyn++].d_un.d_val = elfEditImgGetStrIdxInStrTab(pStubImg, pStubImg->papszNeeded[i]);
     }
 
