@@ -3706,7 +3706,8 @@ class IEMArmGenerator(object):
             oCondCode = oInstr.oCondition.clone().transform(IEMArmGenerator.xformToCCallback, True,
                                                             IEMArmGenerator.XformArg(oInstr), [])
             if oCondCode and not oCondCode.isBoolAndTrue():
-                for i, sLine, fFinal in ArmAst.enumerateWithLookahead(oCondCode.toStringEx(sLang = 'C').split('\n')):
+                cchMax = 128 - len(sIndent) - 8;
+                for i, sLine, fFinal in ArmAst.enumerateWithLookahead(oCondCode.toStringEx('C', cchMax).split('\n')):
                     asLines.append('%s%s%s%s' % (sIndent, '    if (' if i == 0 else '        ', sLine, ')' if fFinal else ''));
                 asLines.append(sIndent + '    {');
 
