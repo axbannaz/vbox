@@ -7737,7 +7737,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FABD_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FABD_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FABD_asimdsamefp16_only
@@ -7790,7 +7791,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FABD_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FABD_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FABD_asisdsamefp16_only
@@ -7948,7 +7950,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FACGE_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FACGE_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FACGE_asimdsamefp16_only
@@ -8001,7 +8004,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FACGE_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FACGE_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FACGE_asisdsamefp16_only
@@ -8056,7 +8060,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FACGT_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FACGT_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FACGT_asimdsamefp16_only
@@ -8109,7 +8114,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FACGT_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FACGT_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FACGT_asisdsamefp16_only
@@ -8164,7 +8170,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FADDP_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FADDP_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FADDP_asimdsamefp16_only
@@ -8189,7 +8196,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FADDP_asisdpair_only_H, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FADDP_asisdpair_only_H Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FADDP_asisdpair_only_H
@@ -9057,7 +9065,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCMGT_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCMGT_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCMGT_asimdsamefp16_only
@@ -9151,7 +9160,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCMGT_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCMGT_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FCMGT_asisdsamefp16_only
@@ -9894,7 +9904,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTAS_asisdmiscfp16_R, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTAS_asisdmiscfp16_R Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FCVTAS_asisdmiscfp16_R
@@ -10147,7 +10158,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTAU_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTAU_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTAU_asimdmiscfp16_R
@@ -10198,7 +10210,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTAU_asisdmiscfp16_R, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTAU_asisdmiscfp16_R Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FCVTAU_asisdmiscfp16_R
@@ -11041,7 +11054,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTNS_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTNS_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTNS_asimdmiscfp16_R
@@ -12435,7 +12449,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZS_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTZS_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZS_asimdmiscfp16_R
@@ -12509,7 +12524,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZS_asisdmiscfp16_R, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTZS_asisdmiscfp16_R Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZS_asisdmiscfp16_R
@@ -12915,7 +12931,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZU_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTZU_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZU_asimdmiscfp16_R
@@ -12989,7 +13006,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZU_asisdmiscfp16_R, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FCVTZU_asisdmiscfp16_R Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZU_asisdmiscfp16_R
@@ -13349,7 +13367,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FDIV_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FDIV_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FDIV_asimdsamefp16_only
@@ -13604,7 +13623,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMAXNMP_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMAXNMP_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMAXNMP_asimdsamefp16_only
@@ -13869,7 +13889,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMAXP_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMAXP_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMAXP_asimdsamefp16_only
@@ -13894,7 +13915,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMAXP_asisdpair_only_H, uint32_t, uOpcode)
     {
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMAXP_asisdpair_only_H Rd=%#x Rn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn));
 #ifdef IEM_INSTR_IMPL_A64__FMAXP_asisdpair_only_H
@@ -14139,7 +14161,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMINNMP_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMINNMP_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMINNMP_asimdsamefp16_only
@@ -14344,7 +14367,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMINNM_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMINNM_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMINNM_asimdsamefp16_only
@@ -14399,7 +14423,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMINP_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMINP_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMINP_asimdsamefp16_only
@@ -14614,7 +14639,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMIN_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMIN_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMIN_asimdsamefp16_only
@@ -15408,7 +15434,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMLS_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMLS_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMLS_asimdsamefp16_only
@@ -16133,7 +16160,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMULX_asisdelem_RH_H, uint32_t, uOpcode)
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const M          = (uOpcode >> 20) & 0x00000001;
         uint32_t const L          = (uOpcode >> 21) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMULX_asisdelem_RH_H Rd=%#x Rn=%#x H=%u Rm=%#x M=%u L=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, H, Rm, M, L));
 #ifdef IEM_INSTR_IMPL_A64__FMULX_asisdelem_RH_H
@@ -16211,7 +16239,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMULX_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMULX_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FMULX_asisdsamefp16_only
@@ -16385,7 +16414,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FMUL_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FMUL_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FMUL_asimdsamefp16_only
@@ -16924,7 +16954,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FRECPS_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FRECPS_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FRECPS_asisdsamefp16_only
@@ -17552,7 +17583,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FRINTM_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FRINTM_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FRINTM_asimdmiscfp16_R
@@ -17871,7 +17903,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FRINTX_asimdmiscfp16_R, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FRINTX_asimdmiscfp16_R Rd=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__FRINTX_asimdmiscfp16_R
@@ -18108,7 +18141,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FRSQRTS_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FRSQRTS_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FRSQRTS_asimdsamefp16_only
@@ -18156,7 +18190,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FRSQRTS_asisdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FRSQRTS_asisdsamefp16_only Rd=%#x Rn=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm));
 #ifdef IEM_INSTR_IMPL_A64__FRSQRTS_asisdsamefp16_only
@@ -18432,7 +18467,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FSUB_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp16 /*FEAT_FP16*/)
         {
             LogFlow(("%018x/%010x: FSUB_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FSUB_asimdsamefp16_only
@@ -54375,7 +54411,8 @@ FNIEMOP_DEF_1(iemDecodeA64_extq_z_zi_des, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: extq_z_zi_des Zdn=%#x Zm=%#x imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, imm4));
 #ifdef IEM_INSTR_IMPL_A64__extq_z_zi_des
@@ -54976,7 +55013,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famax_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: famax_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__famax_mz_zzw_2x2
@@ -55002,7 +55040,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famax_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: famax_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__famax_mz_zzw_4x4
@@ -55051,7 +55090,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famin_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: famin_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__famin_mz_zzw_2x2
@@ -55077,7 +55117,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famin_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: famin_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__famin_mz_zzw_4x4
@@ -55733,7 +55774,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvt_z_p_z_d2sz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvt_z_p_z_d2sz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvt_z_p_z_d2sz
@@ -55869,7 +55911,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvt_z_p_z_s2dz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvt_z_p_z_s2dz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvt_z_p_z_s2dz
@@ -56284,7 +56327,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtx_z_p_z_d2sz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtx_z_p_z_d2sz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtx_z_p_z_d2sz
@@ -56465,7 +56509,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzs_z_p_z_d2xz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzs_z_p_z_d2xz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzs_z_p_z_d2xz
@@ -56512,7 +56557,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzs_z_p_z_fp162hz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzs_z_p_z_fp162hz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzs_z_p_z_fp162hz
@@ -56601,7 +56647,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzs_z_p_z_fp162xz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzs_z_p_z_fp162xz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzs_z_p_z_fp162xz
@@ -56824,7 +56871,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzu_z_p_z_d2xz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzu_z_p_z_d2xz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzu_z_p_z_d2xz
@@ -56871,7 +56919,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzu_z_p_z_fp162hz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzu_z_p_z_fp162hz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzu_z_p_z_fp162hz
@@ -56960,7 +57009,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtzu_z_p_z_fp162xz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: fcvtzu_z_p_z_fp162xz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__fcvtzu_z_p_z_fp162xz
@@ -57768,7 +57818,8 @@ FNIEMOP_DEF_1(iemDecodeA64_flogb_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 13) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: flogb_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__flogb_z_p_z_z
@@ -58603,7 +58654,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnmqv_z_p_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: fminnmqv_z_p_z Vd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Vd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnmqv_z_p_z
@@ -62697,7 +62749,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint32x_z_p_z_m, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 17) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint32x_z_p_z_m Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint32x_z_p_z_m
@@ -62724,7 +62777,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint32x_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 14) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint32x_z_p_z_z Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint32x_z_p_z_z
@@ -62773,7 +62827,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint32z_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 14) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint32z_z_p_z_z Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint32z_z_p_z_z
@@ -62800,7 +62855,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint64x_z_p_z_m, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 17) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint64x_z_p_z_m Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint64x_z_p_z_m
@@ -62827,7 +62883,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint64x_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 14) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint64x_z_p_z_z Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint64x_z_p_z_z
@@ -62876,7 +62933,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frint64z_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const sz         = (uOpcode >> 14) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frint64z_z_p_z_z Zd=%#x Zn=%#x Pg=%u sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, sz));
 #ifdef IEM_INSTR_IMPL_A64__frint64z_z_p_z_z
@@ -63019,7 +63077,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frinti_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frinti_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__frinti_z_p_z_z
@@ -63118,7 +63177,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frintm_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frintm_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__frintm_z_p_z_z
@@ -63350,7 +63410,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frintx_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frintx_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__frintx_z_p_z_z
@@ -63399,7 +63460,8 @@ FNIEMOP_DEF_1(iemDecodeA64_frintz_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: frintz_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__frintz_z_p_z_z
@@ -74655,7 +74717,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_p_zi_b, uint32_t, uOpcode)
     {
         uint32_t const Pd         = (uOpcode >>  0) & 0x0000000f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_p_zi_b Pd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Pd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__pmov_p_zi_b
@@ -74682,7 +74745,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_p_zi_d, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const i3l        = (uOpcode >> 17) & 0x00000003;
         uint32_t const i3h        = (uOpcode >> 22) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_p_zi_d Pd=%#x Zn=%#x i3l=%u i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Pd, Zn, i3l, i3h));
 #ifdef IEM_INSTR_IMPL_A64__pmov_p_zi_d
@@ -74708,7 +74772,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_p_zi_h, uint32_t, uOpcode)
         uint32_t const Pd         = (uOpcode >>  0) & 0x0000000f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const i1         = (uOpcode >> 17) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_p_zi_h Pd=%#x Zn=%#x i1=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Pd, Zn, i1));
 #ifdef IEM_INSTR_IMPL_A64__pmov_p_zi_h
@@ -74734,7 +74799,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_p_zi_s, uint32_t, uOpcode)
         uint32_t const Pd         = (uOpcode >>  0) & 0x0000000f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const i2         = (uOpcode >> 17) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_p_zi_s Pd=%#x Zn=%#x i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Pd, Zn, i2));
 #ifdef IEM_INSTR_IMPL_A64__pmov_p_zi_s
@@ -74759,7 +74825,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_z_pi_b, uint32_t, uOpcode)
     {
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Pn         = (uOpcode >>  5) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_z_pi_b Zd=%#x Pn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Pn));
 #ifdef IEM_INSTR_IMPL_A64__pmov_z_pi_b
@@ -74786,7 +74853,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_z_pi_d, uint32_t, uOpcode)
         uint32_t const Pn         = (uOpcode >>  5) & 0x0000000f;
         uint32_t const i3l        = (uOpcode >> 17) & 0x00000003;
         uint32_t const i3h        = (uOpcode >> 22) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_z_pi_d Zd=%#x Pn=%#x i3l=%u i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Pn, i3l, i3h));
 #ifdef IEM_INSTR_IMPL_A64__pmov_z_pi_d
@@ -74812,7 +74880,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_z_pi_h, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Pn         = (uOpcode >>  5) & 0x0000000f;
         uint32_t const i1         = (uOpcode >> 17) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_z_pi_h Zd=%#x Pn=%#x i1=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Pn, i1));
 #ifdef IEM_INSTR_IMPL_A64__pmov_z_pi_h
@@ -74838,7 +74907,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmov_z_pi_s, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Pn         = (uOpcode >>  5) & 0x0000000f;
         uint32_t const i2         = (uOpcode >> 17) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: pmov_z_pi_s Zd=%#x Pn=%#x i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Pn, i2));
 #ifdef IEM_INSTR_IMPL_A64__pmov_z_pi_s
@@ -76033,7 +76103,8 @@ FNIEMOP_DEF_1(iemDecodeA64_rbit_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: rbit_z_p_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__rbit_z_p_z_z
@@ -76233,7 +76304,8 @@ FNIEMOP_DEF_1(iemDecodeA64_revb_z_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: revb_z_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__revb_z_z_z
@@ -76285,7 +76357,8 @@ FNIEMOP_DEF_1(iemDecodeA64_revd_z_p_z_z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: revd_z_p_z_z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__revd_z_p_z_z
@@ -76334,7 +76407,8 @@ FNIEMOP_DEF_1(iemDecodeA64_revh_z_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: revh_z_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__revh_z_z_z
@@ -76383,7 +76457,8 @@ FNIEMOP_DEF_1(iemDecodeA64_revw_z_z_z, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: revw_z_z_z Zd=%#x Zn=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__revw_z_z_z
@@ -76971,7 +77046,8 @@ FNIEMOP_DEF_1(iemDecodeA64_scvtf_z_p_z_h2fp16z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: scvtf_z_p_z_h2fp16z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__scvtf_z_p_z_h2fp16z
@@ -77144,7 +77220,8 @@ FNIEMOP_DEF_1(iemDecodeA64_scvtf_z_p_z_x2dz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: scvtf_z_p_z_x2dz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__scvtf_z_p_z_x2dz
@@ -77191,7 +77268,8 @@ FNIEMOP_DEF_1(iemDecodeA64_scvtf_z_p_z_x2fp16z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: scvtf_z_p_z_x2fp16z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__scvtf_z_p_z_x2fp16z
@@ -85654,7 +85732,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st2q_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
         {
             LogFlow(("%018x/%010x: st2q_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st2q_z_p_bi_contiguous
@@ -89530,7 +89609,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ucvtf_z_p_z_h2fp16z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: ucvtf_z_p_z_h2fp16z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__ucvtf_z_p_z_h2fp16z
@@ -89619,7 +89699,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ucvtf_z_p_z_w2fp16z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: ucvtf_z_p_z_w2fp16z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__ucvtf_z_p_z_w2fp16z
@@ -89713,7 +89794,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ucvtf_z_p_z_x2dz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: ucvtf_z_p_z_x2dz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__ucvtf_z_p_z_x2dz
@@ -89760,7 +89842,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ucvtf_z_p_z_x2fp16z, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: ucvtf_z_p_z_x2fp16z Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__ucvtf_z_p_z_x2fp16z
@@ -89807,7 +89890,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ucvtf_z_p_z_x2sz, uint32_t, uOpcode)
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p2 /*FEAT_SVE2p2*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/)
         {
             LogFlow(("%018x/%010x: ucvtf_z_p_z_x2sz Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__ucvtf_z_p_z_x2sz
@@ -112206,13 +112290,13 @@ FNIEMOP_DEF_1(iemDecodeA64_1fe0fc38_00c00020_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fedfc38_40c00028_3, uint32_t, uOpcode)
 {
     /* 0xffff1e00/0xc0c20200 org expr: (uOpcode AND 0x80120200) == 0x80020200 && IsFeatureImplemented(FEAT_SME2p1) */
-    if ((uOpcode & 0x80120200) == 0x80020200)
+    if ((uOpcode & UINT32_C(0x80120200)) == UINT32_C(0x80020200))
         return iemDecodeA64_movaz_z_rza_d(pVCpu, uOpcode);
     /* 0xffff0200/0xc0c20000 org expr: (uOpcode AND 0x80120200) == 0x80020000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0x80120200) == 0x80020000)
+    if ((uOpcode & UINT32_C(0x80120200)) == UINT32_C(0x80020000))
         return iemDecodeA64_mova_z_p_rza_d(pVCpu, uOpcode);
     /* 0xffff0010/0xc0c00000 org expr: (uOpcode AND 0x80120000) == 0x80000000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0x80120000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80120000)) == UINT32_C(0x80000000))
         return iemDecodeA64_mova_za_p_rz_d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -112221,13 +112305,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7fedfc38_40c00028_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fedfc38_40c10028_3, uint32_t, uOpcode)
 {
     /* 0xffff1e00/0xc0c30200 org expr: (uOpcode AND 0x80120200) == 0x80020200 && IsFeatureImplemented(FEAT_SME2p1) */
-    if ((uOpcode & 0x80120200) == 0x80020200)
+    if ((uOpcode & UINT32_C(0x80120200)) == UINT32_C(0x80020200))
         return iemDecodeA64_movaz_z_rza_q(pVCpu, uOpcode);
     /* 0xffff0200/0xc0c30000 org expr: (uOpcode AND 0x80120200) == 0x80020000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0x80120200) == 0x80020000)
+    if ((uOpcode & UINT32_C(0x80120200)) == UINT32_C(0x80020000))
         return iemDecodeA64_mova_z_p_rza_q(pVCpu, uOpcode);
     /* 0xffff0010/0xc0c10000 org expr: (uOpcode AND 0x80120000) == 0x80000000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0x80120000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80120000)) == UINT32_C(0x80000000))
         return iemDecodeA64_mova_za_p_rz_q(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -120316,10 +120400,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0120a400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a900_3, uint32_t, uOpcode)
 {
     /* 0xfff0ffe3/0xc120a900 org expr: (uOpcode AND 0xc01000c2) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc01000c2) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc01000c2)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmax_mz_zzv_4x1(pVCpu, uOpcode);
     /* 0xfff0ffe3/0xc120a980 org expr: (uOpcode AND 0xc01000c2) == 0xc0000080 && IsFeatureImplemented(FEAT_SVE_BFSCALE) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc01000c2) == 0xc0000080)
+    if ((uOpcode & UINT32_C(0xc01000c2)) == UINT32_C(0xc0000080))
         return iemDecodeA64_bfscale_mz_zzv_4x1(pVCpu, uOpcode);
     /* skipping 0xff30ffe3/0xc120a900 fmax_mz_zzv_4x1: (uOpcode AND 0xc01000c2) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     /* skipping 0xff30ffe3/0xc120a980 fscale_mz_zzv_4x1:    (uOpcode AND 0xc01000c2) == 0xc0000080
@@ -120334,7 +120418,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a900_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a901_3, uint32_t, uOpcode)
 {
     /* 0xfff0ffe3/0xc120a901 org expr: (uOpcode AND 0xc01000c2) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc01000c2) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc01000c2)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmin_mz_zzv_4x1(pVCpu, uOpcode);
     /* skipping 0xff30ffe3/0xc120a901 fmin_mz_zzv_4x1: (uOpcode AND 0xc01000c2) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120345,7 +120429,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a901_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a920_3, uint32_t, uOpcode)
 {
     /* 0xfff0ffe3/0xc120a920 org expr: (uOpcode AND 0xc01000c2) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc01000c2) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc01000c2)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmaxnm_mz_zzv_4x1(pVCpu, uOpcode);
     /* skipping 0xff30ffe3/0xc120a920 fmaxnm_mz_zzv_4x1: (uOpcode AND 0xc01000c2) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120356,7 +120440,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a920_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0ff25_0120a921_3, uint32_t, uOpcode)
 {
     /* 0xfff0ffe3/0xc120a921 org expr: (uOpcode AND 0xc01000c2) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc01000c2) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc01000c2)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfminnm_mz_zzv_4x1(pVCpu, uOpcode);
     /* skipping 0xff30ffe3/0xc120a921 fminnm_mz_zzv_4x1: (uOpcode AND 0xc01000c2) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120665,10 +120749,10 @@ FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b021_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b100_3, uint32_t, uOpcode)
 {
     /* 0xffe1ffe1/0xc120b100 org expr: (uOpcode AND 0xa0010280) == 0x80000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xa0010280) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0010280)) == UINT32_C(0x80000000))
         return iemDecodeA64_bfmax_mz_zzw_2x2(pVCpu, uOpcode);
     /* 0xffe1ffe1/0xc120b180 org expr: (uOpcode AND 0xa0010280) == 0x80000080 && IsFeatureImplemented(FEAT_SVE_BFSCALE) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xa0010280) == 0x80000080)
+    if ((uOpcode & UINT32_C(0xa0010280)) == UINT32_C(0x80000080))
         return iemDecodeA64_bfscale_mz_zzw_2x2(pVCpu, uOpcode);
     /* skipping 0xff21ffe1/0xc120b100 fmax_mz_zzw_2x2: (uOpcode AND 0xa0010280) == 0x80000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     /* skipping 0xff21ffe1/0xc120b180 fscale_mz_zzw_2x2:    (uOpcode AND 0xa0010280) == 0x80000080
@@ -120683,7 +120767,7 @@ FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b100_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b101_3, uint32_t, uOpcode)
 {
     /* 0xffe1ffe1/0xc120b101 org expr: (uOpcode AND 0xa0010280) == 0x80000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xa0010280) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0010280)) == UINT32_C(0x80000000))
         return iemDecodeA64_bfmin_mz_zzw_2x2(pVCpu, uOpcode);
     /* skipping 0xff21ffe1/0xc120b101 fmin_mz_zzw_2x2: (uOpcode AND 0xa0010280) == 0x80000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120694,7 +120778,7 @@ FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b101_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b120_3, uint32_t, uOpcode)
 {
     /* 0xffe1ffe1/0xc120b120 org expr: (uOpcode AND 0xa0010280) == 0x80000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xa0010280) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0010280)) == UINT32_C(0x80000000))
         return iemDecodeA64_bfmaxnm_mz_zzw_2x2(pVCpu, uOpcode);
     /* skipping 0xff21ffe1/0xc120b120 fmaxnm_mz_zzw_2x2: (uOpcode AND 0xa0010280) == 0x80000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120705,7 +120789,7 @@ FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b120_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe0fd65_4120b121_3, uint32_t, uOpcode)
 {
     /* 0xffe1ffe1/0xc120b121 org expr: (uOpcode AND 0xa0010280) == 0x80000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xa0010280) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0010280)) == UINT32_C(0x80000000))
         return iemDecodeA64_bfminnm_mz_zzw_2x2(pVCpu, uOpcode);
     /* skipping 0xff21ffe1/0xc120b121 fminnm_mz_zzw_2x2: (uOpcode AND 0xa0010280) == 0x80000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120907,10 +120991,10 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b821_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b900_3, uint32_t, uOpcode)
 {
     /* 0xffe3ffe3/0xc120b900 org expr: (uOpcode AND 0xc0030282) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc0030282) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0030282)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmax_mz_zzw_4x4(pVCpu, uOpcode);
     /* 0xffe3ffe3/0xc120b980 org expr: (uOpcode AND 0xc0030282) == 0xc0000080 && IsFeatureImplemented(FEAT_SVE_BFSCALE) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc0030282) == 0xc0000080)
+    if ((uOpcode & UINT32_C(0xc0030282)) == UINT32_C(0xc0000080))
         return iemDecodeA64_bfscale_mz_zzw_4x4(pVCpu, uOpcode);
     /* skipping 0xff23ffe3/0xc120b900 fmax_mz_zzw_4x4: (uOpcode AND 0xc0030282) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     /* skipping 0xff23ffe3/0xc120b980 fscale_mz_zzw_4x4:    (uOpcode AND 0xc0030282) == 0xc0000080
@@ -120925,7 +121009,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b900_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b901_3, uint32_t, uOpcode)
 {
     /* 0xffe3ffe3/0xc120b901 org expr: (uOpcode AND 0xc0030282) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc0030282) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0030282)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmin_mz_zzw_4x4(pVCpu, uOpcode);
     /* skipping 0xff23ffe3/0xc120b901 fmin_mz_zzw_4x4: (uOpcode AND 0xc0030282) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120936,7 +121020,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b901_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b920_3, uint32_t, uOpcode)
 {
     /* 0xffe3ffe3/0xc120b920 org expr: (uOpcode AND 0xc0030282) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc0030282) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0030282)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfmaxnm_mz_zzw_4x4(pVCpu, uOpcode);
     /* skipping 0xff23ffe3/0xc120b920 fmaxnm_mz_zzw_4x4: (uOpcode AND 0xc0030282) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -120947,7 +121031,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b920_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fd69_0120b921_3, uint32_t, uOpcode)
 {
     /* 0xffe3ffe3/0xc120b921 org expr: (uOpcode AND 0xc0030282) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE_B16B16) && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0xc0030282) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0030282)) == UINT32_C(0xc0000000))
         return iemDecodeA64_bfminnm_mz_zzw_4x4(pVCpu, uOpcode);
     /* skipping 0xff23ffe3/0xc120b921 fminnm_mz_zzw_4x4: (uOpcode AND 0xc0030282) == 0xc0000000 && size != '00' && IsFeatureImplemented(FEAT_SME2) */
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
@@ -133960,13 +134044,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01c00400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc10_41c00800_2, uint32_t, uOpcode)
 {
     /* 0xfff09830/0xc1d00800 org expr: (uOpcode AND 0x80100020) == 0x80100000 && IsFeatureImplemented(FEAT_SME_F8F32) */
-    if ((uOpcode & 0x80100020) == 0x80100000)
+    if ((uOpcode & UINT32_C(0x80100020)) == UINT32_C(0x80100000))
         return iemDecodeA64_fvdotb_za32_z8z8i_2xi(pVCpu, uOpcode);
     /* 0xfff09030/0xc1d00020 org expr: (uOpcode AND 0x80100020) == 0x80100020 && IsFeatureImplemented(FEAT_SME_F8F16) */
-    if ((uOpcode & 0x80100020) == 0x80100020)
+    if ((uOpcode & UINT32_C(0x80100020)) == UINT32_C(0x80100020))
         return iemDecodeA64_fdot_za_z8z8i_2xi(pVCpu, uOpcode);
     /* 0xfff01010/0xc1c00000 org expr: (uOpcode AND 0x80100000) == 0x80000000 && IsFeatureImplemented(FEAT_SME_F8F16) */
-    if ((uOpcode & 0x80100000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80100000)) == UINT32_C(0x80000000))
         return iemDecodeA64_fmlal_za_z8z8i_1(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -135716,13 +135800,13 @@ FNIEMOP_DEF_1(iemDecodeA64_5fe0fc10_09c08800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe0fc10_41c08800_2, uint32_t, uOpcode)
 {
     /* 0xfff09878/0xc1d08808 org expr: (uOpcode AND 0xa0100068) == 0x80100008 && IsFeatureImplemented(FEAT_SME2) && IsFeatureImplemented(FEAT_SME_I16I64) */
-    if ((uOpcode & 0xa0100068) == 0x80100008)
+    if ((uOpcode & UINT32_C(0xa0100068)) == UINT32_C(0x80100008))
         return iemDecodeA64_svdot_za_zzi_d4xi(pVCpu, uOpcode);
     /* 0xfff01010/0xc1c00000 org expr: (uOpcode AND 0xa0100000) == 0x80000000 && IsFeatureImplemented(FEAT_SME_F8F16) */
-    if ((uOpcode & 0xa0100000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0100000)) == UINT32_C(0x80000000))
         return iemDecodeA64_fmlal_za_z8z8i_1(pVCpu, uOpcode);
     /* 0xffe00010/0xe1c00000 org expr: (uOpcode AND 0xa0000000) == 0xa0000000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0xa0000000) == 0xa0000000)
+    if ((uOpcode & UINT32_C(0xa0000000)) == UINT32_C(0xa0000000))
         return iemDecodeA64_ld1q_za_p_rrr(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -136441,10 +136525,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_21e00018_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00000_2, uint32_t, uOpcode)
 {
     /* 0xffa39c7e/0xc1a10000 org expr: (uOpcode AND 0x80030066) == 0x80010000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80030066) == 0x80010000)
+    if ((uOpcode & UINT32_C(0x80030066)) == UINT32_C(0x80010000))
         return iemDecodeA64_smlall_za_zzw_4x4(pVCpu, uOpcode);
     /* 0xffa19c3e/0xc1a00000 org expr: (uOpcode AND 0x80010026) == 0x80000000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80010026) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80010026)) == UINT32_C(0x80000000))
         return iemDecodeA64_smlall_za_zzw_2x2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -136453,10 +136537,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00008_2, uint32_t, uOpcode)
 {
     /* 0xffa39c7e/0xc1a10008 org expr: (uOpcode AND 0x80030066) == 0x80010000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80030066) == 0x80010000)
+    if ((uOpcode & UINT32_C(0x80030066)) == UINT32_C(0x80010000))
         return iemDecodeA64_smlsll_za_zzw_4x4(pVCpu, uOpcode);
     /* 0xffa19c3e/0xc1a00008 org expr: (uOpcode AND 0x80010026) == 0x80000000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80010026) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80010026)) == UINT32_C(0x80000000))
         return iemDecodeA64_smlsll_za_zzw_2x2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -136465,10 +136549,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00008_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00010_2, uint32_t, uOpcode)
 {
     /* 0xffa39c7e/0xc1a10010 org expr: (uOpcode AND 0x80030066) == 0x80010000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80030066) == 0x80010000)
+    if ((uOpcode & UINT32_C(0x80030066)) == UINT32_C(0x80010000))
         return iemDecodeA64_umlall_za_zzw_4x4(pVCpu, uOpcode);
     /* 0xffa19c3e/0xc1a00010 org expr: (uOpcode AND 0x80010026) == 0x80000000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80010026) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80010026)) == UINT32_C(0x80000000))
         return iemDecodeA64_umlall_za_zzw_2x2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -136477,10 +136561,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00010_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc18_41e00018_2, uint32_t, uOpcode)
 {
     /* 0xffa39c7e/0xc1a10018 org expr: (uOpcode AND 0x80030066) == 0x80010000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80030066) == 0x80010000)
+    if ((uOpcode & UINT32_C(0x80030066)) == UINT32_C(0x80010000))
         return iemDecodeA64_umlsll_za_zzw_4x4(pVCpu, uOpcode);
     /* 0xffa19c3e/0xc1a00018 org expr: (uOpcode AND 0x80010026) == 0x80000000 && IsFeatureImplemented(FEAT_SME2) */
-    if ((uOpcode & 0x80010026) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80010026)) == UINT32_C(0x80000000))
         return iemDecodeA64_umlsll_za_zzw_2x2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -136763,16 +136847,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_21e01000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_41e01000_2, uint32_t, uOpcode)
 {
     /* 0xffe39c78/0xc1e11008 org expr: (uOpcode AND 0x80030078) == 0x80010008 && IsFeatureImplemented(FEAT_SME_B16B16) */
-    if ((uOpcode & 0x80030078) == 0x80010008)
+    if ((uOpcode & UINT32_C(0x80030078)) == UINT32_C(0x80010008))
         return iemDecodeA64_bfmla_za_zzw_4x4_16(pVCpu, uOpcode);
     /* 0xffe39c78/0xc1e11018 org expr: (uOpcode AND 0x80030078) == 0x80010018 && IsFeatureImplemented(FEAT_SME_B16B16) */
-    if ((uOpcode & 0x80030078) == 0x80010018)
+    if ((uOpcode & UINT32_C(0x80030078)) == UINT32_C(0x80010018))
         return iemDecodeA64_bfmls_za_zzw_4x4_16(pVCpu, uOpcode);
     /* 0xffe19c38/0xc1e01008 org expr: (uOpcode AND 0x80010038) == 0x80000008 && IsFeatureImplemented(FEAT_SME_B16B16) */
-    if ((uOpcode & 0x80010038) == 0x80000008)
+    if ((uOpcode & UINT32_C(0x80010038)) == UINT32_C(0x80000008))
         return iemDecodeA64_bfmla_za_zzw_2x2_16(pVCpu, uOpcode);
     /* 0xffe19c38/0xc1e01018 org expr: (uOpcode AND 0x80010038) == 0x80000018 && IsFeatureImplemented(FEAT_SME_B16B16) */
-    if ((uOpcode & 0x80010038) == 0x80000018)
+    if ((uOpcode & UINT32_C(0x80010038)) == UINT32_C(0x80000018))
         return iemDecodeA64_bfmls_za_zzw_2x2_16(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -137918,16 +138002,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01e0ac00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e0fc08_21e0b000_2, uint32_t, uOpcode)
 {
     /* 0xffe00018/0xa1e00000 org expr: (uOpcode AND 0x88000010) == 0x80000000 && IsFeatureImplemented(FEAT_SME_I16I64) */
-    if ((uOpcode & 0x88000010) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000010)) == UINT32_C(0x80000000))
         return iemDecodeA64_umopa_za_pp_zz_64(pVCpu, uOpcode);
     /* 0xffe00018/0xa1e00010 org expr: (uOpcode AND 0x88000010) == 0x80000010 && IsFeatureImplemented(FEAT_SME_I16I64) */
-    if ((uOpcode & 0x88000010) == 0x80000010)
+    if ((uOpcode & UINT32_C(0x88000010)) == UINT32_C(0x80000010))
         return iemDecodeA64_umops_za_pp_zz_64(pVCpu, uOpcode);
     /* 0xffc00000/0x29c00000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && true */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_LDP_32_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xa9c00000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && true */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_LDP_64_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -138029,13 +138113,13 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fc08_41e0b000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e0fc08_61e0b000_2, uint32_t, uOpcode)
 {
     /* 0xffe00010/0xe1e00000 org expr: (uOpcode AND 0x88000010) == 0x80000000 && IsFeatureImplemented(FEAT_SME) */
-    if ((uOpcode & 0x88000010) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000010)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1q_za_p_rrr(pVCpu, uOpcode);
     /* 0xffc00000/0x69c00000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && true */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_LDPSW_64_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xe9c00000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_LSUI) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_LDTP_64_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -142752,10 +142836,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_03808000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_03a00000_1, uint32_t, uOpcode)
 {
     /* 0xffe0001f/0xf3a0001f org expr: (uOpcode AND 0xf800001f) == 0xf000001f && IsFeatureImplemented(FEAT_PAuth_LR) */
-    if ((uOpcode & 0xf800001f) == 0xf000001f)
+    if ((uOpcode & UINT32_C(0xf800001f)) == UINT32_C(0xf000001f))
         return iemDecodeA64_AUTIBSPPC_only_dp_1src_imm(pVCpu, uOpcode);
     /* 0xffe08000/0x9ba00000 org expr: (uOpcode AND 0xf8000000) == 0x98000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x98000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x98000000))
         return iemDecodeA64_UMADDL_64WA_dp_3src(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -142795,10 +142879,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_03a00000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_03a08000_1, uint32_t, uOpcode)
 {
     /* 0xffe0001f/0xf3a0001f org expr: (uOpcode AND 0xf800001f) == 0xf000001f && IsFeatureImplemented(FEAT_PAuth_LR) */
-    if ((uOpcode & 0xf800001f) == 0xf000001f)
+    if ((uOpcode & UINT32_C(0xf800001f)) == UINT32_C(0xf000001f))
         return iemDecodeA64_AUTIBSPPC_only_dp_1src_imm(pVCpu, uOpcode);
     /* 0xffe08000/0x9ba08000 org expr: (uOpcode AND 0xf8000000) == 0x98000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x98000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x98000000))
         return iemDecodeA64_UMSUBL_64WA_dp_3src(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -174972,13 +175056,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05001c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe7fc00_05002000_2, uint32_t, uOpcode)
 {
     /* 0xfffc0000/0x5000000 org expr: (uOpcode AND 0xc0180000) == 0 && opc != '11' && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0180000) == 0)
+    if ((uOpcode & UINT32_C(0xc0180000)) == 0)
         return iemDecodeA64_orr_z_zi(pVCpu, uOpcode);
     /* 0xff30c000/0x5100000 org expr: (uOpcode AND 0xc0100000) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0100000) == 0x100000)
+    if ((uOpcode & UINT32_C(0xc0100000)) == 0x100000)
         return iemDecodeA64_cpy_z_o_i(pVCpu, uOpcode);
     /* 0xffa0e000/0xc5002000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_ldff1sw_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -174990,10 +175074,10 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe7fc00_05002000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe7fc00_05042000_2, uint32_t, uOpcode)
 {
     /* 0xff30c000/0x5100000 org expr: (uOpcode AND 0xc0100000) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0100000) == 0x100000)
+    if ((uOpcode & UINT32_C(0xc0100000)) == 0x100000)
         return iemDecodeA64_cpy_z_o_i(pVCpu, uOpcode);
     /* 0xffa0e000/0xc5002000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_ldff1sw_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201135,13 +201219,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05808000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_05808400_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xd9f8400 org expr: (uOpcode AND 0x881f0000) == 0x81f0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x881f0000) == 0x81f0000)
+    if ((uOpcode & UINT32_C(0x881f0000)) == 0x81f0000)
         return iemDecodeA64_ST1_asisdlsop_D1_i1d(pVCpu, uOpcode);
     /* 0xfffc0000/0x5800000 org expr: (uOpcode AND 0x881c0000) == 0 && opc != '11' && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x881c0000) == 0)
+    if ((uOpcode & UINT32_C(0x881c0000)) == 0)
         return iemDecodeA64_and_z_zi(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd808400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x88000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_DX1_r1d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201153,10 +201237,10 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_05808400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_15808400_2, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0x88000000) == 0 && true */
-    if ((uOpcode & 0x88000000) == 0)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0x88000000) == 0x80000000 && true */
-    if ((uOpcode & 0x88000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x3fe0fc00/0x1d808400 org expr: (uOpcode AND 0x8000000) == 0x8000000 && IsFeatureImplemented(FEAT_MOPS) */
     if ((uOpcode & 0x8000000) == 0x8000000)
@@ -201225,10 +201309,10 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_35808400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_45808400_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xd9f8400 org expr: (uOpcode AND 0x881f0000) == 0x81f0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x881f0000) == 0x81f0000)
+    if ((uOpcode & UINT32_C(0x881f0000)) == 0x81f0000)
         return iemDecodeA64_ST1_asisdlsop_D1_i1d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd808400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x88000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_DX1_r1d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201237,10 +201321,10 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_45808400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65808400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65008000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fadd_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201249,10 +201333,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65808400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65818400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65018000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fsub_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201261,10 +201345,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65818400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65828400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65028000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fmul_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201273,10 +201357,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65828400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65838400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65038000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fsubr_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201285,10 +201369,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65838400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65848400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65048000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fmaxnm_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201297,10 +201381,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65848400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65858400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65058000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fminnm_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201309,10 +201393,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65858400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65868400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65068000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fmax_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201321,10 +201405,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65868400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65878400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x65078000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fmin_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201333,13 +201417,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65878400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65888400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x65188000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fadd_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65088000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fabd_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201348,13 +201432,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65888400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65898400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x65198000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fsub_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65098000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fscale_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201363,13 +201447,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_65898400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658a8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651a8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fmul_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x650a8000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fmulx_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201378,10 +201462,10 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658a8400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658b8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651b8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fsubr_z_p_zs(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201390,13 +201474,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658b8400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658c8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651c8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fmaxnm_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x650c8000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fdivr_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201405,13 +201489,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658c8400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658d8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651d8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fminnm_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x650d8000 org expr: (uOpcode AND 0x80100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_fdiv_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201420,15 +201504,15 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658d8400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658e8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651e8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fmax_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x650e8000 org expr:    (uOpcode AND 0x80100000) == 0
 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME2))
 && IsFeatureImplemented(FEAT_FAMINMAX) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_famax_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201437,15 +201521,15 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658e8400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658f8400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651f8000 org expr: (uOpcode AND 0x80100300) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80100300) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80100300)) == 0x100000)
         return iemDecodeA64_fmin_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x650f8000 org expr:    (uOpcode AND 0x80100000) == 0
 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME2))
 && IsFeatureImplemented(FEAT_FAMINMAX) */
-    if ((uOpcode & 0x80100000) == 0)
+    if ((uOpcode & UINT32_C(0x80100000)) == 0)
         return iemDecodeA64_famin_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203825,13 +203909,14 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_15809c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_25809c00_2, uint32_t, uOpcode)
 {
     /* 0xff20e010/0x25008000 org expr: (uOpcode AND 0x80000010) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80000010) == 0)
+    if ((uOpcode & UINT32_C(0x80000010)) == 0)
         return iemDecodeA64_cmpeq_p_p_zi(pVCpu, uOpcode);
     /* 0xff20e010/0x25008010 org expr: (uOpcode AND 0x80000010) == 0x10 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80000010) == 0x10)
+    if ((uOpcode & UINT32_C(0x80000010)) == 0x10)
         return iemDecodeA64_cmpne_p_p_zi(pVCpu, uOpcode);
     /* 0xffe0e000/0xa5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && Rm != '11111' && IsFeatureImplemented(FEAT_SVE2p1) */
-    if ((uOpcode & 0x80000000) == 0x80000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (   (uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000)
+        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ld1d_z_p_br_u128(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203904,16 +203989,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_35809c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65809c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x65188000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fadd_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65008000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fadd_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x65088000 org expr: (uOpcode AND 0x80180000) == 0x80000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_fabd_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203922,18 +204007,18 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65809c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65819c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x65198000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fsub_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65018000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fsub_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x65098000 org expr:    (uOpcode AND 0x80180000) == 0x80000
 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME))
 && size != '00' */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_fscale_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203942,16 +204027,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65819c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65829c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651a8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fmul_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65028000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fmul_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x650a8000 org expr: (uOpcode AND 0x80180000) == 0x80000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_fmulx_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203960,13 +204045,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65829c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65839c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651b8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fsubr_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65038000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fsubr_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203975,16 +204060,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65839c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65849c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651c8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fmaxnm_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65048000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fmaxnm_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x650c8000 org expr: (uOpcode AND 0x80180000) == 0x80000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_fdivr_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203993,16 +204078,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65849c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65859c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651d8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fminnm_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65058000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fminnm_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x650d8000 org expr: (uOpcode AND 0x80180000) == 0x80000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_fdiv_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204011,18 +204096,18 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65859c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65869c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651e8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fmax_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65068000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fmax_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x650e8000 org expr:    (uOpcode AND 0x80180000) == 0x80000
 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME2))
 && IsFeatureImplemented(FEAT_FAMINMAX) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_famax_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204031,18 +204116,18 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65869c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_65879c00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe3c0/0x651f8000 org expr: (uOpcode AND 0x801803c0) == 0x180000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801803c0) == 0x180000)
+    if ((uOpcode & UINT32_C(0x801803c0)) == 0x180000)
         return iemDecodeA64_fmin_z_p_zs(pVCpu, uOpcode);
     /* 0xff3fe000/0x65078000 org expr: (uOpcode AND 0x80180000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) && size != '00' */
-    if ((uOpcode & 0x80180000) == 0)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0)
         return iemDecodeA64_fmin_z_p_zz(pVCpu, uOpcode);
     /* 0xff3fe000/0x650f8000 org expr:    (uOpcode AND 0x80180000) == 0x80000
 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME2))
 && IsFeatureImplemented(FEAT_FAMINMAX) */
-    if ((uOpcode & 0x80180000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80180000)) == 0x80000)
         return iemDecodeA64_famin_z_p_zz(pVCpu, uOpcode);
     /* 0xffe0a000/0xe5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204373,10 +204458,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0580a000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_0d81a400_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xd9fa400 org expr: (uOpcode AND 0x801e0000) == 0x1e0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x801e0000) == 0x1e0000)
+    if ((uOpcode & UINT32_C(0x801e0000)) == 0x1e0000)
         return iemDecodeA64_ST3_asisdlsop_D3_i3d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd80a400 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x80000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_DX3_r3d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204691,16 +204776,16 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_6582ac00_2, uint32_t, uOpcode)
     /* 0xffffe000/0x658aa000 org expr:    (uOpcode AND 0x80190000) == 0x80000
 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME))
 && IsFeatureImplemented(FEAT_BF16) */
-    if ((uOpcode & 0x80190000) == 0x80000)
+    if ((uOpcode & UINT32_C(0x80190000)) == 0x80000)
         return iemDecodeA64_bfcvt_z_p_z_s2bf(pVCpu, uOpcode);
     /* 0xff3fe000/0x6502a000 org expr: (uOpcode AND 0x80190000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80190000) == 0)
+    if ((uOpcode & UINT32_C(0x80190000)) == 0)
         return iemDecodeA64_frintm_z_p_z_m(pVCpu, uOpcode);
     /* 0xff3fe000/0x6503a000 org expr: (uOpcode AND 0x80190000) == 0x10000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80190000) == 0x10000)
+    if ((uOpcode & UINT32_C(0x80190000)) == 0x10000)
         return iemDecodeA64_frintz_z_p_z_m(pVCpu, uOpcode);
     /* 0xffe0e000/0xe580a000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204749,13 +204834,13 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_6584ac00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_6586ac00_2, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x6506a000 org expr: (uOpcode AND 0x80190000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80190000) == 0)
+    if ((uOpcode & UINT32_C(0x80190000)) == 0)
         return iemDecodeA64_frintx_z_p_z_m(pVCpu, uOpcode);
     /* 0xff3fe000/0x6507a000 org expr: (uOpcode AND 0x80190000) == 0x10000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x80190000) == 0x10000)
+    if ((uOpcode & UINT32_C(0x80190000)) == 0x10000)
         return iemDecodeA64_frinti_z_p_z_m(pVCpu, uOpcode);
     /* 0xffe0e000/0xe580a000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x80000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -205074,10 +205159,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0580b000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77ecfc00_1580b400_2, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0x88000000) == 0 && true */
-    if ((uOpcode & 0x88000000) == 0)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0x88000000) == 0x80000000 && true */
-    if ((uOpcode & 0x88000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x3fe0fc00/0x1d80b400 org expr: (uOpcode AND 0x8000000) == 0x8000000 && IsFeatureImplemented(FEAT_MOPS) */
     if ((uOpcode & 0x8000000) == 0x8000000)
@@ -205092,16 +205177,16 @@ FNIEMOP_DEF_1(iemDecodeA64_77ecfc00_1580b400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77ecfc00_2580b400_2, uint32_t, uOpcode)
 {
     /* 0xfff0e000/0xa580a000 org expr: (uOpcode AND 0x88100000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x88100000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88100000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1sb_z_p_bi_s64(pVCpu, uOpcode);
     /* 0xfff0e000/0xa590a000 org expr: (uOpcode AND 0x88100000) == 0x80100000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x88100000) == 0x80100000)
+    if ((uOpcode & UINT32_C(0x88100000)) == UINT32_C(0x80100000))
         return iemDecodeA64_ldnf1sb_z_p_bi_s64(pVCpu, uOpcode);
     /* 0xffc00000/0x2d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_S_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xad800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -205220,16 +205305,16 @@ FNIEMOP_DEF_1(iemDecodeA64_77effc00_6584b400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77effc00_6585b400_3, uint32_t, uOpcode)
 {
     /* 0xffffe000/0x6595a000 org expr: (uOpcode AND 0x88100000) == 0x100000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x88100000) == 0x100000)
+    if ((uOpcode & UINT32_C(0x88100000)) == 0x100000)
         return iemDecodeA64_ucvtf_z_p_z_w2s(pVCpu, uOpcode);
     /* 0xffe0e000/0xe580a000 org expr: (uOpcode AND 0x88000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x88000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
     /* 0xffc00000/0x6d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_D_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xed800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) && IsFeatureImplemented(FEAT_LSUI) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STTP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -205238,16 +205323,16 @@ FNIEMOP_DEF_1(iemDecodeA64_77effc00_6585b400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77effc00_6586b400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x6506a000 org expr: (uOpcode AND 0x88100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x88100000) == 0)
+    if ((uOpcode & UINT32_C(0x88100000)) == 0)
         return iemDecodeA64_frintx_z_p_z_m(pVCpu, uOpcode);
     /* 0xffe0e000/0xe580a000 org expr: (uOpcode AND 0x88000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x88000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
     /* 0xffc00000/0x6d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_D_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xed800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) && IsFeatureImplemented(FEAT_LSUI) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STTP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -205256,16 +205341,16 @@ FNIEMOP_DEF_1(iemDecodeA64_77effc00_6586b400_3, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77effc00_6587b400_3, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x6507a000 org expr: (uOpcode AND 0x88100000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x88100000) == 0)
+    if ((uOpcode & UINT32_C(0x88100000)) == 0)
         return iemDecodeA64_frinti_z_p_z_m(pVCpu, uOpcode);
     /* 0xffe0e000/0xe580a000 org expr: (uOpcode AND 0x88000000) == 0x80000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0x88000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_st1d_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
     /* 0xffc00000/0x6d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_D_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xed800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) && IsFeatureImplemented(FEAT_LSUI) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STTP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208246,18 +208331,19 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a08400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a08600_2, uint32_t, uOpcode)
 {
     /* 0xff3ffa00/0x25208200 org expr: (uOpcode AND 0x881e0000) == 0 && (IsFeatureImplemented(FEAT_SME2) || IsFeatureImplemented(FEAT_SVE2p1)) */
-    if ((uOpcode & 0x881e0000) == 0)
+    if ((uOpcode & UINT32_C(0x881e0000)) == 0)
         return iemDecodeA64_cntp_r_pn(pVCpu, uOpcode);
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x88000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if ((uOpcode & 0x88000000) == 0x80000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (   (uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000)
+        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     /* 0xffc00000/0x2d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_S_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xad800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208266,18 +208352,19 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a08600_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a18400_2, uint32_t, uOpcode)
 {
     /* 0xff3fc200/0x25218000 org expr: (uOpcode AND 0x881e0000) == 0 && (IsFeatureImplemented(FEAT_SVE2p2) || IsFeatureImplemented(FEAT_SME2p2)) */
-    if ((uOpcode & 0x881e0000) == 0)
+    if ((uOpcode & UINT32_C(0x881e0000)) == 0)
         return iemDecodeA64_firstp_r_p_p(pVCpu, uOpcode);
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x88000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if ((uOpcode & 0x88000000) == 0x80000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (   (uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000)
+        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     /* 0xffc00000/0x2d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
         return iemDecodeA64_STP_S_ldstpair_pre(pVCpu, uOpcode);
     /* 0xffc00000/0xad800000 org expr: (uOpcode AND 0x88000000) == 0x88000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0x88000000) == 0x88000000)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x88000000))
         return iemDecodeA64_STP_Q_ldstpair_pre(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208303,13 +208390,13 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a18600_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_45a08400_2, uint32_t, uOpcode)
 {
     /* 0xff20e010/0x45208000 org expr: (uOpcode AND 0x88000010) == 0 && IsFeatureImplemented(FEAT_SVE2) */
-    if ((uOpcode & 0x88000010) == 0)
+    if ((uOpcode & UINT32_C(0x88000010)) == 0)
         return iemDecodeA64_match_p_p_zz(pVCpu, uOpcode);
     /* 0xff20e010/0x45208010 org expr: (uOpcode AND 0x88000010) == 0x10 && IsFeatureImplemented(FEAT_SVE2) */
-    if ((uOpcode & 0x88000010) == 0x10)
+    if ((uOpcode & UINT32_C(0x88000010)) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda08400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x88000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208319,16 +208406,16 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_45a08400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_45a18400_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xdbf8400 org expr: (uOpcode AND 0x881e0000) == 0x81e0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x881e0000) == 0x81e0000)
+    if ((uOpcode & UINT32_C(0x881e0000)) == 0x81e0000)
         return iemDecodeA64_ST2_asisdlsop_D2_i2d(pVCpu, uOpcode);
     /* 0xff20e010/0x45208000 org expr: (uOpcode AND 0x88000010) == 0 && IsFeatureImplemented(FEAT_SVE2) */
-    if ((uOpcode & 0x88000010) == 0)
+    if ((uOpcode & UINT32_C(0x88000010)) == 0)
         return iemDecodeA64_match_p_p_zz(pVCpu, uOpcode);
     /* 0xff20e010/0x45208010 org expr: (uOpcode AND 0x88000010) == 0x10 && IsFeatureImplemented(FEAT_SVE2) */
-    if ((uOpcode & 0x88000010) == 0x10)
+    if ((uOpcode & UINT32_C(0x88000010)) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda08400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x88000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208840,10 +208927,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05a08c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_0da09000_2, uint32_t, uOpcode)
 {
     /* 0xbfffec00/0xdbf8000 org expr: (uOpcode AND 0x801f0000) == 0x1f0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x801f0000) == 0x1f0000)
+    if ((uOpcode & UINT32_C(0x801f0000)) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsop_S2_i2s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xda08000 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x80000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_SX2_r2s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208852,18 +208939,19 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_0da09000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_25a09000_2, uint32_t, uOpcode)
 {
     /* 0xff3fc200/0x25208000 org expr: (uOpcode AND 0x801f0000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x801f0000) == 0)
+    if ((uOpcode & UINT32_C(0x801f0000)) == 0)
         return iemDecodeA64_cntp_r_p_p(pVCpu, uOpcode);
     /* 0xff3fc200/0x25218000 org expr: (uOpcode AND 0x801f0000) == 0x10000 && (IsFeatureImplemented(FEAT_SVE2p2) || IsFeatureImplemented(FEAT_SME2p2)) */
-    if ((uOpcode & 0x801f0000) == 0x10000)
+    if ((uOpcode & UINT32_C(0x801f0000)) == 0x10000)
         return iemDecodeA64_firstp_r_p_p(pVCpu, uOpcode);
     /* 0xff3fc200/0x25228000 org expr: (uOpcode AND 0x801f0000) == 0x20000 && (IsFeatureImplemented(FEAT_SVE2p2) || IsFeatureImplemented(FEAT_SME2p2)) */
-    if ((uOpcode & 0x801f0000) == 0x20000)
+    if ((uOpcode & UINT32_C(0x801f0000)) == 0x20000)
         return iemDecodeA64_lastp_r_p_p(pVCpu, uOpcode);
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x80000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if ((uOpcode & 0x80000000) == 0x80000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (   (uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000)
+        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -213238,13 +213326,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05c08c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fcc0_05c09000_2, uint32_t, uOpcode)
 {
     /* 0xfffc0000/0x5c00000 org expr: (uOpcode AND 0xc01c0000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc01c0000) == 0)
+    if ((uOpcode & UINT32_C(0xc01c0000)) == 0)
         return iemDecodeA64_dupm_z_i(pVCpu, uOpcode);
     /* 0xffc0e000/0x85c08000 org expr: (uOpcode AND 0xc0000000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1rsb_z_p_bi_s64(pVCpu, uOpcode);
     /* 0xff20fc00/0x45009000 org expr: (uOpcode AND 0xc0000000) == 0x40000000 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0000000) == 0x40000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == 0x40000000)
         return iemDecodeA64_eorbt_z_zz(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -213256,10 +213344,10 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fcc0_05c09000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fcc0_0dc09000_2, uint32_t, uOpcode)
 {
     /* 0xbfffec00/0xddf8000 org expr: (uOpcode AND 0x801f0000) == 0x1f0000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x801f0000) == 0x1f0000)
+    if ((uOpcode & UINT32_C(0x801f0000)) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsop_S1_i1s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xdc08000 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x80000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
         return iemDecodeA64_LD1_asisdlsop_SX1_r1s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -213941,13 +214029,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05c09000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fcc0_05c09400_2, uint32_t, uOpcode)
 {
     /* 0xfffc0000/0x5c00000 org expr: (uOpcode AND 0xc01c0000) == 0 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc01c0000) == 0)
+    if ((uOpcode & UINT32_C(0xc01c0000)) == 0)
         return iemDecodeA64_dupm_z_i(pVCpu, uOpcode);
     /* 0xffc0e000/0x85c08000 org expr: (uOpcode AND 0xc0000000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1rsb_z_p_bi_s64(pVCpu, uOpcode);
     /* 0xff20fc00/0x45009400 org expr: (uOpcode AND 0xc0000000) == 0x40000000 && (IsFeatureImplemented(FEAT_SVE2) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xc0000000) == 0x40000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == 0x40000000)
         return iemDecodeA64_eortb_z_zz(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214573,16 +214661,16 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c4a400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c5a400_2, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x650da000 org expr: (uOpcode AND 0xe0080000) == 0x60080000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0080000) == 0x60080000)
+    if ((uOpcode & UINT32_C(0xe0080000)) == 0x60080000)
         return iemDecodeA64_fsqrt_z_p_z_m(pVCpu, uOpcode);
     /* 0xfff0e000/0xa5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xa0000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0xa0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xa0000000))
         return iemDecodeA64_ld1sb_z_p_bi_s16(pVCpu, uOpcode);
     /* 0xffe0e000/0xe5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xe0000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0xe0000000) == 0xe0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xe0000000))
         return iemDecodeA64_st1d_z_p_ai_d(pVCpu, uOpcode);
     /* 0xffc0e000/0x85c0a000 org expr: (uOpcode AND 0xe0000000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1rsb_z_p_bi_s32(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214591,16 +214679,16 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c5a400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c6a400_2, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x6506a000 org expr: (uOpcode AND 0xe0080000) == 0x60000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0080000) == 0x60000000)
+    if ((uOpcode & UINT32_C(0xe0080000)) == 0x60000000)
         return iemDecodeA64_frintx_z_p_z_m(pVCpu, uOpcode);
     /* 0xfff0e000/0xa5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xa0000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0xa0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xa0000000))
         return iemDecodeA64_ld1sb_z_p_bi_s16(pVCpu, uOpcode);
     /* 0xffe0e000/0xe5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xe0000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0xe0000000) == 0xe0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xe0000000))
         return iemDecodeA64_st1d_z_p_ai_d(pVCpu, uOpcode);
     /* 0xffc0e000/0x85c0a000 org expr: (uOpcode AND 0xe0000000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1rsb_z_p_bi_s32(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214609,16 +214697,16 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c6a400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c7a400_2, uint32_t, uOpcode)
 {
     /* 0xff3fe000/0x6507a000 org expr: (uOpcode AND 0xe0080000) == 0x60000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0080000) == 0x60000000)
+    if ((uOpcode & UINT32_C(0xe0080000)) == 0x60000000)
         return iemDecodeA64_frinti_z_p_z_m(pVCpu, uOpcode);
     /* 0xfff0e000/0xa5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xa0000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0xa0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xa0000000))
         return iemDecodeA64_ld1sb_z_p_bi_s16(pVCpu, uOpcode);
     /* 0xffe0e000/0xe5c0a000 org expr: (uOpcode AND 0xe0000000) == 0xe0000000 && IsFeatureImplemented(FEAT_SVE) */
-    if ((uOpcode & 0xe0000000) == 0xe0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xe0000000))
         return iemDecodeA64_st1d_z_p_ai_d(pVCpu, uOpcode);
     /* 0xffc0e000/0x85c0a000 org expr: (uOpcode AND 0xe0000000) == 0x80000000 && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0xe0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_ld1rsb_z_p_bi_s32(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214999,7 +215087,7 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_15c0a400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_1dc0a400_2, uint32_t, uOpcode)
 {
     /* 0xffc00000/0x3dc00000 org expr: (uOpcode AND 0xe0000000) == 0x20000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xe0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == 0x20000000)
         return iemDecodeA64_LDR_Q_ldst_pos(pVCpu, uOpcode);
     /* 0x3fe0fc00/0x1dc0a400 org expr: (uOpcode AND 0x20000000) == 0 && IsFeatureImplemented(FEAT_MOPS) && IsFeatureImplemented(FEAT_MTE) */
     if ((uOpcode & 0x20000000) == 0)
@@ -217142,7 +217230,7 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_0dc0b400_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_1dc0b400_2, uint32_t, uOpcode)
 {
     /* 0xffc00000/0x3dc00000 org expr: (uOpcode AND 0xe0000000) == 0x20000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xe0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == 0x20000000)
         return iemDecodeA64_LDR_Q_ldst_pos(pVCpu, uOpcode);
     /* 0x3fe0fc00/0x1dc0b400 org expr: (uOpcode AND 0x20000000) == 0 && IsFeatureImplemented(FEAT_MOPS) && IsFeatureImplemented(FEAT_MTE) */
     if ((uOpcode & 0x20000000) == 0)
@@ -222216,10 +222304,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06000400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_5fe6fc00_16000800_2, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xa0000000) == 0 && true */
-    if ((uOpcode & 0xa0000000) == 0)
+    if ((uOpcode & UINT32_C(0xa0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xa0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xa0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xa0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x20000000) == 0x20000000 && true */
     if ((uOpcode & 0x20000000) == 0x20000000)
@@ -224442,10 +224530,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06007800_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_06008000_2, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf0000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf0000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf0000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf0000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf0000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x70000000) == 0x30000000 && true */
     if ((uOpcode & 0x70000000) == 0x30000000)
@@ -225131,13 +225219,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0600fc00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_0e200000_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce200000 org expr: (uOpcode AND 0xe0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SHA3) */
-    if ((uOpcode & 0xe0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_BCAX_VVV16_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe200000 org expr: (uOpcode AND 0xa0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xa0000000) == 0)
+    if ((uOpcode & UINT32_C(0xa0000000)) == 0)
         return iemDecodeA64_SADDL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e200000 org expr: (uOpcode AND 0xa0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xa0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xa0000000)) == 0x20000000)
         return iemDecodeA64_UADDL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -225192,10 +225280,10 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_0e200000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_16200000_2, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xe0000000) == 0 && true */
-    if ((uOpcode & 0xe0000000) == 0)
+    if ((uOpcode & UINT32_C(0xe0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xe0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xe0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x60000000) == 0x20000000 && true */
     if ((uOpcode & 0x60000000) == 0x20000000)
@@ -225207,13 +225295,13 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_16200000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_16370000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc1f/0xd63f0000 org expr: (uOpcode AND 0xe008001f) == 0xc0080000 && true */
-    if ((uOpcode & 0xe008001f) == 0xc0080000)
+    if ((uOpcode & UINT32_C(0xe008001f)) == UINT32_C(0xc0080000))
         return iemDecodeA64_BLR_64_branch_reg(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xe0000000) == 0 && true */
-    if ((uOpcode & 0xe0000000) == 0)
+    if ((uOpcode & UINT32_C(0xe0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xe0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xe0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xe0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x60000000) == 0x20000000 && true */
     if ((uOpcode & 0x60000000) == 0x20000000)
@@ -227644,16 +227732,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620bc00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e20c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e20c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FABS_S_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1e24c000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTP_S_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -227662,16 +227750,16 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e20c000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e21c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e21c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FSQRT_S_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1e25c000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTZ_S_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -227680,13 +227768,13 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e21c000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e22c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e22c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FCVT_DS_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -227695,16 +227783,16 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e22c000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e23c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e23c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FCVT_HS_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1e27c000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTI_S_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -227713,13 +227801,13 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e23c000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e28c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e28c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FRINTTS) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FRINT32X_S_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -227728,13 +227816,13 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e28c000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e29c000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1e29c000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FRINTTS) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FRINT64X_S_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20c000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_SMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e20c000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_UMULL_asimddiff_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -228116,13 +228204,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620dc00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620e000_1, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20e000 org expr: (uOpcode AND 0xb8000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb8000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0xb8000000)) == 0x8000000)
         return iemDecodeA64_PMULL_asimddiff_L(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -228233,13 +228321,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620ec00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620f000_1, uint32_t, uOpcode)
 {
     /* 0xffe01fe0/0x1e201000 org expr: (uOpcode AND 0xf80003e0) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf80003e0) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf80003e0)) == 0x18000000)
         return iemDecodeA64_FMOV_S_floatimm(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -228378,13 +228466,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620fc00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_16460000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc1f/0xd65f0000 org expr: (uOpcode AND 0xc019001f) == 0xc0190000 && true */
-    if ((uOpcode & 0xc019001f) == 0xc0190000)
+    if ((uOpcode & UINT32_C(0xc019001f)) == UINT32_C(0xc0190000))
         return iemDecodeA64_RET_64R_branch_reg(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xc0000000) == 0 && true */
-    if ((uOpcode & 0xc0000000) == 0)
+    if ((uOpcode & UINT32_C(0xc0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xc0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xc0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -228675,16 +228763,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06400400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_16460800_2, uint32_t, uOpcode)
 {
     /* 0xffffffff/0xd65f0bff org expr: (uOpcode AND 0xc01903ff) == 0xc01903ff && IsFeatureImplemented(FEAT_PAuth) */
-    if ((uOpcode & 0xc01903ff) == 0xc01903ff)
+    if ((uOpcode & UINT32_C(0xc01903ff)) == UINT32_C(0xc01903ff))
         return iemDecodeA64_RETAA_64E_branch_reg(pVCpu, uOpcode);
     /* 0xffffffe0/0xd65f0be0 org expr: (uOpcode AND 0xc01903e0) == 0xc01903e0 && IsFeatureImplemented(FEAT_PAuth_LR) && Rm != '11111' */
-    if ((uOpcode & 0xc01903e0) == 0xc01903e0 && (uOpcode & UINT32_C(0x1f)/*Rm*/) != 0x1f)
+    if ((uOpcode & UINT32_C(0xc01903e0)) == UINT32_C(0xc01903e0) && (uOpcode & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_RETAASPPCR_64M_branch_reg(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xc0000000) == 0 && true */
-    if ((uOpcode & 0xc0000000) == 0)
+    if ((uOpcode & UINT32_C(0xc0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xc0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xc0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -228743,10 +228831,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06400800_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e400c00_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xe400c00 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_FMLA_asimdsamefp16_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -228755,16 +228843,16 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e400c00_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_16460c00_2, uint32_t, uOpcode)
 {
     /* 0xffffffff/0xd65f0fff org expr: (uOpcode AND 0xc01903ff) == 0xc01903ff && IsFeatureImplemented(FEAT_PAuth) */
-    if ((uOpcode & 0xc01903ff) == 0xc01903ff)
+    if ((uOpcode & UINT32_C(0xc01903ff)) == UINT32_C(0xc01903ff))
         return iemDecodeA64_RETAB_64E_branch_reg(pVCpu, uOpcode);
     /* 0xffffffe0/0xd65f0fe0 org expr: (uOpcode AND 0xc01903e0) == 0xc01903e0 && IsFeatureImplemented(FEAT_PAuth_LR) && Rm != '11111' */
-    if ((uOpcode & 0xc01903e0) == 0xc01903e0 && (uOpcode & UINT32_C(0x1f)/*Rm*/) != 0x1f)
+    if ((uOpcode & UINT32_C(0xc01903e0)) == UINT32_C(0xc01903e0) && (uOpcode & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_RETABSPPCR_64M_branch_reg(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xc0000000) == 0 && true */
-    if ((uOpcode & 0xc0000000) == 0)
+    if ((uOpcode & UINT32_C(0xc0000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xc0000000) == 0x80000000 && true */
-    if ((uOpcode & 0xc0000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -228963,10 +229051,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06401400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e401800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe001800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_UZP1_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -229369,10 +229457,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06402400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e402800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe002800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_TRN1_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -229539,10 +229627,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06403400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e403800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe003800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_ZIP1_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -229752,10 +229840,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06404000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e405800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe005800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_UZP2_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -229814,10 +229902,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06405800_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e406800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe006800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_TRN2_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -229876,10 +229964,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06406800_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe6fc00_0e407800_2, uint32_t, uOpcode)
 {
     /* 0xffe08000/0xce400000 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM3) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe007800 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80000000) == 0)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0)
         return iemDecodeA64_ZIP2_asimdperm_only(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -231233,16 +231321,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06601c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fc00_1e602000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc1f/0x1e602008 org expr: (uOpcode AND 0xc01f001f) == 8 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xc01f001f) == 8)
+    if ((uOpcode & UINT32_C(0xc01f001f)) == 8)
         return iemDecodeA64_FCMP_DZ_floatcmp(pVCpu, uOpcode);
     /* 0xfffffc1f/0x1e602018 org expr: (uOpcode AND 0xc01f001f) == 0x18 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xc01f001f) == 0x18)
+    if ((uOpcode & UINT32_C(0xc01f001f)) == 0x18)
         return iemDecodeA64_FCMPE_DZ_floatcmp(pVCpu, uOpcode);
     /* 0xffe0fc1f/0x1e602000 org expr: (uOpcode AND 0xc000001f) == 0 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xc000001f) == 0)
+    if ((uOpcode & UINT32_C(0xc000001f)) == 0)
         return iemDecodeA64_FCMP_D_floatcmp(pVCpu, uOpcode);
     /* 0xffe0fc1f/0x1e602010 org expr: (uOpcode AND 0xc000001f) == 0x10 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xc000001f) == 0x10)
+    if ((uOpcode & UINT32_C(0xc000001f)) == 0x10)
         return iemDecodeA64_FCMPE_D_floatcmp(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -233040,10 +233128,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660c400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3febfc00_0e61c800_2, uint32_t, uOpcode)
 {
     /* 0xbfbffc00/0xe21c800 org expr: (uOpcode AND 0x80140000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x80140000) == 0)
+    if ((uOpcode & UINT32_C(0x80140000)) == 0)
         return iemDecodeA64_FCVTAS_asimdmisc_R(pVCpu, uOpcode);
     /* 0xffe0fc00/0xce60c800 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM4) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM4EKEY_VVV4_cryptosha512_3(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -233052,10 +233140,10 @@ FNIEMOP_DEF_1(iemDecodeA64_3febfc00_0e61c800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3febfc00_0e69c800_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xe79c800 org expr: (uOpcode AND 0x80140000) == 0x100000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0x80140000) == 0x100000)
+    if ((uOpcode & UINT32_C(0x80140000)) == 0x100000)
         return iemDecodeA64_FCVTAS_asimdmiscfp16_R(pVCpu, uOpcode);
     /* 0xffe0fc00/0xce60c800 org expr: (uOpcode AND 0xc0000000) == 0xc0000000 && IsFeatureImplemented(FEAT_SM4) */
-    if ((uOpcode & 0xc0000000) == 0xc0000000)
+    if ((uOpcode & UINT32_C(0xc0000000)) == UINT32_C(0xc0000000))
         return iemDecodeA64_SM4EKEY_VVV4_cryptosha512_3(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -233227,16 +233315,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660d400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e61d800_2, uint32_t, uOpcode)
 {
     /* 0xffbffc00/0x5e21d800 org expr: (uOpcode AND 0xf0140000) == 0x50000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xf0140000) == 0x50000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x50000000)
         return iemDecodeA64_SCVTF_asisdmisc_R(pVCpu, uOpcode);
     /* 0xffbffc00/0x7e21d800 org expr: (uOpcode AND 0xf0140000) == 0x70000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xf0140000) == 0x70000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x70000000)
         return iemDecodeA64_UCVTF_asisdmisc_R(pVCpu, uOpcode);
     /* 0xbfbffc00/0xe21d800 org expr: (uOpcode AND 0xb0140000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0140000) == 0)
+    if ((uOpcode & UINT32_C(0xb0140000)) == 0)
         return iemDecodeA64_SCVTF_asimdmisc_R(pVCpu, uOpcode);
     /* 0xbfbffc00/0x2e21d800 org expr: (uOpcode AND 0xb0140000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0140000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0140000)) == 0x20000000)
         return iemDecodeA64_UCVTF_asimdmisc_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -233245,16 +233333,16 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e61d800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0e69d800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x5e79d800 org expr: (uOpcode AND 0xf0140000) == 0x50100000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x50100000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x50100000)
         return iemDecodeA64_SCVTF_asisdmiscfp16_R(pVCpu, uOpcode);
     /* 0xfffffc00/0x7e79d800 org expr: (uOpcode AND 0xf0140000) == 0x70100000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x70100000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x70100000)
         return iemDecodeA64_UCVTF_asisdmiscfp16_R(pVCpu, uOpcode);
     /* 0xbffffc00/0xe79d800 org expr: (uOpcode AND 0xb0140000) == 0x100000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xb0140000) == 0x100000)
+    if ((uOpcode & UINT32_C(0xb0140000)) == 0x100000)
         return iemDecodeA64_SCVTF_asimdmiscfp16_R(pVCpu, uOpcode);
     /* 0xbffffc00/0x2e79d800 org expr: (uOpcode AND 0xb0140000) == 0x20100000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xb0140000) == 0x20100000)
+    if ((uOpcode & UINT32_C(0xb0140000)) == 0x20100000)
         return iemDecodeA64_UCVTF_asimdmiscfp16_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -233406,13 +233494,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660ec00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660f000_1, uint32_t, uOpcode)
 {
     /* 0xffe01fe0/0x1e601000 org expr: (uOpcode AND 0xf80003e0) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf80003e0) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf80003e0)) == 0x18000000)
         return iemDecodeA64_FMOV_D_floatimm(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -233581,13 +233669,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06800000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06800400_1, uint32_t, uOpcode)
 {
     /* 0xffe00000/0xce800000 org expr: (uOpcode AND 0xf8000000) == 0xc8000000 && IsFeatureImplemented(FEAT_SHA3) */
-    if ((uOpcode & 0xf8000000) == 0xc8000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0xc8000000))
         return iemDecodeA64_XAR_VVV2_crypto3_imm6(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -234327,13 +234415,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a01400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a01800_1, uint32_t, uOpcode)
 {
     /* 0xbf3ffc00/0xe201800 org expr: (uOpcode AND 0xb81f0000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb81f0000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0xb81f0000)) == 0x8000000)
         return iemDecodeA64_REV16_asimdmisc_R(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -234872,13 +234960,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a05400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a05800_1, uint32_t, uOpcode)
 {
     /* 0xbf3ffc00/0xe205800 org expr: (uOpcode AND 0xb81f0000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb81f0000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0xb81f0000)) == 0x8000000)
         return iemDecodeA64_CNT_asimdmisc_R(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -235698,13 +235786,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a0b800_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a0bc00_1, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe20bc00 org expr: (uOpcode AND 0xb8000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb8000000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0xb8000000)) == 0x8000000)
         return iemDecodeA64_ADDP_asimdsame_only(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -235806,10 +235894,10 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe3fc00_1ea0c800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe3fc00_2ea0c800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x6eb0c800 org expr: (uOpcode AND 0xc01c0000) == 0x40100000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xc01c0000) == 0x40100000)
+    if ((uOpcode & UINT32_C(0xc01c0000)) == 0x40100000)
         return iemDecodeA64_FMINNMV_asimdall_only_SD(pVCpu, uOpcode);
     /* 0xbfbffc00/0x2ea0c800 org expr: (uOpcode AND 0x801c0000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x801c0000) == 0)
+    if ((uOpcode & UINT32_C(0x801c0000)) == 0)
         return iemDecodeA64_FCMGE_asimdmisc_FZ(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -236163,10 +236251,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a0ec00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06a0f000_1, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -238472,16 +238560,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e01c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_3fe0fc00_1ee02000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc1f/0x1ee02008 org expr: (uOpcode AND 0xc01f001f) == 8 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc01f001f) == 8)
+    if ((uOpcode & UINT32_C(0xc01f001f)) == 8)
         return iemDecodeA64_FCMP_HZ_floatcmp(pVCpu, uOpcode);
     /* 0xfffffc1f/0x1ee02018 org expr: (uOpcode AND 0xc01f001f) == 0x18 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc01f001f) == 0x18)
+    if ((uOpcode & UINT32_C(0xc01f001f)) == 0x18)
         return iemDecodeA64_FCMPE_HZ_floatcmp(pVCpu, uOpcode);
     /* 0xffe0fc1f/0x1ee02000 org expr: (uOpcode AND 0xc000001f) == 0 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc000001f) == 0)
+    if ((uOpcode & UINT32_C(0xc000001f)) == 0)
         return iemDecodeA64_FCMP_H_floatcmp(pVCpu, uOpcode);
     /* 0xffe0fc1f/0x1ee02010 org expr: (uOpcode AND 0xc000001f) == 0x10 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc000001f) == 0x10)
+    if ((uOpcode & UINT32_C(0xc000001f)) == 0x10)
         return iemDecodeA64_FCMPE_H_floatcmp(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -238784,16 +238872,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e03c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee04000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1ee04000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FMOV_H_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1ee44000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTN_H_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe204000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_ADDHN_asimddiff_N(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e204000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_RADDHN_asimddiff_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -238802,16 +238890,16 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee04000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee14000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1ee14000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FNEG_H_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1ee54000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTM_H_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe204000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_ADDHN_asimddiff_N(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e204000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_RADDHN_asimddiff_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -238820,16 +238908,16 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee14000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee24000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1ee24000 org expr: (uOpcode AND 0xf0140000) == 0x10000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf0140000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10000000)
         return iemDecodeA64_FCVT_SH_floatdp1(pVCpu, uOpcode);
     /* 0xfffffc00/0x1ee64000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTA_H_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe204000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_ADDHN_asimddiff_N(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e204000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_RADDHN_asimddiff_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -238838,13 +238926,13 @@ FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee24000_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_0febfc00_0ee34000_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x1ee74000 org expr: (uOpcode AND 0xf0140000) == 0x10040000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf0140000) == 0x10040000)
+    if ((uOpcode & UINT32_C(0xf0140000)) == 0x10040000)
         return iemDecodeA64_FRINTX_H_floatdp1(pVCpu, uOpcode);
     /* 0xbf20fc00/0xe204000 org expr: (uOpcode AND 0xb0000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0)
         return iemDecodeA64_ADDHN_asimddiff_N(pVCpu, uOpcode);
     /* 0xbf20fc00/0x2e204000 org expr: (uOpcode AND 0xb0000000) == 0x20000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xb0000000) == 0x20000000)
+    if ((uOpcode & UINT32_C(0xb0000000)) == 0x20000000)
         return iemDecodeA64_RADDHN_asimddiff_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -239658,16 +239746,16 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e0a400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06e0a800_2, uint32_t, uOpcode)
 {
     /* 0xbfbffc00/0xea1a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_FCVTPS_asimdmisc_R(pVCpu, uOpcode);
     /* 0xbf3ffc00/0xe20a800 org expr: (uOpcode AND 0x98070000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8000000)
         return iemDecodeA64_CMLT_asimdmisc_Z(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0x98000000) == 0x10000000 && true */
-    if ((uOpcode & 0x98000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0x98000000) == 0x90000000 && true */
-    if ((uOpcode & 0x98000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -239690,16 +239778,16 @@ FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06e8a800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06f0a800_2, uint32_t, uOpcode)
 {
     /* 0xbf3ffc00/0xe30a800 org expr: (uOpcode AND 0x98070000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8000000)
         return iemDecodeA64_SMAXV_asimdall_only(pVCpu, uOpcode);
     /* 0xbf3ffc00/0xe31a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_SMINV_asimdall_only(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0x98000000) == 0x10000000 && true */
-    if ((uOpcode & 0x98000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0x98000000) == 0x90000000 && true */
-    if ((uOpcode & 0x98000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -239708,13 +239796,13 @@ FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06f0a800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06f8a800_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0xef9a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_FCVTPS_asimdmiscfp16_R(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0x98000000) == 0x10000000 && true */
-    if ((uOpcode & 0x98000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0x98000000) == 0x90000000 && true */
-    if ((uOpcode & 0x98000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0x98000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -239723,7 +239811,7 @@ FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_06f8a800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_26e0a800_2, uint32_t, uOpcode)
 {
     /* 0xbfbffc00/0x2ea1a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_FCVTPU_asimdmisc_R(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x18000000) == 0x10000000 && true */
     if ((uOpcode & 0x18000000) == 0x10000000)
@@ -239735,10 +239823,10 @@ FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_26e0a800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_26f0a800_2, uint32_t, uOpcode)
 {
     /* 0xbf3ffc00/0x2e30a800 org expr: (uOpcode AND 0x98070000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8000000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8000000)
         return iemDecodeA64_UMAXV_asimdall_only(pVCpu, uOpcode);
     /* 0xbf3ffc00/0x2e31a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_UMINV_asimdall_only(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x18000000) == 0x10000000 && true */
     if ((uOpcode & 0x18000000) == 0x10000000)
@@ -239750,7 +239838,7 @@ FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_26f0a800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_67f8fc00_26f8a800_2, uint32_t, uOpcode)
 {
     /* 0xbffffc00/0x2ef9a800 org expr: (uOpcode AND 0x98070000) == 0x8010000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0x98070000) == 0x8010000)
+    if ((uOpcode & UINT32_C(0x98070000)) == 0x8010000)
         return iemDecodeA64_FCVTPU_asimdmiscfp16_R(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x18000000) == 0x10000000 && true */
     if ((uOpcode & 0x18000000) == 0x10000000)
@@ -240429,16 +240517,16 @@ FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_06e1d800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_16e0d800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x5ef8d800 org expr: (uOpcode AND 0xc81c0000) == 0x48180000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc81c0000) == 0x48180000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48180000)
         return iemDecodeA64_FCMEQ_asisdmiscfp16_FZ(pVCpu, uOpcode);
     /* 0xffbffc00/0x5ea0d800 org expr: (uOpcode AND 0xc81c0000) == 0x48000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xc81c0000) == 0x48000000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48000000)
         return iemDecodeA64_FCMEQ_asisdmisc_FZ(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xc8000000) == 0 && true */
-    if ((uOpcode & 0xc8000000) == 0)
+    if ((uOpcode & UINT32_C(0xc8000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xc8000000) == 0x80000000 && true */
-    if ((uOpcode & 0xc8000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc8000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -240447,16 +240535,16 @@ FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_16e0d800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_16e1d800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x5ef9d800 org expr: (uOpcode AND 0xc81c0000) == 0x48180000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc81c0000) == 0x48180000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48180000)
         return iemDecodeA64_FRECPE_asisdmiscfp16_R(pVCpu, uOpcode);
     /* 0xffbffc00/0x5ea1d800 org expr: (uOpcode AND 0xc81c0000) == 0x48000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xc81c0000) == 0x48000000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48000000)
         return iemDecodeA64_FRECPE_asisdmisc_R(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xc8000000) == 0 && true */
-    if ((uOpcode & 0xc8000000) == 0)
+    if ((uOpcode & UINT32_C(0xc8000000)) == 0)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xc8000000) == 0x80000000 && true */
-    if ((uOpcode & 0xc8000000) == 0x80000000)
+    if ((uOpcode & UINT32_C(0xc8000000)) == UINT32_C(0x80000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -240508,10 +240596,10 @@ FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_26e1d800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_36e0d800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x7ef8d800 org expr: (uOpcode AND 0xc81c0000) == 0x48180000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc81c0000) == 0x48180000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48180000)
         return iemDecodeA64_FCMLE_asisdmiscfp16_FZ(pVCpu, uOpcode);
     /* 0xffbffc00/0x7ea0d800 org expr: (uOpcode AND 0xc81c0000) == 0x48000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xc81c0000) == 0x48000000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48000000)
         return iemDecodeA64_FCMLE_asisdmisc_FZ(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x48000000) == 0 && true */
     if ((uOpcode & 0x48000000) == 0)
@@ -240523,10 +240611,10 @@ FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_36e0d800_2, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_37e3fc00_36e1d800_2, uint32_t, uOpcode)
 {
     /* 0xfffffc00/0x7ef9d800 org expr: (uOpcode AND 0xc81c0000) == 0x48180000 && IsFeatureImplemented(FEAT_AdvSIMD) && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xc81c0000) == 0x48180000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48180000)
         return iemDecodeA64_FRSQRTE_asisdmiscfp16_R(pVCpu, uOpcode);
     /* 0xffbffc00/0x7ea1d800 org expr: (uOpcode AND 0xc81c0000) == 0x48000000 && IsFeatureImplemented(FEAT_AdvSIMD) */
-    if ((uOpcode & 0xc81c0000) == 0x48000000)
+    if ((uOpcode & UINT32_C(0xc81c0000)) == 0x48000000)
         return iemDecodeA64_FRSQRTE_asisdmisc_R(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x48000000) == 0 && true */
     if ((uOpcode & 0x48000000) == 0)
@@ -240717,13 +240805,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e0ec00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e0f000_1, uint32_t, uOpcode)
 {
     /* 0xffe01fe0/0x1ee01000 org expr: (uOpcode AND 0xf80003e0) == 0x18000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf80003e0) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf80003e0)) == 0x18000000)
         return iemDecodeA64_FMOV_H_floatimm(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x36000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -241149,13 +241237,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07001400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07001c00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f000000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -242076,13 +242164,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0700a400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0700ac00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f008000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -242683,13 +242771,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07201400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07201c00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f200000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -243386,13 +243474,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0720a400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0720ac00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f208000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -243720,13 +243808,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07400400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07400c00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f400000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -244276,13 +244364,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07408c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07409000_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f408000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -244743,13 +244831,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07600400_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07600c00_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f600000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -245299,13 +245387,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07608c00_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07609000_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1f608000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -245789,10 +245877,10 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07800000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07800400_1, uint32_t, uOpcode)
 {
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -246344,13 +246432,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c00000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c00400_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1fc00000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMADD_H_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -246643,13 +246731,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c08000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c08400_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1fc08000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FMSUB_H_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -246939,13 +247027,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e00000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e00400_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1fe00000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMADD_H_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
@@ -247238,13 +247326,13 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e08000_1, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e08400_1, uint32_t, uOpcode)
 {
     /* 0xffe08000/0x1fe08000 org expr: (uOpcode AND 0xf8000000) == 0x18000000 && IsFeatureImplemented(FEAT_FP16) */
-    if ((uOpcode & 0xf8000000) == 0x18000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x18000000)
         return iemDecodeA64_FNMSUB_H_floatdp3(pVCpu, uOpcode);
     /* 0xfc000000/0x14000000 org expr: (uOpcode AND 0xf8000000) == 0x10000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x10000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == 0x10000000)
         return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
     /* 0xfc000000/0x94000000 org expr: (uOpcode AND 0xf8000000) == 0x90000000 && true */
-    if ((uOpcode & 0xf8000000) == 0x90000000)
+    if ((uOpcode & UINT32_C(0xf8000000)) == UINT32_C(0x90000000))
         return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
     /* 0x7f000000/0x37000000 org expr: (uOpcode AND 0x78000000) == 0x30000000 && true */
     if ((uOpcode & 0x78000000) == 0x30000000)
