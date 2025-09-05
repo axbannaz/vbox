@@ -908,7 +908,7 @@ class ArmAstBinaryOp(ArmAstBase):
 
         raise Exception('Unsupported binary operator: %s (%s)' % (self.sOp, self.toString(),));
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         sOpType = self.kdOps[self.sOp];
         if sOpType in (self.ksOpTypeCompare, self.ksOpTypeLogical, self.ksOpTypeSet):
@@ -1021,7 +1021,7 @@ class ArmAstUnaryOp(ArmAstBase):
             return '%s(%s)' % (self.getOpForLang(self.sOp, 'C', False), self.oExpr.toCExpr(oHelper));
         return '%s%s' % (self.getOpForLang(self.sOp, 'C', True), self.oExpr.toCExpr(oHelper));
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         if self.kdOps[self.sOp] == self.ksOpTypeLogical:
             return 1; # boolean result.
         return self.oExpr.getWidth(oHelper);
@@ -1061,7 +1061,7 @@ class ArmAstSlice(ArmAstBase):
         _ = oHelper;
         raise Exception('not implemented');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         raise Exception('not implemented');
 
@@ -1113,7 +1113,7 @@ class ArmAstSquareOp(ArmAstBase):
         _ = oHelper;
         raise Exception('ArmAstSquareOp does not support conversion to C expression: %s' % (self.toString()));
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return -1;
 
@@ -1153,7 +1153,7 @@ class ArmAstTuple(ArmAstValuesBase):
         _ = oHelper;
         raise Exception('ArmAstTuple does not support conversion to C expression: %s' % (self.toString()));
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return -1;
 
@@ -1177,7 +1177,7 @@ class ArmAstDotAtom(ArmAstValuesBase):
     #    """ Limited to identifiers separated byt dots """
     #    asValues = sExpr.split('.');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return -1;
 
@@ -1226,7 +1226,7 @@ class ArmAstConcat(ArmAstValuesBase):
         sConcat += ')';
         return sConcat;
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         cBitsWidth = 0;
         for oValue in self.aoValues:
@@ -1278,7 +1278,7 @@ class ArmAstFunctionCallBase(ArmAstBase):
     def toCExpr(self, oHelper):
         return oHelper.convertFunctionCall(self);
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return -1;
 
@@ -1353,9 +1353,11 @@ class ArmAstIdentifier(ArmAstLeafBase):
         (sCName, _) = oHelper.getFieldInfo(self.sName);
         return sCName;
 
-    def getWidth(self, oHelper):
-        (_, cBitsWidth) = oHelper.getFieldInfo(self.sName);
-        return cBitsWidth;
+    def getWidth(self, oHelper = None):
+        if oHelper:
+            (_, cBitsWidth) = oHelper.getFieldInfo(self.sName);
+            return cBitsWidth;
+        return -1;
 
     def isMatchingIdentifier(self, sName):
         return self.sName == sName;
@@ -1387,7 +1389,7 @@ class ArmAstBool(ArmAstLeafBase):
         _ = oHelper;
         return 'true' if self.fValue is True else 'false';
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return 1;
 
@@ -1429,7 +1431,7 @@ class ArmAstInteger(ArmAstLeafBase):
             return 'UINT32_C(%#x)' % (self.iValue,);
         return '%#x' % (self.iValue,);
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         if self.cBitsWidth > 0:
             return self.cBitsWidth;
@@ -1470,7 +1472,7 @@ class ArmAstSet(ArmAstValuesBase):
         _ = oHelper;
         raise Exception('ArmAstSet does not support conversion to C expression: %s' % (self.toString()));
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         if self.aoValues:
             return max(oValue.getWidth() for oValue in self.aoValues);
@@ -1507,7 +1509,7 @@ class ArmAstValue(ArmAstLeafBase):
             return 'UINT32_C(%#x)' % (fValue,);
         return '%#x' % (fValue,);
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         (_, _, _, cBitsWidth) = ArmAstValue.parseValue(self.sValue, 0);
         return cBitsWidth;
@@ -1582,7 +1584,7 @@ class ArmAstEquationValue(ArmAstLeafBase):
         _ = oHelper;
         raise Exception('todo');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return self.cBitsWidth;
 
@@ -1655,7 +1657,7 @@ class ArmAstValuesGroup(ArmAstBase):
         _ = oHelper;
         raise Exception('todo');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         return sum(oValue.getWidth(oHelper) for oValue in self.aoValues);
 
 
@@ -1681,7 +1683,7 @@ class ArmAstString(ArmAstLeafBase):
         _ = oHelper;
         return '"' + self.sValue.replace('\\', '\\\\').replace('"', '\\"') + '"';
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return -1;
 
@@ -1718,9 +1720,11 @@ class ArmAstField(ArmAstLeafBase):
         (sCName, _) = oHelper.getFieldInfo(self.sField, self.sName, self.sState);
         return sCName;
 
-    def getWidth(self, oHelper):
-        (_, cBitsWidth) = oHelper.getFieldInfo(self.sField, self.sName, self.sState);
-        return cBitsWidth;
+    def getWidth(self, oHelper = None):
+        if oHelper:
+            (_, cBitsWidth) = oHelper.getFieldInfo(self.sField, self.sName, self.sState);
+            return cBitsWidth;
+        return -1;
 
     def isMatchingField(self, sField, sName, sState = 'AArch64'):
         return (    (   sField is None
@@ -1762,7 +1766,7 @@ class ArmAstRegisterType(ArmAstLeafBase):
         #return sCName;
         raise Exception('not implemented');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         #(_, cBitsWidth) = oHelper.getFieldInfo(None, self.sName, self.sState);
         #return cBitsWidth;
         _ = oHelper;
@@ -1800,7 +1804,7 @@ class ArmAstType(ArmAstBase):
         _ = oHelper;
         raise Exception('not implemented');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         raise Exception('not implemented');
 
@@ -1840,7 +1844,7 @@ class ArmAstTypeAnnotation(ArmAstBase):
         _ = oHelper;
         raise Exception('not implemented');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         raise Exception('not implemented');
 
@@ -1869,7 +1873,7 @@ class ArmAstStatementBase(ArmAstBase):
         _ = oHelper;
         raise Exception('not implemented');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         raise Exception('not implemented');
 
@@ -2327,7 +2331,7 @@ class ArmAstCppExpr(ArmAstLeafBase, ArmAstCppExprBase):
         _ = oHelper;
         return self.sExpr;
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return self.cBitsWidth;
 
@@ -2354,7 +2358,7 @@ class ArmAstCppCall(ArmAstFunctionCallBase, ArmAstCppExprBase):
         _ = oHelper;
         return self.toStringEx(sLang = 'C');
 
-    def getWidth(self, oHelper):
+    def getWidth(self, oHelper = None):
         _ = oHelper;
         return self.cBitsWidth;
 
