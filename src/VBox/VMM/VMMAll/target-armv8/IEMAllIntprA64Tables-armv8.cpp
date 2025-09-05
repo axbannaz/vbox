@@ -2203,7 +2203,7 @@ FNIEMOP_DEF_1(iemDecodeA64_BSL_asimdsame_only, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_BTI_HB_hints, uint32_t, uOpcode)
 {
     uint32_t const op2        = (uOpcode >>  5) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBti /*FEAT_BTI*/ && ((op2 & 1) == 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBti /*FEAT_BTI*/ && (op2 & 1) == 0)
     {
         LogFlow(("%018x/%010x: BTI_HB_hints op2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, op2));
 #ifdef IEM_INSTR_IMPL_A64__BTI_HB_hints
@@ -7603,18 +7603,13 @@ FNIEMOP_DEF_1(iemDecodeA64_EXTR_32_extract, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const imms       = (uOpcode >> 10) & 0x0000003f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (0x0 /*op21@29*/ != 3)
-    {
-        LogFlow(("%018x/%010x: EXTR_32_extract Rd=%#x Rn=%#x imms=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, imms, Rm));
+    LogFlow(("%018x/%010x: EXTR_32_extract Rd=%#x Rn=%#x imms=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, imms, Rm));
 #ifdef IEM_INSTR_IMPL_A64__EXTR_32_extract
-        IEM_INSTR_IMPL_A64__EXTR_32_extract(Rd, Rn, imms, Rm);
+    IEM_INSTR_IMPL_A64__EXTR_32_extract(Rd, Rn, imms, Rm);
 #else
-        RT_NOREF(Rd, Rn, imms, Rm, pVCpu, uOpcode);
-        return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+    RT_NOREF(Rd, Rn, imms, Rm, pVCpu, uOpcode);
+    return VERR_IEM_INSTR_NOT_IMPLEMENTED;
 #endif
-    }
-    Log(("Invalid instruction %#x at %x (cond)\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));
-    IEMOP_RAISE_INVALID_OPCODE_RET();
 }
 
 /* ffe00000/93c00000: EXTR  <Xd>, <Xn>, <Xm>, #<lsb>
@@ -7627,18 +7622,13 @@ FNIEMOP_DEF_1(iemDecodeA64_EXTR_64_extract, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const imms       = (uOpcode >> 10) & 0x0000003f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if (0x0 /*op21@29*/ != 3)
-        {
-            LogFlow(("%018x/%010x: EXTR_64_extract Rd=%#x Rn=%#x imms=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, imms, Rm));
+        LogFlow(("%018x/%010x: EXTR_64_extract Rd=%#x Rn=%#x imms=%#x Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, imms, Rm));
 #ifdef IEM_INSTR_IMPL_A64__EXTR_64_extract
-            IEM_INSTR_IMPL_A64__EXTR_64_extract(Rd, Rn, imms, Rm);
+        IEM_INSTR_IMPL_A64__EXTR_64_extract(Rd, Rn, imms, Rm);
 #else
-            RT_NOREF(Rd, Rn, imms, Rm, pVCpu, uOpcode);
-            return VERR_IEM_INSTR_NOT_IMPLEMENTED;
+        RT_NOREF(Rd, Rn, imms, Rm, pVCpu, uOpcode);
+        return VERR_IEM_INSTR_NOT_IMPLEMENTED;
 #endif
-        }
-        Log(("Invalid instruction %#x at %x (cond)\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));
-        IEMOP_RAISE_INVALID_OPCODE_RET();
     }
     Log(("Invalid instruction %#x at %x\n", uOpcode, pVCpu->cpum.GstCtx.Pc.u64));
     IEMOP_RAISE_INVALID_OPCODE_RET();
@@ -8376,7 +8366,9 @@ FNIEMOP_DEF_1(iemDecodeA64_FAMAX_asimdsame_only, uint32_t, uOpcode)
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && ((size & 2) == 2))
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && (size & 2) == 2)
         {
             LogFlow(("%018x/%010x: FAMAX_asimdsame_only Rd=%#x Rn=%#x Rm=%#x size=%u Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, size, Q));
 #ifdef IEM_INSTR_IMPL_A64__FAMAX_asimdsame_only
@@ -8403,7 +8395,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FAMAX_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
         {
             LogFlow(("%018x/%010x: FAMAX_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FAMAX_asimdsamefp16_only
@@ -8431,7 +8424,9 @@ FNIEMOP_DEF_1(iemDecodeA64_FAMIN_asimdsame_only, uint32_t, uOpcode)
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/ && ((size & 2) == 2))
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/
+            && (size & 2) == 2)
         {
             LogFlow(("%018x/%010x: FAMIN_asimdsame_only Rd=%#x Rn=%#x Rm=%#x size=%u Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, size, Q));
 #ifdef IEM_INSTR_IMPL_A64__FAMIN_asimdsame_only
@@ -8458,7 +8453,8 @@ FNIEMOP_DEF_1(iemDecodeA64_FAMIN_asimdsamefp16_only, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
         {
             LogFlow(("%018x/%010x: FAMIN_asimdsamefp16_only Rd=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__FAMIN_asimdsamefp16_only
@@ -12465,7 +12461,7 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZS_asimdshf_C, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: FCVTZS_asimdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZS_asimdshf_C
@@ -12538,7 +12534,7 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZS_asisdshf_C, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: FCVTZS_asisdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZS_asisdshf_C
@@ -12945,7 +12941,7 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZU_asimdshf_C, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: FCVTZU_asimdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZU_asimdshf_C
@@ -13020,7 +13016,7 @@ FNIEMOP_DEF_1(iemDecodeA64_FCVTZU_asisdshf_C, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: FCVTZU_asisdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__FCVTZU_asisdshf_C
@@ -18188,7 +18184,7 @@ FNIEMOP_DEF_1(iemDecodeA64_FSCALE_asimdsame_only, uint32_t, uOpcode)
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && ((size & 2) == 2))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && (size & 2) == 2)
         {
             LogFlow(("%018x/%010x: FSCALE_asimdsame_only Rd=%#x Rn=%#x Rm=%#x size=%u Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, Rm, size, Q));
 #ifdef IEM_INSTR_IMPL_A64__FSCALE_asimdsame_only
@@ -18736,7 +18732,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1R_asisdlsop_RX1_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1R_asisdlsop_RX1_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1R_asisdlsop_RX1_r
@@ -18955,7 +18951,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsep_R1_r1, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsep_R1_r1 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsep_R1_r1
@@ -18978,7 +18974,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsep_R2_r2, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsep_R2_r2 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsep_R2_r2
@@ -19001,7 +18997,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsep_R3_r3, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsep_R3_r3 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsep_R3_r3
@@ -19024,7 +19020,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsep_R4_r4, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsep_R4_r4 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsep_R4_r4
@@ -19175,7 +19171,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsop_BX1_r1b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsop_BX1_r1b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsop_BX1_r1b
@@ -19218,7 +19214,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsop_DX1_r1d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsop_DX1_r1d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsop_DX1_r1d
@@ -19265,7 +19261,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsop_HX1_r1h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsop_HX1_r1h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsop_HX1_r1h
@@ -19310,7 +19306,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD1_asisdlsop_SX1_r1s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD1_asisdlsop_SX1_r1s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD1_asisdlsop_SX1_r1s
@@ -19382,7 +19378,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2R_asisdlsop_RX2_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2R_asisdlsop_RX2_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2R_asisdlsop_RX2_r
@@ -19454,7 +19450,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2_asisdlsep_R2_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2_asisdlsep_R2_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2_asisdlsep_R2_r
@@ -19610,7 +19606,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2_asisdlsop_BX2_r2b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2_asisdlsop_BX2_r2b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2_asisdlsop_BX2_r2b
@@ -19653,7 +19649,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2_asisdlsop_DX2_r2d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2_asisdlsop_DX2_r2d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2_asisdlsop_DX2_r2d
@@ -19700,7 +19696,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2_asisdlsop_HX2_r2h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2_asisdlsop_HX2_r2h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2_asisdlsop_HX2_r2h
@@ -19745,7 +19741,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD2_asisdlsop_SX2_r2s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD2_asisdlsop_SX2_r2s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD2_asisdlsop_SX2_r2s
@@ -19817,7 +19813,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3R_asisdlsop_RX3_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3R_asisdlsop_RX3_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3R_asisdlsop_RX3_r
@@ -19889,7 +19885,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3_asisdlsep_R3_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3_asisdlsep_R3_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3_asisdlsep_R3_r
@@ -20035,7 +20031,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3_asisdlsop_BX3_r3b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3_asisdlsop_BX3_r3b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3_asisdlsop_BX3_r3b
@@ -20078,7 +20074,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3_asisdlsop_DX3_r3d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3_asisdlsop_DX3_r3d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3_asisdlsop_DX3_r3d
@@ -20125,7 +20121,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3_asisdlsop_HX3_r3h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3_asisdlsop_HX3_r3h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3_asisdlsop_HX3_r3h
@@ -20170,7 +20166,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD3_asisdlsop_SX3_r3s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD3_asisdlsop_SX3_r3s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD3_asisdlsop_SX3_r3s
@@ -20242,7 +20238,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4R_asisdlsop_RX4_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4R_asisdlsop_RX4_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4R_asisdlsop_RX4_r
@@ -20314,7 +20310,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4_asisdlsep_R4_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4_asisdlsep_R4_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4_asisdlsep_R4_r
@@ -20470,7 +20466,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4_asisdlsop_BX4_r4b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4_asisdlsop_BX4_r4b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4_asisdlsop_BX4_r4b
@@ -20513,7 +20509,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4_asisdlsop_DX4_r4d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4_asisdlsop_DX4_r4d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4_asisdlsop_DX4_r4d
@@ -20560,7 +20556,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4_asisdlsop_HX4_r4h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4_asisdlsop_HX4_r4h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4_asisdlsop_HX4_r4h
@@ -20605,7 +20601,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LD4_asisdlsop_SX4_r4s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: LD4_asisdlsop_SX4_r4s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__LD4_asisdlsop_SX4_r4s
@@ -20982,7 +20978,8 @@ FNIEMOP_DEF_1(iemDecodeA64_LDAP1_asisdlso_D1, uint32_t, uOpcode)
     uint32_t const Rt         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLrcpc3 /*FEAT_LRCPC3*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLrcpc3 /*FEAT_LRCPC3*/)
     {
         LogFlow(("%018x/%010x: LDAP1_asisdlso_D1 Rt=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__LDAP1_asisdlso_D1
@@ -25721,7 +25718,7 @@ FNIEMOP_DEF_1(iemDecodeA64_LDR_B_ldst_regoff, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const option     = (uOpcode >> 13) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp /*FEAT_FP*/ && (option != 3))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp /*FEAT_FP*/ && option != 3)
     {
         LogFlow(("%018x/%010x: LDR_B_ldst_regoff Rt=%#x Rn=%#x S=%u option=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, option, Rm));
 #ifdef IEM_INSTR_IMPL_A64__LDR_B_ldst_regoff
@@ -29864,7 +29861,7 @@ FNIEMOP_DEF_1(iemDecodeA64_MSR_SI_pstate, uint32_t, uOpcode)
     uint32_t const op2        = (uOpcode >>  5) & 0x00000007;
     uint32_t const CRm        = (uOpcode >>  8) & 0x0000000f;
     uint32_t const op1        = (uOpcode >> 16) & 0x00000007;
-    if (!((op1 == 0) && (((op2 & 6) == 0 || op2 == 2))))
+    if (op1 != 0 || !((op2 & 6) == 0 || op2 == 2))
     {
         LogFlow(("%018x/%010x: MSR_SI_pstate op2=%u CRm=%#x op1=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, op2, CRm, op1));
 #ifdef IEM_INSTR_IMPL_A64__MSR_SI_pstate
@@ -30951,7 +30948,7 @@ FNIEMOP_DEF_1(iemDecodeA64_PRFM_P_ldst_regoff, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const option     = (uOpcode >> 13) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (!((Rt & 0x18) == 0x18) && ((option & 2) == 2))
+    if (!((Rt & 0x18) == 0x18) && (option & 2) == 2)
     {
         LogFlow(("%018x/%010x: PRFM_P_ldst_regoff Rt=%#x Rn=%#x S=%u option=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, option, Rm));
 #ifdef IEM_INSTR_IMPL_A64__PRFM_P_ldst_regoff
@@ -32523,7 +32520,7 @@ FNIEMOP_DEF_1(iemDecodeA64_RCWSWP_64_memop, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_RETAASPPCR_64M_branch_reg, uint32_t, uOpcode)
 {
     uint32_t const Rm         = (uOpcode >>  0) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPAuthLR /*FEAT_PAuth_LR*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPAuthLR /*FEAT_PAuth_LR*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: RETAASPPCR_64M_branch_reg Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rm));
 #ifdef IEM_INSTR_IMPL_A64__RETAASPPCR_64M_branch_reg
@@ -32584,7 +32581,7 @@ FNIEMOP_DEF_1(iemDecodeA64_RETAA_64E_branch_reg, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_RETABSPPCR_64M_branch_reg, uint32_t, uOpcode)
 {
     uint32_t const Rm         = (uOpcode >>  0) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPAuthLR /*FEAT_PAuth_LR*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPAuthLR /*FEAT_PAuth_LR*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: RETABSPPCR_64M_branch_reg Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rm));
 #ifdef IEM_INSTR_IMPL_A64__RETABSPPCR_64M_branch_reg
@@ -32882,7 +32879,7 @@ FNIEMOP_DEF_1(iemDecodeA64_RPRFM_R_ldst_regoff, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const option     = (uOpcode >> 13) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fRprfm /*FEAT_RPRFM*/ && ((option & 2) == 2) && ((Rt & 0x18) == 0x18))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fRprfm /*FEAT_RPRFM*/ && (option & 2) == 2 && (Rt & 0x18) == 0x18)
     {
         LogFlow(("%018x/%010x: RPRFM_R_ldst_regoff Rt=%#x Rn=%#x S=%u option=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, option, Rm));
 #ifdef IEM_INSTR_IMPL_A64__RPRFM_R_ldst_regoff
@@ -32907,7 +32904,7 @@ FNIEMOP_DEF_1(iemDecodeA64_RSHRN_asimdshf_N, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: RSHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__RSHRN_asimdshf_N
@@ -33600,7 +33597,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SCVTF_asimdshf_C, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SCVTF_asimdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SCVTF_asimdshf_C
@@ -33663,7 +33660,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SCVTF_asisdshf_C, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SCVTF_asisdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SCVTF_asisdshf_C
@@ -34849,7 +34846,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SHL_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SHL_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SHL_asimdshf_R
@@ -34871,7 +34868,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SHL_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
     {
         LogFlow(("%018x/%010x: SHL_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SHL_asisdshf_R
@@ -34896,7 +34893,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SHRN_asimdshf_N, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SHRN_asimdshf_N
@@ -34950,7 +34947,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SLI_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SLI_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SLI_asimdshf_R
@@ -34974,7 +34971,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SLI_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: SLI_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SLI_asisdshf_R
@@ -36804,7 +36801,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQRSHRN_asimdshf_N, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQRSHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQRSHRN_asimdshf_N
@@ -36826,7 +36823,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQRSHRN_asisdshf_N, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQRSHRN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQRSHRN_asisdshf_N
@@ -36851,7 +36848,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQRSHRUN_asimdshf_N, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQRSHRUN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQRSHRUN_asimdshf_N
@@ -36878,7 +36875,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQRSHRUN_asisdshf_N, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQRSHRUN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQRSHRUN_asisdshf_N
@@ -36906,7 +36903,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHLU_asimdshf_R, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQSHLU_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQSHLU_asimdshf_R
@@ -36933,7 +36930,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHLU_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQSHLU_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQSHLU_asisdshf_R
@@ -36982,7 +36979,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHL_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQSHL_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQSHL_asimdshf_R
@@ -37026,7 +37023,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHL_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQSHL_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQSHL_asisdshf_R
@@ -37049,7 +37046,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHRN_asimdshf_N, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQSHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQSHRN_asimdshf_N
@@ -37071,7 +37068,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHRN_asisdshf_N, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SQSHRN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQSHRN_asisdshf_N
@@ -37096,7 +37093,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHRUN_asimdshf_N, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQSHRUN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SQSHRUN_asimdshf_N
@@ -37123,7 +37120,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SQSHRUN_asisdshf_N, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SQSHRUN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SQSHRUN_asisdshf_N
@@ -37320,7 +37317,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRI_asimdshf_R, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SRI_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SRI_asimdshf_R
@@ -37347,7 +37344,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRI_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: SRI_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SRI_asisdshf_R
@@ -37417,7 +37414,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRSHR_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SRSHR_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SRSHR_asimdshf_R
@@ -37439,7 +37436,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRSHR_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
     {
         LogFlow(("%018x/%010x: SRSHR_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SRSHR_asisdshf_R
@@ -37462,7 +37459,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRSRA_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SRSRA_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SRSRA_asimdshf_R
@@ -37484,7 +37481,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SRSRA_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
     {
         LogFlow(("%018x/%010x: SRSRA_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SRSRA_asisdshf_R
@@ -37509,7 +37506,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SSHLL_asimdshf_L, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: SSHLL_asimdshf_L Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SSHLL_asimdshf_L
@@ -37579,7 +37576,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SSHR_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SSHR_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SSHR_asimdshf_R
@@ -37601,7 +37598,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SSHR_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
     {
         LogFlow(("%018x/%010x: SSHR_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SSHR_asisdshf_R
@@ -37624,7 +37621,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SSRA_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: SSRA_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__SSRA_asimdshf_R
@@ -37646,7 +37643,7 @@ FNIEMOP_DEF_1(iemDecodeA64_SSRA_asisdshf_R, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
     {
         LogFlow(("%018x/%010x: SSRA_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__SSRA_asisdshf_R
@@ -37921,7 +37918,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsep_R1_r1, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsep_R1_r1 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsep_R1_r1
@@ -37944,7 +37941,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsep_R2_r2, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsep_R2_r2 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsep_R2_r2
@@ -37967,7 +37964,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsep_R3_r3, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsep_R3_r3 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsep_R3_r3
@@ -37990,7 +37987,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsep_R4_r4, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsep_R4_r4 Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsep_R4_r4
@@ -38141,7 +38138,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsop_BX1_r1b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsop_BX1_r1b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsop_BX1_r1b
@@ -38184,7 +38181,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsop_DX1_r1d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsop_DX1_r1d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsop_DX1_r1d
@@ -38231,7 +38228,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsop_HX1_r1h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsop_HX1_r1h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsop_HX1_r1h
@@ -38276,7 +38273,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST1_asisdlsop_SX1_r1s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST1_asisdlsop_SX1_r1s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST1_asisdlsop_SX1_r1s
@@ -38411,7 +38408,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST2_asisdlsep_R2_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST2_asisdlsep_R2_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST2_asisdlsep_R2_r
@@ -38567,7 +38564,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST2_asisdlsop_BX2_r2b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST2_asisdlsop_BX2_r2b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST2_asisdlsop_BX2_r2b
@@ -38610,7 +38607,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST2_asisdlsop_DX2_r2d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST2_asisdlsop_DX2_r2d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST2_asisdlsop_DX2_r2d
@@ -38657,7 +38654,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST2_asisdlsop_HX2_r2h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST2_asisdlsop_HX2_r2h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST2_asisdlsop_HX2_r2h
@@ -38702,7 +38699,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST2_asisdlsop_SX2_r2s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST2_asisdlsop_SX2_r2s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST2_asisdlsop_SX2_r2s
@@ -38774,7 +38771,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST3_asisdlsep_R3_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST3_asisdlsep_R3_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST3_asisdlsep_R3_r
@@ -38930,7 +38927,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST3_asisdlsop_BX3_r3b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST3_asisdlsop_BX3_r3b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST3_asisdlsop_BX3_r3b
@@ -38973,7 +38970,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST3_asisdlsop_DX3_r3d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST3_asisdlsop_DX3_r3d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST3_asisdlsop_DX3_r3d
@@ -39020,7 +39017,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST3_asisdlsop_HX3_r3h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST3_asisdlsop_HX3_r3h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST3_asisdlsop_HX3_r3h
@@ -39065,7 +39062,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST3_asisdlsop_SX3_r3s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST3_asisdlsop_SX3_r3s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST3_asisdlsop_SX3_r3s
@@ -39137,7 +39134,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST4_asisdlsep_R4_r, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 10) & 0x00000003;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST4_asisdlsep_R4_r Rt=%#x Rn=%#x size=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST4_asisdlsep_R4_r
@@ -39293,7 +39290,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST4_asisdlsop_BX4_r4b, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST4_asisdlsop_BX4_r4b Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST4_asisdlsop_BX4_r4b
@@ -39336,7 +39333,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST4_asisdlsop_DX4_r4d, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST4_asisdlsop_DX4_r4d Rt=%#x Rn=%#x Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST4_asisdlsop_DX4_r4d
@@ -39383,7 +39380,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST4_asisdlsop_HX4_r4h, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST4_asisdlsop_HX4_r4h Rt=%#x Rn=%#x size=%u S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, size, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST4_asisdlsop_HX4_r4h
@@ -39428,7 +39425,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ST4_asisdlsop_SX4_r4s, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (Rm != 0x1f))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: ST4_asisdlsop_SX4_r4s Rt=%#x Rn=%#x S=%u Rm=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, Rm, Q));
 #ifdef IEM_INSTR_IMPL_A64__ST4_asisdlsop_SX4_r4s
@@ -40759,7 +40756,8 @@ FNIEMOP_DEF_1(iemDecodeA64_STL1_asisdlso_D1, uint32_t, uOpcode)
     uint32_t const Rt         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLrcpc3 /*FEAT_LRCPC3*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLrcpc3 /*FEAT_LRCPC3*/)
     {
         LogFlow(("%018x/%010x: STL1_asisdlso_D1 Rt=%#x Rn=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, Q));
 #ifdef IEM_INSTR_IMPL_A64__STL1_asisdlso_D1
@@ -42122,7 +42120,7 @@ FNIEMOP_DEF_1(iemDecodeA64_STR_B_ldst_regoff, uint32_t, uOpcode)
     uint32_t const S          = (uOpcode >> 12) & 0x00000001;
     uint32_t const option     = (uOpcode >> 13) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp /*FEAT_FP*/ && (option != 3))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp /*FEAT_FP*/ && option != 3)
     {
         LogFlow(("%018x/%010x: STR_B_ldst_regoff Rt=%#x Rn=%#x S=%u option=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rt, Rn, S, option, Rm));
 #ifdef IEM_INSTR_IMPL_A64__STR_B_ldst_regoff
@@ -42485,7 +42483,7 @@ FNIEMOP_DEF_1(iemDecodeA64_STR_S_ldst_regoff, uint32_t, uOpcode)
 FNIEMOP_DEF_1(iemDecodeA64_STSHH_HI_hints, uint32_t, uOpcode)
 {
     uint32_t const op2        = (uOpcode >>  5) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPCDPHint /*FEAT_PCDPHINT*/ && ((op2 & 6) == 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fPCDPHint /*FEAT_PCDPHINT*/ && (op2 & 6) == 0)
     {
         LogFlow(("%018x/%010x: STSHH_HI_hints op2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, op2));
 #ifdef IEM_INSTR_IMPL_A64__STSHH_HI_hints
@@ -45268,7 +45266,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UCVTF_asimdshf_C, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: UCVTF_asimdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__UCVTF_asimdshf_C
@@ -45333,7 +45331,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UCVTF_asisdshf_C, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: UCVTF_asisdshf_C Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__UCVTF_asisdshf_C
@@ -46324,7 +46322,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQRSHRN_asimdshf_N, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: UQRSHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__UQRSHRN_asimdshf_N
@@ -46348,7 +46346,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQRSHRN_asisdshf_N, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: UQRSHRN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__UQRSHRN_asisdshf_N
@@ -46397,7 +46395,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQSHL_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: UQSHL_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__UQSHL_asimdshf_R
@@ -46448,7 +46446,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQSHL_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: UQSHL_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__UQSHL_asisdshf_R
@@ -46474,7 +46472,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQSHRN_asimdshf_N, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: UQSHRN_asimdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__UQSHRN_asimdshf_N
@@ -46498,7 +46496,7 @@ FNIEMOP_DEF_1(iemDecodeA64_UQSHRN_asisdshf_N, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: UQSHRN_asisdshf_N Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__UQSHRN_asisdshf_N
@@ -46721,7 +46719,7 @@ FNIEMOP_DEF_1(iemDecodeA64_URSHR_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: URSHR_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__URSHR_asimdshf_R
@@ -46745,7 +46743,7 @@ FNIEMOP_DEF_1(iemDecodeA64_URSHR_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: URSHR_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__URSHR_asisdshf_R
@@ -46798,7 +46796,7 @@ FNIEMOP_DEF_1(iemDecodeA64_URSRA_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: URSRA_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__URSRA_asimdshf_R
@@ -46822,7 +46820,7 @@ FNIEMOP_DEF_1(iemDecodeA64_URSRA_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: URSRA_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__URSRA_asisdshf_R
@@ -46902,7 +46900,7 @@ FNIEMOP_DEF_1(iemDecodeA64_USHLL_asimdshf_L, uint32_t, uOpcode)
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
         uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
         {
             LogFlow(("%018x/%010x: USHLL_asimdshf_L Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__USHLL_asimdshf_L
@@ -46972,7 +46970,7 @@ FNIEMOP_DEF_1(iemDecodeA64_USHR_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: USHR_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__USHR_asimdshf_R
@@ -46996,7 +46994,7 @@ FNIEMOP_DEF_1(iemDecodeA64_USHR_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: USHR_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__USHR_asisdshf_R
@@ -47096,7 +47094,7 @@ FNIEMOP_DEF_1(iemDecodeA64_USRA_asimdshf_R, uint32_t, uOpcode)
     uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
     uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
     uint32_t const Q          = (uOpcode >> 30) & 0x00000001;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh != 0) && (immh != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && immh != 0)
     {
         LogFlow(("%018x/%010x: USRA_asimdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x Q=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh, Q));
 #ifdef IEM_INSTR_IMPL_A64__USRA_asimdshf_R
@@ -47120,7 +47118,7 @@ FNIEMOP_DEF_1(iemDecodeA64_USRA_asisdshf_R, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const immb       = (uOpcode >> 16) & 0x00000007;
         uint32_t const immh       = (uOpcode >> 19) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && ((immh & 8) == 8))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fAdvSimd /*FEAT_AdvSIMD*/ && (immh & 8) == 8)
         {
             LogFlow(("%018x/%010x: USRA_asisdshf_R Rd=%#x Rn=%#x immb=%u immh=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Rd, Rn, immb, immh));
 #ifdef IEM_INSTR_IMPL_A64__USRA_asisdshf_R
@@ -48559,7 +48557,7 @@ FNIEMOP_DEF_1(iemDecodeA64_and_z_zi, uint32_t, uOpcode)
     {
         uint32_t const Zdn        = (uOpcode >>  0) & 0x0000001f;
         uint32_t const imm13      = (uOpcode >>  5) & 0x00001fff;
-        if ((0x2 /*opc@22*/ != 3) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: and_z_zi Zdn=%#x imm13=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, imm13));
 #ifdef IEM_INSTR_IMPL_A64__and_z_zi
@@ -48916,7 +48914,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bf1cvt_z_z8_b2bf, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: bf1cvt_z_z8_b2bf Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__bf1cvt_z_z8_b2bf
@@ -48961,7 +48960,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bf1cvtlt_z_z8_b2bf, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: bf1cvtlt_z_z8_b2bf Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__bf1cvtlt_z_z8_b2bf
@@ -49006,7 +49006,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bf2cvt_z_z8_b2bf, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: bf2cvt_z_z8_b2bf Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__bf2cvt_z_z8_b2bf
@@ -49051,7 +49052,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bf2cvtlt_z_z8_b2bf, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: bf2cvtlt_z_z8_b2bf Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__bf2cvtlt_z_z8_b2bf
@@ -49166,7 +49168,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfclamp_mz_zz_2, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfclamp_mz_zz_2 Zd=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfclamp_mz_zz_2
@@ -49187,7 +49190,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfclamp_mz_zz_4, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfclamp_mz_zz_4 Zd=%u Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfclamp_mz_zz_4
@@ -49274,7 +49278,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfcvt_z_p_z_s2bf, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfcvt_z_p_z_s2bf Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__bfcvt_z_p_z_s2bf
@@ -49317,7 +49322,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfcvtn_z8_mz2_bf2b, uint32_t, uOpcode)
     {
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
-        if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+        if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
         {
             LogFlow(("%018x/%010x: bfcvtn_z8_mz2_bf2b Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__bfcvtn_z8_mz2_bf2b
@@ -49361,7 +49367,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfcvtnt_z_p_z_s2bf, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfcvtnt_z_p_z_s2bf Zd=%#x Zn=%#x Pg=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Pg));
 #ifdef IEM_INSTR_IMPL_A64__bfcvtnt_z_p_z_s2bf
@@ -49403,7 +49410,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfdot_z_zzz, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfdot_z_zzz Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfdot_z_zzz
@@ -49425,7 +49433,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfdot_z_zzzi, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i2         = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfdot_z_zzzi Zda=%#x Zn=%#x Zm=%u i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__bfdot_z_zzzi
@@ -49584,7 +49593,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmax_mz_zzv_2x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmax_mz_zzv_2x1 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmax_mz_zzv_2x1
@@ -49604,7 +49614,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmax_mz_zzv_4x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmax_mz_zzv_4x1 Zdn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmax_mz_zzv_4x1
@@ -49624,7 +49635,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmax_mz_zzw_2x2, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmax_mz_zzw_2x2 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmax_mz_zzw_2x2
@@ -49644,7 +49656,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmax_mz_zzw_4x4, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmax_mz_zzw_4x4 Zdn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmax_mz_zzw_4x4
@@ -49685,7 +49698,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmaxnm_mz_zzv_2x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmaxnm_mz_zzv_2x1 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmaxnm_mz_zzv_2x1
@@ -49705,7 +49719,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmaxnm_mz_zzv_4x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmaxnm_mz_zzv_4x1 Zdn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmaxnm_mz_zzv_4x1
@@ -49725,7 +49740,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmaxnm_mz_zzw_2x2, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmaxnm_mz_zzw_2x2 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmaxnm_mz_zzw_2x2
@@ -49745,7 +49761,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmaxnm_mz_zzw_4x4, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmaxnm_mz_zzw_4x4 Zdn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmaxnm_mz_zzw_4x4
@@ -49786,7 +49803,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmin_mz_zzv_2x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmin_mz_zzv_2x1 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmin_mz_zzv_2x1
@@ -49806,7 +49824,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmin_mz_zzv_4x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmin_mz_zzv_4x1 Zdn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmin_mz_zzv_4x1
@@ -49826,7 +49845,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmin_mz_zzw_2x2, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmin_mz_zzw_2x2 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmin_mz_zzw_2x2
@@ -49846,7 +49866,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmin_mz_zzw_4x4, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfmin_mz_zzw_4x4 Zdn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmin_mz_zzw_4x4
@@ -49887,7 +49908,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfminnm_mz_zzv_2x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfminnm_mz_zzv_2x1 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfminnm_mz_zzv_2x1
@@ -49907,7 +49929,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfminnm_mz_zzv_4x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfminnm_mz_zzv_4x1 Zdn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfminnm_mz_zzv_4x1
@@ -49927,7 +49950,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfminnm_mz_zzw_2x2, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfminnm_mz_zzw_2x2 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfminnm_mz_zzw_2x2
@@ -49947,7 +49971,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfminnm_mz_zzw_4x4, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveB16B16 /*FEAT_SVE_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfminnm_mz_zzw_4x4 Zdn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfminnm_mz_zzw_4x4
@@ -50362,7 +50387,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmlalb_z_zzz, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfmlalb_z_zzz Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmlalb_z_zzz
@@ -50385,7 +50411,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmlalb_z_zzzi, uint32_t, uOpcode)
     uint32_t const i3l        = (uOpcode >> 11) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i3h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfmlalb_z_zzzi Zda=%#x Zn=%#x i3l=%u Zm=%u i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i3l, Zm, i3h));
 #ifdef IEM_INSTR_IMPL_A64__bfmlalb_z_zzzi
@@ -50406,7 +50433,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmlalt_z_zzz, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfmlalt_z_zzz Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmlalt_z_zzz
@@ -50429,7 +50457,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmlalt_z_zzzi, uint32_t, uOpcode)
     uint32_t const i3l        = (uOpcode >> 11) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i3h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fBf16 /*FEAT_BF16*/)
     {
         LogFlow(("%018x/%010x: bfmlalt_z_zzzi Zda=%#x Zn=%#x i3l=%u Zm=%u i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i3l, Zm, i3h));
 #ifdef IEM_INSTR_IMPL_A64__bfmlalt_z_zzzi
@@ -51038,7 +51067,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4a_za_zz_h1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4a_za_zz_h1x1
@@ -51064,7 +51094,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4a_za_zz_h1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4a_za_zz_h1x2
@@ -51090,7 +51121,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4a_za_zz_h2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4a_za_zz_h2x1
@@ -51116,7 +51148,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4a_za_zz_h2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4a_za_zz_h2x2
@@ -51246,7 +51279,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4s_za_zz_h1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4s_za_zz_h1x1
@@ -51272,7 +51306,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4s_za_zz_h1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4s_za_zz_h1x2
@@ -51298,7 +51333,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4s_za_zz_h2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4s_za_zz_h2x1
@@ -51324,7 +51360,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmop4s_za_zz_h2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: bfmop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmop4s_za_zz_h2x2
@@ -51450,7 +51487,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmul_mz_zzv_2x1, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
     {
         LogFlow(("%018x/%010x: bfmul_mz_zzv_2x1 Zd=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmul_mz_zzv_2x1
@@ -51471,7 +51509,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmul_mz_zzv_4x1, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  7) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
     {
         LogFlow(("%018x/%010x: bfmul_mz_zzv_4x1 Zd=%u Zn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmul_mz_zzv_4x1
@@ -51492,7 +51531,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmul_mz_zzw_2x2, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
     {
         LogFlow(("%018x/%010x: bfmul_mz_zzw_2x2 Zd=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmul_mz_zzw_2x2
@@ -51513,7 +51553,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfmul_mz_zzw_4x4, uint32_t, uOpcode)
     uint32_t const Zd         = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  7) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/)
     {
         LogFlow(("%018x/%010x: bfmul_mz_zzw_4x4 Zd=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfmul_mz_zzw_4x4
@@ -51598,7 +51639,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfscale_mz_zzv_2x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfscale_mz_zzv_2x1 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfscale_mz_zzv_2x1
@@ -51618,7 +51660,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfscale_mz_zzv_4x1, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfscale_mz_zzv_4x1 Zdn=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfscale_mz_zzv_4x1
@@ -51638,7 +51681,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfscale_mz_zzw_2x2, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfscale_mz_zzw_2x2 Zdn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfscale_mz_zzw_2x2
@@ -51658,7 +51702,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bfscale_mz_zzw_4x4, uint32_t, uOpcode)
 {
     uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSveBfscale /*FEAT_SVE_BFSCALE*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
     {
         LogFlow(("%018x/%010x: bfscale_mz_zzw_4x4 Zdn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bfscale_mz_zzw_4x4
@@ -51821,7 +51866,8 @@ FNIEMOP_DEF_1(iemDecodeA64_bftmopa_za_zzzi_h2x1, uint32_t, uOpcode)
     uint32_t const Zk         = (uOpcode >> 10) & 0x00000003;
     uint32_t const K          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeB16B16 /*FEAT_SME_B16B16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
     {
         LogFlow(("%018x/%010x: bftmopa_za_zzzi_h2x1 ZAda=%u i2=%u Zn=%#x Zk=%u K=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, i2, Zn, Zk, K, Zm));
 #ifdef IEM_INSTR_IMPL_A64__bftmopa_za_zzzi_h2x1
@@ -54106,7 +54152,7 @@ FNIEMOP_DEF_1(iemDecodeA64_eor_z_zi, uint32_t, uOpcode)
     {
         uint32_t const Zdn        = (uOpcode >>  0) & 0x0000001f;
         uint32_t const imm13      = (uOpcode >>  5) & 0x00001fff;
-        if ((0x1 /*opc@22*/ != 3) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: eor_z_zi Zdn=%#x imm13=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, imm13));
 #ifdef IEM_INSTR_IMPL_A64__eor_z_zi
@@ -54377,7 +54423,8 @@ FNIEMOP_DEF_1(iemDecodeA64_f1cvt_z_z8_b2h, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: f1cvt_z_z8_b2h Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__f1cvt_z_z8_b2h
@@ -54422,7 +54469,8 @@ FNIEMOP_DEF_1(iemDecodeA64_f1cvtlt_z_z8_b2h, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: f1cvtlt_z_z8_b2h Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__f1cvtlt_z_z8_b2h
@@ -54467,7 +54515,8 @@ FNIEMOP_DEF_1(iemDecodeA64_f2cvt_z_z8_b2h, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: f2cvt_z_z8_b2h Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__f2cvt_z_z8_b2h
@@ -54512,7 +54561,8 @@ FNIEMOP_DEF_1(iemDecodeA64_f2cvtlt_z_z8_b2h, uint32_t, uOpcode)
 {
     uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
     {
         LogFlow(("%018x/%010x: f2cvtlt_z_z8_b2h Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__f2cvtlt_z_z8_b2h
@@ -54678,7 +54728,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fadd_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fadd_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fadd_z_p_zz
@@ -54700,7 +54751,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fadd_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fadd_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fadd_z_zz
@@ -54750,7 +54802,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fadd_za_zw_2x2_16, uint32_t, uOpcode)
         uint32_t const off3       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zm         = (uOpcode >>  6) & 0x0000000f;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
         {
             LogFlow(("%018x/%010x: fadd_za_zw_2x2_16 off3=%u Zm=%#x Rv=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zm, Rv));
 #ifdef IEM_INSTR_IMPL_A64__fadd_za_zw_2x2_16
@@ -54803,7 +54856,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fadd_za_zw_4x4_16, uint32_t, uOpcode)
         uint32_t const off3       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zm         = (uOpcode >>  7) & 0x00000007;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
         {
             LogFlow(("%018x/%010x: fadd_za_zw_4x4_16 off3=%u Zm=%u Rv=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zm, Rv));
 #ifdef IEM_INSTR_IMPL_A64__fadd_za_zw_4x4_16
@@ -54973,7 +55027,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famax_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
     {
         LogFlow(("%018x/%010x: famax_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__famax_z_p_zz
@@ -55047,7 +55102,8 @@ FNIEMOP_DEF_1(iemDecodeA64_famin_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFaMinMax /*FEAT_FAMINMAX*/)
     {
         LogFlow(("%018x/%010x: famin_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__famin_z_p_zz
@@ -55094,7 +55150,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fclamp_mz_zz_2, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fclamp_mz_zz_2 Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fclamp_mz_zz_2
@@ -55121,7 +55177,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fclamp_mz_zz_4, uint32_t, uOpcode)
         uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fclamp_mz_zz_4 Zd=%u Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fclamp_mz_zz_4
@@ -55146,7 +55202,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fclamp_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fclamp_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fclamp_z_zz
@@ -55993,7 +56050,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtn_z8_mz2_h2b, uint32_t, uOpcode)
     {
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
-        if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+        if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
         {
             LogFlow(("%018x/%010x: fcvtn_z8_mz2_h2b Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__fcvtn_z8_mz2_h2b
@@ -56068,7 +56126,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtnb_z8_mz2_s2b, uint32_t, uOpcode)
     {
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
-        if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+        if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
         {
             LogFlow(("%018x/%010x: fcvtnb_z8_mz2_s2b Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__fcvtnb_z8_mz2_s2b
@@ -56093,7 +56152,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fcvtnt_z8_mz2_s2b, uint32_t, uOpcode)
     {
         uint32_t const Zd         = (uOpcode >>  0) & 0x0000001f;
         uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
-        if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
+        if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/)
         {
             LogFlow(("%018x/%010x: fcvtnt_z8_mz2_s2b Zd=%#x Zn=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn));
 #ifdef IEM_INSTR_IMPL_A64__fcvtnt_z8_mz2_s2b
@@ -57052,7 +57112,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fdot_z32_zz8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot4 /*FEAT_FP8DOT4*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot4 /*FEAT_SSVE_FP8DOT4*/)
+    if (   (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot4 /*FEAT_FP8DOT4*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot4 /*FEAT_SSVE_FP8DOT4*/)
     {
         LogFlow(("%018x/%010x: fdot_z32_zz8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fdot_z32_zz8z8
@@ -57074,7 +57136,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fdot_z32_zz8z8i, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i2         = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot4 /*FEAT_FP8DOT4*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot4 /*FEAT_SSVE_FP8DOT4*/)
+    if (   (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot4 /*FEAT_FP8DOT4*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot4 /*FEAT_SSVE_FP8DOT4*/)
     {
         LogFlow(("%018x/%010x: fdot_z32_zz8z8i Zda=%#x Zn=%#x Zm=%u i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__fdot_z32_zz8z8i
@@ -57095,7 +57159,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fdot_z_zz8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot2 /*FEAT_FP8DOT2*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot2 /*FEAT_SSVE_FP8DOT2*/)
+    if (   (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot2 /*FEAT_FP8DOT2*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot2 /*FEAT_SSVE_FP8DOT2*/)
     {
         LogFlow(("%018x/%010x: fdot_z_zz8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fdot_z_zz8z8
@@ -57118,7 +57184,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fdot_z_zz8z8i, uint32_t, uOpcode)
     uint32_t const i3l        = (uOpcode >> 11) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i3h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot2 /*FEAT_FP8DOT2*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot2 /*FEAT_SSVE_FP8DOT2*/)
+    if (   (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Dot2 /*FEAT_FP8DOT2*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Dot2 /*FEAT_SSVE_FP8DOT2*/)
     {
         LogFlow(("%018x/%010x: fdot_z_zz8z8i Zda=%#x Zn=%#x i3l=%u Zm=%u i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i3l, Zm, i3h));
 #ifdef IEM_INSTR_IMPL_A64__fdot_z_zz8z8i
@@ -57749,7 +57817,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmax_mz_zzv_2x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmax_mz_zzv_2x1 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmax_mz_zzv_2x1
@@ -57775,7 +57843,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmax_mz_zzv_4x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmax_mz_zzv_4x1 Zdn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmax_mz_zzv_4x1
@@ -57801,7 +57869,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmax_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmax_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmax_mz_zzw_2x2
@@ -57827,7 +57895,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmax_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmax_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmax_mz_zzw_4x4
@@ -57879,7 +57947,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmax_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmax_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fmax_z_p_zz
@@ -57902,7 +57971,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmaxnm_mz_zzv_2x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmaxnm_mz_zzv_2x1 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmaxnm_mz_zzv_2x1
@@ -57928,7 +57997,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmaxnm_mz_zzv_4x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmaxnm_mz_zzv_4x1 Zdn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmaxnm_mz_zzv_4x1
@@ -57954,7 +58023,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmaxnm_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmaxnm_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmaxnm_mz_zzw_2x2
@@ -57980,7 +58049,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmaxnm_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmaxnm_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmaxnm_mz_zzw_4x4
@@ -58032,7 +58101,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmaxnm_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmaxnm_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fmaxnm_z_p_zz
@@ -58202,7 +58272,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmin_mz_zzv_2x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmin_mz_zzv_2x1 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmin_mz_zzv_2x1
@@ -58228,7 +58298,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmin_mz_zzv_4x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmin_mz_zzv_4x1 Zdn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmin_mz_zzv_4x1
@@ -58254,7 +58324,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmin_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmin_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmin_mz_zzw_2x2
@@ -58280,7 +58350,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmin_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fmin_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmin_mz_zzw_4x4
@@ -58332,7 +58402,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmin_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmin_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fmin_z_p_zz
@@ -58355,7 +58426,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnm_mz_zzv_2x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fminnm_mz_zzv_2x1 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnm_mz_zzv_2x1
@@ -58381,7 +58452,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnm_mz_zzv_4x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fminnm_mz_zzv_4x1 Zdn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnm_mz_zzv_4x1
@@ -58407,7 +58478,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnm_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fminnm_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnm_mz_zzw_2x2
@@ -58433,7 +58504,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnm_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if ((size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (size != 0 && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fminnm_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnm_mz_zzw_4x4
@@ -58485,7 +58556,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fminnm_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fminnm_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fminnm_z_p_zz
@@ -58660,7 +58732,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmla_z_p_zzz, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmla_z_p_zzz Zda=%#x Zn=%#x Pg=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Pg, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmla_z_p_zzz
@@ -58750,7 +58823,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmla_za_zzi_d2xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmla_za_zzi_d2xi off3=%u Zn=%#x i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmla_za_zzi_d2xi
@@ -58773,7 +58847,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmla_za_zzi_d4xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmla_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmla_za_zzi_d4xi
@@ -59463,7 +59538,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalb_z_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalb_z_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlalb_z_z8z8z8
@@ -59486,7 +59562,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalb_z_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalb_z_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlalb_z_z8z8z8i
@@ -59753,7 +59830,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlallbb_z32_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlallbb_z32_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlallbb_z32_z8z8z8
@@ -59776,7 +59854,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlallbb_z32_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlallbb_z32_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlallbb_z32_z8z8z8i
@@ -59797,7 +59876,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlallbt_z32_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlallbt_z32_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlallbt_z32_z8z8z8
@@ -59820,7 +59900,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlallbt_z32_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlallbt_z32_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlallbt_z32_z8z8z8i
@@ -59841,7 +59922,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalltb_z32_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalltb_z32_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlalltb_z32_z8z8z8
@@ -59864,7 +59946,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalltb_z32_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalltb_z32_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlalltb_z32_z8z8z8i
@@ -59885,7 +59968,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalltt_z32_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalltt_z32_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlalltt_z32_z8z8z8
@@ -59908,7 +59992,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalltt_z32_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalltt_z32_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlalltt_z32_z8z8z8i
@@ -59929,7 +60014,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalt_z_z8z8z8, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalt_z_z8z8z8 Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmlalt_z_z8z8z8
@@ -59952,7 +60038,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmlalt_z_z8z8z8i, uint32_t, uOpcode)
     uint32_t const i4l        = (uOpcode >> 10) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i4h        = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/) || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8Fma /*FEAT_FP8FMA*/)
+        || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSsveFp8Fma /*FEAT_SSVE_FP8FMA*/)
     {
         LogFlow(("%018x/%010x: fmlalt_z_z8z8z8i Zda=%#x Zn=%#x i4l=%u Zm=%u i4h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, i4l, Zm, i4h));
 #ifdef IEM_INSTR_IMPL_A64__fmlalt_z_z8z8z8i
@@ -60019,7 +60106,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmls_z_p_zzz, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmls_z_p_zzz Zda=%#x Zn=%#x Pg=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Pg, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmls_z_p_zzz
@@ -60111,7 +60199,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmls_za_zzi_d2xi, uint32_t, uOpcode)
         uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
         {
             LogFlow(("%018x/%010x: fmls_za_zzi_d2xi off3=%u Zn=%#x i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmls_za_zzi_d2xi
@@ -60137,7 +60226,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmls_za_zzi_d4xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmls_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmls_za_zzi_d4xi
@@ -60834,7 +60924,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za16_z8z8_b1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za16_z8z8_b1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za16_z8z8_b1x1
@@ -60860,7 +60951,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za16_z8z8_b1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za16_z8z8_b1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za16_z8z8_b1x2
@@ -60886,7 +60978,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za16_z8z8_b2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za16_z8z8_b2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za16_z8z8_b2x1
@@ -60912,7 +61005,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za16_z8z8_b2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za16_z8z8_b2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za16_z8z8_b2x2
@@ -60938,7 +61032,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za32_z8z8_b1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000003;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za32_z8z8_b1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za32_z8z8_b1x1
@@ -60964,7 +61059,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za32_z8z8_b1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000003;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za32_z8z8_b1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za32_z8z8_b1x2
@@ -60990,7 +61086,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za32_z8z8_b2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000003;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za32_z8z8_b2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za32_z8z8_b2x1
@@ -61016,7 +61113,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za32_z8z8_b2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000003;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za32_z8z8_b2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za32_z8z8_b2x2
@@ -61146,7 +61244,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_d1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_d1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_d1x1
@@ -61172,7 +61271,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_d1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_d1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_d1x2
@@ -61198,7 +61298,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_d2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_d2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_d2x1
@@ -61224,7 +61325,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_d2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_d2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_d2x2
@@ -61250,7 +61352,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_h1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_h1x1
@@ -61276,7 +61379,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_h1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_h1x2
@@ -61302,7 +61406,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_h2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_h2x1
@@ -61328,7 +61433,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4a_za_zz_h2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4a_za_zz_h2x2
@@ -61560,7 +61666,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_d1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmop4s_za_zz_d1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_d1x1
@@ -61581,7 +61688,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_d1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmop4s_za_zz_d1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_d1x2
@@ -61602,7 +61710,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_d2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmop4s_za_zz_d2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_d2x1
@@ -61623,7 +61732,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_d2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF64F64 /*FEAT_SME_F64F64*/)
     {
         LogFlow(("%018x/%010x: fmop4s_za_zz_d2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_d2x2
@@ -61646,7 +61756,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_h1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_h1x1
@@ -61672,7 +61783,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_h1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_h1x2
@@ -61698,7 +61810,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_h2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_h2x1
@@ -61724,7 +61837,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmop4s_za_zz_h2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000001;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/)
         {
             LogFlow(("%018x/%010x: fmop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__fmop4s_za_zz_h2x2
@@ -62106,7 +62220,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_mz_zzv_2x1, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && (size != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_mz_zzv_2x1 Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_mz_zzv_2x1
@@ -62128,7 +62242,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_mz_zzv_4x1, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  7) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && (size != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_mz_zzv_4x1 Zd=%u Zn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_mz_zzv_4x1
@@ -62150,7 +62264,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_mz_zzw_2x2, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
     uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && (size != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_mz_zzw_2x2 Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_mz_zzw_2x2
@@ -62172,7 +62286,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_mz_zzw_4x4, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  7) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && (size != 0))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p2 /*FEAT_SME2p2*/ && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_mz_zzw_4x4 Zd=%u Zn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_mz_zzw_4x4
@@ -62221,7 +62335,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_z_p_zz
@@ -62243,7 +62358,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fmul_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fmul_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fmul_z_zz
@@ -62422,7 +62538,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fnmla_z_p_zzz, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fnmla_z_p_zzz Zda=%#x Zn=%#x Pg=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Pg, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fnmla_z_p_zzz
@@ -62445,7 +62562,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fnmls_z_p_zzz, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fnmls_z_p_zzz Zda=%#x Zn=%#x Pg=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Pg, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fnmls_z_p_zzz
@@ -63350,7 +63468,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fscale_mz_zzv_2x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && (size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/
+            && size != 0
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fscale_mz_zzv_2x1 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fscale_mz_zzv_2x1
@@ -63376,7 +63496,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fscale_mz_zzv_4x1, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && (size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/
+            && size != 0
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fscale_mz_zzv_4x1 Zdn=%u Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fscale_mz_zzv_4x1
@@ -63402,7 +63524,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fscale_mz_zzw_2x2, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  1) & 0x0000000f;
         uint32_t const Zm         = (uOpcode >> 17) & 0x0000000f;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && (size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/
+            && size != 0
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fscale_mz_zzw_2x2 Zdn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fscale_mz_zzw_2x2
@@ -63428,7 +63552,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fscale_mz_zzw_4x4, uint32_t, uOpcode)
         uint32_t const Zdn        = (uOpcode >>  2) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 18) & 0x00000007;
         uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/ && (size != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fFp8 /*FEAT_FP8*/
+            && size != 0
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
         {
             LogFlow(("%018x/%010x: fscale_mz_zzw_4x4 Zdn=%u Zm=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fscale_mz_zzw_4x4
@@ -63453,7 +63579,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fscale_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fscale_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fscale_z_p_zz
@@ -63546,7 +63673,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fsub_z_p_zz, uint32_t, uOpcode)
     uint32_t const Zm         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fsub_z_p_zz Zdn=%#x Zm=%#x Pg=%u size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, Zm, Pg, size));
 #ifdef IEM_INSTR_IMPL_A64__fsub_z_p_zz
@@ -63568,7 +63696,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fsub_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: fsub_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__fsub_z_zz
@@ -63618,7 +63747,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fsub_za_zw_2x2_16, uint32_t, uOpcode)
         uint32_t const off3       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zm         = (uOpcode >>  6) & 0x0000000f;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
         {
             LogFlow(("%018x/%010x: fsub_za_zw_2x2_16 off3=%u Zm=%#x Rv=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zm, Rv));
 #ifdef IEM_INSTR_IMPL_A64__fsub_za_zw_2x2_16
@@ -63671,7 +63801,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fsub_za_zw_4x4_16, uint32_t, uOpcode)
         uint32_t const off3       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zm         = (uOpcode >>  7) & 0x00000007;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/)
         {
             LogFlow(("%018x/%010x: fsub_za_zw_4x4_16 off3=%u Zm=%u Rv=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zm, Rv));
 #ifdef IEM_INSTR_IMPL_A64__fsub_za_zw_4x4_16
@@ -63769,7 +63900,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ftmopa_za16_z8z8zi_b2x1, uint32_t, uOpcode)
     uint32_t const Zk         = (uOpcode >> 10) & 0x00000003;
     uint32_t const K          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F16 /*FEAT_SME_F8F16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
     {
         LogFlow(("%018x/%010x: ftmopa_za16_z8z8zi_b2x1 ZAda=%u i2=%u Zn=%#x Zk=%u K=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, i2, Zn, Zk, K, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ftmopa_za16_z8z8zi_b2x1
@@ -63793,7 +63925,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ftmopa_za32_z8z8zi_b2x1, uint32_t, uOpcode)
     uint32_t const Zk         = (uOpcode >> 10) & 0x00000003;
     uint32_t const K          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF8F32 /*FEAT_SME_F8F32*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
     {
         LogFlow(("%018x/%010x: ftmopa_za32_z8z8zi_b2x1 ZAda=%u i2=%u Zn=%#x Zk=%u K=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, i2, Zn, Zk, K, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ftmopa_za32_z8z8zi_b2x1
@@ -63841,7 +63974,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ftmopa_za_zzzi_h2x1, uint32_t, uOpcode)
     uint32_t const Zk         = (uOpcode >> 10) & 0x00000003;
     uint32_t const K          = (uOpcode >> 12) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeF16F16 /*FEAT_SME_F16F16*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeTmop /*FEAT_SME_TMOP*/)
     {
         LogFlow(("%018x/%010x: ftmopa_za_zzzi_h2x1 ZAda=%u i2=%u Zn=%#x Zk=%u K=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, i2, Zn, Zk, K, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ftmopa_za_zzzi_h2x1
@@ -64827,7 +64961,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1b_z_p_br_u16, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1b_z_p_br_u16 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1b_z_p_br_u16
@@ -64849,7 +64984,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1b_z_p_br_u32, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1b_z_p_br_u32 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1b_z_p_br_u32
@@ -64871,7 +65007,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1b_z_p_br_u64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1b_z_p_br_u64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1b_z_p_br_u64
@@ -64893,7 +65030,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1b_z_p_br_u8, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1b_z_p_br_u8 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1b_z_p_br_u8
@@ -64961,7 +65099,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1b_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x0 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1b_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1b_z_p_bz_s_x32_unscaled
@@ -65258,7 +65396,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1d_z_p_br_u128, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/)
     {
         LogFlow(("%018x/%010x: ld1d_z_p_br_u128 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1d_z_p_br_u128
@@ -65280,7 +65418,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1d_z_p_br_u64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1d_z_p_br_u64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1d_z_p_br_u64
@@ -65302,7 +65441,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1d_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x3 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1d_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ld1d_z_p_bz_d_64_scaled
@@ -65347,7 +65486,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1d_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x3 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1d_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1d_z_p_bz_d_x32_scaled
@@ -65712,7 +65851,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_br_u16, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1h_z_p_br_u16 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_br_u16
@@ -65734,7 +65874,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_br_u32, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1h_z_p_br_u32 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_br_u32
@@ -65756,7 +65897,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_br_u64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1h_z_p_br_u64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_br_u64
@@ -65778,7 +65920,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1h_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_bz_d_64_scaled
@@ -65823,7 +65965,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1h_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_bz_d_x32_scaled
@@ -65892,7 +66034,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1h_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1h_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1h_z_p_bz_s_x32_unscaled
@@ -66198,7 +66340,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rob_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
     {
         LogFlow(("%018x/%010x: ld1rob_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rob_z_p_br_contiguous
@@ -66247,7 +66389,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rod_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
     {
         LogFlow(("%018x/%010x: ld1rod_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rod_z_p_br_contiguous
@@ -66296,7 +66438,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1roh_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
     {
         LogFlow(("%018x/%010x: ld1roh_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1roh_z_p_br_contiguous
@@ -66345,7 +66487,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1row_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fF64mm /*FEAT_F64MM*/)
     {
         LogFlow(("%018x/%010x: ld1row_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1row_z_p_br_contiguous
@@ -66394,7 +66536,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rqb_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1rqb_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rqb_z_p_br_contiguous
@@ -66438,7 +66581,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rqd_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1rqd_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rqd_z_p_br_contiguous
@@ -66487,7 +66631,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rqh_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1rqh_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rqh_z_p_br_contiguous
@@ -66531,7 +66676,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1rqw_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1rqw_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1rqw_z_p_br_contiguous
@@ -66839,7 +66985,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sb_z_p_br_s16, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sb_z_p_br_s16 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sb_z_p_br_s16
@@ -66861,7 +67008,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sb_z_p_br_s32, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sb_z_p_br_s32 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sb_z_p_br_s32
@@ -66883,7 +67031,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sb_z_p_br_s64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sb_z_p_br_s64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sb_z_p_br_s64
@@ -66951,7 +67100,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sb_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x0 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1sb_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1sb_z_p_bz_s_x32_unscaled
@@ -67061,7 +67210,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sh_z_p_br_s32, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sh_z_p_br_s32 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sh_z_p_br_s32
@@ -67083,7 +67233,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sh_z_p_br_s64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sh_z_p_br_s64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sh_z_p_br_s64
@@ -67105,7 +67256,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sh_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1sh_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sh_z_p_bz_d_64_scaled
@@ -67150,7 +67301,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sh_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1sh_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1sh_z_p_bz_d_x32_scaled
@@ -67226,7 +67377,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sh_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
         uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-        if ((0x1 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
         {
             LogFlow(("%018x/%010x: ld1sh_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1sh_z_p_bz_s_x32_unscaled
@@ -67295,7 +67446,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sw_z_p_br_s64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1sw_z_p_br_s64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sw_z_p_br_s64
@@ -67317,7 +67469,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sw_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1sw_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ld1sw_z_p_bz_d_64_scaled
@@ -67362,7 +67514,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1sw_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1sw_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1sw_z_p_bz_d_x32_scaled
@@ -67697,7 +67849,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_br_u128, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/)
+    if (Rm != 0x1f && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/)
     {
         LogFlow(("%018x/%010x: ld1w_z_p_br_u128 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_br_u128
@@ -67719,7 +67871,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_br_u32, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1w_z_p_br_u32 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_br_u32
@@ -67741,7 +67894,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_br_u64, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld1w_z_p_br_u64 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_br_u64
@@ -67763,7 +67917,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1w_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_bz_d_64_scaled
@@ -67808,7 +67962,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1w_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_bz_d_x32_scaled
@@ -67877,7 +68031,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld1w_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ld1w_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ld1w_z_p_bz_s_x32_unscaled
@@ -67931,7 +68085,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2b_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld2b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld2b_z_p_bi_contiguous
@@ -67956,7 +68110,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld2b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld2b_z_p_br_contiguous
@@ -67980,7 +68135,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2d_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld2d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld2d_z_p_bi_contiguous
@@ -68005,7 +68160,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld2d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld2d_z_p_br_contiguous
@@ -68029,7 +68185,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2h_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld2h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld2h_z_p_bi_contiguous
@@ -68054,7 +68210,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld2h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld2h_z_p_br_contiguous
@@ -68098,7 +68255,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: ld2q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld2q_z_p_br_contiguous
@@ -68122,7 +68281,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2w_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld2w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld2w_z_p_bi_contiguous
@@ -68147,7 +68306,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld2w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld2w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld2w_z_p_br_contiguous
@@ -68171,7 +68331,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3b_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld3b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld3b_z_p_bi_contiguous
@@ -68196,7 +68356,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld3b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld3b_z_p_br_contiguous
@@ -68220,7 +68381,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3d_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld3d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld3d_z_p_bi_contiguous
@@ -68245,7 +68406,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld3d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld3d_z_p_br_contiguous
@@ -68269,7 +68431,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3h_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld3h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld3h_z_p_bi_contiguous
@@ -68294,7 +68456,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld3h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld3h_z_p_br_contiguous
@@ -68338,7 +68501,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: ld3q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld3q_z_p_br_contiguous
@@ -68362,7 +68527,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3w_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld3w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld3w_z_p_bi_contiguous
@@ -68387,7 +68552,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld3w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld3w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld3w_z_p_br_contiguous
@@ -68411,7 +68577,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4b_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld4b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld4b_z_p_bi_contiguous
@@ -68436,7 +68602,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld4b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld4b_z_p_br_contiguous
@@ -68460,7 +68627,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4d_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld4d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld4d_z_p_bi_contiguous
@@ -68485,7 +68652,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld4d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld4d_z_p_br_contiguous
@@ -68509,7 +68677,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4h_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld4h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld4h_z_p_bi_contiguous
@@ -68534,7 +68702,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld4h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld4h_z_p_br_contiguous
@@ -68578,7 +68747,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: ld4q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld4q_z_p_br_contiguous
@@ -68602,7 +68773,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4w_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: ld4w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__ld4w_z_p_bi_contiguous
@@ -68627,7 +68798,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ld4w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ld4w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ld4w_z_p_br_contiguous
@@ -68827,7 +68999,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1b_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x0 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1b_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1b_z_p_bz_s_x32_unscaled
@@ -68893,7 +69065,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1d_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x3 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1d_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ldff1d_z_p_bz_d_64_scaled
@@ -68938,7 +69110,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1d_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x3 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1d_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1d_z_p_bz_d_x32_scaled
@@ -69093,7 +69265,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1h_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1h_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ldff1h_z_p_bz_d_64_scaled
@@ -69138,7 +69310,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1h_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1h_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1h_z_p_bz_d_x32_scaled
@@ -69207,7 +69379,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1h_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1h_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1h_z_p_bz_s_x32_unscaled
@@ -69385,7 +69557,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sb_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x0 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sb_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sb_z_p_bz_s_x32_unscaled
@@ -69495,7 +69667,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sh_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sh_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sh_z_p_bz_d_64_scaled
@@ -69540,7 +69712,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sh_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sh_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sh_z_p_bz_d_x32_scaled
@@ -69609,7 +69781,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sh_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x1 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sh_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sh_z_p_bz_s_x32_unscaled
@@ -69675,7 +69847,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sw_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sw_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sw_z_p_bz_d_64_scaled
@@ -69720,7 +69892,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1sw_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1sw_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1sw_z_p_bz_d_x32_scaled
@@ -69853,7 +70025,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1w_z_p_bz_d_64_scaled, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1w_z_p_bz_d_64_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm));
 #ifdef IEM_INSTR_IMPL_A64__ldff1w_z_p_bz_d_64_scaled
@@ -69898,7 +70070,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1w_z_p_bz_d_x32_scaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 0) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1w_z_p_bz_d_x32_scaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1w_z_p_bz_d_x32_scaled
@@ -69967,7 +70139,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ldff1w_z_p_bz_s_x32_unscaled, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const xs         = (uOpcode >> 22) & 0x00000001;
-    if ((0x2 /*opc@23*/ != 3) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/)
     {
         LogFlow(("%018x/%010x: ldff1w_z_p_bz_s_x32_unscaled Zt=%#x Rn=%#x Pg=%u Zm=%#x xs=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Zm, xs));
 #ifdef IEM_INSTR_IMPL_A64__ldff1w_z_p_bz_s_x32_unscaled
@@ -70592,7 +70764,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ldnt1b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ldnt1b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ldnt1b_z_p_br_contiguous
@@ -70838,7 +71011,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ldnt1d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ldnt1d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ldnt1d_z_p_br_contiguous
@@ -71111,7 +71285,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ldnt1h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ldnt1h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ldnt1h_z_p_br_contiguous
@@ -71494,7 +71669,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ldnt1w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: ldnt1w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__ldnt1w_z_p_br_contiguous
@@ -72021,7 +72197,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti2_z_zz_16, uint32_t, uOpcode)
     uint32_t const i3l        = (uOpcode >> 12) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const i3h        = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
     {
         LogFlow(("%018x/%010x: luti2_z_zz_16 Zd=%#x Zn=%#x i3l=%u Zm=%#x i3h=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, i3l, Zm, i3h));
 #ifdef IEM_INSTR_IMPL_A64__luti2_z_zz_16
@@ -72043,7 +72220,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti2_z_zz_8, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const i2         = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
     {
         LogFlow(("%018x/%010x: luti2_z_zz_8 Zd=%#x Zn=%#x Zm=%#x i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__luti2_z_zz_8
@@ -72146,7 +72324,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti4_mz4_ztmz2_4, uint32_t, uOpcode)
     uint32_t const D          = (uOpcode >>  4) & 0x00000001;
     uint32_t const Zn         = (uOpcode >>  6) & 0x0000000f;
     uint32_t const size       = (uOpcode >> 12) & 0x00000003;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeLutv2 /*FEAT_SME_LUTv2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeLutv2 /*FEAT_SME_LUTv2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/)
     {
         LogFlow(("%018x/%010x: luti4_mz4_ztmz2_4 Zd=%u D=%u Zn=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, D, Zn, size));
 #ifdef IEM_INSTR_IMPL_A64__luti4_mz4_ztmz2_4
@@ -72250,7 +72429,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti4_z_zz_1x16, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const i2         = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
     {
         LogFlow(("%018x/%010x: luti4_z_zz_1x16 Zd=%#x Zn=%#x Zm=%#x i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__luti4_z_zz_1x16
@@ -72272,7 +72452,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti4_z_zz_2x16, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const i2         = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
     {
         LogFlow(("%018x/%010x: luti4_z_zz_2x16 Zd=%#x Zn=%#x Zm=%#x i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__luti4_z_zz_2x16
@@ -72294,7 +72475,8 @@ FNIEMOP_DEF_1(iemDecodeA64_luti4_z_zz_8, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const i1         = (uOpcode >> 23) & 0x00000001;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fLut /*FEAT_LUT*/)
     {
         LogFlow(("%018x/%010x: luti4_z_zz_8 Zd=%#x Zn=%#x Zm=%#x i1=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, i1));
 #ifdef IEM_INSTR_IMPL_A64__luti4_z_zz_8
@@ -74274,7 +74456,7 @@ FNIEMOP_DEF_1(iemDecodeA64_orr_z_zi, uint32_t, uOpcode)
     {
         uint32_t const Zdn        = (uOpcode >>  0) & 0x0000001f;
         uint32_t const imm13      = (uOpcode >>  5) & 0x00001fff;
-        if ((0x0 /*opc@22*/ != 3) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: orr_z_zi Zdn=%#x imm13=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zdn, imm13));
 #ifdef IEM_INSTR_IMPL_A64__orr_z_zi
@@ -74728,7 +74910,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmullb_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: pmullb_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__pmullb_z_zz
@@ -74771,7 +74954,8 @@ FNIEMOP_DEF_1(iemDecodeA64_pmullt_z_zz, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 22) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (size != 0))
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2 /*FEAT_SVE2*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && size != 0)
     {
         LogFlow(("%018x/%010x: pmullt_z_zz Zd=%#x Zn=%#x Zm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zd, Zn, Zm, size));
 #ifdef IEM_INSTR_IMPL_A64__pmullt_z_zz
@@ -74923,7 +75107,8 @@ FNIEMOP_DEF_1(iemDecodeA64_prfb_i_p_br_s, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (   Rm != 0x1f
+            && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
         {
             LogFlow(("%018x/%010x: prfb_i_p_br_s prfop=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, prfop, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__prfb_i_p_br_s
@@ -75114,7 +75299,8 @@ FNIEMOP_DEF_1(iemDecodeA64_prfd_i_p_br_s, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (   Rm != 0x1f
+            && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
         {
             LogFlow(("%018x/%010x: prfd_i_p_br_s prfop=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, prfop, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__prfd_i_p_br_s
@@ -75305,7 +75491,8 @@ FNIEMOP_DEF_1(iemDecodeA64_prfh_i_p_br_s, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (   Rm != 0x1f
+            && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
         {
             LogFlow(("%018x/%010x: prfh_i_p_br_s prfop=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, prfop, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__prfh_i_p_br_s
@@ -75496,7 +75683,8 @@ FNIEMOP_DEF_1(iemDecodeA64_prfw_i_p_br_s, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-        if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (   Rm != 0x1f
+            && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
         {
             LogFlow(("%018x/%010x: prfw_i_p_br_s prfop=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, prfop, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__prfw_i_p_br_s
@@ -77378,7 +77566,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sdot_za_zzi_d2xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sdot_za_zzi_d2xi off3=%u Zn=%#x i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sdot_za_zzi_d2xi
@@ -77401,7 +77590,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sdot_za_zzi_d4xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sdot_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sdot_za_zzi_d4xi
@@ -78564,7 +78754,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlall_za_zzi_d, uint32_t, uOpcode)
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const i3h        = (uOpcode >> 15) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smlall_za_zzi_d off2=%u Zn=%#x i3l=%u Rv=%u i3h=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off2, Zn, i3l, Rv, i3h, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlall_za_zzi_d
@@ -78588,7 +78779,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlall_za_zzi_d2xi, uint32_t, uOpcode)
     uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smlall_za_zzi_d2xi o1=%u i3l=%u Zn=%#x i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlall_za_zzi_d2xi
@@ -78614,7 +78806,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlall_za_zzi_d4xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smlall_za_zzi_d4xi o1=%u i3l=%u Zn=%u i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlall_za_zzi_d4xi
@@ -79191,7 +79384,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlsll_za_zzi_d, uint32_t, uOpcode)
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const i3h        = (uOpcode >> 15) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smlsll_za_zzi_d off2=%u Zn=%#x i3l=%u Rv=%u i3h=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off2, Zn, i3l, Rv, i3h, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlsll_za_zzi_d
@@ -79217,7 +79411,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlsll_za_zzi_d2xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smlsll_za_zzi_d2xi o1=%u i3l=%u Zn=%#x i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlsll_za_zzi_d2xi
@@ -79246,7 +79441,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smlsll_za_zzi_d4xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smlsll_za_zzi_d4xi o1=%u i3l=%u Zn=%u i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smlsll_za_zzi_d4xi
@@ -79756,7 +79952,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4a_za_zz_h1x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4a_za_zz_h1x1
@@ -79782,7 +79979,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4a_za_zz_h1x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4a_za_zz_h1x2
@@ -79808,7 +80006,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4a_za_zz_h2x1, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4a_za_zz_h2x1
@@ -79834,7 +80033,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4a_za_zz_h2x2, uint32_t, uOpcode)
         uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
         uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
         uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: smop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4a_za_zz_h2x2
@@ -80026,7 +80226,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4s_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4s_za_zz_h1x1
@@ -80047,7 +80248,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4s_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4s_za_zz_h1x2
@@ -80068,7 +80270,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4s_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4s_za_zz_h2x1
@@ -80089,7 +80292,8 @@ FNIEMOP_DEF_1(iemDecodeA64_smop4s_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: smop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__smop4s_za_zz_h2x2
@@ -83806,7 +84010,9 @@ FNIEMOP_DEF_1(iemDecodeA64_st1b_z_p_br, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 21) & 0x00000003;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (((uOpcode >> 22) & 0x7) != 6))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && (((uOpcode & UINT32_C(0x1c00000)/*opc*/)) >> 22) != 6)
     {
         LogFlow(("%018x/%010x: st1b_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm, size));
 #ifdef IEM_INSTR_IMPL_A64__st1b_z_p_br
@@ -84171,7 +84377,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st1d_z_p_br, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (0x7 /*opc@22*/ != 6))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st1d_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st1d_z_p_br
@@ -84193,7 +84400,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st1d_z_p_br_u128, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ && (Rm != 0x1f) && (0x7 /*opc@22*/ != 6))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: st1d_z_p_br_u128 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st1d_z_p_br_u128
@@ -84583,7 +84790,9 @@ FNIEMOP_DEF_1(iemDecodeA64_st1h_z_p_br, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const size       = (uOpcode >> 21) & 0x00000003;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (((uOpcode >> 22) & 0x7) != 6))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && (((uOpcode & UINT32_C(0x1c00000)/*opc*/)) >> 22) != 6)
     {
         LogFlow(("%018x/%010x: st1h_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm, size));
 #ifdef IEM_INSTR_IMPL_A64__st1h_z_p_br
@@ -85092,7 +85301,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st1w_z_p_br, uint32_t, uOpcode)
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
     uint32_t const sz         = (uOpcode >> 21) & 0x00000001;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && (0x5 /*opc@22*/ != 6))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st1w_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x sz=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm, sz));
 #ifdef IEM_INSTR_IMPL_A64__st1w_z_p_br
@@ -85114,7 +85324,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st1w_z_p_br_u128, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ && (Rm != 0x1f) && (0x4 /*opc@22*/ != 6))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ && Rm != 0x1f)
     {
         LogFlow(("%018x/%010x: st1w_z_p_br_u128 Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st1w_z_p_br_u128
@@ -85302,7 +85512,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st2b_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st2b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st2b_z_p_bi_contiguous
@@ -85324,7 +85534,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st2b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st2b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st2b_z_p_br_contiguous
@@ -85348,7 +85559,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st2d_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: st2d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st2d_z_p_bi_contiguous
@@ -85373,7 +85584,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st2d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st2d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st2d_z_p_br_contiguous
@@ -85395,7 +85607,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st2h_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st2h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st2h_z_p_bi_contiguous
@@ -85417,7 +85629,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st2h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st2h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st2h_z_p_br_contiguous
@@ -85466,7 +85679,9 @@ FNIEMOP_DEF_1(iemDecodeA64_st2q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: st2q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st2q_z_p_br_contiguous
@@ -85490,7 +85705,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st2w_z_p_bi_contiguous, uint32_t, uOpcode)
         uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
         uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
         uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-        if ((0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
         {
             LogFlow(("%018x/%010x: st2w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st2w_z_p_bi_contiguous
@@ -85515,7 +85730,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st2w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x1 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st2w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st2w_z_p_br_contiguous
@@ -85537,7 +85753,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st3b_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st3b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st3b_z_p_bi_contiguous
@@ -85559,7 +85775,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st3b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st3b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st3b_z_p_br_contiguous
@@ -85581,7 +85798,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st3d_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st3d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st3d_z_p_bi_contiguous
@@ -85603,7 +85820,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st3d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st3d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st3d_z_p_br_contiguous
@@ -85625,7 +85843,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st3h_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st3h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st3h_z_p_bi_contiguous
@@ -85647,7 +85865,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st3h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st3h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st3h_z_p_br_contiguous
@@ -85691,7 +85910,9 @@ FNIEMOP_DEF_1(iemDecodeA64_st3q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: st3q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st3q_z_p_br_contiguous
@@ -85713,7 +85934,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st3w_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st3w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st3w_z_p_bi_contiguous
@@ -85735,7 +85956,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st3w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x2 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st3w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st3w_z_p_br_contiguous
@@ -85757,7 +85979,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st4b_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st4b_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st4b_z_p_bi_contiguous
@@ -85779,7 +86001,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st4b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st4b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st4b_z_p_br_contiguous
@@ -85801,7 +86024,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st4d_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st4d_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st4d_z_p_bi_contiguous
@@ -85823,7 +86046,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st4d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st4d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st4d_z_p_br_contiguous
@@ -85845,7 +86069,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st4h_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st4h_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st4h_z_p_bi_contiguous
@@ -85867,7 +86091,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st4h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st4h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st4h_z_p_br_contiguous
@@ -85911,7 +86136,9 @@ FNIEMOP_DEF_1(iemDecodeA64_st4q_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
+    if (   Rm != 0x1f
+        && (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve2p1 /*FEAT_SVE2p1*/
+            || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2p1 /*FEAT_SME2p1*/))
     {
         LogFlow(("%018x/%010x: st4q_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st4q_z_p_br_contiguous
@@ -85933,7 +86160,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st4w_z_p_bi_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const imm4       = (uOpcode >> 16) & 0x0000000f;
-    if ((0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
     {
         LogFlow(("%018x/%010x: st4w_z_p_bi_contiguous Zt=%#x Rn=%#x Pg=%u imm4=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, imm4));
 #ifdef IEM_INSTR_IMPL_A64__st4w_z_p_bi_contiguous
@@ -85955,7 +86182,8 @@ FNIEMOP_DEF_1(iemDecodeA64_st4w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (0x3 /*opc@21*/ != 0) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: st4w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__st4w_z_p_br_contiguous
@@ -86271,7 +86499,8 @@ FNIEMOP_DEF_1(iemDecodeA64_stnt1b_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: stnt1b_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__stnt1b_z_p_br_contiguous
@@ -86522,7 +86751,8 @@ FNIEMOP_DEF_1(iemDecodeA64_stnt1d_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: stnt1d_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__stnt1d_z_p_br_contiguous
@@ -86790,7 +87020,8 @@ FNIEMOP_DEF_1(iemDecodeA64_stnt1h_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: stnt1h_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__stnt1h_z_p_br_contiguous
@@ -87058,7 +87289,8 @@ FNIEMOP_DEF_1(iemDecodeA64_stnt1w_z_p_br_contiguous, uint32_t, uOpcode)
     uint32_t const Rn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Pg         = (uOpcode >> 10) & 0x00000007;
     uint32_t const Rm         = (uOpcode >> 16) & 0x0000001f;
-    if ((Rm != 0x1f) && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
+    if (   Rm != 0x1f
+        && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/))
     {
         LogFlow(("%018x/%010x: stnt1w_z_p_br_contiguous Zt=%#x Rn=%#x Pg=%u Rm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm));
 #ifdef IEM_INSTR_IMPL_A64__stnt1w_z_p_br_contiguous
@@ -87556,7 +87788,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sudot_z_zzzi_s, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i2         = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
     {
         LogFlow(("%018x/%010x: sudot_z_zzzi_s Zda=%#x Zn=%#x Zm=%u i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__sudot_z_zzzi_s
@@ -87887,7 +88120,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4a_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4a_za_zz_h1x1
@@ -87908,7 +88142,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4a_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4a_za_zz_h1x2
@@ -87929,7 +88164,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4a_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4a_za_zz_h2x1
@@ -87950,7 +88186,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4a_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4a_za_zz_h2x2
@@ -88075,7 +88312,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4s_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4s_za_zz_h1x1
@@ -88096,7 +88334,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4s_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4s_za_zz_h1x2
@@ -88117,7 +88356,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4s_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4s_za_zz_h2x1
@@ -88138,7 +88378,8 @@ FNIEMOP_DEF_1(iemDecodeA64_sumop4s_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: sumop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__sumop4s_za_zz_h2x2
@@ -88449,7 +88690,8 @@ FNIEMOP_DEF_1(iemDecodeA64_svdot_za_zzi_d4xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: svdot_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__svdot_za_zzi_d4xi
@@ -89900,7 +90142,8 @@ FNIEMOP_DEF_1(iemDecodeA64_udot_za_zzi_d2xi, uint32_t, uOpcode)
         uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: udot_za_zzi_d2xi off3=%u Zn=%#x i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__udot_za_zzi_d2xi
@@ -89926,7 +90169,8 @@ FNIEMOP_DEF_1(iemDecodeA64_udot_za_zzi_d4xi, uint32_t, uOpcode)
     uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: udot_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__udot_za_zzi_d4xi
@@ -90865,7 +91109,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlall_za_zzi_d, uint32_t, uOpcode)
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const i3h        = (uOpcode >> 15) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umlall_za_zzi_d off2=%u Zn=%#x i3l=%u Rv=%u i3h=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off2, Zn, i3l, Rv, i3h, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlall_za_zzi_d
@@ -90891,7 +91136,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlall_za_zzi_d2xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: umlall_za_zzi_d2xi o1=%u i3l=%u Zn=%#x i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlall_za_zzi_d2xi
@@ -90920,7 +91166,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlall_za_zzi_d4xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: umlall_za_zzi_d4xi o1=%u i3l=%u Zn=%u i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlall_za_zzi_d4xi
@@ -91497,7 +91744,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlsll_za_zzi_d, uint32_t, uOpcode)
     uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
     uint32_t const i3h        = (uOpcode >> 15) & 0x00000001;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umlsll_za_zzi_d off2=%u Zn=%#x i3l=%u Rv=%u i3h=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off2, Zn, i3l, Rv, i3h, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlsll_za_zzi_d
@@ -91523,7 +91771,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlsll_za_zzi_d2xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: umlsll_za_zzi_d2xi o1=%u i3l=%u Zn=%#x i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlsll_za_zzi_d2xi
@@ -91552,7 +91801,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umlsll_za_zzi_d4xi, uint32_t, uOpcode)
         uint32_t const i3h        = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: umlsll_za_zzi_d4xi o1=%u i3l=%u Zn=%u i3h=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, o1, i3l, Zn, i3h, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umlsll_za_zzi_d4xi
@@ -92095,7 +92345,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4a_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4a_za_zz_h1x1
@@ -92116,7 +92367,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4a_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4a_za_zz_h1x2
@@ -92137,7 +92389,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4a_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4a_za_zz_h2x1
@@ -92158,7 +92411,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4a_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4a_za_zz_h2x2
@@ -92387,7 +92641,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4s_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4s_za_zz_h1x1
@@ -92408,7 +92663,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4s_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4s_za_zz_h1x2
@@ -92429,7 +92685,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4s_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4s_za_zz_h2x1
@@ -92450,7 +92707,8 @@ FNIEMOP_DEF_1(iemDecodeA64_umop4s_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: umop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__umop4s_za_zz_h2x2
@@ -94300,7 +94558,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usdot_z_zzz_s, uint32_t, uOpcode)
     uint32_t const Zda        = (uOpcode >>  0) & 0x0000001f;
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x0000001f;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
     {
         LogFlow(("%018x/%010x: usdot_z_zzz_s Zda=%#x Zn=%#x Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usdot_z_zzz_s
@@ -94322,7 +94581,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usdot_z_zzzi_s, uint32_t, uOpcode)
     uint32_t const Zn         = (uOpcode >>  5) & 0x0000001f;
     uint32_t const Zm         = (uOpcode >> 16) & 0x00000007;
     uint32_t const i2         = (uOpcode >> 19) & 0x00000003;
-    if ((IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/) && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
+    if (   (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fI8mm /*FEAT_I8MM*/)
     {
         LogFlow(("%018x/%010x: usdot_z_zzzi_s Zda=%#x Zn=%#x Zm=%u i2=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zda, Zn, Zm, i2));
 #ifdef IEM_INSTR_IMPL_A64__usdot_z_zzzi_s
@@ -94845,7 +95105,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4a_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4a_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4a_za_zz_h1x1
@@ -94866,7 +95127,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4a_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4a_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4a_za_zz_h1x2
@@ -94887,7 +95149,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4a_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4a_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4a_za_zz_h2x1
@@ -94908,7 +95171,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4a_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4a_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4a_za_zz_h2x2
@@ -95033,7 +95297,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4s_za_zz_h1x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4s_za_zz_h1x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4s_za_zz_h1x1
@@ -95054,7 +95319,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4s_za_zz_h1x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4s_za_zz_h1x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4s_za_zz_h1x2
@@ -95075,7 +95341,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4s_za_zz_h2x1, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4s_za_zz_h2x1 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4s_za_zz_h2x1
@@ -95096,7 +95363,8 @@ FNIEMOP_DEF_1(iemDecodeA64_usmop4s_za_zz_h2x2, uint32_t, uOpcode)
     uint32_t const ZAda       = (uOpcode >>  0) & 0x00000007;
     uint32_t const Zn         = (uOpcode >>  6) & 0x00000007;
     uint32_t const Zm         = (uOpcode >> 17) & 0x00000007;
-    if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+    if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeMop4 /*FEAT_SME_MOP4*/
+        && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
     {
         LogFlow(("%018x/%010x: usmop4s_za_zz_h2x2 ZAda=%u Zn=%u Zm=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, ZAda, Zn, Zm));
 #ifdef IEM_INSTR_IMPL_A64__usmop4s_za_zz_h2x2
@@ -95578,7 +95846,8 @@ FNIEMOP_DEF_1(iemDecodeA64_uvdot_za_zzi_d4xi, uint32_t, uOpcode)
         uint32_t const i1         = (uOpcode >> 10) & 0x00000001;
         uint32_t const Rv         = (uOpcode >> 13) & 0x00000003;
         uint32_t const Zm         = (uOpcode >> 16) & 0x0000000f;
-        if (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/ && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
+        if (   IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme2 /*FEAT_SME2*/
+            && IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSmeI16I64 /*FEAT_SME_I16I64*/)
         {
             LogFlow(("%018x/%010x: uvdot_za_zzi_d4xi off3=%u Zn=%u i1=%u Rv=%u Zm=%#x\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, off3, Zn, i1, Rv, Zm));
 #ifdef IEM_INSTR_IMPL_A64__uvdot_za_zzi_d4xi
