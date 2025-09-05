@@ -62,6 +62,8 @@
 #include <iprt/string.h>
 #include <VBox/log.h>
 
+RTSEMFASTMUTEX nsNativeComponentLoader::m_hLock = NIL_RTSEMFASTMUTEX;
+
 static PRBool PR_CALLBACK
 DLLStore_Destroy(nsHashKey *aKey, void *aData, void* closure)
 {
@@ -76,6 +78,14 @@ nsNativeComponentLoader::nsNativeComponentLoader() :
     mDllStore(nsnull, nsnull, DLLStore_Destroy,
               nsnull, 256, PR_TRUE)
 {
+    int vrc = RTSemFastMutexCreate(&m_hLock);
+    AssertRC(vrc); RT_NOREF(vrc);
+}
+
+nsNativeComponentLoader::~nsNativeComponentLoader()
+{
+    int vrc = RTSemFastMutexDestroy(m_hLock);
+    AssertRC(vrc); RT_NOREF(vrc);
 }
 
 NS_IMPL_THREADSAFE_ISUPPORTS2(nsNativeComponentLoader,
@@ -104,6 +114,8 @@ nsNativeComponentLoader::GetFactory(const nsIID & aCID,
     if (!dll)
         return NS_ERROR_OUT_OF_MEMORY;
 
+    RTSemFastMutexRequest(m_hLock);
+
     if (!dll->IsLoaded()) {
 #ifdef LOG_ENABLED
         nsXPIDLCString displayPath;
@@ -121,6 +133,8 @@ nsNativeComponentLoader::GetFactory(const nsIID & aCID,
             return NS_ERROR_FAILURE;
         }
     }
+
+    RTSemFastMutexRelease(m_hLock);
 
     /* Get service manager for factory */
     nsCOMPtr<nsIServiceManager> serviceMgr;
