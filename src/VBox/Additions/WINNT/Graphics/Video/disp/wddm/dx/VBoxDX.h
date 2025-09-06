@@ -152,6 +152,7 @@ typedef struct VBOXDXKMRESOURCE
         struct /* Context object allocation */
         {
             RTLISTNODE             nodeAllocationsChain;    /* CO allocations can be chained. */
+            uint8_t               *pu8COMapped;             /* If CO is locked. */
             uint64_t               u64Bitmap;               /* Bitmap of allocated blocks. */
             uint32_t               aOffset[VBOXDX_COALLOCATION_MAX_OBJECTS]; /* Start offsets of blocks. */
         } co;

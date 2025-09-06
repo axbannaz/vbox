@@ -44,6 +44,7 @@
 #include <svga3d_surfacedefs.h>
 #pragma pack()
 
+static HRESULT vboxdxQueryGetDataInternal(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData, UINT DataSize);
 
 static uint32_t vboxDXGetSubresourceOffset(VBOXDXALLOCATIONDESC const *pAllocationDesc, UINT Subresource)
 {
@@ -417,9 +418,9 @@ HRESULT vboxDXDeviceFlushCommands(PVBOXDX_DEVICE pDevice)
     RTListForEachSafe(&pDevice->upload.listUploadBatches, pBatch, pNext, VBOXDXUPLOADBATCH, nodeUploadBatch)
     {
         BOOL fCompleted = FALSE;
-        vboxDXQueryGetData(pDevice, &pBatch->queryBatchCompleted,
-                           &fCompleted, sizeof(fCompleted), D3D10_DDI_GET_DATA_DO_NOT_FLUSH);
-        if (!fCompleted)
+        HRESULT hr = vboxdxQueryGetDataInternal(pDevice, &pBatch->queryBatchCompleted,
+                                                &fCompleted, sizeof(fCompleted));
+        if (hr != S_OK || !fCompleted)
             break; /* Queries are completed in order, so if this one is still running, then the next queries are too. */
 
         /* Reclaim the space which was used by this batch. */
@@ -1711,6 +1712,21 @@ static void vboxDXDestroyCOAllocation(PVBOXDX_DEVICE pDevice, PVBOXDXKMRESOURCE 
     {
         Assert(pCOAllocation->AllocationDesc.enmAllocationType == VBOXDXALLOCATIONTYPE_CO);
 
+        if (pCOAllocation->co.pu8COMapped)
+        {
+            D3DKMT_HANDLE const hAllocation = vboxDXGetAllocation(pCOAllocation);
+
+            D3DDDICB_UNLOCK ddiUnlock;
+            ddiUnlock.NumAllocations = 1;
+            ddiUnlock.phAllocations = &hAllocation;
+            HRESULT hr = pDevice->pRTCallbacks->pfnUnlockCb(pDevice->hRTDevice.handle, &ddiUnlock);
+            if (RT_LIKELY(SUCCEEDED(hr)))
+                /* nothing */ ;
+            else
+                vboxDXDeviceSetError(pDevice, hr);
+            pCOAllocation->co.pu8COMapped = NULL;
+        }
+
         /* Remove from the global list of resources. */
         RTListNodeRemove(&pCOAllocation->nodeResource);
         vboxDXDeallocateKMResource(pDevice, pCOAllocation);
@@ -1725,11 +1741,27 @@ static void coAllocationDesc(VBOXDXALLOCATIONDESC *pDesc, void const *pvInitData
 }
 
 
-static bool vboxDXCreateCOAllocation(PVBOXDX_DEVICE pDevice, RTLISTANCHOR *pList, PVBOXDXKMRESOURCE *ppCOAllocation, uint32_t cbAllocation)
+static bool vboxDXCreateCOAllocation(PVBOXDX_DEVICE pDevice, RTLISTANCHOR *pList, PVBOXDXKMRESOURCE *ppCOAllocation, uint32_t cbAllocation, bool fMap = false)
 {
     PVBOXDXKMRESOURCE pCOAllocation = vboxDXAllocateKMResource(pDevice, 0, coAllocationDesc, &cbAllocation, true);
     if (!pCOAllocation)
         return false;
+
+    if (fMap)
+    {
+        D3DDDICB_LOCK ddiLock;
+        RT_ZERO(ddiLock);
+        ddiLock.hAllocation = vboxDXGetAllocation(pCOAllocation);
+        ddiLock.Flags.IgnoreSync = 1;
+        ddiLock.Flags.DonotWait = 1;
+
+        HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
+        if (RT_LIKELY(SUCCEEDED(hr)))
+            pCOAllocation->co.pu8COMapped = (uint8_t *)ddiLock.pData;
+        else
+            AssertFailedReturnStmt(vboxDXDeallocateKMResource(pDevice, pCOAllocation);
+                                   vboxDXDeviceSetError(pDevice, hr), false);
+    }
 
     /* Initially the allocation contains one big free block and zero sized free blocks. */
     pCOAllocation->co.aOffset[0] = 0;
@@ -2237,7 +2269,7 @@ void vboxDXCreateQuery(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, D3D10DDI_QUE
     if (!pQuery->pCOAllocation)
     {
         /* Create a new allocation.  */
-        if (!vboxDXCreateCOAllocation(pDevice, &pDevice->listCOAQuery, &pQuery->pCOAllocation, 4 * _1K))
+        if (!vboxDXCreateCOAllocation(pDevice, &pDevice->listCOAQuery, &pQuery->pCOAllocation, 4 * _1K, /*fMap=*/ true))
             AssertFailedReturnVoidStmt(RTHandleTableFree(pDevice->hHTQuery, pQuery->uQueryId);
                                        vboxDXDeviceSetError(pDevice, E_OUTOFMEMORY));
 
@@ -2250,25 +2282,17 @@ void vboxDXCreateQuery(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, D3D10DDI_QUE
 
     if (pQuery->Query != D3D10DDI_QUERY_EVENT)
     {
-        D3DDDICB_LOCK ddiLock;
-        RT_ZERO(ddiLock);
-        ddiLock.hAllocation = vboxDXGetAllocation(pQuery->pCOAllocation);
-        ddiLock.Flags.WriteOnly = 1;
-        HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
-        if (SUCCEEDED(hr))
-        {
-            *(uint32_t *)((uint8_t *)ddiLock.pData + pQuery->offQuery) = SVGA3D_QUERYSTATE_PENDING;
-
-            D3DDDICB_UNLOCK ddiUnlock;
-            ddiUnlock.NumAllocations = 1;
-            ddiUnlock.phAllocations = &ddiLock.hAllocation;
-            hr = pDevice->pRTCallbacks->pfnUnlockCb(pDevice->hRTDevice.handle, &ddiUnlock);
-        }
-        AssertReturnVoidStmt(SUCCEEDED(hr), vboxDXDeviceSetError(pDevice, hr));
+        uint32_t *pu32QueryState = (uint32_t *)(pQuery->pCOAllocation->co.pu8COMapped + pQuery->offQuery);
+        *pu32QueryState = SVGA3D_QUERYSTATE_PENDING;
 
         vgpu10DefineQuery(pDevice, pQuery->uQueryId, pQuery->svga.queryType, pQuery->svga.flags);
         vgpu10BindQuery(pDevice, pQuery->uQueryId, pQuery->pCOAllocation);
         vgpu10SetQueryOffset(pDevice, pQuery->uQueryId, pQuery->offQuery);
+    }
+    else
+    {
+        uint64_t *pu64Value = (uint64_t *)(pQuery->pCOAllocation->co.pu8COMapped + pQuery->offQuery);
+        *pu64Value = 0;
     }
 }
 
@@ -2323,76 +2347,48 @@ void vboxDXQueryEnd(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery)
 }
 
 
-void vboxDXQueryGetData(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData, UINT DataSize, UINT Flags)
+static HRESULT vboxdxQueryGetDataInternal(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData, UINT DataSize)
 {
-    Assert(pQuery->enmQueryState == VBOXDXQUERYSTATE_ISSUED || pQuery->enmQueryState == VBOXDXQUERYSTATE_SIGNALED);
+    HRESULT hr;
 
-    if (!RT_BOOL(Flags & D3D10_DDI_GET_DATA_DO_NOT_FLUSH))
-        vboxDXDeviceFlushCommands(pDevice);
+    Assert(pQuery->enmQueryState == VBOXDXQUERYSTATE_ISSUED || pQuery->enmQueryState == VBOXDXQUERYSTATE_SIGNALED);
 
     if (pQuery->Query == D3D10DDI_QUERY_EVENT)
     {
-        uint64_t u64Value = 0;
-
-        D3DDDICB_LOCK ddiLock;
-        RT_ZERO(ddiLock);
-        ddiLock.hAllocation = vboxDXGetAllocation(pQuery->pCOAllocation);
-        ddiLock.Flags.ReadOnly = 1;
-        HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
-        if (SUCCEEDED(hr))
-        {
-            u64Value = *(uint64_t *)((uint8_t *)ddiLock.pData + pQuery->offQuery);
-
-            D3DDDICB_UNLOCK ddiUnlock;
-            ddiUnlock.NumAllocations = 1;
-            ddiUnlock.phAllocations = &ddiLock.hAllocation;
-            hr = pDevice->pRTCallbacks->pfnUnlockCb(pDevice->hRTDevice.handle, &ddiUnlock);
-        }
-        AssertReturnVoidStmt(SUCCEEDED(hr), vboxDXDeviceSetError(pDevice, hr));
+        uint64_t const *pu64Value = (uint64_t *)(pQuery->pCOAllocation->co.pu8COMapped + pQuery->offQuery);
+        uint64_t const u64Value = *pu64Value;
 
         if (u64Value < pQuery->u64Value)
-            vboxDXDeviceSetError(pDevice, DXGI_DDI_ERR_WASSTILLDRAWING);
+            hr = DXGI_DDI_ERR_WASSTILLDRAWING;
         else
         {
             pQuery->enmQueryState = VBOXDXQUERYSTATE_SIGNALED;
 
             if (pData && DataSize >= sizeof(BOOL))
                 *(BOOL *)pData = TRUE;
+
+            hr = S_OK;
         }
-        return;
+        return hr;
     }
 
     vgpu10ReadbackQuery(pDevice, pQuery->uQueryId);
 
     VMSVGAQUERYINFO const *pQueryInfo = getQueryInfo(pQuery->Query);
-    AssertReturnVoidStmt(pQueryInfo, vboxDXDeviceSetError(pDevice, E_INVALIDARG));
+    AssertReturn(pQueryInfo, E_INVALIDARG);
 
     void *pvResult = RTMemTmpAlloc(pQueryInfo->cbDataSvga);
-    AssertReturnVoidStmt(pvResult, vboxDXDeviceSetError(pDevice, E_OUTOFMEMORY));
+    AssertReturn(pvResult, E_OUTOFMEMORY);
 
     uint32_t u32QueryStatus = SVGA3D_QUERYSTATE_PENDING;
 
-    D3DDDICB_LOCK ddiLock;
-    RT_ZERO(ddiLock);
-    ddiLock.hAllocation = vboxDXGetAllocation(pQuery->pCOAllocation);
-    ddiLock.Flags.ReadOnly = 1;
-    HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
-    if (SUCCEEDED(hr))
-    {
-        uint8_t *pu8 = (uint8_t *)ddiLock.pData + pQuery->offQuery;
-        u32QueryStatus = *(uint32_t *)pu8;
+    uint8_t const *pu8 = pQuery->pCOAllocation->co.pu8COMapped + pQuery->offQuery;
+    u32QueryStatus = *(uint32_t *)pu8;
 
-        memcpy(pvResult, pu8 + sizeof(uint32_t), pQueryInfo->cbDataSvga);
-
-        D3DDDICB_UNLOCK ddiUnlock;
-        ddiUnlock.NumAllocations = 1;
-        ddiUnlock.phAllocations = &ddiLock.hAllocation;
-        hr = pDevice->pRTCallbacks->pfnUnlockCb(pDevice->hRTDevice.handle, &ddiUnlock);
-    }
-    AssertReturnVoidStmt(SUCCEEDED(hr), RTMemTmpFree(pvResult); vboxDXDeviceSetError(pDevice, hr));
+    memcpy(pvResult, pu8 + sizeof(uint32_t), pQueryInfo->cbDataSvga);
 
     if (u32QueryStatus != SVGA3D_QUERYSTATE_SUCCEEDED)
-        vboxDXDeviceSetError(pDevice, DXGI_DDI_ERR_WASSTILLDRAWING);
+        hr = DXGI_DDI_ERR_WASSTILLDRAWING;
     else
     {
         pQuery->enmQueryState = VBOXDXQUERYSTATE_SIGNALED;
@@ -2485,9 +2481,23 @@ void vboxDXQueryGetData(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData
                     break;
             }
         }
+
+        hr = S_OK;
     }
 
     RTMemTmpFree(pvResult);
+    return hr;
+}
+
+
+void vboxDXQueryGetData(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData, UINT DataSize, UINT Flags)
+{
+    if (!RT_BOOL(Flags & D3D10_DDI_GET_DATA_DO_NOT_FLUSH))
+        vboxDXDeviceFlushCommands(pDevice);
+
+    HRESULT hr = vboxdxQueryGetDataInternal(pDevice, pQuery, pData, DataSize);
+    if (hr != S_OK)
+        vboxDXDeviceSetError(pDevice, hr);
 }
 
 
