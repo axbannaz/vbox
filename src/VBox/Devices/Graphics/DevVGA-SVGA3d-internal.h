@@ -1371,6 +1371,8 @@ DECLINLINE(int) vmsvga3dDXContextFromCid(PVMSVGA3DSTATE pState, uint32_t cid, PV
 }
 
 void vmsvga3dDXInitContextMobData(SVGADXContextMobFormat *p);
+void vmsvga3dDXCbFinishQuery(PVGASTATECC pThisCC, SVGACOTableDXQueryEntry *pEntry,
+                             SVGADXQueryResultUnion const *pQueryResult, uint32_t cbQueryResult);
 #endif
 
 DECLINLINE(int) vmsvga3dSurfaceFromSid(PVMSVGA3DSTATE pState, uint32_t sid, PVMSVGA3DSURFACE *ppSurface)

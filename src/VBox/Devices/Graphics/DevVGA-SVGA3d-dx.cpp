@@ -1071,6 +1071,31 @@ int vmsvga3dDXBeginQuery(PVGASTATECC pThisCC, uint32_t idDXContext, SVGA3dCmdDXB
 }
 
 
+void vmsvga3dDXCbFinishQuery(PVGASTATECC pThisCC, SVGACOTableDXQueryEntry *pEntry,
+                             SVGADXQueryResultUnion const *pQueryResult, uint32_t cbQueryResult)
+{
+    Assert(pEntry->state == SVGADX_QDSTATE_PENDING);
+
+    PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
+
+    uint32_t u32QueryState;
+
+    if (pQueryResult)
+    {
+        /* Write the result after SVGA3dQueryState field. */
+        dxMobWrite(pSvgaR3State, pEntry->mobid, pEntry->offset + sizeof(uint32_t), pQueryResult, cbQueryResult);
+
+        u32QueryState = SVGA3D_QUERYSTATE_SUCCEEDED;
+    }
+    else
+        u32QueryState = SVGA3D_QUERYSTATE_FAILED;
+
+    dxMobWrite(pSvgaR3State, pEntry->mobid, pEntry->offset, &u32QueryState, sizeof(u32QueryState));
+
+    pEntry->state = SVGADX_QDSTATE_FINISHED;
+}
+
+
 static int dxEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGA3dQueryId queryId, SVGACOTableDXQueryEntry *pEntry)
 {
     PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
@@ -1078,26 +1103,40 @@ static int dxEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGA3d
     int rc = VINF_SUCCESS;
     if (pEntry->state == SVGADX_QDSTATE_ACTIVE || pEntry->state == SVGADX_QDSTATE_IDLE)
     {
-        pEntry->state = SVGADX_QDSTATE_PENDING;
-
         uint32_t u32QueryState;
-        SVGADXQueryResultUnion queryResult;
-        uint32_t cbQuery = 0; /* Actual size of query data returned by backend. */
-        rc = pSvgaR3State->pFuncsDX->pfnDXEndQuery(pThisCC, pDXContext, queryId, &queryResult, &cbQuery);
-        if (RT_SUCCESS(rc))
-        {
-            /* Write the result after SVGA3dQueryState. */
-            dxMobWrite(pSvgaR3State, pEntry->mobid, pEntry->offset + sizeof(uint32_t), &queryResult, cbQuery);
 
-            u32QueryState = SVGA3D_QUERYSTATE_SUCCEEDED;
+        if (pSvgaR3State->pFuncsDX->pfnDXEndQuery)
+        {
+            /* Backend will write the result back when is it ready. */
+            if (pEntry->type == SVGA3D_QUERYTYPE_TIMESTAMP)
+            {
+                ASSERT_GUEST(pEntry->state == SVGADX_QDSTATE_IDLE); /* Timestamp query has no Begin. */
+
+                u32QueryState = SVGA3D_QUERYSTATE_PENDING;
+                dxMobWrite(pSvgaR3State, pEntry->mobid, pEntry->offset, &u32QueryState, sizeof(u32QueryState));
+            }
+
+            pEntry->state = SVGADX_QDSTATE_PENDING;
+
+            /* Just tell the backend to end the query.
+             * Note that this might also immediately complete it via vmsvga3dDXCbFinishQuery() callback. */
+            rc = pSvgaR3State->pFuncsDX->pfnDXEndQuery(pThisCC, pDXContext, queryId);
+        }
+        else if (pSvgaR3State->pFuncsDX->pfnDXEndQuerySync)
+        {
+            /* Backend does not support pending tasks like queries. */
+            pEntry->state = SVGADX_QDSTATE_PENDING;
+
+            SVGADXQueryResultUnion queryResult;
+            uint32_t cbQuery = 0; /* Actual size of query data returned by backend. */
+            rc = pSvgaR3State->pFuncsDX->pfnDXEndQuerySync(pThisCC, pDXContext, queryId, &queryResult, &cbQuery);
+            if (RT_SUCCESS(rc))
+                vmsvga3dDXCbFinishQuery(pThisCC, pEntry, &queryResult, cbQuery);
+            else
+                vmsvga3dDXCbFinishQuery(pThisCC, pEntry, NULL, 0);
         }
         else
-            u32QueryState = SVGA3D_QUERYSTATE_FAILED;
-
-        dxMobWrite(pSvgaR3State, pEntry->mobid, pEntry->offset, &u32QueryState, sizeof(u32QueryState));
-
-        if (RT_SUCCESS(rc))
-            pEntry->state = SVGADX_QDSTATE_FINISHED;
+            AssertFailedStmt(rc = VERR_NOT_IMPLEMENTED);
     }
     else
         AssertStmt(pEntry->state == SVGADX_QDSTATE_FINISHED, rc = VERR_INVALID_STATE);
@@ -1110,7 +1149,8 @@ int vmsvga3dDXEndQuery(PVGASTATECC pThisCC, uint32_t idDXContext, SVGA3dCmdDXEnd
 {
     int rc;
     PVMSVGAR3STATE const pSvgaR3State = pThisCC->svga.pSvgaR3State;
-    AssertReturn(pSvgaR3State->pFuncsDX && pSvgaR3State->pFuncsDX->pfnDXEndQuery, VERR_INVALID_STATE);
+    AssertReturn(   pSvgaR3State->pFuncsDX
+                 && (pSvgaR3State->pFuncsDX->pfnDXEndQuery || pSvgaR3State->pFuncsDX->pfnDXEndQuerySync), VERR_INVALID_STATE);
     PVMSVGA3DSTATE p3dState = pThisCC->svga.p3dState;
     AssertReturn(p3dState, VERR_INVALID_STATE);
 

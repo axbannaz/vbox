@@ -105,7 +105,9 @@ typedef struct DXDEVICE
     ID3D11VideoDevice          *pVideoDevice;
     ID3D11VideoContext         *pVideoContext;
 
-    D3D11BLITTER               Blitter;                /* Blits one texture to another. */
+    D3D11BLITTER                Blitter;               /* Blits one texture to another. */
+
+    RTLISTANCHOR                listPendingQueries;    /* Pending queries (DXQUERY::nodePendingQuery). */
 } DXDEVICE;
 
 /* Kind of a texture view. */
@@ -288,6 +290,8 @@ typedef struct DXSHADER
     DXShaderInfo                shaderInfo;
 } DXSHADER;
 
+#define DX_QUERY_F_PENDING      UINT32_C(0x01)
+
 typedef struct DXQUERY
 {
     union
@@ -295,6 +299,11 @@ typedef struct DXQUERY
         ID3D11Query            *pQuery;
         ID3D11Predicate        *pPredicate;
     };
+
+    RTLISTNODE                  nodePendingQuery;   /* Pending queries (DXDEVICE::listPendingQueries). */
+    PVMSVGA3DDXCONTEXT          pDXContext;
+    SVGA3dQueryId               queryId;
+    uint32_t                    u32QueryFlags;
 } DXQUERY;
 
 typedef struct DXVIDEOPROCESSOR
@@ -411,6 +420,7 @@ static DECLCALLBACK(void) vmsvga3dBackSurfaceDestroy(PVGASTATECC pThisCC, bool f
 static int dxDestroyShader(DXSHADER *pDXShader);
 static int dxDestroyQuery(DXQUERY *pDXQuery);
 static int dxReadBuffer(DXDEVICE *pDevice, ID3D11Buffer *pBuffer, UINT Offset, UINT Bytes, void **ppvData, uint32_t *pcbData);
+static int dxCheckQueryCompletion(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGA3dQueryId queryId);
 
 static int dxCreateVideoProcessor(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, VBSVGA3dVideoProcessorId videoProcessorId, VBSVGACOTableDXVideoProcessorEntry const *pEntry);
 static void dxDestroyVideoProcessor(DXVIDEOPROCESSOR *pDXVideoProcessor);
@@ -1495,6 +1505,8 @@ static int dxDeviceCreate(PVMSVGA3DBACKEND pBackend, DXDEVICE *pDXDevice)
         BlitInit(&pDXDevice->Blitter, pDXDevice->pDevice, pDXDevice->pImmediateContext);
     else
         rc = VERR_NOT_SUPPORTED;
+
+    RTListInit(&pDXDevice->listPendingQueries);
 
     if (SUCCEEDED(hr))
     {
@@ -4176,6 +4188,17 @@ static DECLCALLBACK(void) vmsvga3dBackProcessPendingTasks(PVGASTATE pThis, PVGAS
             continue;
 
         dxProcessPendingUpdates(pThisCC, pScreen);
+    }
+
+    DXQUERY *pDXQuery, *pNext;
+    RTListForEachSafe(&pDXDevice->listPendingQueries, pDXQuery, pNext, DXQUERY, nodePendingQuery)
+    {
+        Assert(pDXQuery->u32QueryFlags & DX_QUERY_F_PENDING);
+        if (dxCheckQueryCompletion(pThisCC, pDXQuery->pDXContext, pDXQuery->queryId) == VINF_TRY_AGAIN)
+            continue;
+
+        RTListNodeRemove(&pDXQuery->nodePendingQuery);
+        pDXQuery->u32QueryFlags &= ~DX_QUERY_F_PENDING;
     }
 }
 #endif /* DX_NEW_HWSCREEN */
@@ -8475,6 +8498,11 @@ static int dxDefineQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVG
     HRESULT hr = pDXDevice->pDevice->CreateQuery(&desc, &pDXQuery->pQuery);
     AssertReturn(SUCCEEDED(hr), VERR_INVALID_STATE);
 
+    RT_ZERO(pDXQuery->nodePendingQuery);
+    pDXQuery->pDXContext = pDXContext;
+    pDXQuery->queryId = queryId;
+    pDXQuery->u32QueryFlags = 0;
+
     return VINF_SUCCESS;
 }
 
@@ -8482,6 +8510,11 @@ static int dxDefineQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVG
 static int dxDestroyQuery(DXQUERY *pDXQuery)
 {
     D3D_RELEASE(pDXQuery->pQuery);
+    if (pDXQuery->u32QueryFlags & DX_QUERY_F_PENDING)
+    {
+        RTListNodeRemove(&pDXQuery->nodePendingQuery);
+        pDXQuery->u32QueryFlags &= ~DX_QUERY_F_PENDING;
+    }
     return VINF_SUCCESS;
 }
 
@@ -8558,10 +8591,10 @@ static int dxGetQueryResult(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, 
         return VERR_INVALID_PARAMETER;
 
     DXQUERYRESULT dxQueryResult;
-    while (pDXDevice->pImmediateContext->GetData(pDXQuery->pQuery, &dxQueryResult, pQueryInfo->cbDataD3D11, 0) != S_OK)
-    {
-        RTThreadYield();
-    }
+    HRESULT hr = pDXDevice->pImmediateContext->GetData(pDXQuery->pQuery, &dxQueryResult, pQueryInfo->cbDataD3D11, 0);
+    Assert(SUCCEEDED(hr));
+    if (hr != S_OK)
+        return hr == S_FALSE ? VINF_TRY_AGAIN : VERR_NOT_AVAILABLE;
 
     /* Copy back the result. */
     switch (pEntry->type)
@@ -8616,8 +8649,27 @@ static int dxGetQueryResult(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, 
     return VINF_SUCCESS;
 }
 
-static int dxEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGA3dQueryId queryId,
-                      SVGADXQueryResultUnion *pQueryResult, uint32_t *pcbOut)
+
+static int dxCheckQueryCompletion(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext,
+                                  SVGA3dQueryId queryId)
+{
+    SVGACOTableDXQueryEntry *pEntry = &pDXContext->cot.paQuery[queryId];
+
+    SVGADXQueryResultUnion queryResult;
+    uint32_t cbQuery = 0; /* Actual size of query data returned by backend. */
+
+    int rc = dxGetQueryResult(pThisCC, pDXContext, queryId, &queryResult, &cbQuery);
+    if (rc == VINF_SUCCESS) /* Can be VINF_TRY_AGAIN if the query is not finished. */
+        vmsvga3dDXCbFinishQuery(pThisCC, pEntry, &queryResult, cbQuery);
+    else if (RT_FAILURE(rc))
+        vmsvga3dDXCbFinishQuery(pThisCC, pEntry, NULL, 0);
+
+    return rc;
+}
+
+
+static DECLCALLBACK(int) vmsvga3dBackDXEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext,
+                                                SVGA3dQueryId queryId)
 {
     DXDEVICE *pDXDevice = dxDeviceGet(pThisCC->svga.p3dState);
     AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
@@ -8625,18 +8677,42 @@ static int dxEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGA3d
     DXQUERY *pDXQuery = &pDXContext->pBackendDXContext->paQuery[queryId];
     pDXDevice->pImmediateContext->End(pDXQuery->pQuery);
 
-    /** @todo Consider issuing QueryEnd and getting data later in FIFO thread loop. */
-    return dxGetQueryResult(pThisCC, pDXContext, queryId, pQueryResult, pcbOut);
+    /* Check if the query is already finished. */
+    int rc = dxCheckQueryCompletion(pThisCC, pDXContext, queryId);
+    if (rc == VINF_TRY_AGAIN)
+    {
+        /* Add the query to the list of pending queries, if it is not in the list yet.
+         * ProcessPendingTasks will check these queries and update them.
+         */
+        if ((pDXQuery->u32QueryFlags & DX_QUERY_F_PENDING) == 0)
+        {
+            RTListAppend(&pDXDevice->listPendingQueries, &pDXQuery->nodePendingQuery);
+            pDXQuery->u32QueryFlags |= DX_QUERY_F_PENDING;
+        }
+    }
+    return rc;
 }
 
 
-static DECLCALLBACK(int) vmsvga3dBackDXEndQuery(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext,
-                                                SVGA3dQueryId queryId, SVGADXQueryResultUnion *pQueryResult, uint32_t *pcbOut)
+static DECLCALLBACK(int) vmsvga3dBackDXEndQuerySync(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext,
+                                                    SVGA3dQueryId queryId, SVGADXQueryResultUnion *pQueryResult, uint32_t *pcbOut)
 {
-    PVMSVGA3DBACKEND pBackend = pThisCC->svga.p3dState->pBackend;
-    RT_NOREF(pBackend);
+    DXDEVICE *pDXDevice = dxDeviceGet(pThisCC->svga.p3dState);
+    AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
 
-    int rc = dxEndQuery(pThisCC, pDXContext, queryId, pQueryResult, pcbOut);
+    DXQUERY *pDXQuery = &pDXContext->pBackendDXContext->paQuery[queryId];
+    pDXDevice->pImmediateContext->End(pDXQuery->pQuery);
+
+    int rc;
+    for (;;)
+    {
+        rc = dxGetQueryResult(pThisCC, pDXContext, queryId, pQueryResult, pcbOut);
+        if (rc != VINF_TRY_AGAIN)
+            break;
+
+        RTThreadYield();
+    }
+
     return rc;
 }
 
@@ -9699,8 +9775,8 @@ static int dxCOTableRealloc(void **ppvCOTable, uint32_t *pcCOTable, uint32_t cbE
 
 static DECLCALLBACK(int) vmsvga3dBackDXSetCOTable(PVGASTATECC pThisCC, PVMSVGA3DDXCONTEXT pDXContext, SVGACOTableType type, uint32_t cValidEntries)
 {
-    PVMSVGA3DBACKEND pBackend = pThisCC->svga.p3dState->pBackend;
-    RT_NOREF(pBackend);
+    DXDEVICE *pDXDevice = dxDeviceGet(pThisCC->svga.p3dState);
+    AssertReturn(pDXDevice->pDevice, VERR_INVALID_STATE);
 
     VMSVGA3DBACKENDDXCONTEXT *pBackendDXContext = pDXContext->pBackendDXContext;
 
@@ -9932,6 +10008,17 @@ static DECLCALLBACK(int) vmsvga3dBackDXSetCOTable(PVGASTATECC pThisCC, PVMSVGA3D
         case SVGA_COTABLE_DXQUERY:
             if (pBackendDXContext->paQuery)
             {
+                /* Reinsert pending queries of this context to the list of pending queries
+                 * because the addresses of DXQUERY structures will change.
+                 * Start with removing the structures.
+                 */
+                for (uint32_t i = 0; i < pBackendDXContext->cQuery; ++i)
+                {
+                    DXQUERY *pDXQuery = &pBackendDXContext->paQuery[i];
+                    if (pDXQuery->u32QueryFlags & DX_QUERY_F_PENDING)
+                        RTListNodeRemove(&pDXQuery->nodePendingQuery);
+                }
+
                 /* Destroy the no longer used entries. */
                 for (uint32_t i = cValidEntries; i < pBackendDXContext->cQuery; ++i)
                     dxDestroyQuery(&pBackendDXContext->paQuery[i]);
@@ -9954,6 +10041,14 @@ static DECLCALLBACK(int) vmsvga3dBackDXSetCOTable(PVGASTATECC pThisCC, PVMSVGA3D
                     dxDefineQuery(pThisCC, pDXContext, i, pEntry);
                 else
                     Assert(pEntry->type == SVGA3D_QUERYTYPE_INVALID || pDXQuery->pQuery);
+            }
+
+            /* Reinsert pending queries of this context to the list of pending queries. */
+            for (uint32_t i = 0; i < pBackendDXContext->cQuery; ++i)
+            {
+                DXQUERY *pDXQuery = &pBackendDXContext->paQuery[i];
+                if (pDXQuery->u32QueryFlags & DX_QUERY_F_PENDING)
+                    RTListAppend(&pDXDevice->listPendingQueries, &pDXQuery->nodePendingQuery);
             }
             break;
         case SVGA_COTABLE_DXSHADER:
@@ -12431,7 +12526,12 @@ static DECLCALLBACK(int) vmsvga3dBackQueryInterface(PVGASTATECC pThisCC, char co
                 p->pfnDXDefineQuery               = vmsvga3dBackDXDefineQuery;
                 p->pfnDXDestroyQuery              = vmsvga3dBackDXDestroyQuery;
                 p->pfnDXBeginQuery                = vmsvga3dBackDXBeginQuery;
+#ifdef DX_NEW_HWSCREEN
                 p->pfnDXEndQuery                  = vmsvga3dBackDXEndQuery;
+#else
+                p->pfnDXEndQuery                  = NULL;
+#endif
+                p->pfnDXEndQuerySync              = vmsvga3dBackDXEndQuerySync;
                 p->pfnDXSetPredication            = vmsvga3dBackDXSetPredication;
                 p->pfnDXSetSOTargets              = vmsvga3dBackDXSetSOTargets;
                 p->pfnDXSetViewports              = vmsvga3dBackDXSetViewports;
