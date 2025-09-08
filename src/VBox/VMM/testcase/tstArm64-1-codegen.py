@@ -1155,6 +1155,109 @@ class A64No1CodeGenLdRegFp(A64No1CodeGenFprBase, A64No1CodeGenLdReg):
         self.oFprAllocator.free(iRegDst);
 
 
+class A64No1CodeGenLdLiteral(A64No1CodeGenLdBase):
+    """
+    LDR with PC relative immediate.
+
+    We cannot easily test the full immediate range here, as we don't have suffcient
+    control over where the emitted code is placed stuff and/or don't want to blow
+    it up to more than 2MB in size.  Instead we place data in these locations:
+        0. Before the test function (largish negative offsets).
+        1. After the test function (largish positive offsets).
+        2. 0 to 16 instructions before the LDR (small negative offsets).
+        3. 0 to 16 instructions after the LDR (small positive offsets).
+
+    Note! SP cannot be the destination register.
+    """
+
+    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = None, sName = None):
+        if cBits is None:
+            cBits = 64 if cbMem == 8 else 32;
+        A64No1CodeGenLdBase.__init__(self, sName or sInstr, sInstr, fnCalc, cbMem, cBits);
+        self.asDataBefore = [];
+        self.asDataAfter  = [];
+
+    def generate(self, oOptions):
+        # Generate the test code.
+        super().generate(oOptions);
+        # Insert in the data before and after the code.
+        self.asCode = self.asDataBefore + self.asCode + self.asDataAfter;
+
+    def generateBodyLd(self, oOptions, cLeftToAllCheck, iRegSlot0Ptr):
+        for i in range(oOptions.cTestsPerInstruction):
+            # The data value.
+            uValue    = randUBits(self.cbMem * 8);
+            sAsmValue = '.int '
+            for iValuePart in range(self.cbMem // 4):
+                sAsmValue += '%s%#x' % (', ' if iValuePart > 0 else '', (uValue >> (iValuePart * 32)) & 0xffffffff,);
+            uRes      = self.fnCalc(self.cBits, uValue, self.cbMem);
+
+            # Figure out where the data goes and emit the instruction.
+            iDataLoc  = randUBits(2);
+            if iDataLoc >= 2:
+                # Small offset - data embedded into the code.
+                sDataLabel = '.Ls_%s_%u' % (self.sLabel, i,);
+                sJumpLabel = '.Ljmp_%s_%u' % (self.sLabel, i,);
+                uOff       = randUBits(4) * 4;
+                self.emitCommentLine('i=%u iDataLoc=%u uValue=%#x (uRes=%#x) uOff=%u' % (i, iDataLoc, uValue, uRes, uOff));
+                if iDataLoc == 2:
+                    # before
+                    self.emitInstr('b', sJumpLabel);
+                    self.asCode.append('%s: %s' % (sDataLabel, sAsmValue,));
+                    if uOff > 0:
+                        self.emitInstr('.int', ','.join(['%#x' % (randU32(),) for _ in range(uOff)]), 'padding');
+                    self.emitLabel(sJumpLabel);
+                    iRegDst = self.emitLdInstrAndAllocDst(sDataLabel, uRes);
+                else:
+                    # after
+                    iRegDst = self.emitLdInstrAndAllocDst(sDataLabel, uRes);
+                    self.emitInstr('b', sJumpLabel);
+                    if uOff > 0:
+                        self.emitInstr('.int', ','.join(['%#x' % (randU32(),) for _ in range(uOff)]), 'padding');
+                    self.asCode.append('%s: %s' % (sDataLabel, sAsmValue,));
+                    self.emitLabel(sJumpLabel);
+            else:
+                # Largish offset - either before or after the test function.
+                self.emitCommentLine('i=%u iDataLoc=%u uValue=%#x (uRes=%#x)' % (i, iDataLoc, uValue, uRes,));
+                sDataLabel = 'g_%s_%u' % (self.sLabel, i,);
+                if iDataLoc == 0:
+                    self.asDataBefore.append('%s: %s' % (sDataLabel, sAsmValue,));
+                else:
+                    self.asDataAfter.append('%s: %s' % (sDataLabel, sAsmValue,));
+                iRegDst = self.emitLdInstrAndAllocDst(sDataLabel, uRes);
+
+            # Check the value.
+            self.emitLdValCheckAndFreeDst(iRegDst, uRes);
+
+            cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+    def emitLdInstrAndAllocDst(self, sDataLabel, uExpected):
+        iRegDst = self.oGprAllocator.alloc(uExpected, fIncludingReg31 = True);
+        self.emitInstr(self.sInstr, '%s, %s' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sDataLabel,));
+        return iRegDst;
+
+    def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
+        if iRegDst != 31:
+            self.emitGprValCheck(iRegDst, uExpected);
+        self.oGprAllocator.free(iRegDst);
+
+
+class A64No1CodeGenLdLiteralFp(A64No1CodeGenFprBase, A64No1CodeGenLdLiteral):
+    def __init__(self, sInstr, cbMem = 1):
+        sName = sInstr + '_' + g_kdFprBytesToInfix[cbMem];
+        A64No1CodeGenFprBase.__init__(self, sName, sInstr, cbMem);
+        A64No1CodeGenLdLiteral.__init__(self, sInstr, fnCalc = calcLdUnsigned, cbMem = cbMem, cBits = cbMem * 8, sName = sName);
+
+    def emitLdInstrAndAllocDst(self, sDataLabel, uExpected):
+        iRegDst = self.oFprAllocator.alloc(uExpected);
+        self.emitInstr(self.sInstr, '%s%u, %s' % (self.sPrefix, iRegDst, sDataLabel,));
+        return iRegDst;
+
+    def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
+        self.emitFprValCheck(iRegDst, uExpected);
+        self.oFprAllocator.free(iRegDst);
+
+
 #
 # Store generators.
 #
@@ -1686,6 +1789,14 @@ class Arm64No1CodeGen(object):
 
         # Instantiate the generators.
         aoGenerators = [
+            # PC relative loads:
+            A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  8),
+            A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  4),
+            A64No1CodeGenLdLiteral(  'ldrsw', calcLdSigned,   cbMem =  4, cBits = 64),
+            A64No1CodeGenLdLiteralFp('ldr',                   cbMem = 16),
+            A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  8),
+            A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  4),
+
             # Loads and stores with scaled 12-bit immediates:
             A64No1CodeGenStReg(      'str',                   cbMem =  8),
             A64No1CodeGenStReg(      'str',                   cbMem =  4),
