@@ -189,6 +189,17 @@ const char *PyXPCOMGetObTypeName(PyTypeObject *pTypeObj);
 extern "C" PyAPI_FUNC(const char *) PyUnicode_AsUTF8AndSize(PyObject *, Py_ssize_t *);
 # endif
 
+# if PY_VERSION_HEX >= 0x030d0000 && Py_LIMITED_API < 0x030b0000
+/* The old buffer protocol API was removed in python 3.13 but it is still available in the stable ABI. */
+extern "C" PyAPI_FUNC(int) PyObject_AsReadBuffer(PyObject *obj, const void **buffer, Py_ssize_t *buffer_len);
+extern "C" PyAPI_FUNC(int) PyObject_AsWriteBuffer(PyObject *obj, void **buffer, Py_ssize_t *buffer_len);
+extern "C" PyAPI_FUNC(int) PyObject_CheckReadBuffer(PyObject *obj);
+
+/* PyEval_CallObjectWithKeywords was remoted in python 3.13 but is still available in the stable ABI. */
+extern "C" PyAPI_FUNC(PyObject *) PyEval_CallObjectWithKeywords(PyObject *callable, PyObject *args, PyObject *kwargs);
+# define PyEval_CallObject(callable, arg) PyEval_CallObjectWithKeywords((callable), (arg), _PyObject_CAST(_Py_NULL))
+# endif
+
 /* PyUnicode_AsUTF8 is just PyUnicode_AsUTF8AndSize without returning a size. */
 # define PyUnicode_AsUTF8(o) PyUnicode_AsUTF8AndSize(o, NULL)
 
