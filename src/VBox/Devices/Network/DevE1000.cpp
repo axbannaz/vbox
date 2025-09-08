@@ -2876,10 +2876,12 @@ DECLINLINE(bool) e1kRxIsPacketSplit(PE1KSTATE pThis)
     return GET_BITS(RCTL, DTYP) == RCTL_DTYPE_PSPLIT;
 }
 
+#if 0
 DECLINLINE(bool) e1kRxIsLegacy(PE1KSTATE pThis)
 {
     return GET_BITS(RCTL, DTYP) == RCTL_DTYPE_LEGACY && !(RFCTL & RFCTL_EXSTEN);
 }
+#endif
 
 # ifdef IN_RING3 /* currently only used in ring-3 due to stack space requirements of the caller */
 
