@@ -800,7 +800,7 @@ struct E1kRxDStatusLegacy_st
 typedef struct E1kRxDStatusLegacy_st E1KRXDST;
 AssertCompileSize(E1KRXDST, 4);
 
-/* todo: spec ref! */
+/** todo: spec ref! */
 struct E1kRxDStatusExtended_st
 {
     /** @name Extended Status field (7.1.4.6)
@@ -2138,7 +2138,7 @@ static DECLCALLBACK(void) e1kExtendedWBCopy(E1KRXDESC *pDescTo, E1KRXDESC *pDesc
 {
     pDescTo->writeEx.status = pDescFrom->writeEx.status;
     pDescTo->writeEx.u16VLANTag = pDescFrom->writeEx.u16VLANTag;
-    pDescTo->writeEx.u16Checksum = pDescFrom->writeEx.u16Checksum;   /* @todo are you sure? */
+    pDescTo->writeEx.u16Checksum = pDescFrom->writeEx.u16Checksum;   /** @todo are you sure? */
 }
 
 
@@ -2207,7 +2207,7 @@ static DECLCALLBACK(void) e1kPacketSplitWBCopy(E1KRXDESC *pDescTo, E1KRXDESC *pD
 {
     pDescTo->writePs.status = pDescFrom->writePs.status;
     pDescTo->writePs.u16VLANTag = pDescFrom->writePs.u16VLANTag;
-    pDescTo->writePs.chk_rss.checksum.u16Checksum = pDescFrom->writePs.chk_rss.checksum.u16Checksum;   /* @todo are you sure? */
+    pDescTo->writePs.chk_rss.checksum.u16Checksum = pDescFrom->writePs.chk_rss.checksum.u16Checksum;   /** @todo are you sure? */
 }
 
 
@@ -2242,7 +2242,7 @@ static int e1kR3SetDType(PPDMDEVINS pDevIns, uint32_t uDescType, bool fExtended)
     e1kCsLeave(pThis);
 
     E1kLog2(("%s e1kR3SetDType: RX ops set to %s\n", pThis->szPrf, pNewOps->pcszName));
-    /* @todo Return CS rc! */
+    /** @todo Return CS rc! */
     return VINF_SUCCESS;
 }
 
@@ -2818,7 +2818,7 @@ DECLINLINE(RTGCPHYS) e1kDescAddr(uint32_t baseHigh, uint32_t baseLow, uint32_t i
 DECLINLINE(void) e1kAdvanceRDH(PPDMDEVINS pDevIns, PE1KSTATE pThis, PE1KRXDC pRxdc)
 {
     Assert(e1kCsRxIsOwner(pThis));
-    Assert((pRxdc->rdh % pRxdc->descSize) == 0);    // @todo Decide how to handle odd rdh with packet split desciptors!
+    Assert((pRxdc->rdh % pRxdc->descSize) == 0);    /// @todo Decide how to handle odd rdh with packet split desciptors!
     //e1kR3CsEnterAsserted(pThis);
     pRxdc->rdh += pRxdc->descSize;
     if (pRxdc->rdh * sizeof(E1KRXLDESC) >= pRxdc->rdlen)
@@ -3035,7 +3035,7 @@ static int e1kRxChecksumOffload(PE1KSTATE pThis, const uint8_t *pFrame, size_t c
             break;
     }
 # else
-    // @todo This is wrong!
+    /// @todo This is wrong!
     pWBDesc->legacy.status.fIXSM = true;
     RT_NOREF_PV(pThis); RT_NOREF_PV(pFrame); RT_NOREF_PV(cb);
 # endif
@@ -3086,7 +3086,7 @@ static int e1kHandleRxPacket(PPDMDEVINS pDevIns, PE1KSTATE pThis, PE1KSTATECC pT
     E1KRXDC   rxdc;
 # endif /* E1K_WITH_RXD_CACHE */
 
-    e1kCsRxEnterReturn(pThis);  // @todo I think it is safe to do VLAN handling, padding and checksum offloading outside of CS!
+    e1kCsRxEnterReturn(pThis);  /// @todo I think it is safe to do VLAN handling, padding and checksum offloading outside of CS!
     if (RT_UNLIKELY(!e1kUpdateRxDContext(pDevIns, pThis, &rxdc, "e1kHandleRxPacket")))
     {
         e1kCsRxLeave(pThis);
@@ -4822,7 +4822,7 @@ static void e1kTransmitFrame(PPDMDEVINS pDevIns, PE1KSTATE pThis, PE1KSTATECC pT
         {
             E1KRXDESC writeBackRxDescPart;
             RT_ZERO(writeBackRxDescPart);
-            // @todo Implement loopback! Or not?
+            /// @todo Implement loopback! Or not?
             //pThisCC->pRxOps->setPIF(pThis, writeBackRxDescPart, true);
             e1kHandleRxPacket(pDevIns, pThis, pThisCC, pSg->aSegs[0].pvSeg, cbFrame, &writeBackRxDescPart);
             rc = VINF_SUCCESS;
@@ -7367,7 +7367,7 @@ static bool e1kR3AddressFilter(PE1KSTATE pThis, PE1KSTATECC pThisCC, const void 
     // pWBDesc->fPIF = false;  // OBSOLETE?
     // pWBDesc->fVP  = false;  // OBSOLETE?
     /* Discard oversized packets */
-    if (cb > E1K_MAX_RX_PKT_SIZE)   // @todo Do I need to respect 9018-byte limit for 82574?
+    if (cb > E1K_MAX_RX_PKT_SIZE)   /// @todo Do I need to respect 9018-byte limit for 82574?
     {
         E1kLog(("%s ERROR: Incoming packet is too big, cb=%d > max=%d\n",
                 pThis->szPrf, cb, E1K_MAX_RX_PKT_SIZE));
@@ -7912,7 +7912,7 @@ static DECLCALLBACK(size_t) e1kR3FmtRxDesc(PFNRTSTROUTPUT pfnOutput,
 {
     RT_NOREF(cchWidth,  cchPrecision,  fFlags, pvUser);
     AssertReturn(strcmp(pszType, "e1krxd") == 0, 0);
-    /* @todo separate format functions are needed for different rx descriptor types! */
+    /** @todo separate format functions are needed for different rx descriptor types! */
     /* this covers legacy type only! */
     E1KRXLDESC* pDesc = (E1KRXLDESC*)pvValue;
     if (!pDesc)
@@ -8096,7 +8096,7 @@ static DECLCALLBACK(void) e1kR3Info(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHlp, cons
             pHlp->pfnPrintf(pHlp, "RA%02d: %s %RTmac\n", i, pcszTmp, ra->addr);
         }
     }
-    /* @todo Support different RX descriptor types! */
+    /** @todo Support different RX descriptor types! */
     unsigned cDescs = RDLEN / sizeof(E1KRXLDESC);
     uint32_t rdh = RDH;
     pHlp->pfnPrintf(pHlp, "\n-- Receive Descriptors (%d total) --\n", cDescs);
