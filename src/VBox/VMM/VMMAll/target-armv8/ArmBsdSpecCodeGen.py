@@ -3901,34 +3901,44 @@ class IEMArmGenerator(object):
                         cDuplicateValues += 1;
             if len(dFixedMasks) == 1 and cDuplicateValues == 0:
                 #
-                # One mask and no duplicate values: Switch on the fixed mask bits left to us.
+                # One mask and no duplicate values.
                 #
                 (fFixedMask, dValues) = next(iter(dFixedMasks.items()));
                 assert (1 << fFixedMask.bit_count()) >= len(dValues);
 
-                self.asBody = [
-                    '    switch (uOpcode & UINT32_C(%#010x))' % (fFixedMask,),
-                    '    {',
-                ];
-                for oInstr in oNode.aoInstructions:
-                    self.asBody += [
-                        '        case UINT32_C(%#010x):' % (oInstr.fFixedValue & ~oNode.fCheckedMask,),
-                        '            return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),),
-                    ];
-                if len(dValues) != (1 << fFixedMask.bit_count()):
-                    self.asBody += [
-                        '        default:',
-                        '            return iemDecode%s_Invalid(pVCpu, uOpcode);' % (sInstrSet,),
+                if fFixedMask.bit_count() == 1 and len(dValues) == 2:
+                    # If there are exactly two and one deciding bit, we only need a single if-statement:
+                    oInstr = oNode.aoInstructions[0];
+                    self.asBody = [
+                        '    if ((uOpcode & UINT32_C(%#010x)) == UINT32_C(%#010x))'
+                        % (fFixedMask, oInstr.fFixedValue & ~oNode.fCheckedMask),
+                        '        return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),),
+                        '    return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oNode.aoInstructions[1].getCName(),),
                     ];
                 else:
-                    # This is a hack to shut up the Visual C++ warning "C4715: not all control paths return a value"
-                    # and the gcc warning 'control reaches end of non-void function [-Werror=return-type]' (v13.3.0).
-                    asLastCase = self.asBody[-2:];
-                    self.asBody = self.asBody[:-2];
-                    self.asBody.append('        default:');
-                    self.asBody += asLastCase;
-
-                self.asBody += [ '    }' ];
+                    # Otherwise use a switch.
+                    self.asBody = [
+                        '    switch (uOpcode & UINT32_C(%#010x))' % (fFixedMask,),
+                        '    {',
+                    ];
+                    for oInstr in oNode.aoInstructions:
+                        self.asBody += [
+                            '        case UINT32_C(%#010x):' % (oInstr.fFixedValue & ~oNode.fCheckedMask,),
+                            '            return iemDecode%s_%s(pVCpu, uOpcode);' % (sInstrSet, oInstr.getCName(),),
+                        ];
+                    if len(dValues) != (1 << fFixedMask.bit_count()):
+                        self.asBody += [
+                            '        default:',
+                            '            return iemDecode%s_Invalid(pVCpu, uOpcode);' % (sInstrSet,),
+                        ];
+                    else:
+                        # This is a hack to shut up the Visual C++ warning "C4715: not all control paths return a value"
+                        # and the gcc warning 'control reaches end of non-void function [-Werror=return-type]' (v13.3.0).
+                        asLastCase = self.asBody[-2:];
+                        self.asBody = self.asBody[:-2];
+                        self.asBody.append('        default:');
+                        self.asBody += asLastCase;
+                    self.asBody += [ '    }' ];
             else:
                 #
                 # Do the multiple-if stuff with any extra conditions.
