@@ -800,7 +800,7 @@ struct E1kRxDStatusLegacy_st
 typedef struct E1kRxDStatusLegacy_st E1KRXDST;
 AssertCompileSize(E1KRXDST, 4);
 
-/** @todo: spec ref! */
+/** @todo spec ref! */
 struct E1kRxDStatusExtended_st
 {
     /** @name Extended Status field (7.1.4.6)
