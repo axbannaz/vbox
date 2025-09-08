@@ -22483,7 +22483,7 @@ Snapshot 1 (B.vdi)            Snapshot 1 (B.vdi)
 
   <enum
     name="NetworkAdapterType"
-    uuid="3c2281e4-d952-4e87-8c7d-24379cb6a81c"
+    uuid="afbbd48c-6bb8-4808-a607-6b508724d58b"
     >
     <desc>
       Network adapter type.
@@ -22533,6 +22533,9 @@ Snapshot 1 (B.vdi)            Snapshot 1 (B.vdi)
     </const>
     <const name="UsbNet"                value="14">
         <desc>Ethernet over USB device (usbnet).</desc>
+    </const>
+    <const name="I82583V"               value="15">
+        <desc>Intel 82583V Gigabit Network Connection [EXPERIMENTAL].</desc>
     </const>
   </enum>
 

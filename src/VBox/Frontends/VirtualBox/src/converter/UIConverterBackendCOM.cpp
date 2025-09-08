@@ -423,6 +423,7 @@ template<> SHARED_LIBRARY_STUFF QString UIConverter::toString(const KNetworkAdap
         case KNetworkAdapterType_I82540EM:   return QApplication::translate("UICommon", "Intel PRO/1000 MT Desktop (82540EM)", "NetworkAdapterType");
         case KNetworkAdapterType_I82543GC:   return QApplication::translate("UICommon", "Intel PRO/1000 T Server (82543GC)", "NetworkAdapterType");
         case KNetworkAdapterType_I82545EM:   return QApplication::translate("UICommon", "Intel PRO/1000 MT Server (82545EM)", "NetworkAdapterType");
+        case KNetworkAdapterType_I82583V:    return QApplication::translate("UICommon", "Intel 82583V Gigabit Network Connection [EXPERIMENTAL]", "NetworkAdapterType");
         case KNetworkAdapterType_Virtio:     return QApplication::translate("UICommon", "Paravirtualized Network (virtio-net)", "NetworkAdapterType");
         case KNetworkAdapterType_Am79C960:   return QApplication::translate("UICommon", "PCnet-ISA (Am79C960)", "NetworkAdapterType");
         case KNetworkAdapterType_NE2000:     return QApplication::translate("UICommon", "Novell NE2000 (NE2000)", "NetworkAdapterType");

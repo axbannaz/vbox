@@ -4735,6 +4735,7 @@ int Console::i_configNetworkCtrls(ComPtr<IMachine> pMachine, ComPtr<IPlatformPro
             case NetworkAdapterType_I82540EM:
             case NetworkAdapterType_I82543GC:
             case NetworkAdapterType_I82545EM:
+            case NetworkAdapterType_I82583V:
                 pDev = pDevE1000;
                 pszAdapterName = "e1000";
                 break;
@@ -4855,6 +4856,9 @@ int Console::i_configNetworkCtrls(ComPtr<IMachine> pMachine, ComPtr<IPlatformPro
                     break;
                 case NetworkAdapterType_I82545EM:
                     InsertConfigInteger(pCfg, "AdapterType", 2);
+                    break;
+                case NetworkAdapterType_I82583V:
+                    InsertConfigInteger(pCfg, "AdapterType", 3);
                     break;
                 case NetworkAdapterType_Virtio:
                     break;

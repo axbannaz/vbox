@@ -1727,6 +1727,10 @@ RTEXITCODE handleModifyVM(HandlerArg *a)
                 {
                     CHECK_ERROR(nic, COMSETTER(AdapterType)(NetworkAdapterType_I82545EM));
                 }
+                else if (!RTStrICmp(ValueUnion.psz, "82583V"))
+                {
+                    CHECK_ERROR(nic, COMSETTER(AdapterType)(NetworkAdapterType_I82583V));
+                }
 #endif
 #ifdef VBOX_WITH_VIRTIO
                 else if (!RTStrICmp(ValueUnion.psz, "virtio"))

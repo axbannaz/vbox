@@ -131,6 +131,10 @@ Rules for adding a changelog entry to make them look more uniform:
         <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
       </listitem>
 
+      <listitem>
+        <para>Network: Added new experimental type of e1000 adapter (82583V) </para>
+      </listitem>
+
     </itemizedlist>
   </sect1>
 

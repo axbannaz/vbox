@@ -2072,6 +2072,7 @@ void Appliance::i_buildXMLForOneVirtualSystem(AutoWriteLockBase& writeLock,
 #ifdef VBOX_WITH_E1000
                             case NetworkAdapterType_I82540EM:
                             case NetworkAdapterType_I82545EM:
+                            case NetworkAdapterType_I82583V:
                             case NetworkAdapterType_I82543GC: strResourceSubType = "E1000"; break;
 #endif /* VBOX_WITH_E1000 */
                         }

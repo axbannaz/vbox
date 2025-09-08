@@ -1719,6 +1719,7 @@ inline static const char *networkAdapterTypeToName(NetworkAdapterType_T adapterT
         case NetworkAdapterType_I82540EM:
         case NetworkAdapterType_I82543GC:
         case NetworkAdapterType_I82545EM:
+        case NetworkAdapterType_I82583V:
             return "e1000";
 #endif
 #ifdef VBOX_WITH_VIRTIO

@@ -257,6 +257,7 @@ HRESULT NetworkAdapter::setAdapterType(NetworkAdapterType_T aAdapterType)
         case NetworkAdapterType_I82540EM:
         case NetworkAdapterType_I82543GC:
         case NetworkAdapterType_I82545EM:
+        case NetworkAdapterType_I82583V:
 #endif
 #ifdef VBOX_WITH_VIRTIO
         case NetworkAdapterType_Virtio:
@@ -1392,6 +1393,7 @@ void NetworkAdapter::i_applyDefaults(GuestOSType *aOsType)
     /* Set default network adapter for this OS type */
     if (defaultType == NetworkAdapterType_I82540EM ||
         defaultType == NetworkAdapterType_I82543GC ||
+        defaultType == NetworkAdapterType_I82583V ||
         defaultType == NetworkAdapterType_I82545EM)
     {
         if (e1000enabled)
