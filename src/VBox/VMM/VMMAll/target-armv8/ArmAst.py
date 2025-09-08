@@ -530,6 +530,7 @@ class ArmAstBinaryOp(ArmAstBase):
     ksOpTypeSet          = 'set';
     ksOpTypeConstraints  = 'constraints';
     ksOpTypeBitwise      = 'bitwise';
+    ksOpTypeShift        = 'vbox-shift';
     kdOps = {
         '||':  ksOpTypeLogical,
         '&&':  ksOpTypeLogical,
@@ -548,6 +549,9 @@ class ArmAstBinaryOp(ArmAstBase):
         'OR':  ksOpTypeBitwise,
         '-->': ksOpTypeConstraints,    # implies that the right hand side is true when left hand side is.
         '<->': ksOpTypeConstraints,    # bidirectional version of -->, i.e. it follows strictly in both directions.
+        # These aren't part of the Arm AST.
+        '<<':  ksOpTypeShift,
+        '>>':  ksOpTypeShift,
     };
     kdOpsToC = {
         '||':  '||',
@@ -567,6 +571,8 @@ class ArmAstBinaryOp(ArmAstBase):
         'OR':  '|',
         #'-->': ksOpTypeConstraints,
         #'<->': ksOpTypeConstraints,
+        '<<':  '<<',
+        '>>':  '>>',
     };
 
     ## This is operators that can be grouped by toStringEx.
@@ -589,6 +595,8 @@ class ArmAstBinaryOp(ArmAstBase):
         'OR':  { 'OR', },
         '-->': { '-->', },
         '<->': { '<->', },
+        '<<':  { '<<', '>>', },
+        '>>':  { '<<', '>>', },
     };
 
     ## Operator precedency, lower means higher importance.
@@ -602,6 +610,8 @@ class ArmAstBinaryOp(ArmAstBase):
         '>=':   9,
         '<=':   9,
         'IN':   9,
+        '>>':   7,
+        '<<':   7,
         '+':    6,
         '-':    6,
         'MOD':  5,
