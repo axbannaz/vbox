@@ -932,10 +932,14 @@ void UICommon::loadColorTheme()
 
 #elif defined(VBOX_WS_WIN)
 
-    /* For the Dark mode! */
-    if (   osRelease() < WindowsRelease_11
-        && isInDarkMode())
+    /* We should force the legacy Dark mode in two cases:
+     * 1. For Windows versions less than 11 if Dark mode is chosen either way (packed into m_fDarkMode variable)
+     *    whether it is inherited from system theme or is chosen in the GUI it's packed into that variable after all;
+     * 2. For Windows versions starting from 11 if Dark mode is chosen in the GUI, independent from system theme. */
+    if (   (osRelease() < WindowsRelease_11 && isInDarkMode())
+        || (osRelease() >= WindowsRelease_11 && gEDataManager->colorTheme() == UIColorThemeType_Dark))
     {
+        /* For the Dark mode! */
         qApp->setStyle(QStyleFactory::create("Fusion"));
         QPalette darkPalette;
         QColor windowColor1 = QColor(59, 60, 61);
@@ -961,6 +965,37 @@ void UICommon::loadColorTheme()
         darkPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
         qApp->setPalette(darkPalette);
         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2b2b2b; border: 1px solid #737373; }");
+    }
+    /* We should force the legacy Light mode in one case:
+     * 1. For Windows versions starting from 11 if Light mode is chosen in the GUI only. */
+    else if (osRelease() >= WindowsRelease_11 && gEDataManager->colorTheme() == UIColorThemeType_Light)
+    {
+        /* For the Light mode! */
+        qApp->setStyle(QStyleFactory::create("Fusion"));
+        QPalette lightPalette;
+        QColor windowColor1 = QColor(239, 239, 239);
+        QColor windowColor2 = QColor(240, 240, 240);
+        QColor baseColor1 = QColor(255, 255, 255);
+        QColor baseColor2 = QColor(247, 247, 247);
+        QColor disabledColor = QColor(128, 128, 128);
+        lightPalette.setColor(QPalette::Window, windowColor1);
+        lightPalette.setColor(QPalette::WindowText, Qt::black);
+        lightPalette.setColor(QPalette::Disabled, QPalette::WindowText, disabledColor);
+        lightPalette.setColor(QPalette::Base, baseColor1);
+        lightPalette.setColor(QPalette::AlternateBase, baseColor2);
+        lightPalette.setColor(QPalette::PlaceholderText, disabledColor);
+        lightPalette.setColor(QPalette::Text, Qt::black);
+        lightPalette.setColor(QPalette::Disabled, QPalette::Text, disabledColor);
+        lightPalette.setColor(QPalette::Button, windowColor2);
+        lightPalette.setColor(QPalette::ButtonText, Qt::black);
+        lightPalette.setColor(QPalette::Disabled, QPalette::ButtonText, disabledColor);
+        lightPalette.setColor(QPalette::BrightText, Qt::red);
+        lightPalette.setColor(QPalette::Link, QColor(42, 130, 218));
+        lightPalette.setColor(QPalette::Highlight, QColor(42, 130, 218));
+        lightPalette.setColor(QPalette::HighlightedText, Qt::black);
+        lightPalette.setColor(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
+        qApp->setPalette(lightPalette);
+        qApp->setStyleSheet("QToolTip { color: #000000; background-color: #ffffdc; border: 1px solid #7d7d7d; }");
     }
 
 #else /* Linux, BSD, Solaris */

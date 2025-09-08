@@ -262,13 +262,10 @@ void UIAdvancedSettingsDialogGlobal::prepare()
                 /* Interface page: */
                 case GlobalSettingsPageType_Interface:
                 {
-                    if (uiCommon().osRelease() < WindowsRelease_11)
-                    {
-                        pSettingsPage = new UIGlobalSettingsInterface;
-                        addItem(":/interface_32px.png", ":/interface_24px.png", ":/interface_16px.png",
-                                iPageIndex, "#userInterface", pSettingsPage);
-                        addPageHelpKeyword(iPageIndex, "preferences");
-                    }
+                    pSettingsPage = new UIGlobalSettingsInterface;
+                    addItem(":/interface_32px.png", ":/interface_24px.png", ":/interface_16px.png",
+                            iPageIndex, "#userInterface", pSettingsPage);
+                    addPageHelpKeyword(iPageIndex, "preferences");
                     break;
                 }
 #endif /* VBOX_WS_WIN */
