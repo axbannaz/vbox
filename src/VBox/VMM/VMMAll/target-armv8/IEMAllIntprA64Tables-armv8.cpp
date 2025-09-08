@@ -84090,7 +84090,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st1b_z_p_br, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 21) & 0x00000003;
     if (   Rm != 0x1f
         && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
-        && (((uOpcode & UINT32_C(0x1c00000)/*opc*/)) >> 22) != 6)
+        && ((uOpcode >> 22) & UINT32_C(0x7)/*opc*/) != 6)
     {
         LogFlow(("%018x/%010x: st1b_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm, size));
 #ifdef IEM_INSTR_IMPL_A64__st1b_z_p_br
@@ -84870,7 +84870,7 @@ FNIEMOP_DEF_1(iemDecodeA64_st1h_z_p_br, uint32_t, uOpcode)
     uint32_t const size       = (uOpcode >> 21) & 0x00000003;
     if (   Rm != 0x1f
         && (IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSve /*FEAT_SVE*/ || IEM_GET_GUEST_CPU_FEATURES(pVCpu)->fSme /*FEAT_SME*/)
-        && (((uOpcode & UINT32_C(0x1c00000)/*opc*/)) >> 22) != 6)
+        && ((uOpcode >> 22) & UINT32_C(0x7)/*opc*/) != 6)
     {
         LogFlow(("%018x/%010x: st1h_z_p_br Zt=%#x Rn=%#x Pg=%u Rm=%#x size=%u\n", pVCpu->cpum.GstCtx.Pc.u64, uOpcode, Zt, Rn, Pg, Rm, size));
 #ifdef IEM_INSTR_IMPL_A64__st1h_z_p_br
@@ -97550,14 +97550,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_80000000_2, uint32_t, uOpcode)
    ffe0fc00/a0001c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1b_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_ldnt1b_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1b_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1b_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* ffeffc00/c0020000 level 3
@@ -98314,14 +98309,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00001c00_1, uint32_t, uOpcode)
    ffe0fc00/a0003c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1h_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_ldnt1h_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1h_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1h_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c0002000 level 2
@@ -98734,14 +98724,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00003c00_1, uint32_t, uOpcode)
    ffe0fc00/a0005c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1w_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_ldnt1w_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1w_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1w_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4000/0xf8000000
@@ -99122,14 +99107,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00005c00_1, uint32_t, uOpcode)
    ffe0fc00/a0007c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0006000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1d_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_ldnt1d_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1d_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1d_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x6000/0xf8000000
@@ -101898,14 +101878,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_80200000_2, uint32_t, uOpcode)
    ffe0fc00/a0201800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0200000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_stnt1b_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1b_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x200000/0xf8000000
@@ -101989,14 +101964,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_80200400_2, uint32_t, uOpcode)
    dfe0fc00/88207c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88200400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STNP_64_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STXP_SP32_ldstexclp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STNP_64_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STXP_SP32_ldstexclp(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/c8200400 level 2
@@ -102017,14 +101987,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88200400_2, uint32_t, uOpcode)
    dfe0fc00/c8207c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c8200400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STTNP_64_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STXP_SP64_ldstexclp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STTNP_64_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STXP_SP64_ldstexclp(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/d8200400 level 2
@@ -102059,14 +102024,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c8200400_2, uint32_t, uOpcode)
    dfe0fc00/d860f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d8200400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRAA_64_ldst_pac(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_LDRAA_64_ldst_pac(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00200400 level 1
@@ -102180,14 +102140,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00200800_1, uint32_t, uOpcode)
    dfe0fc00/d860fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d8200c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRAA_64W_ldst_pac(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_LDRAA_64W_ldst_pac(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00200c00 level 1
@@ -102274,14 +102229,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00201000_1, uint32_t, uOpcode)
    ffe0fc00/a0203800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0202000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_stnt1h_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1h_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00202000 level 1
@@ -102510,14 +102460,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00203000_1, uint32_t, uOpcode)
    ffe0fc00/a0205800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0204000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_stnt1w_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1w_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1w_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00204000 level 1
@@ -102746,14 +102691,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00205000_1, uint32_t, uOpcode)
    ffe0fc00/a0207800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a0206000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1d_mz_p_br_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_stnt1d_mz_p_br_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1d_mz_p_br_2(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1d_mz_p_br_2(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00206000 level 1
@@ -102987,14 +102927,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00207000_1, uint32_t, uOpcode)
 /* dfe0fc00/08207c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_08207c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STNP_32_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASP_CP32_comswappr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STNP_32_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_CASP_CP32_comswappr(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00207c00 level 1
@@ -103154,14 +103089,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_80208400_2, uint32_t, uOpcode)
    dfe0fc00/8820fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88208400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STNP_64_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STLXP_SP32_ldstexclp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STNP_64_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STLXP_SP32_ldstexclp(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/c8208400 level 2
@@ -103186,14 +103116,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88208400_2, uint32_t, uOpcode)
    dfe0fc00/c820fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c8208400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STTNP_64_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STLXP_SP64_ldstexclp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STTNP_64_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STLXP_SP64_ldstexclp(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00208400 level 1
@@ -103988,14 +103913,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0020ec00_1, uint32_t, uOpcode)
 /* dfe0fc00/0820fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_0820fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STNP_32_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASPL_CP32_comswappr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_STNP_32_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_CASPL_CP32_comswappr(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0020fc00 level 1
@@ -108041,14 +107961,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00607000_1, uint32_t, uOpcode)
 /* dfe0fc00/08607c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_08607c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDNP_32_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASPA_CP32_comswappr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDNP_32_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_CASPA_CP32_comswappr(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00607c00 level 1
@@ -108345,27 +108260,17 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00608c00_1, uint32_t, uOpcode)
 /* dfe0fc00/18609000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_18609000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWCLRL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWCLRL_64_memop(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/58609000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_58609000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWSCLRL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWSCLRL_64_memop(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00609000 level 1
@@ -108402,27 +108307,17 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00609000_1, uint32_t, uOpcode)
 /* dfe0fc00/1860a000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_1860a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWSWPL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWSWPL_64_memop(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/5860a000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_5860a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWSSWPL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWSSWPL_64_memop(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/8060a000 level 2
@@ -108604,27 +108499,17 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0060ac00_1, uint32_t, uOpcode)
 /* dfe0fc00/1860b000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_1860b000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWSETL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_32_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWSETL_64_memop(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/5860b000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_5860b000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_RCWSSETL_64_memop(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_64_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_RCWSSETL_64_memop(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0060b000 level 1
@@ -109014,14 +108899,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0060ec00_1, uint32_t, uOpcode)
 /* dfe0fc00/0860fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_0860fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDNP_32_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASPAL_CP32_comswappr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDNP_32_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_CASPAL_CP32_comswappr(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0060fc00 level 1
@@ -111750,27 +111630,17 @@ FNIEMOP_DEF_1(iemDecodeA64_1fe0fc38_00c00000_2, uint32_t, uOpcode)
 /* fffdfe38/c0c00008 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffdfe38_c0c00008_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00020000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_mova_za_p_rz_d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00020000):
-            return iemDecodeA64_mova_z_p_rza_d(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00020000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_mova_za_p_rz_d(pVCpu, uOpcode);
+    return iemDecodeA64_mova_z_p_rza_d(pVCpu, uOpcode);
 }
 
 /* fffdfe38/c0c10008 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffdfe38_c0c10008_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00020000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_mova_za_p_rz_q(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00020000):
-            return iemDecodeA64_mova_z_p_rza_q(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00020000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_mova_za_p_rz_q(pVCpu, uOpcode);
+    return iemDecodeA64_mova_z_p_rza_q(pVCpu, uOpcode);
 }
 
 /* 7ff0fe38/40c00008 level 3
@@ -111808,27 +111678,17 @@ FNIEMOP_DEF_1(iemDecodeA64_7ff0fe38_40c00008_3, uint32_t, uOpcode)
 /* fffdfe38/c0c00208 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffdfe38_c0c00208_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00020000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_mova_za_p_rz_d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00020000):
-            return iemDecodeA64_movaz_z_rza_d(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00020000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_mova_za_p_rz_d(pVCpu, uOpcode);
+    return iemDecodeA64_movaz_z_rza_d(pVCpu, uOpcode);
 }
 
 /* fffdfe38/c0c10208 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffdfe38_c0c10208_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00020000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_mova_za_p_rz_q(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00020000):
-            return iemDecodeA64_movaz_z_rza_q(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00020000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_mova_za_p_rz_q(pVCpu, uOpcode);
+    return iemDecodeA64_movaz_z_rza_q(pVCpu, uOpcode);
 }
 
 /* 7ff0fe38/40c00208 level 3
@@ -111913,14 +111773,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1fe0fc38_00c00008_2, uint32_t, uOpcode)
    dfe7fc38/80c70030 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe7fc38_80c00010_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmops_za_pp_zz_64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_smops_za_pp_zz_64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fmops_za_pp_zz_64(pVCpu, uOpcode);
+    return iemDecodeA64_smops_za_pp_zz_64(pVCpu, uOpcode);
 }
 
 /* dfe7fc38/c0c20010 level 3
@@ -112178,27 +112033,17 @@ FNIEMOP_DEF_1(iemDecodeA64_fff2fc38_c0c00020_3, uint32_t, uOpcode)
 /* fffefe38/c0c20020 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffefe38_c0c20020_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00010000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_mova_z_p_rza_d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00010000):
-            return iemDecodeA64_mova_z_p_rza_q(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00010000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_mova_z_p_rza_d(pVCpu, uOpcode);
+    return iemDecodeA64_mova_z_p_rza_q(pVCpu, uOpcode);
 }
 
 /* fffefe38/c0c20220 level 4 */
 FNIEMOP_DEF_1(iemDecodeA64_fffefe38_c0c20220_4, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00010000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_movaz_z_rza_d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00010000):
-            return iemDecodeA64_movaz_z_rza_q(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00010000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_movaz_z_rza_d(pVCpu, uOpcode);
+    return iemDecodeA64_movaz_z_rza_q(pVCpu, uOpcode);
 }
 
 /* fff2fc38/c0c20020 level 3
@@ -112487,14 +112332,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1fe0fc38_08c00000_2, uint32_t, uOpcode)
    1fe0fc38/10c00038 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_1fe0fc38_10c00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ADR_only_pcreladdr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_ADRP_only_pcreladdr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ADR_only_pcreladdr(pVCpu, uOpcode);
+    return iemDecodeA64_ADRP_only_pcreladdr(pVCpu, uOpcode);
 }
 
 /* 1fe0fc38/18c00000 level 2
@@ -113813,14 +113653,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_80e00400_2, uint32_t, uOpcode)
    dfe0fc00/d8e0f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d8e00400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRAB_64_ldst_pac(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_LDRAB_64_ldst_pac(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00e00400 level 1
@@ -113986,14 +113821,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00e00800_1, uint32_t, uOpcode)
    dfe0fc00/d8e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d8e00c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRAB_64W_ldst_pac(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_PRFM_P_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_LDRAB_64W_ldst_pac(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00e00c00 level 1
@@ -114421,53 +114251,33 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00e07000_1, uint32_t, uOpcode)
 /* dfe0fc00/08e07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_08e07c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDP_32_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASAB_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDP_32_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASAB_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/48e07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_48e07c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDPSW_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASAH_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDPSW_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASAH_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/88e07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88e07c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDP_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASA_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDP_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASA_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/c8e07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c8e07c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDTP_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASA_C64_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDTP_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASA_C64_comswap(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00e07c00 level 1
@@ -114722,53 +114532,33 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_00e0c000_1, uint32_t, uOpcode)
 /* dfe0fc00/08e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_08e0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDP_32_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASALB_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDP_32_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASALB_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/48e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_48e0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDPSW_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASALH_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDPSW_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASALH_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/88e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_88e0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDP_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASAL_C32_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDP_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASAL_C32_comswap(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/c8e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c8e0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDTP_64_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CASAL_C64_comswap(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDTP_64_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_CASAL_C64_comswap(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/00e0fc00 level 1
@@ -114844,14 +114634,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_81000000_2, uint32_t, uOpcode)
    ffe0fc00/a1001c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1b_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_ldnt1b_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1b_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1b_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* fff0fc1c/c1100000 level 3
@@ -114888,14 +114673,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1000000_2, uint32_t, uOpcode)
    fff0fc1c/c1106c04 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc1c_c1100000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000020))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_smlall_za_zzi_s2xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000020):
-            return iemDecodeA64_usmlall_za_zzi_s2xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000020)) == UINT32_C(0x00000000))
+        return iemDecodeA64_smlall_za_zzi_s2xi(pVCpu, uOpcode);
+    return iemDecodeA64_usmlall_za_zzi_s2xi(pVCpu, uOpcode);
 }
 
 /* fff0fc1c/c1100010 level 3
@@ -114932,14 +114712,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff0fc1c_c1100000_3, uint32_t, uOpcode)
    fff0fc1c/c1106c14 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc1c_c1100010_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000020))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_umlall_za_zzi_s2xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000020):
-            return iemDecodeA64_sumlall_za_zzi_s2xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000020)) == UINT32_C(0x00000000))
+        return iemDecodeA64_umlall_za_zzi_s2xi(pVCpu, uOpcode);
+    return iemDecodeA64_sumlall_za_zzi_s2xi(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c1000000 level 2
@@ -115498,14 +115273,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01001c00_1, uint32_t, uOpcode)
    ffe0fc00/a1003c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1h_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_ldnt1h_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1h_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1h_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1002000/0xf8000000
@@ -115796,14 +115566,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01003800_1, uint32_t, uOpcode)
    ffe0fc00/a1005c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1w_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_ldnt1w_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1w_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1w_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1004000/0xf8000000
@@ -116094,14 +115859,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01005800_1, uint32_t, uOpcode)
    ffe0fc00/a1007c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1006000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1d_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_ldnt1d_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1d_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1d_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1006000/0xf8000000
@@ -116775,14 +116535,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01008800_1, uint32_t, uOpcode)
    fff0fc18/c100fc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1009000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000004))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_smlall_za_zzi_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000004):
-            return iemDecodeA64_usmlall_za_zzi_s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000004)) == UINT32_C(0x00000000))
+        return iemDecodeA64_smlall_za_zzi_s(pVCpu, uOpcode);
+    return iemDecodeA64_usmlall_za_zzi_s(pVCpu, uOpcode);
 }
 
 /* fff0fc18/c1009010 level 3
@@ -116803,14 +116558,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1009000_3, uint32_t, uOpcode)
    fff0fc18/c100fc10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1009010_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000004))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_umlall_za_zzi_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000004):
-            return iemDecodeA64_sumlall_za_zzi_s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000004)) == UINT32_C(0x00000000))
+        return iemDecodeA64_umlall_za_zzi_s(pVCpu, uOpcode);
+    return iemDecodeA64_sumlall_za_zzi_s(pVCpu, uOpcode);
 }
 
 /* fff0fc18/c1109000 level 3
@@ -118066,14 +117816,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_81200000_2, uint32_t, uOpcode)
    ffe0fc00/a1201c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1200000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_stnt1b_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1b_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c1200000 level 2
@@ -118701,14 +118446,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01201c00_1, uint32_t, uOpcode)
    ffe0fc00/a1203c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1202000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_stnt1h_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1h_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1202000/0xf8000000
@@ -119089,14 +118829,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01203c00_1, uint32_t, uOpcode)
    ffe0fc00/a1205c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1204000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_stnt1w_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1w_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1w_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1204000/0xf8000000
@@ -119477,14 +119212,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01205c00_1, uint32_t, uOpcode)
    ffe0fc00/a1207c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1206000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1d_mzx_p_br_2x8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_stnt1d_mzx_p_br_2x8(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1d_mzx_p_br_2x8(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1d_mzx_p_br_2x8(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1206000/0xf8000000
@@ -121228,14 +120958,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0120c000_1, uint32_t, uOpcode)
    ffe0fc00/c160c400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_c120c400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sclamp_mz_zz_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_uclamp_mz_zz_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sclamp_mz_zz_2(pVCpu, uOpcode);
+    return iemDecodeA64_uclamp_mz_zz_2(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x120c400/0xf8000000
@@ -121405,14 +121130,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0120cc00_1, uint32_t, uOpcode)
    ffe0fc00/c160d000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_c120d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_zip_mz_zz_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_uzp_mz_zz_2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_zip_mz_zz_2(pVCpu, uOpcode);
+    return iemDecodeA64_uzp_mz_zz_2(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x120d000/0xf8000000
@@ -121464,14 +121184,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0120d000_1, uint32_t, uOpcode)
 /* ffe0fc00/c120d400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_c120d400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000001))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_zip_mz_zz_2q(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000001):
-            return iemDecodeA64_uzp_mz_zz_2q(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000001)) == UINT32_C(0x00000000))
+        return iemDecodeA64_zip_mz_zz_2q(pVCpu, uOpcode);
+    return iemDecodeA64_uzp_mz_zz_2q(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x120d400/0xf8000000
@@ -128662,14 +128377,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a1800000_2, uint32_t, uOpcode)
    fff0fc18/c1906400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1900000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000020))
-    {
-        case UINT32_C(0x00000020):
-            return iemDecodeA64_fmlall_za32_z8z8i_2xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_smlall_za_zzi_d2xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000020)) == UINT32_C(0x00000020))
+        return iemDecodeA64_fmlall_za32_z8z8i_2xi(pVCpu, uOpcode);
+    return iemDecodeA64_smlall_za_zzi_d2xi(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c1800000 level 2
@@ -131117,14 +130827,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_c1a01800_2, uint32_t, uOpcode)
    dfe0fc00/d9a0f800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d9a01800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ST2G_64Soffset_ldsttags(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_ST2G_64Soffset_ldsttags(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1a01800/0xd8000000
@@ -131609,14 +131314,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01a04000_1, uint32_t, uOpcode)
    dfe0fc00/d9a0f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d9a04400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ST2G_64Spost_ldsttags(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_ST2G_64Spost_ldsttags(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/01a04400 level 1
@@ -131712,14 +131412,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01a04800_1, uint32_t, uOpcode)
    dfe0fc00/d9a0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_d9a04c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ST2G_64Spre_ldsttags(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_ST2G_64Spre_ldsttags(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/01a04c00 level 1
@@ -131966,14 +131661,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01a05c00_1, uint32_t, uOpcode)
 /* dfe0fc00/19a08000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_19a08000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRSB_64_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SWPPA_128_memop_128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDRSB_64_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_SWPPA_128_memop_128(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/c1a08000 level 2
@@ -132650,14 +132340,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_21a0b800_2, uint32_t, uOpcode)
    7fe0fc03/29a0b803 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_29a0b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STP_32_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_STP_64_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STP_32_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_STP_64_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 7fe0fc03/39a0b800 level 2
@@ -132666,14 +132351,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_29a0b800_2, uint32_t, uOpcode)
    7fe0fc03/39a0b803 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_39a0b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDRSB_64_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_LDRSW_64_ldst_pos(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDRSB_64_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_LDRSW_64_ldst_pos(pVCpu, uOpcode);
 }
 
 /* 7fe0fde3/41a0b820 level 3
@@ -132767,14 +132447,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_41a0b801_2, uint32_t, uOpcode)
    7fe0fc03/69a0b803 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_69a0b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STGP_64_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_STTP_64_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STGP_64_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_STTP_64_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 7fe0fc03/79a0b800 level 2
@@ -132783,14 +132458,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_69a0b800_2, uint32_t, uOpcode)
    7fe0fc03/79a0b803 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc03_79a0b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDRSH_64_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDRSH_64_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_PRFM_P_ldst_pos(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1a0b800/0x78000003
@@ -133660,14 +133330,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_21c00000_2, uint32_t, uOpcode)
    7fe0fc00/29e0e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_29c00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDP_32_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_LDP_64_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDP_32_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_64_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 7ff0fc18/41d00000 level 3 */
@@ -133794,14 +133459,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_41c00000_2, uint32_t, uOpcode)
    7fe0fc00/69e0e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_69c00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDPSW_64_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_LDTP_64_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDPSW_64_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_LDTP_64_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x1c00000/0x78000000
@@ -134927,14 +134587,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01c01800_1, uint32_t, uOpcode)
    fff0fc18/c1d06000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1d02000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000020))
-    {
-        case UINT32_C(0x00000020):
-            return iemDecodeA64_fdot_za_z8z8i_2xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmla_za_zzi_d2xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000020)) == UINT32_C(0x00000020))
+        return iemDecodeA64_fdot_za_z8z8i_2xi(pVCpu, uOpcode);
+    return iemDecodeA64_fmla_za_zzi_d2xi(pVCpu, uOpcode);
 }
 
 /* fff0fc18/c1d02008 level 3
@@ -134942,14 +134597,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1d02000_3, uint32_t, uOpcode)
    fff0fc18/c1d06008 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc18_c1d02008_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000020))
-    {
-        case UINT32_C(0x00000020):
-            return iemDecodeA64_fdot_za_z8z8i_2xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sdot_za_zzi_d2xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000020)) == UINT32_C(0x00000020))
+        return iemDecodeA64_fdot_za_z8z8i_2xi(pVCpu, uOpcode);
+    return iemDecodeA64_sdot_za_zzi_d2xi(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c1c02000 level 2
@@ -135551,14 +135201,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01c07c00_1, uint32_t, uOpcode)
    fff0fc70/c1d0e000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc70_c1d08000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmla_za_zzi_d4xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_sdot_za_zzi_d4xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fmla_za_zzi_d4xi(pVCpu, uOpcode);
+    return iemDecodeA64_sdot_za_zzi_d4xi(pVCpu, uOpcode);
 }
 
 /* fff0fc70/c1d08010 level 3
@@ -135567,14 +135212,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff0fc70_c1d08000_3, uint32_t, uOpcode)
    fff0fc70/c1d0e010 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff0fc70_c1d08010_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000008))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmls_za_zzi_d4xi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000008):
-            return iemDecodeA64_udot_za_zzi_d4xi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000008)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fmls_za_zzi_d4xi(pVCpu, uOpcode);
+    return iemDecodeA64_udot_za_zzi_d4xi(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/c1c08000 level 2
@@ -137392,14 +137032,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_01e05400_1, uint32_t, uOpcode)
 /* dfe0fc00/19e08000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc00_19e08000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_LDRSB_32_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SWPPAL_128_memop_128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_LDRSB_32_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_SWPPAL_128_memop_128(pVCpu, uOpcode);
 }
 
 /* dfe0fc00/81e08000 level 2
@@ -139156,14 +138791,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_02000c00_1, uint32_t, uOpcode)
    f7e0fc00/92003c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_92002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_AND_64_log_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_ADDPT_64_addsub_pt(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_AND_64_log_imm(pVCpu, uOpcode);
+    return iemDecodeA64_ADDPT_64_addsub_pt(pVCpu, uOpcode);
 }
 
 /* f7e0fc00/d2002000 level 2
@@ -139176,14 +138806,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_92002000_2, uint32_t, uOpcode)
    f7e0fc00/d2003c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_d2002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_EOR_64_log_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_SUBPT_64_addsub_pt(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_EOR_64_log_imm(pVCpu, uOpcode);
+    return iemDecodeA64_SUBPT_64_addsub_pt(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/02002000 level 1
@@ -143107,14 +142732,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04000000_2, uint32_t, uOpcode)
    ffe0fc00/24401c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/54000000 level 2
@@ -143545,14 +143165,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24000000_2, uint32_t, uOpcode)
    ffe0fc00/54e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_54000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/d4000000 level 2
@@ -143712,14 +143327,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04000400_1, uint32_t, uOpcode)
    f7fffc10/04000810 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_f7fffc10_04000800_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_ST4_asisdlse_R4(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_ST4_asisdlse_R4(pVCpu, uOpcode);
+    return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/04000800 level 2
@@ -143795,42 +143405,27 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_04000800_2, uint32_t, uOpcode)
    f7e0fc10/14c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_14000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/24000800 level 2
    f7e0fc10/24001800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/24000810 level 2
    f7e0fc10/24001810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24000810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/44000800 level 2
@@ -143860,14 +143455,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_44000800_2, uint32_t, uOpcode)
    f7e0fc10/54c01c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_54000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/54000810 level 2
@@ -143884,14 +143474,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_54000800_2, uint32_t, uOpcode)
    f7e0fc10/54c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_54000810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/64000800 level 2
@@ -143900,14 +143485,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_54000810_2, uint32_t, uOpcode)
    f7e0fc10/64001810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_D_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_D_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/94000800 level 2
@@ -143936,14 +143516,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64000800_2, uint32_t, uOpcode)
    f7e0fc10/94c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_94000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_Q_loadlit(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_Q_loadlit(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/a4000800 level 2
@@ -143952,14 +143527,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_94000800_2, uint32_t, uOpcode)
    f7e0fc10/a4001810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_a4000800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rqb_z_p_br_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STNP_Q_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_ld1rqb_z_p_br_contiguous(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/d4000800 level 2
@@ -144365,14 +143935,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04002000_2, uint32_t, uOpcode)
    ffe0fc00/24c03c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
+    return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4002000/0xf8000000
@@ -144777,14 +144342,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04003c00_1, uint32_t, uOpcode)
    ffe0fc00/24c05c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpge_p_p_zw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpgt_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpge_p_p_zw(pVCpu, uOpcode);
+    return iemDecodeA64_cmpgt_p_p_zw(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4004000/0xf8000000
@@ -145189,14 +144749,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04005c00_1, uint32_t, uOpcode)
    ffe0fc00/24c07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24006000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmplt_p_p_zw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmple_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmplt_p_p_zw(pVCpu, uOpcode);
+    return iemDecodeA64_cmple_p_p_zw(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4006000/0xf8000000
@@ -145761,14 +145316,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_04008000_2, uint32_t, uOpcode)
    bfe0fc10/14c0bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_14008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/14008010 level 2
@@ -145837,14 +145387,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_14008000_2, uint32_t, uOpcode)
    bfe0fc10/14c0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_14008010_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/1c008000 level 2
@@ -145977,14 +145522,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_14008010_2, uint32_t, uOpcode)
    bfe0fc10/1cc0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_1c008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_D_loadlit(pVCpu, uOpcode);
 }
 
 /* ffebfc10/64008000 level 3
@@ -146275,14 +145815,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24008010_2, uint32_t, uOpcode)
    bfe0fc10/2c00bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STNP_D_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_D_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/34008000 level 2
@@ -146315,14 +145850,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c008000_2, uint32_t, uOpcode)
    bfe0fc10/3400bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/3c008000 level 2
@@ -146335,14 +145865,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34008000_2, uint32_t, uOpcode)
    bfe0fc10/3c00b010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STUR_B_ldst_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STUR_H_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STUR_B_ldst_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_STUR_H_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/84008000 level 2
@@ -146361,14 +145886,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008000_2, uint32_t, uOpcode)
    bfe0fc10/84009c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1sb_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ldnt1sb_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1sb_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1sb_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/94008000 level 2
@@ -146432,14 +145952,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_94008000_2, uint32_t, uOpcode)
    bfe0fc10/ac00bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_ac008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STNP_Q_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_STTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc008000 level 2
@@ -146452,14 +145967,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_ac008000_2, uint32_t, uOpcode)
    bfe0fc10/bc00b010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STUR_S_ldst_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STUR_D_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STUR_S_ldst_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_STUR_D_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4008000/0xb8000010
@@ -146520,14 +146030,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04008000_1, uint32_t, uOpcode)
    bfe0fc10/3c00b410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STR_B_ldst_immpost(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STR_H_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STR_B_ldst_immpost(pVCpu, uOpcode);
+    return iemDecodeA64_STR_H_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc008400 level 2
@@ -146540,14 +146045,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008400_2, uint32_t, uOpcode)
    bfe0fc10/bc00b410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc008400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STR_S_ldst_immpost(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STR_D_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STR_S_ldst_immpost(pVCpu, uOpcode);
+    return iemDecodeA64_STR_D_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4008400/0xb8000010
@@ -146656,14 +146156,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04008800_1, uint32_t, uOpcode)
    bfe0fc10/3c00bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STR_B_ldst_immpre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STR_H_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STR_B_ldst_immpre(pVCpu, uOpcode);
+    return iemDecodeA64_STR_H_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc008c00 level 2
@@ -146676,14 +146171,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c008c00_2, uint32_t, uOpcode)
    bfe0fc10/bc00bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc008c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STR_S_ldst_immpre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STR_D_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STR_S_ldst_immpre(pVCpu, uOpcode);
+    return iemDecodeA64_STR_D_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4008c00/0xb8000010
@@ -147093,14 +146583,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_04009810_2, uint32_t, uOpcode)
    dfe0fc10/14c09810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_14009800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/44009800 level 2
@@ -147186,27 +146671,17 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_44009800_2, uint32_t, uOpcode)
 /* dfe0fc10/54009800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54009800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/54009810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54009810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBGT_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/94009800 level 2
@@ -147227,28 +146702,18 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54009810_2, uint32_t, uOpcode)
    dfe0fc10/94c09810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_94009800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/c4009800 level 2
    dfe0fc10/c4009810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_c4009800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_st1b_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1sb_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_st1b_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1sb_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/d4009800 level 2 */
@@ -147743,14 +147208,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2400a010_2, uint32_t, uOpcode)
    bfe0fc10/8400bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_8400a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1b_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ld1q_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1b_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ld1q_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/a400a000 level 2
@@ -148152,27 +147612,17 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_0400b800_2, uint32_t, uOpcode)
 /* f7e0fc10/2400b800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_2400b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpeq_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpeq_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/2400b810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_2400b810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpne_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpne_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/4400b800 level 2
@@ -148275,14 +147725,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_a400b800_2, uint32_t, uOpcode)
    f7e0fc10/e400b810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_e400b800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_st1b_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x400b800/0xf0000010
@@ -148414,14 +147859,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0400bc00_1, uint32_t, uOpcode)
    ffe0fc00/24c0dc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2400c000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmphi_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zw(pVCpu, uOpcode);
+    return iemDecodeA64_cmphi_p_p_zw(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/6400c000 level 2
@@ -148855,14 +148295,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0400dc00_1, uint32_t, uOpcode)
    ffe0fc00/24c0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2400e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmplo_p_p_zw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpls_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmplo_p_p_zw(pVCpu, uOpcode);
+    return iemDecodeA64_cmpls_p_p_zw(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/6400e000 level 2
@@ -148904,14 +148339,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6400e000_2, uint32_t, uOpcode)
    ffe0fc00/e400fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e400e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_stnt1b_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1b_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x400e000/0xf8000000
@@ -149412,14 +148842,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0400fc00_1, uint32_t, uOpcode)
    ffe0fc00/24e0dc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24200000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmphi_p_p_zi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zi(pVCpu, uOpcode);
+    return iemDecodeA64_cmphi_p_p_zi(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4200000/0xf8000000
@@ -149920,14 +149345,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04201c00_1, uint32_t, uOpcode)
    ffe0fc00/24e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_24202000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmplo_p_p_zi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpls_p_p_zi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmplo_p_p_zi(pVCpu, uOpcode);
+    return iemDecodeA64_cmpls_p_p_zi(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4202000/0xf8000000
@@ -151429,14 +150849,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04209c00_1, uint32_t, uOpcode)
    ffe0fc00/a420bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a420a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1b_z_p_bi_u16(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1b_z_p_bi_u16(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1b_z_p_bi_u16(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1b_z_p_bi_u16(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420a000/0xf8000000
@@ -151998,14 +151413,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0420d800_1, uint32_t, uOpcode)
 /* ffe0fc00/0420e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cntb_r_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_incb_r_rs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cntb_r_s(pVCpu, uOpcode);
+    return iemDecodeA64_incb_r_rs(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e420e000 level 2
@@ -152018,14 +151428,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420e000_2, uint32_t, uOpcode)
    ffe0fc00/e420fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e420e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st2b_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st2b_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420e000/0xf8000000
@@ -152215,14 +151620,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0420ec00_1, uint32_t, uOpcode)
 /* ffe0fc00/0420f000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420f000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqincb_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqincb_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqincb_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqincb_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420f000/0xf8000000
@@ -152274,14 +151674,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0420f000_1, uint32_t, uOpcode)
 /* ffe0fc00/0420f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420f400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqincb_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqincb_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqincb_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqincb_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420f400/0xf8000000
@@ -152333,14 +151728,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0420f400_1, uint32_t, uOpcode)
 /* ffe0fc00/0420f800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420f800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqdecb_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqdecb_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqdecb_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqdecb_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420f800/0xf8000000
@@ -152392,14 +151782,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0420f800_1, uint32_t, uOpcode)
 /* ffe0fc00/0420fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0420fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqdecb_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqdecb_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqdecb_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqdecb_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x420fc00/0xf8000000
@@ -152544,14 +151929,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04400400_1, uint32_t, uOpcode)
    f7fffc10/04400810 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_f7fffc10_04400800_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LD4_asisdlse_R4(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_LD4_asisdlse_R4(pVCpu, uOpcode);
+    return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/04400800 level 2
@@ -152605,28 +151985,18 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_04400800_2, uint32_t, uOpcode)
    f7e0fc10/24401800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24400800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/24400810 level 2
    f7e0fc10/24401810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24400810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/44400800 level 2
@@ -152648,14 +152018,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_44400800_2, uint32_t, uOpcode)
    f7e0fc10/64401810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64400800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDNP_D_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_LDNP_D_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/e4400800 level 2
@@ -154217,14 +153582,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24408010_2, uint32_t, uOpcode)
    bfe0fc10/2c40bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDNP_D_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDNP_S_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_LDNP_D_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/34408000 level 2
@@ -154259,14 +153619,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c408000_2, uint32_t, uOpcode)
    bfe0fc10/3440bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/3c408000 level 2
@@ -154279,14 +153634,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34408000_2, uint32_t, uOpcode)
    bfe0fc10/3c40b010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDUR_B_ldst_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDUR_H_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDUR_B_ldst_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_LDUR_H_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/84408000 level 2
@@ -154305,14 +153655,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408000_2, uint32_t, uOpcode)
    bfe0fc10/84409c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rb_z_p_bi_u8(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ld1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rb_z_p_bi_u8(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/94408000 level 2
@@ -154373,14 +153718,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_94408000_2, uint32_t, uOpcode)
    bfe0fc10/ac40bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_ac408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDNP_Q_ldstnapair_offs(pVCpu, uOpcode);
+    return iemDecodeA64_LDTNP_Q_ldstnapair_offs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc408000 level 2
@@ -154393,14 +153733,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_ac408000_2, uint32_t, uOpcode)
    bfe0fc10/bc40b010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc408000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDUR_S_ldst_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDUR_D_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDUR_S_ldst_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_LDUR_D_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4408000/0xb8000010
@@ -154461,14 +153796,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04408000_1, uint32_t, uOpcode)
    bfe0fc10/3c40b410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_B_ldst_immpost(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDR_H_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_B_ldst_immpost(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_H_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc408400 level 2
@@ -154481,14 +153811,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408400_2, uint32_t, uOpcode)
    bfe0fc10/bc40b410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc408400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_ldst_immpost(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDR_D_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_ldst_immpost(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_D_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4408400/0xb8000010
@@ -154597,14 +153922,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04408800_1, uint32_t, uOpcode)
    bfe0fc10/3c40bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_B_ldst_immpre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDR_H_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_B_ldst_immpre(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_H_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/bc408c00 level 2
@@ -154617,14 +153937,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_3c408c00_2, uint32_t, uOpcode)
    bfe0fc10/bc40bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_bc408c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_ldst_immpre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDR_D_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_ldst_immpre(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_D_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4408c00/0xb8000010
@@ -154854,41 +154169,26 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_44409800_2, uint32_t, uOpcode)
 /* dfe0fc10/54409800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54409800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/54409810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54409810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBHI_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/c4409800 level 2
    dfe0fc10/c4409810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_c4409800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_st1b_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_st1b_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4409800/0xd8000010
@@ -155112,14 +154412,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2440a010_2, uint32_t, uOpcode)
    bfe0fc10/8440bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_8440a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rb_z_p_bi_u16(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ldff1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rb_z_p_bi_u16(pVCpu, uOpcode);
+    return iemDecodeA64_ldff1sb_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/a440a000 level 2
@@ -155882,14 +155177,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6440e000_2, uint32_t, uOpcode)
    ffe0fc00/e440fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e440e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st3b_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st3b_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x440e000/0xf8000000
@@ -158029,14 +157319,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04609c00_1, uint32_t, uOpcode)
    ffe0fc00/a460bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a460a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1b_z_p_bi_u64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1b_z_p_bi_u64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1b_z_p_bi_u64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1b_z_p_bi_u64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460a000/0xf8000000
@@ -158275,14 +157560,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460b800_1, uint32_t, uOpcode)
 /* ffe0fc00/0460c000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460c000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqinch_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_inch_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqinch_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_inch_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460c000/0xf8000000
@@ -158334,14 +157614,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460c000_1, uint32_t, uOpcode)
 /* ffe0fc00/0460c400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460c400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqinch_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_dech_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqinch_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_dech_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460c400/0xf8000000
@@ -158624,14 +157899,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460d800_1, uint32_t, uOpcode)
 /* ffe0fc00/0460e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cnth_r_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_inch_r_rs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cnth_r_s(pVCpu, uOpcode);
+    return iemDecodeA64_inch_r_rs(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e460e000 level 2
@@ -158644,14 +157914,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460e000_2, uint32_t, uOpcode)
    ffe0fc00/e460fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e460e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st4b_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1b_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st4b_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460e000/0xf8000000
@@ -158841,14 +158106,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460ec00_1, uint32_t, uOpcode)
 /* ffe0fc00/0460f000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460f000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqinch_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqinch_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqinch_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqinch_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460f000/0xf8000000
@@ -158900,14 +158160,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460f000_1, uint32_t, uOpcode)
 /* ffe0fc00/0460f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460f400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqinch_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqinch_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqinch_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqinch_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460f400/0xf8000000
@@ -158959,14 +158214,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460f400_1, uint32_t, uOpcode)
 /* ffe0fc00/0460f800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460f800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqdech_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqdech_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqdech_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqdech_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460f800/0xf8000000
@@ -159018,14 +158268,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460f800_1, uint32_t, uOpcode)
 /* ffe0fc00/0460fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0460fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqdech_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqdech_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqdech_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqdech_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x460fc00/0xf8000000
@@ -159094,14 +158339,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0460fc00_1, uint32_t, uOpcode)
    ffeffc10/04c00c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04800000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_mul_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_add_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_mul_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/04830000 level 3
@@ -159124,14 +158364,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04800000_3, uint32_t, uOpcode)
    ffeffc10/04c30c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04830000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_subr_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_umulh_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_subr_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_umulh_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/04880000 level 3
@@ -159154,14 +158389,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04830000_3, uint32_t, uOpcode)
    ffeffc10/04c80c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04880000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_smax_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_orr_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_smax_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_orr_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/04890000 level 3
@@ -159184,14 +158414,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04880000_3, uint32_t, uOpcode)
    ffeffc10/04c90c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04890000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_umax_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_eor_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_umax_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_eor_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/048a0000 level 3
@@ -159214,14 +158439,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04890000_3, uint32_t, uOpcode)
    ffeffc10/04ca0c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_048a0000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_smin_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_and_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_smin_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_and_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/048b0000 level 3
@@ -159244,14 +158464,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_048a0000_3, uint32_t, uOpcode)
    ffeffc10/04cb0c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_048b0000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_umin_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_bic_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_umin_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_bic_z_p_zz(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/04800000 level 2
@@ -159316,7 +158531,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0c800000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST4_asisdlsep_I4_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc800000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST4_asisdlsep_R4_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -159330,14 +158545,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0c800000_2, uint32_t, uOpcode)
    bfe0fc10/24c00c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24800000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/24800010 level 2
@@ -159349,14 +158559,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24800000_2, uint32_t, uOpcode)
    bfe0fc10/24c00c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24800010_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/2c800000 level 2
@@ -159395,14 +158600,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24800010_2, uint32_t, uOpcode)
    bfe0fc10/2c80bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c800000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STP_D_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_STP_D_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/84800000 level 2
@@ -159421,14 +158621,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2c800000_2, uint32_t, uOpcode)
    bfe0fc10/84c00c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84800000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ld1sh_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sh_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/a4800000 level 2
@@ -159445,7 +158640,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_a4800000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x40100000) == 0x40000000)
         return iemDecodeA64_st3q_z_p_bi_contiguous(pVCpu, uOpcode);
     /* 0xffe0e000/0xa4800000 org expr: (uOpcode AND 0x40000000) == 0 && Rm != '11111' && (IsFeatureImplemented(FEAT_SVE) || IsFeatureImplemented(FEAT_SME)) */
-    if ((uOpcode & 0x40000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & 0x40000000) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ld1rqh_z_p_br_contiguous(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -159486,14 +158681,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_a4800000_2, uint32_t, uOpcode)
    bfe0fc10/ac80bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_ac800000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STP_Q_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_STTP_Q_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STP_Q_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_STTP_Q_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4800000/0xb8000010
@@ -159837,14 +159027,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04800c00_1, uint32_t, uOpcode)
    f7e0fc10/24801c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24801000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/24801010 level 2
@@ -159852,28 +159037,18 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24801000_2, uint32_t, uOpcode)
    f7e0fc10/24801c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24801010_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_STP_S_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/34801000 level 2
    f7e0fc10/34801010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34801000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STUR_Q_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_STUR_Q_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/64801000 level 2
@@ -159884,14 +159059,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34801000_2, uint32_t, uOpcode)
    f7e0fc10/64801c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64801000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_D_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_STP_D_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/a4801000 level 2
@@ -159902,14 +159072,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64801000_2, uint32_t, uOpcode)
    f7e0fc10/a4801c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_a4801000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_Q_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rqh_z_p_br_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STP_Q_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_ld1rqh_z_p_br_contiguous(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/e4801000 level 2
@@ -159980,14 +159145,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04801000_1, uint32_t, uOpcode)
    f7e0fc10/34801410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34801400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_Q_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_STR_Q_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4801400/0xf0000010
@@ -160088,81 +159248,51 @@ FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_04801800_2, uint32_t, uOpcode)
 /* efe0fc10/24801800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_24801800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/24801810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_24801810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/44801800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_44801800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cdot_z_zzz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cdot_z_zzz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/44801810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_44801810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cdot_z_zzz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cdot_z_zzz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/84801800 level 2
    efe0fc10/84801810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_84801800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
 }
 
 /* efe0fc10/a4801800 level 2
    efe0fc10/a4801810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_a4801800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rqh_z_p_br_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_ld1rqh_z_p_br_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4801800/0xe8000010
@@ -160217,14 +159347,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04801800_1, uint32_t, uOpcode)
    f7e0fc10/34801c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34801c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_Q_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_STR_Q_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4801c00/0xf0000010
@@ -160288,7 +159413,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0c802000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsep_I4_i4(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc802000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsep_R4_r4(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -160529,41 +159654,26 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_04802800_2, uint32_t, uOpcode)
 /* bfe0fc10/24802800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24802800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/24802810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24802810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/84802800 level 2
    bfe0fc10/84802810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84802800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldff1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ldff1sh_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldff1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ldff1sh_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/a4802800 level 2
@@ -160801,67 +159911,42 @@ FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_04803800_2, uint32_t, uOpcode)
 /* efe0fc10/24803800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_24803800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cmpeq_p_p_zw(pVCpu, uOpcode);
 }
 
 /* efe0fc10/24803810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_24803810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_cmpne_p_p_zw(pVCpu, uOpcode);
 }
 
 /* efe0fc10/44803800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_44803800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqrdcmlah_z_zzz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_sqrdcmlah_z_zzz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/44803810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_44803810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqrdcmlah_z_zzz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_sqrdcmlah_z_zzz(pVCpu, uOpcode);
 }
 
 /* efe0fc10/84803800 level 2
    efe0fc10/84803810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_efe0fc10_84803800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x10000000))
-    {
-        case UINT32_C(0x10000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldff1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x10000000)) == UINT32_C(0x10000000))
+        return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_ldff1sh_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
 }
 
 /* efe0fc10/a4803800 level 2
@@ -160985,7 +160070,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0c804000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST3_asisdlsep_I3_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc804000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsep_R3_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -161372,7 +160457,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0c806000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsep_I3_i3(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc806000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsep_R3_r3(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -161575,7 +160660,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0c807000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsep_I1_i1(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc807000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsep_R1_r1(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -161778,7 +160863,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0c808000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsep_I2_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc808000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsep_R2_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -161905,14 +160990,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24808010_2, uint32_t, uOpcode)
    bfe0fc10/84808c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84808000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1sh_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ldnt1sh_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1sh_z_p_ar_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1sh_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4808000/0xb8000010
@@ -162111,14 +161191,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04808c00_1, uint32_t, uOpcode)
    dfe0fc10/1c809010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_1c809000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STUR_Q_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_STUR_Q_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/44809000 level 2
@@ -162217,14 +161292,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_44809000_2, uint32_t, uOpcode)
    dfe0fc10/c4809c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_c4809000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_st1h_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1sh_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_st1h_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ldnt1sh_z_p_ar_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4809000/0xd8000010
@@ -162279,14 +161349,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04809000_1, uint32_t, uOpcode)
    dfe0fc10/1c809410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_1c809400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STR_Q_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_STR_Q_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4809400/0xd8000010
@@ -162389,14 +161454,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04809800_1, uint32_t, uOpcode)
    dfe0fc10/1c809c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_1c809c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_STR_Q_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDR_S_loadlit(pVCpu, uOpcode);
+    return iemDecodeA64_STR_Q_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4809c00/0xd8000010
@@ -162461,7 +161521,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0c80a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsep_I2_i2(pVCpu, uOpcode);
     /* 0xbfe0f000/0xc80a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsep_R2_r2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -163585,14 +162645,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6480e000_2, uint32_t, uOpcode)
    ffe0fc00/a480fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a480e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1h_z_p_bi_contiguous(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ld2q_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1h_z_p_bi_contiguous(pVCpu, uOpcode);
+    return iemDecodeA64_ld2q_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e480e000 level 2
@@ -163605,14 +162660,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a480e000_2, uint32_t, uOpcode)
    ffe0fc00/e480fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e480e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_stnt1h_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1h_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x480e000/0xf8000000
@@ -165912,14 +164962,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a09c00_1, uint32_t, uOpcode)
    ffe0fc00/a4a0bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a4a0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1h_z_p_bi_u16(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1h_z_p_bi_u16(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1h_z_p_bi_u16(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1h_z_p_bi_u16(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0a000/0xf8000000
@@ -166248,14 +165293,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0b800_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0c000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0c000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqincw_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_incw_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqincw_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_incw_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0c000/0xf8000000
@@ -166307,14 +165347,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0c000_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0c400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0c400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqincw_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_decw_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqincw_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_decw_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0c400/0xf8000000
@@ -166597,14 +165632,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0d800_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cntw_r_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_incw_r_rs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cntw_r_s(pVCpu, uOpcode);
+    return iemDecodeA64_incw_r_rs(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e4a0e000 level 2
@@ -166617,14 +165647,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0e000_2, uint32_t, uOpcode)
    ffe0fc00/e4a0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e4a0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st2h_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st2h_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0e000/0xf8000000
@@ -166814,14 +165839,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0ec00_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0f000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0f000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqincw_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqincw_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqincw_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqincw_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0f000/0xf8000000
@@ -166873,14 +165893,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0f000_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0f400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqincw_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqincw_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqincw_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqincw_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0f400/0xf8000000
@@ -166932,14 +165947,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0f400_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0f800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0f800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqdecw_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqdecw_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqdecw_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqdecw_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0f800/0xf8000000
@@ -166991,14 +166001,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0f800_1, uint32_t, uOpcode)
 /* ffe0fc00/04a0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04a0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqdecw_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqdecw_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqdecw_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqdecw_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4a0fc00/0xf8000000
@@ -167057,14 +166062,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04a0fc00_1, uint32_t, uOpcode)
    ffeffc10/04c40c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04c40000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sdiv_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_addpt_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_sdiv_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_addpt_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc10/04c50000 level 3
@@ -167077,14 +166077,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04c40000_3, uint32_t, uOpcode)
    ffeffc10/04c50c10 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc10_04c50000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_udiv_z_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_subpt_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_udiv_z_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_subpt_z_p_zz(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/04c00000 level 2
@@ -167147,7 +166142,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0cc00000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4_asisdlsep_I4_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc00000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsep_R4_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -167190,14 +166185,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0cc00000_2, uint32_t, uOpcode)
    bfe0fc10/2cc0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2cc00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDP_D_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_D_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/34c00000 level 2
@@ -167208,14 +166198,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_2cc00000_2, uint32_t, uOpcode)
    bfe0fc10/34c00c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34c00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/acc00000 level 2
@@ -167256,14 +166241,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34c00000_2, uint32_t, uOpcode)
    bfe0fc10/acc0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_acc00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDP_Q_ldstpair_post(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDTP_Q_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDP_Q_ldstpair_post(pVCpu, uOpcode);
+    return iemDecodeA64_LDTP_Q_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/b4c00000 level 2
@@ -167274,14 +166254,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_acc00000_2, uint32_t, uOpcode)
    bfe0fc10/b4c00c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_b4c00000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CBEQ_64_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_64_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBEQ_64_regs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c00000/0xb8000010
@@ -167533,7 +166508,7 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_0cc00800_2, uint32_t, uOpcode)
     if ((uOpcode & 0x20000000) == 0x20000000)
         return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc00000 org expr: (uOpcode AND 0x20000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x20000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & 0x20000000) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsep_R4_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -167542,14 +166517,9 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_0cc00800_2, uint32_t, uOpcode)
    dfe0fc10/44c00810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_44c00800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqdmlalbt_z_zzz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_sqdmlalbt_z_zzz(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/4cc00800 level 2
@@ -167563,7 +166533,7 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_4cc00800_2, uint32_t, uOpcode)
     if ((uOpcode & 0x20000000) == 0x20000000)
         return iemDecodeA64_LDP_D_ldstpair_post(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc00000 org expr: (uOpcode AND 0x20000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x20000000) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & 0x20000000) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsep_R4_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -167571,27 +166541,17 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_4cc00800_2, uint32_t, uOpcode)
 /* dfe0fc10/54c00800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54c00800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/54c00810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54c00810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBEQ_32_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/c4c00800 level 2
@@ -167810,14 +166770,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_04c01000_2, uint32_t, uOpcode)
    f7e0fc10/24c01c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24c01000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphs_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/24c01010 level 2
@@ -167826,28 +166781,18 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24c01000_2, uint32_t, uOpcode)
    f7e0fc10/24c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_24c01010_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmphi_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_S_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/34c01000 level 2
    f7e0fc10/34c01010 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34c01000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDUR_Q_ldst_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_LDUR_Q_ldst_unscaled(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/64c01000 level 2
@@ -167860,14 +166805,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34c01000_2, uint32_t, uOpcode)
    f7e0fc10/64c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_64c01000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDP_D_ldstpair_post(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmla_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_D_ldstpair_post(pVCpu, uOpcode);
 }
 
 /* f7e0fc10/e4c01000 level 2
@@ -167940,14 +166880,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04c01000_1, uint32_t, uOpcode)
    f7e0fc10/34c01410 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34c01400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_Q_ldst_immpost(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_Q_ldst_immpost(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c01400/0xf0000010
@@ -168048,14 +166983,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04c01800_1, uint32_t, uOpcode)
    f7e0fc10/34c01c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc10_34c01c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_Q_ldst_immpre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_Q_ldst_immpre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c01c00/0xf0000010
@@ -168119,7 +167049,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0cc02000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsep_I4_i4(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc02000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsep_R4_r4(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -168506,7 +167436,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0cc04000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD3_asisdlsep_I3_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc04000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3_asisdlsep_R3_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -168893,7 +167823,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0cc06000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsep_I3_i3(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc06000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsep_R3_r3(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -169096,7 +168026,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0cc07000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsep_I1_i1(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc07000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsep_R1_r1(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -169299,7 +168229,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0cc08000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD2_asisdlsep_I2_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc08000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsep_R2_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -169520,14 +168450,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24c08010_2, uint32_t, uOpcode)
    bfe0fc10/34c0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34c08000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/84c08000 level 2
@@ -169546,14 +168471,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_34c08000_2, uint32_t, uOpcode)
    bfe0fc10/84c09c10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84c08000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rsw_z_p_bi_s64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ld1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rsw_z_p_bi_s64(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c08000/0xb8000010
@@ -169927,41 +168847,26 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_44c09800_2, uint32_t, uOpcode)
 /* dfe0fc10/54c09800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54c09800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/54c09810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_54c09810_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BC_only_condbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBBEQ_8_regs(pVCpu, uOpcode);
 }
 
 /* dfe0fc10/c4c09800 level 2
    dfe0fc10/c4c09810 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe0fc10_c4c09800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_st1h_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_st1h_z_p_bz_s_x32_unscaled(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c09800/0xd8000010
@@ -170074,7 +168979,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_0cc0a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsep_I2_i2(pVCpu, uOpcode);
     /* 0xbfe0f000/0xcc0a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsep_R2_r2(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -170324,14 +169229,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_24c0a010_2, uint32_t, uOpcode)
    bfe0fc10/84c0bc10 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc10_84c0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rh_z_p_bi_u16(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_ldff1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rh_z_p_bi_u16(pVCpu, uOpcode);
+    return iemDecodeA64_ldff1sh_z_p_bz_d_64_unscaled(pVCpu, uOpcode);
 }
 
 /* bfe0fc10/a4c0a000 level 2
@@ -171139,14 +170039,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_64c0e000_2, uint32_t, uOpcode)
    ffe0fc00/e4c0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e4c0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st3h_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st3h_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4c0e000/0xf8000000
@@ -173322,14 +172217,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e09c00_1, uint32_t, uOpcode)
    ffe0fc00/a4e0bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a4e0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1h_z_p_bi_u64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1h_z_p_bi_u64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1h_z_p_bi_u64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1h_z_p_bi_u64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0a000/0xf8000000
@@ -173658,14 +172548,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0b800_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0c000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0c000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqincd_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_incd_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqincd_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_incd_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0c000/0xf8000000
@@ -173717,14 +172602,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0c000_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0c400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0c400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqincd_z_zs(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_decd_z_zs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqincd_z_zs(pVCpu, uOpcode);
+    return iemDecodeA64_decd_z_zs(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0c400/0xf8000000
@@ -174007,14 +172887,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0d800_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0e000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cntd_r_s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_incd_r_rs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cntd_r_s(pVCpu, uOpcode);
+    return iemDecodeA64_incd_r_rs(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e4e0e000 level 2
@@ -174027,14 +172902,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0e000_2, uint32_t, uOpcode)
    ffe0fc00/e4e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e4e0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st4h_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1h_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st4h_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0e000/0xf8000000
@@ -174224,14 +173094,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0ec00_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0f000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0f000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqincd_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqincd_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqincd_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqincd_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0f000/0xf8000000
@@ -174283,14 +173148,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0f000_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0f400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0f400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqincd_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqincd_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqincd_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqincd_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0f400/0xf8000000
@@ -174342,14 +173202,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0f400_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0f800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0f800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_sqdecd_r_rs_sx(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sqdecd_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_sqdecd_r_rs_sx(pVCpu, uOpcode);
+    return iemDecodeA64_sqdecd_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0f800/0xf8000000
@@ -174401,14 +173256,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_04e0f800_1, uint32_t, uOpcode)
 /* ffe0fc00/04e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_04e0fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_uqdecd_r_rs_uw(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_uqdecd_r_rs_x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_uqdecd_r_rs_uw(pVCpu, uOpcode);
+    return iemDecodeA64_uqdecd_r_rs_x(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x4e0fc00/0xf8000000
@@ -174517,14 +173367,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_05000000_2, uint32_t, uOpcode)
    ffe0fc00/25c01c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpge_p_p_zi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpgt_p_p_zi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpge_p_p_zi(pVCpu, uOpcode);
+    return iemDecodeA64_cmpgt_p_p_zi(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/65000000 level 2 */
@@ -175582,14 +174427,9 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe7fc00_15032000_2, uint32_t, uOpcode)
    ffe0fc00/25c03c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe7fc00_25002000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmplt_p_p_zi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmple_p_p_zi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmplt_p_p_zi(pVCpu, uOpcode);
+    return iemDecodeA64_cmple_p_p_zi(pVCpu, uOpcode);
 }
 
 /* ffe7fc00/65002000 level 3 */
@@ -175626,14 +174466,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe7fc00_65002000_3, uint32_t, uOpcode)
    ffe0fc00/a5003c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe7fc00_a5002000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rqw_z_p_bi_u32(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ld1w_z_p_bi_u128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rqw_z_p_bi_u32(pVCpu, uOpcode);
+    return iemDecodeA64_ld1w_z_p_bi_u128(pVCpu, uOpcode);
 }
 
 /* 3fe7fc00/25002000 level 2
@@ -176101,10 +174936,10 @@ FNIEMOP_DEF_1(iemDecodeA64_fffffd0f_d503240f_6, uint32_t, uOpcode)
     if ((uOpcode & 0x2f0) == 0xf0)
         return iemDecodeA64_PACM_HI_hints(pVCpu, uOpcode);
     /* 0xffffff1f/0xd503241f org expr: (uOpcode AND 0x210) == 0x10 && IsFeatureImplemented(FEAT_BTI) && op2 IN ('xx0') */
-    if ((uOpcode & 0x210) == 0x10 && ((((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) & 1) == 0)
+    if ((uOpcode & 0x210) == 0x10 && (((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) & 1) == 0)
         return iemDecodeA64_BTI_HB_hints(pVCpu, uOpcode);
     /* 0xffffff1f/0xd503261f org expr: (uOpcode AND 0x210) == 0x210 && IsFeatureImplemented(FEAT_PCDPHINT) && op2 IN ('00x') */
-    if ((uOpcode & 0x210) == 0x210 && ((((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) & 6) == 0)
+    if ((uOpcode & 0x210) == 0x210 && (((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) & 6) == 0)
         return iemDecodeA64_STSHH_HI_hints(pVCpu, uOpcode);
     /* 0xfffff01f/0xd503201f org expr: (uOpcode AND 0x10) == 0x10 && true */
     if ((uOpcode & 0x10) == 0x10)
@@ -176542,14 +175377,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05003000_1, uint32_t, uOpcode)
    fffffc00/65d03000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fffffc00_65103400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmge_p_p_z0(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_fcmgt_p_p_z0(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmge_p_p_z0(pVCpu, uOpcode);
+    return iemDecodeA64_fcmgt_p_p_z0(pVCpu, uOpcode);
 }
 
 /* fffffc00/65113400 level 3
@@ -176560,14 +175390,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fffffc00_65103400_3, uint32_t, uOpcode)
    fffffc00/65d13000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fffffc00_65113400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmlt_p_p_z0(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_fcmle_p_p_z0(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmlt_p_p_z0(pVCpu, uOpcode);
+    return iemDecodeA64_fcmle_p_p_z0(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/65003400 level 2
@@ -177064,14 +175889,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_25004000_2, uint32_t, uOpcode)
    f7e0fc40/35009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_35004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_B_ldst_pos(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_STR_B_ldst_pos(pVCpu, uOpcode);
 }
 
 /* f7e0fc00/45004000 level 2 */
@@ -177104,14 +175924,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_65004000_2, uint32_t, uOpcode)
 /* f7e0fc00/a5004000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_a5004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_Q_ldstpair_off(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_br_s64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STP_Q_ldstpair_off(pVCpu, uOpcode);
+    return iemDecodeA64_ld1sh_z_p_br_s64(pVCpu, uOpcode);
 }
 
 /* f7e0fc00/b5004000 level 2
@@ -177127,14 +175942,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_a5004000_2, uint32_t, uOpcode)
    f7e0fc40/b5009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_b5004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBNZ_64_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_S_ldst_pos(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBNZ_64_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_STR_S_ldst_pos(pVCpu, uOpcode);
 }
 
 /* fff8fc01/d5004001 level 3 */
@@ -177151,8 +175961,8 @@ FNIEMOP_DEF_1(iemDecodeA64_fff8fc01_d5004001_3, uint32_t, uOpcode)
         return iemDecodeA64_AXFLAG_M_pstate(pVCpu, uOpcode);
     /* 0xfff8f01f/0xd500401f org expr: (uOpcode AND 0x1e) == 0x1e && !(op1 == '000' && op2 IN ('00x', '010')) */
     if (   (uOpcode & 0x1e) == 0x1e
-        && (   (((uOpcode & UINT32_C(0x70000)/*op1*/)) >> 16) != 0
-            || !(((((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) & 6) == 0 || (((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) == 2)))
+        && (   ((uOpcode >> 16) & UINT32_C(0x7)/*op1*/) != 0
+            || !((((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) & 6) == 0 || ((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) == 2)))
         return iemDecodeA64_MSR_SI_pstate(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -177192,14 +176002,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_d5004000_2, uint32_t, uOpcode)
 /* f7e0fc00/e5004000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc00_e5004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STTP_Q_ldstpair_off(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_z_p_br_u128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STTP_Q_ldstpair_off(pVCpu, uOpcode);
+    return iemDecodeA64_st1w_z_p_br_u128(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5004000/0xf0000000
@@ -177329,14 +176134,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25004400_2, uint32_t, uOpcode)
    ffe0fc00/65c05c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_65004400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmge_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_fcmgt_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmge_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_fcmgt_p_p_zz(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/d5004400 level 2
@@ -177346,8 +176146,8 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_d5004400_2, uint32_t, uOpcode)
 {
     /* 0xfff8f01f/0xd500401f org expr: (uOpcode AND 0x18001f) == 0x1f && !(op1 == '000' && op2 IN ('00x', '010')) */
     if (   (uOpcode & 0x18001f) == 0x1f
-        && (   (((uOpcode & UINT32_C(0x70000)/*op1*/)) >> 16) != 0
-            || !(((((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) & 6) == 0 || (((uOpcode & UINT32_C(0xe0)/*op2*/)) >> 5) == 2)))
+        && (   ((uOpcode >> 16) & UINT32_C(0x7)/*op1*/) != 0
+            || !((((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) & 6) == 0 || ((uOpcode >>  5) & UINT32_C(0x7)/*op2*/) == 2)))
         return iemDecodeA64_MSR_SI_pstate(pVCpu, uOpcode);
     /* 0xfff80000/0xd5080000 org expr: (uOpcode AND 0x180000) == 0x80000 && true */
     if ((uOpcode & 0x180000) == 0x80000)
@@ -177714,14 +176514,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05005c00_1, uint32_t, uOpcode)
    ffe0fc00/65c07c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_65006000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmeq_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_fcmne_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmeq_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_fcmne_p_p_zz(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5006000/0xf8000000
@@ -178200,14 +176995,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc40_65028000_3, uint32_t, uOpcode)
 /* ffeffc40/65038000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc40_65038000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ftmad_z_zzi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fsubr_z_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_ftmad_z_zzi(pVCpu, uOpcode);
+    return iemDecodeA64_fsubr_z_p_zz(pVCpu, uOpcode);
 }
 
 /* ffeffc40/65048000 level 3 */
@@ -178582,14 +177372,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_65008040_2, uint32_t, uOpcode)
    f7e0fc40/75009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_75008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_H_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBGT_32_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STR_H_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_CBGT_32_imm(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/a5008000 level 2
@@ -178604,14 +177389,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_75008000_2, uint32_t, uOpcode)
    f7e0fc40/a5009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_a5008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STP_Q_ldstpair_off(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1w_z_p_br_u128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STP_Q_ldstpair_off(pVCpu, uOpcode);
+    return iemDecodeA64_ld1w_z_p_br_u128(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/d5008000 level 2
@@ -178641,14 +177421,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_d5008000_2, uint32_t, uOpcode)
    f7e0fc40/e5009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_e5008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STTP_Q_ldstpair_off(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STTP_Q_ldstpair_off(pVCpu, uOpcode);
+    return iemDecodeA64_st1w_z_p_bz_d_x32_unscaled(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/f5008000 level 2
@@ -178663,14 +177438,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_e5008000_2, uint32_t, uOpcode)
    f7e0fc40/f5009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_f5008000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STR_D_ldst_pos(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBGT_64_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_STR_D_ldst_pos(pVCpu, uOpcode);
+    return iemDecodeA64_CBGT_64_imm(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5008000/0xf0000040
@@ -178740,14 +177510,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_05008400_2, uint32_t, uOpcode)
    f7e0fc40/15008440 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_15008400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_CPYPRN_CPY_memcms(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_CPYPRN_CPY_memcms(pVCpu, uOpcode);
+    return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/45008400 level 2
@@ -178994,14 +177759,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_65008440_2, uint32_t, uOpcode)
    f7e0fc40/95008440 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_95008400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_CPYPRN_CPY_memcms(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x08000000))
+        return iemDecodeA64_CPYPRN_CPY_memcms(pVCpu, uOpcode);
+    return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/d5008400 level 2
@@ -179073,14 +177833,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05008400_1, uint32_t, uOpcode)
    f7e0fc40/15009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_15008800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STLUR_B_ldapstl_simd(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_STLUR_B_ldapstl_simd(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/55008800 level 2
@@ -179104,14 +177859,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_55008800_2, uint32_t, uOpcode)
    f7e0fc40/95009840 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fc40_95008800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_STLUR_S_ldapstl_simd(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_STLUR_S_ldapstl_simd(pVCpu, uOpcode);
 }
 
 /* f7e0fc40/d5008800 level 2
@@ -179394,14 +178144,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05008c00_1, uint32_t, uOpcode)
    ffe3fc00/25c39c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_25009000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cmpeq_p_p_zi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_cmpne_p_p_zi(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cmpeq_p_p_zi(pVCpu, uOpcode);
+    return iemDecodeA64_cmpne_p_p_zi(pVCpu, uOpcode);
 }
 
 /* 0feffc00/05009000 level 2
@@ -179667,14 +178412,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_65089000_3, uint32_t, uOpcode)
    ffeffc00/d50f9000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_d5089000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_MSR_SR_systemmove(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SYS_CR_systeminstrs(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_MSR_SR_systemmove(pVCpu, uOpcode);
+    return iemDecodeA64_SYS_CR_systeminstrs(pVCpu, uOpcode);
 }
 
 /* 0feffc00/05089000 level 2
@@ -181593,14 +180333,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05009c00_1, uint32_t, uOpcode)
    fff7fc00/6502bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6502a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frintm_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtx_z_p_z_d2s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frintm_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtx_z_p_z_d2s(pVCpu, uOpcode);
 }
 
 /* fff7fc00/6504a000 level 3
@@ -181615,14 +180350,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6502a000_3, uint32_t, uOpcode)
    fff7fc00/65c4b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6504a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frinta_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_frecpx_z_p_z_m(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frinta_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_frecpx_z_p_z_m(pVCpu, uOpcode);
 }
 
 /* fff7fc00/6510a000 level 3
@@ -181643,14 +180373,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6504a000_3, uint32_t, uOpcode)
    fff7fc00/6512bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6510a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_flogb_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frint32z_z_p_z_m(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00080000))
+        return iemDecodeA64_flogb_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_frint32z_z_p_z_m(pVCpu, uOpcode);
 }
 
 /* fff7fc00/6514a000 level 3
@@ -181671,14 +180396,9 @@ FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6510a000_3, uint32_t, uOpcode)
    fff7fc00/6516bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_6514a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_flogb_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frint64z_z_p_z_m(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00080000))
+        return iemDecodeA64_flogb_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_frint64z_z_p_z_m(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/6500a000 level 2
@@ -181729,14 +180449,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6500a000_2, uint32_t, uOpcode)
    ffe0fc00/a500bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a500a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_bi_s64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1sh_z_p_bi_s64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sh_z_p_bi_s64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1sh_z_p_bi_s64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x500a000/0xf8000000
@@ -182185,14 +180900,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2500c000_2, uint32_t, uOpcode)
    ffe0fc00/65c0dc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6500c000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fcmuo_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_facge_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fcmuo_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_facge_p_p_zz(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x500c000/0xf8000000
@@ -182627,14 +181337,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2500e000_2, uint32_t, uOpcode)
    ffe0fc00/a500fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a500e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1w_z_p_bi_contiguous(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ld3q_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1w_z_p_bi_contiguous(pVCpu, uOpcode);
+    return iemDecodeA64_ld3q_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/e500e000 level 2
@@ -182647,14 +181352,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a500e000_2, uint32_t, uOpcode)
    ffe0fc00/e500fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e500e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_z_p_bi_u128(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_stnt1w_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1w_z_p_bi_u128(pVCpu, uOpcode);
+    return iemDecodeA64_stnt1w_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x500e000/0xf8000000
@@ -183068,14 +181768,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0500fc00_1, uint32_t, uOpcode)
    ffe0fc00/25e01000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25200000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_whilege_p_p_rr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_whilegt_p_p_rr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_whilege_p_p_rr(pVCpu, uOpcode);
+    return iemDecodeA64_whilegt_p_p_rr(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/65200000 level 2
@@ -183223,14 +181918,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05200000_1, uint32_t, uOpcode)
    ffe0fc00/25e01400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25200400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_whilelt_p_p_rr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_whilele_p_p_rr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_whilelt_p_p_rr(pVCpu, uOpcode);
+    return iemDecodeA64_whilele_p_p_rr(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5200400/0xf8000000
@@ -183289,14 +181979,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05200400_1, uint32_t, uOpcode)
    ffe0fc00/25e01800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25200800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_whilehs_p_p_rr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_whilehi_p_p_rr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_whilehs_p_p_rr(pVCpu, uOpcode);
+    return iemDecodeA64_whilehi_p_p_rr(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5200800/0xf8000000
@@ -183355,14 +182040,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05200800_1, uint32_t, uOpcode)
    ffe0fc00/25e01c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25200c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_whilelo_p_p_rr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_whilels_p_p_rr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_whilelo_p_p_rr(pVCpu, uOpcode);
+    return iemDecodeA64_whilels_p_p_rr(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5200c00/0xf8000000
@@ -183800,14 +182480,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05202c00_1, uint32_t, uOpcode)
    ffe0fc00/25e03000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25203000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_whilewr_p_rr(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_whilerw_p_rr(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_whilewr_p_rr(pVCpu, uOpcode);
+    return iemDecodeA64_whilerw_p_rr(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/d5203000 level 2 */
@@ -185063,14 +183738,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05207c00_1, uint32_t, uOpcode)
    ffeffc00/05219c00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_05218000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_expand_z_p_z(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_compact_z_p_z_s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_expand_z_p_z(pVCpu, uOpcode);
+    return iemDecodeA64_compact_z_p_z_s(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/05208000 level 2
@@ -185240,14 +183910,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_25208000_2, uint32_t, uOpcode)
    ffe6fc00/45e69c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_45208000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_match_p_p_zz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_match_p_p_zz(pVCpu, uOpcode);
+    return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5208000/0xf8000000
@@ -185697,14 +184362,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05209400_1, uint32_t, uOpcode)
    ffeffc00/0520bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_0520a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_lasta_r_p_z(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_clasta_r_p_z(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_lasta_r_p_z(pVCpu, uOpcode);
+    return iemDecodeA64_clasta_r_p_z(pVCpu, uOpcode);
 }
 
 /* ffeffc00/0521a000 level 3
@@ -185717,14 +184377,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_0520a000_3, uint32_t, uOpcode)
    ffeffc00/0521bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_0521a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_lastb_r_p_z(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_clastb_r_p_z(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_lastb_r_p_z(pVCpu, uOpcode);
+    return iemDecodeA64_clastb_r_p_z(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/0520a000 level 2
@@ -185774,14 +184429,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0520a000_2, uint32_t, uOpcode)
    ffe0fc00/a520bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a520a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sh_z_p_bi_s32(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1sh_z_p_bi_s32(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sh_z_p_bi_s32(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1sh_z_p_bi_s32(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x520a000/0xf8000000
@@ -191248,14 +189898,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6540a800_2, uint32_t, uOpcode)
    ffe0fc00/a540b800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a540a800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1w_z_p_bi_u32(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1w_z_p_bi_u32(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1w_z_p_bi_u32(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1w_z_p_bi_u32(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x540a800/0xf8000000
@@ -196494,14 +195139,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2540e000_2, uint32_t, uOpcode)
    ffe0fc00/e540fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e540e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st3w_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1w_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st3w_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x540e000/0xf8000000
@@ -197539,14 +196179,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05603400_1, uint32_t, uOpcode)
    ffeffc00/05e03800 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_05603800_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_dup_z_r(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_sunpklo_z_z(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_dup_z_r(pVCpu, uOpcode);
+    return iemDecodeA64_sunpklo_z_z(pVCpu, uOpcode);
 }
 
 /* ffeffc00/05643800 level 3
@@ -197554,14 +196189,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_05603800_3, uint32_t, uOpcode)
    ffeffc00/05e43800 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_05643800_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_insr_z_r(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_insr_z_v(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_insr_z_r(pVCpu, uOpcode);
+    return iemDecodeA64_insr_z_v(pVCpu, uOpcode);
 }
 
 /* ffeffc00/05683800 level 3 */
@@ -198805,14 +197435,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05609400_1, uint32_t, uOpcode)
    fff7fc00/05e0bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_0560a000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_lasta_r_p_z(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_cpy_z_p_r(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_lasta_r_p_z(pVCpu, uOpcode);
+    return iemDecodeA64_cpy_z_p_r(pVCpu, uOpcode);
 }
 
 /* ffe0fc00/0560a000 level 2
@@ -198879,14 +197504,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0560a000_2, uint32_t, uOpcode)
    ffe0fc00/a560bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a560a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1w_z_p_bi_u64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1w_z_p_bi_u64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1w_z_p_bi_u64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1w_z_p_bi_u64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x560a000/0xf8000000
@@ -199320,14 +197940,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0560d000_1, uint32_t, uOpcode)
    ffe0fc00/e560fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e560e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1w_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st4w_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1w_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st4w_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x560e000/0xf8000000
@@ -199477,7 +198092,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0d800000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsop_B1_i1b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xd800000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_BX1_r1b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -199872,7 +198487,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0d802000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST3_asisdlsop_B3_i3b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xd802000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_BX3_r3b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -199887,14 +198502,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0d802000_2, uint32_t, uOpcode)
    ffe0fc00/a5803c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a5802000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1rqd_z_p_bi_u64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ld1d_z_p_bi_u128(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1rqd_z_p_bi_u64(pVCpu, uOpcode);
+    return iemDecodeA64_ld1d_z_p_bi_u128(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5802000/0xf8000000
@@ -200261,7 +198871,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0d804000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST1_asisdlsop_H1_i1h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xd804000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_HX1_r1h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -200687,7 +199297,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0d806000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST3_asisdlsop_H3_i3h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xd806000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_HX3_r3h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201068,7 +199678,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe1fc00_0d818000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1e0000) == 0x1e0000)
         return iemDecodeA64_ST1_asisdlsop_S1_i1s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xd808000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_SX1_r1s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201225,7 +199835,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_05808400_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x881c0000)) == 0)
         return iemDecodeA64_and_z_zi(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd808400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_DX1_r1d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201312,7 +199922,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e0fcc0_45808400_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x881f0000)) == 0x81f0000)
         return iemDecodeA64_ST1_asisdlsop_D1_i1d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd808400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_DX1_r1d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -201572,14 +200182,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_658f8400_3, uint32_t, uOpcode)
    7fe0fe00/6da09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7feffcc0_6d808400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STP_D_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_STTP_Q_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STP_D_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_STTP_Q_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 77e0fcc0/65808400 level 2
@@ -202244,7 +200849,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe4fc00_0d849000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1b0000) == 0x1b0000)
         return iemDecodeA64_ST1_asisdlsop_S1_i1s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xd808000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST1_asisdlsop_SX1_r1s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203888,14 +202493,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05809800_1, uint32_t, uOpcode)
    7fe0fc00/17e0c800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_15809c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
+    return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
 }
 
 /* 7fe7fc00/25809c00 level 2
@@ -203915,8 +202515,7 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_25809c00_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x80000010)) == 0x10)
         return iemDecodeA64_cmpne_p_p_zi(pVCpu, uOpcode);
     /* 0xffe0e000/0xa5808000 org expr: (uOpcode AND 0x80000000) == 0x80000000 && Rm != '11111' && IsFeatureImplemented(FEAT_SVE2p1) */
-    if (   (uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000)
-        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000) && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ld1d_z_p_br_u128(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -203943,14 +202542,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_25809c00_2, uint32_t, uOpcode)
    7fe0fe00/2da09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_2d809c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_STP_S_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_STP_Q_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_STP_S_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_STP_Q_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 7fe7fc00/35809c00 level 2
@@ -203975,14 +202569,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_2d809c00_2, uint32_t, uOpcode)
    7fe0fe00/35a09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe7fc00_35809c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_CBNZ_64_compbranch(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_CBNZ_64_compbranch(pVCpu, uOpcode);
 }
 
 /* 7fe7fc00/65809c00 level 2 */
@@ -204283,7 +202872,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe1fc00_0d81a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1e0000) == 0x1e0000)
         return iemDecodeA64_ST3_asisdlsop_S3_i3s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xd80a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_SX3_r3s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204364,14 +202953,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe1fc00_6581a000_2, uint32_t, uOpcode)
    ffe1fc00/a581b800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe1fc00_a580a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sb_z_p_bi_s64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1sb_z_p_bi_s64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sb_z_p_bi_s64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1sb_z_p_bi_s64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x580a000/0xf8010000
@@ -204461,7 +203045,7 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_0d81a400_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x801e0000)) == 0x1e0000)
         return iemDecodeA64_ST3_asisdlsop_D3_i3d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xd80a400 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_DX3_r3d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -204494,14 +203078,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_2580a400_2, uint32_t, uOpcode)
    ffeffc00/6584bc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_6584a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frinta_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_scvtf_z_p_z_w2s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frinta_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_scvtf_z_p_z_w2s(pVCpu, uOpcode);
 }
 
 /* ffeffc00/658ca400 level 3
@@ -204509,14 +203088,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_6584a400_3, uint32_t, uOpcode)
    ffeffc00/658cbc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_658ca400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frecpx_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_fcvtzs_z_p_z_s2w(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frecpx_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzs_z_p_z_s2w(pVCpu, uOpcode);
 }
 
 /* 7fe1fc00/6580a400 level 2
@@ -204794,14 +203368,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_6582ac00_2, uint32_t, uOpcode)
    ffeffc00/658dbc00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffc00_658dac00_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fsqrt_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_fcvtzu_z_p_z_s2w(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fsqrt_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzu_z_p_z_s2w(pVCpu, uOpcode);
 }
 
 /* 7fe6fc00/6584ac00 level 2
@@ -204933,7 +203502,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe6fc00_0d86b000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x190000) == 0x190000)
         return iemDecodeA64_ST3_asisdlsop_S3_i3s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xd80a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST3_asisdlsop_SX3_r3s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -206012,14 +204581,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2580e000_2, uint32_t, uOpcode)
    ffe0fc00/a580fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a580e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ldnt1d_z_p_bi_contiguous(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ld4q_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ldnt1d_z_p_bi_contiguous(pVCpu, uOpcode);
+    return iemDecodeA64_ld4q_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0580e000 level 1
@@ -206412,7 +204976,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da00000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsop_B2_i2b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xda00000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_BX2_r2b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -206807,7 +205371,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da02000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST4_asisdlsop_B4_i4b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xda02000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST4_asisdlsop_BX4_r4b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -207208,7 +205772,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da04000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsop_H2_i2h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xda04000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_HX2_r2h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -207595,7 +206159,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da06000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST4_asisdlsop_H4_i4h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xda06000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST4_asisdlsop_HX4_r4h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208027,7 +206591,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fe00_0da08000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsop_S2_i2s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xda08000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_SX2_r2s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208198,14 +206762,9 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_05a08400_2, uint32_t, uOpcode)
    ffeffc00/05a19c00 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_ffeffe00_05a18400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_expand_z_p_z(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_compact_z_p_z(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00100000))
+        return iemDecodeA64_expand_z_p_z(pVCpu, uOpcode);
+    return iemDecodeA64_compact_z_p_z(pVCpu, uOpcode);
 }
 
 /* ffeffe00/0daf8400 level 3
@@ -208216,7 +206775,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffeffe00_0daf8400_3, uint32_t, uOpcode)
     if ((uOpcode & 0x100000) == 0x100000)
         return iemDecodeA64_ST2_asisdlsop_D2_i2d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda08400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208336,8 +206895,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a08600_2, uint32_t, uOpcode)
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x88000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if (   (uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000)
-        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000) && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     /* 0xffc00000/0x2d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
     if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
@@ -208357,8 +206915,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_25a18400_2, uint32_t, uOpcode)
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x88000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if (   (uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000)
-        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == UINT32_C(0x80000000) && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     /* 0xffc00000/0x2d800000 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_FP) */
     if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000)
@@ -208396,7 +206953,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_45a08400_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x88000010)) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda08400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208415,7 +206972,7 @@ FNIEMOP_DEF_1(iemDecodeA64_77e1fe00_45a18400_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x88000010)) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda08400 org expr: (uOpcode AND 0x88000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x88000000)) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208930,7 +207487,7 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_0da09000_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x801f0000)) == 0x1f0000)
         return iemDecodeA64_ST2_asisdlsop_S2_i2s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xda08000 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST2_asisdlsop_SX2_r2s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208950,8 +207507,7 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_25a09000_2, uint32_t, uOpcode)
     /* 0xffe0e000/0xa5a08000 org expr:    (uOpcode AND 0x80000000) == 0x80000000
 && Rm != '11111'
 && (IsFeatureImplemented(FEAT_SVE2p1) || IsFeatureImplemented(FEAT_SME2p1)) */
-    if (   (uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000)
-        && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x80000000) && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ld4q_z_p_br_contiguous(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -208975,14 +207531,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_45a09000_2, uint32_t, uOpcode)
    7fe0fe00/65a09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fe00_65a09000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmad_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_st1d_z_p_bz_d_x32_scaled(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fmad_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_st1d_z_p_bz_d_x32_scaled(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5a09000/0x78000200
@@ -209139,7 +207690,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da0a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST4_asisdlsop_S4_i4s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xda0a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST4_asisdlsop_SX4_r4s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -209154,14 +207705,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da0a000_2, uint32_t, uOpcode)
    ffe0fc00/a5a0bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a5a0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sb_z_p_bi_s32(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1sb_z_p_bi_s32(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sb_z_p_bi_s32(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1sb_z_p_bi_s32(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5a0a000/0xf8000000
@@ -209218,7 +207764,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0da0a400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_ST4_asisdlsop_D4_i4d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xda0a400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_ST4_asisdlsop_DX4_r4d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -209655,7 +208201,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc00000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsop_B1_i1b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xdc00000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsop_BX1_r1b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -210050,7 +208596,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc02000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD3_asisdlsop_B3_i3b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xdc02000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3_asisdlsop_BX3_r3b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -210419,7 +208965,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc04000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsop_H1_i1h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xdc04000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsop_HX1_r1h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -210845,7 +209391,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc06000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD3_asisdlsop_H3_i3h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xdc06000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3_asisdlsop_HX3_r3h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -212940,14 +211486,9 @@ FNIEMOP_DEF_1(iemDecodeA64_0feffc00_05cf8400_2, uint32_t, uOpcode)
    bfeffc00/2dcf8400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_bfeffc00_2dc08400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDP_S_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDP_D_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDP_S_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_D_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* bfeffc00/adc08400 level 3
@@ -212968,14 +211509,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfeffc00_2dc08400_3, uint32_t, uOpcode)
    bfeffc00/adcf8400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_bfeffc00_adc08400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_LDP_Q_ldstpair_pre(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_LDTP_Q_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_LDP_Q_ldstpair_pre(pVCpu, uOpcode);
+    return iemDecodeA64_LDTP_Q_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* 0feffc00/0dc08400 level 2
@@ -213022,7 +211558,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfeffc00_0dcf8400_3, uint32_t, uOpcode)
     if ((uOpcode & 0x100000) == 0x100000)
         return iemDecodeA64_LD1_asisdlsop_D1_i1d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xdc08400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsop_DX1_r1d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -213347,7 +211883,7 @@ FNIEMOP_DEF_1(iemDecodeA64_3fe0fcc0_0dc09000_2, uint32_t, uOpcode)
     if ((uOpcode & UINT32_C(0x801f0000)) == 0x1f0000)
         return iemDecodeA64_LD1_asisdlsop_S1_i1s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xdc08000 org expr: (uOpcode AND 0x80000000) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & UINT32_C(0x80000000)) == 0 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & UINT32_C(0x80000000)) == 0 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1_asisdlsop_SX1_r1s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214317,7 +212853,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe4fc00_0dc4a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1b0000) == 0x1b0000)
         return iemDecodeA64_LD3_asisdlsop_S3_i3s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xdc0a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3_asisdlsop_SX3_r3s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -214402,14 +212938,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe4fc00_65c4a000_2, uint32_t, uOpcode)
    ffe6fc00/a5c6bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe4fc00_a5c0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1sb_z_p_bi_s16(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1sb_z_p_bi_s16(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1sb_z_p_bi_s16(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1sb_z_p_bi_s16(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5c0a000/0xf8040000
@@ -214495,14 +213026,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05c0a000_1, uint32_t, uOpcode)
    fff7fc00/65c0b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65c0a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frintn_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvt_z_p_z_d2h(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frintn_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvt_z_p_z_d2h(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05c0a400 level 2
@@ -214531,14 +213057,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c0a400_2, uint32_t, uOpcode)
    fff7fc00/65c1b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65c1a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frintp_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvt_z_p_z_h2d(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frintp_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvt_z_p_z_h2d(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05c1a400 level 2
@@ -214567,14 +213088,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c1a400_2, uint32_t, uOpcode)
    fff7fc00/65c2b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65c2a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frintm_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvt_z_p_z_d2s(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frintm_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvt_z_p_z_d2s(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05c2a400 level 2
@@ -214603,14 +213119,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c2a400_2, uint32_t, uOpcode)
    fff7fc00/65c3b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65c3a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_frintz_z_p_z_m(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvt_z_p_z_s2d(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_frintz_z_p_z_m(pVCpu, uOpcode);
+    return iemDecodeA64_fcvt_z_p_z_s2d(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05c3a400 level 2
@@ -214715,14 +213226,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05c7a400_2, uint32_t, uOpcode)
    fff7fc00/65d0b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d0a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_scvtf_z_p_z_w2d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzs_z_p_z_d2w(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_scvtf_z_p_z_w2d(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzs_z_p_z_d2w(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d0a400 level 2
@@ -214751,14 +213257,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05d0a400_2, uint32_t, uOpcode)
    fff7fc00/65d1b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d1a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ucvtf_z_p_z_w2d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzu_z_p_z_d2w(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ucvtf_z_p_z_w2d(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzu_z_p_z_d2w(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d1a400 level 2
@@ -214804,14 +213305,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05d2a400_2, uint32_t, uOpcode)
    fff7fc00/65d4b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d4a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_scvtf_z_p_z_x2s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzs_z_p_z_s2x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_scvtf_z_p_z_x2s(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzs_z_p_z_s2x(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d4a400 level 2
@@ -214840,14 +213336,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05d4a400_2, uint32_t, uOpcode)
    fff7fc00/65d5b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d5a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ucvtf_z_p_z_x2s(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzu_z_p_z_s2x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ucvtf_z_p_z_x2s(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzu_z_p_z_s2x(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d5a400 level 2
@@ -214876,14 +213367,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05d5a400_2, uint32_t, uOpcode)
    fff7fc00/65d6b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d6a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_scvtf_z_p_z_x2d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzs_z_p_z_d2x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_scvtf_z_p_z_x2d(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzs_z_p_z_d2x(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d6a400 level 2
@@ -214912,14 +213398,9 @@ FNIEMOP_DEF_1(iemDecodeA64_1ff7fc00_05d6a400_2, uint32_t, uOpcode)
    fff7fc00/65d7b400 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_65d7a400_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00080000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ucvtf_z_p_z_x2d(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00080000):
-            return iemDecodeA64_fcvtzu_z_p_z_d2x(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00080000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ucvtf_z_p_z_x2d(pVCpu, uOpcode);
+    return iemDecodeA64_fcvtzu_z_p_z_d2x(pVCpu, uOpcode);
 }
 
 /* 1ff7fc00/05d7a400 level 2
@@ -214988,7 +213469,7 @@ FNIEMOP_DEF_1(iemDecodeA64_fff7fc00_0dd7a400_3, uint32_t, uOpcode)
     if ((uOpcode & 0x80000) == 0x80000)
         return iemDecodeA64_LD3_asisdlsop_D3_i3d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xdc0a400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3_asisdlsop_DX3_r3d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -217430,7 +215911,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc0c000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD1R_asisdlsop_R1_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xdc0c000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD1R_asisdlsop_RX1_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -217817,7 +216298,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc0e000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD3R_asisdlsop_R3_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xdc0e000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD3R_asisdlsop_RX3_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -217832,14 +216313,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0dc0e000_2, uint32_t, uOpcode)
    ffe0fc00/e5c0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e5c0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1d_z_p_bi_u128(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st3d_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1d_z_p_bi_u128(pVCpu, uOpcode);
+    return iemDecodeA64_st3d_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5c0e000/0xf8000000
@@ -218232,7 +216708,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de00000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD2_asisdlsop_B2_i2b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xde00000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_BX2_r2b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -218447,7 +216923,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de02000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4_asisdlsop_B4_i4b(pVCpu, uOpcode);
     /* 0xbfe0e000/0xde02000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsop_BX4_r4b(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -218789,7 +217265,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de04000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD2_asisdlsop_H2_i2h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xde04000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_HX2_r2h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -219176,7 +217652,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de06000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4_asisdlsop_H4_i4h(pVCpu, uOpcode);
     /* 0xbfe0e400/0xde06000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsop_HX4_r4h(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -219552,14 +218028,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_05e07c00_1, uint32_t, uOpcode)
 /* fffffc00/25e08000 level 3 */
 FNIEMOP_DEF_1(iemDecodeA64_fffffc00_25e08000_3, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000200))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_cntp_r_p_p(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000200):
-            return iemDecodeA64_cntp_r_pn(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000200)) == UINT32_C(0x00000000))
+        return iemDecodeA64_cntp_r_p_p(pVCpu, uOpcode);
+    return iemDecodeA64_cntp_r_pn(pVCpu, uOpcode);
 }
 
 /* 07fffc00/05e08000 level 2
@@ -220526,7 +218997,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffebfe00_0deb8400_3, uint32_t, uOpcode)
     if ((uOpcode & 0x140000) == 0x140000)
         return iemDecodeA64_LD2_asisdlsop_D2_i2d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xde08400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -220601,14 +219072,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_25e08600_2, uint32_t, uOpcode)
    f7e0fe00/35e09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_35e08400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDR_Q_ldst_pos(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_CBNZ_32_compbranch(pVCpu, uOpcode);
+    return iemDecodeA64_LDR_Q_ldst_pos(pVCpu, uOpcode);
 }
 
 /* f7e0fe00/45e08400 level 2
@@ -220625,7 +219091,7 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_45e08400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x8000010) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xde08400 org expr: (uOpcode AND 0x8000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x8000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & 0x8000000) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_DX2_r2d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -220636,14 +219102,9 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_45e08400_2, uint32_t, uOpcode)
    f7e0fe00/65e09200 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_65e08400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x08000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_fmad_z_p_zzz(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x08000000):
-            return iemDecodeA64_LDP_D_ldstpair_pre(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x08000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_fmad_z_p_zzz(pVCpu, uOpcode);
+    return iemDecodeA64_LDP_D_ldstpair_pre(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5e08400/0xf0000200
@@ -221138,7 +219599,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffebfe00_0deb9000_3, uint32_t, uOpcode)
     if ((uOpcode & 0x140000) == 0x140000)
         return iemDecodeA64_LD2_asisdlsop_S2_i2s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xde08000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_SX2_r2s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221190,7 +219651,7 @@ FNIEMOP_DEF_1(iemDecodeA64_f7e0fe00_45e09000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x8000010) == 0x10)
         return iemDecodeA64_nmatch_p_p_zz(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xde08000 org expr: (uOpcode AND 0x8000000) == 0x8000000 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((uOpcode & 0x8000000) == 0x8000000 && (((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if ((uOpcode & 0x8000000) == 0x8000000 && ((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2_asisdlsop_SX2_r2s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221413,7 +219874,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0a000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4_asisdlsop_S4_i4s(pVCpu, uOpcode);
     /* 0xbfe0ec00/0xde0a000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsop_SX4_r4s(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221428,14 +219889,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0a000_2, uint32_t, uOpcode)
    ffe0fc00/a5e0bc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_a5e0a000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ld1d_z_p_bi_u64(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_ldnf1d_z_p_bi_u64(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ld1d_z_p_bi_u64(pVCpu, uOpcode);
+    return iemDecodeA64_ldnf1d_z_p_bi_u64(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5e0a000/0xf8000000
@@ -221492,7 +219948,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0a400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4_asisdlsop_D4_i4d(pVCpu, uOpcode);
     /* 0xbfe0fc00/0xde0a400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4_asisdlsop_DX4_r4d(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221788,7 +220244,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0c000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD2R_asisdlsop_R2_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xde0c000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD2R_asisdlsop_RX2_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221905,7 +220361,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0e000_2, uint32_t, uOpcode)
     if ((uOpcode & 0x1f0000) == 0x1f0000)
         return iemDecodeA64_LD4R_asisdlsop_R4_i(pVCpu, uOpcode);
     /* 0xbfe0f000/0xde0e000 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && Rm != '11111' */
-    if ((((uOpcode & UINT32_C(0x1f0000)/*Rm*/)) >> 16) != 0x1f)
+    if (((uOpcode >> 16) & UINT32_C(0x1f)/*Rm*/) != 0x1f)
         return iemDecodeA64_LD4R_asisdlsop_RX4_r(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -221920,14 +220376,9 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0de0e000_2, uint32_t, uOpcode)
    ffe0fc00/e5e0fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_e5e0e000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00100000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_st1d_z_p_bi(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00100000):
-            return iemDecodeA64_st4d_z_p_bi_contiguous(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00100000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_st1d_z_p_bi(pVCpu, uOpcode);
+    return iemDecodeA64_st4d_z_p_bi_contiguous(pVCpu, uOpcode);
 }
 
 /* --decoder-hint1 0x7e0fc00/0x5e0e000/0xf8000000
@@ -222070,14 +220521,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe5fc00_1e010000_2, uint32_t, uOpcode)
    7fe5fc00/4e050000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe5fc00_4e000000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBL_asimdtbl_L1_1(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBL_asimdtbl_L1_1(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06000000 level 1
@@ -222220,14 +220666,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_1e010400_2, uint32_t, uOpcode)
    7fe1fc00/4e010400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e000400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_DUP_asimdins_DV_v(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_DUP_asimdins_DV_v(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06000400 level 1
@@ -222539,14 +220980,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_1e021000_2, uint32_t, uOpcode)
    7fe6fc00/4e061000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e001000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBX_asimdtbl_L1_1(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBX_asimdtbl_L1_1(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06001000 level 1
@@ -222746,14 +221182,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06001400_1, uint32_t, uOpcode)
    7fe1fc00/4e011800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e001800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_UZP1_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_UZP1_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06001800 level 1
@@ -222928,14 +221359,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06001c00_1, uint32_t, uOpcode)
    7fe6fc00/4e062000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e002000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBL_asimdtbl_L2_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBL_asimdtbl_L2_2(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06002000 level 1
@@ -223021,14 +221447,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06002000_1, uint32_t, uOpcode)
    7fe1fc00/4e012800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e002800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TRN1_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TRN1_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06002800 level 1
@@ -223151,14 +221572,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06002c00_1, uint32_t, uOpcode)
    7fe6fc00/4e063000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e003000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBX_asimdtbl_L2_2(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBX_asimdtbl_L2_2(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06003000 level 1
@@ -223244,14 +221660,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06003000_1, uint32_t, uOpcode)
    7fe1fc00/4e013800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e003800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ZIP1_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ZIP1_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06003800 level 1
@@ -223445,14 +221856,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06003c00_1, uint32_t, uOpcode)
    7fe6fc00/4e064000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e004000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBL_asimdtbl_L3_3(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBL_asimdtbl_L3_3(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06004000 level 1
@@ -223587,14 +221993,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06004800_1, uint32_t, uOpcode)
    7fe6fc00/4e065000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e005000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBX_asimdtbl_L3_3(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBX_asimdtbl_L3_3(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06005000 level 1
@@ -223680,14 +222081,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06005000_1, uint32_t, uOpcode)
    7fe1fc00/4e015800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e005800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_UZP2_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_UZP2_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06005800 level 1
@@ -223743,14 +222139,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06005800_1, uint32_t, uOpcode)
    7fe6fc00/4e066000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e006000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBL_asimdtbl_L4_4(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBL_asimdtbl_L4_4(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06006000 level 1
@@ -223836,14 +222227,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06006000_1, uint32_t, uOpcode)
    7fe1fc00/4e016800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e006800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TRN2_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TRN2_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06006800 level 1
@@ -223897,14 +222283,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06006800_1, uint32_t, uOpcode)
    7fe1fc00/4e017000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e007000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_TBX_asimdtbl_L4_4(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_TBX_asimdtbl_L4_4(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06007000 level 1
@@ -223958,14 +222339,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06007000_1, uint32_t, uOpcode)
    7fe1fc00/4e017800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e007800_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_ZIP2_asimdperm_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_ZIP2_asimdperm_only(pVCpu, uOpcode);
+    return iemDecodeA64_EOR3_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06007800 level 1
@@ -226745,14 +225121,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06205c00_1, uint32_t, uOpcode)
 /* 7fe0fc00/4e206000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_4e206000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SUBHN_asimddiff_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_BCAX_VVV16_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_SUBHN_asimddiff_N(pVCpu, uOpcode);
+    return iemDecodeA64_BCAX_VVV16_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06206000 level 1
@@ -227580,14 +225951,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620b000_1, uint32_t, uOpcode)
    ffe0fc00/1e20e400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_1e20b400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCCMP_S_floatccmp(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_FCCMPE_S_floatccmp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCCMP_S_floatccmp(pVCpu, uOpcode);
+    return iemDecodeA64_FCCMPE_S_floatccmp(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0620b400 level 1
@@ -228412,14 +226778,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0620f800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e20fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e20fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FRECPS_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_S_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FRECPS_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_S_floatsel(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2e20fc00 level 2
@@ -228702,14 +227063,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_1e410400_2, uint32_t, uOpcode)
    7fe1fc00/4e410400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e400400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMAXNM_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FMAXNM_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06400400 level 1
@@ -228987,14 +227343,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06401000_1, uint32_t, uOpcode)
    7fe1fc00/4e411400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e401400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FADD_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FADD_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06401400 level 1
@@ -229150,14 +227501,9 @@ FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_1e421c00_2, uint32_t, uOpcode)
    7fe6fc00/4e461c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e401c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMULX_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FMULX_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06401c00 level 1
@@ -229314,28 +227660,18 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06402000_1, uint32_t, uOpcode)
    dfe4fc00/4e442400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe4fc00_0e402400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCMEQ_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_FCMGE_asimdsamefp16_only(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCMEQ_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCMGE_asimdsamefp16_only(pVCpu, uOpcode);
 }
 
 /* dfe4fc00/16402400 level 2
    dfe4fc00/16442400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe4fc00_16402400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_TBZ_only_testbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_TBZ_only_testbranch(pVCpu, uOpcode);
+    return iemDecodeA64_B_only_branch_imm(pVCpu, uOpcode);
 }
 
 /* dfe4fc00/1e402400 level 2 */
@@ -229360,28 +227696,18 @@ FNIEMOP_DEF_1(iemDecodeA64_dfe4fc00_1e402400_2, uint32_t, uOpcode)
    dfe4fc00/5e442400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe4fc00_5e402400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCMEQ_asisdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_FCMGE_asisdsamefp16_only(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCMEQ_asisdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCMGE_asisdsamefp16_only(pVCpu, uOpcode);
 }
 
 /* dfe4fc00/96402400 level 2
    dfe4fc00/96442400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_dfe4fc00_96402400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x20000000))
-    {
-        case UINT32_C(0x20000000):
-            return iemDecodeA64_TBZ_only_testbranch(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x20000000)) == UINT32_C(0x20000000))
+        return iemDecodeA64_TBZ_only_testbranch(pVCpu, uOpcode);
+    return iemDecodeA64_BL_only_branch_imm(pVCpu, uOpcode);
 }
 
 /* dfe4fc00/9e402400 level 2 */
@@ -229563,14 +227889,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06402c00_1, uint32_t, uOpcode)
    7fe1fc00/4e413400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e403400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMAX_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FMAX_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06403400 level 1
@@ -229688,14 +228009,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06403800_1, uint32_t, uOpcode)
    7fe6fc00/4e463c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe6fc00_4e403c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FRECPS_asimdsamefp16_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FRECPS_asimdsamefp16_only(pVCpu, uOpcode);
+    return iemDecodeA64_SM3SS1_VVV4_crypto4(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06403c00 level 1
@@ -230217,14 +228533,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06408c00_1, uint32_t, uOpcode)
    7fe1fc00/4e419400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe1fc00_4e409400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SDOT_asimdsame2_D(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SM3TT1B_VVV4_crypto3_imm2(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_SDOT_asimdsame2_D(pVCpu, uOpcode);
+    return iemDecodeA64_SM3TT1B_VVV4_crypto3_imm2(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06409400 level 1
@@ -231179,14 +229490,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06600800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e600c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e600c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQADD_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQADD_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06600c00 level 1
@@ -231451,14 +229757,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06602800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e602c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e602c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSUB_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSUB_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06602c00 level 1
@@ -231829,14 +230130,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06604800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e604c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e604c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06604c00 level 1
@@ -231940,14 +230236,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06605800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e605c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e605c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHL_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHL_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06605c00 level 1
@@ -232249,14 +230540,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06607c00_1, uint32_t, uOpcode)
 /* 7fe0fc00/4e608000 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_4e608000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SMLAL_asimddiff_L(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_SHA512H_QQV_cryptosha512_3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_SMLAL_asimddiff_L(pVCpu, uOpcode);
+    return iemDecodeA64_SHA512H_QQV_cryptosha512_3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06608000 level 1
@@ -232764,14 +231050,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660b000_1, uint32_t, uOpcode)
    ffe0fc00/1e60e400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_1e60b400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCCMP_D_floatccmp(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_FCCMPE_D_floatccmp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCCMP_D_floatccmp(pVCpu, uOpcode);
+    return iemDecodeA64_FCCMPE_D_floatccmp(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0660b400 level 1
@@ -233556,14 +231837,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0660f800_1, uint32_t, uOpcode)
 /* bfe0fc00/1e60fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1e60fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FRECPS_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FRECPS_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_D_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0660fc00 level 1
@@ -234003,14 +232279,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06808c00_1, uint32_t, uOpcode)
 /* 7fe0fc00/4e809400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_7fe0fc00_4e809400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x80000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_SDOT_asimdsame2_D(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x80000000):
-            return iemDecodeA64_XAR_VVV2_crypto3_imm6(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x80000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_SDOT_asimdsame2_D(pVCpu, uOpcode);
+    return iemDecodeA64_XAR_VVV2_crypto3_imm6(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06809400 level 1
@@ -238418,14 +236689,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e00800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee00c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee00c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQADD_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQADD_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e00c00 level 1
@@ -238652,14 +236918,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e02800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee02c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee02c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSUB_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSUB_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e02c00 level 1
@@ -238722,14 +236983,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e03000_1, uint32_t, uOpcode)
    ffe0fc00/1ee0b400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_1ee03400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x00000010))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCCMP_H_floatccmp(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000010):
-            return iemDecodeA64_FCCMPE_H_floatccmp(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x00000010)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCCMP_H_floatccmp(pVCpu, uOpcode);
+    return iemDecodeA64_FCCMPE_H_floatccmp(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e03400 level 1
@@ -238827,14 +237083,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e03800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee03c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee03c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CMGE_asisdsame_only(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
+    return iemDecodeA64_CMGE_asisdsame_only(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e03c00 level 1
@@ -239065,14 +237316,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e04800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee04c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee04c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e04c00 level 1
@@ -239207,14 +237453,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e05800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee05c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee05c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHL_asisdsame_only(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHL_asisdsame_only(pVCpu, uOpcode);
+    return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e05c00 level 1
@@ -239539,14 +237780,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_06e08800_1, uint32_t, uOpcode)
 /* bfe0fc00/1ee08c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1ee08c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_CMTST_asisdsame_only(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x00000000))
+        return iemDecodeA64_FCSEL_H_floatsel(pVCpu, uOpcode);
+    return iemDecodeA64_CMTST_asisdsame_only(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/06e08c00 level 1
@@ -240988,7 +239224,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f000400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf000400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SSHR_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -240996,14 +239232,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f000400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f000400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f000400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f000400 level 2 */
@@ -241013,7 +239244,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f000400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f000400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_USHR_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241166,7 +239397,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f001400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_ORR_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf001400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SSRA_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241174,14 +239405,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f001400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f001400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f001400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f001400 level 2 */
@@ -241191,7 +239417,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f001400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_BIC_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f001400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_USRA_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241281,7 +239507,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f002400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf002400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SRSHR_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241289,14 +239515,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f002400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f002400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f002400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f002400 level 2 */
@@ -241306,7 +239527,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f002400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f002400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_URSHR_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241390,7 +239611,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f003400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_ORR_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf003400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SRSRA_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241398,14 +239619,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f003400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f003400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f003400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f003400 level 2 */
@@ -241415,7 +239631,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f003400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_BIC_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f003400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_URSRA_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241483,7 +239699,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f004400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f004400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SRI_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241567,7 +239783,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f005400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_ORR_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf005400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SHL_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241575,14 +239791,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f005400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f005400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f005400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f005400 level 2 */
@@ -241592,7 +239803,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f005400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_BIC_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f005400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SLI_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241658,7 +239869,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f006400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f006400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SQSHLU_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241742,7 +239953,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f007400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_ORR_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf007400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SQSHL_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241750,14 +239961,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f007400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f007400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f007400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f007400 level 2 */
@@ -241767,7 +239973,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f007400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_BIC_asimdimm_L_sl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f007400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_UQSHL_asimdshf_R(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241850,7 +240056,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f008400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf008400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SHRN_asimdshf_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241862,7 +240068,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f008400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f008400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SQSHRUN_asimdshf_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241924,14 +240130,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07008c00_1, uint32_t, uOpcode)
    bfe0fc00/1f009800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f009000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FMUL_asisdelem_RH_H(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FMUL_asisdelem_RH_H(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07009000 level 1
@@ -241973,7 +240174,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f009400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_ORR_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf009400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SQSHRN_asimdshf_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -241981,14 +240182,9 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f009400_2, uint32_t, uOpcode)
 /* bfe0fc00/1f009400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f009400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* bfe0fc00/2f009400 level 2 */
@@ -241998,7 +240194,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f009400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_BIC_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f009400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_UQSHRN_asimdshf_N(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242037,14 +240233,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07009400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f009c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f009c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07009c00 level 1
@@ -242108,7 +240299,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_0f00a400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf00a400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SSHLL_asimdshf_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242120,7 +240311,7 @@ FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_2f00a400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MVNI_asimdimm_L_hl(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f00a400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_USHLL_asimdshf_L(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242289,14 +240480,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0700c400_1, uint32_t, uOpcode)
    bfe0fc00/1f00d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f00d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0700d000 level 1
@@ -242362,7 +240548,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0f00e400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_N_b(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf00e400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_SCVTF_asimdshf_C(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242374,7 +240560,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_2f00e400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_D_ds(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f00e400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_UCVTF_asimdshf_C(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242386,7 +240572,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_6f00e400_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_MOVI_asimdimm_D2_d(pVCpu, uOpcode);
     /* 0xbf80fc00/0x2f00e400 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_UCVTF_asimdshf_C(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242490,7 +240676,7 @@ FNIEMOP_DEF_1(iemDecodeA64_ffe0fc00_0f00fc00_2, uint32_t, uOpcode)
     if ((uOpcode & 0x180000) == 0)
         return iemDecodeA64_FMOV_asimdimm_H_h(pVCpu, uOpcode);
     /* 0xbf80fc00/0xf00fc00 org expr: (uOpcode AND 0) == 0 && IsFeatureImplemented(FEAT_AdvSIMD) && immh != '0000' && immh != '0000' */
-    if ((((uOpcode & UINT32_C(0x780000)/*immh*/)) >> 19) != 0)
+    if (((uOpcode >> 19) & UINT32_C(0xf)/*immh*/) != 0)
         return iemDecodeA64_FCVTZS_asimdshf_C(pVCpu, uOpcode);
     return iemDecodeA64_Invalid(pVCpu, uOpcode);
 }
@@ -242566,14 +240752,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07200000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f200400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f200400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07200400 level 1
@@ -242720,14 +240901,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07201000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f201400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f201400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07201400 level 1
@@ -242811,14 +240987,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07202000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f202400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f202400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07202400 level 1
@@ -242896,14 +241067,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07203000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f203400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f203400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07203400 level 1
@@ -243028,14 +241194,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07205000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f205400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f205400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07205400 level 1
@@ -243158,14 +241319,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07207000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f207400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f207400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07207400 level 1
@@ -243287,14 +241443,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07208c00_1, uint32_t, uOpcode)
    bfe0fc00/1f209800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f209000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FMUL_asisdelem_RH_H(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FMUL_asisdelem_RH_H(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07209000 level 1
@@ -243332,14 +241483,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07209000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f209400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f209400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07209400 level 1
@@ -243376,14 +241522,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07209400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f209c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f209c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07209c00 level 1
@@ -243554,14 +241695,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0720c000_1, uint32_t, uOpcode)
    bfe0fc00/1f20d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f20d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0720d000 level 1
@@ -243622,14 +241758,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0720e000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f20e400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f20e400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0720e400 level 1
@@ -243689,14 +241820,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0720f000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f20fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f20fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_S_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0720fc00 level 1
@@ -243756,14 +241882,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07400000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f400400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f400400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07400400 level 1
@@ -243852,14 +241973,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07401000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f401400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f401400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07401400 level 1
@@ -243919,14 +242035,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07402000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f402400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f402400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07402400 level 1
@@ -244004,14 +242115,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07403000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f403400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f403400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07403400 level 1
@@ -244095,14 +242201,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07404400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f405400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f405400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07405400 level 1
@@ -244225,14 +242326,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07407000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f407400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f407400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07407400 level 1
@@ -244381,14 +242477,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07409000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f409400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f409400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07409400 level 1
@@ -244425,14 +242516,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07409400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f409c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f409c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07409c00 level 1
@@ -244577,14 +242663,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0740c000_1, uint32_t, uOpcode)
    bfe0fc00/1f40d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f40d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0740d000 level 1
@@ -244645,14 +242726,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0740e000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f40e400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f40e400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0740e400 level 1
@@ -244712,14 +242788,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0740f000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f40fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f40fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0740fc00 level 1
@@ -244779,14 +242850,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07600000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f600400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f600400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07600400 level 1
@@ -244875,14 +242941,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07601000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f601400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f601400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07601400 level 1
@@ -244942,14 +243003,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07602000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f602400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f602400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSHR_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07602400 level 1
@@ -245027,14 +243083,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07603000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f603400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f603400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SRSRA_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07603400 level 1
@@ -245118,14 +243169,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07604400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f605400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f605400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07605400 level 1
@@ -245248,14 +243294,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07607000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f607400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f607400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHL_asisdshf_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMADD_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07607400 level 1
@@ -245404,14 +243445,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07609000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f609400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f609400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07609400 level 1
@@ -245448,14 +243484,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07609400_1, uint32_t, uOpcode)
 /* bfe0fc00/1f609c00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f609c00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRSHRN_asisdshf_N(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07609c00 level 1
@@ -245600,14 +243631,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0760c000_1, uint32_t, uOpcode)
    bfe0fc00/1f60d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f60d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0760d000 level 1
@@ -245668,14 +243694,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0760e000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f60e400 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f60e400_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SCVTF_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0760e400 level 1
@@ -245735,14 +243756,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_0760f000_1, uint32_t, uOpcode)
 /* bfe0fc00/1f60fc00 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1f60fc00_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FCVTZS_asisdshf_C(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_D_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/0760fc00 level 1
@@ -246749,14 +244765,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c08400_1, uint32_t, uOpcode)
    bfe0fc00/1fc09800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1fc09000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FMUL_asisdelem_R_SD(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_H_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FMUL_asisdelem_R_SD(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_H_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07c09000 level 1
@@ -246880,14 +244891,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07c0c000_1, uint32_t, uOpcode)
    bfe0fc00/1fc0d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1fc0d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FMSUB_H_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FMSUB_H_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07c0d000 level 1
@@ -247344,14 +245350,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e08400_1, uint32_t, uOpcode)
    bfe0fc00/1fe09800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1fe09000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_FMUL_asisdelem_R_SD(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_H_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_FMUL_asisdelem_R_SD(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_H_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07e09000 level 1
@@ -247475,14 +245476,9 @@ FNIEMOP_DEF_1(iemDecodeA64_07e0fc00_07e0c000_1, uint32_t, uOpcode)
    bfe0fc00/1fe0d800 level 2 */
 FNIEMOP_DEF_1(iemDecodeA64_bfe0fc00_1fe0d000_2, uint32_t, uOpcode)
 {
-    switch (uOpcode & UINT32_C(0x40000000))
-    {
-        case UINT32_C(0x40000000):
-            return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
-        default:
-        case UINT32_C(0x00000000):
-            return iemDecodeA64_FNMSUB_H_floatdp3(pVCpu, uOpcode);
-    }
+    if ((uOpcode & UINT32_C(0x40000000)) == UINT32_C(0x40000000))
+        return iemDecodeA64_SQRDMULH_asisdelem_R(pVCpu, uOpcode);
+    return iemDecodeA64_FNMSUB_H_floatdp3(pVCpu, uOpcode);
 }
 
 /* 07e0fc00/07e0d000 level 1
