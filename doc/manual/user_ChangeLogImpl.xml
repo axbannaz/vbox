@@ -120,6 +120,10 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>USB Webcam: The virtual USB webcam is now part of the open source base package</para>
+      </listitem>
+
+      <listitem>
         <para>Arm host: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
       </listitem>
 
