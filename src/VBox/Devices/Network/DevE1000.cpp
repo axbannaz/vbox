@@ -2871,10 +2871,13 @@ DECLINLINE(void) e1kAdvanceRDH(PPDMDEVINS pDevIns, PE1KSTATE pThis, PE1KRXDC pRx
 }
 #endif /* IN_RING3 */
 
+#ifdef IN_RING3
+/** @todo Compile unconditionally when actual R0 TX (and RX via loopback) is supported! */
 DECLINLINE(bool) e1kRxIsPacketSplit(PE1KSTATE pThis)
 {
     return GET_BITS(RCTL, DTYP) == RCTL_DTYPE_PSPLIT;
 }
+#endif /* IN_RING3 */
 
 #if 0
 DECLINLINE(bool) e1kRxIsLegacy(PE1KSTATE pThis)
