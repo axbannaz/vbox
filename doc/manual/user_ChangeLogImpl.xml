@@ -114,6 +114,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Linux host: Use KVM APIs on kernel 6.16.0 and newer for acquiring/releasing VT-x
+          (issue github:gh-139)</para>
+      </listitem>
+
+      <listitem>
         <para>macOS host: Fixed internal networking, including NAT networks on macOS
           (7.2.0 regression; issue github:gh-140)</para>
       </listitem>
