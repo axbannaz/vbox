@@ -81,8 +81,18 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
+        <para>VMM: Fixed issue when VM was not able to start on Windows Arm
+          host (issue github:gh-8)</para>
+      </listitem>
+
+      <listitem>
         <para>GUI: Fixed VBox Manager crash when some VM has a lot of snapshots
           (issue github:gh-119)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Fixed issue when error notifications could not be displayed
+          on snapshot deletion (issue github:gh-75)</para>
       </listitem>
 
       <listitem>
@@ -120,6 +130,20 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>Network (NAT, DNS): Fixed potential issue where a nameserver in the 127/8 network
+          could have been passed to the guest (issue github:gh-136)</para>
+      </listitem>
+
+      <listitem>
+        <para>Network: Added a new experimental type of e1000 adapter (82583V). It requires the ICH9
+          chipset, since MSIs are not supported by PIIX3</para>
+      </listitem>
+
+      <listitem>
+        <para>USB: Fixed passing through USB devices exposed over USB/IP (issue github:gh-192)</para>
+      </listitem>
+
+      <listitem>
         <para>USB Webcam: The virtual USB webcam is now part of the open source base package</para>
       </listitem>
 
@@ -129,7 +153,7 @@ Rules for adding a changelog entry to make them look more uniform:
 
       <listitem>
         <para>Linux host: Use KVM APIs on kernel 6.16.0 and newer for acquiring/releasing VT-x
-          (issue github:gh-139)</para>
+          (issue github:gh-81, github:gh-139 and github:gh-141)</para>
       </listitem>
 
       <listitem>
@@ -138,21 +162,21 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Network (NAT, DNS): Fixed potential issue where a nameserver in the 127/8 network
-          could have been passed to the guest (issue github:gh-136)</para>
+        <para>macOS host: Fixed VM crash on Arm host on VM start (issue github:gh-101)</para>
       </listitem>
 
       <listitem>
-        <para>USB: Fixed passing through USB devices exposed over USB/IP (issue github:gh-192)</para>
+        <para>Linux Guest Additions: Fixed issue when VBoxClient was reporting it's
+          unable to load shared libraries on start (issue github:gh-165)</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows Guest Additions: Fixed issue when installation was failing on
+          Windows XP SP2 64-bit (issue github:gh-142)</para>
       </listitem>
 
       <listitem>
         <para>EFI: Fixed TPM device not working with certain guests (issue github:gh-143)</para>
-      </listitem>
-
-      <listitem>
-        <para>Network: Added a new experimental type of e1000 adapter (82583V). It requires the ICH9
-          chipset, since MSIs are not supported by PIIX3. </para>
       </listitem>
 
     </itemizedlist>
