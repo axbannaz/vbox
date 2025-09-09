@@ -73,7 +73,7 @@ Rules for adding a changelog entry to make them look more uniform:
                            So, we use chapter and xpointer="xpointer(/chapter/)" with xi:include. -->
   <sect1>
 
-    <title>Version X.Y.Z (date tbd)</title>
+    <title>Version 7.2.2 (date 2025-09-10)</title>
 
     <para>This is a maintenance release. The following items were fixed or
       added:</para>
@@ -81,36 +81,36 @@ Rules for adding a changelog entry to make them look more uniform:
     <itemizedlist>
 
       <listitem>
-        <para>GUI: Fixing VBox Manager crash when some VM has a lot of snapshots
+        <para>GUI: Fixed VBox Manager crash when some VM has a lot of snapshots
           (issue github:gh-119)</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Fixing VBox Manager crash while attempting to show error notifications too early
+        <para>GUI: Fixed VBox Manager crash while attempting to show error notifications too early
           (issues github:gh-135 and github:gh-171)</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Fixing VBox Manager crash while removing all VMs from VM list</para>
+        <para>GUI: Fixed VBox Manager crash while removing all VMs from VM list</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Fixing VBox Manager freeze on Linux hosts at startup or while attempting to
+        <para>GUI: Fixed VBox Manager freeze on Linux hosts at startup or while attempting to
           add a VM (issues github:gh-70 and github:gh-168)</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Fixing VBox Manager layout bug with too strict size constraints
+        <para>GUI: Fixed VBox Manager layout bug with too strict size constraints
           (issue github:gh-87)</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Update VBox VM network status-bar indicator tooltip (IP address) on guest additions
+        <para>GUI: Updated VBox VM network status-bar indicator tooltip (IP address) on guest additions
           change (issue github:gh-179)</para>
       </listitem>
 
       <listitem>
-        <para>GUI: Adding possibility for Windows 11 host to use legacy light/dark themes from Windows 10
+        <para>GUI: Added possibility for Windows 11 host to use legacy light/dark themes from Windows 10
           (issues github:gh-137 and github:gh-151)</para>
       </listitem>
 
@@ -138,8 +138,8 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>NAT DNS: Fixed potential issue where a nameserver in the 127/8 network
-          could have been passed to the guest (issue github:gh:136)</para>
+        <para>Network (NAT, DNS): Fixed potential issue where a nameserver in the 127/8 network
+          could have been passed to the guest (issue github:gh-136)</para>
       </listitem>
 
       <listitem>
