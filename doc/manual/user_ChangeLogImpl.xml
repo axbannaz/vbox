@@ -110,6 +110,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>GUI: Adding possibility for Windows 11 host to use legacy light/dark themes from Windows 10
+          (issues github:gh-137 and github:gh-151)</para>
+      </listitem>
+
+      <listitem>
         <para>Arm host: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
       </listitem>
 
