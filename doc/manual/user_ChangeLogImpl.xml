@@ -115,6 +115,11 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
+        <para>GUI: Forcing xdgdesktopportal platform theme on Linux when org.freedesktop.portal.Desktop DBus
+          service is available (issues github:gh-138 and github:gh-150)</para>
+      </listitem>
+
+      <listitem>
         <para>Arm host: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
       </listitem>
 
