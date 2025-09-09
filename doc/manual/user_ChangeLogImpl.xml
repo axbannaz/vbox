@@ -110,7 +110,7 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Arm hosts: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
+        <para>Arm host: Improved high CPU usage for idling VMs (issue github:gh-34)</para>
       </listitem>
 
       <listitem>
