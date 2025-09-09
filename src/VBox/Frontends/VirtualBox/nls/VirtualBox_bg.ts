@@ -6022,6 +6022,11 @@
         <comment>TpmType</comment>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>Intel 82583V Gigabit Network Connection [EXPERIMENTAL]</source>
+        <comment>NetworkAdapterType</comment>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UICustomFileSystemModel</name>
