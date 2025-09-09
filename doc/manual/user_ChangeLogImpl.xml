@@ -132,7 +132,8 @@ Rules for adding a changelog entry to make them look more uniform:
       </listitem>
 
       <listitem>
-        <para>Network: Added new experimental type of e1000 adapter (82583V) </para>
+        <para>Network: Added a new experimental type of e1000 adapter (82583V). It requires the ICH9
+          chipset, since MSIs are not supported by PIIX3. </para>
       </listitem>
 
     </itemizedlist>
