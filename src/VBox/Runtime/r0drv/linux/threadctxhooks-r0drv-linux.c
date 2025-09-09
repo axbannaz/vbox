@@ -82,11 +82,11 @@ typedef struct RTTHREADCTXHOOKINT
     void                       *pvUser;
     /** The linux callbacks. */
     struct preempt_ops          PreemptOps;
-#if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64)
+# if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64) && !defined(IPRT_WITHOUT_EFLAGS_AC_PRESERVING)
     /** Starting with 3.1.19, the linux kernel doesn't restore kernel RFLAGS during
      * task switch, so we have to do that ourselves. (x86 code is not affected.) */
     RTCCUINTREG                 fSavedRFlags;
-#endif
+# endif
 } RTTHREADCTXHOOKINT;
 typedef RTTHREADCTXHOOKINT *PRTTHREADCTXHOOKINT;
 
@@ -104,10 +104,13 @@ typedef RTTHREADCTXHOOKINT *PRTTHREADCTXHOOKINT;
 static void rtThreadCtxHooksLnxSchedOut(struct preempt_notifier *pPreemptNotifier, struct task_struct *pNext)
 {
     PRTTHREADCTXHOOKINT pThis = RT_FROM_MEMBER(pPreemptNotifier, RTTHREADCTXHOOKINT, LnxPreemptNotifier);
-#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+# if (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)) && !defined(IPRT_WITHOUT_EFLAGS_AC_PRESERVING)
+#  ifdef VBOX_WITHOUT_EFLAGS_AC_SET_IN_VBOXDRV /* unclean VBox define */
     RTCCUINTREG fSavedEFlags = ASMGetFlags();
-    stac();
-#endif
+#  else
+    RTCCUINTREG fSavedEFlags = ASMAddFlags(IPRT_X86_EFL_AC);
+#  endif
+# endif
     RT_NOREF_PV(pNext);
 
     AssertPtr(pThis);
@@ -117,12 +120,12 @@ static void rtThreadCtxHooksLnxSchedOut(struct preempt_notifier *pPreemptNotifie
 
     pThis->pfnCallback(RTTHREADCTXEVENT_OUT, pThis->pvUser);
 
-#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+# if (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)) && !defined(IPRT_WITHOUT_EFLAGS_AC_PRESERVING)
     ASMSetFlags(fSavedEFlags);
-# if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64)
+#  if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64)
     pThis->fSavedRFlags = fSavedEFlags;
+#  endif
 # endif
-#endif
 }
 
 
@@ -139,10 +142,13 @@ static void rtThreadCtxHooksLnxSchedOut(struct preempt_notifier *pPreemptNotifie
 static void rtThreadCtxHooksLnxSchedIn(struct preempt_notifier *pPreemptNotifier, int iCpu)
 {
     PRTTHREADCTXHOOKINT pThis = RT_FROM_MEMBER(pPreemptNotifier, RTTHREADCTXHOOKINT, LnxPreemptNotifier);
-#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
+# if (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)) && !defined(IPRT_WITHOUT_EFLAGS_AC_PRESERVING)
+#  ifdef VBOX_WITHOUT_EFLAGS_AC_SET_IN_VBOXDRV /* unclean VBox define */
     RTCCUINTREG fSavedEFlags = ASMGetFlags();
-    stac();
-#endif
+#  else
+    RTCCUINTREG fSavedEFlags = ASMAddFlags(IPRT_X86_EFL_AC);
+#  endif
+# endif
     RT_NOREF_PV(iCpu);
 
     AssertPtr(pThis);
@@ -151,13 +157,13 @@ static void rtThreadCtxHooksLnxSchedIn(struct preempt_notifier *pPreemptNotifier
 
     pThis->pfnCallback(RTTHREADCTXEVENT_IN, pThis->pvUser);
 
-#if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
-# if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64)
+# if (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)) && !defined(IPRT_WITHOUT_EFLAGS_AC_PRESERVING)
+#  if RTLNX_VER_MIN(3,1,19) && defined(RT_ARCH_AMD64)
     fSavedEFlags &= ~RT_BIT_64(18) /*X86_EFL_AC*/;
-    fSavedEFlags |= pThis->fSavedRFlags & RT_BIT_64(18) /*X86_EFL_AC*/;
-# endif
+    fSavedEFlags |= pThis->fSavedRFlags & IPRT_X86_EFL_AC;
+#  endif
     ASMSetFlags(fSavedEFlags);
-#endif
+# endif
 }
 
 
@@ -208,9 +214,9 @@ RTDECL(int) RTThreadCtxHookCreate(PRTTHREADCTXHOOK phCtxHook, uint32_t fFlags, P
     pThis->PreemptOps.sched_out = rtThreadCtxHooksLnxSchedOut;
     pThis->PreemptOps.sched_in  = rtThreadCtxHooksLnxSchedIn;
 
-#if RTLNX_VER_MIN(4,2,0)
+# if RTLNX_VER_MIN(4,2,0)
     preempt_notifier_inc();
-#endif
+# endif
 
     *phCtxHook = pThis;
     IPRT_LINUX_RESTORE_EFL_AC();
@@ -245,9 +251,9 @@ RTDECL(int ) RTThreadCtxHookDestroy(RTTHREADCTXHOOK hCtxHook)
         Assert(!pThis->fEnabled); /* paranoia */
     }
 
-#if RTLNX_VER_MIN(4,2,0)
+# if RTLNX_VER_MIN(4,2,0)
     preempt_notifier_dec();
-#endif
+# endif
 
     ASMAtomicWriteU32(&pThis->u32Magic, ~RTTHREADCTXHOOKINT_MAGIC);
     RTMemFree(pThis);
