@@ -12967,23 +12967,23 @@
     </message>
     <message>
         <source>The user name cannot contain following characters: / \ [ ] : | &lt; &gt; + = ; , ? * % @</source>
-        <translation type="unfinished"></translation>
+        <translation>Kullanıcı adı şu karakterleri içeremez: / \ [ ] : | &lt; &gt; + = ; , ? * % @</translation>
     </message>
     <message>
         <source>The user name cannot be &apos;NONE&apos;</source>
-        <translation type="unfinished"></translation>
+        <translation>Kullanıcı adı &apos;NONE&apos; olamaz</translation>
     </message>
     <message>
         <source>The user name cannot be longer than 20 characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Kullanıcı adı 20 karakterden daha uzun olamaz</translation>
     </message>
     <message>
         <source>The user name includes invalid characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Kullanıcı adı geçersiz karakterler içeriyor</translation>
     </message>
     <message>
         <source>The user name cannot be longer than 32 characters</source>
-        <translation type="unfinished"></translation>
+        <translation>Kullanıcı adı 32 karakterden daha uzun olamaz</translation>
     </message>
 </context>
 <context>
