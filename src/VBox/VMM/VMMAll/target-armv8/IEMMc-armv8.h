@@ -146,6 +146,11 @@
 
 #define IEM_MC_FETCH_MEM_FLAT_U32_PAIR(a_u32Value1, a_u32Value2, a_GCPtrMem) \
     (a_u32Value1) = iemMemFlatFetchDataPairU32Jmp(pVCpu, (a_GCPtrMem), &(a_u32Value2))
+#define IEM_MC_FETCH_MEM_FLAT_U32_PAIR_SX_U64(a_u64Value1, a_u64Value2, a_GCPtrMem) \
+    uint32_t       u32LdTmp2 = 0; \
+    uint32_t const u32LdTmp1 = iemMemFlatFetchDataPairU32Jmp(pVCpu, (a_GCPtrMem), &u32LdTmp2); \
+    (a_u64Value1) = (int64_t)(int32_t)u32LdTmp1; \
+    (a_u64Value2) = (int64_t)(int32_t)u32LdTmp2
 #define IEM_MC_FETCH_MEM_FLAT_U64_PAIR(a_u64Value1, a_u64Value2, a_GCPtrMem) \
     (a_u64Value1) = iemMemFlatFetchDataPairU64Jmp(pVCpu, (a_GCPtrMem), &(a_u64Value2))
 #define IEM_MC_FETCH_MEM_FLAT_U128_PAIR(a_u128Value1, a_u128Value2, a_GCPtrMem) \
