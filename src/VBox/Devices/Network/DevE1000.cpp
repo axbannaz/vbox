@@ -673,7 +673,152 @@ typedef enum
     E1K_NUM_OF_REGS
 } E1kRegIndex;
 
+
+/**
+ * Indices of memory-mapped registers in register table - old indices before 82583V support (used for old saved state loading).
+ */
+typedef enum
+{
+    CTRL_IDX_OLD,
+    STATUS_IDX_OLD,
+    EECD_IDX_OLD,
+    EERD_IDX_OLD,
+    CTRL_EXT_IDX_OLD,
+    FLA_IDX_OLD,
+    MDIC_IDX_OLD,
+    FCAL_IDX_OLD,
+    FCAH_IDX_OLD,
+    FCT_IDX_OLD,
+    VET_IDX_OLD,
+    ICR_IDX_OLD,
+    ITR_IDX_OLD,
+    ICS_IDX_OLD,
+    IMS_IDX_OLD,
+    IMC_IDX_OLD,
+    RCTL_IDX_OLD,
+    FCTTV_IDX_OLD,
+    TXCW_IDX_OLD,
+    RXCW_IDX_OLD,
+    TCTL_IDX_OLD,
+    TIPG_IDX_OLD,
+    AIFS_IDX_OLD,
+    LEDCTL_IDX_OLD,
+    PBA_IDX_OLD,
+    FCRTL_IDX_OLD,
+    FCRTH_IDX_OLD,
+    RDFH_IDX_OLD,
+    RDFT_IDX_OLD,
+    RDFHS_IDX_OLD,
+    RDFTS_IDX_OLD,
+    RDFPC_IDX_OLD,
+    RDBAL_IDX_OLD,
+    RDBAH_IDX_OLD,
+    RDLEN_IDX_OLD,
+    RDH_IDX_OLD,
+    RDT_IDX_OLD,
+    RDTR_IDX_OLD,
+    RXDCTL_IDX_OLD,
+    RADV_IDX_OLD,
+    RSRPD_IDX_OLD,
+    TXDMAC_IDX_OLD,
+    TDFH_IDX_OLD,
+    TDFT_IDX_OLD,
+    TDFHS_IDX_OLD,
+    TDFTS_IDX_OLD,
+    TDFPC_IDX_OLD,
+    TDBAL_IDX_OLD,
+    TDBAH_IDX_OLD,
+    TDLEN_IDX_OLD,
+    TDH_IDX_OLD,
+    TDT_IDX_OLD,
+    TIDV_IDX_OLD,
+    TXDCTL_IDX_OLD,
+    TADV_IDX_OLD,
+    TSPMT_IDX_OLD,
+    CRCERRS_IDX_OLD,
+    ALGNERRC_IDX_OLD,
+    SYMERRS_IDX_OLD,
+    RXERRC_IDX_OLD,
+    MPC_IDX_OLD,
+    SCC_IDX_OLD,
+    ECOL_IDX_OLD,
+    MCC_IDX_OLD,
+    LATECOL_IDX_OLD,
+    COLC_IDX_OLD,
+    DC_IDX_OLD,
+    TNCRS_IDX_OLD,
+    SEC_IDX_OLD,
+    CEXTERR_IDX_OLD,
+    RLEC_IDX_OLD,
+    XONRXC_IDX_OLD,
+    XONTXC_IDX_OLD,
+    XOFFRXC_IDX_OLD,
+    XOFFTXC_IDX_OLD,
+    FCRUC_IDX_OLD,
+    PRC64_IDX_OLD,
+    PRC127_IDX_OLD,
+    PRC255_IDX_OLD,
+    PRC511_IDX_OLD,
+    PRC1023_IDX_OLD,
+    PRC1522_IDX_OLD,
+    GPRC_IDX_OLD,
+    BPRC_IDX_OLD,
+    MPRC_IDX_OLD,
+    GPTC_IDX_OLD,
+    GORCL_IDX_OLD,
+    GORCH_IDX_OLD,
+    GOTCL_IDX_OLD,
+    GOTCH_IDX_OLD,
+    RNBC_IDX_OLD,
+    RUC_IDX_OLD,
+    RFC_IDX_OLD,
+    ROC_IDX_OLD,
+    RJC_IDX_OLD,
+    MGTPRC_IDX_OLD,
+    MGTPDC_IDX_OLD,
+    MGTPTC_IDX_OLD,
+    TORL_IDX_OLD,
+    TORH_IDX_OLD,
+    TOTL_IDX_OLD,
+    TOTH_IDX_OLD,
+    TPR_IDX_OLD,
+    TPT_IDX_OLD,
+    PTC64_IDX_OLD,
+    PTC127_IDX_OLD,
+    PTC255_IDX_OLD,
+    PTC511_IDX_OLD,
+    PTC1023_IDX_OLD,
+    PTC1522_IDX_OLD,
+    MPTC_IDX_OLD,
+    BPTC_IDX_OLD,
+    TSCTC_IDX_OLD,
+    TSCTFC_IDX_OLD,
+    RXCSUM_IDX_OLD,
+    WUC_IDX_OLD,
+    WUFC_IDX_OLD,
+    WUS_IDX_OLD,
+    MANC_IDX_OLD,
+    IPAV_IDX_OLD,
+    WUPL_IDX_OLD,
+    MTA_IDX_OLD,
+    RA_IDX_OLD,
+    VFTA_IDX_OLD,
+    IP4AT_IDX_OLD,
+    IP6AT_IDX_OLD,
+    WUPM_IDX_OLD,
+    FFLT_IDX_OLD,
+    FFMT_IDX_OLD,
+    FFVT_IDX_OLD,
+    PBM_IDX_OLD,
+    RA_82542_IDX_OLD,
+    MTA_82542_IDX_OLD,
+    VFTA_82542_IDX_OLD,
+    E1K_NUM_OF_REGS_OLD
+} E1kRegIndexOld;
+
+
 #define E1K_NUM_OF_32BIT_REGS           MTA_IDX
+#define E1K_NUM_OF_32BIT_REGS_OLD       MTA_IDX_OLD
 /** The number of registers with strictly increasing offset. */
 #define E1K_NUM_OF_BINARY_SEARCHABLE    (WUPL_IDX + 1)
 
@@ -1176,7 +1321,9 @@ AssertCompileSize(struct E1kTcpHeader, 20);
 
 #ifdef E1K_WITH_TXD_CACHE
 /** The current Saved state version. */
-# define E1K_SAVEDSTATE_VERSION         4
+# define E1K_SAVEDSTATE_VERSION               5
+/** Saved state version before the introduction of 82583V support. */
+# define E1K_SAVEDSTATE_VERSION_PRE_82583V    4
 /** Saved state version for VirtualBox 4.2 with VLAN tag fields.  */
 # define E1K_SAVEDSTATE_VERSION_VBOX_42_VTAG  3
 #else /* !E1K_WITH_TXD_CACHE */
@@ -7769,6 +7916,7 @@ static DECLCALLBACK(int) e1kR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
     int             rc;
 
     if (    uVersion != E1K_SAVEDSTATE_VERSION
+        &&  uVersion != E1K_SAVEDSTATE_VERSION_PRE_82583V
 #ifdef E1K_WITH_TXD_CACHE
         &&  uVersion != E1K_SAVEDSTATE_VERSION_VBOX_42_VTAG
 #endif /* E1K_WITH_TXD_CACHE */
@@ -7802,7 +7950,142 @@ static DECLCALLBACK(int) e1kR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uint
             AssertRCReturn(rc, rc);
         }
         /* the state */
-        pHlp->pfnSSMGetMem(pSSM, &pThis->auRegs, sizeof(pThis->auRegs));
+        /** @todo r=aeichner This needs to be cleaned up properly ASAP after the release.
+         *                   Replace GetMem/PutMem with GetStructEx/PutStructEx.
+         */
+        if (uVersion <= E1K_SAVEDSTATE_VERSION_PRE_82583V)
+        {
+            uint32_t auRegsOld[E1K_NUM_OF_32BIT_REGS_OLD];
+            rc = pHlp->pfnSSMGetMem(pSSM, &auRegsOld, sizeof(auRegsOld));
+            AssertRCReturn(rc, rc);
+
+            #define E1K_REG_RESTORE(a_idx) pThis->auRegs[a_idx] = auRegsOld[a_idx ## _OLD]
+            E1K_REG_RESTORE(CTRL_IDX);
+            E1K_REG_RESTORE(STATUS_IDX);
+            E1K_REG_RESTORE(EECD_IDX);
+            E1K_REG_RESTORE(EERD_IDX);
+            E1K_REG_RESTORE(CTRL_EXT_IDX);
+            E1K_REG_RESTORE(FLA_IDX);
+            E1K_REG_RESTORE(MDIC_IDX);
+            E1K_REG_RESTORE(FCAL_IDX);
+            E1K_REG_RESTORE(FCAH_IDX);
+            E1K_REG_RESTORE(FCT_IDX);
+            E1K_REG_RESTORE(VET_IDX);
+            E1K_REG_RESTORE(ICR_IDX);
+            E1K_REG_RESTORE(ITR_IDX);
+            E1K_REG_RESTORE(ICS_IDX);
+            E1K_REG_RESTORE(IMS_IDX);
+            E1K_REG_RESTORE(IMC_IDX);
+            E1K_REG_RESTORE(RCTL_IDX);
+            E1K_REG_RESTORE(FCTTV_IDX);
+            E1K_REG_RESTORE(TXCW_IDX);
+            E1K_REG_RESTORE(RXCW_IDX);
+            E1K_REG_RESTORE(TCTL_IDX);
+            E1K_REG_RESTORE(TIPG_IDX);
+            E1K_REG_RESTORE(AIFS_IDX);
+            E1K_REG_RESTORE(LEDCTL_IDX);
+            E1K_REG_RESTORE(PBA_IDX);
+            E1K_REG_RESTORE(FCRTL_IDX);
+            E1K_REG_RESTORE(FCRTH_IDX);
+            E1K_REG_RESTORE(RDFH_IDX);
+            E1K_REG_RESTORE(RDFT_IDX);
+            E1K_REG_RESTORE(RDFHS_IDX);
+            E1K_REG_RESTORE(RDFTS_IDX);
+            E1K_REG_RESTORE(RDFPC_IDX);
+            E1K_REG_RESTORE(RDBAL_IDX);
+            E1K_REG_RESTORE(RDBAH_IDX);
+            E1K_REG_RESTORE(RDLEN_IDX);
+            E1K_REG_RESTORE(RDH_IDX);
+            E1K_REG_RESTORE(RDT_IDX);
+            E1K_REG_RESTORE(RDTR_IDX);
+            E1K_REG_RESTORE(RXDCTL_IDX);
+            E1K_REG_RESTORE(RADV_IDX);
+            E1K_REG_RESTORE(RSRPD_IDX);
+            E1K_REG_RESTORE(TXDMAC_IDX);
+            E1K_REG_RESTORE(TDFH_IDX);
+            E1K_REG_RESTORE(TDFT_IDX);
+            E1K_REG_RESTORE(TDFHS_IDX);
+            E1K_REG_RESTORE(TDFTS_IDX);
+            E1K_REG_RESTORE(TDFPC_IDX);
+            E1K_REG_RESTORE(TDBAL_IDX);
+            E1K_REG_RESTORE(TDBAH_IDX);
+            E1K_REG_RESTORE(TDLEN_IDX);
+            E1K_REG_RESTORE(TDH_IDX);
+            E1K_REG_RESTORE(TDT_IDX);
+            E1K_REG_RESTORE(TIDV_IDX);
+            E1K_REG_RESTORE(TXDCTL_IDX);
+            E1K_REG_RESTORE(TADV_IDX);
+            E1K_REG_RESTORE(TSPMT_IDX);
+            E1K_REG_RESTORE(CRCERRS_IDX);
+            E1K_REG_RESTORE(ALGNERRC_IDX);
+            E1K_REG_RESTORE(SYMERRS_IDX);
+            E1K_REG_RESTORE(RXERRC_IDX);
+            E1K_REG_RESTORE(MPC_IDX);
+            E1K_REG_RESTORE(SCC_IDX);
+            E1K_REG_RESTORE(ECOL_IDX);
+            E1K_REG_RESTORE(MCC_IDX);
+            E1K_REG_RESTORE(LATECOL_IDX);
+            E1K_REG_RESTORE(COLC_IDX);
+            E1K_REG_RESTORE(DC_IDX);
+            E1K_REG_RESTORE(TNCRS_IDX);
+            E1K_REG_RESTORE(SEC_IDX);
+            E1K_REG_RESTORE(CEXTERR_IDX);
+            E1K_REG_RESTORE(RLEC_IDX);
+            E1K_REG_RESTORE(XONRXC_IDX);
+            E1K_REG_RESTORE(XONTXC_IDX);
+            E1K_REG_RESTORE(XOFFRXC_IDX);
+            E1K_REG_RESTORE(XOFFTXC_IDX);
+            E1K_REG_RESTORE(FCRUC_IDX);
+            E1K_REG_RESTORE(PRC64_IDX);
+            E1K_REG_RESTORE(PRC127_IDX);
+            E1K_REG_RESTORE(PRC255_IDX);
+            E1K_REG_RESTORE(PRC511_IDX);
+            E1K_REG_RESTORE(PRC1023_IDX);
+            E1K_REG_RESTORE(PRC1522_IDX);
+            E1K_REG_RESTORE(GPRC_IDX);
+            E1K_REG_RESTORE(BPRC_IDX);
+            E1K_REG_RESTORE(MPRC_IDX);
+            E1K_REG_RESTORE(GPTC_IDX);
+            E1K_REG_RESTORE(GORCL_IDX);
+            E1K_REG_RESTORE(GORCH_IDX);
+            E1K_REG_RESTORE(GOTCL_IDX);
+            E1K_REG_RESTORE(GOTCH_IDX);
+            E1K_REG_RESTORE(RNBC_IDX);
+            E1K_REG_RESTORE(RUC_IDX);
+            E1K_REG_RESTORE(RFC_IDX);
+            E1K_REG_RESTORE(ROC_IDX);
+            E1K_REG_RESTORE(RJC_IDX);
+            E1K_REG_RESTORE(MGTPRC_IDX);
+            E1K_REG_RESTORE(MGTPDC_IDX);
+            E1K_REG_RESTORE(MGTPTC_IDX);
+            E1K_REG_RESTORE(TORL_IDX);
+            E1K_REG_RESTORE(TORH_IDX);
+            E1K_REG_RESTORE(TOTL_IDX);
+            E1K_REG_RESTORE(TOTH_IDX);
+            E1K_REG_RESTORE(TPR_IDX);
+            E1K_REG_RESTORE(TPT_IDX);
+            E1K_REG_RESTORE(PTC64_IDX);
+            E1K_REG_RESTORE(PTC127_IDX);
+            E1K_REG_RESTORE(PTC255_IDX);
+            E1K_REG_RESTORE(PTC511_IDX);
+            E1K_REG_RESTORE(PTC1023_IDX);
+            E1K_REG_RESTORE(PTC1522_IDX);
+            E1K_REG_RESTORE(MPTC_IDX);
+            E1K_REG_RESTORE(BPTC_IDX);
+            E1K_REG_RESTORE(TSCTC_IDX);
+            E1K_REG_RESTORE(TSCTFC_IDX);
+            E1K_REG_RESTORE(RXCSUM_IDX);
+            E1K_REG_RESTORE(WUC_IDX);
+            E1K_REG_RESTORE(WUFC_IDX);
+            E1K_REG_RESTORE(WUS_IDX);
+            E1K_REG_RESTORE(MANC_IDX);
+            E1K_REG_RESTORE(IPAV_IDX);
+            E1K_REG_RESTORE(WUPL_IDX);
+            E1K_REG_RESTORE(MTA_IDX);
+            #undef E1K_REG_RESTORE
+        }
+        else
+            pHlp->pfnSSMGetMem(pSSM, &pThis->auRegs, sizeof(pThis->auRegs));
         pHlp->pfnSSMGetBool(pSSM, &pThis->fIntRaised);
         /** @todo PHY could be made a separate device with its own versioning */
         Phy::loadState(pHlp, pSSM, &pThis->phy);
