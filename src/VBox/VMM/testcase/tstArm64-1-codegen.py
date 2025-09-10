@@ -42,6 +42,7 @@ import os;
 import sys;
 
 
+
 # Imports from the VMMAll directory.
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'VMMAll'));
 import PyCommonVmm as pycmn;    # pylint: disable=import-error
@@ -841,6 +842,157 @@ def calcUbfm(cBits, _, uSrc, uImmR, uImmS):
     (fWMask, fTopMask) = decodeBitMasks(uImmR, 1 if cBits == 64 else 0,  uImmS, cBits);
     fBottom = bitsRor(cBits, uSrc, uImmR) & fWMask;
     return fBottom & fTopMask;
+
+
+class A64No1CodeGenMoviGrp(A64No1CodeGenFprBase):
+    """
+    C4.1.95.25 Advanced SIMD modified immediate.
+    """
+    def __init__(self):
+        A64No1CodeGenFprBase.__init__(self, 'asimdimm', 'asimdimm', 16);
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for i in range(oOptions.cTestsPerInstruction):
+            u1Q     = randUBits(1);
+            u1Op    = randUBits(1);
+            u4Mode  = randUBits(4);
+            u8Imm   = randUBits(8);
+            uSrc    = randUBits(128);
+            u1O2    = 0;
+
+            sInstr  = 'movi';
+            if u4Mode == 0b1111:
+                sInstr  = 'fmov';
+                cBits   = 64 if u1Op else 32;
+                if u1Q == 0 and u1Op == 1: # unallocated -> FMOV.4H/8H
+                    u1O2  = 1;
+                    u1Op  = 0;
+                    cBits = 16;
+                    u1Q   = randUBits(1);
+                uRes    = aarchExpandAdvSimdImmFp(u8Imm, cBits);
+                assert uRes >= 0;
+                if u1Q:
+                    uRes |= uRes << 64;
+            else:
+                uRes    = aarchExpandAdvSimdImm(u1Op, u4Mode, u8Imm);
+                assert uRes >= 0;
+                uRes   |= (uRes << 64);
+                if u1Op == 0 and ((u4Mode & 0b1001) == 0b0001 or (u4Mode & 0b1101) == 0b1001): # ORR
+                    sInstr  = 'orr';
+                    uRes |= uSrc;
+                    assert uRes >= 0;
+                elif u1Op == 1 and ((u4Mode & 0b1001) == 0b0001 or (u4Mode & 0b1101) == 0b1001): # BIC
+                    sInstr  = 'bic';
+                    uRes = uSrc & ~uRes;
+                    assert uRes >= 0;
+                elif u1Op == 1 and u4Mode != 0b1110: # MVNI
+                    sInstr  = 'mvni';
+                    uRes ^= bitsOnes(128);
+                    assert uRes >= 0;
+                if not u1Q:
+                    uRes &= bitsOnes(64);
+                    assert uRes >= 0;
+
+            iRegDst = self.oFprAllocator.alloc(uRes);
+
+            self.emitCommentLine('i=%u Q=%u op=%u mode=%s (%s) imm=%s (%x) Rd=%u uSrc=%#x uRes=%#x'
+                                 % (i, u1Q, u1Op, bin(u4Mode), sInstr, bin(u8Imm), u8Imm, iRegDst, uSrc, uRes,));
+            self.emitFprLoad(iRegDst, uSrc);
+            uInstr = (  0x0f000400 | iRegDst | ((u8Imm & 0x1f) << 5) | (u1O2 << 11) | (u4Mode << 12) | (u8Imm >> 5 << 16)
+                      | (u1Op << 29) | (u1Q << 30));
+            self.emitInstr('.int', '%#x' % (uInstr,));
+
+            self.emitFprValCheck(iRegDst, uRes);
+
+            self.oFprAllocator.free(iRegDst);
+        _  = cLeftToAllCheck;
+
+
+def aarchExpandAdvSimdImm(u1Op, u4Mode, u8Imm):
+    """ AdvSIMDExpandImm """
+    if u4Mode < 8:
+        u8Imm <<= 8 * (u4Mode >> 1);
+        return (u8Imm << 32) | u8Imm;
+
+    if u4Mode < 12:
+        if u4Mode >= 10:
+            u8Imm <<= 8;
+        return (u8Imm << 48) | (u8Imm << 32) | (u8Imm << 16) | u8Imm;
+
+    if u4Mode < 14:
+        if u4Mode == 12:
+            u8Imm <<= 8;
+            u8Imm  |= 0xff;
+        else:
+            u8Imm <<= 16;
+            u8Imm  |= 0xffff;
+        return (u8Imm << 32) | u8Imm;
+
+    if u4Mode == 14:
+        if u1Op == 0:
+            return (  (u8Imm <<  0) | (u8Imm <<  8) | (u8Imm << 16) | (u8Imm << 24)
+                    | (u8Imm << 32) | (u8Imm << 40) | (u8Imm << 48) | (u8Imm << 56));
+        return (  (0xff00000000000000 if u8Imm & 0x80 else 0)
+                | (0x00ff000000000000 if u8Imm & 0x40 else 0)
+                | (0x0000ff0000000000 if u8Imm & 0x20 else 0)
+                | (0x000000ff00000000 if u8Imm & 0x10 else 0)
+                | (0x00000000ff000000 if u8Imm & 0x08 else 0)
+                | (0x0000000000ff0000 if u8Imm & 0x04 else 0)
+                | (0x000000000000ff00 if u8Imm & 0x02 else 0)
+                | (0x00000000000000ff if u8Imm & 0x01 else 0));
+
+    assert u4Mode == 15;
+    u32Imm = (  ((u8Imm & 0x80) << (31 - 7))
+              | (0x3e000000 if u8Imm & 0x40 else 0x40000000)
+              | ((u8Imm & 0x3f) << 19));
+    if u1Op == 0:
+        return (u32Imm << 32) | u32Imm;
+    return u32Imm << 32;
+
+def aarchExpandAdvSimdImmFp(u8Imm, cBits):
+    """ The floating point variant of aarchExpandAdvSimdImm (C2.2.3). """
+    if cBits == 16:
+        u16Tmp = (  (( u8Imm & 0x80) << (15 - 7)) # sign
+                  | ((~u8Imm & 0x40) << (14 - 6))
+                  | (( u8Imm & 0x40) << (13 - 6))
+                  | (( u8Imm & 0x40) << (12 - 6))
+                  | (( u8Imm & 0x3f) << 6) );
+        return (u16Tmp << 48) | (u16Tmp << 32) | (u16Tmp << 16) | u16Tmp;
+    if cBits == 32:
+        u32Tmp = (  (( u8Imm & 0x80) << (31 - 7)) # sign
+                  | ((~u8Imm & 0x40) << (30 - 6))
+                  | (( u8Imm & 0x40) << (29 - 6))
+                  | (( u8Imm & 0x40) << (28 - 6))
+                  | (( u8Imm & 0x40) << (27 - 6))
+                  | (( u8Imm & 0x40) << (26 - 6))
+                  | (( u8Imm & 0x40) << (25 - 6))
+                  | (( u8Imm & 0x3f) << 19) );
+        return (u32Tmp << 32) | u32Tmp;
+    if cBits == 64:
+        return (  (( u8Imm & 0x80) << (63 - 7)) # sign
+                | ((~u8Imm & 0x40) << (62 - 6))
+                | (( u8Imm & 0x40) << (61 - 6))
+                | (( u8Imm & 0x40) << (60 - 6))
+                | (( u8Imm & 0x40) << (59 - 6))
+                | (( u8Imm & 0x40) << (58 - 6))
+                | (( u8Imm & 0x40) << (57 - 6))
+                | (( u8Imm & 0x40) << (56 - 6))
+                | (( u8Imm & 0x40) << (55 - 6))
+                | (( u8Imm & 0x40) << (54 - 6))
+                | (( u8Imm & 0x3f) << 48) );
+    raise Exception(str(cBits));
+
+
+
+def aarchExpandAdvSimdImmFMov(u8Imm):
+    """ FEAT_FP16 variant of aarchExpandAdvSimdImm. """
+    u16Imm = (  (( u8Imm & 0x80) << (15 - 7))
+              | ((~u8Imm & 0x40) << (14 - 6))
+              | (( u8Imm & 0x40) << (13 - 6))
+              | (( u8Imm & 0x40) << (12 - 6))
+              | (( u8Imm & 0x3f) <<  6) );
+    return (u16Imm << 48) | (u16Imm << 32) | (u16Imm << 16) | u16Imm;
+
 
 
 #
@@ -2001,226 +2153,261 @@ class Arm64No1CodeGen(object):
         if oOptions.cCheckAllRegsInterval is None:
             oOptions.cCheckAllRegsInterval = min(max(oOptions.cTestsPerInstruction / 4, 8), oOptions.cTestsPerInstruction);
 
-        # See random.
+        #
+        # Seed random.
+        #
         if oOptions.iRandSeed in (None, 0):
             oOptions.iRandSeed = sum((int(bVal) << (iByte * 8)) for iByte, bVal in enumerate(os.urandom(7)))
         g_oRandom.seed(oOptions.iRandSeed);
         print('info: Using seed %#x' % (oOptions.iRandSeed,));
 
+        #
         # Instantiate the generators.
-        aoGenerators = [
+        #
+        aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # asimdimm
+            aoGenerators += [
+                A64No1CodeGenMoviGrp(),
+            ];
+
+
+        if True: # pylint: disable=using-constant-test
             # Pair loads and stores (with 7-bit scaled immediates):
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'postidx'),
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'preidx'),
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'postidx'),
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'preidx'),
-            A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'postidx', cBits = 64),
-            A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'preidx',  cBits = 64),
-            A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'signed',  cBits = 64),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'postidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'preidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'postidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'preidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'postidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'preidx'),
-            A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'signed'),
+            aoGenerators += [
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'postidx'),
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'preidx'),
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'postidx'),
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'preidx'),
+                A64No1CodeGenLdpImm7(    'ldp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'postidx', cBits = 64),
+                A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'preidx',  cBits = 64),
+                A64No1CodeGenLdpImm7(    'ldpsw', calcLdSigned,   cbMem =  4 * 2, sType = 'signed',  cBits = 64),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'postidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'preidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem = 16 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'postidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'preidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'postidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'preidx'),
+                A64No1CodeGenLdpImm7Fp(  'ldp',                   cbMem =  4 * 2, sType = 'signed'),
 
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'postidx'),
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'preidx'),
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'postidx'),
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'preidx'),
-            A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'postidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'preidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'postidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'preidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'postidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'preidx'),
-            A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'postidx'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'preidx'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'postidx'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'preidx'),
+                A64No1CodeGenStpImm7(    'stp',                   cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'postidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'preidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem = 16 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'postidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'preidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'postidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'preidx'),
+                A64No1CodeGenStpImm7Fp(  'stp',                   cbMem =  4 * 2, sType = 'signed'),
 
-            A64No1CodeGenLdpImm7(    'ldnp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7(    'ldnp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem = 16 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7(    'ldnp',   calcLdUnsigned, cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7(    'ldnp',   calcLdUnsigned, cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem = 16 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenLdpImm7Fp(  'ldnp',                   cbMem =  4 * 2, sType = 'signed'),
 
-            A64No1CodeGenStpImm7(    'stnp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7(    'stnp',                   cbMem =  4 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem = 16 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem =  8 * 2, sType = 'signed'),
-            A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7(    'stnp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7(    'stnp',                   cbMem =  4 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem = 16 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem =  8 * 2, sType = 'signed'),
+                A64No1CodeGenStpImm7Fp(  'stnp',                   cbMem =  4 * 2, sType = 'signed'),
+            ];
 
             # PC relative loads:
-            A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  8),
-            A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  4),
-            A64No1CodeGenLdLiteral(  'ldrsw', calcLdSigned,   cbMem =  4, cBits = 64),
-            A64No1CodeGenLdLiteralFp('ldr',                   cbMem = 16),
-            A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  8),
-            A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  4),
+            aoGenerators += [
+                A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  8),
+                A64No1CodeGenLdLiteral(  'ldr',   calcLdUnsigned, cbMem =  4),
+                A64No1CodeGenLdLiteral(  'ldrsw', calcLdSigned,   cbMem =  4, cBits = 64),
+                A64No1CodeGenLdLiteralFp('ldr',                   cbMem = 16),
+                A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  8),
+                A64No1CodeGenLdLiteralFp('ldr',                   cbMem =  4),
+            ];
 
             # Loads and stores with scaled 12-bit immediates:
-            A64No1CodeGenStReg(      'str',                   cbMem =  8),
-            A64No1CodeGenStReg(      'str',                   cbMem =  4),
-            A64No1CodeGenStReg(      'strh',                  cbMem =  2),
-            A64No1CodeGenStReg(      'strb',                  cbMem =  1),
-            A64No1CodeGenStRegFp(    'str',                   cbMem = 16),
-            A64No1CodeGenStRegFp(    'str',                   cbMem =  8),
-            A64No1CodeGenStRegFp(    'str',                   cbMem =  4),
-            A64No1CodeGenStRegFp(    'str',                   cbMem =  2),
-            A64No1CodeGenStRegFp(    'str',                   cbMem =  1),
+            aoGenerators += [
+                A64No1CodeGenStReg(      'str',                   cbMem =  8),
+                A64No1CodeGenStReg(      'str',                   cbMem =  4),
+                A64No1CodeGenStReg(      'strh',                  cbMem =  2),
+                A64No1CodeGenStReg(      'strb',                  cbMem =  1),
+                A64No1CodeGenStRegFp(    'str',                   cbMem = 16),
+                A64No1CodeGenStRegFp(    'str',                   cbMem =  8),
+                A64No1CodeGenStRegFp(    'str',                   cbMem =  4),
+                A64No1CodeGenStRegFp(    'str',                   cbMem =  2),
+                A64No1CodeGenStRegFp(    'str',                   cbMem =  1),
 
-            A64No1CodeGenLdReg(      'ldr',   calcLdUnsigned, cbMem =  8),
-            A64No1CodeGenLdReg(      'ldr',   calcLdUnsigned, cbMem =  4),
-            A64No1CodeGenLdReg(      'ldrh',  calcLdUnsigned, cbMem =  2),
-            A64No1CodeGenLdReg(      'ldrsh', calcLdSigned,   cbMem =  2),
-            A64No1CodeGenLdReg(      'ldrsh', calcLdSigned,   cbMem =  2, cBits = 64),
-            A64No1CodeGenLdReg(      'ldrb',  calcLdUnsigned, cbMem =  1),
-            A64No1CodeGenLdReg(      'ldrsb', calcLdSigned,   cbMem =  1),
-            A64No1CodeGenLdReg(      'ldrsb', calcLdSigned,   cbMem =  1, cBits = 64),
-            A64No1CodeGenLdRegFp(    'ldr',                   cbMem = 16),
-            A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  8),
-            A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  4),
-            A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  2),
-            A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  1),
+                A64No1CodeGenLdReg(      'ldr',   calcLdUnsigned, cbMem =  8),
+                A64No1CodeGenLdReg(      'ldr',   calcLdUnsigned, cbMem =  4),
+                A64No1CodeGenLdReg(      'ldrh',  calcLdUnsigned, cbMem =  2),
+                A64No1CodeGenLdReg(      'ldrsh', calcLdSigned,   cbMem =  2),
+                A64No1CodeGenLdReg(      'ldrsh', calcLdSigned,   cbMem =  2, cBits = 64),
+                A64No1CodeGenLdReg(      'ldrb',  calcLdUnsigned, cbMem =  1),
+                A64No1CodeGenLdReg(      'ldrsb', calcLdSigned,   cbMem =  1),
+                A64No1CodeGenLdReg(      'ldrsb', calcLdSigned,   cbMem =  1, cBits = 64),
+                A64No1CodeGenLdRegFp(    'ldr',                   cbMem = 16),
+                A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  8),
+                A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  4),
+                A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  2),
+                A64No1CodeGenLdRegFp(    'ldr',                   cbMem =  1),
+            ];
 
             # Loads and stores with scaled 12-bit immediates:
-            A64No1CodeGenStImm12Fp(  'str',                   cbMem = 16),
-            A64No1CodeGenStImm12Fp(  'str',                   cbMem =  8),
-            A64No1CodeGenStImm12Fp(  'str',                   cbMem =  4),
-            A64No1CodeGenStImm12Fp(  'str',                   cbMem =  2),
-            A64No1CodeGenStImm12Fp(  'str',                   cbMem =  1),
-            A64No1CodeGenStImm12(    'str',                   cbMem =  8),
-            A64No1CodeGenStImm12(    'str',                   cbMem =  4),
-            A64No1CodeGenStImm12(    'strh',                  cbMem =  2),
-            A64No1CodeGenStImm12(    'strb',                  cbMem =  1),
+            aoGenerators += [
+                A64No1CodeGenStImm12Fp(  'str',                   cbMem = 16),
+                A64No1CodeGenStImm12Fp(  'str',                   cbMem =  8),
+                A64No1CodeGenStImm12Fp(  'str',                   cbMem =  4),
+                A64No1CodeGenStImm12Fp(  'str',                   cbMem =  2),
+                A64No1CodeGenStImm12Fp(  'str',                   cbMem =  1),
+                A64No1CodeGenStImm12(    'str',                   cbMem =  8),
+                A64No1CodeGenStImm12(    'str',                   cbMem =  4),
+                A64No1CodeGenStImm12(    'strh',                  cbMem =  2),
+                A64No1CodeGenStImm12(    'strb',                  cbMem =  1),
 
-            A64No1CodeGenLdImm12(    'ldr',   calcLdUnsigned, cbMem =  8),
-            A64No1CodeGenLdImm12(    'ldr',   calcLdUnsigned, cbMem =  4),
-            A64No1CodeGenLdImm12(    'ldrsw', calcLdSigned,   cbMem =  4, cBits = 64),
-            A64No1CodeGenLdImm12(    'ldrh',  calcLdUnsigned, cbMem =  2),
-            A64No1CodeGenLdImm12(    'ldrsh', calcLdSigned,   cbMem =  2),
-            A64No1CodeGenLdImm12(    'ldrsh', calcLdSigned,   cbMem =  2, cBits = 64),
-            A64No1CodeGenLdImm12(    'ldrb',  calcLdUnsigned, cbMem =  1),
-            A64No1CodeGenLdImm12(    'ldrsb', calcLdSigned,   cbMem =  1),
-            A64No1CodeGenLdImm12(    'ldrsb', calcLdSigned,   cbMem =  1, cBits = 64),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem = 16),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  8),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  4),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  2),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  1),
-            A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  1),
+                A64No1CodeGenLdImm12(    'ldr',   calcLdUnsigned, cbMem =  8),
+                A64No1CodeGenLdImm12(    'ldr',   calcLdUnsigned, cbMem =  4),
+                A64No1CodeGenLdImm12(    'ldrsw', calcLdSigned,   cbMem =  4, cBits = 64),
+                A64No1CodeGenLdImm12(    'ldrh',  calcLdUnsigned, cbMem =  2),
+                A64No1CodeGenLdImm12(    'ldrsh', calcLdSigned,   cbMem =  2),
+                A64No1CodeGenLdImm12(    'ldrsh', calcLdSigned,   cbMem =  2, cBits = 64),
+                A64No1CodeGenLdImm12(    'ldrb',  calcLdUnsigned, cbMem =  1),
+                A64No1CodeGenLdImm12(    'ldrsb', calcLdSigned,   cbMem =  1),
+                A64No1CodeGenLdImm12(    'ldrsb', calcLdSigned,   cbMem =  1, cBits = 64),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem = 16),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  8),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  4),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  2),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  1),
+                A64No1CodeGenLdImm12Fp(  'ldr',   calcLdUnsigned, cbMem =  1),
+            ];
 
             # Loads and stores with unscaled 9-bit signed immediates:
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16,              sType = 'postidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16,              sType = 'preidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8,              sType = 'postidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8,              sType = 'preidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4,              sType = 'postidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4,              sType = 'preidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2,              sType = 'postidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2,              sType = 'preidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1,              sType = 'postidx'),
-            A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1,              sType = 'preidx'),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  8,              sType = 'postidx'),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  8,              sType = 'preidx'),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  4,              sType = 'postidx'),
-            A64No1CodeGenStImm9(     'str',                   cbMem =  4,              sType = 'preidx'),
-            A64No1CodeGenStImm9(     'strh',                  cbMem =  2,              sType = 'postidx'),
-            A64No1CodeGenStImm9(     'strh',                  cbMem =  2,              sType = 'preidx'),
-            A64No1CodeGenStImm9(     'strb',                  cbMem =  1,              sType = 'postidx'),
-            A64No1CodeGenStImm9(     'strb',                  cbMem =  1,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1,              sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1,              sType = 'preidx'),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'postidx'),
-            A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'preidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16,              sType = 'postidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16,              sType = 'preidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'postidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'preidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'postidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'preidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2,              sType = 'postidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2,              sType = 'preidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1,              sType = 'postidx'),
-            A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1,              sType = 'preidx'),
-            A64No1CodeGenStImm9Fp(   'stur',                  cbMem = 16,              sType = 'unscaled'),
-            A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  8,              sType = 'unscaled'),
-            A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  4,              sType = 'unscaled'),
-            A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  2,              sType = 'unscaled'),
-            A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  1,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem = 16,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  8,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  4,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  2,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  1,              sType = 'unscaled'),
-            A64No1CodeGenStImm9(     'stur',                  cbMem =  8,              sType = 'unscaled'),
-            A64No1CodeGenStImm9(     'stur',                  cbMem =  4,              sType = 'unscaled'),
-            A64No1CodeGenStImm9(     'sturh',                 cbMem =  2,              sType = 'unscaled'),
-            A64No1CodeGenStImm9(     'sturb',                 cbMem =  1,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldur',  calcLdUnsigned, cbMem =  8,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldur',  calcLdUnsigned, cbMem =  4,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldursw', calcLdSigned,  cbMem =  4, cBits =  64, sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldurh', calcLdUnsigned, cbMem =  2,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldursh', calcLdSigned,  cbMem =  2,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldursh', calcLdSigned,  cbMem =  2, cBits =  64, sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldurb', calcLdUnsigned, cbMem =  1,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldursb', calcLdSigned,  cbMem =  1,              sType = 'unscaled'),
-            A64No1CodeGenLdImm9(     'ldursb', calcLdSigned,  cbMem =  1, cBits =  64, sType = 'unscaled'),
-            # addsub_imm:
-            A64No1CodeGenAddSubImm(  'add',  calcAdd),
-            A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
-            A64No1CodeGenAddSubImm(  'sub',  calcSub),
-            A64No1CodeGenAddSubImm(  'subs', calcSub, fWithFlags = True),
-            # addsub_shift:
-            A64No1CodeGenShiftedReg( 'add',  calcAdd),
-            A64No1CodeGenShiftedReg( 'adds', calcAdd, fWithFlags = True),
-            A64No1CodeGenShiftedReg( 'sub',  calcSub),
-            A64No1CodeGenShiftedReg( 'subs', calcSub, fWithFlags = True),
-            # addsub_ext
-            A64No1CodeGenExtendedReg('add',  calcAdd),
-            A64No1CodeGenExtendedReg('adds', calcAdd, fWithFlags = True),
-            A64No1CodeGenExtendedReg('sub',  calcSub),
-            A64No1CodeGenExtendedReg('subs', calcSub, fWithFlags = True),
-            # addsub_carry:
-            A64No1CodeGenAddSubCarry('adc',  calcAdd),
-            A64No1CodeGenAddSubCarry('adcs', calcAdd, fWithFlags = True),
-            A64No1CodeGenAddSubCarry('sbc',  calcSubBorrow),
-            A64No1CodeGenAddSubCarry('sbcs', calcSubBorrow, fWithFlags = True),
+            aoGenerators += [
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16,              sType = 'postidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem = 16,              sType = 'preidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8,              sType = 'postidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  8,              sType = 'preidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4,              sType = 'postidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  4,              sType = 'preidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2,              sType = 'postidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  2,              sType = 'preidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1,              sType = 'postidx'),
+                A64No1CodeGenStImm9Fp(   'str',                   cbMem =  1,              sType = 'preidx'),
+                A64No1CodeGenStImm9(     'str',                   cbMem =  8,              sType = 'postidx'),
+                A64No1CodeGenStImm9(     'str',                   cbMem =  8,              sType = 'preidx'),
+                A64No1CodeGenStImm9(     'str',                   cbMem =  4,              sType = 'postidx'),
+                A64No1CodeGenStImm9(     'str',                   cbMem =  4,              sType = 'preidx'),
+                A64No1CodeGenStImm9(     'strh',                  cbMem =  2,              sType = 'postidx'),
+                A64No1CodeGenStImm9(     'strh',                  cbMem =  2,              sType = 'preidx'),
+                A64No1CodeGenStImm9(     'strb',                  cbMem =  1,              sType = 'postidx'),
+                A64No1CodeGenStImm9(     'strb',                  cbMem =  1,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrh',  calcLdUnsigned, cbMem =  2,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrb',  calcLdUnsigned, cbMem =  1,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrsw', calcLdSigned,   cbMem =  4, cBits =  64, sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrsh', calcLdSigned,   cbMem =  2, cBits =  64, sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1,              sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1,              sType = 'preidx'),
+                A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'postidx'),
+                A64No1CodeGenLdImm9(     'ldrsb', calcLdSigned,   cbMem =  1, cBits =  64, sType = 'preidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16,              sType = 'postidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem = 16,              sType = 'preidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'postidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  8,              sType = 'preidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'postidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  4,              sType = 'preidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2,              sType = 'postidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  2,              sType = 'preidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1,              sType = 'postidx'),
+                A64No1CodeGenLdImm9Fp(   'ldr',   calcLdUnsigned, cbMem =  1,              sType = 'preidx'),
+                A64No1CodeGenStImm9Fp(   'stur',                  cbMem = 16,              sType = 'unscaled'),
+                A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  8,              sType = 'unscaled'),
+                A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  4,              sType = 'unscaled'),
+                A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  2,              sType = 'unscaled'),
+                A64No1CodeGenStImm9Fp(   'stur',                  cbMem =  1,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem = 16,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  8,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  4,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  2,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9Fp(   'ldur',  calcLdUnsigned, cbMem =  1,              sType = 'unscaled'),
+                A64No1CodeGenStImm9(     'stur',                  cbMem =  8,              sType = 'unscaled'),
+                A64No1CodeGenStImm9(     'stur',                  cbMem =  4,              sType = 'unscaled'),
+                A64No1CodeGenStImm9(     'sturh',                 cbMem =  2,              sType = 'unscaled'),
+                A64No1CodeGenStImm9(     'sturb',                 cbMem =  1,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldur',  calcLdUnsigned, cbMem =  8,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldur',  calcLdUnsigned, cbMem =  4,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldursw', calcLdSigned,  cbMem =  4, cBits =  64, sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldurh', calcLdUnsigned, cbMem =  2,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldursh', calcLdSigned,  cbMem =  2,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldursh', calcLdSigned,  cbMem =  2, cBits =  64, sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldurb', calcLdUnsigned, cbMem =  1,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldursb', calcLdSigned,  cbMem =  1,              sType = 'unscaled'),
+                A64No1CodeGenLdImm9(     'ldursb', calcLdSigned,  cbMem =  1, cBits =  64, sType = 'unscaled'),
+            ];
+
+        if True: # pylint: disable=using-constant-test
+            # Add & Sub
+            aoGenerators += [
+                # addsub_imm:
+                A64No1CodeGenAddSubImm(  'add',  calcAdd),
+                A64No1CodeGenAddSubImm(  'adds', calcAdd, fWithFlags = True),
+                A64No1CodeGenAddSubImm(  'sub',  calcSub),
+                A64No1CodeGenAddSubImm(  'subs', calcSub, fWithFlags = True),
+                # addsub_shift:
+                A64No1CodeGenShiftedReg( 'add',  calcAdd),
+                A64No1CodeGenShiftedReg( 'adds', calcAdd, fWithFlags = True),
+                A64No1CodeGenShiftedReg( 'sub',  calcSub),
+                A64No1CodeGenShiftedReg( 'subs', calcSub, fWithFlags = True),
+                # addsub_ext
+                A64No1CodeGenExtendedReg('add',  calcAdd),
+                A64No1CodeGenExtendedReg('adds', calcAdd, fWithFlags = True),
+                A64No1CodeGenExtendedReg('sub',  calcSub),
+                A64No1CodeGenExtendedReg('subs', calcSub, fWithFlags = True),
+                # addsub_carry:
+                A64No1CodeGenAddSubCarry('adc',  calcAdd),
+                A64No1CodeGenAddSubCarry('adcs', calcAdd, fWithFlags = True),
+                A64No1CodeGenAddSubCarry('sbc',  calcSubBorrow),
+                A64No1CodeGenAddSubCarry('sbcs', calcSubBorrow, fWithFlags = True),
+            ];
+
+        if True: # pylint: disable=using-constant-test
             # log_shift:
-            A64No1CodeGenShiftedReg( 'and',  calcAnd, fWithRor = True),
-            A64No1CodeGenShiftedReg( 'ands', calcAnd, fWithRor = True, fWithFlags = True),
-            A64No1CodeGenShiftedReg( 'bic',  calcBic, fWithRor = True),
-            A64No1CodeGenShiftedReg( 'bics', calcBic, fWithRor = True, fWithFlags = True),
-            A64No1CodeGenShiftedReg( 'orr',  calcOrr, fWithRor = True),
-            A64No1CodeGenShiftedReg( 'orn',  calcOrn, fWithRor = True),
-            A64No1CodeGenShiftedReg( 'eor',  calcEor, fWithRor = True),
-            A64No1CodeGenShiftedReg( 'eon',  calcEon, fWithRor = True),
+            aoGenerators += [
+                A64No1CodeGenShiftedReg( 'and',  calcAnd, fWithRor = True),
+                A64No1CodeGenShiftedReg( 'ands', calcAnd, fWithRor = True, fWithFlags = True),
+                A64No1CodeGenShiftedReg( 'bic',  calcBic, fWithRor = True),
+                A64No1CodeGenShiftedReg( 'bics', calcBic, fWithRor = True, fWithFlags = True),
+                A64No1CodeGenShiftedReg( 'orr',  calcOrr, fWithRor = True),
+                A64No1CodeGenShiftedReg( 'orn',  calcOrn, fWithRor = True),
+                A64No1CodeGenShiftedReg( 'eor',  calcEor, fWithRor = True),
+                A64No1CodeGenShiftedReg( 'eon',  calcEon, fWithRor = True),
+            ];
+
+        if True: # pylint: disable=using-constant-test
             # bitfield:
-            A64No1CodeGenBitfieldMove('bfm',  calcBfm),
-            A64No1CodeGenBitfieldMove('sbfm', calcSbfm),
-            A64No1CodeGenBitfieldMove('ubfm', calcUbfm),
-        ];
+            aoGenerators += [
+                A64No1CodeGenBitfieldMove('bfm',  calcBfm),
+                A64No1CodeGenBitfieldMove('sbfm', calcSbfm),
+                A64No1CodeGenBitfieldMove('ubfm', calcUbfm),
+            ];
 
 
         #
@@ -2259,6 +2446,7 @@ class Arm64No1CodeGen(object):
         for oGenerator in aoGenerators:
             asLines.extend(('','','',));
             oGenerator.generate(self.oOptions);
+            asLines.append('.balign 4') ## @todo ALIGNCODE doesn't work
             asLines.extend(oGenerator.asCode);
             asLines.extend(('','',));
             asLines.extend(oGenerator.asData);

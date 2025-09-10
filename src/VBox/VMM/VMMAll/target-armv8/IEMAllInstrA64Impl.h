@@ -1231,68 +1231,213 @@
  */
 
 /* MOVI  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff89c00/0f000400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    uint64_t const u64Imm = Armv8A64ExpandAdvSimdImm(((uOpcode >> 29) & 1) /*uOp*/, cmode, \
+                                                       (a << 7) | (b << 6) | (c << 5) | (d << 4) \
+                                                     | (e << 3) | (f << 2) | (g << 1) | (h << 0)); \
+    if (Q) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmCopy); \
+        IEM_MC_STORE_FREG_HI_U64(Rd, u64ImmCopy); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmCopy); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* ORR  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff89c00/0f001400) */
-//#define IEM_INSTR_IMPL_A64__ORR_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__ORR_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    uint64_t const u64Imm = Armv8A64ExpandAdvSimdImm(((uOpcode >> 29) & 1) /*uOp*/, cmode, \
+                                                       (a << 7) | (b << 6) | (c << 5) | (d << 4) \
+                                                     | (e << 3) | (f << 2) | (g << 1) | (h << 0)); \
+    if (Q) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_LOCAL(uint64_t, u64TmpLo); \
+        IEM_MC_FETCH_FREG_U64(u64TmpLo, Rd); \
+        IEM_MC_LOCAL(uint64_t, u64TmpHi); \
+        IEM_MC_FETCH_FREG_HI_U64(u64TmpHi, Rd); \
+        IEM_MC_OR_2LOCS_U64(u64TmpLo, u64ImmCopy); \
+        IEM_MC_OR_2LOCS_U64(u64TmpHi, u64ImmCopy); \
+        IEM_MC_STORE_FREG_U64(Rd, u64TmpLo); \
+        IEM_MC_STORE_FREG_HI_U64(Rd, u64TmpHi); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_LOCAL(uint64_t, u64Tmp); \
+        IEM_MC_FETCH_FREG_U64(u64Tmp, Rd); \
+        IEM_MC_OR_2LOCS_U64(u64Tmp, u64ImmCopy); \
+        IEM_MC_STORE_FREG_U64(Rd, u64Tmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* MOVI  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff8dc00/0f008400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 
 /* ORR  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff8dc00/0f009400) */
-//#define IEM_INSTR_IMPL_A64__ORR_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__ORR_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__ORR_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 
 /* MOVI  <Vd>.<T>, #<imm8>, MSL #<amount> (bff8ec00/0f00c400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_M_sm(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_M_sm(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 
 /* MOVI  <Vd>.<T>, #<imm8>{, LSL #0} (bff8fc00/0f00e400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_N_b(Rd, h, g, f, e, d, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_N_b(Rd, h, g, f, e, d, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, 0xe /*cmode*/, c, b, a, Q)
 
 
 /* FMOV  <Vd>.<T>, #<imm> (bff8fc00/0f00f400) */
-//#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_S_s(Rd, h, g, f, e, d, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_S_s(Rd, h, g, f, e, d, c, b, a, Q) \
+    uint64_t const u64Imm = Armv8A64ExpandAdvSimdImmFp(((uOpcode >> 29) & 1) /*op*/, ((uOpcode >> 11) & 1) /*o2*/, \
+                                                         (a << 7) | (b << 6) | (c << 5) | (d << 4) \
+                                                       | (e << 3) | (f << 2) | (g << 1) | (h << 0)); \
+    if (Q) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmCopy); \
+        IEM_MC_STORE_FREG_HI_U64(Rd, u64ImmCopy); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmCopy, u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmCopy); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* FMOV  <Vd>.<T>, #<imm> (bff8fc00/0f00fc00) */
-//#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_H_h(Rd, h, g, f, e, d, c, b, a, Q)
-
+#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_H_h(Rd, h, g, f, e, d, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__FMOV_asimdimm_S_s(Rd, h, g, f, e, d, c, b, a, Q)
 
 /* MVNI  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff89c00/2f000400) */
-//#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    uint64_t const u64Imm = Armv8A64ExpandAdvSimdImm(((uOpcode >> 29) & 1) /*uOp*/, cmode, \
+                                                       (a << 7) | (b << 6) | (c << 5) | (d << 4) \
+                                                     | (e << 3) | (f << 2) | (g << 1) | (h << 0)); \
+    if (Q) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmInv, ~u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmInv); \
+        IEM_MC_STORE_FREG_HI_U64(Rd, u64ImmInv); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64ImmInv, ~u64Imm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64ImmInv); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* BIC  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff89c00/2f001400) */
-//#define IEM_INSTR_IMPL_A64__BIC_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__BIC_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    uint64_t const u64Imm = Armv8A64ExpandAdvSimdImm(((uOpcode >> 29) & 1) /*uOp*/, cmode, \
+                                                       (a << 7) | (b << 6) | (c << 5) | (d << 4) \
+                                                     | (e << 3) | (f << 2) | (g << 1) | (h << 0)); \
+    if (Q) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64InvImm, ~u64Imm); \
+        IEM_MC_LOCAL(uint64_t, u64TmpLo); \
+        IEM_MC_FETCH_FREG_U64(u64TmpLo, Rd); \
+        IEM_MC_LOCAL(uint64_t, u64TmpHi); \
+        IEM_MC_FETCH_FREG_HI_U64(u64TmpHi, Rd); \
+        IEM_MC_AND_2LOCS_U64(u64TmpLo, u64InvImm); \
+        IEM_MC_AND_2LOCS_U64(u64TmpHi, u64InvImm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64TmpLo); \
+        IEM_MC_STORE_FREG_HI_U64(Rd, u64TmpHi); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+        IEM_MC_PREPARE_FPU_USAGE(); \
+        IEM_MC_LOCAL_CONST(uint64_t, u64InvImm, ~u64Imm); \
+        IEM_MC_LOCAL(uint64_t, u64Tmp); \
+        IEM_MC_FETCH_FREG_U64(u64Tmp, Rd); \
+        IEM_MC_AND_2LOCS_U64(u64Tmp, u64InvImm); \
+        IEM_MC_STORE_FREG_U64(Rd, u64Tmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* MVNI  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff8dc00/2f008400) */
-//#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
-
+#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 /* BIC  <Vd>.<T>, #<imm8>{, LSL #<amount>} (bff8dc00/2f009400) */
-//#define IEM_INSTR_IMPL_A64__BIC_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
+#define IEM_INSTR_IMPL_A64__BIC_asimdimm_L_hl(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__BIC_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 
 /* MVNI  <Vd>.<T>, #<imm8>, MSL #<amount> (bff8ec00/2f00c400) */
-//#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_M_sm(Rd, h, g, f, e, d, cmode, c, b, a, Q)
-
+#define IEM_INSTR_IMPL_A64__MVNI_asimdimm_M_sm(Rd, h, g, f, e, d, cmode, c, b, a, Q) \
+    IEM_INSTR_IMPL_A64__MVNI_asimdimm_L_sl(Rd, h, g, f, e, d, cmode, c, b, a, Q)
 
 /* MOVI  <Dd>, #<imm> (fff8fc00/2f00e400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_D_ds(Rd, h, g, f, e, d, c, b, a)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_D_ds(Rd, h, g, f, e, d, c, b, a) \
+    IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, 0xe /*cmode*/, c, b, a, 0 /*Q*/)
 
 
 /* MOVI  <Vd>.2D, #<imm> (fff8fc00/6f00e400) */
-//#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_D2_d(Rd, h, g, f, e, d, c, b, a)
+#define IEM_INSTR_IMPL_A64__MOVI_asimdimm_D2_d(Rd, h, g, f, e, d, c, b, a) \
+    IEM_INSTR_IMPL_A64__MOVI_asimdimm_L_sl(Rd, h, g, f, e, d, 0xe /*cmode*/, c, b, a, 1 /*Q*/)
 
 
 /* FMOV  <Vd>.2D, #<imm> (fff8fc00/6f00f400) */
-//#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_D2_d(Rd, h, g, f, e, d, c, b, a)
-
+#define IEM_INSTR_IMPL_A64__FMOV_asimdimm_D2_d(Rd, h, g, f, e, d, c, b, a) \
+    IEM_INSTR_IMPL_A64__FMOV_asimdimm_S_s(Rd, h, g, f, e, d, c, b, a, 1 /*Q*/)
 
 
 /*

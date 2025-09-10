@@ -5932,6 +5932,125 @@ DECL_FORCE_INLINE(uint32_t) Armv8A64MkVecInstrFp3Op(ARMV8INSTRVECFPOP enmOp, ARM
 }
 
 
+/**
+ * Expands an AdvSIMD immediate.
+ *
+ * @returns The decoded immediate.
+ * @param   uOp         The 1-bit operation value.
+ * @param   uMode       The 4-bit mode.
+ * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
+ */
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImm(uint32_t uOp, uint32_t uMode, uint32_t uImm)
+{
+    Assert(!(uImm  & UINT32_C(0xffffff00)));
+    Assert(!(uOp   & UINT32_C(0xfffffffe)));
+    Assert(!(uMode & UINT32_C(0xfffffff0)));
+    switch (uMode)
+    {
+        case 0:
+        case 1:
+            return RT_MAKE_U64(uImm, uImm);
+        case 2:
+        case 3:
+            uImm <<= 8;
+            return RT_MAKE_U64(uImm, uImm);
+        case 4:
+        case 5:
+            uImm <<= 16;
+            return RT_MAKE_U64(uImm, uImm);
+        case 6:
+        case 7:
+            uImm <<= 24;
+            return RT_MAKE_U64(uImm, uImm);
+        case 8:
+        case 9:
+            return RT_MAKE_U64_FROM_U16(uImm, uImm, uImm, uImm);
+        case 10:
+        case 11:
+            uImm <<= 8;
+            return RT_MAKE_U64_FROM_U16(uImm, uImm, uImm, uImm);
+        case 12:
+            uImm <<= 8;
+            uImm  |= 0xff;
+            return RT_MAKE_U64(uImm, uImm);
+        case 13:
+            uImm <<= 16;
+            uImm  |= 0xffff;
+            return RT_MAKE_U64(uImm, uImm);
+        case 14:
+            if (uOp == 0)
+                return RT_MAKE_U64_FROM_MSB_U8(uImm, uImm, uImm, uImm, uImm, uImm, uImm, uImm);
+            return RT_MAKE_U64_FROM_MSB_U8(uImm & 0x80 ? 0xff : 0, uImm & 0x40 ? 0xff : 0,
+                                           uImm & 0x20 ? 0xff : 0, uImm & 0x10 ? 0xff : 0,
+                                           uImm & 0x08 ? 0xff : 0, uImm & 0x04 ? 0xff : 0,
+                                           uImm & 0x02 ? 0xff : 0, uImm & 0x01 ? 0xff : 0);
+        default:
+            AssertFailed();
+            RT_FALL_THRU();
+        case 15:
+        {
+            uint64_t const uImm32 = ((uImm & 0x80) << (31 - 7))
+                                  | (uImm & 0x40 ? UINT32_C(0x3e000000) : UINT32_C(0x40000000))
+                                  | ((uImm & 0x3f) << 19);
+            if (uOp == 0)
+                return RT_MAKE_U64(uImm32, uImm32);
+            return uImm32 << 32;
+        }
+    }
+}
+
+
+/**
+ * Expands an floating point AdvSIMD immediate (for FMOV).
+ *
+ * @returns The decoded immediate.
+ * @param   uOp         The 1-bit operation value (bit 29).
+ * @param   uO2         The 1-bit 2nd operation value (bit 11)
+ * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
+ */
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp(uint32_t uOp, uint32_t uO2, uint32_t uImm)
+{
+    Assert(!(uImm  & UINT32_C(0xffffff00)));
+    Assert(!(uOp   & UINT32_C(0xfffffffe)));
+    Assert(!(uO2   & UINT32_C(0xfffffffe)));
+    if (uOp == 0)
+    {
+        if (uO2 == 0)
+        {
+            /* 32-bit / single precision */
+            uint32_t const uImm32 = (( uImm & 0x80) << (31 - 7))
+                                  | ((~uImm & 0x40) << (30 - 6))
+                                  | (( uImm & 0x40) << (29 - 6))
+                                  | (( uImm & 0x40) << (28 - 6))
+                                  | (( uImm & 0x40) << (27 - 6))
+                                  | (( uImm & 0x40) << (26 - 6))
+                                  | (( uImm & 0x7f) << 19);
+            return RT_MAKE_U64(uImm32, uImm32);
+        }
+        /* 16-bit / half precision */
+        uint32_t const uImm16 = (( uImm & 0x80) << (15 - 7))
+                              | ((~uImm & 0x40) << (14 - 6))
+                              | (( uImm & 0x40) << (13 - 6))
+                              | (( uImm & 0x7f) << 6);
+        return RT_MAKE_U64_FROM_U16(uImm16, uImm16, uImm16, uImm16);
+    }
+
+    AssertReturn(uO2 == 0, UINT64_MAX); /* unallocated encoding */
+
+    /* 64-bit / double precision */
+    return ((uint64_t)( uImm & 0x80) << (63 - 7))
+         | ((uint64_t)(~uImm & 0x40) << (62 - 6))
+         | ((uint64_t)( uImm & 0x40) << (61 - 6))
+         | ((uint64_t)( uImm & 0x40) << (60 - 6))
+         | ((uint64_t)( uImm & 0x40) << (59 - 6))
+         | ((uint64_t)( uImm & 0x40) << (58 - 6))
+         | ((uint64_t)( uImm & 0x40) << (57 - 6))
+         | ((uint64_t)( uImm & 0x40) << (56 - 6))
+         | ((uint64_t)( uImm & 0x40) << (55 - 6))
+         | ((uint64_t)( uImm & 0x7f) << 48);
+}
+
+
 /** @} */
 
 #endif /* !dtrace && __cplusplus */
