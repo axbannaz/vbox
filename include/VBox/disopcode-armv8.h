@@ -798,7 +798,7 @@ typedef enum DISARMV8OPPARMEXTEND
     kDisArmv8OpParmExtendSxtW,
     kDisArmv8OpParmExtendSxtX,
     /** An LSL that shifts in 1s, used by AdvSIMDExpandImm w/ cmode=110x. */
-    kDisArmv8OpParmExtendMsl,
+    kDisArmv8OpParmExtendMsl
 } DISARMV8OPPARMEXTEND;
 /** @} */
 
