@@ -879,6 +879,160 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(DataProcAdvSimdThreeSame_U1, 0x00000000 /
                                        kDisArmV8OpcDecodeCollate, UINT32_C(0x00c0f800), 11);
 
 
+/*
+ * C4.1.95.25 - Data Processing - Advanced SIMD modified immediate
+ *
+ * Indexing size (bits 22 & 23) and opcode (bits 11 thru 15):
+ *      - bits 0-4 = opcode; 0x00..0x1f
+ *      - bits 5-6 = size;   0x00..0x60
+ *      - total 7 bits;      0x00..0x7f
+ */
+
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(DataProcAdvSimdModifiedImm_Op0)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLo,     5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHi,    16,  3, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdCMode8,   12,  4, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecQ,            30,  1, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(DataProcAdvSimdModifiedImm_Op0_FpSingle)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecRegTypeFixed, kDisOpParamArmV8VecRegType_2S, 0, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecQ,            30,  1, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLoFp,   5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHiFp,  16,  3, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(DataProcAdvSimdModifiedImm_Op0_FpHalf)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecRegTypeFixed, kDisOpParamArmV8VecRegType_4H, 0, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecQ,            30,  1, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLoFp,   5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHiFp,  16,  3, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(DataProcAdvSimdModifiedImm_Op0)
+  /*0x00/cmode=0000/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x01/cmode=0000/o2=1*/  INVALID_OPCODE,
+  /*0x02/cmode=0001/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x03/cmode=0001/o2=1*/  INVALID_OPCODE,
+  /*0x04/cmode=0010/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x05/cmode=0010/o2=1*/  INVALID_OPCODE,
+  /*0x06/cmode=0011/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x07/cmode=0011/o2=1*/  INVALID_OPCODE,
+  /*0x08/cmode=0100/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x09/cmode=0100/o2=1*/  INVALID_OPCODE,
+  /*0x0a/cmode=0101/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x0b/cmode=0101/o2=1*/  INVALID_OPCODE,
+  /*0x0c/cmode=0110/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x0d/cmode=0110/o2=1*/  INVALID_OPCODE,
+  /*0x0e/cmode=0111/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x0f/cmode=0111/o2=1*/  INVALID_OPCODE,
+  /*0x10/cmode=1000/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x11/cmode=1000/o2=1*/  INVALID_OPCODE,
+  /*0x12/cmode=1001/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x13/cmode=1001/o2=1*/  INVALID_OPCODE,
+  /*0x14/cmode=1010/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x15/cmode=1010/o2=1*/  INVALID_OPCODE,
+  /*0x16/cmode=1011/o2=0*/  DIS_ARMV8_OP(           0, "orr",  OP_ARMV8_A64_ORR),
+  /*0x17*cmode=1011/o2=1*/  INVALID_OPCODE,
+  /*0x18*cmode=1100/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x19*cmode=1100/o2=1*/  INVALID_OPCODE,
+  /*0x1a*cmode=1101/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x1b*cmode=1101/o2=1*/  INVALID_OPCODE,
+  /*0x1c*cmode=1110/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x1d*cmode=1110/o2=1*/  INVALID_OPCODE,
+  /*0x1e*cmode=1111/o2=0*/  DIS_ARMV8_OP_ALT_DECODE(0, "fmov", OP_ARMV8_A64_FMOV, DataProcAdvSimdModifiedImm_Op0_FpSingle),
+  /*0x1f*cmode=1111/o2=1*/  DIS_ARMV8_OP_ALT_DECODE(0, "fmov", OP_ARMV8_A64_FMOV, DataProcAdvSimdModifiedImm_Op0_FpHalf),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(DataProcAdvSimdModifiedImm_Op0, 0 /*fFixedInsn*/,
+                                       kDisArmV8OpcDecodeNop, UINT32_C(0x0000f800), 11);
+
+
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(DataProcAdvSimdModifiedImm_Op1_Q0)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLo,     5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHi,    16,  3, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdCMode64,  12,  4, 1 /*idxParam*/),
+    //DIS_ARMV8_INSN_DECODE(kDisParmParseVecQ,            30,  1, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(DataProcAdvSimdModifiedImm_Op1_Q0)
+  /*0x00/cmode=0000/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x01/cmode=0000/o2=1*/  INVALID_OPCODE,
+  /*0x02/cmode=0001/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x03/cmode=0001/o2=1*/  INVALID_OPCODE,
+  /*0x04/cmode=0010/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x05/cmode=0010/o2=1*/  INVALID_OPCODE,
+  /*0x06/cmode=0011/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x07/cmode=0011/o2=1*/  INVALID_OPCODE,
+  /*0x08/cmode=0100/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x09/cmode=0100/o2=1*/  INVALID_OPCODE,
+  /*0x0a/cmode=0101/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x0b/cmode=0101/o2=1*/  INVALID_OPCODE,
+  /*0x0c/cmode=0110/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x0d/cmode=0110/o2=1*/  INVALID_OPCODE,
+  /*0x0e/cmode=0111/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x0f/cmode=0111/o2=1*/  INVALID_OPCODE,
+  /*0x10/cmode=1000/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x11/cmode=1000/o2=1*/  INVALID_OPCODE,
+  /*0x12/cmode=1001/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x13/cmode=1001/o2=1*/  INVALID_OPCODE,
+  /*0x14/cmode=1010/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x15/cmode=1010/o2=1*/  INVALID_OPCODE,
+  /*0x16/cmode=1011/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x17*cmode=1011/o2=1*/  INVALID_OPCODE,
+  /*0x18*cmode=1100/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x19*cmode=1100/o2=1*/  INVALID_OPCODE,
+  /*0x1a*cmode=1101/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x1b*cmode=1101/o2=1*/  INVALID_OPCODE,
+  /*0x1c*cmode=1110/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x1d*cmode=1110/o2=1*/  INVALID_OPCODE,
+  /*0x1e*cmode=1111/o2=0*/  INVALID_OPCODE,
+  /*0x1f*cmode=1111/o2=1*/  INVALID_OPCODE,
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(DataProcAdvSimdModifiedImm_Op1_Q0, 0 /*fFixedInsn*/,
+                                       kDisArmV8OpcDecodeNop, UINT32_C(0x0000f800), 11);
+
+
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER(DataProcAdvSimdModifiedImm_Op1_Q1)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLo,     5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHi,    16,  3, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdCMode64,  12,  4, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecQ,            30,  1, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_DECODER_ALTERNATIVE(DataProcAdvSimdModifiedImm_Op1_Q1_FpDouble)
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecRegTypeFixed, kDisOpParamArmV8VecRegType_2D, 0, DIS_ARMV8_INSN_PARAM_UNSET),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseVecReg,           0,  5, 0 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmLoFp,   5,  5, 1 /*idxParam*/),
+    DIS_ARMV8_INSN_DECODE(kDisParmParseAdvSimdImmHiFp,  16,  3, 1 /*idxParam*/),
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_BEGIN(DataProcAdvSimdModifiedImm_Op1_Q1)
+  /*0x00/cmode=0000/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x01/cmode=0000/o2=1*/  INVALID_OPCODE,
+  /*0x02/cmode=0001/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x03/cmode=0001/o2=1*/  INVALID_OPCODE,
+  /*0x04/cmode=0010/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x05/cmode=0010/o2=1*/  INVALID_OPCODE,
+  /*0x06/cmode=0011/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x07/cmode=0011/o2=1*/  INVALID_OPCODE,
+  /*0x08/cmode=0100/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x09/cmode=0100/o2=1*/  INVALID_OPCODE,
+  /*0x0a/cmode=0101/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x0b/cmode=0101/o2=1*/  INVALID_OPCODE,
+  /*0x0c/cmode=0110/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x0d/cmode=0110/o2=1*/  INVALID_OPCODE,
+  /*0x0e/cmode=0111/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x0f/cmode=0111/o2=1*/  INVALID_OPCODE,
+  /*0x10/cmode=1000/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x11/cmode=1000/o2=1*/  INVALID_OPCODE,
+  /*0x12/cmode=1001/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x13/cmode=1001/o2=1*/  INVALID_OPCODE,
+  /*0x14/cmode=1010/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x15/cmode=1010/o2=1*/  INVALID_OPCODE,
+  /*0x16/cmode=1011/o2=0*/  DIS_ARMV8_OP(           0, "bic",  OP_ARMV8_A64_BIC),
+  /*0x17*cmode=1011/o2=1*/  INVALID_OPCODE,
+  /*0x18*cmode=1100/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x19*cmode=1100/o2=1*/  INVALID_OPCODE,
+  /*0x1a*cmode=1101/o2=0*/  DIS_ARMV8_OP(           0, "mvni", OP_ARMV8_A64_MVNI),
+  /*0x1b*cmode=1101/o2=1*/  INVALID_OPCODE,
+  /*0x1c*cmode=1110/o2=0*/  DIS_ARMV8_OP(           0, "movi", OP_ARMV8_A64_MOVI),
+  /*0x1d*cmode=1110/o2=1*/  INVALID_OPCODE,
+  /*0x1e*cmode=1111/o2=0*/  DIS_ARMV8_OP_ALT_DECODE(0, "fmov", OP_ARMV8_A64_FMOV, DataProcAdvSimdModifiedImm_Op1_Q1_FpDouble),
+  /*0x1f*cmode=1111/o2=1*/  INVALID_OPCODE,
+DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(DataProcAdvSimdModifiedImm_Op1_Q1, 0 /*fFixedInsn*/,
+                                       kDisArmV8OpcDecodeNop, UINT32_C(0x0000f800), 11);
+
 
 /*
  * C4.1.95 - Data Processing - Scalar Floating-Point and Advanced SIMD
@@ -923,7 +1077,7 @@ DIS_ARMV8_DECODE_MAP_DEFINE_BEGIN(DataProcSimdFp_b10is1_op0is0000)
   /*0x1d:op0=0000/op1=01/op2=1101*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
   /*0x1e:op0=0000/op1=01/op2=1110*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
   /*0x1f:op0=0000/op1=01/op2=1111*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
-  /*0x20:op0=0000/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
+  /*0x20:op0=0000/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdModifiedImm_Op0),
   /*0x21:op0=0000/op1=10/op2=0001*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x22:op0=0000/op1=10/op2=0010*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x23:op0=0000/op1=10/op2=0011*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
@@ -990,7 +1144,7 @@ DIS_ARMV8_DECODE_MAP_DEFINE_BEGIN(DataProcSimdFp_b10is1_op0is0010)
   /*0x1d:op0=0010/op1=01/op2=1101*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
   /*0x1e:op0=0010/op1=01/op2=1110*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
   /*0x1f:op0=0010/op1=01/op2=1111*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
-  /*0x20:op0=0010/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
+  /*0x20:op0=0010/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdModifiedImm_Op1_Q0),
   /*0x21:op0=0010/op1=10/op2=0001*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x22:op0=0010/op1=10/op2=0010*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x23:op0=0010/op1=10/op2=0011*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
@@ -1057,7 +1211,7 @@ DIS_ARMV8_DECODE_MAP_DEFINE_BEGIN(DataProcSimdFp_b10is1_op0is0100)
   /*0x1d:op0=0100/op1=01/op2=1101*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
   /*0x1e:op0=0100/op1=01/op2=1110*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
   /*0x1f:op0=0100/op1=01/op2=1111*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U0),
-  /*0x20:op0=0100/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
+  /*0x20:op0=0100/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdModifiedImm_Op0),
   /*0x21:op0=0100/op1=10/op2=0001*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x22:op0=0100/op1=10/op2=0010*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x23:op0=0100/op1=10/op2=0011*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
@@ -1124,7 +1278,7 @@ DIS_ARMV8_DECODE_MAP_DEFINE_BEGIN(DataProcSimdFp_b10is1_op0is0110)
   /*0x1d:op0=0110/op1=01/op2=1101*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
   /*0x1e:op0=0110/op1=01/op2=1110*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
   /*0x1f:op0=0110/op1=01/op2=1111*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdThreeSame_U1),
-  /*0x20:op0=0110/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
+  /*0x20:op0=0110/op1=10/op2=0000*/ DIS_ARMV8_DECODE_MAP_ENTRY(DataProcAdvSimdModifiedImm_Op1_Q1),
   /*0x21:op0=0110/op1=10/op2=0001*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x22:op0=0110/op1=10/op2=0010*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */
   /*0x23:op0=0110/op1=10/op2=0011*/ DIS_ARMV8_DECODE_MAP_INVALID_ENTRY,                 /** @todo */

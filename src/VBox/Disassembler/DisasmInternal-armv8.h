@@ -105,6 +105,12 @@ typedef enum DISPARMPARSEIDX
     kDisParmParseVecQ,
     kDisParmParseVecGrp,
     kDisParmParseSimdLdStPostIndexImm,
+    kDisParmParseAdvSimdImmLo,
+    kDisParmParseAdvSimdImmHi,
+    kDisParmParseAdvSimdCMode8,
+    kDisParmParseAdvSimdCMode64,
+    kDisParmParseAdvSimdImmLoFp,
+    kDisParmParseAdvSimdImmHiFp,
     kDisParmParseMax
 } DISPARMPARSEIDX;
 /** @}  */

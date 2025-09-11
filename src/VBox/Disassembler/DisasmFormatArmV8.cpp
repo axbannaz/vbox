@@ -927,6 +927,27 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                         PUT_SYMBOL(DIS_FMT_SEL_FROM_REG(DISSELREG_CS), uTrgAddr, " (", ')');
                     break;
                 }
+                case kDisArmv8OpParmImmFp:
+                {
+                    PUT_C('#');
+                    switch (pParam->fUse & DISUSE_IMMEDIATE)
+                    {
+                        /** @todo floating point formatting. */
+                        case DISUSE_IMMEDIATE16:
+                            PUT_NUM_16(pParam->uValue);
+                            break;
+                        case DISUSE_IMMEDIATE32:
+                            PUT_NUM_32(pParam->uValue);
+                            break;
+                        case DISUSE_IMMEDIATE64:
+                            PUT_NUM_64(pParam->uValue);
+                            break;
+                        default:
+                            AssertFailed();
+                            break;
+                    }
+                    break;
+                }
                 case kDisArmv8OpParmReg:
                 {
                     Assert(!(pParam->fUse & (DISUSE_DISPLACEMENT8 | DISUSE_DISPLACEMENT16 | DISUSE_DISPLACEMENT32 | DISUSE_DISPLACEMENT64 | DISUSE_RIPDISPLACEMENT32)));
@@ -1186,6 +1207,9 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                         break;
                     case kDisArmv8OpParmExtendSxtX:
                         PUT_SZ("SXTX #");
+                        break;
+                    case kDisArmv8OpParmExtendMsl:
+                        PUT_SZ("MSL #");
                         break;
                     default:
                         AssertFailed();

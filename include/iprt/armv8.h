@@ -6001,42 +6001,14 @@ DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImm(uint32_t uOp, uint32_t uMode, uint
 
 
 /**
- * Expands an floating point AdvSIMD immediate (for FMOV).
+ * Expands an AdvSIMD immediate to 64-bit floating point (for FMOV).
  *
  * @returns The decoded immediate.
- * @param   uOp         The 1-bit operation value (bit 29).
- * @param   uO2         The 1-bit 2nd operation value (bit 11)
  * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
  */
-DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp(uint32_t uOp, uint32_t uO2, uint32_t uImm)
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp64(uint32_t uImm)
 {
     Assert(!(uImm  & UINT32_C(0xffffff00)));
-    Assert(!(uOp   & UINT32_C(0xfffffffe)));
-    Assert(!(uO2   & UINT32_C(0xfffffffe)));
-    if (uOp == 0)
-    {
-        if (uO2 == 0)
-        {
-            /* 32-bit / single precision */
-            uint32_t const uImm32 = (( uImm & 0x80) << (31 - 7))
-                                  | ((~uImm & 0x40) << (30 - 6))
-                                  | (( uImm & 0x40) << (29 - 6))
-                                  | (( uImm & 0x40) << (28 - 6))
-                                  | (( uImm & 0x40) << (27 - 6))
-                                  | (( uImm & 0x40) << (26 - 6))
-                                  | (( uImm & 0x7f) << 19);
-            return RT_MAKE_U64(uImm32, uImm32);
-        }
-        /* 16-bit / half precision */
-        uint32_t const uImm16 = (( uImm & 0x80) << (15 - 7))
-                              | ((~uImm & 0x40) << (14 - 6))
-                              | (( uImm & 0x40) << (13 - 6))
-                              | (( uImm & 0x7f) << 6);
-        return RT_MAKE_U64_FROM_U16(uImm16, uImm16, uImm16, uImm16);
-    }
-
-    AssertReturn(uO2 == 0, UINT64_MAX); /* unallocated encoding */
-
     /* 64-bit / double precision */
     return ((uint64_t)( uImm & 0x80) << (63 - 7))
          | ((uint64_t)(~uImm & 0x40) << (62 - 6))
@@ -6048,6 +6020,68 @@ DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp(uint32_t uOp, uint32_t uO2, uint
          | ((uint64_t)( uImm & 0x40) << (56 - 6))
          | ((uint64_t)( uImm & 0x40) << (55 - 6))
          | ((uint64_t)( uImm & 0x7f) << 48);
+}
+
+
+/**
+ * Expands an AdvSIMD immediate to 32-bit floating point (for FMOV).
+ *
+ * @returns The decoded immediate (64-bit wide, 2 values).
+ * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
+ */
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp32(uint32_t uImm)
+{
+    Assert(!(uImm  & UINT32_C(0xffffff00)));
+    /* 32-bit / single precision */
+    uint32_t const uImm32 = (( uImm & 0x80) << (31 - 7))
+                          | ((~uImm & 0x40) << (30 - 6))
+                          | (( uImm & 0x40) << (29 - 6))
+                          | (( uImm & 0x40) << (28 - 6))
+                          | (( uImm & 0x40) << (27 - 6))
+                          | (( uImm & 0x40) << (26 - 6))
+                          | (( uImm & 0x7f) << 19);
+    return RT_MAKE_U64(uImm32, uImm32);
+}
+
+
+/**
+ * Expands an AdvSIMD immediate to 16-bit floating point (for FMOV).
+ *
+ * @returns The decoded immediate (64-bit wide, 4 values).
+ * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
+ */
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp16(uint32_t uImm)
+{
+    Assert(!(uImm  & UINT32_C(0xffffff00)));
+    /* 16-bit / half precision */
+    uint32_t const uImm16 = (( uImm & 0x80) << (15 - 7))
+                          | ((~uImm & 0x40) << (14 - 6))
+                          | (( uImm & 0x40) << (13 - 6))
+                          | (( uImm & 0x7f) << 6);
+    return RT_MAKE_U64_FROM_U16(uImm16, uImm16, uImm16, uImm16);
+}
+
+
+/**
+ * Expands an floating point AdvSIMD immediate (for FMOV).
+ *
+ * @returns The decoded immediate.
+ * @param   uOp         The 1-bit operation value (bit 29).
+ * @param   uO2         The 1-bit 2nd operation value (bit 11)
+ * @param   uImm        The 8-bit immediate (a:b:c:d:e:f:g:h).
+ */
+DECLINLINE(uint64_t) Armv8A64ExpandAdvSimdImmFp(uint32_t uOp, uint32_t uO2, uint32_t uImm)
+{
+    Assert(!(uOp & UINT32_C(0xfffffffe)));
+    Assert(!(uO2 & UINT32_C(0xfffffffe)));
+    if (uOp == 0)
+    {
+        if (uO2 == 0)
+            return Armv8A64ExpandAdvSimdImmFp32(uImm);
+        return Armv8A64ExpandAdvSimdImmFp16(uImm);
+    }
+    AssertReturn(uO2 == 0, UINT64_MAX); /* unallocated encoding */
+    return Armv8A64ExpandAdvSimdImmFp64(uImm);
 }
 
 

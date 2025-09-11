@@ -388,6 +388,7 @@ enum OPCODESARMV8
     OP_ARMV8_A64_MLS,
     OP_ARMV8_A64_MNEG,
     OP_ARMV8_A64_MOV,
+    OP_ARMV8_A64_MOVI,
     OP_ARMV8_A64_MOVK,
     OP_ARMV8_A64_MOVN,
     OP_ARMV8_A64_MOVZ,
@@ -396,6 +397,7 @@ enum OPCODESARMV8
     OP_ARMV8_A64_MSUB,
     OP_ARMV8_A64_MUL,
     OP_ARMV8_A64_MVN,
+    OP_ARMV8_A64_MVNI,
     OP_ARMV8_A64_NEG,
     OP_ARMV8_A64_NEGS,
     OP_ARMV8_A64_NGC,
@@ -752,6 +754,8 @@ typedef enum DISARMV8OPPARM
     kDisArmv8OpParmImm,
     /** Relative address immediate. */
     kDisArmv8OpParmImmRel,
+    /** Immediate floating point value. */
+    kDisArmv8OpParmImmFp,
     /** Register. */
     kDisArmv8OpParmReg,
     /** System instruction (in idSysReg). */
@@ -792,7 +796,9 @@ typedef enum DISARMV8OPPARMEXTEND
     kDisArmv8OpParmExtendSxtB,
     kDisArmv8OpParmExtendSxtH,
     kDisArmv8OpParmExtendSxtW,
-    kDisArmv8OpParmExtendSxtX
+    kDisArmv8OpParmExtendSxtX,
+    /** An LSL that shifts in 1s, used by AdvSIMDExpandImm w/ cmode=110x. */
+    kDisArmv8OpParmExtendMsl,
 } DISARMV8OPPARMEXTEND;
 /** @} */
 

@@ -123,6 +123,11 @@ static FNDISPARSEARMV8 disArmV8ParseVecRegTypeFixed;
 static FNDISPARSEARMV8 disArmV8ParseVecRegQ;
 static FNDISPARSEARMV8 disArmV8ParseVecGrp;
 static FNDISPARSEARMV8 disArmV8ParseSimdLdStPostIndexImm;
+static FNDISPARSEARMV8 disArmV8ParseAdvSimdImmLo;
+static FNDISPARSEARMV8 disArmV8ParseAdvSimdImmHi;
+static FNDISPARSEARMV8 disArmV8ParseAdvSimdCModeXx;
+static FNDISPARSEARMV8 disArmV8ParseAdvSimdImmLoFp;
+static FNDISPARSEARMV8 disArmV8ParseAdvSimdImmHiFp;
 /** @}  */
 
 
@@ -201,7 +206,13 @@ static PFNDISPARSEARMV8 const g_apfnDisasm[kDisParmParseMax] =
     disArmV8ParseVecRegTypeFixed,
     disArmV8ParseVecRegQ,
     disArmV8ParseVecGrp,
-    disArmV8ParseSimdLdStPostIndexImm
+    disArmV8ParseSimdLdStPostIndexImm,
+    disArmV8ParseAdvSimdImmLo,
+    disArmV8ParseAdvSimdImmHi,
+    disArmV8ParseAdvSimdCModeXx,
+    disArmV8ParseAdvSimdCModeXx,
+    disArmV8ParseAdvSimdImmLoFp,
+    disArmV8ParseAdvSimdImmHiFp,
 };
 
 
@@ -1307,6 +1318,134 @@ static int  disArmV8ParseSimdLdStPostIndexImm(PDISSTATE pDis, uint32_t u32Insn, 
     Assert(pInsnParm->idxBitStart == 8 || pInsnParm->idxBitStart == 16 || pInsnParm->idxBitStart == 24 || pInsnParm->idxBitStart == 32);
     Assert(pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_64Bit || pParam->armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Sp);
     pParam->armv8.u.offBase = RT_BOOL(u32Insn & RT_BIT_32(30)) ? pInsnParm->cBits : pInsnParm->idxBitStart;
+    return VINF_SUCCESS;
+}
+
+
+static int disArmV8ParseAdvSimdImmLo(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                     PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pDis, pOp, pInsnClass, pf64Bit);
+    pParam->fUse  |= DISUSE_IMMEDIATE8;
+    pParam->uValue = disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits);
+    return VINF_SUCCESS;
+}
+
+
+static int disArmV8ParseAdvSimdImmHi(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                     PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pDis, pOp, pInsnClass, pf64Bit);
+    Assert(pParam->fUse & DISUSE_IMMEDIATE8);
+    pParam->uValue |= disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits) << (8 - pInsnParm->cBits);
+    return VINF_SUCCESS;
+}
+
+
+static int disArmV8ParseAdvSimdCModeXx(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                       PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pDis, pOp, pInsnClass, pf64Bit);
+    Assert(pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_None);
+    pParam->fUse |= DISUSE_IMMEDIATE8;
+
+    uint32_t uMode = disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits);
+    if (uMode < 8)
+    {
+        pDis->armv8.enmVecRegType = kDisOpParamArmV8VecRegType_2S;
+        pParam->armv8.enmType     = kDisArmv8OpParmImm;
+        pParam->armv8.cb          = sizeof(uint32_t);
+        pParam->armv8.enmExtend   = uMode & 6 ? kDisArmv8OpParmExtendLsl : kDisArmv8OpParmExtendNone;
+        pParam->armv8.u.cExtend   = ((uMode >> 1) & 3) * 8;
+    }
+    else if (uMode < 12)
+    {
+        pDis->armv8.enmVecRegType = kDisOpParamArmV8VecRegType_4H;
+        pParam->armv8.enmType     = kDisArmv8OpParmImm;
+        pParam->armv8.cb          = sizeof(uint16_t);
+        pParam->armv8.enmExtend   = uMode & 2 ? kDisArmv8OpParmExtendLsl : kDisArmv8OpParmExtendNone;
+        pParam->armv8.u.cExtend   = ((uMode >> 1) & 1) * 8;
+    }
+    else if (uMode < 14)
+    {
+        pDis->armv8.enmVecRegType = kDisOpParamArmV8VecRegType_2S;
+        pParam->armv8.enmType     = kDisArmv8OpParmImm;
+        pParam->armv8.cb          = sizeof(uint32_t);
+        pParam->armv8.enmExtend   = kDisArmv8OpParmExtendMsl;
+        pParam->armv8.u.cExtend   = uMode & 1 ? 16 : 8;
+    }
+    else if (uMode == 14)
+    {
+        if (pInsnParm->idxParse == kDisParmParseAdvSimdCMode8)
+        {
+            pDis->armv8.enmVecRegType = kDisOpParamArmV8VecRegType_8H;
+            pParam->armv8.enmType     = kDisArmv8OpParmImm;
+            pParam->armv8.cb          = sizeof(uint8_t);
+        }
+        else
+        {
+            pDis->armv8.enmVecRegType = kDisOpParamArmV8VecRegType_1D;
+            pParam->armv8.enmType     = kDisArmv8OpParmImm;
+            pParam->armv8.cb          = sizeof(uint64_t);
+            pParam->uValue            = Armv8A64ExpandAdvSimdImm(1, uMode, pParam->uValue);
+            pParam->fUse              = (pParam->fUse & ~DISUSE_IMMEDIATE8) | DISUSE_IMMEDIATE64;
+        }
+        pParam->armv8.enmExtend   = kDisArmv8OpParmExtendNone;
+        pParam->armv8.u.cExtend   = 0;
+    }
+    else
+        AssertFailedReturn(VERR_DIS_INVALID_OPCODE); /** @todo uMode=15 FP only?*/
+    return VINF_SUCCESS;
+}
+
+
+static int disArmV8ParseAdvSimdImmLoFp(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                       PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pDis, pOp, pInsnClass, pf64Bit);
+    pParam->fUse  |= DISUSE_IMMEDIATE8;
+    pParam->uValue = disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits);
+    return VINF_SUCCESS;
+}
+
+
+static int disArmV8ParseAdvSimdImmHiFp(PDISSTATE pDis, uint32_t u32Insn, PCDISARMV8OPCODE pOp, PCDISARMV8INSNCLASS pInsnClass,
+                                       PDISOPPARAM pParam, PCDISARMV8INSNPARAM pInsnParm, bool *pf64Bit)
+{
+    RT_NOREF(pOp, pInsnClass, pf64Bit);
+    Assert(pParam->fUse & DISUSE_IMMEDIATE8);
+    pParam->uValue |= disArmV8ExtractBitVecFromInsn(u32Insn, pInsnParm->idxBitStart, pInsnParm->cBits) << (8 - pInsnParm->cBits);
+    pParam->armv8.enmType = kDisArmv8OpParmImmFp;
+
+    if (   pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_4H
+        || pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_8H
+        || (   pDis->armv8.enmVecRegType >= kDisOpParamArmV8VecRegType_H_Elem0
+            && pDis->armv8.enmVecRegType <= kDisOpParamArmV8VecRegType_H_Elem7))
+    {
+        pParam->uValue   = Armv8A64ExpandAdvSimdImmFp16(pParam->uValue);
+        pParam->armv8.cb = sizeof(uint16_t);
+        pParam->fUse     = (pParam->fUse & ~DISUSE_IMMEDIATE8) | DISUSE_IMMEDIATE16;
+    }
+    else if (   pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_2S
+             || pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_4S
+             || (   pDis->armv8.enmVecRegType >= kDisOpParamArmV8VecRegType_S_Elem0
+                 && pDis->armv8.enmVecRegType <= kDisOpParamArmV8VecRegType_S_Elem3))
+    {
+        pParam->uValue   = Armv8A64ExpandAdvSimdImmFp32(pParam->uValue);
+        pParam->armv8.cb = sizeof(uint32_t);
+        pParam->fUse     = (pParam->fUse & ~DISUSE_IMMEDIATE8) | DISUSE_IMMEDIATE32;
+    }
+    else if (   pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_1D
+             || pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_2D
+             || pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_D_Elem0
+             || pDis->armv8.enmVecRegType == kDisOpParamArmV8VecRegType_D_Elem1)
+    {
+        pParam->uValue   = Armv8A64ExpandAdvSimdImmFp64(pParam->uValue);
+        pParam->armv8.cb = sizeof(uint64_t);
+        pParam->fUse     = (pParam->fUse & ~DISUSE_IMMEDIATE8) | DISUSE_IMMEDIATE64;
+    }
+    else
+        AssertFailedReturn(VERR_DIS_INVALID_OPCODE);
     return VINF_SUCCESS;
 }
 
