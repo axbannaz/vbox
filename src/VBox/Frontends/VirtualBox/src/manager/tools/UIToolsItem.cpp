@@ -43,6 +43,7 @@
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
+#include "UITranslationEventListener.h"
 #include "UIVirtualBoxManager.h"
 
 
@@ -130,8 +131,7 @@ public:
         switch (enmTextRole)
         {
             case QAccessible::Name:        return item()->name();
-            /// @todo handle!
-            //case QAccessible::Description: return item()->description();
+            case QAccessible::Description: return item()->description();
             default: break;
         }
 
@@ -554,6 +554,12 @@ void UIToolsItem::paint(QPainter *pPainter, const QStyleOptionGraphicsItem *pOpt
     paintToolInfo(pPainter, rectangle);
 }
 
+void UIToolsItem::sltRetranslateUI()
+{
+    /* Update internal stuff: */
+    m_strDescription = tr("Tool item");
+}
+
 void UIToolsItem::sltHandleWindowRemapped()
 {
     /* Update pixmap: */
@@ -584,6 +590,11 @@ void UIToolsItem::prepare()
 
     /* Create animation engine: */
     m_pAnimationEngine = new UIToolsItemAnimationEngine(this);
+
+    /* Apply language settings: */
+    sltRetranslateUI();
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
+            this, &UIToolsItem::sltRetranslateUI);
 }
 
 void UIToolsItem::prepareConnections()

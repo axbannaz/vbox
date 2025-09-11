@@ -101,6 +101,9 @@ public:
         /** Defines item @a strName. */
         void setName(const QString &strName);
 
+        /** Returns item description. */
+        QString description() const { return m_strDescription; }
+
         /** Returns item class. */
         UIToolClass itemClass() const { return m_enmClass; }
         /** Returns item type. */
@@ -152,6 +155,9 @@ private slots:
 
     /** @name Item stuff.
       * @{ */
+        /** Handles translation event. */
+        void sltRetranslateUI();
+
         /** Handles top-level window remaps. */
         void sltHandleWindowRemapped();
     /** @} */
@@ -253,6 +259,9 @@ private:
 
         /** Holds whether item is hovered. */
         bool  m_fHovered;
+
+        /** Holds item description. */
+        QString  m_strDescription;
     /** @} */
 
     /** @name Layout stuff.
