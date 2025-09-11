@@ -704,6 +704,8 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
 #define PUT_NUM_32(num) PUT_NUM(10, "0x%08x", (uint32_t)(num))
 #define PUT_NUM_64(num) PUT_NUM(18, "0x%016RX64", (uint64_t)(num))
 
+#define PUT_NUM_DECIMAL_XX(num) PUT_NUM((unsigned)(num) < 10 ? 1U : 2U,  "%u", (unsigned)(num))
+
 #define PUT_NUM_SIGN(cch, fmt, num, stype, utype) \
             do { \
                 if ((stype)(num) >= 0) \
@@ -1214,7 +1216,7 @@ DISDECL(size_t) DISFormatArmV8Ex(PCDISSTATE pDis, char *pszBuf, size_t cchBuf, u
                     default:
                         AssertFailed();
                 }
-                PUT_NUM_8(pParam->armv8.u.cExtend);
+                PUT_NUM_DECIMAL_XX(pParam->armv8.u.cExtend);
             }
         }
     }
