@@ -103,7 +103,7 @@ public:
 
         /* Return view tool-tip: */
         Q_UNUSED(enmTextRole);
-        return view()->toolTip();
+        return view()->whatsThis();
     }
 
 private:
