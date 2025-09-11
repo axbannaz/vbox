@@ -1482,6 +1482,31 @@ static DWORD vboxDispIfUpdateModesWDDM(VBOXDISPIF_OP *pOp, uint32_t u32TargetId,
     return winEr;
 }
 
+static DWORD vboxDispIfReconnectTargetsWDDM(VBOXDISPIF_OP *pOp, uint32_t u32ConnectMask, uint32_t u32DisconnectMask)
+{
+    VBOXDISPIFESCAPE_RECONNECT_TARGETS PrivateData;
+    RT_ZERO(PrivateData);
+    PrivateData.EscapeHdr.escapeCode = VBOXESC_RECONNECT_TARGETS;
+    PrivateData.u32ConnectMask = u32ConnectMask;
+    PrivateData.u32DisconnectMask = u32DisconnectMask;
+
+    D3DKMT_ESCAPE EscapeData;
+    RT_ZERO(EscapeData);
+    EscapeData.hAdapter = pOp->u.wddm.Adapter.hAdapter;
+    EscapeData.Type = D3DKMT_ESCAPE_DRIVERPRIVATE;
+    EscapeData.Flags.HardwareAccess = 1;
+    EscapeData.pPrivateDriverData = &PrivateData;
+    EscapeData.PrivateDriverDataSize = sizeof(PrivateData);
+
+    NTSTATUS Status = pOp->pIf->modeData.wddm.KmtCallbacks.pfnD3DKMTEscape(&EscapeData);
+    if (NT_SUCCESS(Status))
+        return ERROR_SUCCESS;
+
+    WARN(("VBoxTray: pfnD3DKMTEscape VBOXESC_RECONNECT_TARGETS failed Status 0x%x\n", Status));
+    return ERROR_GEN_FAILURE;
+}
+
+
 static DWORD vboxDispIfTargetConnectivityWDDM(VBOXDISPIF_OP *pOp, uint32_t u32TargetId, uint32_t fu32Connect)
 {
     VBOXDISPIFESCAPE_TARGETCONNECTIVITY PrivateData;
@@ -1847,11 +1872,6 @@ BOOL VBoxDispIfResizeDisplayWin7Wddm(PCVBOXDISPIF const pIf, uint32_t cDispDef, 
         }
     }
 
-    vboxDispIfOpEndWddm(&Op);
-
-    if (winEr != ERROR_SUCCESS)
-        return (winEr == ERROR_SUCCESS);
-
     VBOXDISPIF_WDDM_DISPCFG DispCfg;
     winEr = vboxDispIfWddmDcCreate(&DispCfg, QDC_ALL_PATHS);
     if (winEr != ERROR_SUCCESS)
@@ -1859,6 +1879,46 @@ BOOL VBoxDispIfResizeDisplayWin7Wddm(PCVBOXDISPIF const pIf, uint32_t cDispDef, 
         WARN(("VBoxTray: vboxDispIfWddmDcCreate failed winEr 0x%x", winEr));
         return (winEr == ERROR_SUCCESS);
     }
+
+    uint32_t u32ConnectMask = 0;
+
+    for (i = 0; i < cDispDef; ++i)
+    {
+        pDispDef = &paDispDef[i];
+
+        if (pDispDef->fDisplayFlags & VMMDEV_DISPLAY_DISABLED)
+            continue;
+
+        int const iPath = vboxDispIfWddmDcSearchPath(&DispCfg, i, i);
+
+        if (iPath < 0)
+        {
+            u32ConnectMask |= RT_BIT_32(i);
+            continue;
+        }
+
+        DISPLAYCONFIG_PATH_INFO *pPathInfo = &DispCfg.pPathInfoArray[iPath];
+
+        if (!pPathInfo->targetInfo.targetAvailable)
+        {
+            u32ConnectMask |= RT_BIT_32(i);
+        }
+    }
+
+    LogRel2(("VBoxTray:(WDDM) u32ConnectMask 0x%X\n", u32ConnectMask));
+
+    if (u32ConnectMask)
+    {
+        vboxDispIfReconnectTargetsWDDM(&Op, u32ConnectMask, 0);
+        /* Wait till Windows reconnects the displays.
+           Most likely this arbitrary timeout is not needed and should be deleted after testing. */
+        RTThreadSleep(50);
+    }
+
+    vboxDispIfOpEndWddm(&Op);
+
+    if (winEr != ERROR_SUCCESS)
+        return (winEr == ERROR_SUCCESS);
 
     if (pDispDefPrimary == NULL)
     {
@@ -1884,6 +1944,9 @@ BOOL VBoxDispIfResizeDisplayWin7Wddm(PCVBOXDISPIF const pIf, uint32_t cDispDef, 
             }
         }
     }
+
+    LogRel2(("VBoxTray:(WDDM) The current display config is:\n"));
+    vboxDispIfWddmDcLogRel(&DispCfg, 0);
 
     for (i = 0; i < cDispDef; ++i)
     {
@@ -2129,6 +2192,9 @@ BOOL VBoxDispIfResizeDisplayWin7Wddm(PCVBOXDISPIF const pIf, uint32_t cDispDef, 
         }
     }
 
+    LogRel2(("VBoxTray:(WDDM) Display config being applied is:\n"));
+    vboxDispIfWddmDcLogRel(&DispCfg, 0);
+
     UINT fSetFlags = SDC_USE_SUPPLIED_DISPLAY_CONFIG;
     winEr = vboxDispIfWddmDcSet(&DispCfg, fSetFlags | SDC_VALIDATE);
     if (winEr != ERROR_SUCCESS)
@@ -2139,8 +2205,7 @@ BOOL VBoxDispIfResizeDisplayWin7Wddm(PCVBOXDISPIF const pIf, uint32_t cDispDef, 
     }
     else
     {
-        Log(("VBoxTray:(WDDM) pfnSetDisplayConfig Ok to VALIDATE.\n"));
-        vboxDispIfWddmDcLogRel(&DispCfg, fSetFlags);
+        LogRel2(("VBoxTray:(WDDM) pfnSetDisplayConfig Ok to VALIDATE.\n"));
     }
 
     winEr = vboxDispIfWddmDcSet(&DispCfg, fSetFlags | SDC_SAVE_TO_DATABASE | SDC_APPLY);
