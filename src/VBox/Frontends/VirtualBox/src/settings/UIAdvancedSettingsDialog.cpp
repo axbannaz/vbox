@@ -50,6 +50,9 @@
 #include <QToolButton>
 #include <QVariant>
 #include <QVBoxLayout>
+#ifndef VBOX_WS_MAC
+# include <QStyle>
+#endif
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
@@ -265,6 +268,9 @@ private:
 UIModeCheckBox::UIModeCheckBox(QWidget *pParent)
     : QCheckBox(pParent)
 {
+#ifndef VBOX_WS_MAC
+    setFocusPolicy(Qt::TabFocus);
+#endif
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
 
@@ -322,7 +328,22 @@ void UIModeCheckBox::paintEvent(QPaintEvent *pEvent)
 #ifdef VBOX_WS_MAC
     contentRect.setLeft(contentRect.left() + 2); /// @todo justify!
     contentRect.setWidth(contentRect.width() - 10); /// @todo justify!
-#endif
+#else /* !VBOX_WS_MAC */
+    /* On non-macOS hosts we'll have to give some space to focus-frame: */
+    contentRect.setLeft(contentRect.left() + 1);
+    contentRect.setTop(contentRect.top() + 1);
+#endif /* !VBOX_WS_MAC */
+
+#ifndef VBOX_WS_MAC
+    /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
+    if (hasFocus())
+    {
+        QStyleOptionFocusRect option;
+        option.initFrom(this);
+        option.rect = rect();
+        style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
+    }
+#endif /* !VBOX_WS_MAC */
 
     /* Prepare left painter paths: */
     QPainterPath painterPath1;
