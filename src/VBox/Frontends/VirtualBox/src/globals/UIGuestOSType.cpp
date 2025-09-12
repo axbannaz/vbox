@@ -56,7 +56,8 @@ bool UIGuestOSTypeHelpers::isWddmCompatibleOsType(const QString &strGuestOSTypeI
            || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2008"))
            || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2012"))
            || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2016"))
-           || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2019"));
+           || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2019"))
+           || strGuestOSTypeId.startsWith(GUEST_OS_ID_STR_PARTIAL("Windows2022"));
 }
 #endif /* VBOX_WITH_3D_ACCELERATION */
 
