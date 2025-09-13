@@ -216,6 +216,9 @@
 #define IEM_MC_SUB_LOCAL_U32(a_u32Value, a_u32Const)    do { (a_u32Value) -= (a_u32Const); } while (0)
 #define IEM_MC_SUB_LOCAL_U64(a_u64Value, a_u64Const)    do { (a_u64Value) -= (a_u64Const); } while (0)
 
+#define IEM_MC_ADD_LOCAL_U32(a_u32Value, a_u32Const)    do { (a_u32Value) += (a_u32Const); } while (0)
+#define IEM_MC_ADD_LOCAL_U64(a_u64Value, a_u64Const)    do { (a_u64Value) += (a_u64Const); } while (0)
+
 #define IEM_MC_ADD_GREG_U8_TO_LOCAL(a_u8Value, a_iGReg)    do { (a_u8Value)  += iemGRegFetchU8( pVCpu, (a_iGReg)); } while (0)
 #define IEM_MC_ADD_GREG_U16_TO_LOCAL(a_u16Value, a_iGReg)  do { (a_u16Value) += iemGRegFetchU16(pVCpu, (a_iGReg)); } while (0)
 #define IEM_MC_ADD_GREG_U32_TO_LOCAL(a_u32Value, a_iGReg)  do { (a_u32Value) += iemGRegFetchU32(pVCpu, (a_iGReg)); } while (0)
@@ -223,6 +226,9 @@
 #define IEM_MC_ADD_LOCAL_S16_TO_EFF_ADDR(a_EffAddr, a_i16) do { (a_EffAddr) += (a_i16); } while (0)
 #define IEM_MC_ADD_LOCAL_S32_TO_EFF_ADDR(a_EffAddr, a_i32) do { (a_EffAddr) += (a_i32); } while (0)
 #define IEM_MC_ADD_LOCAL_S64_TO_EFF_ADDR(a_EffAddr, a_i64) do { (a_EffAddr) += (a_i64); } while (0)
+
+#define IEM_MC_NEG_LOCAL_U32(a_u32Local)                do { (a_u32Local) = (uint32_t)-(int32_t)(a_u32Local); } while (0)
+#define IEM_MC_NEG_LOCAL_U64(a_u64Local)                do { (a_u64Local) = (uint64_t)-(int64_t)(a_u64Local); } while (0)
 
 #define IEM_MC_NOT_LOCAL_U32(a_u32Local)                do { (a_u32Local) = ~(a_u32Local); } while (0)
 #define IEM_MC_NOT_LOCAL_U64(a_u64Local)                do { (a_u64Local) = ~(a_u64Local); } while (0)
