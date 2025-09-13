@@ -994,6 +994,93 @@ def aarchExpandAdvSimdImmFMov(u8Imm):
     return (u16Imm << 48) | (u16Imm << 32) | (u16Imm << 16) | u16Imm;
 
 
+## Condition codes to name
+g_kdCondNames = {
+    0:  'EQ',
+    1:  'NE',
+    2:  'CS',
+    3:  'CC',
+    4:  'MI',
+    5:  'PL',
+    6:  'VS',
+    7:  'VC',
+    8:  'HI',
+    9:  'LS',
+    10: 'GE',
+    11: 'LT',
+    12: 'GT',
+    13: 'LE',
+    14: 'AL',
+    15: 'NV',
+};
+
+class A64No1CodeGenCondSel(A64No1CodeGenBase):
+    """ C4.1.94.12 Conditional Select - CSEL, CSINC, CSINV, CSNEG """
+    def __init__(self, sInstr, fnCalc):
+        A64No1CodeGenBase.__init__(self, sInstr, sInstr, Arm64GprAllocator());
+        self.fnCalc = fnCalc;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in (64, 32):
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                u4Nzcv              = randUBits(4);
+                u4Cond              = randUBits(4);
+
+                uRes = self.fnCalc(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond);
+
+                # Load NZCV
+                iRegTmp = self.emitGprLoad(self.oGprAllocator.alloc(), u4Nzcv << 28);
+                self.emitInstr('msr',   'NZCV, x%u' % (iRegTmp,));
+                self.oGprAllocator.free(iRegTmp);
+
+                # Execute the instruction.
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+                self.emitInstr(self.sInstr, '%s, %s, %s, %s'
+                               % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
+                                  g_ddGprNamesZrByBits[cBits][iRegIn2], g_kdCondNames[u4Cond],));
+                if iRegDst != 31:
+                    self.emitGprValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+def calcCond(u4Nzcv, u4Cond):
+    """ Matches the given condition to the NZCV value. """
+    fInv = u4Cond & 1;
+    u4Cond >>= 1;
+    if u4Cond == 0:     fResult = (u4Nzcv & 4) != 0;                   # Z != 0            # EQ / NE
+    elif u4Cond == 1:   fResult = (u4Nzcv & 2) != 0;                   # C != 0            # CS / CC
+    elif u4Cond == 2:   fResult = (u4Nzcv & 8) != 0;                   # N != 0            # MI / PL
+    elif u4Cond == 3:   fResult = (u4Nzcv & 1) != 0;                   # V != 0            # VS / VC
+    elif u4Cond == 4:   fResult = (u4Nzcv & 6) == 2;                   # C == 1 && Z == 0  # HI / LS
+    elif u4Cond == 5:   fResult = ((u4Nzcv >> 3) & 1) == (u4Nzcv & 1); # N == V            # GE / LT
+    elif u4Cond == 6:   fResult = ((u4Nzcv >> 3) & 1) == (u4Nzcv & 5); # N == V && Z == 0  # GT / LE
+    elif u4Cond == 7:   return True;                                                       # AL / NV
+    else: assert False;
+    if fInv:
+        fResult = not fResult;
+    return fResult;
+
+def calcCondSel(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
+    """ Regular CSEL result. """
+    uRes = uSrc1 if calcCond(u4Nzcv, u4Cond) else uSrc2;
+    return uRes & bitsOnes(cBits);
+
+def calcCondSelInc(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
+    """ Calc CSINC result. """
+    return calcCondSel(cBits, uSrc1, uSrc2 + 1, u4Nzcv, u4Cond);
+
+def calcCondSelInv(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
+    """ Calc CSINV result. """
+    return calcCondSel(cBits, uSrc1, ~uSrc2, u4Nzcv, u4Cond);
+
+def calcCondSelNeg(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
+    """ Calc CSNEG result. """
+    return calcCondSel(cBits, uSrc1, -uSrc2, u4Nzcv, u4Cond);
+
+
 
 #
 # Load generators.
@@ -2169,9 +2256,17 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # asimdimm
             aoGenerators += [
-                A64No1CodeGenMoviGrp(),
+                A64No1CodeGenCondSel(    'csel',    calcCondSel),
+                A64No1CodeGenCondSel(    'csinc',   calcCondSelInc),
+                A64No1CodeGenCondSel(    'csinv',   calcCondSelInv),
+                A64No1CodeGenCondSel(    'csneg',   calcCondSelNeg),
             ];
 
+        if True: # pylint: disable=using-constant-test
+            # asimdimm
+            aoGenerators += [
+                A64No1CodeGenMoviGrp(),
+            ];
 
         if True: # pylint: disable=using-constant-test
             # Pair loads and stores (with 7-bit scaled immediates):
