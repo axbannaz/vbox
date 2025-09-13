@@ -510,7 +510,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_OSECCR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
     {
         if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT64_C(0x300) /*TDE,TDA*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
-        if (!(pVCpu->cpum.GstCtx.fOsLck & RT_BIT_32(0)/*OSLK*/))
+        if (!(pVCpu->cpum.GstCtx.fOsLck & UINT32_C(1)/*OSLK*/))
             *puDst = 0;
         else
             return iemCImplA64_mrs_novar(pVCpu,
@@ -521,7 +521,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_OSECCR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
     }
     else
     {
-        if (!(pVCpu->cpum.GstCtx.fOsLck & RT_BIT_32(0)/*OSLK*/))
+        if (!(pVCpu->cpum.GstCtx.fOsLck & UINT32_C(1)/*OSLK*/))
             *puDst = 0;
         else
             return iemCImplA64_mrs_novar(pVCpu,
@@ -2041,7 +2041,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCQCTLR(PVMCPU pVCpu, uint64_t * puDst, uin
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(14)/*QFILT*/)) >> 14) != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >> 14) & UINT32_C(1)/*QFILT*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -2413,8 +2413,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCSTALLCTLR(PVMCPU pVCpu, uint64_t * puDst,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,11,7)) & RT_BIT_32(26)/*STALLCTL*/)) >> 26)
-           != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,11,7)) >> 26) & UINT32_C(1)/*STALLCTL*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -2866,7 +2865,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCCCCTLR(PVMCPU pVCpu, uint64_t * puDst, ui
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(7)/*TRCCCI*/)) >> 7) != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >>  7) & UINT32_C(1)/*TRCCCI*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -3016,7 +3015,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCBBCTLR(PVMCPU pVCpu, uint64_t * puDst, ui
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(5)/*TRCBB*/)) >> 5) != 1
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >>  5) & UINT32_C(1)/*TRCBB*/) != 1
         || (iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf)/*NUMACPAIRS*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
@@ -3464,8 +3463,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCVIPCSSCTLR(PVMCPU pVCpu, uint64_t * puDst
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000)/*NUMPC*/)) >> 12)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 12) & UINT32_C(0xf)/*NUMPC*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -4441,10 +4439,8 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCCIDCCTLR0(PVMCPU pVCpu, uint64_t * puDst,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000000)/*NUMCIDC*/)) >> 24)
-           <= 0
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x3e0)/*CIDSIZE*/)) >> 5)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 24) & UINT32_C(0xf)/*NUMCIDC*/) <= 0
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >>  5) & UINT32_C(0x1f)/*CIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -4521,10 +4517,8 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCCIDCCTLR1(PVMCPU pVCpu, uint64_t * puDst,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000000)/*NUMCIDC*/)) >> 24)
-           <= 4
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x3e0)/*CIDSIZE*/)) >> 5)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 24) & UINT32_C(0xf)/*NUMCIDC*/) <= 4
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >>  5) & UINT32_C(0x1f)/*CIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -4601,10 +4595,8 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCVMIDCCTLR0(PVMCPU pVCpu, uint64_t * puDst
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT64_C(0xf0000000)/*NUMVMIDC*/)) >> 28)
-           <= 0
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x7c00)/*VMIDSIZE*/)) >> 10)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 28) & UINT32_C(0xf)/*NUMVMIDC*/) <= 0
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >> 10) & UINT32_C(0x1f)/*VMIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -4685,10 +4677,8 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRCVMIDCCTLR1(PVMCPU pVCpu, uint64_t * puDst
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT64_C(0xf0000000)/*NUMVMIDC*/)) >> 28)
-           <= 4
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x7c00)/*VMIDSIZE*/)) >> 10)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 28) & UINT32_C(0xf)/*NUMVMIDC*/) <= 4
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >> 10) & UINT32_C(0x1f)/*VMIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -10285,7 +10275,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_ZCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uint
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -10296,7 +10286,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_ZCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uint
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 2);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x1e0, puDst);
@@ -10308,7 +10298,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_ZCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uint
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSve(pVCpu, 2);
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,0), "ZCR_EL2", puDst, uInstrEssence);
@@ -10545,7 +10535,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SMCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uin
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -10556,7 +10546,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SMCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uin
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x1f0, puDst);
@@ -10568,7 +10558,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SMCR_EL1(PVMCPU pVCpu, uint64_t * puDst, uin
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,6), "SMCR_EL2", puDst, uInstrEssence);
@@ -16762,7 +16752,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMBLIMITR_EL1(PVMCPU pVCpu, uint64_t * puDst
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x800, puDst);
@@ -16839,7 +16829,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMBPTR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x810, puDst);
@@ -16914,7 +16904,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMBSR_EL1(PVMCPU pVCpu, uint64_t * puDst, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x820, puDst);
@@ -17083,7 +17073,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMBMAR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,10,5), "PMBMAR_EL1", puDst, uInstrEssence);
     }
@@ -17201,7 +17191,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBLIMITR_EL1(PVMCPU pVCpu, uint64_t * puDst
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu,
                                      ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,0),
@@ -17281,7 +17271,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBPTR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,1), "TRBPTR_EL1", puDst, uInstrEssence);
     }
@@ -17357,7 +17347,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBBASER_EL1(PVMCPU pVCpu, uint64_t * puDst,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu,
                                      ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,2),
@@ -17439,7 +17429,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBSR_EL1(PVMCPU pVCpu, uint64_t * puDst, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7 && EffectiveTRFCR_EL2_EE() != 0 && AArch64.TRFCR_EL1.EE != 0)
             return iemCImplHlpNVMemReadU64(pVCpu, 0x860, puDst);
@@ -17528,7 +17518,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBMAR_EL1(PVMCPU pVCpu, uint64_t * puDst, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,4), "TRBMAR_EL1", puDst, uInstrEssence);
     }
@@ -17604,7 +17594,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBMPAM_EL1(PVMCPU pVCpu, uint64_t * puDst, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,5), "TRBMPAM_EL1", puDst, uInstrEssence);
     }
@@ -17693,7 +17683,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_TRBTRG_EL1(PVMCPU pVCpu, uint64_t * puDst, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,6), "TRBTRG_EL1", puDst, uInstrEssence);
     }
@@ -20489,7 +20479,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCT_EL0(PVMCPU pVCpu, uint64_t * puDst, u
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && !(pVCpu->cpum.GstCtx.CntKCtl.u64 & RT_BIT_32(0)/*EL0PCTEN*/))
+            && !(pVCpu->cpum.GstCtx.CntKCtl.u64 & UINT32_C(1)/*EL0PCTEN*/))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
@@ -20499,7 +20489,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCT_EL0(PVMCPU pVCpu, uint64_t * puDst, u
             && (   !pGstFeats->fVhe
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
-            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL1PCTEN_AT_00*/))
+            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL1PCTEN_AT_00*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
@@ -20511,13 +20501,13 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCT_EL0(PVMCPU pVCpu, uint64_t * puDst, u
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL0PCTEN*/))
+            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL0PCTEN*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         *puDst = iemCImplHlpGetPhysicalSystemTimerCount(pVCpu);
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL1PCTEN_AT_00*/))
+        if (pGstFeats->fEl2 && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL1PCTEN_AT_00*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         *puDst = iemCImplHlpGetPhysicalSystemTimerCount(pVCpu);
     }
@@ -20592,8 +20582,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTVCT_EL0(PVMCPU pVCpu, uint64_t * puDst, u
             && (pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(14)/*EL1TVCT*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (   pGstFeats->fEl2
-            && (   !pGstFeats->fEl2
-                || !pGstFeats->fVhe
+            && (   !pGstFeats->fVhe
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)))
@@ -20672,7 +20661,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCTSS_EL0(PVMCPU pVCpu, uint64_t * puDst,
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && !(pVCpu->cpum.GstCtx.CntKCtl.u64 & RT_BIT_32(0)/*EL0PCTEN*/))
+            && !(pVCpu->cpum.GstCtx.CntKCtl.u64 & UINT32_C(1)/*EL0PCTEN*/))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
@@ -20682,7 +20671,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCTSS_EL0(PVMCPU pVCpu, uint64_t * puDst,
             && (   !pGstFeats->fVhe
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
-            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL1PCTEN_AT_00*/))
+            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL1PCTEN_AT_00*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
@@ -20694,13 +20683,13 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTPCTSS_EL0(PVMCPU pVCpu, uint64_t * puDst,
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL0PCTEN*/))
+            && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL0PCTEN*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         *puDst = iemCImplHlpGetPhysicalSystemTimerCount(pVCpu);
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(0)/*EL1PCTEN_AT_00*/))
+        if (pGstFeats->fEl2 && !(pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & UINT32_C(1)/*EL1PCTEN_AT_00*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         *puDst = iemCImplHlpGetPhysicalSystemTimerCount(pVCpu);
     }
@@ -20779,8 +20768,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTVCTSS_EL0(PVMCPU pVCpu, uint64_t * puDst,
             && (pVCpu->cpum.GstCtx.CntHCtlEl2.u64 & RT_BIT_32(14)/*EL1TVCT*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (   pGstFeats->fEl2
-            && (   !pGstFeats->fEl2
-                || !pGstFeats->fVhe
+            && (   !pGstFeats->fVhe
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)))
@@ -20857,7 +20845,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCCFILTR_EL0(PVMCPU pVCpu, uint64_t * puDst
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -20996,7 +20984,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTP_TVAL_EL0(PVMCPU pVCpu, uint64_t * puDst
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
         {
-            if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & RT_BIT_32(0)/*ENABLE*/))
+            if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & UINT32_C(1)/*ENABLE*/))
                 *puDst = 0;
             else
                 *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntHpCValEl2.u64 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -21023,7 +21011,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTP_TVAL_EL0(PVMCPU pVCpu, uint64_t * puDst
     {
         if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         {
-            if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & RT_BIT_32(0)/*ENABLE*/))
+            if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & UINT32_C(1)/*ENABLE*/))
                 *puDst = 0;
             else
                 *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntHpCValEl2.u64 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -21391,12 +21379,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTV_TVAL_EL0(PVMCPU pVCpu, uint64_t * puDst
                      || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                      || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)))
         {
-            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
                 *puDst = 0;
             else
                 *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu) - pVCpu->cpum.GstCtx.CntVOffEl2.u64);
         }
-        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
             *puDst = 0;
         else
             *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -21407,12 +21395,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTV_TVAL_EL0(PVMCPU pVCpu, uint64_t * puDst
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (pGstFeats->fEl2)
         {
-            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
                 *puDst = 0;
             else
                 *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu) - pVCpu->cpum.GstCtx.CntVOffEl2.u64);
         }
-        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
             *puDst = 0;
         else
             *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -21430,12 +21418,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTV_TVAL_EL0(PVMCPU pVCpu, uint64_t * puDst
                  || !pGstFeats->fEl2
                  || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         {
-            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+            if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
                 *puDst = 0;
             else
                 *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu) - pVCpu->cpum.GstCtx.CntVOffEl2.u64);
         }
-        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+        else if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
             *puDst = 0;
         else
             *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -21836,7 +21824,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_GCSPR_EL0(PVMCPU pVCpu, uint64_t * puDst, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (!pGstFeats->fEl2 || (((pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)) >> 27) != 1)
+        if (!pGstFeats->fEl2 || ((pVCpu->cpum.GstCtx.HcrEl2.u64 >> 27) & UINT32_C(1)/*TGE*/) != 1)
             return iemRaiseSystemAccessTrap(pVCpu, 1, uInstrEssence);
         if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
@@ -21986,7 +21974,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SVCR(PVMCPU pVCpu, uint64_t * puDst, uint32_
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapSme(pVCpu, 2);
@@ -21996,12 +21984,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_SVCR(PVMCPU pVCpu, uint64_t * puDst, uint32_
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) != 3)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22013,7 +22001,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SVCR(PVMCPU pVCpu, uint64_t * puDst, uint32_
     }
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22024,7 +22012,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SVCR(PVMCPU pVCpu, uint64_t * puDst, uint32_
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,2,2), "SVCR", puDst, uInstrEssence);
     }
@@ -22034,7 +22022,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SVCR(PVMCPU pVCpu, uint64_t * puDst, uint32_
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,2,2), "SVCR", puDst, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -22187,7 +22175,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPCR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -22197,12 +22185,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPCR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22214,7 +22202,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPCR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22225,7 +22213,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPCR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         *puDst = pVCpu->cpum.GstCtx.fpcr;
     }
@@ -22239,7 +22227,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPCR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         *puDst = pVCpu->cpum.GstCtx.fpcr;
     }
@@ -22317,7 +22305,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPSR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -22327,12 +22315,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPSR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22344,7 +22332,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPSR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22355,7 +22343,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPSR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         *puDst = pVCpu->cpum.GstCtx.fpsr;
     }
@@ -22369,7 +22357,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPSR(PVMCPU pVCpu, uint64_t * puDst) RT_NOEX
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         *puDst = pVCpu->cpum.GstCtx.fpsr;
     }
@@ -22471,7 +22459,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPMR(PVMCPU pVCpu, uint64_t * puDst, uint32_
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -22481,12 +22469,12 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPMR(PVMCPU pVCpu, uint64_t * puDst, uint32_
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22504,7 +22492,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPMR(PVMCPU pVCpu, uint64_t * puDst, uint32_
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -22515,7 +22503,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPMR(PVMCPU pVCpu, uint64_t * puDst, uint32_
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,4,2), "FPMR", puDst, uInstrEssence);
     }
@@ -22525,7 +22513,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPMR(PVMCPU pVCpu, uint64_t * puDst, uint32_
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
     return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,4,2), "FPMR", puDst, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -22665,7 +22653,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCR_EL0(PVMCPU pVCpu, uint64_t * puDst, uin
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             || (pGstFeats->fPmuV3p9 && (iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -22749,7 +22737,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCNTENSET_EL0(PVMCPU pVCpu, uint64_t * puDs
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -22844,7 +22832,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCNTENCLR_EL0(PVMCPU pVCpu, uint64_t * puDs
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -22939,7 +22927,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMOVSCLR_EL0(PVMCPU pVCpu, uint64_t * puDst,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -23123,7 +23111,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCEID0_EL0(PVMCPU pVCpu, uint64_t * puDst, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -23221,7 +23209,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMCEID1_EL0(PVMCPU pVCpu, uint64_t * puDst, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -23429,7 +23417,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMXEVTYPER_EL0(PVMCPU pVCpu, uint64_t * puDs
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -23821,7 +23809,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_PMOVSSET_EL0(PVMCPU pVCpu, uint64_t * puDst,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -24686,7 +24674,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_ZCR_EL2(PVMCPU pVCpu, uint64_t * puDst, uint
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSve(pVCpu, 2);
     return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,0), "ZCR_EL2", puDst, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -24928,7 +24916,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SMCR_EL2(PVMCPU pVCpu, uint64_t * puDst, uin
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,6), "SMCR_EL2", puDst, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -27165,7 +27153,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTHP_TVAL_EL2(PVMCPU pVCpu, uint64_t * puDs
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemRaiseUndefined(pVCpu);
     }
-    if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & RT_BIT_32(0)/*ENABLE*/))
+    if (!(pVCpu->cpum.GstCtx.CntHpCtlEl2.u64 & UINT32_C(1)/*ENABLE*/))
         *puDst = 0;
     else
         *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntHpCValEl2.u64 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu));
@@ -29061,7 +29049,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_FPEXC32_EL2(PVMCPU pVCpu, uint64_t * puDst, 
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
     return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,5,3,0), "FPEXC32_EL2", puDst, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -29653,7 +29641,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_ZCR_EL12(PVMCPU pVCpu, uint64_t * puDst, uin
     }
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
     {
-        if (((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 2);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,1,2,0), "ZCR_EL1", puDst, uInstrEssence);
     }
@@ -29827,7 +29815,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_SMCR_EL12(PVMCPU pVCpu, uint64_t * puDst, ui
     }
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
     {
-        if (((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         return iemCImplA64_mrs_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,1,2,6), "SMCR_EL1", puDst, uInstrEssence);
     }
@@ -30971,7 +30959,7 @@ static VBOXSTRICTRC iemCImplA64_mrs_CNTV_TVAL_EL02(PVMCPU pVCpu, uint64_t * puDs
     }
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
     {
-        if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & RT_BIT_32(0)/*ENABLE*/))
+        if (!(pVCpu->cpum.GstCtx.CntvCtlEl0 & UINT32_C(1)/*ENABLE*/))
             *puDst = 0;
         else
             *puDst = (uint64_t)(uint32_t)(pVCpu->cpum.GstCtx.CntvCValEl0 - iemCImplHlpGetPhysicalSystemTimerCount(pVCpu) - pVCpu->cpum.GstCtx.CntVOffEl2.u64);
@@ -39013,8 +39001,8 @@ IEM_CIMPL_DEF_2(iemCImplA64_mrs, uint32_t, idSysReg, uint32_t, idxGprDst)
  * A64.MSRregister
  *
  *  498 registers
- *  383 complete - 283 with unresolved registers
- *   80 incomplete
+ *  393 complete - 283 with unresolved registers
+ *   70 incomplete
  *
  * Warnings:
  *   Assignment to Identifier: Unable to map AArch64.ICV_BPR0_EL1 to anything
@@ -39481,11 +39469,11 @@ static VBOXSTRICTRC iemCImplA64_msr_OSECCR_EL1(PVMCPU pVCpu, uint64_t uValue, ui
     {
         if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT64_C(0x300) /*TDE,TDA*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
-        if (!(pVCpu->cpum.GstCtx.fOsLck & RT_BIT_32(0)/*OSLK*/))
+        if (!(pVCpu->cpum.GstCtx.fOsLck & UINT32_C(1)/*OSLK*/))
             return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,0,0,6,2), "OSECCR_EL1", uValue, uInstrEssence);
     }
-    if (!(pVCpu->cpum.GstCtx.fOsLck & RT_BIT_32(0)/*OSLK*/))
+    if (!(pVCpu->cpum.GstCtx.fOsLck & UINT32_C(1)/*OSLK*/))
         return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,0,0,6,2), "OSECCR_EL1", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -40356,7 +40344,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCQCTLR(PVMCPU pVCpu, uint64_t uValue, uint
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(14)/*QFILT*/)) >> 14) != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >> 14) & UINT32_C(1)/*QFILT*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -40576,8 +40564,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCSTALLCTLR(PVMCPU pVCpu, uint64_t uValue, 
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,11,7)) & RT_BIT_32(26)/*STALLCTL*/)) >> 26)
-           != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,11,7)) >> 26) & UINT32_C(1)/*STALLCTL*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -40801,7 +40788,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCCCCTLR(PVMCPU pVCpu, uint64_t uValue, uin
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(7)/*TRCCCI*/)) >> 7) != 1)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >>  7) & UINT32_C(1)/*TRCCCI*/) != 1)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -40875,7 +40862,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCBBCTLR(PVMCPU pVCpu, uint64_t uValue, uin
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        || (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) & RT_BIT_32(5)/*TRCBB*/)) >> 5) != 1
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,8,7)) >>  5) & UINT32_C(1)/*TRCBB*/) != 1
         || (iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf)/*NUMACPAIRS*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
@@ -41099,8 +41086,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCVIPCSSCTLR(PVMCPU pVCpu, uint64_t uValue,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000)/*NUMPC*/)) >> 12)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 12) & UINT32_C(0xf)/*NUMPC*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -41628,10 +41614,8 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCCIDCCTLR0(PVMCPU pVCpu, uint64_t uValue, 
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000000)/*NUMCIDC*/)) >> 24)
-           <= 0
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x3e0)/*CIDSIZE*/)) >> 5)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 24) & UINT32_C(0xf)/*NUMCIDC*/) <= 0
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >>  5) & UINT32_C(0x1f)/*CIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -41712,10 +41696,8 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCCIDCCTLR1(PVMCPU pVCpu, uint64_t uValue, 
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT32_C(0xf000000)/*NUMCIDC*/)) >> 24)
-           <= 4
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x3e0)/*CIDSIZE*/)) >> 5)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 24) & UINT32_C(0xf)/*NUMCIDC*/) <= 4
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >>  5) & UINT32_C(0x1f)/*CIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -41796,10 +41778,8 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCVMIDCCTLR0(PVMCPU pVCpu, uint64_t uValue,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT64_C(0xf0000000)/*NUMVMIDC*/)) >> 28)
-           <= 0
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x7c00)/*VMIDSIZE*/)) >> 10)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 28) & UINT32_C(0xf)/*NUMVMIDC*/) <= 0
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >> 10) & UINT32_C(0x1f)/*VMIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -41880,10 +41860,8 @@ static VBOXSTRICTRC iemCImplA64_msr_TRCVMIDCCTLR1(PVMCPU pVCpu, uint64_t uValue,
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (   !pGstFeats->fEte
         || !pGstFeats->fTrcSr
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) & UINT64_C(0xf0000000)/*NUMVMIDC*/)) >> 28)
-           <= 4
-        ||    (((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) & UINT32_C(0x7c00)/*VMIDSIZE*/)) >> 10)
-           <= 0)
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,12,7)) >> 28) & UINT32_C(0xf)/*NUMVMIDC*/) <= 4
+        || ((iemCImplHlpGetIdSysReg(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(2,1,0,10,7)) >> 10) & UINT32_C(0x1f)/*VMIDSIZE*/) <= 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
@@ -44508,7 +44486,7 @@ static VBOXSTRICTRC iemCImplA64_msr_ZCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint3
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -44519,7 +44497,7 @@ static VBOXSTRICTRC iemCImplA64_msr_ZCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint3
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 2);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x1e0, uValue);
@@ -44531,7 +44509,7 @@ static VBOXSTRICTRC iemCImplA64_msr_ZCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint3
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSve(pVCpu, 2);
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,0), "ZCR_EL2", uValue, uInstrEssence);
@@ -44781,7 +44759,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SMCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -44792,7 +44770,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SMCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x1f0, uValue);
@@ -44804,7 +44782,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SMCR_EL1(PVMCPU pVCpu, uint64_t uValue, uint
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,6), "SMCR_EL2", uValue, uInstrEssence);
@@ -49600,18 +49578,14 @@ static VBOXSTRICTRC iemCImplA64_msr_SP_EL0(PVMCPU pVCpu, uint64_t uValue) RT_NOE
 
 /**
  * SPSel - OrderedDict({'op0': '11', 'op1': '000', 'CRn': '0100', 'CRm': '0010', 'op2': '000'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_SPSel(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.SP = (uValue)<0>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffffffffffe)) | (uValue & 1);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (PSTATE.EL == EL0)
     //     Undefined()
@@ -49626,21 +49600,17 @@ static VBOXSTRICTRC iemCImplA64_msr_SPSel(PVMCPU pVCpu, uint64_t uValue) RT_NOEX
 
 /**
  * PAN - OrderedDict({'op0': '11', 'op1': '000', 'CRn': '0100', 'CRm': '0010', 'op2': '011'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_PAN(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fPan)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.PAN = (uValue)<0x16>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffffffbfffff)) | (uValue & 0x400000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_PAN))
     //     Undefined()
@@ -49657,21 +49627,17 @@ static VBOXSTRICTRC iemCImplA64_msr_PAN(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCE
 
 /**
  * UAO - OrderedDict({'op0': '11', 'op1': '000', 'CRn': '0100', 'CRm': '0010', 'op2': '100'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_UAO(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fUao)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.UAO = (uValue)<0x17>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffffff7fffff)) | (uValue & 0x800000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_UAO))
     //     Undefined()
@@ -49688,24 +49654,20 @@ static VBOXSTRICTRC iemCImplA64_msr_UAO(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCE
 
 /**
  * ALLINT - OrderedDict({'op0': '11', 'op1': '000', 'CRn': '0100', 'CRm': '0011', 'op2': '000'})
- * Transformation status: 8 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_ALLINT(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fNmi)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
-        PSTATE.ALLINT = (uValue)<0xd>;
+        pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffffffffdfff)) | (uValue & 0x2000);
     else
-        PSTATE.ALLINT = (uValue)<0xd>;
+        pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffffffffdfff)) | (uValue & 0x2000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_NMI))
     //     Undefined()
@@ -49725,21 +49687,17 @@ static VBOXSTRICTRC iemCImplA64_msr_ALLINT(PVMCPU pVCpu, uint64_t uValue) RT_NOE
 
 /**
  * PM - OrderedDict({'op0': '11', 'op1': '000', 'CRn': '0100', 'CRm': '0011', 'op2': '001'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_PM(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fEbep)
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.PM = (uValue)<0x20>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffeffffffff)) | (uValue & UINT64_C(0x100000000));
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_EBEP))
     //     Undefined()
@@ -50946,7 +50904,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMBLIMITR_EL1(PVMCPU pVCpu, uint64_t uValue,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x800, uValue);
@@ -51023,7 +50981,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMBPTR_EL1(PVMCPU pVCpu, uint64_t uValue, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x810, uValue);
@@ -51098,7 +51056,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMBSR_EL1(PVMCPU pVCpu, uint64_t uValue, uin
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if ((iemGetEffHcrEl2NVx(pVCpu, pGstFeats) & 5) == 5)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x820, uValue);
@@ -51271,7 +51229,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMBMAR_EL1(PVMCPU pVCpu, uint64_t uValue, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000)/*E2PB*/)) >> 12) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 12) & UINT32_C(0x3)/*E2PB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,10,5), "PMBMAR_EL1", uValue, uInstrEssence);
     }
@@ -51353,7 +51311,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBLIMITR_EL1(PVMCPU pVCpu, uint64_t uValue,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu,
                                      ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,0),
@@ -51433,7 +51391,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBPTR_EL1(PVMCPU pVCpu, uint64_t uValue, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,1), "TRBPTR_EL1", uValue, uInstrEssence);
     }
@@ -51509,7 +51467,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBBASER_EL1(PVMCPU pVCpu, uint64_t uValue, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu,
                                      ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,2),
@@ -51591,7 +51549,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBSR_EL1(PVMCPU pVCpu, uint64_t uValue, uin
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         if (iemGetEffHcrEl2NVx(pVCpu, pGstFeats) == 7 && EffectiveTRFCR_EL2_EE() != 0 && AArch64.TRFCR_EL1.EE != 0)
             return iemCImplHlpNVMemWriteU64(pVCpu, 0x860, uValue);
@@ -51680,7 +51638,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBMAR_EL1(PVMCPU pVCpu, uint64_t uValue, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,4), "TRBMAR_EL1", uValue, uInstrEssence);
     }
@@ -51756,7 +51714,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBMPAM_EL1(PVMCPU pVCpu, uint64_t uValue, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu,
                                      ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,5),
@@ -51849,7 +51807,7 @@ static VBOXSTRICTRC iemCImplA64_msr_TRBTRG_EL1(PVMCPU pVCpu, uint64_t uValue, ui
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (pGstFeats->fEl2 && ((((pVCpu->cpum.GstCtx.MdcrEl2.u64 & UINT32_C(0x3000000)/*E2TB*/)) >> 24) & 1) == 0)
+        if (pGstFeats->fEl2 && (((pVCpu->cpum.GstCtx.MdcrEl2.u64 >> 24) & UINT32_C(0x3)/*E2TB*/) & 1) == 0)
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,9,11,6), "TRBTRG_EL1", uValue, uInstrEssence);
     }
@@ -53463,7 +53421,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMCCFILTR_EL0(PVMCPU pVCpu, uint64_t uValue,
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -54309,16 +54267,12 @@ static VBOXSTRICTRC iemCImplA64_msr_GCSPR_EL0(PVMCPU pVCpu, uint64_t uValue, uin
 
 /**
  * NZCV - OrderedDict({'op0': '11', 'op1': '011', 'CRn': '0100', 'CRm': '0010', 'op2': '000'})
- * Transformation status: 2 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_NZCV(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
-    ((pVCpu->cpum.GstCtx.fPState & UINT64_C(0xf0000000)/*N,Z,C,V*/) >> 28) = (uValue)<[0x1f:0x1c]>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffff0fffffff)) | (uValue & UINT32_C(0xf0000000));
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (PSTATE.EL == EL0)
     //     (PSTATE.N):(PSTATE.Z):(PSTATE.C):(PSTATE.V) = (X<t,0x40>)<[0x1f:0x1c]>;
@@ -54333,12 +54287,10 @@ static VBOXSTRICTRC iemCImplA64_msr_NZCV(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
 
 /**
  * DAIF - OrderedDict({'op0': '11', 'op1': '011', 'CRn': '0100', 'CRm': '0010', 'op2': '001'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_DAIF(PVMCPU pVCpu, uint64_t uValue, uint32_t uInstrEssence) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue, uInstrEssence);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
@@ -54352,13 +54304,11 @@ static VBOXSTRICTRC iemCImplA64_msr_DAIF(PVMCPU pVCpu, uint64_t uValue, uint32_t
                 return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
             return iemRaiseSystemAccessTrap(pVCpu, 1, uInstrEssence);
         }
-        ((pVCpu->cpum.GstCtx.fPState & UINT64_C(0x3c0)/*D,A,I,F*/) >> 6) = (uValue)<[9:6]>;
+        pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffffffffc3f)) | (uValue & 0x3c0);
     }
     else
-        ((pVCpu->cpum.GstCtx.fPState & UINT64_C(0x3c0)/*D,A,I,F*/) >> 6) = (uValue)<[9:6]>;
+        pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffffffffc3f)) | (uValue & 0x3c0);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (PSTATE.EL == EL0)
     //     if (ELIsInHost(EL0) || AArch64.SCTLR_EL1.UMA == '0')
@@ -54392,7 +54342,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapSme(pVCpu, 2);
@@ -54402,12 +54352,12 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) != 3)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54419,7 +54369,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
     }
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54430,7 +54380,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,2,2), "SVCR", uValue, uInstrEssence);
     }
@@ -54440,7 +54390,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,2,2), "SVCR", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -54507,19 +54457,15 @@ static VBOXSTRICTRC iemCImplA64_msr_SVCR(PVMCPU pVCpu, uint64_t uValue, uint32_t
 
 /**
  * DIT - OrderedDict({'op0': '11', 'op1': '011', 'CRn': '0100', 'CRm': '0010', 'op2': '101'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_DIT(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fDit)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.DIT = (uValue)<0x18>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffffeffffff)) | (uValue & 0x1000000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_DIT))
     //     Undefined()
@@ -54536,19 +54482,15 @@ static VBOXSTRICTRC iemCImplA64_msr_DIT(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCE
 
 /**
  * SSBS - OrderedDict({'op0': '11', 'op1': '011', 'CRn': '0100', 'CRm': '0010', 'op2': '110'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_SSBS(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fSsbs2)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.SSBS = (uValue)<0xc>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xffffffffffffefff)) | (uValue & 0x1000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_SSBS2))
     //     Undefined()
@@ -54565,19 +54507,15 @@ static VBOXSTRICTRC iemCImplA64_msr_SSBS(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
 
 /**
  * TCO - OrderedDict({'op0': '11', 'op1': '011', 'CRn': '0100', 'CRm': '0010', 'op2': '111'})
- * Transformation status: 4 - incomplete
+ * Transformation status: 0 - complete
  */
 static VBOXSTRICTRC iemCImplA64_msr_TCO(PVMCPU pVCpu, uint64_t uValue) RT_NOEXCEPT
 {
-    RT_NOREF(pVCpu, uValue);
-#ifdef IEM_SYSREG_TODO
     const CPUMFEATURESARMV8 * const pGstFeats = IEM_GET_GUEST_CPU_FEATURES(pVCpu);
     if (!pGstFeats->fMte)
         return iemRaiseUndefined(pVCpu);
-    PSTATE.TCO = (uValue)<0x19>;
+    pVCpu->cpum.GstCtx.fPState = (pVCpu->cpum.GstCtx.fPState & UINT64_C(0xfffffffffdffffff)) | (uValue & 0x2000000);
     return iemRegPcA64IncAndFinishingClearingFlags(pVCpu, VINF_SUCCESS);
-#endif
-    return VERR_IEM_ASPECT_NOT_IMPLEMENTED;
     /* -------- Original code specification: -------- */
     // if (!IsFeatureImplemented(FEAT_MTE))
     //     Undefined()
@@ -54605,7 +54543,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPCR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -54615,12 +54553,12 @@ static VBOXSTRICTRC iemCImplA64_msr_FPCR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54632,7 +54570,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPCR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54643,7 +54581,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPCR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         pVCpu->cpum.GstCtx.fpcr = uValue;
     }
@@ -54657,7 +54595,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPCR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         pVCpu->cpum.GstCtx.fpcr = uValue;
     }
@@ -54735,7 +54673,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPSR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -54745,12 +54683,12 @@ static VBOXSTRICTRC iemCImplA64_msr_FPSR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54762,7 +54700,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPSR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 1)
     {
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54773,7 +54711,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPSR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         pVCpu->cpum.GstCtx.fpsr = uValue;
     }
@@ -54787,7 +54725,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPSR(PVMCPU pVCpu, uint64_t uValue) RT_NOEXC
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         pVCpu->cpum.GstCtx.fpsr = uValue;
     }
@@ -54889,7 +54827,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPMR(PVMCPU pVCpu, uint64_t uValue, uint32_t
                 || !pGstFeats->fEl2
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
-            && (((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
                 return iemRaiseSystemAccessTrapUnknown(pVCpu, 2);
@@ -54899,12 +54837,12 @@ static VBOXSTRICTRC iemCImplA64_msr_FPMR(PVMCPU pVCpu, uint64_t uValue, uint32_t
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
             && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)
-            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) != 3)
+            && ((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) != 3)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54922,7 +54860,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPMR(PVMCPU pVCpu, uint64_t uValue, uint32_t
                 || (pGstFeats->fE2H0 && !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
                 || !(pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
-        if (((((pVCpu->cpum.GstCtx.Cpacr.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.Cpacr.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 1);
         if (   pGstFeats->fEl2
             && (   !pGstFeats->fVhe
@@ -54933,7 +54871,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPMR(PVMCPU pVCpu, uint64_t uValue, uint32_t
         if (   pGstFeats->fVhe
             && pGstFeats->fEl2
             && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-            && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+            && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,4,2), "FPMR", uValue, uInstrEssence);
     }
@@ -54943,7 +54881,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPMR(PVMCPU pVCpu, uint64_t uValue, uint32_t
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,3,4,4,2), "FPMR", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -55083,7 +55021,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMCR_EL0(PVMCPU pVCpu, uint64_t uValue, uint
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             || (pGstFeats->fPmuV3p9 && (iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55178,7 +55116,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMCNTENSET_EL0(PVMCPU pVCpu, uint64_t uValue
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55273,7 +55211,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMCNTENCLR_EL0(PVMCPU pVCpu, uint64_t uValue
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55368,7 +55306,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMOVSCLR_EL0(PVMCPU pVCpu, uint64_t uValue, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55649,7 +55587,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMCCNTR_EL0(PVMCPU pVCpu, uint64_t uValue, u
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55761,7 +55699,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMXEVTYPER_EL0(PVMCPU pVCpu, uint64_t uValue
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -55943,7 +55881,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMXEVCNTR_EL0(PVMCPU pVCpu, uint64_t uValue,
     }
     else if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -56076,7 +56014,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMZR_EL0(PVMCPU pVCpu, uint64_t uValue, uint
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -56224,7 +56162,7 @@ static VBOXSTRICTRC iemCImplA64_msr_PMOVSSET_EL0(PVMCPU pVCpu, uint64_t uValue, 
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(0)/*EN*/)
+        if (   !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & UINT32_C(1)/*EN*/)
             && (!pGstFeats->fPmuV3p9 || !(iemCImplHlpGetPmUserEnrEl0(pVCpu) & RT_BIT_32(4)/*UEN*/)))
         {
             if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
@@ -57116,7 +57054,7 @@ static VBOXSTRICTRC iemCImplA64_msr_ZCR_EL2(PVMCPU pVCpu, uint64_t uValue, uint3
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSve(pVCpu, 2);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,0), "ZCR_EL2", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -57357,7 +57295,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SMCR_EL2(PVMCPU pVCpu, uint64_t uValue, uint
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapSme(pVCpu, 2);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,1,2,6), "SMCR_EL2", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -61327,7 +61265,7 @@ static VBOXSTRICTRC iemCImplA64_msr_FPEXC32_EL2(PVMCPU pVCpu, uint64_t uValue, u
     if (   pGstFeats->fVhe
         && pGstFeats->fEl2
         && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/))
-        && ((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x300000)/*FPEN*/)) >> 20) & 1) == 0)
+        && (((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 20) & UINT32_C(0x3)/*FPEN*/) & 1) == 0)
         return iemRaiseSystemAccessTrapAdvSimdFpAccessA64(pVCpu, 2);
     return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,4,5,3,0), "FPEXC32_EL2", uValue, uInstrEssence);
     /* -------- Original code specification: -------- */
@@ -61923,7 +61861,7 @@ static VBOXSTRICTRC iemCImplA64_msr_ZCR_EL12(PVMCPU pVCpu, uint64_t uValue, uint
     }
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
     {
-        if (((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x30000)/*ZEN*/)) >> 16) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 16) & UINT32_C(0x3)/*ZEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSve(pVCpu, 2);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,1,2,0), "ZCR_EL1", uValue, uInstrEssence);
     }
@@ -62101,7 +62039,7 @@ static VBOXSTRICTRC iemCImplA64_msr_SMCR_EL12(PVMCPU pVCpu, uint64_t uValue, uin
     }
     if (pGstFeats->fVhe && pGstFeats->fEl2 && (!pGstFeats->fE2H0 || (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_64(34)/*E2H*/)))
     {
-        if (((((pVCpu->cpum.GstCtx.CptrEl2.u64 & UINT32_C(0x3000000)/*SMEN*/)) >> 24) & 1) == 0)
+        if ((((pVCpu->cpum.GstCtx.CptrEl2.u64 >> 24) & UINT32_C(0x3)/*SMEN*/) & 1) == 0)
             return iemRaiseSystemAccessTrapSme(pVCpu, 2);
         return iemCImplA64_msr_novar(pVCpu, ARMV8_AARCH64_SYSREG_ID_CREATE(3,0,1,2,6), "SMCR_EL1", uValue, uInstrEssence);
     }
@@ -81494,7 +81432,7 @@ static VBOXSTRICTRC iemCImplA64_sys_GCSPUSHM(PVMCPU pVCpu, uint64_t uValue, uint
         return iemRaiseUndefined(pVCpu);
     if (IEM_F_MODE_ARM_GET_EL(pVCpu->iem.s.fExec) == 0)
     {
-        if (!pGstFeats->fEl2 || (((pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/)) >> 27) != 1)
+        if (!pGstFeats->fEl2 || ((pVCpu->cpum.GstCtx.HcrEl2.u64 >> 27) & UINT32_C(1)/*TGE*/) != 1)
             return iemRaiseSystemAccessTrap(pVCpu, 1, uInstrEssence);
         if (pGstFeats->fEl2 && (pVCpu->cpum.GstCtx.HcrEl2.u64 & RT_BIT_32(27)/*TGE*/))
             return iemRaiseSystemAccessTrap(pVCpu, 2, uInstrEssence);
