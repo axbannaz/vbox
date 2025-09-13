@@ -983,18 +983,21 @@ class ArmAstBinaryOp(ArmAstBase):
         return -1;
 
     @staticmethod
+    def listToTree(aoConditions, sOp):
+        """ Creates AST tree from 'aoConditions' with 'sOp' as operator. """
+        if len(aoConditions) <= 1:
+            return aoConditions[0].clone();
+        return ArmAstBinaryOp(aoConditions[0].clone(), sOp, ArmAstBinaryOp.listToTree(aoConditions[1:], sOp));
+
+    @staticmethod
     def andListToTree(aoAndConditions):
         """ Creates AST tree of AND binary checks from aoAndConditions. """
-        if len(aoAndConditions) <= 1:
-            return aoAndConditions[0].clone();
-        return ArmAstBinaryOp(aoAndConditions[0].clone(), '&&', ArmAstBinaryOp.andListToTree(aoAndConditions[1:]));
+        return ArmAstBinaryOp.listToTree(aoAndConditions, '&&');
 
     @staticmethod
     def orListToTree(aoOrConditions):
         """ Creates AST tree of OR binary checks from aoAndConditions. """
-        if len(aoOrConditions) <= 1:
-            return aoOrConditions[0].clone();
-        return ArmAstBinaryOp(aoOrConditions[0].clone(), '||', ArmAstBinaryOp.orListToTree(aoOrConditions[1:]));
+        return ArmAstBinaryOp.listToTree(aoOrConditions, '||');
 
 
 class ArmAstUnaryOp(ArmAstBase):

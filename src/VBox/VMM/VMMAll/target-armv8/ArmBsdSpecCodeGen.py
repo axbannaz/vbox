@@ -1386,7 +1386,7 @@ class VBoxAstCppField(ArmAstCppExpr):
 
         if cBitsWidth == 1:
             if iFirstBit == 0:
-                return VBoxAstCppField('(%s & UINT32_C(1))' % (oAccessExprOrInt,), 1);
+                return VBoxAstCppField('(%s & UINT32_C(1)/*%s*/)' % (oAccessExprOrInt, sName,), 1);
             sExpr        = '((%s >> %2d) & UINT32_C(1)/*%s*/)' % (oAccessExprOrInt, iFirstBit, sName,);
             sNoShiftExpr = '(%s & RT_BIT_%u(%d)/*%s*/)' % (oAccessExprOrInt, 64 if iFirstBit >= 32 else 32, iFirstBit, sName,);
         else:
@@ -1420,6 +1420,17 @@ class VBoxAstCppCast(ArmAstBase, ArmAstCppExprBase):
                 if self.fSigned == oOther.fSigned:
                     return self.oExpr.isSame(oOther.oExpr);
         return False;
+
+    def walk(self, fnCallback, oCallbackArg = None, fDepthFirst = True):
+        return self._walker(fnCallback, oCallbackArg, fDepthFirst, self.oExpr);
+
+    def transform(self, fnCallback, fEliminationAllowed, oCallbackArg, aoStack):
+        oRet  = None;
+        oExpr = self.oExpr.transform(fnCallback, fEliminationAllowed, oCallbackArg, aoStack);
+        if oExpr:
+            self.oExpr = oExpr;
+            oRet = fnCallback(self, fEliminationAllowed, oCallbackArg, aoStack);
+        return oRet;
 
     def toStringEx(self, sLang = None, cchMaxWidth = 120):
         sRet  = '(%sint%u_t)' % ('' if self.fSigned else 'u', self.cTargetBits,);
@@ -1689,7 +1700,7 @@ class SysRegGeneratorBase(object):
     def getRegStateName(self):
         return 'AArch64' if self.isA64Instruction() else 'AArch32';
 
-    def warn(self, sMsg, oRetValue):
+    def warn(self, sMsg, oRetValue = None):
         if sMsg not in self.dWarnings:
             self.dWarnings[sMsg]  = 1;
             #print('warning: %s' % (sMsg,)); # delay
@@ -2928,6 +2939,123 @@ class SysRegGeneratorBase(object):
         return self.warn('Assignment %s Identifier: Unable to map %s.%s to anything'
                          % ('from' if fRead else 'to', sState, sRegName,), (None, None));
 
+    class AssignField(object):
+        def __init__(self, iFirstBit, cBits, iSrcBit):
+            self.iDstBit   = iFirstBit;
+            self.cBits     = cBits;
+            self.iSrcBit   = iSrcBit;
+
+        def nextBit(self):
+            return self.iDstBit + self.cBits;
+
+    koReIdentifier = re.compile(r'^[a-zA-Z_][a-zA-Z0-9_]*$');
+
+    def transformCodePass2_AssignToFieldsCommon(self, sDstVar, aoFields, oSrcVal):
+        """ Worker for transformCodePass2_AssignToConcat and transformCodePass2_AssignToDotAtom. """
+        #
+        # Process the fields. a little.
+        #
+        cTotalBits = 0;
+        fDstMask   = 0;
+        for oField in aoFields:
+            cTotalBits += oField.cBits;
+            fDstMask   |= ((1 << oField.cBits) - 1) << oField.iDstBit;
+        fDstMask = ~fDstMask & 0xffffffffffffffff;
+        assert 0 < fDstMask <= 0xffffffffffffffff;
+
+        #
+        # Check out the value, in case we've got some SquareOp + Slice fun we
+        # can use to simplify the translation.
+        #
+        if isinstance(oSrcVal, ArmAstSquareOp) and len(oSrcVal.aoValues) == 1:
+            if isinstance(oSrcVal.aoValues[0], ArmAstSlice):
+                oSlice = oSrcVal.aoValues[0];
+                iFrom  = oSlice.oFrom.getIntegerValue();
+                iTo    = oSlice.oTo.getIntegerValue();
+                if iFrom is not None and iTo is not None and 0 <= iTo < iFrom < 64 and iFrom - iTo + 1 == cTotalBits:
+                    for oField in aoFields:
+                        oField.iSrcBit += iTo;
+                    oSrcVal = oSrcVal.oVar;
+                else:
+                    self.warn('Bad oSlice=%s; iFrom=%s iTo=%s cTotalBits=%s' % (oSlice, iFrom, iTo, cTotalBits,));
+            else:
+                iTo = oSrcVal.aoValues[0].getIntegerValue();
+                if iTo is not None and 0 <= iTo <= 64 and cTotalBits == 1:
+                    assert len(aoFields) == 1
+                    aoFields[0].iSrcBit += iTo;
+                    oSrcVal = oSrcVal.oVar;
+                else:
+                    self.warn('Odd squareop=%s; iTo=%s cTotalBits=%s' % (oSrcVal.aoValues[0], iTo, cTotalBits,));
+
+        #
+        # Simple approach.
+        #
+        fSingleStmt = (    isinstance(oSrcVal, ArmAstCppExpr)
+                       and oSrcVal.cBitsWidth == 64
+                       and self.koReIdentifier.match(oSrcVal.sExpr));
+        sValName    = 'uTmpVal' if not fSingleStmt else oSrcVal.sExpr;
+
+        aoOrList = [];
+        for oField in aoFields:
+            oExtract = ArmAstBinaryOp(ArmAstCppExpr(sValName),
+                                      'AND', ArmAstInteger(((1 << oField.cBits) - 1) << oField.iSrcBit, 64));
+            if oField.iDstBit != oField.iSrcBit:
+                oExtract = ArmAstBinaryOp(oExtract, '<<' if oField.iDstBit > oField.iSrcBit else '>>',
+                                          ArmAstInteger(abs(oField.iDstBit - oField.iSrcBit), 32));
+            aoOrList.append(oExtract);
+        oAssignStmt = ArmAstAssignment(ArmAstCppExpr(sDstVar),
+                                       ArmAstBinaryOp(ArmAstBinaryOp(ArmAstCppExpr(sDstVar), 'AND', ArmAstInteger(fDstMask)),
+                                                      'OR', ArmAstBinaryOp.listToTree(aoOrList, 'OR')));
+        if fSingleStmt:
+            return oAssignStmt;
+        return ArmAstStatementList([
+            ArmAstAssignment(ArmAstCppExpr('uint64_t const uTmpVal', 64), oSrcVal),
+            oAssignStmt,
+        ]);
+
+
+    def transformCodePass2_AssignToConcat(self, oNode):
+        """ Pass 2: Assignment to a concatenation of fields (e.g. MSR NZCV, x0). """
+        #
+        # Check out the concatenation first.
+        #
+        sDstVar  = 'pVCpu->cpum.GstCtx.fPState';
+        aoFields = [] # type: List[SysRegGeneratorBase.AssignField]
+        iSrcBit  = 0;
+        for oValue in reversed(oNode.oVar.aoValues):
+            if isinstance(oValue, ArmAstDotAtom) and len(oValue.aoValues) == 2:
+                sField = oValue.aoValues[1].getIdentifierName();
+                if sField and oValue.aoValues[0].isMatchingIdentifier('PSTATE'):
+                    (cBits, iFirstBit) = self.kdPstateFields[sField];
+                    if aoFields and aoFields[-1].nextBit() == iFirstBit:
+                        aoFields[-1].cBits += cBits;
+                    else:
+                        aoFields.append(SysRegGeneratorBase.AssignField(iFirstBit, cBits, iSrcBit));
+                    iSrcBit += cBits;
+                else:
+                    assert False;
+                    return oNode;
+            else:
+                assert False;
+                return oNode;
+        if not aoFields:
+            assert False;
+            return None;
+        return self.transformCodePass2_AssignToFieldsCommon(sDstVar, aoFields, oNode.oValue);
+
+
+    def transformCodePass2_AssignToDotAtom(self, oNode):
+        """ Pass 2: Assignment to a single field (e.g. MSR DIT, x0). """
+        oDotAtom = oNode.oVar;
+        if len(oDotAtom.aoValues) == 2:
+            if oDotAtom.aoValues[0].isMatchingIdentifier('PSTATE'):
+                sField = oDotAtom.aoValues[1].getIdentifierName();
+                if sField:
+                    (cBits, iFirstBit) = self.kdPstateFields[sField];
+                    return self.transformCodePass2_AssignToFieldsCommon('pVCpu->cpum.GstCtx.fPState',
+                                                                        [SysRegGeneratorBase.AssignField(iFirstBit, cBits, 0),],
+                                                                        oNode.oValue);
+        return oNode;
 
     def transformCodePass2_AssignFromIdentifier(self, oNode, oInfo): # pylint: disable=invalid-name
         """ Pass 2: Assignment with an system register identifier on the right side (MRS). """
@@ -3064,7 +3192,10 @@ class SysRegGeneratorBase(object):
                 if ArmAstBinaryOp.kdOps[oNode.sOp] == ArmAstBinaryOp.ksOpTypeLogical:
                     oNode.oRight = oNode.oRight.dropShift();
 
-        elif isinstance(oNode, ArmAstConcat):
+        elif (    isinstance(oNode, ArmAstConcat)
+              and (   not aoStack                                    # Not when on the left side of an assignment, please,
+                   or not isinstance(aoStack[-1], ArmAstAssignment)  # that'll require special handling.
+                   or oNode is not aoStack[-1].oVar)):
             return self.transformCodePass2_Concat(oNode);
 
         elif (    isinstance(oNode, ArmAstField)
@@ -3111,6 +3242,10 @@ class SysRegGeneratorBase(object):
                 if oNode.oValue.sName == 'Read_DBGDTR_EL0':
                     return self.transformCodePass2_Assign_Read_DBGDTR_EL0(oNode);
 
+            if isinstance(oNode.oVar, ArmAstConcat):  # MSR NZCV, x0
+                return self.transformCodePass2_AssignToConcat(oNode);
+            if isinstance(oNode.oVar, ArmAstDotAtom): # MSR DIT, x0
+                return self.transformCodePass2_AssignToDotAtom(oNode);
             if isinstance(oNode.oVar, ArmAstIdentifier):
                 return self.transformCodePass2_AssignToIdentifier(oNode, oInfo);
             if isinstance(oNode.oValue, ArmAstIdentifier):
