@@ -1562,21 +1562,23 @@ static void disArmV8A64InsnAliasesProcess(PDISSTATE pDis)
     {
         case OP_ARMV8_A64_ORR:
         {
-            /* Check for possible MOV conversion for the register variant when: shift is None and the first source is the zero register. */
-            Assert(pDis->aParams[1].armv8.enmType == kDisArmv8OpParmReg);
-            Assert(   pDis->aParams[1].armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_32Bit
-                   || pDis->aParams[1].armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_64Bit);
-
-            if (   pDis->aParams[2].armv8.enmType == kDisArmv8OpParmReg
-                && pDis->aParams[2].armv8.enmExtend == kDisArmv8OpParmExtendNone
-                && pDis->aParams[1].armv8.Op.Reg.idReg == ARMV8_A64_REG_XZR)
+            if (   pDis->aParams[1].armv8.enmType == kDisArmv8OpParmReg
+                && (   pDis->aParams[1].armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_32Bit
+                    || pDis->aParams[1].armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_64Bit))
             {
-                DIS_ARMV8_ALIAS_CREATE(Mov, "mov", OP_ARMV8_A64_MOV, DISOPTYPE_HARMLESS);
-                pDis->pCurInstr  = DIS_ARMV8_ALIAS_REF(Mov);
-                pDis->aParams[1] = pDis->aParams[2];
-                pDis->aParams[2].armv8.enmType = kDisArmv8OpParmNone;
+                /* Check for possible MOV conversion for the register variant when:
+                        shift is None and the first source is the zero register. */
+                if (   pDis->aParams[2].armv8.enmType == kDisArmv8OpParmReg
+                    && pDis->aParams[2].armv8.enmExtend == kDisArmv8OpParmExtendNone
+                    && pDis->aParams[1].armv8.Op.Reg.idReg == ARMV8_A64_REG_XZR)
+                {
+                    DIS_ARMV8_ALIAS_CREATE(Mov, "mov", OP_ARMV8_A64_MOV, DISOPTYPE_HARMLESS);
+                    pDis->pCurInstr  = DIS_ARMV8_ALIAS_REF(Mov);
+                    pDis->aParams[1] = pDis->aParams[2];
+                    pDis->aParams[2].armv8.enmType = kDisArmv8OpParmNone;
+                }
+                /** @todo Immediate variant. */
             }
-            /** @todo Immediate variant. */
             break;
         }
         case OP_ARMV8_A64_SUBS:
