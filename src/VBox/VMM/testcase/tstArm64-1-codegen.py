@@ -1161,6 +1161,36 @@ def calcCondSelNeg(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
     return calcCondSel(cBits, uSrc1, -uSrc2, u4Nzcv, u4Cond);
 
 
+#
+# Branches.
+#
+
+class A64No1CodeGenTestBranch(A64No1CodeGenBase):
+    """ C4.1.93.16 Test and branch (immediate) """
+    def __init__(self, sInstr, fJumpIfSet):
+        A64No1CodeGenBase.__init__(self, sInstr, sInstr, Arm64GprAllocator());
+        self.fJumpIfSet = fJumpIfSet;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for _ in range(oOptions.cTestsPerInstruction):
+            (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+            iBitNo              = randUBits(6);
+            sJmpLabel           = self.localLabel();
+            self.emitInstr(self.sInstr, '%s, #%u, %s' % (g_dGpr64NamesZr[iRegIn], iBitNo, sJmpLabel,));
+            if (((uSrc >> iBitNo) & 1) != 0) == self.fJumpIfSet:
+                self.emitBrk();
+                self.emitLabel(sJmpLabel);
+            else:
+                sJmpLabel2      = self.localLabel();
+                self.emitInstr('b', sJmpLabel2);
+                self.emitLabel(sJmpLabel);
+                self.emitBrk();
+                self.emitLabel(sJmpLabel2);
+
+            self.oGprAllocator.free(iRegIn);
+            cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+
 
 #
 # Load generators.
@@ -2332,6 +2362,13 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         #
         aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # testbranch
+            aoGenerators += [
+                A64No1CodeGenTestBranch( 'tbz',     fJumpIfSet = False),
+                A64No1CodeGenTestBranch( 'tbnz',    fJumpIfSet = True),
+            ];
 
         if True: # pylint: disable=using-constant-test
             # condcmp_reg & condcmp_imm

@@ -25505,8 +25505,25 @@
  */
 
 /* TBZ  <R><t>, #<imm>, <label> (7f000000/36000000) */
-//#define IEM_INSTR_IMPL_A64__TBZ_only_testbranch(Rt, imm14, b40, b5)
+#define IEM_INSTR_IMPL_A64__TBZ_only_testbranch(Rt, imm14, b40, b5) \
+    uint32_t const iBitNo = b40 | (b5 << 5); \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+    IEM_MC_IF_GREG_BIT_SET(Rt, iBitNo) { \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_REL_JMP_S32_AND_FINISH(IEM_SIGN_EXTEND_TO_U64(imm14, 14, 2)); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_END()
 
 
 /* TBNZ  <R><t>, #<imm>, <label> (7f000000/37000000) */
-//#define IEM_INSTR_IMPL_A64__TBNZ_only_testbranch(Rt, imm14, b40, b5)
+#define IEM_INSTR_IMPL_A64__TBNZ_only_testbranch(Rt, imm14, b40, b5) \
+    uint32_t const iBitNo = b40 | (b5 << 5); \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+    IEM_MC_IF_GREG_BIT_SET(Rt, iBitNo) { \
+        IEM_MC_REL_JMP_S32_AND_FINISH(IEM_SIGN_EXTEND_TO_U64(imm14, 14, 2)); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_END()
+
