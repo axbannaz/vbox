@@ -1038,6 +1038,45 @@ def calcCond(u4Nzcv, u4Cond):
     return fResult;
 
 
+class A64No1CodeGenCondCmpReg(A64No1CodeGenBase):
+    """ C4.1.94.10 Conditional Compare (register) - CCMN, CCMP """
+    def __init__(self, sInstr, fnCalc):
+        A64No1CodeGenBase.__init__(self, sInstr + '_reg', sInstr, Arm64GprAllocator());
+        self.fnCalc = fnCalc; # calcSub/calcAdd
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in (64, 32):
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                u4Cond              = randUBits(4);
+                u4NzcvMiss          = randUBits(4);
+                u4NzcvIn            = randUBits(4);
+                if u4Cond < 14:
+                    fDoCmp          = randBool();
+                    while fDoCmp != calcCond(u4NzcvIn, u4Cond):
+                        u4NzcvIn    = randUBits(4);
+
+                if calcCond(u4NzcvIn, u4Cond):
+                    fExpectedNzcv   = self.fnCalc(cBits, uSrc1, uSrc2, 0)[1];
+                    while fExpectedNzcv == u4NzcvMiss << 28:
+                        u4NzcvMiss  = randUBits(4);
+                else:
+                    fExpectedNzcv   = u4NzcvMiss << 28;
+
+                # Load flags and execute the instruction.
+                self.emitLoadNzcv(u4NzcvIn);
+                self.emitInstr(self.sInstr, '%s, %s, #%u, %s'
+                               % (g_ddGprNamesZrByBits[cBits][iRegIn1], g_ddGprNamesZrByBits[cBits][iRegIn2],
+                                  u4NzcvMiss, g_kdCondNames[u4Cond],));
+
+                # Check the resulting flags.
+                self.emitFlagsCheck(fExpectedNzcv);
+
+                self.oGprAllocator.freeList((iRegIn1, iRegIn2,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+
 class A64No1CodeGenCondCmpImm(A64No1CodeGenBase):
     """ C4.1.94.11 Conditional Compare (immediate) - CCMN, CCMP """
     def __init__(self, sInstr, fnCalc):
@@ -2295,8 +2334,10 @@ class Arm64No1CodeGen(object):
         aoGenerators = [];
 
         if True: # pylint: disable=using-constant-test
-            # asimdimm
+            # condcmp_reg & condcmp_imm
             aoGenerators += [
+                A64No1CodeGenCondCmpReg( 'ccmn',    calcAdd),
+                A64No1CodeGenCondCmpReg( 'ccmp',    calcSub),
                 A64No1CodeGenCondCmpImm( 'ccmn',    calcAdd),
                 A64No1CodeGenCondCmpImm( 'ccmp',    calcSub),
             ];

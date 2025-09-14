@@ -5274,19 +5274,63 @@
  */
 
 /* CCMN  <Wn>, <Wm>, #<nzcv>, <cond> (ffe00c10/3a400000) */
-//#define IEM_INSTR_IMPL_A64__CCMN_32_condcmp_reg(nzcv, Rn, cond, Rm)
+#define IEM_INSTR_IMPL_A64__CCMN_32_condcmp_reg(nzcv, Rn, cond, Rm) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_32_condcmp_reg, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_32_condcmp_reg() \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, uAddend); \
+    IEM_MC_FETCH_GREG_U32(uAddend, Rm); \
+    IEM_MC_A64_ADDS_U32(uTmp, uTmp, uAddend, 0)
 
 
 /* CCMP  <Wn>, <Wm>, #<nzcv>, <cond> (ffe00c10/7a400000) */
-//#define IEM_INSTR_IMPL_A64__CCMP_32_condcmp_reg(nzcv, Rn, cond, Rm)
+#define IEM_INSTR_IMPL_A64__CCMP_32_condcmp_reg(nzcv, Rn, cond, Rm) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_32_condcmp_reg, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_32_condcmp_reg() \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, uSubtrahend); \
+    IEM_MC_FETCH_GREG_U32(uSubtrahend, Rm); \
+    IEM_MC_A64_SUBS_U32(uTmp, uTmp, uSubtrahend, 1)
 
 
 /* CCMN  <Xn>, <Xm>, #<nzcv>, <cond> (ffe00c10/ba400000) */
-//#define IEM_INSTR_IMPL_A64__CCMN_64_condcmp_reg(nzcv, Rn, cond, Rm)
+#define IEM_INSTR_IMPL_A64__CCMN_64_condcmp_reg(nzcv, Rn, cond, Rm) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_64_condcmp_reg, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_64_condcmp_reg() \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uAddend); \
+    IEM_MC_FETCH_GREG_U64(uAddend, Rm); \
+    IEM_MC_A64_ADDS_U64(uTmp, uTmp, uAddend, 0)
 
 
 /* CCMP  <Xn>, <Xm>, #<nzcv>, <cond> (ffe00c10/fa400000) */
-//#define IEM_INSTR_IMPL_A64__CCMP_64_condcmp_reg(nzcv, Rn, cond, Rm)
+#define IEM_INSTR_IMPL_A64__CCMP_64_condcmp_reg(nzcv, Rn, cond, Rm) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_64_condcmp_reg, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_64_condcmp_reg() \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uSubtrahend); \
+    IEM_MC_FETCH_GREG_U64(uSubtrahend, Rm); \
+    IEM_MC_A64_SUBS_U64(uTmp, uTmp, uSubtrahend, 1)
 
 
 
