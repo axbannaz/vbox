@@ -314,7 +314,7 @@
     IEM_MC_FETCH_GREG_SP_U32(uTmp, Rn); \
     IEM_MC_LOCAL_CONST(uint32_t, uAddend2, !sh ? imm12 : imm12 << 12); \
     IEM_MC_A64_ADDS_U32(uTmp, uTmp, uAddend2, 0); \
-    IEM_MC_STORE_GREG_SP_U32(Rd, uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 
@@ -361,7 +361,7 @@
     IEM_MC_FETCH_GREG_SP_U64(uTmp, Rn); \
     IEM_MC_LOCAL_CONST(uint64_t, uAddend2, !sh ? imm12 : imm12 << 12); \
     IEM_MC_A64_ADDS_U64(uTmp, uTmp, uAddend2, 0); \
-    IEM_MC_STORE_GREG_SP_U64(Rd, uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 

@@ -125,20 +125,12 @@ def randURange(uFirst, uEnd): # uEnd is exclusive
 
 class Arm64RegAllocator(object):
     """ This is mainly for random register allocating. """
-    def __init__(self, oParent = None, cMax = 32, bmPreallocated = 0):
+    def __init__(self, cMax = 32, bmPreallocated = 0):
         self.cMax        = cMax;
         self.bmAllocated = bmPreallocated;
         self.auValues    = [None for _ in range(cMax)];
-        if oParent:
-            self.bmAllocated |= oParent.bmAllocated;
-            # Note! Value tracking in the parent will be broken ...
-            for i, uValue in enumerate(oParent.auValues):
-                if uValue is not None:
-                    if i < cMax:
-                        self.auValues[i] = uValue;
-                    oParent.auValues[i] = None;
 
-    def alloc(self, uValue = None, fIncludingReg31 = False):
+    def alloc(self, uValue = None, fIncludingReg31 = False, fReg31IsSp = False):
         """ Allocates a random register. """
         iReg      = randUx(self.cMax - 1);
         fRegMask  = 1 << iReg;
@@ -149,7 +141,8 @@ class Arm64RegAllocator(object):
             fRegMask = 1 << iReg;
 
         self.bmAllocated   |= fRegMask;
-        self.auValues[iReg] = uValue;
+        if iReg != 31 or fReg31IsSp:
+            self.auValues[iReg] = uValue;
         return iReg;
 
     def allocFixed(self, iReg, uValue = None):
@@ -185,9 +178,8 @@ class Arm64RegAllocator(object):
 class Arm64GprAllocator(Arm64RegAllocator):
     """ GPR allocator.  This excludes the SP/XZR register. """
 
-    def __init__(self, oParent = None, bmPreallocated = 0):
-        Arm64RegAllocator.__init__(self, oParent = oParent, cMax = 32, bmPreallocated = bmPreallocated);
-        #self.bmAllocated |= 1 << 31; # SP/XZR
+    def __init__(self, bmPreallocated = 0):
+        Arm64RegAllocator.__init__(self, cMax = 32, bmPreallocated = bmPreallocated);
         self.bmAllocated |= 1 << 18; # PR - platform register.
 
 g_dGpr64NamesZr = {
@@ -227,8 +219,8 @@ g_dddGprNamesBySpAndBits = {
 class Arm64FpRegAllocator(Arm64RegAllocator):
     """ FPU/SIMD allocator. """
 
-    def __init__(self, oParent = None):
-        Arm64RegAllocator.__init__(self, oParent = oParent, cMax = 32);
+    def __init__(self):
+        Arm64RegAllocator.__init__(self, cMax = 32);
 
     def alloc(self, uValue = None): # pylint: disable=arguments-differ
         return Arm64RegAllocator.alloc(self, uValue, fIncludingReg31 = True);
@@ -290,6 +282,11 @@ class A64No1CodeGenBase(object):
         self.emitInstr('adrp',  'x%u, PAGE(g_DataStart_%s)' % (self.iRegDataPtr, self.sLabel,));
         self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_DataStart_%s)' % (self.iRegDataPtr, self.iRegDataPtr, self.sLabel,));
         self.asCode.append('');
+
+        if self.fMayUseSp:
+            uSpFiller = randU64() & ~15; # load known value into SP.
+            self.oGprAllocator.free(self.emitGprLoad(self.oGprAllocator.allocFixed(31, uSpFiller), uSpFiller, fReg31IsSp = True));
+            self.asCode.append('');
 
         self.generateBody(oOptions, oOptions.cCheckAllRegsInterval);
 
@@ -373,7 +370,7 @@ class A64No1CodeGenBase(object):
             self.emitInstr('mov', 'sp, %s' % (g_dGpr64NamesZr[iRegToLoad],));
             self.oGprAllocator.free(iRegToLoad);
 
-        if not fTempValue:
+        if not fTempValue and (iReg != 31 or fReg31IsSp):
             self.oGprAllocator.updateValue(iReg, uValue);
         return iReg;
 
@@ -407,8 +404,8 @@ class A64No1CodeGenBase(object):
         iRegTmp  = self.oGprAllocator.alloc();
         cChecked = 0;
         for iReg, uValue in enumerate(self.oGprAllocator.auValues):
-            if uValue is not None and iReg != 31:
-                self.emitGprValCheck(iReg, uValue, iRegTmp = iRegTmp);
+            if uValue is not None:
+                self.emitGprValCheck(iReg, uValue, iRegTmp = iRegTmp, fReg31IsSp = True);
                 cChecked += 1;
         self.oGprAllocator.free(iRegTmp);
         self.asCode.append('        /* End all GPR check (%u regs checked) */' % (cChecked,));
@@ -426,7 +423,7 @@ class A64No1CodeGenBase(object):
         return (uValue, iReg)
         """
         uValue = randUBits(cBits);
-        iReg = self.oGprAllocator.alloc(uValue, fIncludingReg31 = fIncludingReg31);
+        iReg = self.oGprAllocator.alloc(uValue, fIncludingReg31 = fIncludingReg31, fReg31IsSp = fReg31IsSp);
         if iReg != 31 or fReg31IsSp:
             self.emitGprLoad(iReg, uValue, fReg31IsSp = fReg31IsSp);
         else:
@@ -579,7 +576,7 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
                 uVal2Shifted = uVal2 << 12 if fShift else uVal2;
 
                 uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
-                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True, fReg31IsSp = self.fWithSpDst);
 
                 self.emitInstr(self.sInstr,
                                '%s, %s, #0x%x%s' % (g_dddGprNamesBySpAndBits[self.fWithSpDst][cBits][iRegDst],
@@ -713,7 +710,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
                     cBitsRegIn2 = 32;
 
                 uRes, fNzcv = self.fnCalc(cBits, uVal1, uVal2Shifted, 0);
-                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True, fReg31IsSp = self.fWithSpDst);
 
                 self.emitInstr(self.sInstr, '%s, %s, %s, %s #%u'
                                % (g_dddGprNamesBySpAndBits[self.fWithSpDst][cBits][iRegDst], g_ddGprNamesSpByBits[cBits][iRegIn1],
@@ -731,7 +728,7 @@ class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
     """
     C4.1.94.6 addsub_carry
 
-    None of these instructions operates of SP.
+    None of these instructions operates on SP.
     """
     def __init__(self, sInstr, fnCalc, fWithFlags = False):
         A64No1CodeGenBase.__init__(self, sInstr + '_carry', sInstr, Arm64GprAllocator());
@@ -785,7 +782,7 @@ class A64No1CodeGenBitfieldMove(A64No1CodeGenBase):
     """
     C4.1.92.8 bitfield
 
-    None of these instructions operates of SP.
+    None of these instructions operates on SP.
     """
     def __init__(self, sInstr, fnCalc):
         A64No1CodeGenBase.__init__(self, sInstr + '_carry', sInstr, Arm64GprAllocator());
@@ -1170,10 +1167,13 @@ class A64No1CodeGenTestBranch(A64No1CodeGenBase):
     def __init__(self, sInstr, fJumpIfSet):
         A64No1CodeGenBase.__init__(self, sInstr, sInstr, Arm64GprAllocator());
         self.fJumpIfSet = fJumpIfSet;
+        assert self.oGprAllocator.auValues[31] is None;
 
     def generateBody(self, oOptions, cLeftToAllCheck):
         for _ in range(oOptions.cTestsPerInstruction):
+            assert self.oGprAllocator.auValues[31] is None;
             (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+            assert self.oGprAllocator.auValues[31] is None;
             iBitNo              = randUBits(6);
             sJmpLabel           = self.localLabel();
             self.emitInstr(self.sInstr, '%s, #%u, %s' % (g_dGpr64NamesZr[iRegIn], iBitNo, sJmpLabel,));
@@ -1188,6 +1188,7 @@ class A64No1CodeGenTestBranch(A64No1CodeGenBase):
                 self.emitLabel(sJmpLabel2);
 
             self.oGprAllocator.free(iRegIn);
+            assert self.oGprAllocator.auValues[31] is None;
             cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
@@ -1264,7 +1265,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -1354,7 +1355,7 @@ class A64No1CodeGenLdImm12(A64No1CodeGenLdBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - uOffset;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -1443,7 +1444,7 @@ class A64No1CodeGenLdReg(A64No1CodeGenLdBase):
             uOffset    &= fMask64Bits;
             idxPreSlot  = (idxMemSlot - uOffset) & fMask64Bits;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (idxPreSlot & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -1628,7 +1629,7 @@ class A64No1CodeGenLdpImm7(A64No1CodeGenLdBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -1836,7 +1837,7 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -1940,7 +1941,7 @@ class A64No1CodeGenStImm12(A64No1CodeGenStBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - uOffset;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -2036,7 +2037,7 @@ class A64No1CodeGenStReg(A64No1CodeGenStBase):
             uOffset    &= fMask64Bits;
             idxPreSlot  = (idxMemSlot - uOffset) & fMask64Bits;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (idxPreSlot & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
@@ -2123,7 +2124,7 @@ class A64No1CodeGenStpImm7(A64No1CodeGenStBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
-            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegBase    = self.oGprAllocator.alloc(fIncludingReg31 = True, fReg31IsSp = True);
             sRegBase    = g_dGpr64NamesSp[iRegBase];
             if iRegBase == 31 and (abs(idxPreSlot) & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
                 idxMemSlot -= idxPreSlot & 15
