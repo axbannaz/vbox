@@ -5009,11 +5009,11 @@
 /**
  * Helper for implementing conditional jumps, selects and such.
  */
-#define IEM_INSTR_IMPL_HLP_COND(a_Cond, a_PrologMacroNm, a_TrueMacroNm, a_FalseMacroNm, a_EpilogMacroNm) \
+#define IEM_INSTR_IMPL_HLP_COND(a_Cond, a_fCImplFlags, a_PrologMacroNm, a_TrueMacroNm, a_FalseMacroNm, a_EpilogMacroNm) \
     switch (a_Cond) \
     { \
         case  0: /* Z=1: EQ - equal. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET(ARMV8_SPSR_EL2_AARCH64_Z) { \
                 a_TrueMacroNm(); \
@@ -5024,7 +5024,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  1: /* Z=0: NE - not equal. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_Z) { \
                 a_TrueMacroNm(); \
@@ -5035,7 +5035,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  2: /* C=1: CS - carry set   / HS - unsigned higher or same. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET(ARMV8_SPSR_EL2_AARCH64_C) { \
                 a_TrueMacroNm(); \
@@ -5046,7 +5046,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  3: /* C=0: CC - carry clear / LS - unsigned less than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_C) { \
                 a_TrueMacroNm(); \
@@ -5057,7 +5057,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  4: /* N=1: MI - minus. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET(ARMV8_SPSR_EL2_AARCH64_N) { \
                 a_TrueMacroNm(); \
@@ -5068,7 +5068,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  5: /* N=0: PL - plus (positive or zero). */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_N) { \
                 a_TrueMacroNm(); \
@@ -5079,7 +5079,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  6: /* V=1: VS - overflow set. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET(ARMV8_SPSR_EL2_AARCH64_V) { \
                 a_TrueMacroNm(); \
@@ -5090,7 +5090,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  7: /* V=0: VC - overflow clear. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_V) { \
                 a_TrueMacroNm(); \
@@ -5101,7 +5101,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  8: /* C=1 && Z=0:  HI - unsigned higher than */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET_AND_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_C, ARMV8_SPSR_EL2_AARCH64_Z) { \
                 a_TrueMacroNm(); \
@@ -5112,7 +5112,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case  9: /* C=0 || Z=1:  LS - unsigned less or equal than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET_OR_BIT_NOT_SET(ARMV8_SPSR_EL2_AARCH64_Z, ARMV8_SPSR_EL2_AARCH64_C) { \
                 a_TrueMacroNm(); \
@@ -5123,7 +5123,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case 10: /* N=V:         GE - signed greater or equal than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BITS_EQ(ARMV8_SPSR_EL2_AARCH64_N, ARMV8_SPSR_EL2_AARCH64_V) { \
                 a_TrueMacroNm(); \
@@ -5134,7 +5134,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case 11: /* N!=V:        LT - signed less than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BITS_NE(ARMV8_SPSR_EL2_AARCH64_N, ARMV8_SPSR_EL2_AARCH64_V) { \
                 a_TrueMacroNm(); \
@@ -5145,7 +5145,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case 12: /* Z=0 && N=V:  GT - sigend greater than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_NOT_SET_AND_BITS_EQ(ARMV8_SPSR_EL2_AARCH64_Z, \
                                                     ARMV8_SPSR_EL2_AARCH64_N, ARMV8_SPSR_EL2_AARCH64_V) { \
@@ -5157,7 +5157,7 @@
             IEM_MC_END(); \
             break; /* for VS2022 */ \
         case 13: /* Z=1 || N!=V: LE - signed less or equal than. */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, a_fCImplFlags); \
             a_PrologMacroNm(); \
             IEM_MC_IF_FLAGS_BIT_SET_OR_BITS_NE(ARMV8_SPSR_EL2_AARCH64_Z, \
                                                ARMV8_SPSR_EL2_AARCH64_N, ARMV8_SPSR_EL2_AARCH64_V) { \
@@ -5171,7 +5171,7 @@
         default: RT_FALL_THRU(); \
         case 14: /* AL - always. */ RT_FALL_THRU(); \
         case 15: /* NV - never == always (https://devblogs.microsoft.com/oldnewthing/20220815-00/?p=106975) */ \
-            IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_RELATIVE); \
+            IEM_MC_BEGIN(0, (a_fCImplFlags) & ~IEM_CIMPL_F_BRANCH_CONDITIONAL); \
             a_PrologMacroNm(); \
             a_TrueMacroNm(); \
             a_EpilogMacroNm(); \
@@ -5179,20 +5179,21 @@
             break; /* for VS2022 */ \
     } ((void)0)
 
-#define IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP()                   ((void)0)
-#define IEM_INSTR_IMPL_HLP_COND_EPILOG_NOP()                   ((void)0)
+#define IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP()                    ((void)0)
+#define IEM_INSTR_IMPL_HLP_COND_EPILOG_NOP()                    ((void)0)
+#define IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH()                 IEM_MC_ADVANCE_PC_AND_FINISH()
 
 
 /* B.<cond>  <label> (ff000010/54000000) */
 #define IEM_INSTR_IMPL_A64__B_only_condbranch(cond, imm19) \
     int32_t const offRel = (int32_t)(imm19 << (32 - 19)) >> (32 - 19 - 2); \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_BRANCH_CONDITIONAL | IEM_CIMPL_F_BRANCH_RELATIVE, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__B_only_condbranch, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__B_only_condbranch, \
                             IEM_INSTR_IMPL_HLP_COND_EPILOG_NOP)
-#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__B_only_condbranch()  IEM_MC_REL_JMP_S32_AND_FINISH(offRel)
-#define IEM_INSTR_IMPL_HLP_COND_FALSE_A64__B_only_condbranch() IEM_MC_ADVANCE_PC_AND_FINISH()
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__B_only_condbranch()   IEM_MC_REL_JMP_S32_AND_FINISH(offRel)
+#define IEM_INSTR_IMPL_HLP_COND_FALSE_A64__B_only_condbranch()  IEM_MC_ADVANCE_PC_AND_FINISH()
 
 /* BC.<cond>  <label> (ff000010/54000010) */
 #define IEM_INSTR_IMPL_A64__BC_only_condbranch(cond, imm19) \
@@ -5206,20 +5207,63 @@
  *
  */
 
+#define IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST() \
+    IEM_MC_A64_STORE_NZCV_CONST(nzcv << 28)
+
 /* CCMN  <Wn>, #<imm>, #<nzcv>, <cond> (ffe00c10/3a400800) */
-//#define IEM_INSTR_IMPL_A64__CCMN_32_condcmp_imm(nzcv, Rn, cond, imm5)
+#define IEM_INSTR_IMPL_A64__CCMN_32_condcmp_imm(nzcv, Rn, cond, imm5) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_32_condcmp_imm, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_32_condcmp_imm() \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_LOCAL_CONST(uint32_t, uAddend, imm5); \
+    IEM_MC_A64_ADDS_U32(uTmp, uTmp, uAddend, 0)
 
 
 /* CCMP  <Wn>, #<imm>, #<nzcv>, <cond> (ffe00c10/7a400800) */
-//#define IEM_INSTR_IMPL_A64__CCMP_32_condcmp_imm(nzcv, Rn, cond, imm5)
+#define IEM_INSTR_IMPL_A64__CCMP_32_condcmp_imm(nzcv, Rn, cond, imm5) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_32_condcmp_imm, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_32_condcmp_imm() \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_LOCAL_CONST(uint32_t, uSubtrahend, imm5); \
+    IEM_MC_A64_SUBS_U32(uTmp, uTmp, uSubtrahend, 1)
 
 
 /* CCMN  <Xn>, #<imm>, #<nzcv>, <cond> (ffe00c10/ba400800) */
-//#define IEM_INSTR_IMPL_A64__CCMN_64_condcmp_imm(nzcv, Rn, cond, imm5)
+#define IEM_INSTR_IMPL_A64__CCMN_64_condcmp_imm(nzcv, Rn, cond, imm5) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_64_condcmp_imm, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMN_64_condcmp_imm() \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL_CONST(uint64_t, uAddend, imm5); \
+    IEM_MC_A64_ADDS_U64(uTmp, uTmp, uAddend, 0)
 
 
 /* CCMP  <Xn>, #<imm>, #<nzcv>, <cond> (ffe00c10/fa400800) */
-//#define IEM_INSTR_IMPL_A64__CCMP_64_condcmp_imm(nzcv, Rn, cond, imm5)
+#define IEM_INSTR_IMPL_A64__CCMP_64_condcmp_imm(nzcv, Rn, cond, imm5) \
+    IEM_INSTR_IMPL_HLP_COND(cond, IEM_CIMPL_F_STATUS_FLAGS, \
+                            IEM_INSTR_IMPL_HLP_COND_PROLOG_NOP, \
+                            IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_64_condcmp_imm, \
+                            IEM_INSTR_IMPL_HLP_COND_STORE_NZCV_CONST, \
+                            IEM_INSTR_IMPL_HLP_COND_EPILOG_FINISH)
+#define IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CCMP_64_condcmp_imm() \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL_CONST(uint64_t, uSubtrahend, imm5); \
+    IEM_MC_A64_SUBS_U64(uTmp, uTmp, uSubtrahend, 1)
 
 
 
@@ -5254,7 +5298,7 @@
 
 /* CSEL  <Wd>, <Wn>, <Wm>, <cond> (ffe00c00/1a800000) */
 #define IEM_INSTR_IMPL_A64__CSEL_32_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSEL_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSEL_32_condsel, \
@@ -5272,7 +5316,7 @@
 
 /* CSINC  <Wd>, <Wn>, <Wm>, <cond> (ffe00c00/1a800400) */
 #define IEM_INSTR_IMPL_A64__CSINC_32_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSINC_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSINC_32_condsel, \
@@ -5286,7 +5330,7 @@
 
 /* CSINV  <Wd>, <Wn>, <Wm>, <cond> (ffe00c00/5a800000) */
 #define IEM_INSTR_IMPL_A64__CSINV_32_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSINV_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSINV_32_condsel, \
@@ -5300,7 +5344,7 @@
 
 /* CSNEG  <Wd>, <Wn>, <Wm>, <cond> (ffe00c00/5a800400) */
 #define IEM_INSTR_IMPL_A64__CSNEG_32_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSNEG_32_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSNEG_32_condsel, \
@@ -5314,7 +5358,7 @@
 
 /* CSEL  <Xd>, <Xn>, <Xm>, <cond> (ffe00c00/9a800000) */
 #define IEM_INSTR_IMPL_A64__CSEL_64_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSEL_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSEL_64_condsel, \
@@ -5332,7 +5376,7 @@
 
 /* CSINC  <Xd>, <Xn>, <Xm>, <cond> (ffe00c00/9a800400) */
 #define IEM_INSTR_IMPL_A64__CSINC_64_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSINC_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSINC_64_condsel, \
@@ -5346,7 +5390,7 @@
 
 /* CSINV  <Xd>, <Xn>, <Xm>, <cond> (ffe00c00/da800000) */
 #define IEM_INSTR_IMPL_A64__CSINV_64_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSINV_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSINV_64_condsel, \
@@ -5360,7 +5404,7 @@
 
 /* CSNEG  <Xd>, <Xn>, <Xm>, <cond> (ffe00c00/da800400) */
 #define IEM_INSTR_IMPL_A64__CSNEG_64_condsel(Rd, Rn, cond, Rm) \
-    IEM_INSTR_IMPL_HLP_COND(cond, \
+    IEM_INSTR_IMPL_HLP_COND(cond, 0, \
                             IEM_INSTR_IMPL_HLP_COND_PROLOG_A64__CSEL_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_TRUE_A64__CSNEG_64_condsel, \
                             IEM_INSTR_IMPL_HLP_COND_FALSE_A64__CSNEG_64_condsel, \
