@@ -4527,7 +4527,12 @@
  */
 
 /* BR  <Xn> (fffffc1f/d61f0000) */
-//#define IEM_INSTR_IMPL_A64__BR_64_branch_reg(Rn)
+#define IEM_INSTR_IMPL_A64__BR_64_branch_reg(Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_BRANCH_INDIRECT); \
+    IEM_MC_LOCAL(uint64_t, uJmpAddr); \
+    IEM_MC_FETCH_GREG_U64(uJmpAddr, Rn); \
+    IEM_MC_BRANCH_TO_WITH_BTYPE_AND_FINISH(uJmpAddr, 1 /*BType*/); /** @todo BType 3 for guarded pages */ \
+    IEM_MC_END()
 
 
 /* BRAAZ  <Xn> (fffffc1f/d61f081f) */
