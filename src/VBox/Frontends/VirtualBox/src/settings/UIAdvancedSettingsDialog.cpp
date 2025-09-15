@@ -50,9 +50,6 @@
 #include <QToolButton>
 #include <QVariant>
 #include <QVBoxLayout>
-#ifndef VBOX_WS_MAC
-# include <QStyle>
-#endif
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
