@@ -322,6 +322,13 @@ class A64No1CodeGenBase(object):
         self.emitInstr('ret',   'lr');
         self.asCode.append('ENDPROC %s' % (self.sLabel,));
 
+        # Serialize the data.
+        offData = 0;
+        while offData < len(self.abData):
+            self.asData.append('    .byte %s' % (','.join(['%#04x' % (b,) for b in self.abData[offData:offData+16]]),));
+            offData += 16;
+
+        return None;
 
     def generateBody(self, oOptions, cLeftToAllCheck):
         _ = oOptions; _ = cLeftToAllCheck;
@@ -403,13 +410,6 @@ class A64No1CodeGenBase(object):
             else:
                 self.abData += abValue;
                 self.emitInstr('ldr',   'w%u, [x%u], #4' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
-                if self.cbLastData == 4 and self.cLastDataItems < 9:
-                    self.asData[-1] += ', 0x%08x' % (uValue,);
-                    self.cLastDataItems += 1;
-                else:
-                    self.asData.append('        .int    0x%08x' % (uValue,));  # 0xe8e829929cdd3d -> 5.262.336 bytes
-                    self.cbLastData     = 4;
-                    self.cLastDataItems = 1;
         else:
             abValue  = uValue.to_bytes(8, byteorder = 'little');
             offValue = self._findInData(abValue);
@@ -418,13 +418,6 @@ class A64No1CodeGenBase(object):
             else:
                 self.abData += abValue;
                 self.emitInstr('ldr',   'x%u, [x%u], #8' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
-                if self.cbLastData == 8 and self.cLastDataItems < 5:
-                    self.asData[-1] += ', 0x%016x' % (uValue,);
-                    self.cLastDataItems += 1;
-                else:
-                    self.asData.append('        .quad   0x%016x' % (uValue,));
-                    self.cbLastData     = 8;
-                    self.cLastDataItems = 1;
 
         # SP hack:
         if iReg != iRegToLoad:
@@ -530,7 +523,7 @@ class A64No1CodeGenBase(object):
 
     def emitFlagsCheck(self, fExpectedNzcv, iRegTmp = -1):
         """ Emits a NZCV flags check. """
-        assert iRegTmp != 31; # 0x06b53736 + #0xe40 => 0x0000000006b54576 + flags=0x20001000
+        assert iRegTmp != 31;
         iRegTmpToUse = iRegTmp if iRegTmp >= 0 else self.oGprAllocator.allocNo31(fExpectedNzcv);
         self.emitInstr('mrs',   'x%u, NZCV' % (iRegTmpToUse,));
         self.emitGprValCheck(iRegTmpToUse, fExpectedNzcv);
@@ -600,7 +593,7 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
         """
         assert uValue >= 0;
 
-        for chRegPfx, uMax, cb, sAsDir, cbAsItem, cMaxAsItemsPerLine in self.kaFprLoadSpecs:
+        for chRegPfx, uMax, cb, _, _, _ in self.kaFprLoadSpecs:
             if 0 <= uValue < uMax:
                 abValue  = uValue.to_bytes(cb, byteorder = 'little');
                 offValue = self._findInData(abValue);
@@ -609,16 +602,6 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
                 else:
                     self.abData += abValue;
                     self.emitInstr('ldr',   '%s%u, [x%u], #%u' % (chRegPfx, iReg, self.iRegDataPtr, cb), hex(uValue));
-                    for _ in range(cb // cbAsItem):
-                        uThisValue = uValue & ((1 << (cbAsItem * 8)) - 1)
-                        if self.cbLastData == cbAsItem and self.cLastDataItems < cMaxAsItemsPerLine:
-                            self.asData[-1]     += ', 0x%0*x' % (cbAsItem * 2, uThisValue,);
-                            self.cLastDataItems += 1;
-                        else:
-                            self.asData.append('        %-7s 0x%0*x' % (sAsDir, cbAsItem * 2, uThisValue,));
-                            self.cLastDataItems  = 1;
-                            self.cbLastData      = cbAsItem;
-                        uValue >>= cbAsItem * 8;
                 return iReg;
         self.oFprAllocator.updateValue(iReg, uValue);
         return iReg;
