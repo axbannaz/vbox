@@ -477,6 +477,22 @@ void UISelectorDelegate::paint(QPainter *pPainter, const QStyleOptionViewItem &o
     itemRectangle.setTop(itemRectangle.top() + 1);
     itemRectangle.setRight(itemRectangle.right() - 1);
     itemRectangle.setBottom(itemRectangle.bottom() - 1);
+
+    /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
+    if (enmState & QStyle::State_HasFocus)
+    {
+        QRect focusRect = option.rect;
+        focusRect.setRight(focusRect.right() - 1);
+        focusRect.setBottom(focusRect.bottom() - 1);
+        QStyleOptionFocusRect focusOption;
+        QWidget *pParent = qobject_cast<QWidget*>(parent());
+        AssertPtr(pParent);
+        if (pParent)
+            focusOption.initFrom(pParent);
+        focusOption.rect = focusRect;
+        focusOption.backgroundColor = palette.color(QPalette::Window);
+        QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, pPainter, pParent);
+    }
 #endif /* !VBOX_WS_MAC */
 
     /* Draw background: */
@@ -827,6 +843,9 @@ QSize UISelectorTreeView::sizeHint() const
 void UISelectorTreeView::prepare()
 {
     /* Configure tree-view: */
+#ifndef VBOX_WS_MAC
+    setFocusPolicy(Qt::TabFocus);
+#endif
     setSortingEnabled(true);
     sortByColumn(0, Qt::AscendingOrder);
     setFrameShape(QFrame::NoFrame);
