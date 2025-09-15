@@ -600,6 +600,7 @@ void UIFilterEditor::prepare()
     m_pToolButton = new QToolButton(this);
     if (m_pToolButton)
     {
+        m_pToolButton->setFocusPolicy(Qt::NoFocus);
         m_pToolButton->setStyleSheet("QToolButton {\
                                       border: 0px none black;\
                                       margin: 0px 5px 0px 5px;\
@@ -776,6 +777,9 @@ void UIVerticalScrollArea::wheelEvent(QWheelEvent *pEvent)
 
 void UIVerticalScrollArea::prepare()
 {
+    /* No need to have focus, children will have it: */
+    setFocusPolicy(Qt::NoFocus);
+
     /* Make vertical scroll-bar always hidden: */
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
