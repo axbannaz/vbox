@@ -1516,10 +1516,7 @@ void UIAdvancedSettingsDialog::prepareSelector()
     /* Prepare classical tree-view selector: */
     m_pSelector = new UISettingsSelectorTreeView(centralWidget());
     if (m_pSelector)
-    {
         m_pLayoutMain->addWidget(m_pSelector->widget(), 1, 0);
-        m_pSelector->widget()->setFocus();
-    }
 
     /* Prepare filter editor: */
     m_pEditorFilter = new UIFilterEditor(centralWidget());
