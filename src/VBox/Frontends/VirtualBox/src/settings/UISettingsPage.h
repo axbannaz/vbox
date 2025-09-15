@@ -135,11 +135,6 @@ public:
     /** Performs page validation composing a list of @a messages. */
     virtual bool validate(QList<UIValidationMessage> &messages) { Q_UNUSED(messages); return true; }
 
-    /** Returns first navigation widget. */
-    QWidget *firstWidget() const { return m_pFirstWidget; }
-    /** Defines the first navigation widget for TAB-order. */
-    virtual void setOrderAfter(QWidget *pWidget) { m_pFirstWidget = pWidget; }
-
     /** Defines @a enmConfigurationAccessLevel. */
     virtual void setConfigurationAccessLevel(ConfigurationAccessLevel enmConfigurationAccessLevel);
     /** Returns configuration access level. */
@@ -200,8 +195,6 @@ private:
     /** Holds the page ID. */
     int  m_cId;
 
-    /** Holds the first TAB-orer widget reference. */
-    QWidget                 *m_pFirstWidget;
     /** Holds the page validator. */
     UISettingsPageValidator *m_pValidator;
 

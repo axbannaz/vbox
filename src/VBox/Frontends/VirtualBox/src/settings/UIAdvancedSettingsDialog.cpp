@@ -1251,9 +1251,6 @@ void UIAdvancedSettingsDialog::addItem(const QString &strBigIcon,
                 this, &UIAdvancedSettingsDialog::sltHandleValidityChange);
         pSettingsPage->setValidator(pValidator);
         m_pWarningPane->registerValidator(pValidator);
-
-        /* Update navigation (tab-order): */
-        pSettingsPage->setOrderAfter(m_pSelector->widget());
     }
 }
 

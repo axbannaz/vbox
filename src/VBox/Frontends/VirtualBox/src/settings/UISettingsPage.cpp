@@ -49,7 +49,6 @@
 UISettingsPage::UISettingsPage()
     : m_enmConfigurationAccessLevel(ConfigurationAccessLevel_Null)
     , m_cId(-1)
-    , m_pFirstWidget(0)
     , m_pValidator(0)
     , m_fIsValidatorBlocked(true)
     , m_fProcessed(false)
