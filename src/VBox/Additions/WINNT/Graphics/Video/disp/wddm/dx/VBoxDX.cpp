@@ -271,6 +271,279 @@ static void dxUploadBatchRetire(PVBOXDX_DEVICE pDevice, VBOXDXUPLOADBATCH *pBatc
 }
 
 
+static VBOXDXTRANSIENTHEAPBLOCKDESC *dxTransientBlockAllocate(VBOXDXTRANSIENTHEAP *pHeap, uint32_t offBlock, uint32_t cbBlock)
+{
+    /** @todo Allocate block descriptors in chunks in order to reduce amount of heap allocations. */
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock = (VBOXDXTRANSIENTHEAPBLOCKDESC *)RTMemAlloc(sizeof(VBOXDXTRANSIENTHEAPBLOCKDESC));
+    AssertReturnStmt(pBlock, vboxDXDeviceSetError(pHeap->pDevice, E_OUTOFMEMORY), NULL);
+
+    pBlock->pHeap = pHeap;
+    RT_ZERO(pBlock->nodeTransientHeap);
+    RT_ZERO(pBlock->nodeTransientBlock);
+    pBlock->offBlock = offBlock;
+    pBlock->cbBlock = cbBlock;
+    pBlock->fFreeBlock = 1;
+    pBlock->fReserved = 0;
+    return pBlock;
+}
+
+
+static void dxTransientBlockDeallocate(VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock)
+{
+    Assert(pBlock->nodeTransientHeap.pNext == NULL);
+    Assert(pBlock->nodeTransientBlock.pNext == NULL);
+    Assert(pBlock->fFreeBlock);
+    RTMemFree(pBlock);
+}
+
+
+static VBOXDXTRANSIENTHEAPBATCH *dxTransientHeapBatchAllocate(VBOXDXTRANSIENTHEAP *pHeap)
+{
+    VBOXDXTRANSIENTHEAPBATCH *pBatch = (VBOXDXTRANSIENTHEAPBATCH *)RTMemAlloc(sizeof(VBOXDXTRANSIENTHEAPBATCH));
+    AssertReturnStmt(pBatch, vboxDXDeviceSetError(pHeap->pDevice, E_OUTOFMEMORY), NULL);
+
+    pBatch->pHeap = pHeap;
+    RT_ZERO(pBatch->nodeTransientBatch);
+    RTListInit(&pBatch->listPendingBlocks);
+    vboxDXCreateQuery(pHeap->pDevice, &pBatch->queryBatchCompleted, D3D10DDI_QUERY_EVENT, 0);
+    return pBatch;
+}
+
+
+static void dxTransientHeapBatchDeallocate(VBOXDXTRANSIENTHEAPBATCH *pBatch)
+{
+    Assert(pBatch->nodeTransientBatch.pNext == NULL);
+    Assert(RTListIsEmpty(&pBatch->listPendingBlocks));
+    vboxDXDestroyQuery(pBatch->pHeap->pDevice, &pBatch->queryBatchCompleted);
+    RTMemFree(pBatch);
+}
+
+
+static VBOXDXTRANSIENTHEAPBATCH *dxTransientHeapBatchGet(VBOXDXTRANSIENTHEAP *pHeap)
+{
+    VBOXDXTRANSIENTHEAPBATCH *pBatch = RTListRemoveFirst(&pHeap->listLookasideBatches,
+                                                         VBOXDXTRANSIENTHEAPBATCH, nodeTransientBatch);
+    if (!pBatch)
+        pBatch = dxTransientHeapBatchAllocate(pHeap);
+    else
+        Assert(RTListIsEmpty(&pBatch->listPendingBlocks));
+
+    return pBatch;
+}
+
+
+static void dxTransientHeapBatchRetire(VBOXDXTRANSIENTHEAPBATCH *pBatch)
+{
+    Assert(RTListIsEmpty(&pBatch->listPendingBlocks));
+    RTListNodeRemove(&pBatch->nodeTransientBatch);
+    RTListAppend(&pBatch->pHeap->listLookasideBatches, &pBatch->nodeTransientBatch);
+}
+
+
+static DECLCALLBACK(int) dxReclaimFreeBlocksCb(PAVLU32NODECORE pNode, void *pvUser)
+{
+    VBOXDXTRANSIENTHEAPFREEBLOCKS *p = (VBOXDXTRANSIENTHEAPFREEBLOCKS *)pNode;
+    VBOXDXTRANSIENTHEAP *pHeap = (VBOXDXTRANSIENTHEAP *)pvUser;
+
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pIter, *pNext;
+    RTListForEachSafe(&p->listFreeBlocks, pIter, pNext, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+    {
+        Assert(pIter->fFreeBlock);
+
+        RTListNodeRemove(&pIter->nodeTransientBlock);
+        RTListAppend(&pHeap->listFreeBlocks, &pIter->nodeTransientBlock);
+    }
+
+    return 0;
+}
+
+
+static void dxTransientHeapMergeFreeBlocks(VBOXDXTRANSIENTHEAP *pHeap)
+{
+    /* First, move free blocks from per-size lists to the generic list. */
+    RTAvlU32DoWithAll(&pHeap->treeFreeBlocks, 0, dxReclaimFreeBlocksCb, pHeap);
+
+    /* Merge free blocks in the generic list. */
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pIter, *pNext;
+    RTListForEachSafe(&pHeap->listFreeBlocks, pIter, pNext, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+    {
+        Assert(pIter->fFreeBlock);
+
+        /* Check if this block can be merged with the previous block in the heap list. */
+        VBOXDXTRANSIENTHEAPBLOCKDESC *pPrevBlock = RTListNodeGetPrev(&pIter->nodeTransientHeap, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap);
+        if (   !RTListNodeIsDummy(&pHeap->listBlocks, pPrevBlock, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap)
+            && pPrevBlock->fFreeBlock)
+        {
+            /* The block can be merged with the previous block. */
+            Assert(pPrevBlock->offBlock + pPrevBlock->cbBlock == pIter->offBlock);
+
+            RTListNodeRemove(&pIter->nodeTransientBlock);
+            RTListNodeRemove(&pIter->nodeTransientHeap);
+
+            pPrevBlock->cbBlock += pIter->cbBlock;
+            dxTransientBlockDeallocate(pIter);
+        }
+    }
+
+#ifdef DEBUG
+    /* Check that all block were merged. */
+    RTListForEach(&pHeap->listFreeBlocks, pIter, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+    {
+        Assert(pIter->fFreeBlock);
+
+        VBOXDXTRANSIENTHEAPBLOCKDESC *pPrevBlock = RTListNodeGetPrev(&pIter->nodeTransientHeap, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap);
+        if (   !RTListNodeIsDummy(&pHeap->listBlocks, pPrevBlock, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap)
+            && pPrevBlock->fFreeBlock)
+        {
+            AssertFailed();
+        }
+
+        VBOXDXTRANSIENTHEAPBLOCKDESC *pNextBlock = RTListNodeGetNext(&pIter->nodeTransientHeap, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap);
+        if (   !RTListNodeIsDummy(&pHeap->listBlocks, pNextBlock, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap)
+            && pNextBlock->fFreeBlock)
+        {
+            AssertFailed();
+        }
+    }
+#endif /* DEBUG */
+}
+
+
+static VBOXDXTRANSIENTHEAPBLOCKDESC *dxTransientBlockReserve(VBOXDXTRANSIENTHEAP *pHeap, uint32_t cbBlock)
+{
+    VBOXDXTRANSIENTHEAPFREEBLOCKS *pFreeBlocks = (VBOXDXTRANSIENTHEAPFREEBLOCKS *)RTAvlU32Get(&pHeap->treeFreeBlocks, cbBlock);
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock = pFreeBlocks
+                                         ? RTListRemoveFirst(&pFreeBlocks->listFreeBlocks, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+                                         : NULL;
+    if (pBlock)
+    {
+        Assert(pBlock->fFreeBlock);
+        pBlock->fFreeBlock = 0;
+        return pBlock;
+    }
+
+    /* Walk the free list for a matching block. */
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pIter;
+    RTListForEach(&pHeap->listFreeBlocks, pIter, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+    {
+        Assert(pIter->fFreeBlock);
+        if (pIter->cbBlock >= cbBlock)
+        {
+            pBlock = pIter;
+            break;
+        }
+    }
+
+    if (RT_LIKELY(pBlock))
+    { /* likely */ }
+    else
+    {
+        /* There were no space for the block in both generic and per-size lists.
+         * Move the free blocks from per-size lists to the generic free list and merge the free blocks.
+         */
+        dxTransientHeapMergeFreeBlocks(pHeap);
+
+        /* Repeat the search for a free block. */
+        RTListForEach(&pHeap->listFreeBlocks, pIter, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+        {
+            Assert(pIter->fFreeBlock);
+            if (pIter->cbBlock >= cbBlock)
+            {
+                pBlock = pIter;
+                break;
+            }
+        }
+
+        if (!pBlock)
+            return NULL;
+    }
+
+    Assert(pBlock);
+    if (pBlock->cbBlock > cbBlock)
+    {
+        /* Split the block and return the newly allocated block. */
+        VBOXDXTRANSIENTHEAPBLOCKDESC *pNewBlock = dxTransientBlockAllocate(pHeap, pBlock->offBlock, cbBlock);
+        AssertReturn(pNewBlock, NULL);
+
+        pBlock->offBlock += cbBlock;
+        pBlock->cbBlock -= cbBlock;
+
+        /* Insert the new block in the sorted list of all blocks. */
+        RTListNodeInsertBefore(&pBlock->nodeTransientHeap, &pNewBlock->nodeTransientHeap);
+
+        pBlock = pNewBlock;
+    }
+    else
+    {
+        /* This can happen when the never allocated free block has the requested size coincidentally. */
+        RTListNodeRemove(&pBlock->nodeTransientBlock); /* Remove from listFreeBlocks */
+    }
+
+    pBlock->fFreeBlock = 0;
+    return pBlock;
+}
+
+
+static void dxTransientBlockRelease(VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock)
+{
+    Assert(!pBlock->fFreeBlock);
+    Assert(pBlock->nodeTransientBlock.pNext == NULL);
+
+    VBOXDXTRANSIENTHEAPFREEBLOCKS *pFreeBlocks = (VBOXDXTRANSIENTHEAPFREEBLOCKS *)RTAvlU32Get(&pBlock->pHeap->treeFreeBlocks, pBlock->cbBlock);
+    if (!pFreeBlocks)
+    {
+        pFreeBlocks = (VBOXDXTRANSIENTHEAPFREEBLOCKS *)RTMemAllocZ(sizeof(VBOXDXTRANSIENTHEAPFREEBLOCKS));
+        AssertReturnVoidStmt(pFreeBlocks, vboxDXDeviceSetError(pBlock->pHeap->pDevice, E_OUTOFMEMORY));
+
+        pFreeBlocks->Core.Key = pBlock->cbBlock;
+        RTListInit(&pFreeBlocks->listFreeBlocks);
+
+        bool fInserted = RTAvlU32Insert(&pBlock->pHeap->treeFreeBlocks, &pFreeBlocks->Core);
+        AssertReturnVoidStmt(fInserted, RTMemFree(pFreeBlocks); vboxDXDeviceSetError(pBlock->pHeap->pDevice, E_OUTOFMEMORY));
+    }
+
+    RTListPrepend(&pFreeBlocks->listFreeBlocks, &pBlock->nodeTransientBlock);
+    pBlock->fFreeBlock = 1;
+
+}
+
+
+static void dxTransientHeapOnFlush(VBOXDXTRANSIENTHEAP *pHeap)
+{
+    /* Check which batches have been processed by the host. */
+    VBOXDXTRANSIENTHEAPBATCH *pBatch, *pNext;
+    RTListForEachSafe(&pHeap->listTransientBatches, pBatch, pNext, VBOXDXTRANSIENTHEAPBATCH, nodeTransientBatch)
+    {
+        BOOL fCompleted = FALSE;
+        HRESULT hr = vboxdxQueryGetDataInternal(pHeap->pDevice, &pBatch->queryBatchCompleted,
+                                                &fCompleted, sizeof(fCompleted));
+        if (hr != S_OK || !fCompleted)
+            break; /* Queries are completed in order, so if this one is still running, then the next queries are too. */
+
+        /* Reclaim the blocks which were used by this batch. */
+        VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock, *pBlockNext;
+        RTListForEachSafe(&pBatch->listPendingBlocks, pBlock, pBlockNext, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientBlock)
+        {
+            RTListNodeRemove(&pBlock->nodeTransientBlock);
+            dxTransientBlockRelease(pBlock);
+        }
+
+        dxTransientHeapBatchRetire(pBatch);
+    }
+
+    /* Submit the current batch query. */
+    pBatch = pHeap->pCurrentBatch;
+    if (pBatch && !RTListIsEmpty(&pBatch->listPendingBlocks))
+    {
+        vboxDXQueryEnd(pHeap->pDevice, &pBatch->queryBatchCompleted);
+
+        RTListAppend(&pHeap->listTransientBatches, &pBatch->nodeTransientBatch);
+
+        pHeap->pCurrentBatch = dxTransientHeapBatchGet(pHeap);
+    }
+}
+
+
 static HRESULT vboxDXDeviceRender(PVBOXDX_DEVICE pDevice)
 {
     LogFlowFunc(("pDevice %p, cbCommandBuffer %d\n", pDevice, pDevice->cbCommandBuffer));
@@ -413,6 +686,8 @@ static bool dxIsAllocationInUse(PVBOXDX_DEVICE pDevice, D3DKMT_HANDLE hAllocatio
 
 HRESULT vboxDXDeviceFlushCommands(PVBOXDX_DEVICE pDevice)
 {
+    dxTransientHeapOnFlush(&pDevice->transientHeap);
+
     /* Check which upload batches have been processed by the host. */
     VBOXDXUPLOADBATCH *pBatch, *pNext;
     RTListForEachSafe(&pDevice->upload.listUploadBatches, pBatch, pNext, VBOXDXUPLOADBATCH, nodeUploadBatch)
@@ -1004,6 +1279,7 @@ bool vboxDXCreateResource(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource,
         pResource->aMipInfoList[i] = pCreateResource->pMipInfoList[i];
     pResource->cSubresources = pCreateResource->MipLevels * pCreateResource->ArraySize;
     pResource->uMap = 0;
+    pResource->pMappedTransientHeapBlock = NULL;
 
     RTListInit(&pResource->listSRV);
     RTListInit(&pResource->listRTV);
@@ -1054,6 +1330,7 @@ bool vboxDXOpenResource(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource,
         RT_ZERO(pResource->aMipInfoList[i]);
     pResource->cSubresources = pDesc->surfaceInfo.numMipLevels * pDesc->surfaceInfo.arraySize;
     pResource->uMap = 0;
+    pResource->pMappedTransientHeapBlock = NULL;
 
     RTListInit(&pResource->listSRV);
     RTListInit(&pResource->listRTV);
@@ -3088,6 +3365,76 @@ void vboxDXResourceUnmap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UIN
 }
 
 
+void vboxDXDynamicConstantBufferMapDiscard(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT Flags,
+                                           D3D10DDI_MAPPED_SUBRESOURCE *pMappedSubResource)
+{
+    VBOXDXALLOCATIONDESC const *pDstAllocationDesc = vboxDXGetAllocationDesc(pResource);
+    AssertReturnVoidStmt(pDstAllocationDesc, vboxDXDeviceSetError(pDevice, E_INVALIDARG));
+
+    VBOXDXTRANSIENTHEAP *pHeap = &pDevice->transientHeap;
+    uint32_t const cbBlock = pDstAllocationDesc->cbAllocation;
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock = dxTransientBlockReserve(pHeap, cbBlock);
+    if (!pBlock)
+    {
+        vboxDXResourceMap(pDevice, pResource, 0, D3D10_DDI_MAP_WRITE_DISCARD, Flags, pMappedSubResource);
+        return;
+    }
+
+    pMappedSubResource->pData = (uint8_t *)pHeap->pvTransientHeapMapped + pBlock->offBlock;
+    pMappedSubResource->RowPitch = cbBlock;
+    pMappedSubResource->DepthPitch = cbBlock;
+
+    pResource->pMappedTransientHeapBlock = pBlock;
+    pResource->DDIMap = D3D10_DDI_MAP_WRITE_DISCARD;
+}
+
+
+void vboxDXDynamicConstantBufferUnmap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource)
+{
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock = pResource->pMappedTransientHeapBlock;
+    if (pBlock == NULL)
+    {
+        /* The buffer was mapped via ddi10DynamicConstantBufferMapNoOverwrite
+         * or the transient heap had no space for the buffer.
+         */
+        Assert(pResource->DDIMap == D3D10_DDI_MAP_WRITE_DISCARD);
+        vboxDXResourceUnmap(pDevice, pResource, 0);
+        return;
+    }
+
+    uint32 const srcOffset = pBlock->offBlock;
+    uint32 const srcPitch = pBlock->cbBlock;
+
+    /* Inform the host that the heap buffer has been updated. */
+    SVGA3dBox box;
+    box.x = srcOffset;
+    box.y = 0;
+    box.z = 0;
+    box.w = srcPitch;
+    box.h = 1;
+    box.d = 1;
+    vgpu10UpdateSubResource(pDevice, vboxDXGetKMResource(pBlock->pHeap->pTransientHeapBuffer), 0, &box);
+
+    /* Issue SVGA_3D_CMD_DX_TRANSFER_FROM_BUFFER */
+    SVGA3dBox destBox;
+    destBox.x = 0;
+    destBox.y = 0;
+    destBox.z = 0;
+    destBox.w = srcPitch;
+    destBox.h = 1;
+    destBox.d = 1;
+    vgpu10TransferFromBuffer(pDevice,
+                             vboxDXGetKMResource(pBlock->pHeap->pTransientHeapBuffer), srcOffset, srcPitch, srcPitch,
+                             vboxDXGetKMResource(pResource), 0, destBox);
+
+    Assert(pBlock->nodeTransientBlock.pNext == NULL);
+    RTListAppend(&pBlock->pHeap->pCurrentBatch->listPendingBlocks, &pBlock->nodeTransientBlock);
+
+    pResource->pMappedTransientHeapBlock = NULL;
+    pResource->uMap = 0;
+}
+
+
 static SVGA3dResourceType d3dToSvgaResourceDimension(D3D10DDIRESOURCE_TYPE ResourceDimension)
 {
     switch (ResourceDimension)
@@ -4179,6 +4526,105 @@ static HRESULT vboxDXCreateKernelContextForDevice(PVBOXDX_DEVICE pDevice)
 }
 
 
+static int dxTransientHeapInit(PVBOXDX_DEVICE pDevice, VBOXDXTRANSIENTHEAP *pHeap)
+{
+    pHeap->pDevice = pDevice;
+
+    pHeap->pTransientHeapBuffer = vboxDXCreateStagingBuffer(pDevice, VBOXDX_TRANSIENT_HEAP_SIZE);
+    AssertReturn(pHeap->pTransientHeapBuffer, VERR_NO_MEMORY);
+
+    D3DDDICB_LOCK ddiLock;
+    RT_ZERO(ddiLock);
+    ddiLock.hAllocation = vboxDXGetAllocation(pHeap->pTransientHeapBuffer);
+    ddiLock.Flags.WriteOnly = 1;
+    ddiLock.Flags.IgnoreSync = 1;
+    ddiLock.Flags.DonotWait = 1;
+    HRESULT hr = pDevice->pRTCallbacks->pfnLockCb(pDevice->hRTDevice.handle, &ddiLock);
+    AssertReturn(SUCCEEDED(hr), VERR_NO_MEMORY);
+    pHeap->pvTransientHeapMapped = ddiLock.pData;
+
+    RTListInit(&pHeap->listBlocks);
+    RTListInit(&pHeap->listFreeBlocks);
+    pHeap->treeFreeBlocks = NULL;
+
+    /* The first free block for entire buffer. */
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pFreeBlock = dxTransientBlockAllocate(pHeap, 0, VBOXDX_TRANSIENT_HEAP_SIZE);
+    AssertReturn(pFreeBlock, VERR_NO_MEMORY);
+    RTListAppend(&pHeap->listBlocks, &pFreeBlock->nodeTransientHeap);
+    RTListAppend(&pHeap->listFreeBlocks, &pFreeBlock->nodeTransientBlock);
+
+    pHeap->pCurrentBatch = dxTransientHeapBatchAllocate(pHeap);
+    AssertReturn(pHeap->pCurrentBatch, VERR_NO_MEMORY);
+
+    RTListInit(&pHeap->listTransientBatches);
+    RTListInit(&pHeap->listLookasideBatches);
+    return VINF_SUCCESS;
+}
+
+
+static DECLCALLBACK(int) dxDestroyFreeBlocksNodeCb(PAVLU32NODECORE pNode, void *pvUser)
+{
+    VBOXDXTRANSIENTHEAPFREEBLOCKS *p = (VBOXDXTRANSIENTHEAPFREEBLOCKS *)pNode;
+    VBOXDXTRANSIENTHEAP *pHeap = (VBOXDXTRANSIENTHEAP *)pvUser;
+
+    RT_NOREF(pHeap);
+    RTMemFree(p);
+    return 0;
+}
+
+
+static void dxTransientHeapDestroy(VBOXDXTRANSIENTHEAP *pHeap)
+{
+    if (pHeap->pCurrentBatch)
+    {
+        Assert(RTListIsEmpty(&pHeap->pCurrentBatch->listPendingBlocks)); /* Flush submitted all pending blocks. */
+        dxTransientHeapBatchDeallocate(pHeap->pCurrentBatch);
+        pHeap->pCurrentBatch = NULL;
+    }
+
+    if (!RTListIsEmpty(&pHeap->listTransientBatches))
+    {
+        /// @todo This should not happen. Wait for the last query.
+        DEBUG_BREAKPOINT_TEST();
+    }
+
+    VBOXDXTRANSIENTHEAPBATCH *pBatch, *pNext;
+    RTListForEachSafe(&pHeap->listLookasideBatches, pBatch, pNext, VBOXDXTRANSIENTHEAPBATCH, nodeTransientBatch)
+    {
+        RTListNodeRemove(&pBatch->nodeTransientBatch);
+        dxTransientHeapBatchDeallocate(pBatch);
+    }
+
+    VBOXDXTRANSIENTHEAPBLOCKDESC *pBlock, *pBlockNext;
+    RTListForEachSafe(&pHeap->listBlocks, pBlock, pBlockNext, VBOXDXTRANSIENTHEAPBLOCKDESC, nodeTransientHeap)
+    {
+        RTListNodeRemove(&pBlock->nodeTransientBlock);
+        RTListNodeRemove(&pBlock->nodeTransientHeap);
+        dxTransientBlockDeallocate(pBlock);
+    }
+
+    RTAvlU32Destroy(&pHeap->treeFreeBlocks, dxDestroyFreeBlocksNodeCb, pHeap);
+
+    if (pHeap->pvTransientHeapMapped)
+    {
+        D3DKMT_HANDLE const hAllocation = vboxDXGetAllocation(pHeap->pTransientHeapBuffer);
+
+        D3DDDICB_UNLOCK ddiUnlock;
+        ddiUnlock.NumAllocations = 1;
+        ddiUnlock.phAllocations = &hAllocation;
+        HRESULT hr = pHeap->pDevice->pRTCallbacks->pfnUnlockCb(pHeap->pDevice->hRTDevice.handle, &ddiUnlock);
+        Assert(SUCCEEDED(hr)); RT_NOREF(hr);
+        pHeap->pvTransientHeapMapped = NULL;
+    }
+
+    if (pHeap->pTransientHeapBuffer)
+    {
+        vboxDXDestroyResource(pHeap->pDevice, pHeap->pTransientHeapBuffer);
+        pHeap->pTransientHeapBuffer = NULL;
+    }
+}
+
+
 static int vboxDXDeviceCreateObjects(PVBOXDX_DEVICE pDevice)
 {
     int rc;
@@ -4283,6 +4729,9 @@ static int vboxDXDeviceCreateObjects(PVBOXDX_DEVICE pDevice)
 
     RTListInit(&pDevice->upload.listUploadBatches);
     RTListInit(&pDevice->upload.listLookasideBatches);
+
+    rc = dxTransientHeapInit(pDevice, &pDevice->transientHeap);
+    AssertRCReturn(rc, rc);
 
     return VINF_SUCCESS;
 }
@@ -4413,6 +4862,8 @@ void vboxDXDestroyDevice(PVBOXDX_DEVICE pDevice)
 
     /* Flush will deallocate staging resources. */
     vboxDXFlush(pDevice, true);
+
+    dxTransientHeapDestroy(&pDevice->transientHeap);
 
     if (pDevice->upload.pvUploadBufferMapped)
     {

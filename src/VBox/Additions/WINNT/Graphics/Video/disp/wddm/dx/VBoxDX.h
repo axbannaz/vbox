@@ -35,7 +35,10 @@
  * Requires g_VBoxLogUm = VBOXWDDM_CFG_LOG_UM_BACKDOOR in a release build in the miniport driver.
  */
 //#define DX_STATS
+/** @todo Development define. Remove. */
+#define DX_FAST_DYNAMIC_MAP
 
+#include <iprt/avl.h>
 #include <iprt/assert.h>
 #include <iprt/handletable.h>
 
@@ -231,6 +234,7 @@ typedef struct VBOXDX_RESOURCE
         D3D10_DDI_MAP              DDIMap;
         UINT                       uMap;
     };
+    struct VBOXDXTRANSIENTHEAPBLOCKDESC *pMappedTransientHeapBlock;
 
     RTLISTANCHOR                   listSRV;                 /* Shader resource views created for this resource. */
     RTLISTANCHOR                   listRTV;                 /* Render target views. */
@@ -547,6 +551,73 @@ typedef struct VBOXDXSRVSTATE
 } VBOXDXSRVSTATE, *PVBOXDXSRVSTATE;
 
 
+/* Transient heap is a big buffer where the driver can sub-allocate blocks of data
+ * and free them after VGPU has processed them.
+ * All blocks (free and used) in the heap are in a list sorted by block offset (listBlocks).
+ * This allows to optimize merging of free blocks.
+ * Additionally all free blocks are in other lists in order to find a free block faster.
+ * Blocks in use are part of a pending blocks list.
+ *
+ * Since the heap is used for MapDiscard access to various buffers, it is very likely that
+ * an application will re-use the buffer and then MapDiscard it again. Therefore the heap
+ * has multiple lists of free blocks: one generic list and a list for each buffer size.
+ * An AVL tree is used for finding a list given a block size.
+ */
+
+/* Arbitrary size of the transient heap. The heap is used for transfers of a large amount of small buffers. */
+#define VBOXDX_TRANSIENT_HEAP_SIZE _8M
+
+/* A block in the transient heap. */
+typedef struct VBOXDXTRANSIENTHEAPBLOCKDESC
+{
+    struct VBOXDXTRANSIENTHEAP    *pHeap;                    /* The block belongs to this heap. */
+    RTLISTNODE                     nodeTransientHeap;        /* VBOXDXTRANSIENTHEAP::listBlocks */
+    RTLISTNODE                     nodeTransientBlock;       /* VBOXDXTRANSIENTHEAP::listFreeBlocks,
+                                                              * VBOXDXTRANSIENTHEAPFREEBLOCKS::listFreeBlocks,
+                                                              * VBOXDXTRANSIENTHEAPBATCH::listPendingBlocks */
+    uint32_t                       offBlock;                 /* Block offset in the heap. */
+    struct {
+        uint32_t                   cbBlock : 28;             /* How many bytes in this block. */
+        uint32_t                   fFreeBlock : 1;           /* Whether this is a free block. */
+        uint32_t                   fReserved : 3;            /* 32 bit alignment. */
+    };
+} VBOXDXTRANSIENTHEAPBLOCKDESC;
+
+/* A collection of allocated blocks which will become free when the query completes. */
+typedef struct VBOXDXTRANSIENTHEAPBATCH
+{
+    struct VBOXDXTRANSIENTHEAP    *pHeap;                    /* The batch belongs to this heap. */
+    RTLISTNODE                     nodeTransientBatch;
+    RTLISTANCHOR                   listPendingBlocks;        /* Blocks of this batch (VBOXDXTRANSIENTHEAPBLOCKDESC::nodeTransientBlock). */
+    VBOXDXQUERY                    queryBatchCompleted;      /* Blocks will be free to reuse when this query completes. */
+} VBOXDXTRANSIENTHEAPBATCH;
+
+struct VBOXDXTRANSIENTHEAPFREEBLOCKS
+{
+    AVLU32NODECORE                 Core;                     /* Key is the size of the blocks. */
+    RTLISTANCHOR                   listFreeBlocks;           /* Blocks which can be used (VBOXDXTRANSIENTHEAPBLOCKDESC::nodeTransientBlock). */
+};
+
+typedef struct VBOXDXTRANSIENTHEAP
+{
+    struct VBOXDX_DEVICE          *pDevice;                  /* The heap belongs to this device. */
+
+    PVBOXDX_RESOURCE               pTransientHeapBuffer;     /* Buffer for data blocks. */
+    void                          *pvTransientHeapMapped;    /* The buffer is always mapped. */
+
+    RTLISTANCHOR                   listBlocks;               /* All blocks (VBOXDXTRANSIENTHEAPBLOCKDESC::nodeTransientHeap). */
+    RTLISTANCHOR                   listFreeBlocks;           /* Free blocks which either were never allocated
+                                                              * or were merged (VBOXDXTRANSIENTHEAPBLOCKDESC::nodeTransientBlock).
+                                                              */
+    AVLU32TREE                     treeFreeBlocks;           /* VBOXDXTRANSIENTHEAPFREEBLOCKS */
+
+    VBOXDXTRANSIENTHEAPBATCH      *pCurrentBatch;            /* Blocks are added to this batch. */
+
+    RTLISTANCHOR                   listTransientBatches;     /* Submitted batches (VBOXDXTRANSIENTHEAPBATCH). */
+    RTLISTANCHOR                   listLookasideBatches;     /* Unused batches (VBOXDXTRANSIENTHEAPBATCH). */
+} VBOXDXTRANSIENTHEAP;
+
+
 /* Arbitrary size of the upload buffer. */
 #define VBOXDX_UPLOAD_BUFFER_SIZE _8M
 
@@ -656,6 +727,7 @@ typedef struct VBOXDX_DEVICE
     } pipeline;
 
     VBOXDXUPLOAD                upload;                     /* UpdateSubresourceUP helpers. */
+    VBOXDXTRANSIENTHEAP         transientHeap;
 
     /* Video decoding and processing. */
     struct
@@ -762,6 +834,9 @@ void vboxDXResourceUpdateSubresourceUP(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE 
 void vboxDXResourceMap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT Subresource,
                               D3D10_DDI_MAP DDIMap, UINT Flags, D3D10DDI_MAPPED_SUBRESOURCE *pMappedSubResource);
 void vboxDXResourceUnmap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT Subresource);
+void vboxDXDynamicConstantBufferMapDiscard(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource, UINT Flags,
+                                           D3D10DDI_MAPPED_SUBRESOURCE *pMappedSubResource);
+void vboxDXDynamicConstantBufferUnmap(PVBOXDX_DEVICE pDevice, PVBOXDX_RESOURCE pResource);
 void vboxDXSoSetTargets(PVBOXDX_DEVICE pDevice, uint32_t NumTargets, PVBOXDXKMRESOURCE *papKMResources, uint32_t *paOffsets, uint32_t *paSizes);
 void vboxDXCreateShaderResourceView(PVBOXDX_DEVICE pDevice, PVBOXDXSHADERRESOURCEVIEW pShaderResourceView);
 void vboxDXGenMips(PVBOXDX_DEVICE pDevice, PVBOXDXSHADERRESOURCEVIEW pShaderResourceView);

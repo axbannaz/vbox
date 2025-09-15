@@ -126,7 +126,6 @@ static HRESULT vboxDXAdapterInit(D3D10DDIARG_OPENADAPTER const* pOpenData, VBOXW
 }
 
 #ifdef DX_STATS
-#include <iprt/avl.h>
 #include <iprt/time.h>
 
 struct DxDdiFnStats {
@@ -162,7 +161,7 @@ static DECLCALLBACK(int) dxDdiCb(PAVLU64NODECORE pNode, void *pvUser)
 
     *pu64NsTotal += p->u64NsTotal;
 
-    LogRel(("[%52s] %6RU64 %6RU64 %6RU64 %6RU64 %6RU64 %6RU64, total %10RU64ns\n",
+    LogRel(("[%52s] %8RU64 %6RU64 %6RU64 %6RU64 %6RU64 %6RU64, total %10RU64ns\n",
         p->pszFunctionName,
         p->au64NsDelayHistogram[0],
         p->au64NsDelayHistogram[1],
@@ -481,7 +480,12 @@ static void APIENTRY ddi10DynamicConstantBufferMapDiscard(
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
     LogFlowFunc(("pDevice 0x%p, pResource 0x%p, subres %d, map %d, flags 0x%X", pDevice, pResource, Subresource, DDIMap, Flags));
 
+#ifndef DX_FAST_DYNAMIC_MAP
     vboxDXResourceMap(pDevice, pResource, Subresource, DDIMap, Flags, pMappedSubResource);
+#else
+    RT_NOREF(Subresource, DDIMap);
+    vboxDXDynamicConstantBufferMapDiscard(pDevice, pResource, Flags, pMappedSubResource);
+#endif
 }
 
 static void APIENTRY ddi10DynamicIABufferMapDiscard(
@@ -514,7 +518,12 @@ static void APIENTRY ddi10DynamicConstantBufferUnmap(
     PVBOXDX_RESOURCE pResource = (PVBOXDX_RESOURCE)hResource.pDrvPrivate;
     LogFlowFunc(("pDevice 0x%p, pResource 0x%p, subres %d", pDevice, pResource, Subresource));
 
+#ifndef DX_FAST_DYNAMIC_MAP
     vboxDXResourceUnmap(pDevice, pResource, Subresource);
+#else
+    RT_NOREF(Subresource);
+    vboxDXDynamicConstantBufferUnmap(pDevice, pResource);
+#endif
 }
 
 static void APIENTRY ddi11_1PsSetConstantBuffers(
