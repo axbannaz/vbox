@@ -6248,11 +6248,72 @@
  */
 
 /* EXTR  <Wd>, <Wn>, <Wm>, #<lsb> (ffe08000/13800000) */
-//#define IEM_INSTR_IMPL_A64__EXTR_32_extract(Rd, Rn, imms, Rm)
+#define IEM_INSTR_IMPL_A64__EXTR_32_extract(Rd, Rn, imms, Rm) \
+    if (!(imms & 32)) \
+    { \
+        if (Rm == Rn || imms == 0) \
+        { \
+            /* ROR */ \
+            IEM_MC_BEGIN(0, 0); \
+            IEM_MC_LOCAL(uint32_t, uTmp); \
+            IEM_MC_FETCH_GREG_U32(uTmp, Rm); \
+            IEM_MC_ROR_LOCAL_U32(uTmp, imms); \
+            IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+        } \
+        else \
+        { \
+            IEM_MC_BEGIN(0, 0); \
+            /* shift the 2nd register up. */ \
+            IEM_MC_LOCAL(uint32_t, uTmpHi); \
+            IEM_MC_FETCH_GREG_U32(uTmpHi, Rn); \
+            IEM_MC_SHL_LOCAL_U32(uTmpHi, 32 - imms); \
+            /* shift the 1st register down. */ \
+            IEM_MC_LOCAL(uint32_t, uTmp); \
+            IEM_MC_FETCH_GREG_U32(uTmp, Rm); \
+            IEM_MC_SHR_LOCAL_U32(uTmp, imms); \
+            /* Merge the two. */ \
+            IEM_MC_OR_2LOCS_U32(uTmp, uTmpHi); \
+            IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+            IEM_MC_ADVANCE_PC_AND_FINISH(); \
+            IEM_MC_END(); \
+        } \
+    } \
+    else \
+        IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* EXTR  <Xd>, <Xn>, <Xm>, #<lsb> (ffe00000/93c00000) */
-//#define IEM_INSTR_IMPL_A64__EXTR_64_extract(Rd, Rn, imms, Rm)
+#define IEM_INSTR_IMPL_A64__EXTR_64_extract(Rd, Rn, imms, Rm) \
+    if (Rm == Rn || imms == 0) \
+    { \
+        /* ROR */ \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U64(uTmp, Rm); \
+        IEM_MC_ROR_LOCAL_U64(uTmp, imms); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        /* shift the 2nd register up. */ \
+        IEM_MC_LOCAL(uint64_t, uTmpHi); \
+        IEM_MC_FETCH_GREG_U64(uTmpHi, Rn); \
+        IEM_MC_SHL_LOCAL_U64(uTmpHi, 64 - imms); \
+        /* shift the 1st register down. */ \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U64(uTmp, Rm); \
+        IEM_MC_SHR_LOCAL_U64(uTmp, imms); \
+        /* Merge the two. */ \
+        IEM_MC_OR_2LOCS_U64(uTmp, uTmpHi); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 

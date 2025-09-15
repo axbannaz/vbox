@@ -590,6 +590,42 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
 
 
+class A64No1CodeGenExtrImm(A64No1CodeGenBase):
+    """
+    C4.1.92.9 extract
+
+    No SP use.
+    """
+    def __init__(self, sInstr, fnCalc):
+        A64No1CodeGenBase.__init__(self, sInstr + '_imm', sInstr, Arm64GprAllocator());
+        self.fnCalc = fnCalc;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in (32, 64,):
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                fRor             = randUBits(2) == 0;
+                (uVal2, iRegIn2) = (uVal1, iRegIn1) if fRor else \
+                                   self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                cShift  = randUBits(5 if cBits == 32 else 6);
+
+                uRes = self.fnCalc(cBits, uVal1, uVal2, cShift);
+                iRegDst = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+
+                self.emitInstr(self.sInstr,
+                               '%s, %s, %s, #%u' % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
+                                                    g_ddGprNamesZrByBits[cBits][iRegIn2], cShift));
+                if iRegDst != 31:
+                    self.emitGprValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.freeList((iRegIn1, iRegDst, -1 if iRegIn1 == iRegIn2 else iRegIn2));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+def calcExtr(cBits, uVal1, uVal2, cShift):
+    fMask = bitsOnes(cBits);
+    return ((((uVal1 & fMask) << cBits) | (uVal2 & fMask)) >> cShift) & fMask;
+
+
 class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
     """
     C4.1.94.3 log_shift
@@ -2439,6 +2475,13 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         #
         aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # extract
+            aoGenerators += [
+                A64No1CodeGenExtrImm(   'extr',   calcExtr),
+            ];
+
 
         if True: # pylint: disable=using-constant-test
             # testbranch

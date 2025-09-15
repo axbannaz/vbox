@@ -254,6 +254,7 @@
 #define IEM_MC_SAR_LOCAL_U64(a_u64Local, a_cShift)      do { (a_u64Local) = (uint64_t)((int64_t)(a_u64Local) >>(a_cShift));  } while (0)
 
 #define IEM_MC_SHR_LOCAL_U8(a_u8Local, a_cShift)        do { (a_u8Local)  >>= (a_cShift);  } while (0)
+#define IEM_MC_SHR_LOCAL_U32(a_u32Local, a_cShift)      do { (a_u32Local) >>= (a_cShift);  } while (0)
 #define IEM_MC_SHR_LOCAL_U64(a_u64Local, a_cShift)      do { (a_u64Local) >>= (a_cShift);  } while (0)
 
 #define IEM_MC_SHL_LOCAL_S16(a_i16Local, a_cShift)      do { (a_i16Local) <<= (a_cShift);  } while (0)
