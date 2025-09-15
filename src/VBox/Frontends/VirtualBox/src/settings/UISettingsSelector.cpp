@@ -467,9 +467,17 @@ void UISelectorDelegate::paint(QPainter *pPainter, const QStyleOptionViewItem &o
 
     /* Acquire item properties: */
     const QPalette palette = QGuiApplication::palette();
-    const QRect itemRectangle = option.rect;
+    QRect itemRectangle = option.rect;
     const QStyle::State enmState = option.state;
     const bool fChosen = enmState & QStyle::State_Selected;
+
+#ifndef VBOX_WS_MAC
+    /* Adjust rectangle to avoid painting artifats: */
+    itemRectangle.setLeft(itemRectangle.left() + 1);
+    itemRectangle.setTop(itemRectangle.top() + 1);
+    itemRectangle.setRight(itemRectangle.right() - 1);
+    itemRectangle.setBottom(itemRectangle.bottom() - 1);
+#endif /* !VBOX_WS_MAC */
 
     /* Draw background: */
     QColor backColor;
