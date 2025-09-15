@@ -580,7 +580,7 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fReg31IsSp = True);
                 uVal2   = randUBits(12);
 
                 fShift = randBool();
@@ -614,10 +614,9 @@ class A64No1CodeGenExtrImm(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits();
                 fRor             = randUBits(2) == 0;
-                (uVal2, iRegIn2) = (uVal1, iRegIn1) if fRor else \
-                                   self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits() if not fRor else (uVal1, iRegIn1);
                 cShift  = randUBits(5 if cBits == 32 else 6);
 
                 uRes = self.fnCalc(cBits, uVal1, uVal2, cShift);
@@ -676,8 +675,8 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
-                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits();
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits();
 
                 bShiftType = randU8() % self.cShiftTypes;
                 cShift     = randU8() % cBits if i & 1 else 0;
@@ -746,8 +745,8 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for i in range(oOptions.cTestsPerInstruction):
-                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = True);
-                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
+                (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fReg31IsSp = True);
+                (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fReg31IsSp = False);
 
                 bOpType = randUBits(3);
                 cShift  = randUBits(2) if i & 1 else 0;
@@ -801,8 +800,8 @@ class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
                     iRegIn1 = self.emitGprLoad(self.oGprAllocator.allocNo31(uVal1), uVal1);
                     iRegIn2 = self.emitGprLoad(self.oGprAllocator.allocNo31(uVal2), uVal2);
                 else:
-                    (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
-                    (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                    (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits();
+                    (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits();
                     fCarry           = randUBits(1);
 
                 if fCarry:
@@ -838,8 +837,8 @@ class A64No1CodeGenBitfieldMove(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
-                (uDst, iRegDst) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits();
+                (uDst, iRegDst) = self.allocGprAndLoadRandUBits();
                 uImmR           = randUBits(5 if cBits == 32 else 6);
                 uImmS           = randUBits(5 if cBits == 32 else 6);
 
@@ -1091,8 +1090,8 @@ class A64No1CodeGenCondCmpReg(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (64, 32):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
-                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits();
+                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits();
                 u4Cond              = randUBits(4);
                 u4NzcvMiss          = randUBits(4);
                 u4NzcvIn            = randUBits(4);
@@ -1130,7 +1129,7 @@ class A64No1CodeGenCondCmpImm(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (64, 32):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits();
                 u5Imm               = randUBits(5);
                 u4Cond              = randUBits(4);
                 u4NzcvMiss          = randUBits(4);
@@ -1168,8 +1167,8 @@ class A64No1CodeGenCondSel(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (64, 32):
             for _ in range(oOptions.cTestsPerInstruction):
-                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
-                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc1, iRegIn1)    = self.allocGprAndLoadRandUBits();
+                (uSrc2, iRegIn2)    = self.allocGprAndLoadRandUBits();
                 u4Nzcv              = randUBits(4);
                 u4Cond              = randUBits(4);
 
@@ -1215,7 +1214,7 @@ class A64No1CodeGenData1Op(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in self.acBits:
             for _ in range(oOptions.cTestsPerInstruction):
-                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits();
                 uRes            = self.fnCalc(cBits, uSrc);
                 iRegDst         = self.oGprAllocator.alloc(uRes);
                 self.emitInstr(self.sInstr,
@@ -1295,7 +1294,7 @@ class A64No1CodeGenTestBranch(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for _ in range(oOptions.cTestsPerInstruction):
             assert self.oGprAllocator.auValues[31] is None;
-            (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+            (uSrc, iRegIn)      = self.allocGprAndLoadRandUBits();
             assert self.oGprAllocator.auValues[31] is None;
             iBitNo              = randUBits(6);
             sJmpLabel           = self.localLabel();
@@ -2012,7 +2011,7 @@ class A64No1CodeGenStImm9(A64No1CodeGenStBase):
         return None;
 
     def emitStInstrAndRandValue(self, sRegBase, iOffset):
-        (uValue, iRegSrc) = self.allocGprAndLoadRandUBits(fIncludingReg31 = True, fReg31IsSp = False);
+        (uValue, iRegSrc) = self.allocGprAndLoadRandUBits(fReg31IsSp = False);
         self.emitStInstrAndFree(iRegSrc, sRegBase, iOffset);
         return uValue & bitsOnes(self.cbMem * 8);
 
@@ -2147,7 +2146,7 @@ class A64No1CodeGenStReg(A64No1CodeGenStBase):
             idxMemSlot  = randURange(0, 256 - self.cbMem);
             iOption     = randUBits(3) | 2;
             cShift      = self.cShift if randBool() else 0;
-            iRegIndex   = self.oGprAllocator.alloc(fIncludingReg31 = True);
+            iRegIndex   = self.oGprAllocator.alloc();
             sRegIndex   = g_dGpr64NamesZr[iRegIndex] if iOption & 1 else g_dGpr32NamesZr[iRegIndex];
             uIndex      = randUBits(64) if iRegIndex != 31 else 0;
             if iOption == 2:        # UXTW
