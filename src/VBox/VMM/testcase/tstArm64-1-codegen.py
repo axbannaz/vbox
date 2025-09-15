@@ -287,14 +287,16 @@ class A64No1CodeGenBase(object):
         ];
         self.emitInstr('stp',   'fp, lr, [sp, #-64]!');
         if self.fMayUseSp:
-            self.asCode.append('/* Save SP as it may be used in the test: */');
-            self.emitInstr('adrp',  'x%u, PAGE(g_u64SavedSp)' % (self.iRegDataPtr,));
-            self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_u64SavedSp)' % (self.iRegDataPtr, self.iRegDataPtr,));
-            iTmp = self.oGprAllocator.allocNo31();
-            self.emitInstr('mov',   'x%u, sp' % (iTmp,));
-            self.emitInstr('str',   'x%u, [x%u]' % (iTmp, self.iRegDataPtr));
-            self.oGprAllocator.free(iTmp);
-            self.asCode.append('');
+            self.asCode.append('/* Save SP so we can use it in the test: */');
+        else:
+            self.asCode.append('/* Save SP so we can check its value while testing: */');
+        self.emitInstr('adrp',  'x%u, PAGE(g_u64SavedSp)' % (self.iRegDataPtr,));
+        self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_u64SavedSp)' % (self.iRegDataPtr, self.iRegDataPtr,));
+        iTmp = self.oGprAllocator.allocNo31();
+        self.emitInstr('mov',   'x%u, sp' % (iTmp,));
+        self.emitInstr('str',   'x%u, [x%u]' % (iTmp, self.iRegDataPtr));
+        self.oGprAllocator.free(iTmp);
+        self.asCode.append('');
 
         self.emitInstr('adrp',  'x%u, PAGE(g_DataStart_%s)' % (self.iRegDataPtr, self.sLabel,));
         self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_DataStart_%s)' % (self.iRegDataPtr, self.iRegDataPtr, self.sLabel,));
@@ -393,6 +395,36 @@ class A64No1CodeGenBase(object):
 
     def emitGprValCheck(self, iRegToCheck, uExpectedValue, iRegTmp = -1, fReg31IsSp = False):
         """ Emits a register value check. """
+        #
+        # If the register we're supposed to check is XZR, we should try make
+        # sure SP wasn't modified by accident (this have happened already).
+        #
+        if iRegToCheck == 31 and not fReg31IsSp:
+            if self.fMayUseSp:
+                # The testcase uses SP, so it should normally have a known value,
+                # modify the parameters to check for this in SP instead.
+                uExpectedValue = self.oGprAllocator.auValues[31];
+                if uExpectedValue is None:
+                    return None;
+                fReg31IsSp = True;
+            else:
+                # If the testcase doesn't use SP, it should have the incoming stack
+                # value which the prolog saved in a global variable. Load and compare.
+                iRegTmp = self.oGprAllocator.allocNo31();
+                self.emitInstr('adrp',  'x%u, PAGE(g_u64SavedSp)' % (iRegTmp,));
+                self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_u64SavedSp)' % (iRegTmp, iRegTmp,));
+                self.emitInstr('ldr',   'x%u, [x%u]' % (iRegTmp, iRegTmp));
+                self.emitInstr('cmp',   'sp, x%u, UXTX' % (iRegTmp));
+                sLabel = self.localLabel();
+                self.emitInstr('b.eq',  sLabel);
+                self.emitBrk();
+                self.emitLabel(sLabel);
+                self.oGprAllocator.free(iRegTmp);
+                return None;
+
+        #
+        # Regular check.
+        #
         sRegToCheck = g_dddGprNamesBySpAndBits[fReg31IsSp][64][iRegToCheck];
         sCmpForceExtended = ', UXTX' if iRegToCheck == 31 and fReg31IsSp else '';
 
@@ -600,8 +632,7 @@ class A64No1CodeGenAddSubImm(A64No1CodeGenBase):
                                                     g_ddGprNamesSpByBits[cBits][iRegIn1], uVal2, ', LSL #12' if fShift else '',));
                 if self.fWithFlags:
                     self.emitFlagsCheck(fNzcv);
-                if iRegDst != 31 or self.fWithSpDst:
-                    self.emitGprValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
+                self.emitGprValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -621,29 +652,21 @@ class A64No1CodeGenExtrImm(A64No1CodeGenBase):
     def generateBody(self, oOptions, cLeftToAllCheck):
         for cBits in (32, 64,):
             for _ in range(oOptions.cTestsPerInstruction):
-                assert self.oGprAllocator.auValues[31] is None;
                 (uVal1, iRegIn1) = self.allocGprAndLoadRandUBits();
-                assert self.oGprAllocator.auValues[31] is None;
                 fRor             = randUBits(2) == 0;
                 (uVal2, iRegIn2) = self.allocGprAndLoadRandUBits() if not fRor else (uVal1, iRegIn1);
-                assert self.oGprAllocator.auValues[31] is None;
                 cShift  = randUBits(5 if cBits == 32 else 6);
 
                 uRes = self.fnCalc(cBits, uVal1, uVal2, cShift);
                 iRegDst = self.oGprAllocator.alloc(uRes);
-                assert self.oGprAllocator.auValues[31] is None;
 
                 self.emitInstr(self.sInstr,
                                '%s, %s, %s, #%u' % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
                                                     g_ddGprNamesZrByBits[cBits][iRegIn2], cShift));
-                if iRegDst != 31:
-                    assert self.oGprAllocator.auValues[31] is None;
-                    self.emitGprValCheck(iRegDst, uRes);
-                    assert self.oGprAllocator.auValues[31] is None;
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegDst, -1 if iRegIn1 == iRegIn2 else iRegIn2));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
-                assert self.oGprAllocator.auValues[31] is None;
 
 def calcExtr(cBits, uVal1, uVal2, cShift):
     fMask = bitsOnes(cBits);
@@ -704,8 +727,7 @@ class A64No1CodeGenShiftedReg(A64No1CodeGenBase):
                                   g_ddGprNamesZrByBits[cBits][iRegIn2], self.kdShiftNm[bShiftType], cShift,));
                 if self.fWithFlags:
                     self.emitFlagsCheck(fNzcv);
-                if iRegDst != 31:
-                    self.emitGprValCheck(iRegDst, uRes);
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -777,8 +799,7 @@ class A64No1CodeGenExtendedReg(A64No1CodeGenBase):
                                   g_ddGprNamesZrByBits[cBitsRegIn2][iRegIn2], self.kdOp[bOpType], cShift,));
                 if self.fWithFlags:
                     self.emitFlagsCheck(fNzcv);
-                if iRegDst != 31 or self.fWithSpDst:
-                    self.emitGprValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
+                self.emitGprValCheck(iRegDst, uRes, fReg31IsSp = self.fWithSpDst);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -831,8 +852,7 @@ class A64No1CodeGenAddSubCarry(A64No1CodeGenBase):
                                   g_ddGprNamesZrByBits[cBits][iRegIn2],));
                 if self.fWithFlags:
                     self.emitFlagsCheck(fNzcv);
-                if iRegDst != 31:
-                    self.emitGprValCheck(iRegDst, uRes);
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -863,7 +883,7 @@ class A64No1CodeGenBitfieldMove(A64No1CodeGenBase):
                                   uImmR, uImmS,));
                 if iRegDst != 31:
                     self.oGprAllocator.updateValue(iRegDst, uRes);
-                    self.emitGprValCheck(iRegDst, uRes);
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -1194,8 +1214,7 @@ class A64No1CodeGenCondSel(A64No1CodeGenBase):
                 self.emitInstr(self.sInstr, '%s, %s, %s, %s'
                                % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn1],
                                   g_ddGprNamesZrByBits[cBits][iRegIn2], g_kdCondNames[u4Cond],));
-                if iRegDst != 31:
-                    self.emitGprValCheck(iRegDst, uRes);
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.freeList((iRegIn1, iRegIn2, iRegDst,));
                 cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
@@ -1233,8 +1252,7 @@ class A64No1CodeGenData1Op(A64No1CodeGenBase):
                 iRegDst         = self.oGprAllocator.alloc(uRes);
                 self.emitInstr(self.sInstr,
                                '%s, %s' % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn],));
-                if iRegDst != 31:
-                    self.emitGprValCheck(iRegDst, uRes);
+                self.emitGprValCheck(iRegDst, uRes);
 
                 self.oGprAllocator.free(iRegDst);
                 self.oGprAllocator.free(iRegIn);
@@ -1444,8 +1462,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
         return iRegDst;
 
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
-        if iRegDst != 31:
-            self.emitGprValCheck(iRegDst, uExpected);
+        self.emitGprValCheck(iRegDst, uExpected);
         self.oGprAllocator.free(iRegDst);
 
 
@@ -1524,8 +1541,7 @@ class A64No1CodeGenLdImm12(A64No1CodeGenLdBase):
         return iRegDst;
 
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
-        if iRegDst != 31:
-            self.emitGprValCheck(iRegDst, uExpected);
+        self.emitGprValCheck(iRegDst, uExpected);
         self.oGprAllocator.free(iRegDst);
 
 
@@ -1620,8 +1636,7 @@ class A64No1CodeGenLdReg(A64No1CodeGenLdBase):
         return iRegDst;
 
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
-        if iRegDst != 31:
-            self.emitGprValCheck(iRegDst, uExpected);
+        self.emitGprValCheck(iRegDst, uExpected);
         self.oGprAllocator.free(iRegDst);
 
 
@@ -1723,8 +1738,7 @@ class A64No1CodeGenLdLiteral(A64No1CodeGenLdBase):
         return iRegDst;
 
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
-        if iRegDst != 31:
-            self.emitGprValCheck(iRegDst, uExpected);
+        self.emitGprValCheck(iRegDst, uExpected);
         self.oGprAllocator.free(iRegDst);
 
 
@@ -1818,8 +1832,7 @@ class A64No1CodeGenLdpImm7(A64No1CodeGenLdBase):
         return (iRegDst1, iRegDst2);
 
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
-        if iRegDst != 31:
-            self.emitGprValCheck(iRegDst, uExpected);
+        self.emitGprValCheck(iRegDst, uExpected);
         self.oGprAllocator.free(iRegDst);
 
 
