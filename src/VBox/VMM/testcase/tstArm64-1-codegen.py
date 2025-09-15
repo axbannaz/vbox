@@ -362,16 +362,33 @@ class A64No1CodeGenBase(object):
         if iReg == 31 and fReg31IsSp:
             iRegToLoad = self.oGprAllocator.allocNo31(uValue);
 
-        ## @todo this can be compacted more!              0xffffffffffffffff
+        uInvVal = ~uValue & 0xffffffffffffffff
+        # 16-bit immediates
         if 0 <= uValue <= 0xffff:
             self.emitInstr('movz',  'x%u, #0x%x' % (iRegToLoad, uValue));
+        elif (uValue & ~0xffff0000) == 0:
+            self.emitInstr('movz',  'x%u,  #0x%x, LSL #16' % (iRegToLoad, uValue >> 16), hex(uValue));
+        elif (uValue & ~0xffff00000000) == 0:
+            self.emitInstr('movz',  'x%u, #0x%x, LSL #32' % (iRegToLoad, uValue >> 32), hex(uValue));
+        elif (uValue & ~0xffff000000000000) == 0:
+            self.emitInstr('movz',  'x%u, #0x%x, LSL #48' % (iRegToLoad, uValue >> 48), hex(uValue));
+        # 16-bit inverted immediates
+        elif 0 <= uInvVal <= 0xffff:
+            self.emitInstr('movn',  'x%u, #0x%x' % (iRegToLoad, uInvVal), hex(uValue));
+        elif (uInvVal & ~0xffff0000) == 0:
+            self.emitInstr('movn',  'x%u, #0x%x, LSL #16' % (iRegToLoad, uInvVal >> 16), hex(uValue));
+        elif (uInvVal & ~0xffff00000000) == 0:
+            self.emitInstr('movn',  'x%u, #0x%x, LSL #32' % (iRegToLoad, uInvVal >> 32), hex(uValue));
+        elif (uInvVal & ~0xffff000000000000) == 0:
+            self.emitInstr('movn',  'x%u, #0x%x, LSL #48' % (iRegToLoad, uInvVal >> 48), hex(uValue));
+        # Load data.
         elif 0 <= uValue <= 0xffffffff:
             self.emitInstr('ldr',   'w%u, [x%u], #4' % (iRegToLoad, self.iRegDataPtr), '%#x' % (uValue,));
             if self.cbLastData == 4 and self.cLastDataItems < 9:
                 self.asData[-1] += ', 0x%08x' % (uValue,);
                 self.cLastDataItems += 1;
             else:
-                self.asData.append('        .int    0x%08x' % (uValue,));
+                self.asData.append('        .int    0x%08x' % (uValue,));  # 0xe8e829929cdd3d -> 5.262.336 bytes
                 self.cbLastData     = 4;
                 self.cLastDataItems = 1;
         else:
