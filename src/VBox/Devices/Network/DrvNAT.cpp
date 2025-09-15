@@ -113,10 +113,16 @@ RTVEC_DECL(InAddrList, struct in_addr)
 /** Slirp Timer */
 typedef struct slirpTimer
 {
+    /**
+     * Pointer to next timer in linked list.
+     * @note: This currently is not in use. See note in struct DRVNAT.
+     */
     struct slirpTimer *next;
     /** The time deadline (milliseconds, RTTimeMilliTS).   */
     int64_t msExpire;
+    /** Callback to be called on timer expiry. Supplied by libslirp. */
     SlirpTimerCb pHandler;
+    /** Opaque object passed to callback. */
     void *opaque;
 } SlirpTimer;
 
@@ -263,7 +269,7 @@ static DECLCALLBACK(int) drvNATRecvWakeup(PPDMDRVINS pDrvIns, PPDMTHREAD pThread
  * @param   pBuf    Pointer to packet buffer.
  * @param   cb      Size of packet in buffer.
  *
- * @thread  NAT
+ * @thread  NATRX
  */
 static DECLCALLBACK(void) drvNATRecvWorker(PDRVNAT pThis, void *pBuf, size_t cb)
 {
@@ -330,6 +336,7 @@ static void drvNATFreeSgBuf(PDRVNAT pThis, PPDMSCATTERGATHER pSgBuf)
  *
  * @param   pThis               Pointer to the NAT instance.
  * @param   pSgBuf              The scatter/gather buffer.
+ *
  * @thread  NAT
  */
 static DECLCALLBACK(void) drvNATSendWorker(PDRVNAT pThis, PPDMSCATTERGATHER pSgBuf)
@@ -656,7 +663,7 @@ static DECLCALLBACK(void) drvNATNetworkUp_NotifyLinkChanged(PPDMINETWORKUP pInte
  * The slirp implementation is single-threaded so we execute this enginre in a
  * dedicated thread. We take care that this thread does not become the
  * bottleneck: If the guest wants to send, a request is enqueued into the
- * hSlirpReqQueue and handled asynchronously by this thread.  If this thread
+ * hSlirpReqQueue and handled asynchronously by this thread. If this thread
  * wants to deliver packets to the guest, it enqueues a request into
  * hRecvReqQueue which is later handled by the Recv thread.
  *
@@ -762,7 +769,7 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
             cbRead = recv(pThis->ahWakeupSockPair[1], &achBuf[0], RT_MIN(cbWakeupNotifs, sizeof(achBuf)), NULL);
             int iError = WSAGetLastError();
             if(cbRead == SOCKET_ERROR)
-                LogFlowFunc(("Wakeup socket read erorr: %d\n", iError));
+                LogRel(("Wakeup socket read erorr: %d\n", iError));
 #else
             RTPipeRead(pThis->hPipeRead, &achBuf[0], RT_MIN(cbWakeupNotifs, sizeof(achBuf)), &cbRead);
 #endif
@@ -786,7 +793,7 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
  * @param   pDrvIns     The pcnet device instance.
  * @param   pThread     The send thread.
  *
- * @thread  ?
+ * @thread  NAT
  */
 static DECLCALLBACK(int) drvNATAsyncIoWakeup(PPDMDRVINS pDrvIns, PPDMTHREAD pThread)
 {
@@ -815,7 +822,7 @@ static DECLCALLBACK(void *) drvNATQueryInterface(PPDMIBASE pInterface, const cha
  * Info handler.
  *
  * @param   pDrvIns     The PDM driver context.
- * @param   pHlp        ....
+ * @param   pHlp        Info helper callbacks.
  * @param   pszArgs     Unused.
  *
  * @thread  any
@@ -835,12 +842,12 @@ static DECLCALLBACK(void) drvNATInfo(PPDMDRVINS pDrvIns, PCDBGFINFOHLP pHlp, con
  * Sets up the redirectors.
  *
  * @returns VBox status code.
- * @param   uInstance       ?
- * @param   pThis           ?
+ * @param   uInstance       Index of the redirection being constructed.
+ * @param   pThis           Pointer to NAT context.
  * @param   pCfg            The configuration handle.
  * @param   pNetwork        Unused.
  *
- * @thread  ?
+ * @thread  EMT
  */
 static int drvNATConstructRedir(unsigned iInstance, PDRVNAT pThis, PCFGMNODE pCfg, PRTNETADDRIPV4 pNetwork)
 {
@@ -951,7 +958,7 @@ static int drvNATConstructRedir(unsigned iInstance, PDRVNAT pThis, PCFGMNODE pCf
  * @param   pszGuestIp      String of guest IP address.
  * @param   u16GuestPort    Guest port to forward.
  *
- * @thread  ?
+ * @thread  EMT
  */
 static DECLCALLBACK(int) drvNATNotifyApplyPortForwardCommand(PDRVNAT pThis, bool fRemove, bool fUdp, const char *pszHostIp,
                                                              uint16_t u16HostPort, const char *pszGuestIp, uint16_t u16GuestPort)
@@ -1184,9 +1191,9 @@ static short drvNAT_PollEventSlirpToHost(int iEvents)
  *
  * @param   iEvents     Integer representing host type poll events.
  *
- * @returns Integer representing slirp type poll events.
+ * @returns integer     representing slirp type poll events.
  *
- * @thread  ?
+ * @thread  NAT
  */
 static int drvNAT_PollEventHostToSlirp(int iEvents) {
     int iRet = 0;
@@ -1446,7 +1453,7 @@ static DECLCALLBACK(int) drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void
  *
  * @returns Integer representing transalted revents.
  *
- * @thread  ?
+ * @thread  NAT
  */
 static DECLCALLBACK(int) drvNAT_GetREventsCb(int idx, void *opaque)
 {
