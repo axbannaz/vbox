@@ -1158,6 +1158,82 @@ def calcCondSelNeg(cBits, uSrc1, uSrc2, u4Nzcv, u4Cond):
     return calcCondSel(cBits, uSrc1, -uSrc2, u4Nzcv, u4Cond);
 
 
+class A64No1CodeGenData1Op(A64No1CodeGenBase):
+    """ C4.1.94.2 Data-processing (1 source) """
+    def __init__(self, sInstr, fnCalc, acBits = (32, 64)):
+        A64No1CodeGenBase.__init__(self, sInstr, sInstr, Arm64GprAllocator());
+        self.fnCalc = fnCalc;
+        self.acBits = acBits;
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in self.acBits:
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uSrc, iRegIn)  = self.allocGprAndLoadRandUBits(fIncludingReg31 = True);
+                uRes            = self.fnCalc(cBits, uSrc);
+                iRegDst         = self.oGprAllocator.alloc(uRes, fIncludingReg31 = True);
+                self.emitInstr(self.sInstr,
+                               '%s, %s' % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBits][iRegIn],));
+                if iRegDst != 31:
+                    self.emitGprValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.free(iRegDst);
+                self.oGprAllocator.free(iRegIn);
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+def calcRbit(cBits, uSrc):
+    uRet = 0;
+    for iBit in range(cBits):
+        uRet |= ((uSrc >> iBit) & 1) << (cBits - iBit - 1);
+    return uRet;
+
+def calcRev(cBits, uSrc):
+    uRet = 0;
+    for iBit in range(0, cBits, 8):
+        uRet |= ((uSrc >> iBit) & 0xff) << (cBits - iBit - 8);
+    return uRet;
+
+def calcRev16(cBits, uSrc):
+    uRet = 0;
+    for iBit in range(0, cBits, 16):
+        uWord = (uSrc >> iBit) & 0xffff;
+        uWord = ((uWord >> 8) & 0xff) | ((uWord & 0xff) << 8);
+        uRet |= uWord << iBit;
+    return uRet;
+
+def calcRev32(cBits, uSrc):
+    assert cBits == 64;
+    return (calcRev(32, uSrc >> 32) << 32) | calcRev(32, uSrc);
+
+def calcClz(cBits, uSrc):
+    iTopBit = (uSrc & bitsOnes(cBits)).bit_length();
+    return cBits - iTopBit;
+
+def calcCls(cBits, uSrc):
+    uRet     = 0;
+    fSignBit = (uSrc >> (cBits - 1)) & 1;
+    for iBit in range(cBits - 2, -1, -1):
+        if ((uSrc >> iBit) & 1) != fSignBit:
+            break;
+        uRet += 1;
+    return uRet;
+
+def calcCtz(cBits, uSrc):
+    uRet = 0;
+    while cBits > 0 and (uSrc & 1) == 0:
+        uSrc >>= 1;
+        uRet  += 1;
+        cBits -= 1;
+    return uRet;
+
+def calcCnt(cBits, uSrc):
+    return (uSrc & bitsOnes(cBits)).bit_count();
+
+def calcAbs(cBits, uSrc):
+    if uSrc & (1 << (cBits - 1)):
+        uSrc = -bitsSignedToInt(cBits, uSrc);
+    return uSrc & bitsOnes(cBits);
+
+
 #
 # Branches.
 #
@@ -2363,6 +2439,21 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         #
         aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # testbranch
+            aoGenerators += [
+                A64No1CodeGenData1Op(    'rbit',   calcRbit),
+                A64No1CodeGenData1Op(    'rev16',  calcRev16),
+                A64No1CodeGenData1Op(    'rev',    calcRev,),
+                A64No1CodeGenData1Op(    'rev32',  calcRev32, acBits = (64,)),
+                A64No1CodeGenData1Op(    'clz',    calcClz),
+                A64No1CodeGenData1Op(    'cls',    calcCls),
+                #A64No1CodeGenData1Op(    'ctz',    calcCtz), - not supported by available HW (FEAT_CSSC)
+                #A64No1CodeGenData1Op(    'cnt',    calcCnt), - not supported by available HW (FEAT_CSSC)
+                #A64No1CodeGenData1Op(    'abs',    calcAbs), - not supported by available HW (FEAT_CSSC)
+                ## @todo do PACIA and all that stuff...
+            ];
 
         if True: # pylint: disable=using-constant-test
             # testbranch

@@ -5653,23 +5653,58 @@
  */
 
 /* RBIT  <Wd>, <Wn> (fffffc00/5ac00000) */
-//#define IEM_INSTR_IMPL_A64__RBIT_32_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__RBIT_32_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_A64_RBIT_LOCAL_U32(uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* REV16  <Wd>, <Wn> (fffffc00/5ac00400) */
-//#define IEM_INSTR_IMPL_A64__REV16_32_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__REV16_32_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_A64_REV16_LOCAL_U32(uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* REV  <Wd>, <Wn> (fffffc00/5ac00800) */
-//#define IEM_INSTR_IMPL_A64__REV_32_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__REV_32_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_BSWAP_LOCAL_U32(uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CLZ  <Wd>, <Wn> (fffffc00/5ac01000) */
-//#define IEM_INSTR_IMPL_A64__CLZ_32_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__CLZ_32_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_A64_CLZ_LOCAL_U32(uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CLS  <Wd>, <Wn> (fffffc00/5ac01400) */
-//#define IEM_INSTR_IMPL_A64__CLS_32_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__CLS_32_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_A64_CLS_LOCAL_U32(uTmp); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CTZ  <Wd>, <Wn> (fffffc00/5ac01800) */
@@ -5685,27 +5720,68 @@
 
 
 /* RBIT  <Xd>, <Xn> (fffffc00/dac00000) */
-//#define IEM_INSTR_IMPL_A64__RBIT_64_dp_1src(Rd, Rn)
-
+#define IEM_INSTR_IMPL_A64__RBIT_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_RBIT_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 /* REV16  <Xd>, <Xn> (fffffc00/dac00400) */
-//#define IEM_INSTR_IMPL_A64__REV16_64_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__REV16_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_REV16_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* REV32  <Xd>, <Xn> (fffffc00/dac00800) */
-//#define IEM_INSTR_IMPL_A64__REV32_64_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__REV32_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_REV32_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* REV  <Xd>, <Xn> (fffffc00/dac00c00) */
-//#define IEM_INSTR_IMPL_A64__REV_64_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__REV_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_BSWAP_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CLZ  <Xd>, <Xn> (fffffc00/dac01000) */
-//#define IEM_INSTR_IMPL_A64__CLZ_64_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__CLZ_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_CLZ_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CLS  <Xd>, <Xn> (fffffc00/dac01400) */
-//#define IEM_INSTR_IMPL_A64__CLS_64_dp_1src(Rd, Rn)
+#define IEM_INSTR_IMPL_A64__CLS_64_dp_1src(Rd, Rn) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_A64_CLS_LOCAL_U64(uTmp); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* CTZ  <Xd>, <Xn> (fffffc00/dac01800) */
