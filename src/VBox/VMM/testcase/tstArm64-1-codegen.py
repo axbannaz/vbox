@@ -268,6 +268,7 @@ class A64No1CodeGenBase(object):
         self.asData        = [];        # Assembly data lines.
         self.cbLastData    = -1;
         self.cLastDataItems = 0;
+        self.abData        = b'';
 
         self.sLabel        = sName;
         if sName not in g_dNameSeqNumbers:
@@ -349,6 +350,18 @@ class A64No1CodeGenBase(object):
         self.emitInstr('brk', '#0x%x' % (g_iBrkNo & 0xffff,));
         g_iBrkNo += 1;
 
+    def _findInData(self, abValue):
+        """
+        Locates abValue in self.abData, returning the (positive) offset relative
+        to the end (iRegDataPtr).   Rejects offset unsuitable for ldur.
+        """
+        offValue = self.abData.rfind(abValue);
+        if offValue >= 0:
+            offValue = len(self.abData) - offValue;
+            if offValue <= 256:
+                return offValue;
+        return -1;
+
     def emitGprLoad(self, iReg, uValue, fReg31IsSp = True, fTempValue = False):
         """
         Generates loading uValue into GPR 'iReg'.
@@ -383,23 +396,35 @@ class A64No1CodeGenBase(object):
             self.emitInstr('movn',  'x%u, #0x%x, LSL #48' % (iRegToLoad, uInvVal >> 48), hex(uValue));
         # Load data.
         elif 0 <= uValue <= 0xffffffff:
-            self.emitInstr('ldr',   'w%u, [x%u], #4' % (iRegToLoad, self.iRegDataPtr), '%#x' % (uValue,));
-            if self.cbLastData == 4 and self.cLastDataItems < 9:
-                self.asData[-1] += ', 0x%08x' % (uValue,);
-                self.cLastDataItems += 1;
+            abValue  = uValue.to_bytes(4, byteorder = 'little');
+            offValue = self._findInData(abValue);
+            if offValue >= 0:
+                self.emitInstr('ldur',  'w%u, [x%u, #%d]' % (iRegToLoad, self.iRegDataPtr, -offValue), hex(uValue));
             else:
-                self.asData.append('        .int    0x%08x' % (uValue,));  # 0xe8e829929cdd3d -> 5.262.336 bytes
-                self.cbLastData     = 4;
-                self.cLastDataItems = 1;
+                self.abData += abValue;
+                self.emitInstr('ldr',   'w%u, [x%u], #4' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
+                if self.cbLastData == 4 and self.cLastDataItems < 9:
+                    self.asData[-1] += ', 0x%08x' % (uValue,);
+                    self.cLastDataItems += 1;
+                else:
+                    self.asData.append('        .int    0x%08x' % (uValue,));  # 0xe8e829929cdd3d -> 5.262.336 bytes
+                    self.cbLastData     = 4;
+                    self.cLastDataItems = 1;
         else:
-            self.emitInstr('ldr',   'x%u, [x%u], #8' % (iRegToLoad, self.iRegDataPtr), '%#x' % (uValue,));
-            if self.cbLastData == 8 and self.cLastDataItems < 5:
-                self.asData[-1] += ', 0x%016x' % (uValue,);
-                self.cLastDataItems += 1;
+            abValue  = uValue.to_bytes(8, byteorder = 'little');
+            offValue = self._findInData(abValue);
+            if offValue >= 0:
+                self.emitInstr('ldur',  'x%u, [x%u, #%d]' % (iRegToLoad, self.iRegDataPtr, -offValue), hex(uValue));
             else:
-                self.asData.append('        .quad   0x%016x' % (uValue,));
-                self.cbLastData     = 8;
-                self.cLastDataItems = 1;
+                self.abData += abValue;
+                self.emitInstr('ldr',   'x%u, [x%u], #8' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
+                if self.cbLastData == 8 and self.cLastDataItems < 5:
+                    self.asData[-1] += ', 0x%016x' % (uValue,);
+                    self.cLastDataItems += 1;
+                else:
+                    self.asData.append('        .quad   0x%016x' % (uValue,));
+                    self.cbLastData     = 8;
+                    self.cLastDataItems = 1;
 
         # SP hack:
         if iReg != iRegToLoad:
@@ -577,16 +602,23 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
 
         for chRegPfx, uMax, cb, sAsDir, cbAsItem, cMaxAsItemsPerLine in self.kaFprLoadSpecs:
             if 0 <= uValue < uMax:
-                self.emitInstr('ldr',   '%s%u, [x%u], #%u' % (chRegPfx, iReg, self.iRegDataPtr, cb), '%#x' % (uValue,));
-                for _ in range(cb // cbAsItem):
-                    if self.cbLastData == cbAsItem and self.cLastDataItems < cMaxAsItemsPerLine:
-                        self.asData[-1]     += ', 0x%0*x' % (cbAsItem * 2, uValue & ((1 << (cbAsItem * 8)) - 1),);
-                        self.cLastDataItems += 1;
-                    else:
-                        self.asData.append('        %-7s 0x%0*x' % (sAsDir, cbAsItem * 2, uValue & ((1 << (cbAsItem * 8)) - 1),));
-                        self.cLastDataItems  = 1;
-                        self.cbLastData      = cbAsItem;
-                    uValue >>= cbAsItem * 8;
+                abValue  = uValue.to_bytes(cb, byteorder = 'little');
+                offValue = self._findInData(abValue);
+                if offValue >= 0:
+                    self.emitInstr('ldur',  '%s%u, [x%u, #%d]' % (chRegPfx, iReg, self.iRegDataPtr, -offValue), hex(uValue));
+                else:
+                    self.abData += abValue;
+                    self.emitInstr('ldr',   '%s%u, [x%u], #%u' % (chRegPfx, iReg, self.iRegDataPtr, cb), hex(uValue));
+                    for _ in range(cb // cbAsItem):
+                        uThisValue = uValue & ((1 << (cbAsItem * 8)) - 1)
+                        if self.cbLastData == cbAsItem and self.cLastDataItems < cMaxAsItemsPerLine:
+                            self.asData[-1]     += ', 0x%0*x' % (cbAsItem * 2, uThisValue,);
+                            self.cLastDataItems += 1;
+                        else:
+                            self.asData.append('        %-7s 0x%0*x' % (sAsDir, cbAsItem * 2, uThisValue,));
+                            self.cLastDataItems  = 1;
+                            self.cbLastData      = cbAsItem;
+                        uValue >>= cbAsItem * 8;
                 return iReg;
         self.oFprAllocator.updateValue(iReg, uValue);
         return iReg;
