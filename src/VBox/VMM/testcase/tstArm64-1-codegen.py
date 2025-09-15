@@ -279,9 +279,6 @@ class A64No1CodeGenBase(object):
 
 
     def generate(self, oOptions):
-        self.asData += [
-            'g_DataStart_%s: /* %s / %s */' % (self.sLabel, self.sName, self.sInstr),
-        ];
         self.asCode += [
             '/* %s / %s */' % (self.sName, self.sInstr,),
             'BEGINPROC %s' % (self.sLabel,),
@@ -299,8 +296,8 @@ class A64No1CodeGenBase(object):
         self.oGprAllocator.free(iTmp);
         self.asCode.append('');
 
-        self.emitInstr('adrp',  'x%u, PAGE(g_DataStart_%s)' % (self.iRegDataPtr, self.sLabel,));
-        self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_DataStart_%s)' % (self.iRegDataPtr, self.iRegDataPtr, self.sLabel,));
+        self.emitInstr('adrp',  'x%u, PAGE(g_DataEnd_%s)' % (self.iRegDataPtr, self.sLabel,));
+        self.emitInstr('add',   'x%u, x%u, PAGEOFF(g_DataEnd_%s)' % (self.iRegDataPtr, self.iRegDataPtr, self.sLabel,));
         self.asCode.append('');
 
         if self.fMayUseSp:
@@ -323,10 +320,16 @@ class A64No1CodeGenBase(object):
         self.asCode.append('ENDPROC %s' % (self.sLabel,));
 
         # Serialize the data.
+        self.asData += [
+            'g_DataStart_%s: /* %s / %s */' % (self.sLabel, self.sName, self.sInstr),
+        ];
         offData = 0;
         while offData < len(self.abData):
             self.asData.append('    .byte %s' % (','.join(['%#04x' % (b,) for b in self.abData[offData:offData+16]]),));
             offData += 16;
+        self.asData += [
+            'g_DataEnd_%s: /* %s / %s */' % (self.sLabel, self.sName, self.sInstr),
+        ];
 
         return None;
 
@@ -357,17 +360,25 @@ class A64No1CodeGenBase(object):
         self.emitInstr('brk', '#0x%x' % (g_iBrkNo & 0xffff,));
         g_iBrkNo += 1;
 
-    def _findInData(self, abValue):
+    def _findInData(self, abValue, cbMult):
         """
-        Locates abValue in self.abData, returning the (positive) offset relative
-        to the end (iRegDataPtr).   Rejects offset unsuitable for ldur.
+        Locates abValue in self.abData, if possible.
+        Returns offset relative to the end (iRegDataPtr) and the load instruction to use.
+
+        Note! We accumulate content of abData in reverse order and iRegDataPtr starts at
+              at the end of the data area, so that we can use the 12-bit unsigned offset
+              variant of LDR as well as LDUR to get at the data.
         """
-        offValue = self.abData.rfind(abValue);
-        if offValue >= 0:
-            offValue = len(self.abData) - offValue;
-            if offValue <= 256:
-                return offValue;
-        return -1;
+        cbMax    = 0xfff * cbMult + cbMult - 1;
+        offValue = self.abData.find(abValue, 0, cbMax + 1);
+        while offValue > 0 and (offValue & (cbMult - 1)) != 0:
+            if offValue < 256:
+                return (offValue, 'ldur');
+            offValue = self.abData.find(abValue, offValue + 1, cbMax);
+        if offValue > 0 and (offValue & (cbMult - 1)) == 0:
+            assert offValue / cbMult <= 0xfff;
+            return (offValue, 'ldr');
+        return (-1, None);
 
     def emitGprLoad(self, iReg, uValue, fReg31IsSp = True, fTempValue = False):
         """
@@ -403,21 +414,21 @@ class A64No1CodeGenBase(object):
             self.emitInstr('movn',  'x%u, #0x%x, LSL #48' % (iRegToLoad, uInvVal >> 48), hex(uValue));
         # Load data.
         elif 0 <= uValue <= 0xffffffff:
-            abValue  = uValue.to_bytes(4, byteorder = 'little');
-            offValue = self._findInData(abValue);
+            abValue             = uValue.to_bytes(4, byteorder = 'little');
+            (offValue, sLdrIns) = self._findInData(abValue, 4);
             if offValue >= 0:
-                self.emitInstr('ldur',  'w%u, [x%u, #%d]' % (iRegToLoad, self.iRegDataPtr, -offValue), hex(uValue));
+                self.emitInstr(sLdrIns, 'w%u, [x%u, #%u]' % (iRegToLoad, self.iRegDataPtr, offValue), hex(uValue));
             else:
-                self.abData += abValue;
-                self.emitInstr('ldr',   'w%u, [x%u], #4' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
+                self.abData = abValue + self.abData;
+                self.emitInstr('ldr',   'w%u, [x%u, #-4]!' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
         else:
-            abValue  = uValue.to_bytes(8, byteorder = 'little');
-            offValue = self._findInData(abValue);
+            abValue             = uValue.to_bytes(8, byteorder = 'little');
+            (offValue, sLdrIns) = self._findInData(abValue, 8);
             if offValue >= 0:
-                self.emitInstr('ldur',  'x%u, [x%u, #%d]' % (iRegToLoad, self.iRegDataPtr, -offValue), hex(uValue));
+                self.emitInstr(sLdrIns, 'x%u, [x%u, #%u]' % (iRegToLoad, self.iRegDataPtr, offValue), hex(uValue));
             else:
-                self.abData += abValue;
-                self.emitInstr('ldr',   'x%u, [x%u], #8' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
+                self.abData = abValue + self.abData;
+                self.emitInstr('ldr',   'x%u, [x%u, #-8]!' % (iRegToLoad, self.iRegDataPtr), hex(uValue));
 
         # SP hack:
         if iReg != iRegToLoad:
@@ -595,13 +606,13 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
 
         for chRegPfx, uMax, cb, _, _, _ in self.kaFprLoadSpecs:
             if 0 <= uValue < uMax:
-                abValue  = uValue.to_bytes(cb, byteorder = 'little');
-                offValue = self._findInData(abValue);
+                abValue             = uValue.to_bytes(cb, byteorder = 'little');
+                (offValue, sLdrIns) = self._findInData(abValue, cb);
                 if offValue >= 0:
-                    self.emitInstr('ldur',  '%s%u, [x%u, #%d]' % (chRegPfx, iReg, self.iRegDataPtr, -offValue), hex(uValue));
+                    self.emitInstr(sLdrIns, '%s%u, [x%u, #%u]' % (chRegPfx, iReg, self.iRegDataPtr, offValue), hex(uValue));
                 else:
-                    self.abData += abValue;
-                    self.emitInstr('ldr',   '%s%u, [x%u], #%u' % (chRegPfx, iReg, self.iRegDataPtr, cb), hex(uValue));
+                    self.abData = abValue + self.abData;
+                    self.emitInstr('ldr',   '%s%u, [x%u, #-%u]!' % (chRegPfx, iReg, self.iRegDataPtr, cb), hex(uValue));
                 return iReg;
         self.oFprAllocator.updateValue(iReg, uValue);
         return iReg;
