@@ -31,12 +31,12 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QApplication>
-#include <QItemDelegate>
 #include <QGuiApplication>
 #include <QLayout>
 #include <QPainter>
 #include <QPainterPath>
 #include <QSortFilterProxyModel>
+#include <QStyledItemDelegate>
 #include <QTabWidget>
 #include <QToolButton>
 
@@ -186,8 +186,8 @@ private:
 };
 
 
-/** QItemDelegate subclass used as selector tree-view item delegate. */
-class UISelectorDelegate : public QItemDelegate
+/** QStyledItemDelegate subclass used as selector tree-view item delegate. */
+class UISelectorDelegate : public QStyledItemDelegate
 {
     Q_OBJECT;
 
@@ -445,7 +445,7 @@ UISelectorTreeViewItem *UISelectorTreeViewItem::childItemByLink(const QString &s
 *********************************************************************************************************************************/
 
 UISelectorDelegate::UISelectorDelegate(QObject *pParent)
-    : QItemDelegate(pParent)
+    : QStyledItemDelegate(pParent)
 {
 }
 
