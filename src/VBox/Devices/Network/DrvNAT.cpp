@@ -121,26 +121,6 @@ typedef struct slirpTimer
 } SlirpTimer;
 
 /**
- * Main state of Libslirp NAT
- */
-typedef struct SlirpState
-{
-    unsigned int nsock;
-
-    Slirp *pSlirp;
-    struct pollfd *polls;
-
-    /** Num Polls (not bytes) */
-    unsigned int uPollCap = 0;
-
-    /** List of timers (in reverse creation order).
-     * @note There is currently only one libslirp timer (v4.8 / 2025-01-16).  */
-    SlirpTimer *pTimerHead;
-    bool fPassDomain;
-} SlirpState;
-typedef SlirpState *pSlirpState;
-
-/**
  * NAT network transport driver instance data.
  *
  * @implements  PDMINETWORKUP
@@ -159,8 +139,6 @@ typedef struct DRVNAT
     PPDMDRVINS              pDrvIns;
     /** Link state */
     PDMNETWORKLINKSTATE     enmLinkState;
-    /** NAT state */
-    pSlirpState             pNATState;
     /** tftp server name to provide in the DHCP server response. */
     char                   *pszNextServer;
     /** Polling thread. */
@@ -188,25 +166,38 @@ typedef struct DRVNAT
 #define DRV_PROFILE_COUNTER(name, dsc)     STAMPROFILE Stat ## name
 #define DRV_COUNTING_COUNTER(name, dsc)    STAMCOUNTER Stat ## name
 #include "slirp/counters.h"
+
     /** thread delivering packets for receiving by the guest */
     PPDMTHREAD              pRecvThread;
     /** event to wakeup the guest receive thread */
     RTSEMEVENT              hEventRecv;
     /** Receive Req queue (deliver packets to the guest) */
     RTREQQUEUE              hRecvReqQueue;
-
     /** makes access to device func RecvAvail and Recv atomical. */
     RTCRITSECT              DevAccessLock;
     /** Number of in-flight packets. */
     volatile uint32_t       cPkts;
-
     /** Transmit lock taken by BeginXmit and released by EndXmit. */
     RTCRITSECT              XmitLock;
 
-#ifdef RT_OS_DARWIN
-    /* Handle of the DNS watcher runloop source. */
-    CFRunLoopSourceRef      hRunLoopSrcDnsWatcher;
-#endif
+    /**  Pointer to Slirp NAT engine instance */
+    Slirp *pSlirp;
+    /** Count of open socket connections as of last poll fill */
+    unsigned int cSockets;
+    /**
+     * A cSockets length list of file descriptors to poll, filled by slirp
+     *
+     * @note: Array is allocated to fit uPollCap number of pollfd structs.
+     * It is only populated with cSockets number of pollfd structs.
+     */
+    struct pollfd *aPolls;
+    /** Cap of the number of file descriptors to poll, can be increased when needed */
+    unsigned int uPollCap = 0;
+    /** List of timers (in reverse creation order).
+     * @note There is currently only one libslirp timer (v4.8 / 2025-01-16).  */
+    SlirpTimer *pTimerHead;
+    /** Flag from Main API that determines if we pass search domain via DHCP */
+    bool fPassDomain;
 } DRVNAT;
 AssertCompileMemberAlignment(DRVNAT, StatNATRecvWakeups, 8);
 /** Pointer to the NAT driver instance data. */
@@ -353,7 +344,7 @@ static DECLCALLBACK(void) drvNATSendWorker(PDRVNAT pThis, PPDMSCATTERGATHER pSgB
              * A normal frame.
              */
             LogFlowFunc(("pvAllocator=%p LB %#zx\n", pSgBuf->pvAllocator, pSgBuf->cbUsed));
-            slirp_input(pThis->pNATState->pSlirp, (uint8_t const *)pSgBuf->pvAllocator, (int)pSgBuf->cbUsed);
+            slirp_input(pThis->pSlirp, (uint8_t const *)pSgBuf->pvAllocator, (int)pSgBuf->cbUsed);
         }
         else
         {
@@ -384,7 +375,7 @@ static DECLCALLBACK(void) drvNATSendWorker(PDRVNAT pThis, PPDMSCATTERGATHER pSgB
 
                         memcpy(&pbSeg[cbHdrs], &pbFrame[offPayload], cbPayload);
 
-                        slirp_input(pThis->pNATState->pSlirp, pbSeg, (int)(cbPayload + cbHdrs));
+                        slirp_input(pThis->pSlirp, pbSeg, (int)(cbPayload + cbHdrs));
                     }
                     RTMemFree(pbSeg);
                 }
@@ -689,16 +680,16 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
     drvNAT_AddPollCb(pThis->ahWakeupSockPair[1], SLIRP_POLL_IN | SLIRP_POLL_HUP, pThis);
 
     /* HACK ALERT: while Windows socket handling is weird, do this explicitly. */
-    pThis->pNATState->polls[0].fd = pThis->ahWakeupSockPair[1];
+    pThis->aPolls[0].fd = pThis->ahWakeupSockPair[1];
 #else
     unsigned int cPollNegRet = 0;
     RTHCINTPTR const i64NativeReadPipe = RTPipeToNative(pThis->hPipeRead);
     int const        fdNativeReadPipe  = (int)i64NativeReadPipe;
     Assert(fdNativeReadPipe == i64NativeReadPipe); Assert(fdNativeReadPipe >= 0);
     drvNAT_AddPollCb(fdNativeReadPipe, SLIRP_POLL_IN | SLIRP_POLL_HUP, pThis);
-    pThis->pNATState->polls[0].fd = fdNativeReadPipe;
-    pThis->pNATState->polls[0].events = POLLRDNORM | POLLPRI | POLLRDBAND;
-    pThis->pNATState->polls[0].revents = 0;
+    pThis->aPolls[0].fd = fdNativeReadPipe;
+    pThis->aPolls[0].events = POLLRDNORM | POLLPRI | POLLRDBAND;
+    pThis->aPolls[0].revents = 0;
 #endif /* !RT_OS_WINDOWS */
 
     LogFlow(("drvNATAsyncIoThread: pThis=%p\n", pThis));
@@ -717,23 +708,23 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
         /*
          * To prevent concurrent execution of sending/receiving threads
          */
-        pThis->pNATState->nsock = 1;
+        pThis->cSockets = 1;
 
         uint32_t cMsTimeout = DRVNAT_DEFAULT_TIMEOUT;
-        slirp_pollfds_fill_socket(pThis->pNATState->pSlirp, &cMsTimeout, drvNAT_AddPollCb /* SlirpAddPollCb */, pThis /* opaque */);
+        slirp_pollfds_fill_socket(pThis->pSlirp, &cMsTimeout, drvNAT_AddPollCb /* SlirpAddPollCb */, pThis /* opaque */);
         cMsTimeout = drvNATTimersAdjustTimeoutDown(pThis, cMsTimeout);
 
 #ifdef RT_OS_WINDOWS
-        int cChangedFDs = WSAPoll(pThis->pNATState->polls, pThis->pNATState->nsock, cMsTimeout);
+        int cChangedFDs = WSAPoll(pThis->aPolls, pThis->cSockets, cMsTimeout);
 #else
-        int cChangedFDs = poll(pThis->pNATState->polls, pThis->pNATState->nsock, cMsTimeout);
+        int cChangedFDs = poll(pThis->aPolls, pThis->cSockets, cMsTimeout);
 #endif
         if (cChangedFDs < 0)
         {
 #ifdef RT_OS_WINDOWS
             int const iLastErr = WSAGetLastError(); /* (In debug builds LogRel translates to two RTLogLoggerExWeak calls.) */
             LogRel(("NAT: RTWinPoll returned error=%Rrc (cChangedFDs=%d)\n", iLastErr, cChangedFDs));
-            Log4(("NAT: NSOCK = %d\n", pThis->pNATState->nsock));
+            Log4(("NAT: cSockets = %d\n", pThis->cSockets));
 #else
             if (errno == EINTR)
             {
@@ -750,7 +741,7 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
         }
 
         Log4(("%s: poll\n", __FUNCTION__));
-        slirp_pollfds_poll(pThis->pNATState->pSlirp, cChangedFDs < 0, drvNAT_GetREventsCb, pThis /* opaque */);
+        slirp_pollfds_poll(pThis->pSlirp, cChangedFDs < 0, drvNAT_GetREventsCb, pThis /* opaque */);
 
         /*
          * Drain the control pipe if necessary.
@@ -760,19 +751,19 @@ static DECLCALLBACK(int) drvNATAsyncIoThread(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
          *       so to avoid false alarm drain pipe here to the very end
          */
         /** @todo revise the above note.   */
-        if (pThis->pNATState->polls[0].revents & (POLLRDNORM|POLLPRI|POLLRDBAND))   /* POLLPRI won't be seen with WSAPoll. */
+        if (pThis->aPolls[0].revents & (POLLRDNORM|POLLPRI|POLLRDBAND))   /* POLLPRI won't be seen with WSAPoll. */
         {
             char achBuf[1024];
-            size_t cbRead;
+            size_t cbRead = 0;
             uint64_t cbWakeupNotifs = ASMAtomicReadU64(&pThis->cbWakeupNotifs);
 #ifdef RT_OS_WINDOWS
             /** @todo r=bird: This returns -1 (SOCKET_ERROR) on failure, so any kind of
              *        error return here and we'll bugger up cbWakeupNotifs! */
             cbRead = recv(pThis->ahWakeupSockPair[1], &achBuf[0], RT_MIN(cbWakeupNotifs, sizeof(achBuf)), NULL);
+            int iError = WSAGetLastError();
+            if(cbRead == SOCKET_ERROR)
+                LogFlowFunc(("Wakeup socket read erorr: %d\n", iError));
 #else
-            /** @todo r=bird: cbRead may in theory be used uninitialized here!  This
-             *        isn't blocking, though, so we won't get stuck here if we mess up
-             *         the count. */
             RTPipeRead(pThis->hPipeRead, &achBuf[0], RT_MIN(cbWakeupNotifs, sizeof(achBuf)), &cbRead);
 #endif
             ASMAtomicSubU64(&pThis->cbWakeupNotifs, cbRead);
@@ -834,9 +825,9 @@ static DECLCALLBACK(void) drvNATInfo(PPDMDRVINS pDrvIns, PCDBGFINFOHLP pHlp, con
     RT_NOREF(pszArgs);
     PDRVNAT pThis = PDMINS_2_DATA(pDrvIns, PDRVNAT);
     pHlp->pfnPrintf(pHlp, "libslirp Connection Info:\n");
-    pHlp->pfnPrintf(pHlp, slirp_connection_info(pThis->pNATState->pSlirp));
+    pHlp->pfnPrintf(pHlp, slirp_connection_info(pThis->pSlirp));
     pHlp->pfnPrintf(pHlp, "libslirp Neighbor Info:\n");
-    pHlp->pfnPrintf(pHlp, slirp_neighbor_info(pThis->pNATState->pSlirp));
+    pHlp->pfnPrintf(pHlp, slirp_neighbor_info(pThis->pSlirp));
     pHlp->pfnPrintf(pHlp, "libslirp Version String: %s \n", slirp_version_string());
 }
 
@@ -981,9 +972,9 @@ static DECLCALLBACK(int) drvNATNotifyApplyPortForwardCommand(PDRVNAT pThis, bool
 
     int rc;
     if (fRemove)
-        rc = slirp_remove_hostfwd(pThis->pNATState->pSlirp, fUdp, hostIp, u16HostPort);
+        rc = slirp_remove_hostfwd(pThis->pSlirp, fUdp, hostIp, u16HostPort);
     else
-        rc = slirp_add_hostfwd(pThis->pNATState->pSlirp, fUdp, hostIp,
+        rc = slirp_add_hostfwd(pThis->pSlirp, fUdp, hostIp,
                                u16HostPort, guestIp, u16GuestPort);
     if (rc < 0)
     {
@@ -1037,22 +1028,21 @@ static DECLCALLBACK(int) drvNATNetworkNatConfigRedirect(PPDMINETWORKNATCONFIG pI
  */
 static DECLCALLBACK(void) drvNATNotifyDnsChanged(PPDMINETWORKNATCONFIG pInterface, PCPDMINETWORKNATDNSCONFIG pDnsConf)
 {
-    PDRVNAT const      pThis     = RT_FROM_MEMBER(pInterface, DRVNAT, INetworkNATCfg);
-    SlirpState * const pNATState = pThis->pNATState;
-    AssertReturnVoid(pNATState);
-    AssertReturnVoid(pNATState->pSlirp);
-
-    if (!pNATState->fPassDomain)
-        return;
+    PDRVNAT const pThis = RT_FROM_MEMBER(pInterface, DRVNAT, INetworkNATCfg);
+    AssertReturnVoid(pThis->pSlirp);
 
     LogRel(("NAT: DNS settings changed, triggering update\n"));
 
-    if (pDnsConf->szDomainName[0] == '\0')
-        slirp_set_vdomainname(pNATState->pSlirp, NULL);
-    else
-        slirp_set_vdomainname(pNATState->pSlirp, pDnsConf->szDomainName);
+    if (pThis->fPassDomain)
+    {
+        if (pDnsConf->szDomainName[0] == '\0')
+            slirp_set_vdomainname(pThis->pSlirp, NULL);
+        else
+            slirp_set_vdomainname(pThis->pSlirp, pDnsConf->szDomainName);
+    }
 
-    slirp_set_vdnssearch(pNATState->pSlirp, pDnsConf->papszSearchDomains);
+    if (pDnsConf->papszSearchDomains)
+        slirp_set_vdnssearch(pThis->pSlirp, pDnsConf->papszSearchDomains);
 
     if (pDnsConf->cNameServers > 0)
     {
@@ -1080,19 +1070,19 @@ static DECLCALLBACK(void) drvNATNotifyDnsChanged(PPDMINETWORKNATCONFIG pInterfac
                     "Falling back to libslirp DNS proxy.\n"));
 
             struct in_addr mProxyNameserver;
-            mProxyNameserver.s_addr = slirp_get_vnetwork_addr(pNATState->pSlirp).s_addr | RT_H2N_U32_C(0x00000003);
+            mProxyNameserver.s_addr = slirp_get_vnetwork_addr(pThis->pSlirp).s_addr | RT_H2N_U32_C(0x00000003);
 
-            slirp_set_vnameserver(pNATState->pSlirp, mProxyNameserver);
-            slirp_set_cRealNameservers(pNATState->pSlirp, 0); // Ensures libslirp uses fallback.
+            slirp_set_vnameserver(pThis->pSlirp, mProxyNameserver);
+            slirp_set_cRealNameservers(pThis->pSlirp, 0); // Ensures libslirp uses fallback.
 
             LogRel(("fallback virtual nameserver: %u", mProxyNameserver.s_addr));
         }
 
-        slirp_set_cRealNameservers(pNATState->pSlirp, InAddrListSize(&vNameservers));
+        slirp_set_cRealNameservers(pThis->pSlirp, InAddrListSize(&vNameservers));
         LogRelMax(256, ("NAT DNS Update: Stored %u total nameservers\n", InAddrListSize(&vNameservers)));
 
         struct in_addr *paDetachedNameservers = InAddrListDetach(&vNameservers);
-        slirp_set_aRealNameservers(pNATState->pSlirp, paDetachedNameservers);
+        slirp_set_aRealNameservers(pThis->pSlirp, paDetachedNameservers);
     }
 }
 
@@ -1119,7 +1109,7 @@ static int drvNATTimersAdjustTimeoutDown(PDRVNAT pThis, int cMsTimeout)
 
     /* Find the first (lowest) deadline. */
     int64_t msDeadline = INT64_MAX;
-    for (SlirpTimer *pCurrent = pThis->pNATState->pTimerHead; pCurrent; pCurrent = pCurrent->next)
+    for (SlirpTimer *pCurrent = pThis->pTimerHead; pCurrent; pCurrent = pCurrent->next)
         if (pCurrent->msExpire < msDeadline && pCurrent->msExpire > 0)
             msDeadline = pCurrent->msExpire;
 
@@ -1150,7 +1140,7 @@ static int drvNATTimersAdjustTimeoutDown(PDRVNAT pThis, int cMsTimeout)
 static void drvNATTimersRunExpired(PDRVNAT pThis)
 {
     int64_t const msNow    = drvNAT_ClockGetNsCb(pThis) / RT_NS_1MS;
-    SlirpTimer   *pCurrent = pThis->pNATState->pTimerHead;
+    SlirpTimer   *pCurrent = pThis->pTimerHead;
     while (pCurrent != NULL)
     {
         SlirpTimer * const pNext = pCurrent->next; /* (in case the timer is destroyed from the callback) */
@@ -1315,8 +1305,8 @@ static DECLCALLBACK(void *) drvNAT_TimerNewCb(SlirpTimerCb slirpTimeCb, void *cb
         pNewTimer->pHandler = slirpTimeCb;
         pNewTimer->opaque = cb_opaque;
         /** @todo r=bird: Not thread safe. Assumes pSlirpThread */
-        pNewTimer->next = pThis->pNATState->pTimerHead;
-        pThis->pNATState->pTimerHead = pNewTimer;
+        pNewTimer->next = pThis->pTimerHead;
+        pThis->pTimerHead = pNewTimer;
     }
     return pNewTimer;
 }
@@ -1335,14 +1325,14 @@ static DECLCALLBACK(void) drvNAT_TimerFreeCb(void *pvTimer, void *pvUser)
     /** @todo r=bird: Not thread safe. Assumes pSlirpThread */
 
     SlirpTimer *pPrev    = NULL;
-    SlirpTimer *pCurrent = pThis->pNATState->pTimerHead;
+    SlirpTimer *pCurrent = pThis->pTimerHead;
     while (pCurrent != NULL)
     {
         if (pCurrent == pTimer)
         {
             /* unlink it. */
             if (!pPrev)
-                pThis->pNATState->pTimerHead = pCurrent->next;
+                pThis->pTimerHead = pCurrent->next;
             else
                 pPrev->next                  = pCurrent->next;
             pCurrent->next = NULL;
@@ -1426,25 +1416,25 @@ static DECLCALLBACK(int) drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void
 {
     PDRVNAT pThis = (PDRVNAT)opaque;
 
-    if (pThis->pNATState->nsock + 1 >= pThis->pNATState->uPollCap)
+    if (pThis->cSockets + 1 >= pThis->uPollCap)
     {
-        size_t cbNew = pThis->pNATState->uPollCap * 2 * sizeof(struct pollfd);
-        struct pollfd *pvNew = (struct pollfd *)RTMemRealloc(pThis->pNATState->polls, cbNew);
+        size_t cbNew = pThis->uPollCap * 2 * sizeof(struct pollfd);
+        struct pollfd *pvNew = (struct pollfd *)RTMemRealloc(pThis->aPolls, cbNew);
         if (pvNew)
         {
-            pThis->pNATState->polls = pvNew;
-            pThis->pNATState->uPollCap *= 2;
+            pThis->aPolls = pvNew;
+            pThis->uPollCap *= 2;
         }
         else
             return -1;
     }
 
-    unsigned int uIdx = pThis->pNATState->nsock;
+    unsigned int uIdx = pThis->cSockets;
     Assert(uIdx < INT_MAX);
-    pThis->pNATState->polls[uIdx].fd = hFd;
-    pThis->pNATState->polls[uIdx].events = drvNAT_PollEventSlirpToHost(iEvents);
-    pThis->pNATState->polls[uIdx].revents = 0;
-    pThis->pNATState->nsock += 1;
+    pThis->aPolls[uIdx].fd = hFd;
+    pThis->aPolls[uIdx].events = drvNAT_PollEventSlirpToHost(iEvents);
+    pThis->aPolls[uIdx].revents = 0;
+    pThis->cSockets += 1;
     return uIdx;
 }
 
@@ -1461,8 +1451,8 @@ static DECLCALLBACK(int) drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void
 static DECLCALLBACK(int) drvNAT_GetREventsCb(int idx, void *opaque)
 {
     PDRVNAT pThis = (PDRVNAT)opaque;
-    struct pollfd* polls = pThis->pNATState->polls;
-    return drvNAT_PollEventHostToSlirp(polls[idx].revents);
+    struct pollfd* aPolls = pThis->aPolls;
+    return drvNAT_PollEventHostToSlirp(aPolls[idx].revents);
 }
 
 /**
@@ -1482,13 +1472,12 @@ static DECLCALLBACK(void) drvNATDestruct(PPDMDRVINS pDrvIns)
     LogFlow(("drvNATDestruct:\n"));
     PDMDRV_CHECK_VERSIONS_RETURN_VOID(pDrvIns);
 
-    SlirpState * const pNATState = pThis->pNATState;
-    if (pNATState)
+    if (pThis)
     {
-        if (pNATState->pSlirp)
+        if (pThis->pSlirp)
         {
-            slirp_cleanup(pNATState->pSlirp);
-            pNATState->pSlirp = NULL;
+            slirp_cleanup(pThis->pSlirp);
+            pThis->pSlirp = NULL;
         }
 
 #ifdef VBOX_WITH_STATISTICS
@@ -1496,11 +1485,8 @@ static DECLCALLBACK(void) drvNATDestruct(PPDMDRVINS pDrvIns)
 # define DRV_COUNTING_COUNTER(name, dsc)    DEREGISTER_COUNTER(name, pThis)
 # include "slirp/counters.h"
 #endif
-        RTMemFree(pNATState->polls);
-        pNATState->polls = NULL;
-
-        RTMemFree(pNATState);
-        pThis->pNATState = NULL;
+        RTMemFree(pThis->aPolls);
+        pThis->aPolls = NULL;
     }
 
     RTReqQueueDestroy(pThis->hSlirpReqQueue);
@@ -1548,16 +1534,11 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
     pThis->hPipeRead                    = NIL_RTPIPE;
     pThis->hPipeWrite                   = NIL_RTPIPE;
 #endif
-
-    SlirpState * const pNATState = (SlirpState *)RTMemAllocZ(sizeof(*pNATState));
-    if (pNATState == NULL)
-        return VERR_NO_MEMORY;
-    pThis->pNATState                    = pNATState;
-    pNATState->nsock                    = 0;
-    pNATState->pTimerHead               = NULL;
-    pNATState->polls                    = (struct pollfd *)RTMemAllocZ(64 * sizeof(struct pollfd));
-    AssertReturn(pNATState->polls, VERR_NO_MEMORY);
-    pNATState->uPollCap                 = 64;
+    pThis->cSockets                     = 0;
+    pThis->pTimerHead                   = NULL;
+    pThis->aPolls                       = (struct pollfd *)RTMemAllocZ(64 * sizeof(struct pollfd));
+    AssertReturn(pThis->aPolls, VERR_NO_MEMORY);
+    pThis->uPollCap                 = 64;
 
     /* IBase */
     pDrvIns->IBase.pfnQueryInterface    = drvNATQueryInterface;
@@ -1627,7 +1608,7 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
 
     /** @todo clean up the macros used here. S32 != int. Use defaults. ++  */
 
-    rc = pDrvIns->pHlpR3->pfnCFGMQueryBoolDef(pCfg, "PassDomain", &pNATState->fPassDomain, true);
+    rc = pDrvIns->pHlpR3->pfnCFGMQueryBoolDef(pCfg, "PassDomain", &pThis->fPassDomain, true);
     AssertLogRelRCReturn(rc, rc);
 
     rc = pDrvIns->pHlpR3->pfnCFGMQueryBoolDef(pCfg, "ForwardBroadcast", &slirpCfg.fForwardBroadcast, false);
@@ -1757,7 +1738,7 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
         return PDMDRV_SET_ERROR(pDrvIns, VERR_INTERNAL_ERROR_4,
                                 N_("Configuration error: libslirp failed to create new instance - probably misconfiguration"));
 
-    pNATState->pSlirp = pSlirp;
+    pThis->pSlirp = pSlirp;
 
     rc = drvNATConstructRedir(pDrvIns->iInstance, pThis, pCfg, &Network);
     AssertLogRelRCReturn(rc, rc);
