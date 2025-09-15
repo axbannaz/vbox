@@ -78,9 +78,6 @@ protected:
     /** Performs validation, updates @a messages list if something is wrong. */
     virtual bool validate(QList<UIValidationMessage> &messages) RT_OVERRIDE;
 
-    /** Defines TAB order for passed @a pWidget. */
-    virtual void setOrderAfter(QWidget *pWidget) RT_OVERRIDE;
-
     /** Performs final page polishing. */
     virtual void polishPage() RT_OVERRIDE;
 

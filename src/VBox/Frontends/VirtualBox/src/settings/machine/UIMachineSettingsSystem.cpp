@@ -606,27 +606,6 @@ bool UIMachineSettingsSystem::validate(QList<UIValidationMessage> &messages)
     return fPass;
 }
 
-void UIMachineSettingsSystem::setOrderAfter(QWidget *pWidget)
-{
-    /* Configure navigation for 'motherboard' tab: */
-    setTabOrder(pWidget, m_pTabWidget->focusProxy());
-    setTabOrder(m_pTabWidget->focusProxy(), m_pEditorBaseMemory);
-    setTabOrder(m_pEditorBaseMemory, m_pEditorBootOrder);
-    setTabOrder(m_pEditorBootOrder, m_pEditorChipset);
-    setTabOrder(m_pEditorChipset, m_pEditorTpm);
-    setTabOrder(m_pEditorTpm, m_pEditorPointingHID);
-    setTabOrder(m_pEditorPointingHID, m_pEditorMotherboardFeatures);
-    setTabOrder(m_pEditorMotherboardFeatures, m_pEditorVCPU);
-
-    /* Configure navigation for 'processor' tab: */
-    setTabOrder(m_pEditorVCPU, m_pEditorExecCap);
-    setTabOrder(m_pEditorExecCap, m_pEditorProcessorFeatures);
-    setTabOrder(m_pEditorProcessorFeatures, m_pEditorParavirtProvider);
-
-    /* Configure navigation for 'acceleration' tab: */
-    setTabOrder(m_pEditorParavirtProvider, m_pEditorAccelerationFeatures);
-}
-
 void UIMachineSettingsSystem::sltRetranslateUI()
 {
     m_pTabWidget->setTabText(m_pTabWidget->indexOf(m_pTabMotherboard), tr("&Motherboard"));

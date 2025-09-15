@@ -306,11 +306,6 @@ bool UIMachineSettingsUSB::validate(QList<UIValidationMessage> &messages)
     return fPass;
 }
 
-void UIMachineSettingsUSB::setOrderAfter(QWidget *pWidget)
-{
-    setTabOrder(pWidget, m_pEditorUsbSettings);
-}
-
 void UIMachineSettingsUSB::sltRetranslateUI()
 {
 }

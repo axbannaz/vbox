@@ -437,27 +437,6 @@ bool UIMachineSettingsGeneral::validate(QList<UIValidationMessage> &messages)
     return fPass;
 }
 
-void UIMachineSettingsGeneral::setOrderAfter(QWidget *pWidget)
-{
-    /* 'Basic' tab: */
-    if (pWidget && m_pTabWidget && m_pTabWidget->focusProxy())
-        setTabOrder(pWidget, m_pTabWidget->focusProxy());
-    if (m_pTabWidget && m_pTabWidget->focusProxy() && m_pEditorNameAndSystem)
-        setTabOrder(m_pTabWidget->focusProxy(), m_pEditorNameAndSystem);
-
-    /* 'Advanced' tab: */
-    if (m_pEditorNameAndSystem && m_pEditorSnapshotFolder)
-        setTabOrder(m_pEditorNameAndSystem, m_pEditorSnapshotFolder);
-    if (m_pEditorSnapshotFolder && m_pEditorClipboard)
-        setTabOrder(m_pEditorSnapshotFolder, m_pEditorClipboard);
-    if (m_pEditorClipboard && m_pEditorDragAndDrop)
-        setTabOrder(m_pEditorClipboard, m_pEditorDragAndDrop);
-
-    /* 'Description' tab: */
-    if (m_pEditorDragAndDrop && m_pEditorDescription)
-        setTabOrder(m_pEditorDragAndDrop, m_pEditorDescription);
-}
-
 void UIMachineSettingsGeneral::sltRetranslateUI()
 {
     m_pTabWidget->setTabText(m_pTabWidget->indexOf(m_pTabBasic), tr("&Identity"));
