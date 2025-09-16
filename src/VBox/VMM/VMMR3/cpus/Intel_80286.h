@@ -36,7 +36,7 @@
 /**
  * Fake CPUID leaves for Intel(R) 80286.
  *
- * We fake these to keep the CPUM ignorant of CPUs wihtout CPUID leaves
+ * We fake these to keep the CPUM ignorant of CPUs without CPUID leaves
  * and avoid having to seed CPUM::GuestFeatures filling with bits from the
  * CPUMDBENTRY.
  */
