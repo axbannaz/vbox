@@ -638,6 +638,15 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
         self.oFprAllocator.free(iRegTmpFree);
         return None;
 
+    def allocFprAndLoadRandUBits(self, cBits = 128):
+        """
+        Allocates a SIMD&FP register and load a random value into them.
+        return (uValue, iReg)
+        """
+        uValue = randUBits(cBits);
+        iReg   = self.oFprAllocator.alloc(uValue);
+        self.emitFprLoad(iReg, uValue);
+        return (uValue, iReg);
 
 
 #
@@ -2409,6 +2418,64 @@ class A64No1CodeGenStpImm7Fp(A64No1CodeGenFprBase, A64No1CodeGenStpImm7):
 
 
 #
+# Advanced SIMD.
+#
+
+g_kdCfgToElemInfo = {
+    '8B':  ( 1,  8,   8, 0xff, ),
+    '16B': ( 1,  8,  16, 0xff, ),
+    '4H':  ( 2, 16,   4, 0xffff, ),
+    '8H':  ( 2, 16,   8, 0xffff, ),
+    '2S':  ( 4, 32,   2, 0xffffffff, ),
+    '4S':  ( 4, 32,   4, 0xffffffff, ),
+    '1D':  ( 8, 64,   1, 0xffffffffffffffff, ),
+    '2D':  ( 8, 64,   2, 0xffffffffffffffff, ),
+};
+
+
+class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
+    def __init__(self, sInstr, fnCalc, asSkip = None, asOnly = None):
+        A64No1CodeGenFprBase.__init__(self, sInstr + '_advsimd_3same', sInstr, 16);
+        self.fnCalc = fnCalc;
+        self.asCfgs = list(g_kdCfgToElemInfo.keys()) if not asOnly else list(asOnly);
+        if asSkip:
+            for sCfg in asSkip:
+                self.asCfgs.remove(sCfg);
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        iCfg = 0;
+        for _ in range(oOptions.cTestsPerInstruction):
+            # Retrieve the vector configuration for this iteration and advance it.
+            sCfg = self.asCfgs[iCfg];
+            iCfg = (iCfg + 1) % len(self.asCfgs);
+            (_, cBitsElem, cElems, fElemMask) = g_kdCfgToElemInfo[sCfg];
+
+            # Get source values and calculate the result.
+            (uSrc1, iRegSrc1) = self.allocFprAndLoadRandUBits();
+            (uSrc2, iRegSrc2) = self.allocFprAndLoadRandUBits();
+
+            uRes = 0;
+            for iElem in range(cElems):
+                uSrcElem1 = (uSrc1 >> (iElem * cBitsElem)) & fElemMask;
+                uSrcElem2 = (uSrc2 >> (iElem * cBitsElem)) & fElemMask;
+                uResElem  = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2);
+                assert (uResElem & ~fElemMask) == 0;
+                uRes     |= uResElem << (iElem * cBitsElem);
+
+            # Emit the test instruction and result checks.
+            iRegDst = self.oFprAllocator.alloc();
+            self.emitInstr(self.sInstr, 'v%u.%s, v%u.%s, v%u.%s' % (iRegDst, sCfg, iRegSrc1, sCfg, iRegSrc2, sCfg,));
+
+            self.emitFprValCheck(iRegDst, uRes);
+
+            self.oFprAllocator.freeList((iRegDst, iRegSrc2, iRegSrc1));
+
+
+def calcAdvSimd3Add(cBitsElem, fElemMask, uSrcElem1, uSrcElem2):
+    _ = cBitsElem;
+    return (uSrcElem1 + uSrcElem2) & fElemMask;
+
+#
 # Result calculation functions.
 #
 
@@ -2559,9 +2626,14 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # extract
             aoGenerators += [
-                A64No1CodeGenExtrImm(   'extr',   calcExtr),
+                A64No1CodeGenAdvSimdThreeSame('add', calcAdvSimd3Add, asSkip = ('1D',)),
             ];
 
+        if True: # pylint: disable=using-constant-test
+            # extract
+            aoGenerators += [
+                A64No1CodeGenExtrImm(   'extr',   calcExtr),
+            ];
 
         if True: # pylint: disable=using-constant-test
             # testbranch
