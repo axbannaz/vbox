@@ -56,6 +56,9 @@ typedef TESTRDR *PTESTRDR;
 DECLASM(int) TestProcA64(void);
 DECLASM(int) TestProcA64_EndProc(void);
 
+DECLASM(int) TestProcA64Simd(void);
+DECLASM(int) TestProcA64Simd_EndProc(void);
+
 
 static DECLCALLBACK(int) rtScriptLexParseNumber(RTSCRIPTLEX hScriptLex, char ch, PRTSCRIPTLEXTOKEN pToken, void *pvUser)
 {
@@ -94,6 +97,8 @@ static const RTSCRIPTLEXTOKMATCH s_aMatches[] =
     { RT_STR_TUPLE("generic+the+d128"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("_testproca64"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("_testproca64_endproc"),     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("_testproca64simd"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("_testproca64simd_endproc"), RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE(":"),                        RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     /* End of stuff which will get ignored in the semantic matching. */
 
@@ -628,8 +633,10 @@ int main(int argc, char **argv)
     } aSnippets[] =
     {
 #ifndef RT_OS_OS2
-        { "64-bit",     (uint8_t const *)(uintptr_t)TestProcA64, (uintptr_t)&TestProcA64_EndProc, DISCPUMODE_ARMV8_A64,
+        { "64-bit",      (uint8_t const *)(uintptr_t)TestProcA64, (uintptr_t)&TestProcA64_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1, g_cbtstDisasmArmv8_1 },
+        { "64-bit SIMD", (uint8_t const *)(uintptr_t)TestProcA64Simd, (uintptr_t)&TestProcA64Simd_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Simd, g_cbtstDisasmArmv8_1_Simd },
 #endif
     };
 

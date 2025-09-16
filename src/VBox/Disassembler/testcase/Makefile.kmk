@@ -75,7 +75,8 @@ ifdef VBOX_WITH_TESTCASES
   #
   TST_DISASM_ARMV8_1_FILE = $(tstDisasmArmv8-1_0_OUTDIR)/tstDisasmArmv8-1-asm.cpp
   TST_DISASM_ARMV8_1_SOURCES := \
-  	tstDisasmArmv8_1=tstDisasmArmv8-1-asm.S
+  	tstDisasmArmv8_1=tstDisasmArmv8-1-asm.S \
+  	tstDisasmArmv8_1_Simd=tstDisasmArmv8-1-asm-simd.S
 
   TST_DISASM_ARMV8_1_PATH_SOURCES := $(PATH_SUB_CURRENT)
 
@@ -103,6 +104,7 @@ ifdef VBOX_WITH_TESTCASES
   tstDisasmArmv8-1_SOURCES    = \
   	$(TST_DISASM_ARMV8_1_FILE) \
   	tstDisasmArmv8-1-asm.S \
+  	tstDisasmArmv8-1-asm-simd.S \
   	tstDisasmArmv8-1.cpp
   tstDisasmArmv8-1_LIBS       = \
   	$(PATH_STAGE_LIB)/DisasmR3$(VBOX_SUFF_LIB) \

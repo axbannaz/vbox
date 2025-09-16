@@ -38,6 +38,10 @@ RT_C_DECLS_BEGIN
 extern const unsigned char g_abtstDisasmArmv8_1[];
 extern const unsigned g_cbtstDisasmArmv8_1;
 
+extern const unsigned char g_abtstDisasmArmv8_1_Simd[];
+extern const unsigned g_cbtstDisasmArmv8_1_Simd;
+
+
 RT_C_DECLS_END
 
 #endif /* !VBOX_INCLUDED_SRC_testcase_tstDisasmArmv8_1_tests_h */
