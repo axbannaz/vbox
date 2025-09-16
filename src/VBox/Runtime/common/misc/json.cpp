@@ -297,21 +297,43 @@ static int rtJsonParseValue(PRTJSONTOKENIZER pTokenizer, PRTJSONTOKEN pToken, PR
  */
 static int rtJsonTokenizerRead(PRTJSONTOKENIZER pTokenizer)
 {
-    size_t cbRead = 0;
-    int rc = pTokenizer->pfnRead(pTokenizer->pvUser, pTokenizer->offInput, &pTokenizer->achBuf[0],
-                                 sizeof(pTokenizer->achBuf), &cbRead);
-    if (RT_SUCCESS(rc))
+    int rc;
+    size_t cchToRead = sizeof(pTokenizer->achBuf);
+    char *pchRead = &pTokenizer->achBuf[0];
+
+    /* If there is input left to process move it to the front and fill the remainder. */
+    if (pTokenizer->offBuf != pTokenizer->cbBuf)
     {
-        pTokenizer->cbBuf    = cbRead;
-        pTokenizer->offInput += cbRead;
-        pTokenizer->offBuf   = 0;
-        /* Validate UTF-8 encoding. */
-        rc = RTStrValidateEncodingEx(&pTokenizer->achBuf[0], cbRead, 0 /* fFlags */);
-        /* If we read less than requested we reached the end and fill the remainder with terminators. */
-        if (cbRead < sizeof(pTokenizer->achBuf))
-            memset(&pTokenizer->achBuf[cbRead], 0, sizeof(pTokenizer->achBuf) - cbRead);
+        /* Move the rest to the front. */
+        size_t const cchLeft = sizeof(pTokenizer->achBuf) - pTokenizer->offBuf;
+        memmove(&pTokenizer->achBuf[0], &pTokenizer->achBuf[pTokenizer->offBuf], cchLeft);
+        pchRead = &pTokenizer->achBuf[0] + cchLeft;
+        cchToRead = sizeof(pTokenizer->achBuf) - cchLeft;
     }
 
+    if (cchToRead)
+    {
+        size_t cbRead = 0;
+        rc = pTokenizer->pfnRead(pTokenizer->pvUser, pTokenizer->offInput, pchRead,
+                                 cchToRead, &cbRead);
+        if (RT_SUCCESS(rc))
+        {
+            pTokenizer->cbBuf    = cbRead + pTokenizer->offBuf;
+            pTokenizer->offInput += cbRead;
+            pTokenizer->offBuf   = 0;
+            /* Validate UTF-8 encoding. */
+            rc = RTStrValidateEncodingEx(pchRead, cbRead, 0 /* fFlags */);
+            /* If we read less than requested we reached the end and fill the remainder with terminators. */
+            if (cbRead < cchToRead)
+                memset(&pchRead[cbRead], 0, cchToRead - cbRead);
+        }
+        else
+            pTokenizer->rcTok = rc;
+    }
+    else
+        rc = VERR_BUFFER_OVERFLOW; /** @todo */
+
+    AssertRC(rc);
     return rc;
 }
 
@@ -361,6 +383,13 @@ static int rtJsonTokenizerSkip(PRTJSONTOKENIZER pTokenizer, size_t cchSkip)
  */
 DECLINLINE(bool) rtJsonTokenizerIsEos(PRTJSONTOKENIZER pTokenizer)
 {
+    if (pTokenizer->offBuf == sizeof(pTokenizer->achBuf))
+    {
+        int rc = rtJsonTokenizerRead(pTokenizer);
+        if (RT_FAILURE(rc))
+            return '\0';
+    }
+
     return pTokenizer->achBuf[pTokenizer->offBuf] == '\0';
 }
 
@@ -384,9 +413,17 @@ DECLINLINE(void) rtJsonTokenizerSkipCh(PRTJSONTOKENIZER pTokenizer)
  */
 DECLINLINE(char) rtJsonTokenizerPeekCh(PRTJSONTOKENIZER pTokenizer)
 {
-    return   !rtJsonTokenizerIsEos(pTokenizer)
-           ? pTokenizer->achBuf[pTokenizer->offBuf + 1] /** @todo Read out of bounds */
-           : '\0';
+    if (rtJsonTokenizerIsEos(pTokenizer))
+        return '\0';
+
+    if (pTokenizer->offBuf == sizeof(pTokenizer->achBuf) - 1)
+    {
+        int rc = rtJsonTokenizerRead(pTokenizer);
+        if (RT_FAILURE(rc))
+            return '\0';
+    }
+
+    return pTokenizer->achBuf[pTokenizer->offBuf + 1];
 }
 
 /**
