@@ -867,6 +867,13 @@ DIS_ARMV8_DECODE_INSN_CLASS_DEFINE_END(DataProcAdvSimdThreeSame_U0, 0x00000000 /
 /*
  * C4.1.95.24 - Data Processing - Advanced SIMD three same, U=1
  *
+ * Fixed bits:
+ *      - bit 31:     0     (op0=0xx0)
+ *      - bit 28:     1     (op0=0xx0,U=1)
+ *      - bits 27-24: 1110  (111,op1=0x)
+ *      - bits 21:    1     (op2=x1xx)
+ *      - bits 10:    1     (op3=xxxxxxxx1)
+ *
  * Indexing size (bits 22 & 23) and opcode (bits 11 thru 15):
  *      - bits 0-4 = opcode; 0x00..0x1f
  *      - bits 5-6 = size;   0x00..0x60
