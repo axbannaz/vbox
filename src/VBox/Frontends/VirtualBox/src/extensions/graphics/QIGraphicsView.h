@@ -51,6 +51,9 @@ public:
     /** Constructs graphics-view passing @a pParent to the base-class. */
     QIGraphicsView(QWidget *pParent = 0);
 
+    /** Returns this widget's preferred size. */
+    virtual QSize sizeHint() const RT_OVERRIDE;
+
 protected:
 
     /** Handles any Qt @a pEvent. */
