@@ -524,31 +524,31 @@ void UIFilterEditor::paintEvent(QPaintEvent *pEvent)
     /* Prepare colors: */
     const bool fActive = window() && window()->isActiveWindow();
     const QPalette::ColorGroup enmColorGroup = fActive ? QPalette::Active : QPalette::Inactive;
-#ifdef VBOX_WS_MAC
     const QColor colorHighlight = uiCommon().isInDarkMode()
                                 ? qApp->palette().color(enmColorGroup, QPalette::Highlight).lighter(110)
                                 : qApp->palette().color(enmColorGroup, QPalette::Highlight).darker(110);
-#endif
-    const QColor colorBase = qApp->palette().color(enmColorGroup, QPalette::Base);
+    QColor colorBase = qApp->palette().color(enmColorGroup, QPalette::Base);
+    colorBase.setAlpha(qMax(colorBase.alpha(), 250));
     const QColor colorFrame = uiCommon().isInDarkMode()
                             ? qApp->palette().color(enmColorGroup, QPalette::Window).lighter(120)
                             : qApp->palette().color(enmColorGroup, QPalette::Window).darker(120);
 
-    /* Prepare base/frame painter path: */
+    /* Prepare focus-frame and base painter path: */
     const QRegion totalRegion = QRegion(m_pLineEdit->geometry()) + QRegion(m_pToolButton->geometry());
     QRect widgetRect = totalRegion.boundingRect();
-#ifdef VBOX_WS_MAC
-    const QRect focusRect = widgetRect;
+    QRect focusRect = widgetRect;
     widgetRect.adjust(3, 3, -3, -3);
+#ifndef VBOX_WS_MAC
+    focusRect.adjust(1, 1, -1, -1);
+#endif /* !VBOX_WS_MAC */
     const QPainterPath focusPath = cookPainterPath(focusRect, m_iRadius + 2);
-#endif
     const QPainterPath widgetPath = cookPainterPath(widgetRect, m_iRadius);
 
-    /* Draw base/frame: */
-#ifdef VBOX_WS_MAC
+    /* Draw cross-platform focus-frame: */
     if (m_pLineEdit->hasFocus())
         painter.fillPath(focusPath, colorHighlight);
-#endif
+
+    /* Draw base: */
     painter.fillPath(widgetPath, colorBase);
     painter.strokePath(widgetPath, colorFrame);
 }
@@ -567,7 +567,7 @@ void UIFilterEditor::sltHandleButtonClicked()
 void UIFilterEditor::prepare()
 {
     /* Init the decoration radius: */
-    m_iRadius = 10;
+    m_iRadius = 8;
 
     /* Prepare filter editor: */
     m_pLineEdit = new QILineEdit(this);
