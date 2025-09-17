@@ -80,9 +80,7 @@ Rules for adding a changelog entry to make them look more uniform:
 
     <itemizedlist>
 
-      <listitem>
-        <para>Linux host: Use KVM APIs on kernel 6.12.0 and newer for acquiring/releasing VT-x
-          (issue github:gh-81, github:gh-139 and github:gh-141)</para>
+      <listitem><para></para>
       </listitem>
 
     </itemizedlist>
