@@ -79,7 +79,7 @@
 # include <iprt/asm-amd64-x86.h>
 #endif
 
-#if (RTLNX_VER_MIN(6,12,0)) && defined(CONFIG_KVM_GENERIC_HARDWARE_ENABLING) && defined(VBOX_WITH_HOST_VMX)
+#if (RTLNX_VER_MIN(6,16,0)) && defined(CONFIG_KVM_GENERIC_HARDWARE_ENABLING) && defined(VBOX_WITH_HOST_VMX)
 # if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
 #  include <linux/kvm_host.h>
 #  define SUPDRV_LINUX_HAS_KVM_VMX_API
