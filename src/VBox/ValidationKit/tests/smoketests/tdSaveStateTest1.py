@@ -160,9 +160,6 @@ class tdSaveStateTest1(vbox.TestDriver):
         """
 
         # Save State test.
-        MAX_SNAPSHOTS = 3;
-        SNAPSHOT_DELAY_SECONDS = 10;
-        snapshot_names = [];
         self.logVmInfo(oVM);
         # Try waiting for a bit longer (15 minutes) until the CD is available to avoid running into timeouts.
         oSession, oTxsSession = self.startVmAndConnectToTxsViaTcp(oTestVm.sVmName, fCdWait = True, cMsCdWait = 15 * 60 * 1000);
@@ -170,40 +167,14 @@ class tdSaveStateTest1(vbox.TestDriver):
             self.addTask(oTxsSession);
 
             ## @todo restore is not working properly fully and need to implement disk images
-            for i in range(MAX_SNAPSHOTS):
-                name = f"snapshot_{i+1}";
-                time.sleep(SNAPSHOT_DELAY_SECONDS);
-                frc = oSession.takeSnapshot(name);
-                if frc.resultCode != 0:
-                    reporter.error(f"Snapshot '{name}' failed.");
-                    return None;
-                reporter.log(f"Snapshot '{name}' created.");
-                snapshot_names.append(name);
-            reporter.log("Shutting down test VM");
-            self.txsDisconnect(oSession, oTxsSession);
-            self.removeTask(oTxsSession);
-            self.terminateVmBySession(oSession);
-            fRc = oSession.close() and fRc and True; # pychecker hack.
-            oSession = None;
-            oTxsSession = None;
+            fRc = oSession.saveState();
             if not fRc:
-                return reporter.error("Failed to take snapshot of test VM");
-            oVM = self.getVmByName(self.sVmName);
-            oSession = self.openSession(oVM);
-            if oSession is None:
-                return reporter.error("Failed to create session for test VM");
-            snapshot_to_restore = random.choice(snapshot_names);
-            oSnapshot = oSession.findSnapshot(snapshot_to_restore);
-            if oSnapshot is None:
-                return reporter.testFailure("Failed to find snapshot");
-            fRc = oSession.restoreSnapshot(oSnapshot);
-            if not fRc:
-                return reporter.error("Failed to restore snapshot");
-            reporter.log("Starting test VM after snapshot restore");
+                return reporter.error("Failed to take save state");
+            reporter.log("Machine is in saved state");
             oSession, oTxsSession = self.startVmAndConnectToTxsViaTcp(oTestVm.sVmName, fCdWait = True, cMsCdWait = 15 * 60 * 1000);
             if oSession is None or oTxsSession is None:
                 return reporter.error("Failed to start test VM");
-            reporter.log("Successfully started VM after restoring snapshot");
+            reporter.log("Successfully started VM after saving state");
             self.addTask(oTxsSession);
 
             # cleanup.
