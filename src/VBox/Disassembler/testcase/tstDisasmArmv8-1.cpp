@@ -83,11 +83,13 @@ DECLASM(int) TestProcA64Frint3264_EndProc(void);
 DECLASM(int) TestProcA64Rcpc(void);
 DECLASM(int) TestProcA64Rcpc_EndProc(void);
 
+#ifdef TST_DISASM_ARM8_WITH_FULL_TESTCASES
 DECLASM(int) TestProcA64The(void);
 DECLASM(int) TestProcA64The_EndProc(void);
 
 DECLASM(int) TestProcA64Mte(void);
 DECLASM(int) TestProcA64Mte_EndProc(void);
+#endif
 
 static DECLCALLBACK(int) rtScriptLexParseNumber(RTSCRIPTLEX hScriptLex, char ch, PRTSCRIPTLEXTOKEN pToken, void *pvUser)
 {
@@ -718,10 +720,12 @@ int main(int argc, char **argv)
           g_abtstDisasmArmv8_1_Frint3264, g_cbtstDisasmArmv8_1_Frint3264 },
         { "64-bit RCPC", (uint8_t const *)(uintptr_t)TestProcA64Rcpc, (uintptr_t)&TestProcA64Rcpc_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1_Rcpc, g_cbtstDisasmArmv8_1_Rcpc },
+# ifdef TST_DISASM_ARM8_WITH_FULL_TESTCASES
         { "64-bit THE", (uint8_t const *)(uintptr_t)TestProcA64The, (uintptr_t)&TestProcA64The_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1_The, g_cbtstDisasmArmv8_1_The },
         { "64-bit MTE", (uint8_t const *)(uintptr_t)TestProcA64Mte, (uintptr_t)&TestProcA64Mte_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1_Mte, g_cbtstDisasmArmv8_1_Mte },
+# endif
 #endif
     };
 

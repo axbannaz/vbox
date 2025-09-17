@@ -108,7 +108,9 @@ ifdef VBOX_WITH_TESTCASES
 
   PROGRAMS += tstDisasmArmv8-1
   tstDisasmArmv8-1_TEMPLATE   = VBoxR3TstExe
-  tstDisasmArmv8-1_DEFS       = IN_DIS
+  tstDisasmArmv8-1_DEFS       = \
+    IN_DIS \
+    $(if $(TST_DISASM_ARM8_WITH_FULL_TESTCASES),TST_DISASM_ARM8_WITH_FULL_TESTCASES,)
   tstDisasmArmv8-1_INCS = \
   	.
   tstDisasmArmv8-1_SOURCES    = \
@@ -123,8 +125,8 @@ ifdef VBOX_WITH_TESTCASES
   	tstDisasmArmv8-1-asm-crc.S \
   	tstDisasmArmv8-1-asm-frint3264.S \
   	tstDisasmArmv8-1-asm-rcpc.S \
-  	tstDisasmArmv8-1-asm-the.S \
-  	tstDisasmArmv8-1-asm-mte.S \
+  	$(if $(TST_DISASM_ARM8_WITH_FULL_TESTCASES),tstDisasmArmv8-1-asm-the.S,) \
+  	$(if $(TST_DISASM_ARM8_WITH_FULL_TESTCASES),tstDisasmArmv8-1-asm-mte.S,) \
   	tstDisasmArmv8-1.cpp
   tstDisasmArmv8-1_LIBS       = \
   	$(PATH_STAGE_LIB)/DisasmR3$(VBOX_SUFF_LIB) \
