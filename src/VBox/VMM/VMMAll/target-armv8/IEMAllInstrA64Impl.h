@@ -3071,7 +3071,20 @@
 
 
 /* SQADD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e200c00) */
-//#define IEM_INSTR_IMPL_A64__SQADD_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__SQADD_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_MC_SQADD_2LOCS_ELEM_S64(a_cBits, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8B( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_16B(IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4H( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8H( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm) /** @todo unclean */
 
 
 /* SRHADD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e201400) */

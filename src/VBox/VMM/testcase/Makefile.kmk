@@ -846,7 +846,7 @@ tstX86-FpuSaveRestore_LIBS     = $(LIB_RUNTIME)
 #
 tstArm64-1_TEMPLATE     := VBoxR3TstExe
 tstArm64-1_SOURCES       = tstArm64-1.S
-tstArm64-1_LDFLAGS.win  := -Entry:MainEntrypoint -Subsystem:console -guard:no
+tstArm64-1_LDFLAGS.win  := -Entry:ExeEntrypoint -Subsystem:console -guard:no
 #tstArm64-1_ASFLAGS.win.arm64 := -g1 -gcodeview - doesn't work, clang -cc1as doesn't do codeview, only dwarf.
 tstArm64-1_INCS          = $(tstArm64-1_0_OUTDIR)
 tstArm64-1_INTERMEDIATES = $(tstArm64-1_0_OUTDIR)/tstArm64-1-generated.S

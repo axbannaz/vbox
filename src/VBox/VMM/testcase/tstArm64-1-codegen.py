@@ -648,6 +648,28 @@ class A64No1CodeGenFprBase(A64No1CodeGenBase):
         self.emitFprLoad(iReg, uValue);
         return (uValue, iReg);
 
+    def emitFpSrLoad(self, fFpSrIn):
+        """
+        Loads 'fFpSrIn' into to the FPSR (FPU status) register
+        """
+        if fFpSrIn == 0:
+            self.emitInstr('msr', 'FPSR, xzr');
+        else:
+            iRegTmp = self.emitGprLoad(self.oGprAllocator.allocNo31(fFpSrIn), fFpSrIn);
+            self.emitInstr('msr', 'FPSR, x%u' % (iRegTmp,));
+            self.oGprAllocator.free(iRegTmp);
+        return None;
+
+    def emitFpSrCheck(self, fFpSrOut):
+        """
+        Checks that the FPSR (FPU status) register value is 'fFpSrOut'.
+        """
+        iRegTmp = self.oGprAllocator.allocNo31(fFpSrOut);
+        self.emitInstr('mrs', 'x%u, FPSR' % (iRegTmp,));
+        self.emitGprValCheck(iRegTmp, fFpSrOut);
+        self.oGprAllocator.free(iRegTmp);
+        return None;
+
 
 #
 # The code generators for specific instructions.
@@ -2460,7 +2482,7 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
             (uSrc2, iRegSrc2) = self.allocFprAndLoadRandUBits();
 
             uRes     = 0;
-            fFpSrIn  = 0;
+            fFpSrIn  = 0; ## @todo IEM doesn't handle random values right (RES0 bits are implicitly masked out).
             fFpSrOut = 0;
             if not self.fPairElems:
                 for iElem in range(cElems):
@@ -2481,21 +2503,25 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
                     uRes     |= uResElem << (iElem * cBitsElem);
                     fFpSrOut |= fFpSrElem;
 
-            ## @todo load and check FPSR.
+            # Load FPSR.
+            if self.fWithFlags:
+                self.emitFpSrLoad(fFpSrIn);
 
             # Emit the test instruction and result checks.
             iRegDst = self.oFprAllocator.alloc();
             self.emitInstr(self.sInstr, 'v%u.%s, v%u.%s, v%u.%s' % (iRegDst, sCfg, iRegSrc1, sCfg, iRegSrc2, sCfg,));
 
+            if self.fWithFlags:
+                self.emitFpSrCheck(fFpSrOut);
             self.emitFprValCheck(iRegDst, uRes);
 
             self.oFprAllocator.freeList((iRegDst, iRegSrc2, iRegSrc1));
 
 def calcSignedSatQ(iSum, cBitsElem):
     fMask = bitsOnes(cBitsElem - 1);
-    if iSum >= fMask:
+    if iSum > fMask:
         return (fMask, True);
-    if iSum < -fMask:
+    if iSum < -fMask - 1:
         return (-fMask - 1, True);
     return (iSum, False);
 
@@ -2672,7 +2698,7 @@ class Arm64No1CodeGen(object):
                 A64No1CodeGenAdvSimdThreeSame('addp',   calcAdvSimd3Add,     asSkip = ('1D',), fPairElems = True),
                 A64No1CodeGenAdvSimdThreeSame('shadd',  calcAdvSimd3ShAdd,   asSkip = ('1D', '2D',)),
                 A64No1CodeGenAdvSimdThreeSame('srhadd', calcAdvSimd3SrhAdd,  asSkip = ('1D', '2D',)),
-                #A64No1CodeGenAdvSimdThreeSame('sqadd',  calcAdvSimd3SqAdd,   asSkip = ('1D',), fWithFlags = True),
+                A64No1CodeGenAdvSimdThreeSame('sqadd',  calcAdvSimd3SqAdd,   asSkip = ('1D',), fWithFlags = True),
                 #A64No1CodeGenAdvSimdThreeSame('shsub',  calcAdvSimd3ShSub,   asSkip = ('1D', '2D',)),
             ];
 

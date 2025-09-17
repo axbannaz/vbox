@@ -332,6 +332,36 @@ DECLINLINE(uint64_t) iemMcA64ClsU64(uint64_t uValue)
 #define IEM_MC_A64_ISB()            ((void)0)
 
 
+/*
+ * Advanced SIMD.
+ */
+/** Element worker for SQADD - set FPSR.QC=1 on overflow. */
+#define IEM_MC_SQADD_2LOCS_ELEM_S64(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    (a_iResultAndLeftElem) = iemMcA64SQAddElem<a_cBits, INT##a_cBits##_MAX, INT##a_cBits##_MIN>((a_iResultAndLeftElem), \
+                                                                                                (a_iRightElem), \
+                                                                                                &pVCpu->cpum.GstCtx.fpsr)
+
+/** Helper that implements IEM_MC_A64_SUBS_U32 & IEM_MC_A64_SUBS_U64. */
+template<unsigned const a_cBits, int64_t const a_iMax, int64_t const a_iMin>
+DECL_FORCE_INLINE(int64_t) iemMcA64SQAddElem(int64_t iAddend1, int64_t iAddend2, uint64_t *pfFpSr)
+{
+    int64_t iSum = iAddend1 + iAddend2;
+
+    if (!((~((uint64_t)iAddend1 ^ (uint64_t)iAddend2) & ((uint64_t)iSum ^ (uint64_t)iAddend1)) >> (a_cBits - 1)))
+        return iSum;
+
+    /* Some kind of overflow. Since setting QC is cummulative and nothing else
+       will abort the instruction, there isn't strictly a problem doing it
+       before we've calculated everything... */
+    *pfFpSr |= RT_BIT_32(27); /* QC */
+    if RT_CONSTEXPR_IF(a_cBits < 64)
+        iSum = iSum < 0 ? a_iMin : a_iMax;
+    else
+        iSum = iSum >= 0 ? a_iMin : a_iMax;
+    return iSum;
+}
+
+
 /** @}  */
 
 #endif /* !VMM_INCLUDED_SRC_VMMAll_target_armv8_IEMMc_armv8_h */
