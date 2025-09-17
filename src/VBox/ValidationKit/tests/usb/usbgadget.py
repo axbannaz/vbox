@@ -215,7 +215,7 @@ def strToByteArry(sStr):
         # the primitive approach...
         sUtf8 = sStr.encode('utf_8');
         for ch in sUtf8:
-            abPayload.append(ord(ch))
+            abArray.append(ord(ch))
     abArray.append(0);
     return abArray;
 
