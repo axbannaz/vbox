@@ -65,6 +65,10 @@ extern const unsigned g_cbtstDisasmArmv8_1_Frint3264;
 extern const unsigned char g_abtstDisasmArmv8_1_Rcpc[];
 extern const unsigned g_cbtstDisasmArmv8_1_Rcpc;
 
+extern const unsigned char g_abtstDisasmArmv8_1_The[];
+extern const unsigned g_cbtstDisasmArmv8_1_The;
+
+
 RT_C_DECLS_END
 
 #endif /* !VBOX_INCLUDED_SRC_testcase_tstDisasmArmv8_1_tests_h */

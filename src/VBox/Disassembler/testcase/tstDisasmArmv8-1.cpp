@@ -83,6 +83,10 @@ DECLASM(int) TestProcA64Frint3264_EndProc(void);
 DECLASM(int) TestProcA64Rcpc(void);
 DECLASM(int) TestProcA64Rcpc_EndProc(void);
 
+DECLASM(int) TestProcA64The(void);
+DECLASM(int) TestProcA64The_EndProc(void);
+
+
 static DECLCALLBACK(int) rtScriptLexParseNumber(RTSCRIPTLEX hScriptLex, char ch, PRTSCRIPTLEXTOKEN pToken, void *pvUser)
 {
     RT_NOREF(ch, pvUser);
@@ -128,6 +132,7 @@ static const RTSCRIPTLEXTOKMATCH s_aMatches[] =
     { RT_STR_TUPLE("generic+crc"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("generic+fp16"),                 RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("generic+flagm"),                RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+the"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("armv8.5-a"),                    RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("testproca64"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("testproca64_endproc"),          RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
@@ -149,6 +154,8 @@ static const RTSCRIPTLEXTOKMATCH s_aMatches[] =
     { RT_STR_TUPLE("testproca64frint3264_endproc"), RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("testproca64rcpc"),              RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
     { RT_STR_TUPLE("testproca64rcpc_endproc"),      RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64the"),               RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64the_endproc"),       RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
 
     /* End of stuff which will get ignored in the semantic matching. */
 
@@ -703,6 +710,8 @@ int main(int argc, char **argv)
           g_abtstDisasmArmv8_1_Frint3264, g_cbtstDisasmArmv8_1_Frint3264 },
         { "64-bit RCPC", (uint8_t const *)(uintptr_t)TestProcA64Rcpc, (uintptr_t)&TestProcA64Rcpc_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1_Rcpc, g_cbtstDisasmArmv8_1_Rcpc },
+        { "64-bit THE", (uint8_t const *)(uintptr_t)TestProcA64The, (uintptr_t)&TestProcA64The_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_The, g_cbtstDisasmArmv8_1_The },
 #endif
     };
 
