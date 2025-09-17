@@ -472,16 +472,18 @@ void UISelectorDelegate::paint(QPainter *pPainter, const QStyleOptionViewItem &o
     const bool fChosen = enmState & QStyle::State_Selected;
 
 #ifndef VBOX_WS_MAC
-    /* Adjust rectangle to avoid painting artifats: */
-    itemRectangle.setLeft(itemRectangle.left() + 1);
-    itemRectangle.setTop(itemRectangle.top() + 1);
-    itemRectangle.setRight(itemRectangle.right() - 1);
-    itemRectangle.setBottom(itemRectangle.bottom() - 1);
+    /* Adjust rectangle to avoid painting artifacts: */
+    itemRectangle.setLeft(itemRectangle.left() + 2);
+    itemRectangle.setTop(itemRectangle.top() + 2);
+    itemRectangle.setRight(itemRectangle.right() - 2);
+    itemRectangle.setBottom(itemRectangle.bottom() - 2);
 
     /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
     if (enmState & QStyle::State_HasFocus)
     {
         QRect focusRect = option.rect;
+        focusRect.setLeft(focusRect.left() + 1);
+        focusRect.setTop(focusRect.top() + 1);
         focusRect.setRight(focusRect.right() - 1);
         focusRect.setBottom(focusRect.bottom() - 1);
         QStyleOptionFocusRect focusOption;
@@ -636,8 +638,12 @@ QVariant UISelectorModel::data(const QModelIndex &specifiedIndex, int iRole) con
                                            + fm.horizontalAdvance(strName) /* name width */;
             const int iMinimumContentHeight = qMax(fm.height() /* font height */,
                                                    iIconSize /* icon height */);
-            const int iMinimumWidth = iMinimumContentWidth + iMargin * 2;
-            const int iMinimumHeight = iMinimumContentHeight + iMargin * 2;
+            int iMinimumWidth = iMinimumContentWidth + iMargin * 2;
+            int iMinimumHeight = iMinimumContentHeight + iMargin * 2;
+#ifndef VBOX_WS_MAC
+            iMinimumWidth += 2 /* left */ + 2 /* right */;
+            iMinimumHeight += 2 /* top */ + 2 /* bottom */;
+#endif
             return QSize(iMinimumWidth, iMinimumHeight);
         }
 
@@ -691,8 +697,13 @@ QVariant UISelectorModel::data(const QModelIndex &specifiedIndex, int iRole) con
             const int iIconSize = data(specifiedIndex, R_IconSize).toInt();
             const QFontMetrics fm(data(specifiedIndex, Qt::FontRole).value<QFont>());
             const QSize sizeHint = data(specifiedIndex, Qt::SizeHintRole).toSize();
-            return QPoint(iMargin + iIconSize + iSpacing,
-                          sizeHint.height() / 2 + fm.ascent() / 2 - 1 /* base line */);
+            int iNamePointX = iMargin + iIconSize + iSpacing;
+            int iNamePointY = sizeHint.height() / 2 + fm.ascent() / 2 - 1 /* base line */;
+#ifndef VBOX_WS_MAC
+            iNamePointX -= 2 /* left */;
+            iNamePointY -= 2 /* top */;
+#endif
+            return QPoint(iNamePointX, iNamePointY);
         }
         case R_ItemHidden:
         {
