@@ -209,9 +209,13 @@ def zeroByteArray(cb):
 def strToByteArry(sStr):
     """Encodes the string as a little endian byte (B) array including the terminator."""
     abArray = array.array('B');
-    sUtf8 = sStr.encode('utf_8');
-    for ch in sUtf8:
-        abArray.append(ord(ch));
+    if sys.version_info[0] >= 3:
+        abArray.extend(sStr.encode('utf_8'));
+    else:
+        # the primitive approach...
+        sUtf8 = sStr.encode('utf_8');
+        for ch in sUtf8:
+            abPayload.append(ord(ch))
     abArray.append(0);
     return abArray;
 
@@ -403,7 +407,13 @@ class TransportBase(object):
         # Unpack and validate the header.
         cbMsg   = getU32(abHdr, 0);
         uCrc32  = getU32(abHdr, 4);
-        sOpcode = abHdr[8:16].tostring().decode('ascii');
+
+        if sys.version_info < (3, 9, 0):
+            # Removed since Python 3.9.
+            sOpcode = abHdr[8:16].tostring(); # pylint: disable=no-member
+        else:
+            sOpcode = abHdr[8:16].tobytes();
+        sOpcode = sOpcode.decode('ascii');
 
         if cbMsg < 16:
             reporter.fatal('recvMsg: message length is out of range: %s (min 16 bytes)' % (cbMsg));
@@ -459,17 +469,15 @@ class TransportBase(object):
         for o in aoPayload:
             try:
                 if utils.isString(o):
-                    # the primitive approach...
-                    sUtf8 = o.encode('utf_8');
-                    for ch in sUtf8:
-                        abPayload.append(ord(ch))
+                    if sys.version_info[0] >= 3:
+                        abPayload.extend(o.encode('utf_8'));
+                    else:
+                        # the primitive approach...
+                        sUtf8 = o.encode('utf_8');
+                        for ch in sUtf8:
+                            abPayload.append(ord(ch))
                     abPayload.append(0);
-                elif isinstance(o, long):
-                    if o < 0 or o > 0xffffffff:
-                        reporter.fatal('sendMsg: uint32_t payload is out of range: %s' % (hex(o)));
-                        return None;
-                    abPayload.extend(u32ToByteArray(o));
-                elif isinstance(o, int):
+                elif isinstance(o, (long, int)):
                     if o < 0 or o > 0xffffffff:
                         reporter.fatal('sendMsg: uint32_t payload is out of range: %s' % (hex(o)));
                         return None;
@@ -992,11 +1000,11 @@ class TransportTcp(TransportBase):
         try:
             if isinstance(oXcpt, socket.error):
                 try:
-                    if oXcpt[0] == errno.EINPROGRESS:
+                    if oXcpt.errno == errno.EINPROGRESS:
                         return True;
                 except: pass;
                 try:
-                    if oXcpt[0] == errno.EWOULDBLOCK:
+                    if oXcpt.errno == errno.EWOULDBLOCK:
                         return True;
                     if utils.getHostOs() == 'win' and oXcpt[0] == errno.WSAEWOULDBLOCK: # pylint: disable=no-member
                         return True;
@@ -1010,11 +1018,11 @@ class TransportTcp(TransportBase):
         try:
             if isinstance(oXcpt, socket.error):
                 try:
-                    if oXcpt[0] == errno.EWOULDBLOCK:
+                    if oXcpt.errno == errno.EWOULDBLOCK:
                         return True;
                 except: pass;
                 try:
-                    if oXcpt[0] == errno.EAGAIN:
+                    if oXcpt.errno == errno.EAGAIN:
                         return True;
                 except: pass;
         except:
@@ -1026,11 +1034,11 @@ class TransportTcp(TransportBase):
         try:
             if isinstance(oXcpt, socket.error):
                 try:
-                    if oXcpt[0] == errno.ECONNRESET:
+                    if oXcpt.errno == errno.ECONNRESET:
                         return True;
                 except: pass;
                 try:
-                    if oXcpt[0] == errno.ENETRESET:
+                    if oXcpt.errno == errno.ENETRESET:
                         return True;
                 except: pass;
         except:
