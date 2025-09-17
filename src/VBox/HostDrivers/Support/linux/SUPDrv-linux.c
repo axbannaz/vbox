@@ -1672,30 +1672,6 @@ int VBOXCALL supdrvOSEnableVTx(bool fEnable)
 
 
 /**
- * @copydoc SUPR0SuspendVTxOnCpu
- */
-bool VBOXCALL supdrvOSSuspendVTxOnCpu(void)
-{
-# ifdef SUPDRV_LINUX_HAS_KVM_VMX_API
-    /* The KVM kernel API registers and handles suspend/resume callbacks by itself. */
-    return true;
-# else
-    return false;
-# endif
-}
-
-
-/**
- * @copydoc SUPR0ResumeVTxOnCpu
- */
-void VBOXCALL supdrvOSResumeVTxOnCpu(bool fSuspended)
-{
-    /* The KVM kernel API registers and handles suspend/resume callbacks by itself. */
-    NOREF(fSuspended);
-}
-
-
-/**
  * Converts a supdrv error code to an linux error code.
  *
  * @returns corresponding linux error code.

@@ -293,8 +293,6 @@ static SUPFUNC g_aFunctions[] =
     SUPEXP_STK_OKAY(    1,  SUPR0FpuEnd),               /* not-arch-arm64 */
     SUPEXP_STK_BACK(    2,  SUPR0ChangeCR4),            /* not-arch-arm64 */
     SUPEXP_STK_BACK(    1,  SUPR0EnableVTx),            /* not-arch-arm64 */
-    SUPEXP_STK_BACK(    0,  SUPR0SuspendVTxOnCpu),      /* not-arch-arm64 */
-    SUPEXP_STK_BACK(    1,  SUPR0ResumeVTxOnCpu),       /* not-arch-arm64 */
     SUPEXP_STK_OKAY(    1,  SUPR0GetCurrentGdtRw),      /* not-arch-arm64 */
     SUPEXP_STK_BACK(    3,  SUPR0GetHwvirtMsrs),        /* not-arch-arm64 */
     SUPEXP_STK_BACK(    1,  SUPR0GetSvmUsability),      /* not-arch-arm64 */
@@ -4323,47 +4321,6 @@ SUPR0DECL(int) SUPR0EnableVTx(bool fEnable)
 # endif
 }
 SUPR0_EXPORT_SYMBOL(SUPR0EnableVTx);
-
-
-/**
- * Suspends hardware virtualization extensions using the native OS API.
- *
- * This is called prior to entering raw-mode context.
- *
- * @returns @c true if suspended, @c false if not.
- */
-SUPR0DECL(bool) SUPR0SuspendVTxOnCpu(void)
-{
-# if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    return supdrvOSSuspendVTxOnCpu();
-# elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    return supdrvOSSuspendVTxOnCpu();
-# else
-    return false;
-# endif
-}
-SUPR0_EXPORT_SYMBOL(SUPR0SuspendVTxOnCpu);
-
-
-/**
- * Resumes hardware virtualization extensions using the native OS API.
- *
- * This is called after to entering raw-mode context.
- *
- * @param   fSuspended      The return value of SUPR0SuspendVTxOnCpu.
- */
-SUPR0DECL(void) SUPR0ResumeVTxOnCpu(bool fSuspended)
-{
-# if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    supdrvOSResumeVTxOnCpu(fSuspended);
-# elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    supdrvOSResumeVTxOnCpu(fSuspended);
-# else
-    RT_NOREF1(fSuspended);
-    Assert(!fSuspended);
-# endif
-}
-SUPR0_EXPORT_SYMBOL(SUPR0ResumeVTxOnCpu);
 
 
 SUPR0DECL(int) SUPR0GetCurrentGdtRw(RTHCUINTPTR *pGdtRw)
