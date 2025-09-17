@@ -29,7 +29,9 @@
 
 BEGINPROC_HIDDEN TestProcA64FullFp16
 
-        .cpu generic+fp16
+#ifndef RT_OS_DARWIN
+        .cpu generic+fp16 /* Our macOS toolchain doesn't know about fp16 but includes support by default */
+#endif
 
         fmadd  h0, h1, h3, h31
         fmsub  h0, h1, h3, h31
