@@ -2646,14 +2646,6 @@ BEGINPROC_HIDDEN TestProcA64
         /* msr svcrsma, #1 Not supported by the toolchain */
         /* msr svcrsma, #0 Not supported by the toolchain */
 
-        /* Add/subtract immediate with tags */
-
-        /*addg x0, x1, #0, #0       - Requires FEAT_MTE */
-        /*addg sp, sp, #1008, #0x0f - Requires FEAT_MTE */
-
-        /*subg x0, x1, #0, #0       - Requires FEAT_MTE */
-        /*subg sp, sp, #1008, #0x0f - Requires FEAT_MTE */
-
         /* Floating Point instructions. */
         fmadd  s0, s1, s3, s31
         fmadd  d0, d1, d3, d31
@@ -2844,20 +2836,6 @@ BEGINPROC_HIDDEN TestProcA64
         dsb #0xd
         dsb #0xe
         dsb #0xf
-
-        /*subps x0, x1, x3 - Requires FEAT_MTE */
-        /*subps x0, sp, sp - Requires FEAT_MTE */
-
-        /*subp  x0, x1, x3 - Requires FEAT_MTE */
-        /*subp  x0, sp, sp - Requires FEAT_MTE */
-
-        /*gmi   x0, x1, x3  - Requires FEAT_MTE */
-        /*gmi   x0, sp, x3  - Requires FEAT_MTE */
-
-        /*irg   x0, x1, x3  - Requires FEAT_MTE */
-        /*irg   x0, x1, xzr - Requires FEAT_MTE */
-        /*irg   sp, sp, x3  - Requires FEAT_MTE */
-        /*irg   sp, sp, xzr - Requires FEAT_MTE */
 
         udiv w0, w1, wzr
         udiv x0, x1, xzr

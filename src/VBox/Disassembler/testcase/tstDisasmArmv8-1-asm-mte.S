@@ -31,6 +31,27 @@ BEGINPROC_HIDDEN TestProcA64Mte
 
         .cpu generic+memtag
 
+        /* Add/subtract immediate with tags */
+        addg x0, x1, #0, #0
+        addg sp, sp, #1008, #0x0f
+
+        subg x0, x1, #0, #0
+        subg sp, sp, #1008, #0x0f
+
+        subps x0, x1, x3
+        subps x0, sp, sp
+
+        subp  x0, x1, x3
+        subp  x0, sp, sp
+
+        gmi   x0, x1, x3
+        gmi   x0, sp, x3
+
+        irg   x0, x1, x3
+        irg   x0, x1, xzr
+        irg   sp, sp, x3
+        irg   sp, sp, xzr
+
         /*
          * Load/Store memory tags
          */
