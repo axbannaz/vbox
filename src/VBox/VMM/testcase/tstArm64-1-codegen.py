@@ -2543,6 +2543,20 @@ def calcAdvSimd3SqAdd(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
     return (iSum & fElemMask, fFpSr);
 
 
+def calcAdvSimd3Sub(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return ((uSrcElem1 - uSrcElem2) & fElemMask, fFpSr);
+
+def calcAdvSimd3ShSub(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    iSum = bitsSignedToInt(cBitsElem, uSrcElem1) - bitsSignedToInt(cBitsElem, uSrcElem2);
+    return ((iSum >> 1) & fElemMask, fFpSr);
+
+def calcAdvSimd3SqSub(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    (iSum, fSat) = calcSignedSatQ(bitsSignedToInt(cBitsElem, uSrcElem1) - bitsSignedToInt(cBitsElem, uSrcElem2), cBitsElem);
+    if fSat:
+        fFpSr |= 1 << 27;
+    return (iSum & fElemMask, fFpSr);
+
+
 #
 # Result calculation functions.
 #
@@ -2699,7 +2713,10 @@ class Arm64No1CodeGen(object):
                 A64No1CodeGenAdvSimdThreeSame('shadd',  calcAdvSimd3ShAdd,   asSkip = ('1D', '2D',)),
                 A64No1CodeGenAdvSimdThreeSame('srhadd', calcAdvSimd3SrhAdd,  asSkip = ('1D', '2D',)),
                 A64No1CodeGenAdvSimdThreeSame('sqadd',  calcAdvSimd3SqAdd,   asSkip = ('1D',), fWithFlags = True),
-                #A64No1CodeGenAdvSimdThreeSame('shsub',  calcAdvSimd3ShSub,   asSkip = ('1D', '2D',)),
+
+                A64No1CodeGenAdvSimdThreeSame('sub',    calcAdvSimd3Sub,     asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('shsub',  calcAdvSimd3ShSub,   asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('sqsub',  calcAdvSimd3SqSub,   asSkip = ('1D',), fWithFlags = True),
             ];
 
         if True: # pylint: disable=using-constant-test
