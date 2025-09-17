@@ -25,9 +25,9 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-.private_extern _TestProcA64Simd
-_TestProcA64Simd:
+#include <iprt/asmdefs-arm.h>
 
+BEGINPROC_HIDDEN TestProcA64Simd
     add v0.8B,  v1.8B,  v2.8B
     add v31.8B, v30.8B, v29.8B
     add v0.16B,  v1.16B,  v2.16B
@@ -43,9 +43,9 @@ _TestProcA64Simd:
     add v0.2D,  v1.2D,  v2.2D
     add v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;add d0,  d1,  d2
-    ;add d31, d30, d29
+    /* @todo Scalar variants */
+    /*add d0,  d1,  d2 */
+    /*add d31, d30, d29 */
 
     addp v0.8B,  v1.8B,  v2.8B
     addp v31.8B, v30.8B, v29.8B
@@ -73,17 +73,17 @@ _TestProcA64Simd:
     addv s0, v0.4S
     addv s31, v31.4S
 
-    ; @todo Fix diassembler tables
-    ;bif v0.8B,  v1.8B,  v2.8B
-    ;bif v31.8B, v30.8B, v29.8B
-    ;bif v0.16B,  v1.16B,  v2.16B
-    ;bif v31.16B, v30.16B, v29.16B
+    /* @todo Fix diassembler tables */
+    /*bif v0.8B,  v1.8B,  v2.8B */
+    /*bif v31.8B, v30.8B, v29.8B */
+    /*bif v0.16B,  v1.16B,  v2.16B */
+    /*bif v31.16B, v30.16B, v29.16B */
 
-    ; @todo Fix diassembler tables
-    ;bit v0.8B,  v1.8B,  v2.8B
-    ;bit v31.8B, v30.8B, v29.8B
-    ;bit v0.16B,  v1.16B,  v2.16B
-    ;bit v31.16B, v30.16B, v29.16B
+    /* @todo Fix diassembler tables */
+    /*bit v0.8B,  v1.8B,  v2.8B */
+    /*bit v31.8B, v30.8B, v29.8B */
+    /*bit v0.16B,  v1.16B,  v2.16B */
+    /*bit v31.16B, v30.16B, v29.16B */
 
     cmeq v0.8B,  v1.8B,  v2.8B
     cmeq v31.8B, v30.8B, v29.8B
@@ -100,9 +100,9 @@ _TestProcA64Simd:
     cmeq v0.2D,  v1.2D,  v2.2D
     cmeq v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmeq d0,  d1,  d2
-    ;cmeq d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmeq d0,  d1,  d2 */
+    /*cmeq d31, d30, d29 */
 
     cmge v0.8B,  v1.8B,  v2.8B
     cmge v31.8B, v30.8B, v29.8B
@@ -119,9 +119,9 @@ _TestProcA64Simd:
     cmge v0.2D,  v1.2D,  v2.2D
     cmge v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmge d0,  d1,  d2
-    ;cmge d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmge d0,  d1,  d2 */
+    /*cmge d31, d30, d29 */
 
     cmgt v0.8B,  v1.8B,  v2.8B
     cmgt v31.8B, v30.8B, v29.8B
@@ -138,9 +138,9 @@ _TestProcA64Simd:
     cmgt v0.2D,  v1.2D,  v2.2D
     cmgt v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmgt d0,  d1,  d2
-    ;cmgt d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmgt d0,  d1,  d2 */
+    /*cmgt d31, d30, d29 */
 
     cmhi v0.8B,  v1.8B,  v2.8B
     cmhi v31.8B, v30.8B, v29.8B
@@ -157,9 +157,9 @@ _TestProcA64Simd:
     cmhi v0.2D,  v1.2D,  v2.2D
     cmhi v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmhi d0,  d1,  d2
-    ;cmhi d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmhi d0,  d1,  d2 */
+    /*cmhi d31, d30, d29 */
 
     cmhs v0.8B,  v1.8B,  v2.8B
     cmhs v31.8B, v30.8B, v29.8B
@@ -176,9 +176,9 @@ _TestProcA64Simd:
     cmhs v0.2D,  v1.2D,  v2.2D
     cmhs v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmhs d0,  d1,  d2
-    ;cmhs d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmhs d0,  d1,  d2 */
+    /*cmhs d31, d30, d29 */
 
     cmtst v0.8B,  v1.8B,  v2.8B
     cmtst v31.8B, v30.8B, v29.8B
@@ -195,38 +195,38 @@ _TestProcA64Simd:
     cmtst v0.2D,  v1.2D,  v2.2D
     cmtst v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;cmtst d0,  d1,  d2
-    ;cmtst d31, d30, d29
+    /* @todo Scalar variants */
+    /*cmtst d0,  d1,  d2 */
+    /*cmtst d31, d30, d29 */
 
     eor v0.8B,  v1.8B,  v2.8B
     eor v31.8B, v30.8B, v29.8B
     eor v0.16B,  v1.16B,  v2.16B
     eor v31.16B, v30.16B, v29.16B
 
-    ; @todo Buggy disassembler table
-    ;fadd v0.2S,  v1.2S,  v2.2S
-    ;fadd v31.2S, v30.2S, v29.2S
-    ;fadd v0.4S,  v1.4S,  v2.4S
-    ;fadd v31.4S, v30.4S, v29.4S
-    ;fadd v0.2D,  v1.2D,  v2.2D
-    ;fadd v31.2D, v30.2D, v29.2D
+    /* @todo Buggy disassembler table */
+    /*fadd v0.2S,  v1.2S,  v2.2S */
+    /*fadd v31.2S, v30.2S, v29.2S */
+    /*fadd v0.4S,  v1.4S,  v2.4S */
+    /*fadd v31.4S, v30.4S, v29.4S */
+    /*fadd v0.2D,  v1.2D,  v2.2D */
+    /*fadd v31.2D, v30.2D, v29.2D */
 
-    ; @todo Buggy disassembler table
-    ;fmaxnm v0.2S,  v1.2S,  v2.2S
-    ;fmaxnm v31.2S, v30.2S, v29.2S
-    ;fmaxnm v0.4S,  v1.4S,  v2.4S
-    ;fmaxnm v31.4S, v30.4S, v29.4S
-    ;fmaxnm v0.2D,  v1.2D,  v2.2D
-    ;fmaxnm v31.2D, v30.2D, v29.2D
+    /* @todo Buggy disassembler table */
+    /*fmaxnm v0.2S,  v1.2S,  v2.2S */
+    /*fmaxnm v31.2S, v30.2S, v29.2S */
+    /*fmaxnm v0.4S,  v1.4S,  v2.4S */
+    /*fmaxnm v31.4S, v30.4S, v29.4S */
+    /*fmaxnm v0.2D,  v1.2D,  v2.2D */
+    /*fmaxnm v31.2D, v30.2D, v29.2D */
 
-    ; @todo Buggy disassembler table
-    ;fmla v0.2S,  v1.2S,  v2.2S
-    ;fmla v31.2S, v30.2S, v29.2S
-    ;fmla v0.4S,  v1.4S,  v2.4S
-    ;fmla v31.4S, v30.4S, v29.4S
-    ;fmla v0.2D,  v1.2D,  v2.2D
-    ;fmla v31.2D, v30.2D, v29.2D
+    /* @todo Buggy disassembler table */
+    /*fmla v0.2S,  v1.2S,  v2.2S */
+    /*fmla v31.2S, v30.2S, v29.2S */
+    /*fmla v0.4S,  v1.4S,  v2.4S */
+    /*fmla v31.4S, v30.4S, v29.4S */
+    /*fmla v0.2D,  v1.2D,  v2.2D */
+    /*fmla v31.2D, v30.2D, v29.2D */
 
     mla v0.8B,  v1.8B,  v2.8B
     mla v31.8B, v30.8B, v29.8B
@@ -385,15 +385,15 @@ _TestProcA64Simd:
     sqadd v0.2D,  v1.2D,  v2.2D
     sqadd v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sqadd b0,  b1,  b2
-    ;sqadd b31, b30, b29
-    ;sqadd h0,  h1,  h2
-    ;sqadd h31, h30, h29
-    ;sqadd s0,  s1,  s2
-    ;sqadd s31, s30, s29
-    ;sqadd d0,  d1,  d2
-    ;sqadd d31, d30, d29
+    /* @todo Scalar variants */
+    /*sqadd b0,  b1,  b2 */
+    /*sqadd b31, b30, b29 */
+    /*sqadd h0,  h1,  h2 */
+    /*sqadd h31, h30, h29 */
+    /*sqadd s0,  s1,  s2 */
+    /*sqadd s31, s30, s29 */
+    /*sqadd d0,  d1,  d2 */
+    /*sqadd d31, d30, d29 */
 
     sqdmulh v0.4H,  v1.4H,  v2.4H
     sqdmulh v31.4H, v30.4H, v29.4H
@@ -404,11 +404,11 @@ _TestProcA64Simd:
     sqdmulh v0.4S,  v1.4S,  v2.4S
     sqdmulh v31.4S, v30.4S, v29.4S
 
-    ; @todo Scalar variants
-    ;sqdmulh h0,  h1,  h2
-    ;sqdmulh h31, h30, h29
-    ;sqdmulh s0,  s1,  s2
-    ;sqdmulh s31, s30, s29
+    /* @todo Scalar variants */
+    /*sqdmulh h0,  h1,  h2 */
+    /*sqdmulh h31, h30, h29 */
+    /*sqdmulh s0,  s1,  s2 */
+    /*sqdmulh s31, s30, s29 */
 
     sqrshl v0.8B,  v1.8B,  v2.8B
     sqrshl v31.8B, v30.8B, v29.8B
@@ -425,15 +425,15 @@ _TestProcA64Simd:
     sqrshl v0.2D,  v1.2D,  v2.2D
     sqrshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sqrshl b0,  b1,  b2
-    ;sqrshl b31, b30, b29
-    ;sqrshl h0,  h1,  h2
-    ;sqrshl h31, h30, h29
-    ;sqrshl s0,  s1,  s2
-    ;sqrshl s31, s30, s29
-    ;sqrshl d0,  d1,  d2
-    ;sqrshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*sqrshl b0,  b1,  b2 */
+    /*sqrshl b31, b30, b29 */
+    /*sqrshl h0,  h1,  h2 */
+    /*sqrshl h31, h30, h29 */
+    /*sqrshl s0,  s1,  s2 */
+    /*sqrshl s31, s30, s29 */
+    /*sqrshl d0,  d1,  d2 */
+    /*sqrshl d31, d30, d29 */
 
     sqshl v0.8B,  v1.8B,  v2.8B
     sqshl v31.8B, v30.8B, v29.8B
@@ -450,15 +450,15 @@ _TestProcA64Simd:
     sqshl v0.2D,  v1.2D,  v2.2D
     sqshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sqshl b0,  b1,  b2
-    ;sqshl b31, b30, b29
-    ;sqshl h0,  h1,  h2
-    ;sqshl h31, h30, h29
-    ;sqshl s0,  s1,  s2
-    ;sqshl s31, s30, s29
-    ;sqshl d0,  d1,  d2
-    ;sqshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*sqshl b0,  b1,  b2 */
+    /*sqshl b31, b30, b29 */
+    /*sqshl h0,  h1,  h2 */
+    /*sqshl h31, h30, h29 */
+    /*sqshl s0,  s1,  s2 */
+    /*sqshl s31, s30, s29 */
+    /*sqshl d0,  d1,  d2 */
+    /*sqshl d31, d30, d29 */
 
     srhadd v0.8B,  v1.8B,  v2.8B
     srhadd v31.8B, v30.8B, v29.8B
@@ -495,11 +495,11 @@ _TestProcA64Simd:
     sqrdmulh v0.4S,  v1.4S,  v2.4S
     sqrdmulh v31.4S, v30.4S, v29.4S
 
-    ; @todo Scalar variants
-    ;sqrdmulh h0,  h1,  h2
-    ;sqrdmulh h31, h30, h29
-    ;sqrdmulh s0,  s1,  s2
-    ;sqrdmulh s31, s30, s29
+    /* @todo Scalar variants */
+    /*sqrdmulh h0,  h1,  h2 */
+    /*sqrdmulh h31, h30, h29 */
+    /*sqrdmulh s0,  s1,  s2 */
+    /*sqrdmulh s31, s30, s29 */
 
     sqsub v0.8B,  v1.8B,  v2.8B
     sqsub v31.8B, v30.8B, v29.8B
@@ -516,15 +516,15 @@ _TestProcA64Simd:
     sqsub v0.2D,  v1.2D,  v2.2D
     sqsub v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sqsub b0,  b1,  b2
-    ;sqsub b31, b30, b29
-    ;sqsub h0,  h1,  h2
-    ;sqsub h31, h30, h29
-    ;sqsub s0,  s1,  s2
-    ;sqsub s31, s30, s29
-    ;sqsub d0,  d1,  d2
-    ;sqsub d31, d30, d29
+    /* @todo Scalar variants */
+    /*sqsub b0,  b1,  b2 */
+    /*sqsub b31, b30, b29 */
+    /*sqsub h0,  h1,  h2 */
+    /*sqsub h31, h30, h29 */
+    /*sqsub s0,  s1,  s2 */
+    /*sqsub s31, s30, s29 */
+    /*sqsub d0,  d1,  d2 */
+    /*sqsub d31, d30, d29 */
 
     sshl v0.8B,  v1.8B,  v2.8B
     sshl v31.8B, v30.8B, v29.8B
@@ -541,9 +541,9 @@ _TestProcA64Simd:
     sshl v0.2D,  v1.2D,  v2.2D
     sshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sshl d0,  d1,  d2
-    ;sshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*sshl d0,  d1,  d2 */
+    /*sshl d31, d30, d29 */
 
     sub v0.8B,  v1.8B,  v2.8B
     sub v31.8B, v30.8B, v29.8B
@@ -560,9 +560,9 @@ _TestProcA64Simd:
     sub v0.2D,  v1.2D,  v2.2D
     sub v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;sub d0,  d1,  d2
-    ;sub d31, d30, d29
+    /* @todo Scalar variants */
+    /*sub d0,  d1,  d2 */
+    /*sub d31, d30, d29 */
 
     uaba v0.8B,  v1.8B,  v2.8B
     uaba v31.8B, v30.8B, v29.8B
@@ -703,15 +703,15 @@ _TestProcA64Simd:
     uqadd v0.2D,  v1.2D,  v2.2D
     uqadd v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;uqadd b0,  b1,  b2
-    ;uqadd b31, b30, b29
-    ;uqadd h0,  h1,  h2
-    ;uqadd h31, h30, h29
-    ;uqadd s0,  s1,  s2
-    ;uqadd s31, s30, s29
-    ;uqadd d0,  d1,  d2
-    ;uqadd d31, d30, d29
+    /* @todo Scalar variants */
+    /*uqadd b0,  b1,  b2 */
+    /*uqadd b31, b30, b29 */
+    /*uqadd h0,  h1,  h2 */
+    /*uqadd h31, h30, h29 */
+    /*uqadd s0,  s1,  s2 */
+    /*uqadd s31, s30, s29 */
+    /*uqadd d0,  d1,  d2 */
+    /*uqadd d31, d30, d29 */
 
     uqrshl v0.8B,  v1.8B,  v2.8B
     uqrshl v31.8B, v30.8B, v29.8B
@@ -728,15 +728,15 @@ _TestProcA64Simd:
     uqrshl v0.2D,  v1.2D,  v2.2D
     uqrshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;uqrshl b0,  b1,  b2
-    ;uqrshl b31, b30, b29
-    ;uqrshl h0,  h1,  h2
-    ;uqrshl h31, h30, h29
-    ;uqrshl s0,  s1,  s2
-    ;uqrshl s31, s30, s29
-    ;uqrshl d0,  d1,  d2
-    ;uqrshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*uqrshl b0,  b1,  b2 */
+    /*uqrshl b31, b30, b29 */
+    /*uqrshl h0,  h1,  h2 */
+    /*uqrshl h31, h30, h29 */
+    /*uqrshl s0,  s1,  s2 */
+    /*uqrshl s31, s30, s29 */
+    /*uqrshl d0,  d1,  d2 */
+    /*uqrshl d31, d30, d29 */
 
     uqshl v0.8B,  v1.8B,  v2.8B
     uqshl v31.8B, v30.8B, v29.8B
@@ -753,15 +753,15 @@ _TestProcA64Simd:
     uqshl v0.2D,  v1.2D,  v2.2D
     uqshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;uqshl b0,  b1,  b2
-    ;uqshl b31, b30, b29
-    ;uqshl h0,  h1,  h2
-    ;uqshl h31, h30, h29
-    ;uqshl s0,  s1,  s2
-    ;uqshl s31, s30, s29
-    ;uqshl d0,  d1,  d2
-    ;uqshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*uqshl b0,  b1,  b2 */
+    /*uqshl b31, b30, b29 */
+    /*uqshl h0,  h1,  h2 */
+    /*uqshl h31, h30, h29 */
+    /*uqshl s0,  s1,  s2 */
+    /*uqshl s31, s30, s29 */
+    /*uqshl d0,  d1,  d2 */
+    /*uqshl d31, d30, d29 */
 
     uqsub v0.8B,  v1.8B,  v2.8B
     uqsub v31.8B, v30.8B, v29.8B
@@ -778,15 +778,15 @@ _TestProcA64Simd:
     uqsub v0.2D,  v1.2D,  v2.2D
     uqsub v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;uqsub b0,  b1,  b2
-    ;uqsub b31, b30, b29
-    ;uqsub h0,  h1,  h2
-    ;uqsub h31, h30, h29
-    ;uqsub s0,  s1,  s2
-    ;uqsub s31, s30, s29
-    ;uqsub d0,  d1,  d2
-    ;uqsub d31, d30, d29
+    /* @todo Scalar variants */
+    /*uqsub b0,  b1,  b2 */
+    /*uqsub b31, b30, b29 */
+    /*uqsub h0,  h1,  h2 */
+    /*uqsub h31, h30, h29 */
+    /*uqsub s0,  s1,  s2 */
+    /*uqsub s31, s30, s29 */
+    /*uqsub d0,  d1,  d2 */
+    /*uqsub d31, d30, d29 */
 
     urhadd v0.8B,  v1.8B,  v2.8B
     urhadd v31.8B, v30.8B, v29.8B
@@ -816,9 +816,9 @@ _TestProcA64Simd:
     urshl v0.2D,  v1.2D,  v2.2D
     urshl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;urshl d0,  d1,  d2
-    ;urshl d31, d30, d29
+    /* @todo Scalar variants */
+    /*urshl d0,  d1,  d2 */
+    /*urshl d31, d30, d29 */
 
     ushl v0.8B,  v1.8B,  v2.8B
     ushl v31.8B, v30.8B, v29.8B
@@ -835,15 +835,14 @@ _TestProcA64Simd:
     ushl v0.2D,  v1.2D,  v2.2D
     ushl v31.2D, v30.2D, v29.2D
 
-    ; @todo Scalar variants
-    ;ushl d0,  d1,  d2
-    ;ushl d31, d30, d29
+    /* @todo Scalar variants */
+    /*ushl d0,  d1,  d2 */
+    /*ushl d31, d30, d29 */
 
-    ;
-    ; Keep last so the testcase can catch errors in
-    ; the disassembly of the last instruction.
-    ;
+    /*
+     * Keep last so the testcase can catch errors in
+     * the disassembly of the last instruction.
+     */
     nop
 
-.private_extern _TestProcA64Simd_EndProc
-_TestProcA64Simd_EndProc:
+BEGINPROC_HIDDEN TestProcA64Simd_EndProc

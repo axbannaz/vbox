@@ -59,6 +59,29 @@ DECLASM(int) TestProcA64_EndProc(void);
 DECLASM(int) TestProcA64Simd(void);
 DECLASM(int) TestProcA64Simd_EndProc(void);
 
+DECLASM(int) TestProcA64PAuth(void);
+DECLASM(int) TestProcA64PAuth_EndProc(void);
+
+DECLASM(int) TestProcA64FlagM(void);
+DECLASM(int) TestProcA64FlagM_EndProc(void);
+
+DECLASM(int) TestProcA64FullFp16(void);
+DECLASM(int) TestProcA64FullFp16_EndProc(void);
+
+DECLASM(int) TestProcA64Lor(void);
+DECLASM(int) TestProcA64Lor_EndProc(void);
+
+DECLASM(int) TestProcA64Lse(void);
+DECLASM(int) TestProcA64Lse_EndProc(void);
+
+DECLASM(int) TestProcA64Crc(void);
+DECLASM(int) TestProcA64Crc_EndProc(void);
+
+DECLASM(int) TestProcA64Frint3264(void);
+DECLASM(int) TestProcA64Frint3264_EndProc(void);
+
+DECLASM(int) TestProcA64Rcpc(void);
+DECLASM(int) TestProcA64Rcpc_EndProc(void);
 
 static DECLCALLBACK(int) rtScriptLexParseNumber(RTSCRIPTLEX hScriptLex, char ch, PRTSCRIPTLEXTOKEN pToken, void *pvUser)
 {
@@ -87,19 +110,46 @@ static const char *s_aszMultiEnd[] =
     NULL
 };
 
-
 static const RTSCRIPTLEXTOKMATCH s_aMatches[] =
 {
     /* Begin of stuff which will get ignored in the semantic matching. */
-    { RT_STR_TUPLE(".private_extern"),          RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE(".cpu"),                     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("generic+mte"),              RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("generic+the+d128"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("_testproca64"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("_testproca64_endproc"),     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("_testproca64simd"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE("_testproca64simd_endproc"), RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
-    { RT_STR_TUPLE(":"),                        RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("#include"),                     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("<iprt/asmdefs-arm.h>"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("beginproc_hidden"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE(".private_extern"),              RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE(".cpu"),                         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE(".arch"),                        RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+mte"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+pauth"),                RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+the+d128"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+lor"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+lse"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+rcpc"),                 RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+crc"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+fp16"),                 RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("generic+flagm"),                RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("armv8.5-a"),                    RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64"),                  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64_endproc"),          RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64simd"),              RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64simd_endproc"),      RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64pauth"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64pauth_endproc"),     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64flagm"),             RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64flagm_endproc"),     RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64fullfp16"),          RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64fullfp16_endproc"),  RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64lor"),               RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64lor_endproc"),       RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64lse"),               RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64lse_endproc"),       RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64crc"),               RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64crc_endproc"),       RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64frint3264"),         RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64frint3264_endproc"), RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64rcpc"),              RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+    { RT_STR_TUPLE("testproca64rcpc_endproc"),      RTSCRIPTLEXTOKTYPE_KEYWORD,    true,  0 },
+
     /* End of stuff which will get ignored in the semantic matching. */
 
     { RT_STR_TUPLE(","),                        RTSCRIPTLEXTOKTYPE_PUNCTUATOR, false, 0 },
@@ -385,17 +435,17 @@ static void testDisas(const char *pszSub, uint8_t const *pabInstrs, uintptr_t uE
                 RTTestIFailureDetails("rc=%Rrc, off=%#x (%u) cbInstr=%u enmDisCpuMode=%d\n",
                                       rc, off, off, Dis.cbInstr, enmDisCpuMode);
                 RTTestIPrintf(RTTESTLVL_ALWAYS, "%s\n", szOutput);
+
+                /* Do the output formatting again, now with all the addresses and opcode bytes. */
+                DISFormatArmV8Ex(&Dis, szOutput, sizeof(szOutput),
+                                   DIS_FMT_FLAGS_BYTES_LEFT | DIS_FMT_FLAGS_BYTES_BRACKETS | DIS_FMT_FLAGS_BYTES_SPACED
+                                 | DIS_FMT_FLAGS_RELATIVE_BRANCH | DIS_FMT_FLAGS_ADDR_LEFT,
+                                 NULL /*pfnGetSymbol*/, NULL /*pvUser*/);
+                RTStrStripR(szOutput);
+                RTTESTI_CHECK(szOutput[0]);
+                RTTestIPrintf(RTTESTLVL_ALWAYS, "%s\n", szOutput);
                 break;
             }
-
-            /* Do the output formatting again, now with all the addresses and opcode bytes. */
-            DISFormatArmV8Ex(&Dis, szOutput, sizeof(szOutput),
-                               DIS_FMT_FLAGS_BYTES_LEFT | DIS_FMT_FLAGS_BYTES_BRACKETS | DIS_FMT_FLAGS_BYTES_SPACED
-                             | DIS_FMT_FLAGS_RELATIVE_BRANCH | DIS_FMT_FLAGS_ADDR_LEFT,
-                             NULL /*pfnGetSymbol*/, NULL /*pvUser*/);
-            RTStrStripR(szOutput);
-            RTTESTI_CHECK(szOutput[0]);
-            RTTestIPrintf(RTTESTLVL_ALWAYS, "%s\n", szOutput);
         }
         else
             break;
@@ -637,6 +687,22 @@ int main(int argc, char **argv)
           g_abtstDisasmArmv8_1, g_cbtstDisasmArmv8_1 },
         { "64-bit SIMD", (uint8_t const *)(uintptr_t)TestProcA64Simd, (uintptr_t)&TestProcA64Simd_EndProc, DISCPUMODE_ARMV8_A64,
           g_abtstDisasmArmv8_1_Simd, g_cbtstDisasmArmv8_1_Simd },
+        { "64-bit PAuth", (uint8_t const *)(uintptr_t)TestProcA64PAuth, (uintptr_t)&TestProcA64PAuth_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_PAuth, g_cbtstDisasmArmv8_1_PAuth },
+        { "64-bit FlagM", (uint8_t const *)(uintptr_t)TestProcA64FlagM, (uintptr_t)&TestProcA64FlagM_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_FlagM, g_cbtstDisasmArmv8_1_FlagM },
+        { "64-bit FullFP16", (uint8_t const *)(uintptr_t)TestProcA64FullFp16, (uintptr_t)&TestProcA64FullFp16_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_FullFp16, g_cbtstDisasmArmv8_1_FullFp16 },
+        { "64-bit LOR", (uint8_t const *)(uintptr_t)TestProcA64Lor, (uintptr_t)&TestProcA64Lor_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Lor, g_cbtstDisasmArmv8_1_Lor },
+        { "64-bit LSE", (uint8_t const *)(uintptr_t)TestProcA64Lse, (uintptr_t)&TestProcA64Lse_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Lse, g_cbtstDisasmArmv8_1_Lse },
+        { "64-bit CRC", (uint8_t const *)(uintptr_t)TestProcA64Crc, (uintptr_t)&TestProcA64Crc_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Crc, g_cbtstDisasmArmv8_1_Crc },
+        { "64-bit Frint3264", (uint8_t const *)(uintptr_t)TestProcA64Frint3264, (uintptr_t)&TestProcA64Frint3264_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Frint3264, g_cbtstDisasmArmv8_1_Frint3264 },
+        { "64-bit RCPC", (uint8_t const *)(uintptr_t)TestProcA64Rcpc, (uintptr_t)&TestProcA64Rcpc_EndProc, DISCPUMODE_ARMV8_A64,
+          g_abtstDisasmArmv8_1_Rcpc, g_cbtstDisasmArmv8_1_Rcpc },
 #endif
     };
 

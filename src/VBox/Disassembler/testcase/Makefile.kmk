@@ -69,14 +69,22 @@ ifdef VBOX_WITH_TESTCASES
  endif
 
 
- if1of ($(KBUILD_TARGET).$(KBUILD_TARGET_ARCH), darwin.arm64) ## @todo make this compile on win.arm64. Trouble with ';' and feats.
+ if1of ($(KBUILD_TARGET_ARCH), arm64)
   #
   # tstDisasmArmv8-1 assembly files -> .cpp
   #
   TST_DISASM_ARMV8_1_FILE = $(tstDisasmArmv8-1_0_OUTDIR)/tstDisasmArmv8-1-asm.cpp
   TST_DISASM_ARMV8_1_SOURCES := \
   	tstDisasmArmv8_1=tstDisasmArmv8-1-asm.S \
-  	tstDisasmArmv8_1_Simd=tstDisasmArmv8-1-asm-simd.S
+  	tstDisasmArmv8_1_Simd=tstDisasmArmv8-1-asm-simd.S \
+  	tstDisasmArmv8_1_PAuth=tstDisasmArmv8-1-asm-pauth.S \
+  	tstDisasmArmv8_1_FlagM=tstDisasmArmv8-1-asm-flagm.S \
+  	tstDisasmArmv8_1_FullFp16=tstDisasmArmv8-1-asm-fullfp16.S \
+  	tstDisasmArmv8_1_Lor=tstDisasmArmv8-1-asm-lor.S \
+  	tstDisasmArmv8_1_Lse=tstDisasmArmv8-1-asm-lse.S \
+  	tstDisasmArmv8_1_Crc=tstDisasmArmv8-1-asm-crc.S \
+  	tstDisasmArmv8_1_Frint3264=tstDisasmArmv8-1-asm-frint3264.S \
+  	tstDisasmArmv8_1_Rcpc=tstDisasmArmv8-1-asm-rcpc.S
 
   TST_DISASM_ARMV8_1_PATH_SOURCES := $(PATH_SUB_CURRENT)
 
@@ -105,6 +113,14 @@ ifdef VBOX_WITH_TESTCASES
   	$(TST_DISASM_ARMV8_1_FILE) \
   	tstDisasmArmv8-1-asm.S \
   	tstDisasmArmv8-1-asm-simd.S \
+  	tstDisasmArmv8-1-asm-pauth.S \
+  	tstDisasmArmv8-1-asm-flagm.S \
+  	tstDisasmArmv8-1-asm-fullfp16.S \
+  	tstDisasmArmv8-1-asm-lor.S \
+  	tstDisasmArmv8-1-asm-lse.S \
+  	tstDisasmArmv8-1-asm-crc.S \
+  	tstDisasmArmv8-1-asm-frint3264.S \
+  	tstDisasmArmv8-1-asm-rcpc.S \
   	tstDisasmArmv8-1.cpp
   tstDisasmArmv8-1_LIBS       = \
   	$(PATH_STAGE_LIB)/DisasmR3$(VBOX_SUFF_LIB) \

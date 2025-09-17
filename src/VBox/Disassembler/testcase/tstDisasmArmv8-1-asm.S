@@ -25,10 +25,11 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-.private_extern _TestProcA64
-_TestProcA64:
+#include <iprt/asmdefs-arm.h>
 
-        ; Miscellaneous instructions without a parameter
+BEGINPROC_HIDDEN TestProcA64
+
+        /* Miscellaneous instructions without a parameter */
         nop
         yield
         wfe
@@ -42,12 +43,12 @@ _TestProcA64:
         pacib1716
         autia1716
         autib1716
-        esb
-        ;psb csync - Requires FEAT_SPE
-        tsb csync
-        ;gcsb dsync - Not supported by buildbox toolchain
+        /*esb*/
+        /*psb csync - Requires FEAT_SPE */
+        /*tsb csync*/
+        /*gcsb dsync - Not supported by buildbox toolchain */
         csdb
-        ;clrbhb - Not supported by buildbox toolchain
+        /*clrbhb - Not supported by buildbox toolchain */
         paciaz
         paciasp
         pacibz
@@ -62,25 +63,25 @@ _TestProcA64:
         bti c
         bti jc
 
-        ;chkfeat x16 - Not supported by buildbox toolchain
+        /*chkfeat x16 - Not supported by buildbox toolchain */
 
-        ; Barrier instructions
+        /* Barrier instructions */
 
         isb #0
         isb #8
         isb #15
 
-        sb
+        /*sb*/
 
-        ;tcommit - Requires FEAT_TME
+        /*tcommit - Requires FEAT_TME */
 
-        ; Control flow instructions
+        /* Control flow instructions */
         svc #0xfefe
         hvc #0xdead
         smc #0xcafe
         brk #0xd0d0
         hlt #0xc0de
-;        tcancel #0xd00f Requires FEAT_TME
+/*        tcancel #0xd00f Requires FEAT_TME */
         dcps1   #0xdeca
         dcps2   #0xdec0
         dcps3   #0xfeed
@@ -90,8 +91,8 @@ _TestProcA64:
         bl #-0x100
         b.ne #+0x1000
         b.eq #-0x1000
-;        bc.ne #+0x1000 Requires FEAT_HBC
-;        bc.eq #-0x1000 Requires FEAT_HBC
+/*        bc.ne #+0x1000 Requires FEAT_HBC */
+/*        bc.eq #-0x1000 Requires FEAT_HBC */
         cbz x0, #+0x100
         cbz x0, #-0x100
         cbz w0, #+0x100
@@ -105,32 +106,16 @@ _TestProcA64:
         ret x1
         ret x2
         ret x15
-        retaa
-        retab
         br  x15
-        braaz x15
-        brabz xzr
         blr x15
-        blraaz x15
-        blrabz xzr
         eret
-        eretaa
-        eretab
         drps
-        braa xzr, sp
-        braa x0, x1
-        brab xzr, sp
-        brab x0, x1
-        blraa xzr, sp
-        blraa x0, x1
-        blrab xzr, sp
-        blrab x0, x1
 
-        ; System register access instructions
+        /* System register access instructions */
         msr ttbr0_el1, x0
         mrs x0, ttbr0_el1
 
-        ; Arithmetic instructions
+        /* Arithmetic instructions */
         add  x0, x0, #0x0
         add  x0, x1, #0x10000
         add  x0, x1, #65536
@@ -142,7 +127,7 @@ _TestProcA64:
         add  x0, x1, x28, LSR #63
         add  x0, x1, x28, ASR #1
         add  x0, x1, x28, ASR #63
-        ; ROR is reserved
+        /* ROR is reserved */
 
         add  w0, w1, #0x0
         add  w0, w1, #0x10000
@@ -154,7 +139,7 @@ _TestProcA64:
         add  w0, w1, w28, LSR #31
         add  w0, w1, w28, ASR #1
         add  w0, w1, w28, ASR #31
-        ; ROR is reserved
+        /* ROR is reserved */
 
         adds x0, x0, #0x0
         adds x0, x1, #0x10000
@@ -167,7 +152,7 @@ _TestProcA64:
         adds x0, x1, x28, LSR #63
         adds x0, x1, x28, ASR #1
         adds x0, x1, x28, ASR #63
-        ; ROR is reserved
+        /* ROR is reserved */
 
         adds w0, w1, #0x0
         adds w0, w1, #0x10000
@@ -179,7 +164,7 @@ _TestProcA64:
         adds w0, w1, w28, LSR #31
         adds w0, w1, w28, ASR #1
         adds w0, w1, w28, ASR #31
-        ; ROR is reserved
+        /* ROR is reserved */
 
         sub  x0, x0, #0x0
         sub  x0, x1, #0x10000
@@ -192,7 +177,7 @@ _TestProcA64:
         sub  x0, x1, x28, LSR #63
         sub  x0, x1, x28, ASR #1
         sub  x0, x1, x28, ASR #63
-        ; ROR is reserved
+        /* ROR is reserved */
 
         sub  w0, w1, #0x0
         sub  w0, w1, #0x10000
@@ -204,7 +189,7 @@ _TestProcA64:
         sub  w0, w1, w28, LSR #31
         sub  w0, w1, w28, ASR #1
         sub  w0, w1, w28, ASR #31
-        ; ROR is reserved
+        /* ROR is reserved */
 
         subs x0, x0, #0x0
         subs x0, x1, #0x10000
@@ -217,7 +202,7 @@ _TestProcA64:
         subs x0, x1, x28, LSR #63
         subs x0, x1, x28, ASR #1
         subs x0, x1, x28, ASR #63
-        ; ROR is reserved
+        /* ROR is reserved */
 
         subs w0, w1, #0x0
         subs w0, w1, #0x10000
@@ -229,15 +214,15 @@ _TestProcA64:
         subs w0, w1, w28, LSR #31
         subs w0, w1, w28, ASR #1
         subs w0, w1, w28, ASR #31
-        ; ROR is reserved
+        /* ROR is reserved */
 
-        ; Aliases of subs -> cmp
+        /* Aliases of subs -> cmp */
         cmp x0, x1
         cmp w0, w1
         cmp x0, x1, LSL #1
         cmp w0, w1, LSL #1
 
-        ; Add/Sub extended register
+        /* Add/Sub extended register */
         add w0, w1, w2
 
         add x0, x1, x2
@@ -700,7 +685,7 @@ _TestProcA64:
         subs x0, x1,  w2, UXTB #2
         subs x0, x1,  w2, UXTB #3
         subs x0, x1,  w2, UXTB #4
-        subs x28, sp, wzr, UXTB #1 ; targetting xzr would produce an cmp alias instruction
+        subs x28, sp, wzr, UXTB #1 /* targetting xzr would produce an cmp alias instruction */
         subs x28, sp, wzr, UXTB #2
         subs x28, sp, wzr, UXTB #3
         subs x28, sp, wzr, UXTB #4
@@ -832,7 +817,7 @@ _TestProcA64:
         subs x28, sp, xzr, SXTX #4
 
 
-        ; Logical instructions
+        /* Logical instructions */
         and  x0,  x0,  #0xffff
         and  w0,  wzr, #0xffff
 
@@ -842,8 +827,8 @@ _TestProcA64:
         orr  x0,  x0,  #0xffff
         orr  w0,  wzr, #0xffff
 
-        mov x0, x1 ; Alias of orr
-        mov w0, w1 ; Alias of orr
+        mov x0, x1 /* Alias of orr */
+        mov w0, w1 /* Alias of orr */
 
         eor  x0,  x0,  #0x00ffff00
         eor w10, w23,  #0x55555555
@@ -870,7 +855,7 @@ _TestProcA64:
         movk w0, #0xffff
         movk w0, #0xffff, LSL #16
 
-        ; Logical instructions with a shifted register
+        /* Logical instructions with a shifted register */
         and  w0, w0, w27
         and  w0, w1, w28, LSL #1
         and  w0, w1, w28, LSL #31
@@ -1134,7 +1119,7 @@ _TestProcA64:
         umulh  xzr, x1, x2
 
 
-        ; Memory loads
+        /* Memory loads */
         ldrb w0, [x28]
         ldrb w0, [x28, #1]
         ldrb w0, [x28, #4095]
@@ -1573,7 +1558,7 @@ _TestProcA64:
         ldr  x0, [x1, x2]
         ldr  w0, [x1, x2]
         ldr  x0, [x1, x2, SXTX #0]
-        ldr  x0, [x1, x2, LSL  #3]  ; UXTX
+        ldr  x0, [x1, x2, LSL  #3]  /* UXTX */
         ldr  x0, [x1, x2, SXTX #3]
         ldr  w0, [x1, w2, UXTW #0]
         ldr  w0, [x1, w2, SXTW #0]
@@ -1583,7 +1568,7 @@ _TestProcA64:
         ldr  x0, [sp, x2]
         ldr  w0, [sp, x2]
         ldr  x0, [sp, x2, SXTX #0]
-        ldr  x0, [sp, x2, LSL  #3]  ; UXTX
+        ldr  x0, [sp, x2, LSL  #3]  /* UXTX */
         ldr  x0, [sp, x2, SXTX #3]
         ldr  w0, [sp, w2, UXTW #0]
         ldr  w0, [sp, w2, SXTW #0]
@@ -1591,33 +1576,33 @@ _TestProcA64:
         ldr  w0, [sp, w2, SXTW #2]
 
         ldrb w0, [x1, x2]
-        ldrb w0, [x1, x2, LSL  #0]  ; UXTX
+        ldrb w0, [x1, x2, LSL  #0]  /* UXTX */
         ldrb w0, [x1, x2, SXTX #0]
         ldrb w0, [x1, w2, UXTW #0]
         ldrb w0, [x1, w2, SXTW #0]
 
         ldrb w0, [sp, x2]
-        ldrb w0, [sp, x2, LSL  #0]  ; UXTX
+        ldrb w0, [sp, x2, LSL  #0]  /* UXTX */
         ldrb w0, [sp, x2, SXTX #0]
         ldrb w0, [sp, w2, UXTW #0]
         ldrb w0, [sp, w2, SXTW #0]
 
         ldrsb w0, [x1, x2]
-        ldrsb w0, [x1, x2, LSL  #0] ; UXTX
+        ldrsb w0, [x1, x2, LSL  #0] /* UXTX */
         ldrsb w0, [x1, x2, SXTX #0]
         ldrsb w0, [x1, w2, UXTW #0]
         ldrsb w0, [x1, w2, SXTW #0]
 
         ldrsb w0, [sp, x2]
-        ldrsb w0, [sp, x2, LSL  #0] ; UXTX
+        ldrsb w0, [sp, x2, LSL  #0] /* UXTX */
         ldrsb w0, [sp, x2, SXTX #0]
         ldrsb w0, [sp, w2, UXTW #0]
         ldrsb w0, [sp, w2, SXTW #0]
 
         ldrh w0, [x1, x2]
-        ;ldrh w0, [x1, x2, LSL  #0]  ; UXTX
+        /*ldrh w0, [x1, x2, LSL  #0]  UXTX */
         ldrh w0, [x1, x2, SXTX #0]
-        ldrh w0, [x1, x2, LSL  #1]   ; UXTX
+        ldrh w0, [x1, x2, LSL  #1]   /* UXTX */
         ldrh w0, [x1, x2, SXTX #1]
         ldrh w0, [x1, w2, UXTW #0]
         ldrh w0, [x1, w2, SXTW #0]
@@ -1625,9 +1610,9 @@ _TestProcA64:
         ldrh w0, [x1, w2, SXTW #1]
 
         ldrh w0, [sp, x2]
-        ;ldrh w0, [sp, x2, LSL  #0]  ; UXTX
+        /*ldrh w0, [sp, x2, LSL  #0]  UXTX */
         ldrh w0, [sp, x2, SXTX #0]
-        ldrh w0, [sp, x2, LSL  #1]   ; UXTX
+        ldrh w0, [sp, x2, LSL  #1]   /* UXTX */
         ldrh w0, [sp, x2, SXTX #1]
         ldrh w0, [sp, w2, UXTW #0]
         ldrh w0, [sp, w2, SXTW #0]
@@ -1635,9 +1620,9 @@ _TestProcA64:
         ldrh w0, [sp, w2, SXTW #1]
 
         ldrsh w0, [x1, x2]
-        ;ldrsh w0, [x1, x2, LSL  #0] ; UXTX
+        /*ldrsh w0, [x1, x2, LSL  #0]  UXTX */
         ldrsh w0, [x1, x2, SXTX #0]
-        ldrsh w0, [x1, x2, LSL  #1]   ; UXTX
+        ldrsh w0, [x1, x2, LSL  #1]   /* UXTX */
         ldrsh w0, [x1, x2, SXTX #1]
         ldrsh w0, [x1, w2, UXTW #0]
         ldrsh w0, [x1, w2, SXTW #0]
@@ -1645,9 +1630,9 @@ _TestProcA64:
         ldrsh w0, [x1, w2, SXTW #1]
 
         ldrsh w0, [sp, x2]
-        ;ldrsh w0, [sp, x2, LSL  #0] ; UXTX
+        /*ldrsh w0, [sp, x2, LSL  #0]  UXTX */
         ldrsh w0, [sp, x2, SXTX #0]
-        ldrsh w0, [sp, x2, LSL  #1]   ; UXTX
+        ldrsh w0, [sp, x2, LSL  #1]   /* UXTX */
         ldrsh w0, [sp, x2, SXTX #1]
         ldrsh w0, [sp, w2, UXTW #0]
         ldrsh w0, [sp, w2, SXTW #0]
@@ -1655,9 +1640,9 @@ _TestProcA64:
         ldrsh w0, [sp, w2, SXTW #1]
 
         ldrsw x0, [x1, x2]
-        ;ldrsw x0, [x1, x2, LSL  #0] ; UXTX
+        /*ldrsw x0, [x1, x2, LSL  #0]  UXTX */
         ldrsw x0, [x1, x2, SXTX #0]
-        ldrsw x0, [x1, x2, LSL  #2]  ; UXTX
+        ldrsw x0, [x1, x2, LSL  #2]  /* UXTX */
         ldrsw x0, [x1, x2, SXTX #2]
         ldrsw x0, [x1, w2, UXTW #0]
         ldrsw x0, [x1, w2, SXTW #0]
@@ -1665,61 +1650,16 @@ _TestProcA64:
         ldrsw x0, [x1, w2, SXTW #2]
 
         ldrsw x0, [sp, x2]
-        ;ldrsw x0, [sp, x2, LSL  #0] ; UXTX
+        /*ldrsw x0, [sp, x2, LSL  #0]  UXTX */
         ldrsw x0, [sp, x2, SXTX #0]
-        ldrsw x0, [sp, x2, LSL  #2]  ; UXTX
+        ldrsw x0, [sp, x2, LSL  #2]  /* UXTX */
         ldrsw x0, [sp, x2, SXTX #2]
         ldrsw x0, [sp, w2, UXTW #0]
         ldrsw x0, [sp, w2, SXTW #0]
         ldrsw x0, [sp, w2, UXTW #2]
         ldrsw x0, [sp, w2, SXTW #2]
 
-
-        ; FEAT_PAuth memory loads
-
-        ldraa x0, [x1]
-        ldraa x0, [x1, #-1024]
-        ldraa x0, [x1, #-4096]
-        ldraa x0, [x1, #4088]
-
-        ldraa xzr, [sp]
-        ldraa xzr, [sp, #-1024]
-        ldraa xzr, [sp, #-4096]
-        ldraa xzr, [sp, #4088]
-
-        ldraa x0, [x1, #0]!
-        ldraa x0, [x1, #-1024]!
-        ldraa x0, [x1, #-4096]!
-        ldraa x0, [x1, #4088]!
-
-        ldraa xzr, [sp, #0]!
-        ldraa xzr, [sp, #-1024]!
-        ldraa xzr, [sp, #-4096]!
-        ldraa xzr, [sp, #4088]!
-
-
-        ldrab x0, [x1]
-        ldrab x0, [x1, #-1024]
-        ldrab x0, [x1, #-4096]
-        ldrab x0, [x1, #4088]
-
-        ldrab xzr, [sp]
-        ldrab xzr, [sp, #-1024]
-        ldrab xzr, [sp, #-4096]
-        ldrab xzr, [sp, #4088]
-
-        ldrab x0, [x1, #0]!
-        ldrab x0, [x1, #-1024]!
-        ldrab x0, [x1, #-4096]!
-        ldrab x0, [x1, #4088]!
-
-        ldrab xzr, [sp, #0]!
-        ldrab xzr, [sp, #-1024]!
-        ldrab xzr, [sp, #-4096]!
-        ldrab xzr, [sp, #4088]!
-
-
-        ; Memory stores
+        /* Memory stores */
         strb w0, [x28]
         strb w0, [x28, #1]
         strb w0, [x28, #4095]
@@ -1960,7 +1900,7 @@ _TestProcA64:
         str  x0, [x1, x2]
         str  w0, [x1, x2]
         str  x0, [x1, x2, SXTX #0]
-        str  x0, [x1, x2, LSL  #3]  ; UXTX
+        str  x0, [x1, x2, LSL  #3]  /* UXTX */
         str  x0, [x1, x2, SXTX #3]
         str  w0, [x1, w2, UXTW #0]
         str  w0, [x1, w2, SXTW #0]
@@ -1970,7 +1910,7 @@ _TestProcA64:
         str  x0, [sp, x2]
         str  w0, [sp, x2]
         str  x0, [sp, x2, SXTX #0]
-        str  x0, [sp, x2, LSL  #3]  ; UXTX
+        str  x0, [sp, x2, LSL  #3]  /* UXTX */
         str  x0, [sp, x2, SXTX #3]
         str  w0, [sp, w2, UXTW #0]
         str  w0, [sp, w2, SXTW #0]
@@ -1990,9 +1930,9 @@ _TestProcA64:
         strb w0, [sp, w2, SXTW #0x0]
 
         strh w0, [x1, x2]
-        ;strh w0, [x1, x2, LSL  #0x0] ; UXTX
+        /*strh w0, [x1, x2, LSL  #0x0]  UXTX */
         strh w0, [x1, x2, SXTX #0x0]
-        strh w0, [x1, x2, LSL  #1]   ; UXTX
+        strh w0, [x1, x2, LSL  #1]   /* UXTX */
         strh w0, [x1, x2, SXTX #1]
         strh w0, [x1, w2, UXTW #0x0]
         strh w0, [x1, w2, SXTW #0x0]
@@ -2000,9 +1940,9 @@ _TestProcA64:
         strh w0, [x1, w2, SXTW #1]
 
         strh w0, [sp, x2]
-        ;strh w0, [sp, x2, LSL  #0x0] ; UXTX
+        /*strh w0, [sp, x2, LSL  #0x0]  UXTX */
         strh w0, [sp, x2, SXTX #0x0]
-        strh w0, [sp, x2, LSL  #1]   ; UXTX
+        strh w0, [sp, x2, LSL  #1]   /* UXTX */
         strh w0, [sp, x2, SXTX #1]
         strh w0, [sp, w2, UXTW #0x0]
         strh w0, [sp, w2, SXTW #0x0]
@@ -2010,7 +1950,7 @@ _TestProcA64:
         strh w0, [sp, w2, SXTW #1]
 
 
-        ; SIMD memory loads
+        /* SIMD memory loads */
         ldr b0, [x0]
         ldr b0, [x0, #4095]
 
@@ -2045,7 +1985,7 @@ _TestProcA64:
         ldr  b0,  [x1, x2]
         ldr  b31, [x1, x2]
         ldr  b0,  [x1, x2, SXTX #0]
-        ldr  b0,  [x1, x2, LSL  #0]  ; UXTX
+        ldr  b0,  [x1, x2, LSL  #0]  /* UXTX */
         ldr  b0,  [x1, x2, SXTX #0]
         ldr  b31, [x1, w2, UXTW #0]
         ldr  b31, [x1, w2, SXTW #0]
@@ -2055,7 +1995,7 @@ _TestProcA64:
         ldr  b0,  [sp, x2]
         ldr  b31, [sp, x2]
         ldr  b0,  [sp, x2, SXTX #0]
-        ldr  b0,  [sp, x2, LSL  #0]  ; UXTX
+        ldr  b0,  [sp, x2, LSL  #0]  /* UXTX */
         ldr  b0,  [sp, x2, SXTX #0]
         ldr  b31, [sp, w2, UXTW #0]
         ldr  b31, [sp, w2, SXTW #0]
@@ -2066,7 +2006,7 @@ _TestProcA64:
         ldr  h0,  [x1, x2]
         ldr  h31, [x1, x2]
         ldr  h0,  [x1, x2, SXTX #1]
-        ldr  h0,  [x1, x2, LSL  #1]  ; UXTX
+        ldr  h0,  [x1, x2, LSL  #1]  /* UXTX */
         ldr  h0,  [x1, x2, SXTX #1]
         ldr  h31, [x1, w2, UXTW #0]
         ldr  h31, [x1, w2, SXTW #0]
@@ -2076,7 +2016,7 @@ _TestProcA64:
         ldr  h0,  [sp, x2]
         ldr  h31, [sp, x2]
         ldr  h0,  [sp, x2, SXTX #1]
-        ldr  h0,  [sp, x2, LSL  #1]  ; UXTX
+        ldr  h0,  [sp, x2, LSL  #1]  /* UXTX */
         ldr  h0,  [sp, x2, SXTX #1]
         ldr  h31, [sp, w2, UXTW #0]
         ldr  h31, [sp, w2, SXTW #0]
@@ -2087,7 +2027,7 @@ _TestProcA64:
         ldr  s0,  [x1, x2]
         ldr  s31, [x1, x2]
         ldr  s0,  [x1, x2, SXTX #2]
-        ldr  s0,  [x1, x2, LSL  #2]  ; UXTX
+        ldr  s0,  [x1, x2, LSL  #2]  /* UXTX */
         ldr  s0,  [x1, x2, SXTX #2]
         ldr  s31, [x1, w2, UXTW #0]
         ldr  s31, [x1, w2, SXTW #0]
@@ -2097,7 +2037,7 @@ _TestProcA64:
         ldr  s0,  [sp, x2]
         ldr  s31, [sp, x2]
         ldr  s0,  [sp, x2, SXTX #2]
-        ldr  s0,  [sp, x2, LSL  #2]  ; UXTX
+        ldr  s0,  [sp, x2, LSL  #2]  /* UXTX */
         ldr  s0,  [sp, x2, SXTX #2]
         ldr  s31, [sp, w2, UXTW #0]
         ldr  s31, [sp, w2, SXTW #0]
@@ -2108,7 +2048,7 @@ _TestProcA64:
         ldr  d0,  [x1, x2]
         ldr  d31, [x1, x2]
         ldr  d0,  [x1, x2, SXTX #3]
-        ldr  d0,  [x1, x2, LSL  #3]  ; UXTX
+        ldr  d0,  [x1, x2, LSL  #3]  /* UXTX */
         ldr  d0,  [x1, x2, SXTX #3]
         ldr  d31, [x1, w2, UXTW #0]
         ldr  d31, [x1, w2, SXTW #0]
@@ -2118,7 +2058,7 @@ _TestProcA64:
         ldr  d0,  [sp, x2]
         ldr  d31, [sp, x2]
         ldr  d0,  [sp, x2, SXTX #3]
-        ldr  d0,  [sp, x2, LSL  #3]  ; UXTX
+        ldr  d0,  [sp, x2, LSL  #3]  /* UXTX */
         ldr  d0,  [sp, x2, SXTX #3]
         ldr  d31, [sp, w2, UXTW #0]
         ldr  d31, [sp, w2, SXTW #0]
@@ -2129,7 +2069,7 @@ _TestProcA64:
         ldr  q0,  [x1, x2]
         ldr  q31, [x1, x2]
         ldr  q0,  [x1, x2, SXTX #4]
-        ldr  q0,  [x1, x2, LSL  #4]  ; UXTX
+        ldr  q0,  [x1, x2, LSL  #4]  /* UXTX */
         ldr  q0,  [x1, x2, SXTX #4]
         ldr  q31, [x1, w2, UXTW #0]
         ldr  q31, [x1, w2, SXTW #0]
@@ -2139,7 +2079,7 @@ _TestProcA64:
         ldr  q0,  [sp, x2]
         ldr  q31, [sp, x2]
         ldr  q0,  [sp, x2, SXTX #4]
-        ldr  q0,  [sp, x2, LSL  #4]  ; UXTX
+        ldr  q0,  [sp, x2, LSL  #4]  /* UXTX */
         ldr  q0,  [sp, x2, SXTX #4]
         ldr  q31, [sp, w2, UXTW #0]
         ldr  q31, [sp, w2, SXTW #0]
@@ -2283,7 +2223,7 @@ _TestProcA64:
         ldr q31, [sp, #255]!
 
 
-        ; SIMD memory stores
+        /* SIMD memory stores */
         str b0, [x0]
         str b0, [x0, #4095]
 
@@ -2318,7 +2258,7 @@ _TestProcA64:
         str  b0,  [x1, x2]
         str  b31, [x1, x2]
         str  b0,  [x1, x2, SXTX #0]
-        str  b0,  [x1, x2, LSL  #0]  ; UXTX
+        str  b0,  [x1, x2, LSL  #0]  /* UXTX */
         str  b0,  [x1, x2, SXTX #0]
         str  b31, [x1, w2, UXTW #0]
         str  b31, [x1, w2, SXTW #0]
@@ -2328,7 +2268,7 @@ _TestProcA64:
         str  b0,  [sp, x2]
         str  b31, [sp, x2]
         str  b0,  [sp, x2, SXTX #0]
-        str  b0,  [sp, x2, LSL  #0]  ; UXTX
+        str  b0,  [sp, x2, LSL  #0]  /* UXTX */
         str  b0,  [sp, x2, SXTX #0]
         str  b31, [sp, w2, UXTW #0]
         str  b31, [sp, w2, SXTW #0]
@@ -2339,7 +2279,7 @@ _TestProcA64:
         str  h0,  [x1, x2]
         str  h31, [x1, x2]
         str  h0,  [x1, x2, SXTX #1]
-        str  h0,  [x1, x2, LSL  #1]  ; UXTX
+        str  h0,  [x1, x2, LSL  #1]  /* UXTX */
         str  h0,  [x1, x2, SXTX #1]
         str  h31, [x1, w2, UXTW #0]
         str  h31, [x1, w2, SXTW #0]
@@ -2349,7 +2289,7 @@ _TestProcA64:
         str  h0,  [sp, x2]
         str  h31, [sp, x2]
         str  h0,  [sp, x2, SXTX #1]
-        str  h0,  [sp, x2, LSL  #1]  ; UXTX
+        str  h0,  [sp, x2, LSL  #1]  /* UXTX */
         str  h0,  [sp, x2, SXTX #1]
         str  h31, [sp, w2, UXTW #0]
         str  h31, [sp, w2, SXTW #0]
@@ -2360,7 +2300,7 @@ _TestProcA64:
         str  s0,  [x1, x2]
         str  s31, [x1, x2]
         str  s0,  [x1, x2, SXTX #2]
-        str  s0,  [x1, x2, LSL  #2]  ; UXTX
+        str  s0,  [x1, x2, LSL  #2]  /* UXTX */
         str  s0,  [x1, x2, SXTX #2]
         str  s31, [x1, w2, UXTW #0]
         str  s31, [x1, w2, SXTW #0]
@@ -2370,7 +2310,7 @@ _TestProcA64:
         str  s0,  [sp, x2]
         str  s31, [sp, x2]
         str  s0,  [sp, x2, SXTX #2]
-        str  s0,  [sp, x2, LSL  #2]  ; UXTX
+        str  s0,  [sp, x2, LSL  #2]  /* UXTX */
         str  s0,  [sp, x2, SXTX #2]
         str  s31, [sp, w2, UXTW #0]
         str  s31, [sp, w2, SXTW #0]
@@ -2381,7 +2321,7 @@ _TestProcA64:
         str  d0,  [x1, x2]
         str  d31, [x1, x2]
         str  d0,  [x1, x2, SXTX #3]
-        str  d0,  [x1, x2, LSL  #3]  ; UXTX
+        str  d0,  [x1, x2, LSL  #3]  /* UXTX */
         str  d0,  [x1, x2, SXTX #3]
         str  d31, [x1, w2, UXTW #0]
         str  d31, [x1, w2, SXTW #0]
@@ -2391,7 +2331,7 @@ _TestProcA64:
         str  d0,  [sp, x2]
         str  d31, [sp, x2]
         str  d0,  [sp, x2, SXTX #3]
-        str  d0,  [sp, x2, LSL  #3]  ; UXTX
+        str  d0,  [sp, x2, LSL  #3]  /* UXTX */
         str  d0,  [sp, x2, SXTX #3]
         str  d31, [sp, w2, UXTW #0]
         str  d31, [sp, w2, SXTW #0]
@@ -2402,7 +2342,7 @@ _TestProcA64:
         str  q0,  [x1, x2]
         str  q31, [x1, x2]
         str  q0,  [x1, x2, SXTX #4]
-        str  q0,  [x1, x2, LSL  #4]  ; UXTX
+        str  q0,  [x1, x2, LSL  #4]  /* UXTX */
         str  q0,  [x1, x2, SXTX #4]
         str  q31, [x1, w2, UXTW #0]
         str  q31, [x1, w2, SXTW #0]
@@ -2412,7 +2352,7 @@ _TestProcA64:
         str  q0,  [sp, x2]
         str  q31, [sp, x2]
         str  q0,  [sp, x2, SXTX #4]
-        str  q0,  [sp, x2, LSL  #4]  ; UXTX
+        str  q0,  [sp, x2, LSL  #4]  /* UXTX */
         str  q0,  [sp, x2, SXTX #4]
         str  q31, [sp, w2, UXTW #0]
         str  q31, [sp, w2, SXTW #0]
@@ -2556,7 +2496,7 @@ _TestProcA64:
         str q31, [sp, #255]!
 
 
-        ; Add/subtract with carry
+        /* Add/subtract with carry */
 
         adc w0, w1, wzr
         adc x0, x1, xzr
@@ -2570,19 +2510,7 @@ _TestProcA64:
         sbcs w0, w1, wzr
         sbcs x0, x1, xzr
 
-
-        rmif x0,  #0,  #0
-        rmif xzr, #63, #0xf
-
-
-        setf8 w0
-        setf8 wzr
-
-        setf16 w0
-        setf16 wzr
-
-
-        ; Conditional compare
+        /* Conditional compare */
         ccmp x0, x1, #0x3, eq
         ccmp w0, w1, #0xf, eq
         ccmp x0, x1, #0x3, ne
@@ -2697,51 +2625,47 @@ _TestProcA64:
         msr daifset, #15
         msr daifclr, #0
         msr daifclr, #15
-        msr uao,     #1
-        msr uao,     #0
-        msr pan,     #1
-        msr pan,     #0
-        ; msr allint,  #1 Not supported by the toolchain
-        ; msr allint,  #0 Not supported by the toolchain
-        ;msr pm,      #1 Not supported by the maca1 toolchain
-        ;msr pm,      #0 Not supported by the maca1 toolchain
-        msr ssbs,    #1
-        msr ssbs,    #0
-        msr dit,     #1
-        msr dit,     #0
-        ; msr tco,     #1 Not supported by the toolchain
-        ; msr tco,     #0 Not supported by the toolchain
-        ; msr svcrsm,  #1 Not supported by the toolchain
-        ; msr svcrsm,  #0 Not supported by the toolchain
-        ; msr svcrza,  #1 Not supported by the toolchain
-        ; msr svcrza,  #0 Not supported by the toolchain
-        ; msr svcrsma, #1 Not supported by the toolchain
-        ; msr svcrsma, #0 Not supported by the toolchain
+        /*msr uao,     #1*/
+        /*msr uao,     #0*/
+        /*msr pan,     #1*/
+        /*msr pan,     #0*/
+        /* msr allint,  #1 Not supported by the toolchain */
+        /* msr allint,  #0 Not supported by the toolchain */
+        /*msr pm,      #1 Not supported by the maca1 toolchain */
+        /*msr pm,      #0 Not supported by the maca1 toolchain */
+        /*msr ssbs,    #1*/
+        /*msr ssbs,    #0*/
+        /*msr dit,     #1*/
+        /*msr dit,     #0*/
+        /* msr tco,     #1 Not supported by the toolchain */
+        /* msr tco,     #0 Not supported by the toolchain */
+        /* msr svcrsm,  #1 Not supported by the toolchain */
+        /* msr svcrsm,  #0 Not supported by the toolchain */
+        /* msr svcrza,  #1 Not supported by the toolchain */
+        /* msr svcrza,  #0 Not supported by the toolchain */
+        /* msr svcrsma, #1 Not supported by the toolchain */
+        /* msr svcrsma, #0 Not supported by the toolchain */
 
-        ; Add/subtract immediate with tags
+        /* Add/subtract immediate with tags */
 
-        ;addg x0, x1, #0, #0       - Requires FEAT_MTE
-        ;addg sp, sp, #1008, #0x0f - Requires FEAT_MTE
+        /*addg x0, x1, #0, #0       - Requires FEAT_MTE */
+        /*addg sp, sp, #1008, #0x0f - Requires FEAT_MTE */
 
-        ;subg x0, x1, #0, #0       - Requires FEAT_MTE
-        ;subg sp, sp, #1008, #0x0f - Requires FEAT_MTE
+        /*subg x0, x1, #0, #0       - Requires FEAT_MTE */
+        /*subg sp, sp, #1008, #0x0f - Requires FEAT_MTE */
 
-        ; Floating Point instructions.
+        /* Floating Point instructions. */
         fmadd  s0, s1, s3, s31
         fmadd  d0, d1, d3, d31
-        fmadd  h0, h1, h3, h31
 
         fmsub  s0, s1, s3, s31
         fmsub  d0, d1, d3, d31
-        fmsub  h0, h1, h3, h31
 
         fnmadd s0, s1, s3, s31
         fnmadd d0, d1, d3, d31
-        fnmadd h0, h1, h3, h31
 
         fnmsub s0, s1, s3, s31
         fnmsub d0, d1, d3, d31
-        fnmsub h0, h1, h3, h31
 
         fcvtzu x0, s0, #1
         fcvtzu x0, s0, #31
@@ -2755,12 +2679,6 @@ _TestProcA64:
         fcvtzu w0, d0, #1
         fcvtzu w0, d0, #32
 
-        fcvtzu x0, h0, #1
-        fcvtzu x0, h0, #31
-        fcvtzu x0, h0, #63
-        fcvtzu w0, h0, #1
-        fcvtzu w0, h0, #32
-
         fcvtzs x0, s0, #1
         fcvtzs x0, s0, #31
         fcvtzs x0, s0, #63
@@ -2772,12 +2690,6 @@ _TestProcA64:
         fcvtzs x0, d0, #63
         fcvtzs w0, d0, #1
         fcvtzs w0, d0, #32
-
-        fcvtzs x0, h0, #1
-        fcvtzs x0, h0, #31
-        fcvtzs x0, h0, #63
-        fcvtzs w0, h0, #1
-        fcvtzs w0, h0, #32
 
         ucvtf  s0, x0, #1
         ucvtf  s0, x0, #31
@@ -2791,12 +2703,6 @@ _TestProcA64:
         ucvtf  d0, w0, #1
         ucvtf  d0, w0, #32
 
-        ucvtf  h0, x0, #1
-        ucvtf  h0, x0, #31
-        ucvtf  h0, x0, #63
-        ucvtf  h0, w0, #1
-        ucvtf  h0, w0, #32
-
         scvtf  s0, x0, #1
         scvtf  s0, x0, #31
         scvtf  s0, x0, #63
@@ -2809,144 +2715,93 @@ _TestProcA64:
         scvtf  d0, w0, #1
         scvtf  d0, w0, #32
 
-        scvtf  h0, x0, #1
-        scvtf  h0, x0, #31
-        scvtf  h0, x0, #63
-        scvtf  h0, w0, #1
-        scvtf  h0, w0, #32
-
         fcsel  s0, s1, s2, eq
         fcsel  d0, d1, d2, eq
-        fcsel  h0, h1, h2, eq
 
         fmul   s0, s1, s2
         fmul   d0, d1, d2
-        fmul   h0, h1, h2
 
         fdiv   s0, s1, s2
         fdiv   d0, d1, d2
-        fdiv   h0, h1, h2
 
         fadd   s0, s1, s2
         fadd   d0, d1, d2
-        fadd   h0, h1, h2
 
         fsub   s0, s1, s2
         fsub   d0, d1, d2
-        fsub   h0, h1, h2
 
         fmax   s0, s1, s2
         fmax   d0, d1, d2
-        fmax   h0, h1, h2
 
         fmin   s0, s1, s2
         fmin   d0, d1, d2
-        fmin   h0, h1, h2
 
         fmaxnm s0, s1, s2
         fmaxnm d0, d1, d2
-        fmaxnm h0, h1, h2
 
         fminnm s0, s1, s2
         fminnm d0, d1, d2
-        fminnm h0, h1, h2
 
         fnmul  s0, s1, s2
         fnmul  d0, d1, d2
-        fnmul  h0, h1, h2
 
         fccmp  s0, s1, #0,  eq
         fccmp  s0, s1, #15, ne
         fccmp  d0, d1, #0,  eq
         fccmp  d0, d1, #15, ne
-        fccmp  h0, h1, #0,  eq
-        fccmp  h0, h1, #15, ne
 
         fccmpe s0, s1, #0,  eq
         fccmpe s0, s1, #15, ne
         fccmpe d0, d1, #0,  eq
         fccmpe d0, d1, #15, ne
-        fccmpe h0, h1, #0,  eq
-        fccmpe h0, h1, #15, ne
 
-        ;fmov   s0, #1 @todo Needs FP immediate parsing
+        /*fmov   s0, #1 @todo Needs FP immediate parsing */
 
         fcmp s0, s1
-        ;fcmp s0, #0.0
+        /*fcmp s0, #0.0 */
         fcmp d0, d1
-        ;fcmp d0, #0.0
-        fcmp h0, h1
-        ;fcmp h0, #0.0
+        /*fcmp d0, #0.0 */
 
         fcmpe s0, s1
-        ;fcmpe s0, #0.0
+        /*fcmpe s0, #0.0 */
         fcmpe d0, d1
-        ;fcmpe d0, #0.0
-        fcmpe h0, h1
-        ;fcmpe h0, #0.0
+        /*fcmpe d0, #0.0 */
 
         fmov  s0, s1
         fmov  d0, d1
-        fmov  h0, h1
 
         fabs  s0, s1
         fabs  d0, d1
-        fabs  h0, h1
 
         fneg  s0, s1
         fneg  d0, d1
-        fneg  h0, h1
 
         fsqrt s0, s1
         fsqrt d0, d1
-        fsqrt h0, h1
 
         fcvt s0, d1
-        fcvt s0, h1
         fcvt d0, s1
-        fcvt d0, h1
-        fcvt h0, s1
-        fcvt h0, d1
 
         frintn s0, s1
         frintn d0, d1
-        frintn h0, h1
 
         frintp s0, s1
         frintp d0, d1
-        frintp h0, h1
 
         frintm s0, s1
         frintm d0, d1
-        frintm h0, h1
 
         frintz s0, s1
         frintz d0, d1
-        frintz h0, h1
 
         frinta s0, s1
         frinta d0, d1
-        frinta h0, h1
 
         frintx s0, s1
         frintx d0, d1
-        frintx h0, h1
 
         frinti s0, s1
         frinti d0, d1
-        frinti h0, h1
-
-        frint32z s0, s1
-        frint32z d0, d1
-
-        frint32x s0, s1
-        frint32x d0, d1
-
-        frint64z s0, s1
-        frint64z d0, d1
-
-        frint64x s0, s1
-        frint64x d0, d1
 
         sshr d0, d1, #1
         sshr d0, d1, #64
@@ -2960,18 +2815,18 @@ _TestProcA64:
         srsra d0, d1, #1
         srsra d0, d1, #64
 
-        ; @todo
-        ;shl   d0, d1, #0
-        ;shl   d0, d1, #63
+        /* @todo */
+        /*shl   d0, d1, #0 */
+        /*shl   d0, d1, #63 */
 
-        ;sqshl d0, d1, #0
-        ;sqshl d0, d1, #63
+        /*sqshl d0, d1, #0 */
+        /*sqshl d0, d1, #63 */
 
-        ;sqshrn q0, q1, #1
-        ;sqshrn q0, q1, #64
+        /*sqshrn q0, q1, #1 */
+        /*sqshrn q0, q1, #64 */
 
-        ;sqrshrn q0, dq, #1
-        ;sqrshrn q0, q1, #64
+        /*sqrshrn q0, dq, #1 */
+        /*sqrshrn q0, q1, #64 */
 
         dsb #0
         dsb #1
@@ -2990,23 +2845,19 @@ _TestProcA64:
         dsb #0xe
         dsb #0xf
 
-        ;subps x0, x1, x3 - Requires FEAT_MTE
-        ;subps x0, sp, sp - Requires FEAT_MTE
+        /*subps x0, x1, x3 - Requires FEAT_MTE */
+        /*subps x0, sp, sp - Requires FEAT_MTE */
 
-        ;subp  x0, x1, x3 - Requires FEAT_MTE
-        ;subp  x0, sp, sp - Requires FEAT_MTE
+        /*subp  x0, x1, x3 - Requires FEAT_MTE */
+        /*subp  x0, sp, sp - Requires FEAT_MTE */
 
-        ;gmi   x0, x1, x3  - Requires FEAT_MTE
-        ;gmi   x0, sp, x3  - Requires FEAT_MTE
+        /*gmi   x0, x1, x3  - Requires FEAT_MTE */
+        /*gmi   x0, sp, x3  - Requires FEAT_MTE */
 
-        ;irg   x0, x1, x3  - Requires FEAT_MTE
-        ;irg   x0, x1, xzr - Requires FEAT_MTE
-        ;irg   sp, sp, x3  - Requires FEAT_MTE
-        ;irg   sp, sp, xzr - Requires FEAT_MTE
-
-        pacga  xzr, x0, x1
-        pacga  x28, x0, sp
-
+        /*irg   x0, x1, x3  - Requires FEAT_MTE */
+        /*irg   x0, x1, xzr - Requires FEAT_MTE */
+        /*irg   sp, sp, x3  - Requires FEAT_MTE */
+        /*irg   sp, sp, xzr - Requires FEAT_MTE */
 
         udiv w0, w1, wzr
         udiv x0, x1, xzr
@@ -3026,31 +2877,17 @@ _TestProcA64:
         rorv w0, w1, wzr
         rorv x0, x1, xzr
 
-        crc32b w0, w1, wzr
-        crc32w w0, w1, wzr
-        crc32h w0, w1, wzr
+        /*umax w0, w1, wzr - Requires FEAT_CSSC */
+        /*umax x0, x1, xzr - Requires FEAT_CSSC */
 
-        crc32cb w0, w1, wzr
-        crc32cw w0, w1, wzr
-        crc32ch w0, w1, wzr
+        /*smax w0, w1, wzr - Requires FEAT_CSSC */
+        /*smax x0, x1, xzr - Requires FEAT_CSSC */
 
-        crc32x w0, w1, x3
-        crc32x w0, w1, xzr
+        /*umin w0, w1, wzr - Requires FEAT_CSSC */
+        /*umin x0, x1, xzr - Requires FEAT_CSSC */
 
-        crc32cx w0, w1, x3
-        crc32cx w0, w1, xzr
-
-        ;umax w0, w1, wzr - Requires FEAT_CSSC
-        ;umax x0, x1, xzr - Requires FEAT_CSSC
-
-        ;smax w0, w1, wzr - Requires FEAT_CSSC
-        ;smax x0, x1, xzr - Requires FEAT_CSSC
-
-        ;umin w0, w1, wzr - Requires FEAT_CSSC
-        ;umin x0, x1, xzr - Requires FEAT_CSSC
-
-        ;smin w0, w1, wzr - Requires FEAT_CSSC
-        ;smin x0, x1, xzr - Requires FEAT_CSSC
+        /*smin w0, w1, wzr - Requires FEAT_CSSC */
+        /*smin x0, x1, xzr - Requires FEAT_CSSC */
 
         rbit w0, wzr
         rbit w0, w1
@@ -3067,7 +2904,7 @@ _TestProcA64:
         rev   x0, xzr
         rev   x0, x1
 
-        ; @todo rev32
+        /* @todo rev32 */
 
         clz   w0, wzr
         clz   w0, w1
@@ -3079,501 +2916,91 @@ _TestProcA64:
         cls   x0, xzr
         cls   x0, x1
 
-        ;ctz   w0, wzr - Requires FEAT_CSSC
-        ;ctz   w0, w1  - Requires FEAT_CSSC
-        ;ctz   x0, xzr - Requires FEAT_CSSC
-        ;ctz   x0, x1  - Requires FEAT_CSSC
+        /*ctz   w0, wzr - Requires FEAT_CSSC */
+        /*ctz   w0, w1  - Requires FEAT_CSSC */
+        /*ctz   x0, xzr - Requires FEAT_CSSC */
+        /*ctz   x0, x1  - Requires FEAT_CSSC */
 
-        ;cnt   w0, wzr - Requires FEAT_CSSC
-        ;cnt   w0, w1  - Requires FEAT_CSSC
-        ;cnt   x0, xzr - Requires FEAT_CSSC
-        ;cnt   x0, x1  - Requires FEAT_CSSC
+        /*cnt   w0, wzr - Requires FEAT_CSSC */
+        /*cnt   w0, w1  - Requires FEAT_CSSC */
+        /*cnt   x0, xzr - Requires FEAT_CSSC */
+        /*cnt   x0, x1  - Requires FEAT_CSSC */
 
+        /*rcwclr x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwclr xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ; Atomic memory operations
+        /*rcwswp x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwswp xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldaddb w1,  w2,  [x0]
-        ldaddb wzr, wzr, [sp]
+        /*rcwset x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwset xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldclrb w1,  w2,  [x0]
-        ldclrb wzr, wzr, [sp]
+        /*rcwclrl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwclrl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldeorb w1,  w2,  [x0]
-        ldeorb wzr, wzr, [sp]
+        /*rcwswpl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwswpl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsetb w1,  w2,  [x0]
-        ldsetb wzr, wzr, [sp]
+        /*rcwsetl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsetl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsmaxb w1,  w2,  [x0]
-        ldsmaxb wzr, wzr, [sp]
+        /*rcwclra x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwclra xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsminb w1,  w2,  [x0]
-        ldsminb wzr, wzr, [sp]
+        /*rcwswpa x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwswpa xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldumaxb w1,  w2,  [x0]
-        ldumaxb wzr, wzr, [sp]
+        /*rcwseta x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwseta xzr, xzr, [sp] - Requires FEAT_THE */
 
-        lduminb w1,  w2,  [x0]
-        lduminb wzr, wzr, [sp]
+        /*rcwclral x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwclral xzr, xzr, [sp] - Requires FEAT_THE */
 
-        swpb w1,  w2,  [x0]
-        swpb wzr, wzr, [sp]
+        /*rcwswpal x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwswpal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwclr x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwclr xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwsetal x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsetal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwswp x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwswp xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwsclr x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsclr xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwset x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwset xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwsswp x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsswp xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldaddlb w1,  w2,  [x0]
-        ldaddlb wzr, wzr, [sp]
+        /*rcwsset x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsset xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldclrlb w1,  w2,  [x0]
-        ldclrlb wzr, wzr, [sp]
+        /*rcwsclrl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsclrl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldeorlb w1,  w2,  [x0]
-        ldeorlb wzr, wzr, [sp]
+        /*rcwsswpl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsswpl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsetlb w1,  w2,  [x0]
-        ldsetlb wzr, wzr, [sp]
+        /*rcwssetl x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwssetl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsmaxlb w1,  w2,  [x0]
-        ldsmaxlb wzr, wzr, [sp]
+        /*rcwsclra x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsclra xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldsminlb w1,  w2,  [x0]
-        ldsminlb wzr, wzr, [sp]
+        /*rcwsswpa x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsswpa xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ldumaxlb w1,  w2,  [x0]
-        ldumaxlb wzr, wzr, [sp]
+        /*rcwsseta x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsseta xzr, xzr, [sp] - Requires FEAT_THE */
 
-        lduminlb w1,  w2,  [x0]
-        lduminlb wzr, wzr, [sp]
+        /*rcwsclral x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsclral xzr, xzr, [sp] - Requires FEAT_THE */
 
-        swplb w1,  w2,  [x0]
-        swplb wzr, wzr, [sp]
+        /*rcwsswpal x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwsswpal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwclrl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwclrl xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwssetal x1,  x2,  [x0] - Requires FEAT_THE */
+        /*rcwssetal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwswpl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwswpl xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsetl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsetl xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaddab w1,  w2,  [x0]
-        ldaddab wzr, wzr, [sp]
-
-        ldclrab w1,  w2,  [x0]
-        ldclrab wzr, wzr, [sp]
-
-        ldeorab w1,  w2,  [x0]
-        ldeorab wzr, wzr, [sp]
-
-        ldsetab w1,  w2,  [x0]
-        ldsetab wzr, wzr, [sp]
-
-        ldsmaxab w1,  w2,  [x0]
-        ldsmaxab wzr, wzr, [sp]
-
-        ldsminab w1,  w2,  [x0]
-        ldsminab wzr, wzr, [sp]
-
-        ldumaxab w1,  w2,  [x0]
-        ldumaxab wzr, wzr, [sp]
-
-        lduminab w1,  w2,  [x0]
-        lduminab wzr, wzr, [sp]
-
-        swpab w1,  w2,  [x0]
-        swpab wzr, wzr, [sp]
-
-        ;rcwclra x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwclra xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwswpa x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwswpa xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwseta x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwseta xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaprb w0, [x1]
-        ldaprb wzr, [sp]
-
-        ldaddalb w1,  w2,  [x0]
-        ldaddalb wzr, wzr, [sp]
-
-        ldclralb w1,  w2,  [x0]
-        ldclralb wzr, wzr, [sp]
-
-        ldeoralb w1,  w2,  [x0]
-        ldeoralb wzr, wzr, [sp]
-
-        ldsetalb w1,  w2,  [x0]
-        ldsetalb wzr, wzr, [sp]
-
-        ldsmaxalb w1,  w2,  [x0]
-        ldsmaxalb wzr, wzr, [sp]
-
-        ldsminalb w1,  w2,  [x0]
-        ldsminalb wzr, wzr, [sp]
-
-        ldumaxalb w1,  w2,  [x0]
-        ldumaxalb wzr, wzr, [sp]
-
-        lduminalb w1,  w2,  [x0]
-        lduminalb wzr, wzr, [sp]
-
-        swpalb w1,  w2,  [x0]
-        swpalb wzr, wzr, [sp]
-
-        ;rcwclral x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwclral xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwswpal x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwswpal xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsetal x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsetal xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaddh w1,  w2,  [x0]
-        ldaddh wzr, wzr, [sp]
-
-        ldclrh w1,  w2,  [x0]
-        ldclrh wzr, wzr, [sp]
-
-        ldeorh w1,  w2,  [x0]
-        ldeorh wzr, wzr, [sp]
-
-        ldseth w1,  w2,  [x0]
-        ldseth wzr, wzr, [sp]
-
-        ldsmaxh w1,  w2,  [x0]
-        ldsmaxh wzr, wzr, [sp]
-
-        ldsminh w1,  w2,  [x0]
-        ldsminh wzr, wzr, [sp]
-
-        ldumaxh w1,  w2,  [x0]
-        ldumaxh wzr, wzr, [sp]
-
-        lduminh w1,  w2,  [x0]
-        lduminh wzr, wzr, [sp]
-
-        swph w1,  w2,  [x0]
-        swph wzr, wzr, [sp]
-
-        ;rcwsclr x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsclr xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsswp x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsswp xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsset x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsset xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaddlh w1,  w2,  [x0]
-        ldaddlh wzr, wzr, [sp]
-
-        ldclrlh w1,  w2,  [x0]
-        ldclrlh wzr, wzr, [sp]
-
-        ldeorlh w1,  w2,  [x0]
-        ldeorlh wzr, wzr, [sp]
-
-        ldsetlh w1,  w2,  [x0]
-        ldsetlh wzr, wzr, [sp]
-
-        ldsmaxlh w1,  w2,  [x0]
-        ldsmaxlh wzr, wzr, [sp]
-
-        ldsminlh w1,  w2,  [x0]
-        ldsminlh wzr, wzr, [sp]
-
-        ldumaxlh w1,  w2,  [x0]
-        ldumaxlh wzr, wzr, [sp]
-
-        lduminlh w1,  w2,  [x0]
-        lduminlh wzr, wzr, [sp]
-
-        swplh w1,  w2,  [x0]
-        swplh wzr, wzr, [sp]
-
-        ;rcwsclrl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsclrl xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsswpl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsswpl xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwssetl x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwssetl xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaddah w1,  w2,  [x0]
-        ldaddah wzr, wzr, [sp]
-
-        ldclrah w1,  w2,  [x0]
-        ldclrah wzr, wzr, [sp]
-
-        ldeorah w1,  w2,  [x0]
-        ldeorah wzr, wzr, [sp]
-
-        ldsetah w1,  w2,  [x0]
-        ldsetah wzr, wzr, [sp]
-
-        ldsmaxah w1,  w2,  [x0]
-        ldsmaxah wzr, wzr, [sp]
-
-        ldsminah w1,  w2,  [x0]
-        ldsminah wzr, wzr, [sp]
-
-        ldumaxah w1,  w2,  [x0]
-        ldumaxah wzr, wzr, [sp]
-
-        lduminah w1,  w2,  [x0]
-        lduminah wzr, wzr, [sp]
-
-        swpah w1,  w2,  [x0]
-        swpah wzr, wzr, [sp]
-
-        ;rcwsclra x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsclra xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsswpa x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsswpa xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsseta x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsseta xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldaprh w0, [x1]
-        ldaprh wzr, [sp]
-
-        ldaddalh w1,  w2,  [x0]
-        ldaddalh wzr, wzr, [sp]
-
-        ldclralh w1,  w2,  [x0]
-        ldclralh wzr, wzr, [sp]
-
-        ldeoralh w1,  w2,  [x0]
-        ldeoralh wzr, wzr, [sp]
-
-        ldsetalh w1,  w2,  [x0]
-        ldsetalh wzr, wzr, [sp]
-
-        ldsmaxalh w1,  w2,  [x0]
-        ldsmaxalh wzr, wzr, [sp]
-
-        ldsminalh w1,  w2,  [x0]
-        ldsminalh wzr, wzr, [sp]
-
-        ldumaxalh w1,  w2,  [x0]
-        ldumaxalh wzr, wzr, [sp]
-
-        lduminalh w1,  w2,  [x0]
-        lduminalh wzr, wzr, [sp]
-
-        swpalh w1,  w2,  [x0]
-        swpalh wzr, wzr, [sp]
-
-        ;rcwsclral x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsclral xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwsswpal x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwsswpal xzr, xzr, [sp] - Requires FEAT_THE
-
-        ;rcwssetal x1,  x2,  [x0] - Requires FEAT_THE
-        ;rcwssetal xzr, xzr, [sp] - Requires FEAT_THE
-
-        ldadd w1,  w2,  [x0]
-        ldadd wzr, wzr, [sp]
-        ldadd x1,  x2,  [x0]
-        ldadd xzr, xzr, [sp]
-
-        ldclr w1,  w2,  [x0]
-        ldclr wzr, wzr, [sp]
-        ldclr x1,  x2,  [x0]
-        ldclr xzr, xzr, [sp]
-
-        ldeor w1,  w2,  [x0]
-        ldeor wzr, wzr, [sp]
-        ldeor x1,  x2,  [x0]
-        ldeor xzr, xzr, [sp]
-
-        ldset w1,  w2,  [x0]
-        ldset wzr, wzr, [sp]
-        ldset x1,  x2,  [x0]
-        ldset xzr, xzr, [sp]
-
-        ldsmax w1,  w2,  [x0]
-        ldsmax wzr, wzr, [sp]
-        ldsmax x1,  x2,  [x0]
-        ldsmax xzr, xzr, [sp]
-
-        ldsmin w1,  w2,  [x0]
-        ldsmin wzr, wzr, [sp]
-        ldsmin x1,  x2,  [x0]
-        ldsmin xzr, xzr, [sp]
-
-        ldumax w1,  w2,  [x0]
-        ldumax wzr, wzr, [sp]
-        ldumax x1,  x2,  [x0]
-        ldumax xzr, xzr, [sp]
-
-        ldumin w1,  w2,  [x0]
-        ldumin wzr, wzr, [sp]
-        ldumin x1,  x2,  [x0]
-        ldumin xzr, xzr, [sp]
-
-        swp w1,  w2,  [x0]
-        swp wzr, wzr, [sp]
-        swp x1,  x2,  [x0]
-        swp xzr, xzr, [sp]
-
-        ldaddl w1,  w2,  [x0]
-        ldaddl wzr, wzr, [sp]
-        ldaddl x1,  x2,  [x0]
-        ldaddl xzr, xzr, [sp]
-
-        ldclrl w1,  w2,  [x0]
-        ldclrl wzr, wzr, [sp]
-        ldclrl x1,  x2,  [x0]
-        ldclrl xzr, xzr, [sp]
-
-        ldeorl w1,  w2,  [x0]
-        ldeorl wzr, wzr, [sp]
-        ldeorl x1,  x2,  [x0]
-        ldeorl xzr, xzr, [sp]
-
-        ldsetl w1,  w2,  [x0]
-        ldsetl wzr, wzr, [sp]
-        ldsetl x1,  x2,  [x0]
-        ldsetl xzr, xzr, [sp]
-
-        ldsmaxl w1,  w2,  [x0]
-        ldsmaxl wzr, wzr, [sp]
-        ldsmaxl x1,  x2,  [x0]
-        ldsmaxl xzr, xzr, [sp]
-
-        ldsminl w1,  w2,  [x0]
-        ldsminl wzr, wzr, [sp]
-        ldsminl x1,  x2,  [x0]
-        ldsminl xzr, xzr, [sp]
-
-        ldumaxl w1,  w2,  [x0]
-        ldumaxl wzr, wzr, [sp]
-        ldumaxl x1,  x2,  [x0]
-        ldumaxl xzr, xzr, [sp]
-
-        lduminl w1,  w2,  [x0]
-        lduminl wzr, wzr, [sp]
-        lduminl x1,  x2,  [x0]
-        lduminl xzr, xzr, [sp]
-
-        swpl w1,  w2,  [x0]
-        swpl wzr, wzr, [sp]
-        swpl x1,  x2,  [x0]
-        swpl xzr, xzr, [sp]
-
-        ldadda w1,  w2,  [x0]
-        ldadda wzr, wzr, [sp]
-        ldadda x1,  x2,  [x0]
-        ldadda xzr, xzr, [sp]
-
-        ldclra w1,  w2,  [x0]
-        ldclra wzr, wzr, [sp]
-        ldclra x1,  x2,  [x0]
-        ldclra xzr, xzr, [sp]
-
-        ldeora w1,  w2,  [x0]
-        ldeora wzr, wzr, [sp]
-        ldeora x1,  x2,  [x0]
-        ldeora xzr, xzr, [sp]
-
-        ldseta w1,  w2,  [x0]
-        ldseta wzr, wzr, [sp]
-        ldseta x1,  x2,  [x0]
-        ldseta xzr, xzr, [sp]
-
-        ldsmaxa w1,  w2,  [x0]
-        ldsmaxa wzr, wzr, [sp]
-        ldsmaxa x1,  x2,  [x0]
-        ldsmaxa xzr, xzr, [sp]
-
-        ldsmina w1,  w2,  [x0]
-        ldsmina wzr, wzr, [sp]
-        ldsmina x1,  x2,  [x0]
-        ldsmina xzr, xzr, [sp]
-
-        ldumaxa w1,  w2,  [x0]
-        ldumaxa wzr, wzr, [sp]
-        ldumaxa x1,  x2,  [x0]
-        ldumaxa xzr, xzr, [sp]
-
-        ldumina w1,  w2,  [x0]
-        ldumina wzr, wzr, [sp]
-        ldumina x1,  x2,  [x0]
-        ldumina xzr, xzr, [sp]
-
-        swpa w1,  w2,  [x0]
-        swpa wzr, wzr, [sp]
-        swpa x1,  x2,  [x0]
-        swpa xzr, xzr, [sp]
-
-        ldapr w0, [x1]
-        ldapr wzr, [sp]
-        ldapr x0, [x1]
-        ldapr xzr, [sp]
-
-        ldaddal w1,  w2,  [x0]
-        ldaddal wzr, wzr, [sp]
-        ldaddal x1,  x2,  [x0]
-        ldaddal xzr, xzr, [sp]
-
-        ldclral w1,  w2,  [x0]
-        ldclral wzr, wzr, [sp]
-        ldclral x1,  x2,  [x0]
-        ldclral xzr, xzr, [sp]
-
-        ldeoral w1,  w2,  [x0]
-        ldeoral wzr, wzr, [sp]
-        ldeoral x1,  x2,  [x0]
-        ldeoral xzr, xzr, [sp]
-
-        ldsetal w1,  w2,  [x0]
-        ldsetal wzr, wzr, [sp]
-        ldsetal x1,  x2,  [x0]
-        ldsetal xzr, xzr, [sp]
-
-        ldsmaxal w1,  w2,  [x0]
-        ldsmaxal wzr, wzr, [sp]
-        ldsmaxal x1,  x2,  [x0]
-        ldsmaxal xzr, xzr, [sp]
-
-        ldsminal w1,  w2,  [x0]
-        ldsminal wzr, wzr, [sp]
-        ldsminal x1,  x2,  [x0]
-        ldsminal xzr, xzr, [sp]
-
-        ldumaxal w1,  w2,  [x0]
-        ldumaxal wzr, wzr, [sp]
-        ldumaxal x1,  x2,  [x0]
-        ldumaxal xzr, xzr, [sp]
-
-        lduminal w1,  w2,  [x0]
-        lduminal wzr, wzr, [sp]
-        lduminal x1,  x2,  [x0]
-        lduminal xzr, xzr, [sp]
-
-        swpal w1,  w2,  [x0]
-        swpal wzr, wzr, [sp]
-        swpal x1,  x2,  [x0]
-        swpal xzr, xzr, [sp]
-
-        ;
-        ; LDR literal variants
-        ;
+        /*
+         * LDR literal variants
+         */
 
         ldr w0, #0
         ldr wzr, #0xffffc
@@ -3599,167 +3026,115 @@ _TestProcA64:
         ldr q31, #0xffffc
         ldr q31, #-0xffffc
 
-        ;
-        ; Load/Store memory tags
-        ;
+        /*
+         * Load/Store memory tags
+         */
 
-        ;.cpu generic+mte
+        /*.cpu generic+mte */
 
-        ;stg x0, [x0]
-        ;stg x0, [x0, #-4096]
-        ;stg x0, [x0, #4080]
-        ;stg sp, [sp]
-        ;stg sp, [sp, #-4096]
-        ;stg sp, [sp, #4080]
+        /*stg x0, [x0] */
+        /*stg x0, [x0, #-4096] */
+        /*stg x0, [x0, #4080] */
+        /*stg sp, [sp] */
+        /*stg sp, [sp, #-4096] */
+        /*stg sp, [sp, #4080] */
 
-        ;stg x0, [x0], #0
-        ;stg x0, [x0], #-4096
-        ;stg x0, [x0], #4080
-        ;stg sp, [sp], #0
-        ;stg sp, [sp], #-4096
-        ;stg sp, [sp], #4080
+        /*stg x0, [x0], #0 */
+        /*stg x0, [x0], #-4096 */
+        /*stg x0, [x0], #4080 */
+        /*stg sp, [sp], #0 */
+        /*stg sp, [sp], #-4096 */
+        /*stg sp, [sp], #4080 */
 
-        ;stg x0, [x0, #0]!
-        ;stg x0, [x0, #-4096]!
-        ;stg x0, [x0, #4080]!
-        ;stg sp, [sp, #0]!
-        ;stg sp, [sp, #-4096]!
-        ;stg sp, [sp, #4080]!
+        /*stg x0, [x0, #0]! */
+        /*stg x0, [x0, #-4096]! */
+        /*stg x0, [x0, #4080]! */
+        /*stg sp, [sp, #0]! */
+        /*stg sp, [sp, #-4096]! */
+        /*stg sp, [sp, #4080]! */
 
-        ;stzgm x1, [x0]
-        ;stzgm xzr, [sp]
+        /*stzgm x1, [x0] */
+        /*stzgm xzr, [sp] */
 
-        ;ldg x0, [x0]
-        ;ldg x0, [x0, #-4096]
-        ;ldg x0, [x0, #4080]
-        ;ldg xzr, [sp]
-        ;ldg xzr, [sp, #-4096]
-        ;ldg xzr, [sp, #4080]
+        /*ldg x0, [x0] */
+        /*ldg x0, [x0, #-4096] */
+        /*ldg x0, [x0, #4080] */
+        /*ldg xzr, [sp] */
+        /*ldg xzr, [sp, #-4096] */
+        /*ldg xzr, [sp, #4080] */
 
-        ;stzg x0, [x0]
-        ;stzg x0, [x0, #-4096]
-        ;stzg x0, [x0, #4080]
-        ;stzg sp, [sp]
-        ;stzg sp, [sp, #-4096]
-        ;stzg sp, [sp, #4080]
+        /*stzg x0, [x0] */
+        /*stzg x0, [x0, #-4096] */
+        /*stzg x0, [x0, #4080] */
+        /*stzg sp, [sp] */
+        /*stzg sp, [sp, #-4096] */
+        /*stzg sp, [sp, #4080] */
 
-        ;stzg x0, [x0], #0
-        ;stzg x0, [x0], #-4096
-        ;stzg x0, [x0], #4080
-        ;stzg sp, [sp], #0
-        ;stzg sp, [sp], #-4096
-        ;stzg sp, [sp], #4080
+        /*stzg x0, [x0], #0 */
+        /*stzg x0, [x0], #-4096 */
+        /*stzg x0, [x0], #4080 */
+        /*stzg sp, [sp], #0 */
+        /*stzg sp, [sp], #-4096 */
+        /*stzg sp, [sp], #4080 */
 
-        ;stzg x0, [x0, #0]!
-        ;stzg x0, [x0, #-4096]!
-        ;stzg x0, [x0, #4080]!
-        ;stzg sp, [sp, #0]!
-        ;stzg sp, [sp, #-4096]!
-        ;stzg sp, [sp, #4080]!
+        /*stzg x0, [x0, #0]! */
+        /*stzg x0, [x0, #-4096]! */
+        /*stzg x0, [x0, #4080]! */
+        /*stzg sp, [sp, #0]! */
+        /*stzg sp, [sp, #-4096]! */
+        /*stzg sp, [sp, #4080]! */
 
-        ;stgm x1, [x0]
-        ;stgm xzr, [sp]
+        /*stgm x1, [x0] */
+        /*stgm xzr, [sp] */
 
-        ;st2g x0, [x0]
-        ;st2g x0, [x0, #-4096]
-        ;st2g x0, [x0, #4080]
-        ;st2g sp, [sp]
-        ;st2g sp, [sp, #-4096]
-        ;st2g sp, [sp, #4080]
+        /*st2g x0, [x0] */
+        /*st2g x0, [x0, #-4096] */
+        /*st2g x0, [x0, #4080] */
+        /*st2g sp, [sp] */
+        /*st2g sp, [sp, #-4096] */
+        /*st2g sp, [sp, #4080] */
 
-        ;st2g x0, [x0], #0
-        ;st2g x0, [x0], #-4096
-        ;st2g x0, [x0], #4080
-        ;st2g sp, [sp], #0
-        ;st2g sp, [sp], #-4096
-        ;st2g sp, [sp], #4080
+        /*st2g x0, [x0], #0 */
+        /*st2g x0, [x0], #-4096 */
+        /*st2g x0, [x0], #4080 */
+        /*st2g sp, [sp], #0 */
+        /*st2g sp, [sp], #-4096 */
+        /*st2g sp, [sp], #4080 */
 
-        ;st2g x0, [x0, #0]!
-        ;st2g x0, [x0, #-4096]!
-        ;st2g x0, [x0, #4080]!
-        ;st2g sp, [sp, #0]!
-        ;st2g sp, [sp, #-4096]!
-        ;st2g sp, [sp, #4080]!
+        /*st2g x0, [x0, #0]! */
+        /*st2g x0, [x0, #-4096]! */
+        /*st2g x0, [x0, #4080]! */
+        /*st2g sp, [sp, #0]! */
+        /*st2g sp, [sp, #-4096]! */
+        /*st2g sp, [sp, #4080]! */
 
-        ;ldgm x1, [x0]
-        ;ldgm xzr, [sp]
+        /*ldgm x1, [x0] */
+        /*ldgm xzr, [sp] */
 
-        ;stz2g x0, [x0]
-        ;stz2g x0, [x0, #-4096]
-        ;stz2g x0, [x0, #4080]
-        ;stz2g sp, [sp]
-        ;stz2g sp, [sp, #-4096]
-        ;stz2g sp, [sp, #4080]
+        /*stz2g x0, [x0] */
+        /*stz2g x0, [x0, #-4096] */
+        /*stz2g x0, [x0, #4080] */
+        /*stz2g sp, [sp] */
+        /*stz2g sp, [sp, #-4096] */
+        /*stz2g sp, [sp, #4080] */
 
-        ;stz2g x0, [x0], #0
-        ;stz2g x0, [x0], #-4096
-        ;stz2g x0, [x0], #4080
-        ;stz2g sp, [sp], #0
-        ;stz2g sp, [sp], #-4096
-        ;stz2g sp, [sp], #4080
+        /*stz2g x0, [x0], #0 */
+        /*stz2g x0, [x0], #-4096 */
+        /*stz2g x0, [x0], #4080 */
+        /*stz2g sp, [sp], #0 */
+        /*stz2g sp, [sp], #-4096 */
+        /*stz2g sp, [sp], #4080 */
 
-        ;stz2g x0, [x0, #0]!
-        ;stz2g x0, [x0, #-4096]!
-        ;stz2g x0, [x0, #4080]!
-        ;stz2g sp, [sp, #0]!
-        ;stz2g sp, [sp, #-4096]!
-        ;stz2g sp, [sp, #4080]!
+        /*stz2g x0, [x0, #0]! */
+        /*stz2g x0, [x0, #-4096]! */
+        /*stz2g x0, [x0, #4080]! */
+        /*stz2g sp, [sp, #0]! */
+        /*stz2g sp, [sp, #-4096]! */
+        /*stz2g sp, [sp, #4080]! */
 
-        ;
-        ; Compare and swap
-        ;
-
-        casb  w0,  w1, [x0]
-        casb wzr, wzr, [sp]
-
-        caslb  w0,  w1, [x0]
-        caslb wzr, wzr, [sp]
-
-        casab  w0,  w1, [x0]
-        casab wzr, wzr, [sp]
-
-        casalb  w0,  w1, [x0]
-        casalb wzr, wzr, [sp]
-
-        cash  w0,  w1, [x0]
-        cash wzr, wzr, [sp]
-
-        caslh  w0,  w1, [x0]
-        caslh wzr, wzr, [sp]
-
-        casah  w0,  w1, [x0]
-        casah wzr, wzr, [sp]
-
-        casalh  w0,  w1, [x0]
-        casalh wzr, wzr, [sp]
-
-        cas  w0,  w1, [x0]
-        cas wzr, wzr, [sp]
-
-        casl  w0,  w1, [x0]
-        casl wzr, wzr, [sp]
-
-        casa  w0,  w1, [x0]
-        casa wzr, wzr, [sp]
-
-        casal  w0,  w1, [x0]
-        casal wzr, wzr, [sp]
-
-        cas  x0,  x1, [x0]
-        cas xzr, xzr, [sp]
-
-        casl  x0,  x1, [x0]
-        casl xzr, xzr, [sp]
-
-        casa  x0,  x1, [x0]
-        casa xzr, xzr, [sp]
-
-        casal  x0,  x1, [x0]
-        casal xzr, xzr, [sp]
-
-        ;
-        ; Load/store exclusive register
-        ;
+        /*
+         * Load/store exclusive register
+         */
 
         stxrb  w0,   w1, [x2]
         stxrb  w0,  wzr, [sp]
@@ -3817,9 +3192,9 @@ _TestProcA64:
         ldaxr  x0,  [x2]
         ldaxr  xzr, [sp]
 
-        ;
-        ; Load/store exclusive pair
-        ;
+        /*
+         * Load/store exclusive pair
+         */
 
         stxp w0,  w1,  w2, [x3]
         stxp w0, wzr, wzr, [sp]
@@ -3841,61 +3216,37 @@ _TestProcA64:
         ldaxp  x1,  x2, [x0]
         ldaxp xzr, xzr, [sp]
 
-        ;
-        ; Load/store ordered
-        ;
-
-        stllrb w0,  [x1]
-        stllrb wzr, [sp]
+        /*
+         * Load/store ordered
+         */
 
         stlrb w0,  [x1]
         stlrb wzr, [sp]
 
-        ldlarb w0,  [x1]
-        ldlarb wzr, [sp]
-
         ldarb w0,  [x1]
         ldarb wzr, [sp]
-
-        stllrh w0,  [x1]
-        stllrh wzr, [sp]
 
         stlrh w0,  [x1]
         stlrh wzr, [sp]
 
-        ldlarh w0,  [x1]
-        ldlarh wzr, [sp]
-
         ldarh w0,  [x1]
         ldarh wzr, [sp]
-
-        stllr w0,  [x1]
-        stllr wzr, [sp]
 
         stlr w0,  [x1]
         stlr wzr, [sp]
 
-        ldlar w0,  [x1]
-        ldlar wzr, [sp]
-
         ldar w0,  [x1]
         ldar wzr, [sp]
-
-        stllr x0,  [x1]
-        stllr xzr, [sp]
 
         stlr x0,  [x1]
         stlr xzr, [sp]
 
-        ldlar x0,  [x1]
-        ldlar xzr, [sp]
-
         ldar x0,  [x1]
         ldar xzr, [sp]
 
-        ;
-        ; Advanced SIMD load/store multiple structures
-        ;
+        /*
+         * Advanced SIMD load/store multiple structures
+         */
         st4 { v0.8B,  v1.8B, v2.8B, v3.8B }, [x0]
         st4 { v31.8B, v0.8B, v1.8B, v2.8B }, [sp]
         st4 { v0.16B,  v1.16B, v2.16B, v3.16B }, [x0]
@@ -4150,9 +3501,9 @@ _TestProcA64:
         ld1 { v31.2D, v0.2D }, [sp]
 
 
-        ;
-        ; Advanced SIMD load/store multiple structures, post-indexed register
-        ;
+        /*
+         * Advanced SIMD load/store multiple structures, post-indexed register
+         */
 
         st4 { v0.8B,  v1.8B, v2.8B, v3.8B }, [x0], x1
         st4 { v31.8B, v0.8B, v1.8B, v2.8B }, [sp], x30
@@ -4408,9 +3759,9 @@ _TestProcA64:
         ld1 { v31.2D, v0.2D }, [sp], x30
 
 
-        ;
-        ; Advanced SIMD load/store multiple structures, post-indexed immediate
-        ;
+        /*
+         * Advanced SIMD load/store multiple structures, post-indexed immediate
+         */
 
         st4 { v0.8B,  v1.8B, v2.8B, v3.8B }, [x0], #32
         st4 { v31.8B, v0.8B, v1.8B, v2.8B }, [sp], #32
@@ -4666,68 +4017,67 @@ _TestProcA64:
         ld1 { v31.2D, v0.2D }, [sp], #32
 
 
-        ;
-        ; RCW compare and swap
-        ;
-        ;.cpu generic+the+d128
+        /*
+         * RCW compare and swap
+         */
+        /*.cpu generic+the+d128 */
 
-        ;rcwcas x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwcas xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwcas x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwcas xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwcasl x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwcasl xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwcasl x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwcasl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwcasa x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwcasa xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwcasa x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwcasa xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwcasal x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwcasal xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwcasal x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwcasal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwscas x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwscas xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwscas x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwscas xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwscasl x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwscasl xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwscasl x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwscasl xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwscasa x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwscasa xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwscasa x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwscasa xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;rcwscasal x0,   x1, [x3] - Requires FEAT_THE
-        ;rcwscasal xzr, xzr, [sp] - Requires FEAT_THE
+        /*rcwscasal x0,   x1, [x3] - Requires FEAT_THE */
+        /*rcwscasal xzr, xzr, [sp] - Requires FEAT_THE */
 
-        ;
-        ; RCW compare and swap pair
-        ;
+        /*
+         * RCW compare and swap pair
+         */
 
-        ;rcwcasp x0, x1, x2, x3, [x4] - Requires FEAT_THE && FEAT_D128
-        ;rcwcasp x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwcasp x0, x1, x2, x3, [x4] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwcasp x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwcaspl x0, x1, x2, x3, [x4] - Requires FEAT_THE && FEAT_D128
-        ;rcwcaspl x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwcaspl x0, x1, x2, x3, [x4] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwcaspl x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwcaspa x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwcaspa x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwcaspa x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwcaspa x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwcaspal x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwcaspal x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwcaspal x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwcaspal x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwscasp x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwscasp x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwscasp x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwscasp x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwscaspl x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwscaspl x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwscaspl x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwscaspl x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwscaspa x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwscaspa x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwscaspa x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwscaspa x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;rcwscaspal x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128
-        ;rcwscaspal x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128
+        /*rcwscaspal x0, x1, x2, x3, [x3] - Requires FEAT_THE && FEAT_D128 */
+        /*rcwscaspal x0, x1, x2, x3, [sp] - Requires FEAT_THE && FEAT_D128 */
 
-        ;
-        ; Keep last so the testcase can catch errors in
-        ; the disassembly of the last instruction.
-        ;
+        /*
+         * Keep last so the testcase can catch errors in
+         * the disassembly of the last instruction.
+         */
         nop
 
-.private_extern _TestProcA64_EndProc
-_TestProcA64_EndProc:
+BEGINPROC_HIDDEN TestProcA64_EndProc
