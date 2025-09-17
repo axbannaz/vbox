@@ -109,8 +109,8 @@ ifdef VBOX_WITH_TESTCASES
   PROGRAMS += tstDisasmArmv8-1
   tstDisasmArmv8-1_TEMPLATE   = VBoxR3TstExe
   tstDisasmArmv8-1_DEFS       = \
-    IN_DIS \
-    $(if $(TST_DISASM_ARM8_WITH_FULL_TESTCASES),TST_DISASM_ARM8_WITH_FULL_TESTCASES,)
+  	IN_DIS \
+  	$(if $(TST_DISASM_ARM8_WITH_FULL_TESTCASES),TST_DISASM_ARM8_WITH_FULL_TESTCASES,)
   tstDisasmArmv8-1_INCS = \
   	.
   tstDisasmArmv8-1_SOURCES    = \
