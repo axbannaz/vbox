@@ -29,7 +29,9 @@
 
 BEGINPROC_HIDDEN TestProcA64Lor
 
-        .cpu generic+lor
+#ifndef RT_OS_DARWIN
+        .cpu generic+lor /* Our macOS toolchain doesn't know about fp16 but includes support by default */
+#endif
 
         ldlarb w0,  [x1]
         ldlarb wzr, [sp]
