@@ -3668,8 +3668,10 @@ static int vmsvga3dCmdDXTransferFromBuffer(PVGASTATECC pThisCC, SVGA3dCmdDXTrans
          * Map the surface.
          */
         VMSVGA3D_MAPPED_SURFACE mapSurface;
+        uint32_t const mapFlags = vmsvga3dIsEntireImage(pThisCC, &imageSurface, &pCmd->destBox)
+                                ? 0 : (VMSVGA3D_MAP_F_DYNAMIC_INTERMEDIATE | VMSVGA3D_MAP_F_EXACT_REGION);
         rc = vmsvga3dSurfaceMap(pThisCC, &imageSurface, &pCmd->destBox, VMSVGA3D_SURFACE_MAP_WRITE_DISCARD,
-            VMSVGA3D_MAP_F_DYNAMIC_INTERMEDIATE | VMSVGA3D_MAP_F_EXACT_REGION, &mapSurface);
+            mapFlags, &mapSurface);
         if (RT_SUCCESS(rc))
         {
             /*
