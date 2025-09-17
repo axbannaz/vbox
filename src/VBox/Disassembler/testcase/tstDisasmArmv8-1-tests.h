@@ -68,6 +68,8 @@ extern const unsigned g_cbtstDisasmArmv8_1_Rcpc;
 extern const unsigned char g_abtstDisasmArmv8_1_The[];
 extern const unsigned g_cbtstDisasmArmv8_1_The;
 
+extern const unsigned char g_abtstDisasmArmv8_1_Mte[];
+extern const unsigned g_cbtstDisasmArmv8_1_Mte;
 
 RT_C_DECLS_END
 
