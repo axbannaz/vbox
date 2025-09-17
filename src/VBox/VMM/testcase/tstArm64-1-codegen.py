@@ -73,7 +73,7 @@ def bitsSignedToInt(cBits, uValue):
     """ Returns a signed integer value. """
     fSignFlag = 1 << (cBits - 1);
     if uValue & fSignFlag:
-        return -(~uValue & (fSignFlag - 1));
+        return -(~uValue & (fSignFlag - 1)) - 1;
     return uValue;
 
 def bitsSignExtend(cBits, uValue, cToBits):
@@ -2422,25 +2422,30 @@ class A64No1CodeGenStpImm7Fp(A64No1CodeGenFprBase, A64No1CodeGenStpImm7):
 #
 
 g_kdCfgToElemInfo = {
-    '8B':  ( 1,  8,   8, 0xff, ),
-    '16B': ( 1,  8,  16, 0xff, ),
-    '4H':  ( 2, 16,   4, 0xffff, ),
-    '8H':  ( 2, 16,   8, 0xffff, ),
-    '2S':  ( 4, 32,   2, 0xffffffff, ),
-    '4S':  ( 4, 32,   4, 0xffffffff, ),
-    '1D':  ( 8, 64,   1, 0xffffffffffffffff, ),
-    '2D':  ( 8, 64,   2, 0xffffffffffffffff, ),
+    '8B':  ( 1,  8,  8, 0xff, ),
+    '16B': ( 1,  8, 16, 0xff, ),
+    '4H':  ( 2, 16,  4, 0xffff, ),
+    '8H':  ( 2, 16,  8, 0xffff, ),
+    '2S':  ( 4, 32,  2, 0xffffffff, ),
+    '4S':  ( 4, 32,  4, 0xffffffff, ),
+    '1D':  ( 8, 64,  1, 0xffffffffffffffff, ),
+    '2D':  ( 8, 64,  2, 0xffffffffffffffff, ),
 };
 
 
 class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
-    def __init__(self, sInstr, fnCalc, asSkip = None, asOnly = None):
+    """
+    C4.1.95.24 Advanced SIMD three same
+    """
+    def __init__(self, sInstr, fnCalc, asSkip = None, asOnly = None, fWithFlags = False, fPairElems = False):
         A64No1CodeGenFprBase.__init__(self, sInstr + '_advsimd_3same', sInstr, 16);
         self.fnCalc = fnCalc;
         self.asCfgs = list(g_kdCfgToElemInfo.keys()) if not asOnly else list(asOnly);
         if asSkip:
             for sCfg in asSkip:
                 self.asCfgs.remove(sCfg);
+        self.fWithFlags = fWithFlags;
+        self.fPairElems = fPairElems;
 
     def generateBody(self, oOptions, cLeftToAllCheck):
         iCfg = 0;
@@ -2454,13 +2459,29 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
             (uSrc1, iRegSrc1) = self.allocFprAndLoadRandUBits();
             (uSrc2, iRegSrc2) = self.allocFprAndLoadRandUBits();
 
-            uRes = 0;
-            for iElem in range(cElems):
-                uSrcElem1 = (uSrc1 >> (iElem * cBitsElem)) & fElemMask;
-                uSrcElem2 = (uSrc2 >> (iElem * cBitsElem)) & fElemMask;
-                uResElem  = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2);
-                assert (uResElem & ~fElemMask) == 0;
-                uRes     |= uResElem << (iElem * cBitsElem);
+            uRes     = 0;
+            fFpSrIn  = 0;
+            fFpSrOut = 0;
+            if not self.fPairElems:
+                for iElem in range(cElems):
+                    uSrcElem1 = (uSrc1 >> (iElem * cBitsElem)) & fElemMask;
+                    uSrcElem2 = (uSrc2 >> (iElem * cBitsElem)) & fElemMask;
+                    (uResElem, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
+                    assert (uResElem & ~fElemMask) == 0;
+                    uRes     |= uResElem << (iElem * cBitsElem);
+                    fFpSrOut |= fFpSrElem;
+            else:
+                cBitsPerReg  = cElems * cBitsElem;
+                uSrcCombined = ((uSrc2 & bitsOnes(cBitsPerReg)) << cBitsPerReg) | (uSrc1 & bitsOnes(cBitsPerReg));
+                for iElem in range(cElems):
+                    uSrcElem1 = (uSrcCombined >> (iElem * 2       * cBitsElem)) & fElemMask;
+                    uSrcElem2 = (uSrcCombined >> ((iElem * 2 + 1) * cBitsElem)) & fElemMask;
+                    (uResElem, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
+                    assert (uResElem & ~fElemMask) == 0;
+                    uRes     |= uResElem << (iElem * cBitsElem);
+                    fFpSrOut |= fFpSrElem;
+
+            ## @todo load and check FPSR.
 
             # Emit the test instruction and result checks.
             iRegDst = self.oFprAllocator.alloc();
@@ -2470,10 +2491,31 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
 
             self.oFprAllocator.freeList((iRegDst, iRegSrc2, iRegSrc1));
 
+def calcSignedSatQ(iSum, cBitsElem):
+    fMask = bitsOnes(cBitsElem - 1);
+    if iSum >= fMask:
+        return (fMask, True);
+    if iSum < -fMask:
+        return (-fMask - 1, True);
+    return (iSum, False);
 
-def calcAdvSimd3Add(cBitsElem, fElemMask, uSrcElem1, uSrcElem2):
-    _ = cBitsElem;
-    return (uSrcElem1 + uSrcElem2) & fElemMask;
+def calcAdvSimd3Add(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return ((uSrcElem1 + uSrcElem2) & fElemMask, fFpSr);
+
+def calcAdvSimd3ShAdd(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    iSum = bitsSignedToInt(cBitsElem, uSrcElem1) + bitsSignedToInt(cBitsElem, uSrcElem2);
+    return ((iSum >> 1) & fElemMask, fFpSr);
+
+def calcAdvSimd3SrhAdd(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    iSum = bitsSignedToInt(cBitsElem, uSrcElem1) + bitsSignedToInt(cBitsElem, uSrcElem2) + 1;
+    return ((iSum >> 1) & fElemMask, fFpSr);
+
+def calcAdvSimd3SqAdd(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    (iSum, fSat) = calcSignedSatQ(bitsSignedToInt(cBitsElem, uSrcElem1) + bitsSignedToInt(cBitsElem, uSrcElem2), cBitsElem);
+    if fSat:
+        fFpSr |= 1 << 27;
+    return (iSum & fElemMask, fFpSr);
+
 
 #
 # Result calculation functions.
@@ -2624,9 +2666,14 @@ class Arm64No1CodeGen(object):
         aoGenerators = [];
 
         if True: # pylint: disable=using-constant-test
-            # extract
+            # C4.1.95.24 Advanced SIMD three same
             aoGenerators += [
-                A64No1CodeGenAdvSimdThreeSame('add', calcAdvSimd3Add, asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('add',    calcAdvSimd3Add,     asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('addp',   calcAdvSimd3Add,     asSkip = ('1D',), fPairElems = True),
+                A64No1CodeGenAdvSimdThreeSame('shadd',  calcAdvSimd3ShAdd,   asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('srhadd', calcAdvSimd3SrhAdd,  asSkip = ('1D', '2D',)),
+                #A64No1CodeGenAdvSimdThreeSame('sqadd',  calcAdvSimd3SqAdd,   asSkip = ('1D',), fWithFlags = True),
+                #A64No1CodeGenAdvSimdThreeSame('shsub',  calcAdvSimd3ShSub,   asSkip = ('1D', '2D',)),
             ];
 
         if True: # pylint: disable=using-constant-test

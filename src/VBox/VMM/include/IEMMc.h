@@ -109,6 +109,12 @@
 
 #define IEM_MC_LOCAL_ASSIGN_CONST_U64(a_VarDst, a_Value)    (a_VarDst) = (a_Value)
 #define IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_VarDst, a_VarSrc)   (a_VarDst) = (a_VarSrc)
+/** For extracting a subfield from a_u64Value and assign it to a_u64VarDst. */
+#define IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(a_u64VarDst, a_u64Value, a_iFirstBit, a_cBits) \
+    (a_u64VarDst) = ((a_u64Value) >> (a_iFirstBit)) & (RT_BIT_64(a_cBits) - UINT64_C(1))
+/** For extracting a signed subfield from a_u64Value and assign it to a_u64VarDst. */
+#define IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(a_i64VarDst, a_u64Value, a_iFirstBit, a_cBits); \
+    (a_i64VarDst) = (int64_t)((a_u64Value) << (64 - a_iFirstBit - a_cBits)) >> (64 - a_cBits)
 
 /*
  * General purpose register accessors.
@@ -218,6 +224,7 @@
 
 #define IEM_MC_ADD_LOCAL_U32(a_u32Value, a_u32Const)    do { (a_u32Value) += (a_u32Const); } while (0)
 #define IEM_MC_ADD_LOCAL_U64(a_u64Value, a_u64Const)    do { (a_u64Value) += (a_u64Const); } while (0)
+#define IEM_MC_ADD_LOCAL_S64(a_i64Value, a_i64Const)    do { (a_i64Value) += (a_i64Const); } while (0)
 
 #define IEM_MC_ADD_GREG_U8_TO_LOCAL(a_u8Value, a_iGReg)    do { (a_u8Value)  += iemGRegFetchU8( pVCpu, (a_iGReg)); } while (0)
 #define IEM_MC_ADD_GREG_U16_TO_LOCAL(a_u16Value, a_iGReg)  do { (a_u16Value) += iemGRegFetchU16(pVCpu, (a_iGReg)); } while (0)
@@ -269,6 +276,7 @@
 
 #define IEM_MC_ADD_2LOCS_U32(a_u32Value, a_u32Addend)   do { (a_u32Value) += a_u32Addend; } while (0)
 #define IEM_MC_ADD_2LOCS_U64(a_u64Value, a_u64Addend)   do { (a_u64Value) += a_u64Addend; } while (0)
+#define IEM_MC_ADD_2LOCS_S64(a_i64Value, a_i64Addend)   do { (a_i64Value) += a_i64Addend; } while (0)
 
 #define IEM_MC_SUB_2LOCS_U32(a_u32Value, a_u32Subtrahend) do { (a_u32Value) -= a_u32Subtrahend; } while (0)
 #define IEM_MC_SUB_2LOCS_U64(a_u64Value, a_u64Subtrahend) do { (a_u64Value) -= a_u64Subtrahend; } while (0)
@@ -278,6 +286,11 @@
 
 #define IEM_MC_OR_2LOCS_U32(a_u32Local, a_u32Mask)      do { (a_u32Local) |= (a_u32Mask); } while (0)
 #define IEM_MC_OR_2LOCS_U64(a_u64Local, a_u64Mask)      do { (a_u64Local) |= (a_u64Mask); } while (0)
+
+/** For OR'ing in a subfield from a_u64Value into a_u64Local.
+ * @note The a_u64Value type can be int64_t, thus the cast.  */
+#define IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_u64Local, a_u64Value, a_fValueAndMask, a_cValueLeftShift) \
+    do { (a_u64Local) |= ((uint64_t)(a_u64Value) & (a_fValueAndMask)) << (a_cValueLeftShift); } while (0)
 
 #define IEM_MC_XOR_2LOCS_U32(a_u32Local, a_u32Mask)     do { (a_u32Local) ^= (a_u32Mask); } while (0)
 #define IEM_MC_XOR_2LOCS_U64(a_u64Local, a_u64Mask)     do { (a_u64Local) ^= (a_u64Mask); } while (0)
