@@ -539,6 +539,8 @@ void UIFilterEditor::paintEvent(QPaintEvent *pEvent)
     QRect focusRect = widgetRect;
     widgetRect.adjust(3, 3, -3, -3);
 #ifndef VBOX_WS_MAC
+    /* Additionally prepare Windows/nix focus-frame: */
+    QRect nativeFocusRect = focusRect;
     focusRect.adjust(1, 1, -1, -1);
 #endif /* !VBOX_WS_MAC */
     const QPainterPath focusPath = cookPainterPath(focusRect, m_iRadius + 2);
@@ -547,6 +549,16 @@ void UIFilterEditor::paintEvent(QPaintEvent *pEvent)
     /* Draw cross-platform focus-frame: */
     if (m_pLineEdit->hasFocus())
         painter.fillPath(focusPath, colorHighlight);
+#ifndef VBOX_WS_MAC
+    /* Additionally draw Windows/nix focus-frame: */
+    if (m_pLineEdit->hasFocus())
+    {
+        QStyleOptionFocusRect option;
+        option.initFrom(this);
+        option.rect = nativeFocusRect;
+        style()->drawPrimitive(QStyle::PE_FrameFocusRect, &option, &painter, this);
+    }
+#endif /* !VBOX_WS_MAC */
 
     /* Draw base: */
     painter.fillPath(widgetPath, colorBase);
