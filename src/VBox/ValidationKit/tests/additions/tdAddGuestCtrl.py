@@ -1666,7 +1666,8 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
         return fRc;
 
     def waitForGuestFacility(self, oSession, eFacilityType, sDesc,
-                             eFacilityStatus, cMsTimeout = 30 * 1000):
+                             eFacilityStatus, cMsTimeout = 30 * 1000,
+                             fReportError = True):
         """
         Waits for a guest facility to enter a certain status.
         By default the "Active" status is being used.
@@ -1699,7 +1700,10 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
             self.oTstDrv.sleep(5); # Do some busy waiting.
 
         if not fRc:
-            reporter.error('Waiting for Guest Additions facility "%s" timed out' % (sDesc));
+            if fReportError:
+                reporter.error('Waiting for Guest Additions facility "%s" timed out' % (sDesc));
+            else:
+                reporter.log('Waiting for Guest Additions facility "%s" timed out' % (sDesc));
         else:
             reporter.log('Guest Additions facility "%s" reached requested status %s after %dms'
                          % (sDesc, str(eFacilityStatus), base.timestampMilli() - tsStart));
@@ -1843,6 +1847,47 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 self.vboxServiceControl(oTxsSession, oTestVm, fStart = False);
                 self.oTstDrv.sleep(5);
                 self.vboxServiceControl(oTxsSession, oTestVm, fStart = True);
+
+                ## @todo r=aeichner A workaround for the t-xppro VM failing to start VBoxService the first time after
+                #                   the reboot.
+                #
+                #                   The t-xppro VM exihibts a strange issue where the VBoxService is reported as terminated by
+                #                   the guest additions facility (101 == AdditionsFacilityStatus_Terminated) but starting the service
+                #                   fails with:
+                # tdAddBasic1: 18:11:44.002520  tst-xppro, 1 cpu, NestedPaging, none, Guest Control, Preparations, Stopping VBoxService: TESTING
+                # tdAddBasic1: 18:11:44.033670 stdout: 
+                # tdAddBasic1: 18:11:44.033670 stdout: SERVICE_NAME: VBoxService
+                # tdAddBasic1: 18:11:44.033670 stdout:         TYPE               : 10  WIN32_OWN_PROCESS 
+                # tdAddBasic1: 18:11:44.033670 stdout:         STATE              : 3  STOP_PENDING 
+                # tdAddBasic1: 18:11:44.033670 stdout:                                 (STOPPABLE,NOT_PAUSABLE,ACCEPTS_SHUTDOWN)
+                # tdAddBasic1: 18:11:44.033670 stdout:         WIN32_EXIT_CODE    : 0   (0x0)
+                # tdAddBasic1: 18:11:44.033670 stdout:         SERVICE_EXIT_CODE  : 0   (0x0)
+                # tdAddBasic1: 18:11:44.033670 stdout:         CHECKPOINT         : 0x0
+                # tdAddBasic1: 18:11:44.033670 stdout:         WAIT_HINT          : 0x0
+                # tdAddBasic1: 18:11:44.033981 taskExecEx: returns True
+                # tdAddBasic1: 18:11:44.033999 taskThread: signalling task with status "exec", oTaskRc=True
+                # tdAddBasic1: 18:11:44.036066 txsRunTest: isSuccess=True getResult=True
+                # tdAddBasic1: 18:11:44.036107 ** tst-xppro, 1 cpu, NestedPaging, none, Guest Control, Preparations, Stopping VBoxService: PASSED
+                # tdAddBasic1: 18:11:49.037711  tst-xppro, 1 cpu, NestedPaging, none, Guest Control, Preparations, Starting VBoxService: TESTING
+                # tdAddBasic1: 18:11:57.128258 stdout: [SC] StartService FAILED 1056:
+                # tdAddBasic1: 18:11:57.128258 stdout:
+                # tdAddBasic1: 18:11:57.128258 stdout: An instance of the service is already running.
+                # tdAddBasic1: 18:11:57.128258 stdout:
+                # tdAddBasic1: 18:11:57.128258 stdout:
+                #
+                #                   This fails the whole testcase and it happens quite often on the testboxes, and I can reproduce it locally
+                #                   as well. Could be some race in Windows XP as the other Windows guests seem to work fine, or it could be something
+                #                   in VBoxService where it doesn't properly terminate after setting its status in the guest additions facilities to terminated.
+                #                   The length of the sleep fudge doesn't matter. However a subsequent restarting of the
+                #                   VBoxService service just works perfectly. So in order to "fix" the testcase check whether the
+                #                   first start of VBoxService works without reporting an error when it times out and just try again.
+                #
+                #                   This needs to be investigate by a Windows/Guest Additions expert.
+                fRc = self.waitForGuestFacility(oSession, vboxcon.AdditionsFacilityType_VBoxService, "VBoxService",
+                                                vboxcon.AdditionsFacilityStatus_Active, cMsTimeout = 3 * 1000,
+                                                fReportError = False);
+                if not fRc:
+                    self.vboxServiceControl(oTxsSession, oTestVm, fStart = True);
 
         # Wait for VBoxService to start up in any case.
         reporter.testStart('Waiting for VBoxService to get started');
