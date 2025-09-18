@@ -190,7 +190,7 @@ g_kfIsaExtPopcnt     = 0x00004;
 g_kfIsaExtCmpxchgb16 = 0x00008;
 
 # This is a convenient helper for what is known as the x86-64-v2 microarchitecture level
-g_fIsaExtsX86_64_v2  = g_kfIsaExtSse42 | g_kfIsaExtSsse3 | g_kfIsaExtPopcnt | g_kfIsaExtCmpxchgb16;
+g_fIsaExtsX8664v2  = g_kfIsaExtSse42 | g_kfIsaExtSsse3 | g_kfIsaExtPopcnt | g_kfIsaExtCmpxchgb16;
 ## @}
 
 g_kdaIsaExtsCpuidBits = {
@@ -462,7 +462,8 @@ class BaseTestVm(object):
         elif self.sPlatformArchitecture == 'ARM' and utils.getHostArch() == 'amd64':
             reporter.log('Skipping ARM VM on amd64 host');
         elif not self.areIsaExtsSupported(oTestDrv, self.fIsaExts):
-            # @todo r=aeichner This will skip a VM on an ARM host running in IEM if fIsaExts != 0, not important right now.
+            # @todo r=aeichner This will skip a VM on an ARM host running in IEM if fIsaExts != 0,
+            #                  not important right now.
             reporter.log('Skipping VM requiring ISA extensions not supported on the host');
         else:
             return False;
@@ -1033,7 +1034,7 @@ class BaseTestVm(object):
 
 
 ## @todo Inherit from BaseTestVm
-class TestVm(object):
+class TestVm(object):                                       # pylint: disable=too-many-instance-attributes
     """
     A Test VM - name + VDI/whatever.
 
@@ -1332,7 +1333,8 @@ class TestVm(object):
                 elif self.sPlatformArchitecture == 'ARM' and utils.getHostArch() == 'amd64':
                     fRc = None; # Skip the test.
                 elif not self.areIsaExtsSupported(oTestDrv, self.fIsaExts):
-                     # @todo r=aeichner This will skip a VM on an ARM host running in IEM if fIsaExts != 0, not important right now.
+                     # @todo r=aeichner This will skip a VM on an ARM host running in IEM if fIsaExts != 0,
+                     #                  not important right now.
                     fRc = None; # Skip the test.
                 else:
                     oSession = oTestDrv.openSession(oVM);
@@ -2210,7 +2212,7 @@ class TestVmManager(object):
                sKind = 'Oracle_64', acCpusSup = range(1, 33), fIoApic = True,
                asParavirtModesSup = [g_ksParavirtProviderKVM,], sHddControllerType='SATA Controller',
                sDvdControllerType = 'SATA Controller', sGraphicsControllerType = 'VMSVGA',
-               fIsaExts = g_fIsaExtsX86_64_v2),
+               fIsaExts = g_fIsaExtsX8664v2),
         # Note: Don't use this image for VBoxService / Guest Control-related tests anymore;
         #       The distro has a buggy dbus implementation, which crashes often in some dbus watcher functions when being
         #       invoked by pm_sm_authenticate(). Also, the distro's repositories can't be used either easily anymore due to old
