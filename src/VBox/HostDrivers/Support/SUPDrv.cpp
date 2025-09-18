@@ -4306,6 +4306,7 @@ SUPR0_EXPORT_SYMBOL(SUPR0ChangeCR4);
  * @returns VBox status code.
  * @retval  VINF_SUCCESS on success.
  * @retval  VERR_NOT_SUPPORTED if not supported by the native OS.
+ * @retval  VERR_NOT_AVAILABLE if supported by the native OS but not available atm.
  *
  * @param   fEnable         Whether to enable or disable.
  */
