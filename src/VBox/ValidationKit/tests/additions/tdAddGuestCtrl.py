@@ -1848,6 +1848,7 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 self.oTstDrv.sleep(5);
                 self.vboxServiceControl(oTxsSession, oTestVm, fStart = True);
 
+                # pylint: disable=line-too-long
                 ## @todo r=aeichner A workaround for the t-xppro VM failing to start VBoxService the first time after
                 #                   the reboot.
                 #
@@ -1883,6 +1884,7 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 #                   first start of VBoxService works without reporting an error when it times out and just try again.
                 #
                 #                   This needs to be investigate by a Windows/Guest Additions expert.
+                # pylint: enable=line-too-long
                 fRc = self.waitForGuestFacility(oSession, vboxcon.AdditionsFacilityType_VBoxService, "VBoxService",
                                                 vboxcon.AdditionsFacilityStatus_Active, cMsTimeout = 3 * 1000,
                                                 fReportError = False);
