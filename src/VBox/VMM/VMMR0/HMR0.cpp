@@ -437,11 +437,11 @@ static int hmR0InitIntel(void)
 
     /*
      * First try use native kernel API for controlling VT-x.
-     * (This is only supported by some Mac OS X kernels atm.)
+     * (This is only supported by some Mac OS X and Linux kernels atm.)
      */
     int rc;
     g_rcHmInit = rc = SUPR0EnableVTx(true /* fEnable */);
-    g_fHmVmxUsingSUPR0EnableVTx = rc != VERR_NOT_SUPPORTED;
+    g_fHmVmxUsingSUPR0EnableVTx = (rc != VERR_NOT_SUPPORTED && rc != VERR_NOT_AVAILABLE);
     if (g_fHmVmxUsingSUPR0EnableVTx)
     {
         AssertLogRelMsg(rc == VINF_SUCCESS || rc == VERR_VMX_IN_VMX_ROOT_MODE || rc == VERR_VMX_NO_VMX, ("%Rrc\n", rc));
