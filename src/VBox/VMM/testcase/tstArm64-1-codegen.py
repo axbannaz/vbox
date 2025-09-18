@@ -2459,7 +2459,8 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
     """
     C4.1.95.24 Advanced SIMD three same
     """
-    def __init__(self, sInstr, fnCalc, asSkip = None, asOnly = None, fWithFlags = False, fPairElems = False):
+    def __init__(self, sInstr, fnCalc, asSkip = None, asOnly = None, fWithFlags = False,
+                 fPairElems = False, fWithDstInput = False):
         A64No1CodeGenFprBase.__init__(self, sInstr + '_advsimd_3same', sInstr, 16);
         self.fnCalc = fnCalc;
         self.asCfgs = list(g_kdCfgToElemInfo.keys()) if not asOnly else list(asOnly);
@@ -2468,6 +2469,8 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
                 self.asCfgs.remove(sCfg);
         self.fWithFlags = fWithFlags;
         self.fPairElems = fPairElems;
+        self.fWithDstInput = fWithDstInput;
+        assert not fWithDstInput or not fPairElems;
 
     def generateBody(self, oOptions, cLeftToAllCheck):
         iCfg = 0;
@@ -2480,6 +2483,10 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
             # Get source values and calculate the result.
             (uSrc1, iRegSrc1) = self.allocFprAndLoadRandUBits();
             (uSrc2, iRegSrc2) = self.allocFprAndLoadRandUBits();
+            if not self.fWithDstInput:
+                iRegDst       = self.oFprAllocator.alloc();
+            else:
+                (uDstIn, iRegDst) = self.allocFprAndLoadRandUBits();
 
             uRes     = 0;
             fFpSrIn  = 0; ## @todo IEM doesn't handle random values right (RES0 bits are implicitly masked out).
@@ -2488,7 +2495,11 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
                 for iElem in range(cElems):
                     uSrcElem1 = (uSrc1 >> (iElem * cBitsElem)) & fElemMask;
                     uSrcElem2 = (uSrc2 >> (iElem * cBitsElem)) & fElemMask;
-                    (uResElem, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
+                    if not self.fWithDstInput:
+                        (uResElem, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
+                    else: # HACK ALERT!
+                        uResElem = (uDstIn >> (iElem * cBitsElem)) & fElemMask;
+                        (uResElem, fFpSrElem) = self.fnCalc(uResElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
                     assert (uResElem & ~fElemMask) == 0;
                     uRes     |= uResElem << (iElem * cBitsElem);
                     fFpSrOut |= fFpSrElem;
@@ -2508,7 +2519,6 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
                 self.emitFpSrLoad(fFpSrIn);
 
             # Emit the test instruction and result checks.
-            iRegDst = self.oFprAllocator.alloc();
             self.emitInstr(self.sInstr, 'v%u.%s, v%u.%s, v%u.%s' % (iRegDst, sCfg, iRegSrc1, sCfg, iRegSrc2, sCfg,));
 
             if self.fWithFlags:
@@ -2599,6 +2609,19 @@ def calcAdvSimd3Orr(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
 
 def calcAdvSimd3Orn(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
     return ((uSrcElem1 | ~uSrcElem2) & fElemMask, fFpSr);
+
+def calcAdvSimd3Eor(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return ((uSrcElem1 ^ uSrcElem2) & fElemMask, fFpSr);
+
+def calcAdvSimd3Bsl(uDstElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr): # HACK
+    return ((uSrcElem2 ^ ((uSrcElem1 ^ uSrcElem2) & uDstElem)) & fElemMask, fFpSr);
+
+def calcAdvSimd3Bit(uDstElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr): # HACK
+    return ((uDstElem ^ ((uDstElem ^ uSrcElem1) & uSrcElem2)) & fElemMask, fFpSr);
+
+def calcAdvSimd3Bif(uDstElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr): # HACK
+    return ((uDstElem ^ ((uDstElem ^ uSrcElem1) & ~uSrcElem2)) & fElemMask, fFpSr);
+
 
 
 #
@@ -2752,6 +2775,11 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # C4.1.95.24 Advanced SIMD three same
             aoGenerators += [
+                A64No1CodeGenAdvSimdThreeSame('eor',    calcAdvSimd3Eor,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('bsl',    calcAdvSimd3Bsl,     asOnly = ('8B', '16B',), fWithDstInput = True),
+                A64No1CodeGenAdvSimdThreeSame('bit',    calcAdvSimd3Bit,     asOnly = ('8B', '16B',), fWithDstInput = True),
+                A64No1CodeGenAdvSimdThreeSame('bif',    calcAdvSimd3Bif,     asOnly = ('8B', '16B',), fWithDstInput = True),
+
                 A64No1CodeGenAdvSimdThreeSame('and',    calcAdvSimd3And,     asOnly = ('8B', '16B',)),
                 A64No1CodeGenAdvSimdThreeSame('bic',    calcAdvSimd3Bic,     asOnly = ('8B', '16B',)),
                 A64No1CodeGenAdvSimdThreeSame('orr',    calcAdvSimd3Orr,     asOnly = ('8B', '16B',)),
