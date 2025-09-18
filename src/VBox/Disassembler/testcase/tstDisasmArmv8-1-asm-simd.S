@@ -73,6 +73,48 @@ BEGINPROC_HIDDEN TestProcA64Simd
     addv s0, v0.4S
     addv s31, v31.4S
 
+    bic v0.4H, #0    /* , LSL #0 */
+    bic v0.4H, #0,   LSL #8
+    bic v0.4H, #63   /* , LSL #0 */
+    bic v0.4H, #63,  LSL #8
+    bic v0.4H, #255  /* , LSL #0 */
+    bic v0.4H, #255, LSL #8
+    bic v0.8H, #0    /* , LSL #0 */
+    bic v0.8H, #0,   LSL #8
+    bic v0.8H, #63   /* , LSL #0 */
+    bic v0.8H, #63,  LSL #8
+    bic v0.8H, #255   /* , LSL #0 */
+    bic v0.8H, #255, LSL #8
+
+    bic v0.2S, #0    /* , LSL #0 */
+    bic v0.2S, #0,   LSL #8
+    bic v0.2S, #0,   LSL #16
+    bic v0.2S, #0,   LSL #24
+    bic v0.2S, #63   /* , LSL #0 */
+    bic v0.2S, #63,  LSL #8
+    bic v0.2S, #63,  LSL #16
+    bic v0.2S, #63,  LSL #24
+    bic v0.2S, #255  /* , LSL #0 */
+    bic v0.2S, #255, LSL #8
+    bic v0.2S, #255, LSL #16
+    bic v0.2S, #255, LSL #24
+    bic v0.4S, #0    /* , LSL #0 */
+    bic v0.4S, #0,   LSL #8
+    bic v0.4S, #0,   LSL #16
+    bic v0.4S, #0,   LSL #24
+    bic v0.4S, #63   /* , LSL #0 */
+    bic v0.4S, #63,  LSL #8
+    bic v0.4S, #63,  LSL #16
+    bic v0.4S, #63,  LSL #24
+    bic v0.4S, #255  /* , LSL #0 */
+    bic v0.4S, #255, LSL #8
+    bic v0.4S, #255, LSL #16
+    bic v0.4S, #255, LSL #24
+
+    /* @todo Fix diassembler tables */
+    /*bic v0.8B, v1.8B, v31.8B */
+    /*bic v0.16B, v1.16B, v31.16B */
+
     /* @todo Fix diassembler tables */
     /*bif v0.8B,  v1.8B,  v2.8B */
     /*bif v31.8B, v30.8B, v29.8B */
@@ -266,6 +308,98 @@ BEGINPROC_HIDDEN TestProcA64Simd
     mul v31.2S, v30.2S, v29.2S
     mul v0.4S,  v1.4S,  v2.4S
     mul v31.4S, v30.4S, v29.4S
+
+    mvni v0.4H, #0    /* , LSL #0 */
+    mvni v0.4H, #0,   LSL #8
+    mvni v0.4H, #63   /* , LSL #0 */
+    mvni v0.4H, #63,  LSL #8
+    mvni v0.4H, #255  /* , LSL #0 */
+    mvni v0.4H, #255, LSL #8
+    mvni v0.8H, #0    /* , LSL #0 */
+    mvni v0.8H, #0,   LSL #8
+    mvni v0.8H, #63   /* , LSL #0 */
+    mvni v0.8H, #63,  LSL #8
+    mvni v0.8H, #255   /* , LSL #0 */
+    mvni v0.8H, #255, LSL #8
+
+    mvni v0.2S, #0    /* , LSL #0 */
+    mvni v0.2S, #0,   LSL #8
+    mvni v0.2S, #0,   LSL #16
+    mvni v0.2S, #0,   LSL #24
+    mvni v0.2S, #63   /* , LSL #0 */
+    mvni v0.2S, #63,  LSL #8
+    mvni v0.2S, #63,  LSL #16
+    mvni v0.2S, #63,  LSL #24
+    mvni v0.2S, #255  /* , LSL #0 */
+    mvni v0.2S, #255, LSL #8
+    mvni v0.2S, #255, LSL #16
+    mvni v0.2S, #255, LSL #24
+    mvni v0.4S, #0    /* , LSL #0 */
+    mvni v0.4S, #0,   LSL #8
+    mvni v0.4S, #0,   LSL #16
+    mvni v0.4S, #0,   LSL #24
+    mvni v0.4S, #63   /* , LSL #0 */
+    mvni v0.4S, #63,  LSL #8
+    mvni v0.4S, #63,  LSL #16
+    mvni v0.4S, #63,  LSL #24
+    mvni v0.4S, #255  /* , LSL #0 */
+    mvni v0.4S, #255, LSL #8
+    mvni v0.4S, #255, LSL #16
+    mvni v0.4S, #255, LSL #24
+
+    mvni v0.2S, #0,   MSL #8
+    mvni v0.2S, #0,   MSL #16
+    mvni v0.2S, #63,  MSL #8
+    mvni v0.2S, #63,  MSL #16
+    mvni v0.2S, #255, MSL #8
+    mvni v0.2S, #255, MSL #16
+    mvni v0.4S, #0,   MSL #8
+    mvni v0.4S, #0,   MSL #16
+    mvni v0.4S, #63,  MSL #8
+    mvni v0.4S, #63,  MSL #16
+    mvni v0.4S, #255, MSL #8
+    mvni v0.4S, #255, MSL #16
+
+    orr v0.4H, #0    /*, LSL #0 */
+    orr v0.4H, #0,   LSL #8
+    orr v0.4H, #63   /*, LSL #0 */
+    orr v0.4H, #63,  LSL #8
+    orr v0.4H, #255  /*, LSL #0 */
+    orr v0.4H, #255, LSL #8
+    orr v0.8H, #0    /*, LSL #0 */
+    orr v0.8H, #0,   LSL #8
+    orr v0.8H, #63   /*, LSL #0 */
+    orr v0.8H, #63,  LSL #8
+    orr v0.8H, #255  /*, LSL #0 */
+    orr v0.8H, #255, LSL #8
+
+    orr v0.2S, #0    /* , LSL #0 */
+    orr v0.2S, #0,   LSL #8
+    orr v0.2S, #0,   LSL #16
+    orr v0.2S, #0,   LSL #24
+    orr v0.2S, #63   /* , LSL #0 */
+    orr v0.2S, #63,  LSL #8
+    orr v0.2S, #63,  LSL #16
+    orr v0.2S, #63,  LSL #24
+    orr v0.2S, #255  /* , LSL #0 */
+    orr v0.2S, #255, LSL #8
+    orr v0.2S, #255, LSL #16
+    orr v0.2S, #255, LSL #24
+    orr v0.4S, #0    /* , LSL #0 */
+    orr v0.4S, #0,   LSL #8
+    orr v0.4S, #0,   LSL #16
+    orr v0.4S, #0,   LSL #24
+    orr v0.4S, #63   /* , LSL #0 */
+    orr v0.4S, #63,  LSL #8
+    orr v0.4S, #63,  LSL #16
+    orr v0.4S, #63,  LSL #24
+    orr v0.4S, #255  /* , LSL #0 */
+    orr v0.4S, #255, LSL #8
+    orr v0.4S, #255, LSL #16
+    orr v0.4S, #255, LSL #24
+
+    orr v0.8B, v1.8B, v31.8B
+    orr v0.16B, v1.16B, v31.16B
 
     pmul v0.8B,  v1.8B,  v2.8B
     pmul v31.8B, v30.8B, v29.8B
