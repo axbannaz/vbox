@@ -2500,7 +2500,7 @@ class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
                     else: # HACK ALERT!
                         uResElem = (uDstIn >> (iElem * cBitsElem)) & fElemMask;
                         (uResElem, fFpSrElem) = self.fnCalc(uResElem, fElemMask, uSrcElem1, uSrcElem2, fFpSrIn);
-                    assert (uResElem & ~fElemMask) == 0;
+                    assert (uResElem & ~fElemMask) == 0, self.sInstr;
                     uRes     |= uResElem << (iElem * cBitsElem);
                     fFpSrOut |= fFpSrElem;
             else:
@@ -2621,6 +2621,19 @@ def calcAdvSimd3Bit(uDstElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr): # HACK
 
 def calcAdvSimd3Bif(uDstElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr): # HACK
     return ((uDstElem ^ ((uDstElem ^ uSrcElem1) & ~uSrcElem2)) & fElemMask, fFpSr);
+
+
+def calcAdvSimd3SMax(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (max(bitsSignedToInt(cBitsElem, uSrcElem1), bitsSignedToInt(cBitsElem, uSrcElem2)) & fElemMask, fFpSr);
+
+def calcAdvSimd3SMin(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (min(bitsSignedToInt(cBitsElem, uSrcElem1), bitsSignedToInt(cBitsElem, uSrcElem2)) & fElemMask, fFpSr);
+
+def calcAdvSimd3UMax(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (max(uSrcElem1 & fElemMask, uSrcElem2 & fElemMask), fFpSr);
+
+def calcAdvSimd3UMin(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (min(uSrcElem1 & fElemMask, uSrcElem2 & fElemMask), fFpSr);
 
 
 
@@ -2775,15 +2788,23 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # C4.1.95.24 Advanced SIMD three same
             aoGenerators += [
-                A64No1CodeGenAdvSimdThreeSame('eor',    calcAdvSimd3Eor,     asOnly = ('8B', '16B',)),
-                A64No1CodeGenAdvSimdThreeSame('bsl',    calcAdvSimd3Bsl,     asOnly = ('8B', '16B',), fWithDstInput = True),
-                A64No1CodeGenAdvSimdThreeSame('bit',    calcAdvSimd3Bit,     asOnly = ('8B', '16B',), fWithDstInput = True),
-                A64No1CodeGenAdvSimdThreeSame('bif',    calcAdvSimd3Bif,     asOnly = ('8B', '16B',), fWithDstInput = True),
+                A64No1CodeGenAdvSimdThreeSame('smax',   calcAdvSimd3SMax,    asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('smaxp',  calcAdvSimd3SMax,    asSkip = ('1D', '2D',), fPairElems = True),
+                A64No1CodeGenAdvSimdThreeSame('smin',   calcAdvSimd3SMin,    asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('sminp',  calcAdvSimd3SMin,    asSkip = ('1D', '2D',), fPairElems = True),
+                A64No1CodeGenAdvSimdThreeSame('umax',   calcAdvSimd3UMax,    asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('umaxp',  calcAdvSimd3UMax,    asSkip = ('1D', '2D',), fPairElems = True),
+                A64No1CodeGenAdvSimdThreeSame('umin',   calcAdvSimd3UMin,    asSkip = ('1D', '2D',)),
+                A64No1CodeGenAdvSimdThreeSame('uminp',  calcAdvSimd3UMin,    asSkip = ('1D', '2D',), fPairElems = True),
 
                 A64No1CodeGenAdvSimdThreeSame('and',    calcAdvSimd3And,     asOnly = ('8B', '16B',)),
                 A64No1CodeGenAdvSimdThreeSame('bic',    calcAdvSimd3Bic,     asOnly = ('8B', '16B',)),
                 A64No1CodeGenAdvSimdThreeSame('orr',    calcAdvSimd3Orr,     asOnly = ('8B', '16B',)),
                 A64No1CodeGenAdvSimdThreeSame('orn',    calcAdvSimd3Orn,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('eor',    calcAdvSimd3Eor,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('bsl',    calcAdvSimd3Bsl,     asOnly = ('8B', '16B',), fWithDstInput = True),
+                A64No1CodeGenAdvSimdThreeSame('bit',    calcAdvSimd3Bit,     asOnly = ('8B', '16B',), fWithDstInput = True),
+                A64No1CodeGenAdvSimdThreeSame('bif',    calcAdvSimd3Bif,     asOnly = ('8B', '16B',), fWithDstInput = True),
 
                 A64No1CodeGenAdvSimdThreeSame('cmeq',   calcAdvSimd3CmEq,    asSkip = ('1D',)),
                 A64No1CodeGenAdvSimdThreeSame('cmgt',   calcAdvSimd3CmGt,    asSkip = ('1D',)),

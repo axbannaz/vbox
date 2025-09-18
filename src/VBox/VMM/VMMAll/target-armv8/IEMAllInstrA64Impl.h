@@ -2707,6 +2707,9 @@
  * Unsigned pairs.
  */
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8B(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8B_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8B_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -2718,52 +2721,47 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResult, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResult); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 2 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 16); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 24); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Fetch the next register half into uSrc. */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     /* Process element 4 - bits 7:0 & 15:8 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 32); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 5 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 40); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 6 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 48); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 7 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xff), 56); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResult, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
     IEM_MC_STORE_FREG_U64(a_RegDst, uResult); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END(); \
 
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_16B(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_16B_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                     IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_16B_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -2775,91 +2773,75 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultLo, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 2 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 16); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 24); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Low register, high half: */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegLow); \
     /* Process element 4 - bits 7:0 & 15:8 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 32); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 5 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 40); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 6 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 48); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 7 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xff), 56); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register, low half: */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     /* Process element 0 - bits 7:0 & 15:8 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultHi, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 2 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 16); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 24); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register, high half: */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegHigh); \
     /* Process element 4 - bits 7:0 & 15:8 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc,  8, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 32); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 5 - bits 23:16 & 31:24 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 16, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 24, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 40); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 6 - bits 39:32 & 47:40 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 40, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 48); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 7 - bits 55:48 & 63:56 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 48, 8); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 56, 8); \
-    a_ElementOperations(8, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xff), 56); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
     IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
     IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
@@ -2867,6 +2849,9 @@
     IEM_MC_END()
 
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4H(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4H_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4H_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -2878,32 +2863,31 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResult, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xffff), 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register: */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     /* Process element 2 - bits 15:0 & 31:16 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xffff), 32); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xffff), 48); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
-    IEM_MC_STORE_FREG_U64(a_RegDst, uResult); \
+    IEM_MC_STORE_FREG_U64(a_RegDst, uResultLo); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8H(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8H_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8H_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -2915,51 +2899,43 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultLo, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xffff), 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Low register, high half: */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegLow); \
     /* Process element 2 - bits 15:0 & 31:16 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xffff), 32); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xffff), 48); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register, low half: */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     /* Process element 4 - bits 15:0 & 31:16 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultHi, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 5 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xffff), 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register, high half: */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegHigh); \
     /* Process element 6 - bits 15:0 & 31:16 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 16, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xffff), 32); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 7 - bits 47:32 & 63:48 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc, 32, 16); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 48, 16); \
-    a_ElementOperations(16, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xffff), 48); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
     IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
     IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
@@ -2967,6 +2943,9 @@
     IEM_MC_END()
 
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_2S(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_2S_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_2S_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -2978,22 +2957,23 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffffffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResult, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* High register: */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     /* Process element 1 - bits 31:0 & 63:32 */ \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResult, uLeftAndResElem, UINT64_C(0xffffffff), 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
-    IEM_MC_STORE_FREG_U64(a_RegDst, uResult); \
+    IEM_MC_STORE_FREG_U64(a_RegDst, uResultLo); \
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 
 #define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4S(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4S_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4S_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
     IEM_MC_BEGIN(0, 0); \
     IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
     IEM_MC_PREPARE_FPU_USAGE(); \
@@ -3004,28 +2984,24 @@
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_LOCAL(uint64_t, uRightElem); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffffffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultLo, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 1 - low register, high half: bits 31:0 & 63:32 */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegLow); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultLo, uLeftAndResElem, UINT64_C(0xffffffff), 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultLo, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 2 - high register, low half: bits 31:0 & 63:32 */ \
     IEM_MC_FETCH_FREG_U64(uSrc, a_RegHigh); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_AND_LOCAL_U64(uLeftAndResElem, UINT64_C(0xffffffff)); \
-    IEM_MC_LOCAL_ASSIGN(uint64_t, uResultHi, uLeftAndResElem); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Process element 3 - high register, high half: bits 31:0 & 63:32 */ \
     IEM_MC_FETCH_FREG_HI_U64(uSrc, a_RegHigh); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uLeftAndResElem, uSrc,  0, 32); \
     IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64(uRightElem,      uSrc, 32, 32); \
-    a_ElementOperations(32, uLeftAndResElem, uRightElem); \
-    IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(uResultHi, uLeftAndResElem, UINT64_C(0xffffffff), 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultHi, a_ElemOps, uLeftAndResElem, uRightElem); \
     /* Store the result and advance PC. */ \
     IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
     IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
@@ -3068,6 +3044,347 @@
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 
+
+/*
+ * Signed pairs.
+ */
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8B(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8B_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                  IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8B_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Fetch the low source register. */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    /* Process element 0 - bits 7:0 & 15:8 */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    IEM_MC_LOCAL(uint64_t, uResult); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 2 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Fetch the next register half into iSrc. */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    /* Process element 4 - bits 7:0 & 15:8 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 5 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 6 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 7 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResult, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(a_RegDst, uResult); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END(); \
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_16B(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_16B_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                     IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_16B_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Low register, low half: */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    /* Process element 0 - bits 7:0 & 15:8 */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 2 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Low register, high half: */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegLow); \
+    /* Process element 4 - bits 7:0 & 15:8 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 5 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 6 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 7 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register, low half: */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    /* Process element 0 - bits 7:0 & 15:8 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(8, UINT64_C(0xff), 0, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff),  8, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 2 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 16, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 24, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register, high half: */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegHigh); \
+    /* Process element 4 - bits 7:0 & 15:8 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc,  8, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 32, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 5 - bits 23:16 & 31:24 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 16, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 24, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 40, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 6 - bits 39:32 & 47:40 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 40, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 48, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 7 - bits 55:48 & 63:56 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 48, 8); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 56, 8); \
+    a_ElemOpExRest(8, UINT64_C(0xff), 56, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
+    IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4H(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4H_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4H_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Low register: */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    /* Process element 0 - bits 15:0 & 31:16 */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register: */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    /* Process element 2 - bits 15:0 & 31:16 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(a_RegDst, uResultLo); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8H(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8H_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8H_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Low register, low half: */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    /* Process element 0 - bits 15:0 & 31:16 */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Low register, high half: */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegLow); \
+    /* Process element 2 - bits 15:0 & 31:16 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register, low half: */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    /* Process element 4 - bits 15:0 & 31:16 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(16, UINT64_C(0xffff), 0, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 5 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 16, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register, high half: */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegHigh); \
+    /* Process element 6 - bits 15:0 & 31:16 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 16, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 32, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 7 - bits 47:32 & 63:48 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc, 32, 16); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 48, 16); \
+    a_ElemOpExRest(16, UINT64_C(0xffff), 48, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
+    IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2S(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2S_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2S_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Low register: */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    /* Process element 0 - bits 31:0 & 63:32 */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* High register: */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    /* Process element 1 - bits 31:0 & 63:32 */ \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(a_RegDst, uResultLo); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4S(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4S_EX(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh, \
+                                                    IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_ADVSIMD_ELEM_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4S_EX(a_ElemOps, a_RegDst, a_RegLow, a_RegHigh, a_ElemOpExFirst, a_ElemOpExRest) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Process element 0 - low register, low half: bits 31:0 & 63:32 */ \
+    IEM_MC_LOCAL(int64_t, iSrc); \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegLow); \
+    IEM_MC_LOCAL(int64_t, iLeftAndResElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    IEM_MC_LOCAL(uint64_t, uResultLo); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 1 - low register, high half: bits 31:0 & 63:32 */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegLow); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultLo, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 2 - high register, low half: bits 31:0 & 63:32 */ \
+    IEM_MC_FETCH_FREG_U64(iSrc, a_RegHigh); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    IEM_MC_LOCAL(uint64_t, uResultHi); \
+    a_ElemOpExFirst(32, UINT64_C(0xffffffff), 0, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Process element 3 - high register, high half: bits 31:0 & 63:32 */ \
+    IEM_MC_FETCH_FREG_HI_U64(iSrc, a_RegHigh); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iLeftAndResElem, iSrc,  0, 32); \
+    IEM_MC_ASSIGN_2LOCS_SUBFIELD_U64_SX_S64(iRightElem,      iSrc, 32, 32); \
+    a_ElemOpExRest(32, UINT64_C(0xffffffff), 32, uResultHi, a_ElemOps, iLeftAndResElem, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_U64(   a_RegDst, uResultLo); \
+    IEM_MC_STORE_FREG_HI_U64(a_RegDst, uResultHi); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_1D(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Process element 0 - low register bits 63:0 & high register bits 63:0 */ \
+    IEM_MC_LOCAL(int64_t, iLeftElemAndResult); \
+    IEM_MC_FETCH_FREG_S64(iLeftElemAndResult, a_RegLow); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_FETCH_FREG_S64(iRightElem, a_RegHigh); \
+    a_ElementOperations(64, iLeftElemAndResult, iRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_S64(a_RegDst, iLeftElemAndResult); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2D(a_ElementOperations, a_RegDst, a_RegLow, a_RegHigh) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Process element 0 - low register: bits 63:0 & 127:64 */ \
+    IEM_MC_LOCAL(int64_t, iLeftElemAndResultLo); \
+    IEM_MC_FETCH_FREG_S64(iLeftElemAndResultLo, a_RegLow); \
+    IEM_MC_LOCAL(int64_t, iRightElem); \
+    IEM_MC_FETCH_FREG_HI_S64(iRightElem, a_RegLow); \
+    a_ElementOperations(64, iLeftElemAndResultLo, uRightElem); \
+    /* Process element 1 - high register: bits 63:0 & 127:64 */ \
+    IEM_MC_LOCAL(uint64_t, iLeftElemAndResultHi); \
+    IEM_MC_FETCH_FREG_S64(iLeftElemAndResultHi, a_RegHigh); \
+    IEM_MC_FETCH_FREG_HI_S64(iRightElem, a_RegHigh); \
+    a_ElementOperations(64, iLeftElemAndResultHi, uRightElem); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_S64(   a_RegDst, iLeftElemAndResultLo); \
+    IEM_MC_STORE_FREG_HI_S64(a_RegDst, iLeftElemAndResultHi); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SHADD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e200400) */
@@ -3236,11 +3553,67 @@
 
 
 /* SMAX  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e206400) */
-//#define IEM_INSTR_IMPL_A64__SMAX_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__SMAX_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iLeftAndResElem, a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iRightElem,      a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_2D(a_cBits, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iRightElem, a_iLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_iLeftAndResElem, a_iRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__SMAX_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* SMIN  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e206c00) */
-//#define IEM_INSTR_IMPL_A64__SMIN_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__SMIN_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iRightElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iLeftAndResElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iRightElem,      a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iLeftAndResElem, a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_2D(a_cBits, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_iLeftAndResElem, a_iRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__SMIN_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* SABD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e207400) */
@@ -3310,11 +3683,66 @@
 
 
 /* SMAXP  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e20a400) */
-//#define IEM_INSTR_IMPL_A64__SMAXP_asimdsame_only(Rd, Rn, Rm, size, Q)
-
+#define IEM_INSTR_IMPL_A64__SMAXP_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iLeftAndResElem, a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iRightElem,      a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_2D(a_cBits, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iRightElem, a_iLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_iLeftAndResElem, a_iRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__SMAXP_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 /* SMINP  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e20ac00) */
-//#define IEM_INSTR_IMPL_A64__SMINP_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__SMINP_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iRightElem, a_iLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_iRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iRightElem, a_iLeftAndResElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iLeftAndResElem, a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_iRightElem,      a_fMask, a_iFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_2D(a_cBits, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_iLeftAndResElem, a_iRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_PAIRS_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__SMINP_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* SQDMULH  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e20b400) */
@@ -3538,11 +3966,67 @@
 
 
 /* UMAX  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e206400) */
-//#define IEM_INSTR_IMPL_A64__UMAX_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__UMAX_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uLeftAndResElem, a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uRightElem,      a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_2D(a_cBits, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uLeftAndResElem, a_uRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__UMAX_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* UMIN  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e206c00) */
-//#define IEM_INSTR_IMPL_A64__UMIN_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__UMIN_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uLeftAndResElem, a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uRightElem,      a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_2D(a_cBits, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uLeftAndResElem, a_uRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__UMIN_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* UABD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e207400) */
@@ -3842,11 +4326,67 @@
 
 
 /* UMAXP  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e20a400) */
-//#define IEM_INSTR_IMPL_A64__UMAXP_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__UMAXP_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                                a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                              a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uLeftAndResElem, a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uRightElem,      a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_2D(a_cBits, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uLeftAndResElem, a_uRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__UMAXP_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* UMINP  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e20ac00) */
-//#define IEM_INSTR_IMPL_A64__UMINP_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__UMINP_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                                a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uLeftAndResElem); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uResult, a_uRightElem); \
+    } IEM_MC_ENDIF(); \
+    IEM_MC_AND_LOCAL_U64(a_uResult, a_fMask)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_uFirstResultBit, a_uResult, \
+                                                              a_ElemOps, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_uRightElem, a_uLeftAndResElem) { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uLeftAndResElem, a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_OR_2LOCS_MASKED_AND_SHIFTED_U64(a_uResult, a_uRightElem,      a_fMask, a_uFirstResultBit); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_2D(a_cBits, a_uLeftAndResElem, a_uRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_uLeftAndResElem, a_uRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_LOCAL_U64(a_uLeftAndResElem, a_uRightElem); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_PAIRS_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__UMINP_asimdsame_only_2D()  IEMOP_RAISE_INVALID_OPCODE_RET()
 
 
 /* SQRDMULH  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e20b400) */
