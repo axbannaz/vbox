@@ -2666,6 +2666,42 @@
     IEM_MC_ADVANCE_PC_AND_FINISH(); \
     IEM_MC_END()
 
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_1D(a_ElementOperations, a_RegDst, a_RegLeft, a_RegRight) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Fetch the sources. */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResult); \
+    IEM_MC_FETCH_FREG_S64(iLeftAndResult, a_RegLeft); \
+    IEM_MC_LOCAL(int64_t, iRight); \
+    IEM_MC_FETCH_FREG_S64(iRight, a_RegRight); \
+    a_ElementOperations(64, iLeftAndResult, iRight); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_S64(a_RegDst, iLeftAndResult); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
+#define IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2D(a_ElementOperations, a_RegDst, a_RegLeft, a_RegRight) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_A64_CHECK_FP_AND_ADV_SIMD_ENABLED(); \
+    IEM_MC_PREPARE_FPU_USAGE(); \
+    /* Fetch the low half of the source registers. */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResultLo); \
+    IEM_MC_FETCH_FREG_S64(iLeftAndResultLo, a_RegLeft); \
+    IEM_MC_LOCAL(int64_t, iRight); \
+    IEM_MC_FETCH_FREG_S64(iRight, a_RegRight); \
+    a_ElementOperations(64, iLeftAndResultLo, iRight); \
+    /* Fetch the high source register halves. */ \
+    IEM_MC_LOCAL(int64_t, iLeftAndResultHi); \
+    IEM_MC_FETCH_FREG_HI_S64(iLeftAndResultHi, a_RegLeft); \
+    IEM_MC_FETCH_FREG_HI_S64(iRight, a_RegRight); \
+    a_ElementOperations(64, iLeftAndResultHi, iRight); \
+    /* Store the result and advance PC. */ \
+    IEM_MC_STORE_FREG_S64(   a_RegDst, iLeftAndResultLo); \
+    IEM_MC_STORE_FREG_HI_S64(a_RegDst, iLeftAndResultHi); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
+
 
 /*
  * Unsigned pairs.
@@ -3066,7 +3102,7 @@
 #define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
 #define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
 #define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
-#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm) /** @todo unclean */
+#define IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2D( IEM_INSTR_IMPL_HLP_A64__SQADD_asimdsame_only_OPS, Rd, Rn, Rm)
 
 
 /* SRHADD  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e201400) */
@@ -3120,15 +3156,67 @@
 #define IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S( IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_OPS, Rd, Rn, Rm)
 #define IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S( IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_OPS, Rd, Rn, Rm)
 #define IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
-#define IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D( IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_OPS, Rd, Rn, Rm) /** @todo unclean */
+#define IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2D( IEM_INSTR_IMPL_HLP_A64__SQSUB_asimdsame_only_OPS, Rd, Rn, Rm)
 
 
 /* CMGT  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e203400) */
-//#define IEM_INSTR_IMPL_A64__CMGT_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__CMGT_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, a_fMask); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, 0); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_LOCAL_U64(a_uResult, (a_fMask) << (a_iFirstResultBit)); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_2D(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST(a_cBits, UINT64_MAX, 0, a_iResultAndLeftElem, \
+                                                           IEM_UNUSED_OPS, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2D(IEM_INSTR_IMPL_HLP_A64__CMGT_asimdsame_only_OPS_2D, Rd, Rn, Rm)
 
 
 /* CMGE  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e203c00) */
-//#define IEM_INSTR_IMPL_A64__CMGE_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__CMGE_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, a_fMask); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, 0); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_LOCAL_U64(a_uResult, (a_fMask) << (a_iFirstResultBit)); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_2D(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST(a_cBits, UINT64_MAX, 0, a_iResultAndLeftElem, \
+                                                           IEM_UNUSED_OPS, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_SIGNED_2D(IEM_INSTR_IMPL_HLP_A64__CMGE_asimdsame_only_OPS_2D, Rd, Rn, Rm)
 
 
 /* SSHL  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e204400) */
@@ -3181,7 +3269,36 @@
 
 
 /* CMTST  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e208c00) */
-//#define IEM_INSTR_IMPL_A64__CMTST_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__CMTST_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_AND_2LOCS_U64(a_iLeftAndResElem, a_iRightElem); \
+    IEM_MC_IF_LOCAL_IS_NZ(a_iLeftAndResElem) { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, a_fMask); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, 0); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_AND_2LOCS_U64(a_iLeftAndResElem, a_iRightElem); \
+    IEM_MC_IF_LOCAL_IS_NZ(a_iLeftAndResElem) { \
+        IEM_MC_OR_LOCAL_U64(a_uResult, (a_fMask) << (a_iFirstResultBit)); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_2D(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST(a_cBits, UINT64_MAX, 0, a_iResultAndLeftElem, \
+                                                           IEM_UNUSED_OPS, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D(IEM_INSTR_IMPL_HLP_A64__CMTST_asimdsame_only_OPS_2D, Rd, Rn, Rm)
+
 
 
 /* MLA  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/0e209400) */
@@ -3318,11 +3435,64 @@
 
 
 /* CMHI  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e203400) */
-//#define IEM_INSTR_IMPL_A64__CMHI_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__CMHI_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, a_fMask); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, 0); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GT_U64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_LOCAL_U64(a_uResult, (a_fMask) << (a_iFirstResultBit)); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_2D(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST(a_cBits, UINT64_MAX, 0, a_iResultAndLeftElem, \
+                                                           IEM_UNUSED_OPS, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D(IEM_INSTR_IMPL_HLP_A64__CMHI_asimdsame_only_OPS_2D, Rd, Rn, Rm)
 
 
 /* CMHS  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e203c00) */
-//#define IEM_INSTR_IMPL_A64__CMHS_asimdsame_only(Rd, Rn, Rm, size, Q)
+#define IEM_INSTR_IMPL_A64__CMHS_asimdsame_only(Rd, Rn, Rm, size, Q) \
+    IEM_INSTR_IMPL_HLP_SIZE_Q(size, Q, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                               a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_S64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, a_fMask); \
+    } IEM_MC_ELSE() { \
+        IEM_MC_LOCAL_ASSIGN_CONST_U64(a_uResult, 0); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N(a_cBits, a_fMask, a_iFirstResultBit, a_uResult, \
+                                                             a_ElemOps, a_iLeftAndResElem, a_iRightElem) \
+    IEM_MC_IF_2LOCS_GE_U64(a_iLeftAndResElem, a_iRightElem) { \
+        IEM_MC_OR_LOCAL_U64(a_uResult, (a_fMask) << (a_iFirstResultBit)); \
+    } IEM_MC_ENDIF()
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_2D(a_cBits, a_iResultAndLeftElem, a_iRightElem) \
+    IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST(a_cBits, UINT64_MAX, 0, a_iResultAndLeftElem, \
+                                                           IEM_UNUSED_OPS, a_iResultAndLeftElem, a_iRightElem)
+
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_8B()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8B_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_16B() IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_16B_EX(IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_4H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_8H()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_8H_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_2S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_4S()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_4S_EX( IEM_UNUSED_OPS, Rd, Rn, Rm, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_1ST, IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_EX_N)
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_1D()  IEMOP_RAISE_INVALID_OPCODE_RET()
+#define IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_2D()  IEM_INSTR_IMPL_HLP_ADVSIMD_UNSIGNED_2D(IEM_INSTR_IMPL_HLP_A64__CMHS_asimdsame_only_OPS_2D, Rd, Rn, Rm)
+
 
 
 /* USHL  <Vd>.<T>, <Vn>.<T>, <Vm>.<T> (bf20fc00/2e204400) */

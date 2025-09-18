@@ -2556,6 +2556,36 @@ def calcAdvSimd3SqSub(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
         fFpSr |= 1 << 27;
     return (iSum & fElemMask, fFpSr);
 
+def calcAdvSimd3CmEq(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if (uSrcElem1 & fElemMask) == (uSrcElem2 & fElemMask):
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
+def calcAdvSimd3CmGt(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if bitsSignedToInt(cBitsElem, uSrcElem1) > bitsSignedToInt(cBitsElem, uSrcElem2):
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
+def calcAdvSimd3CmGe(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if bitsSignedToInt(cBitsElem, uSrcElem1) >= bitsSignedToInt(cBitsElem, uSrcElem2):
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
+def calcAdvSimd3CmHi(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if (uSrcElem1 & fElemMask) > (uSrcElem2 & fElemMask):
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
+def calcAdvSimd3CmHs(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if (uSrcElem1 & fElemMask) >= (uSrcElem2 & fElemMask):
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
+def calcAdvSimd3CmTst(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    if (uSrcElem1 & uSrcElem2 & fElemMask) != 0:
+        return (fElemMask, fFpSr);
+    return (0, fFpSr);
+
 
 #
 # Result calculation functions.
@@ -2708,6 +2738,13 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # C4.1.95.24 Advanced SIMD three same
             aoGenerators += [
+                A64No1CodeGenAdvSimdThreeSame('cmeq',   calcAdvSimd3CmEq,    asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('cmgt',   calcAdvSimd3CmGt,    asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('cmge',   calcAdvSimd3CmGe,    asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('cmhi',   calcAdvSimd3CmHi,    asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('cmhs',   calcAdvSimd3CmHs,    asSkip = ('1D',)),
+                A64No1CodeGenAdvSimdThreeSame('cmtst',  calcAdvSimd3CmTst,   asSkip = ('1D',)),
+
                 A64No1CodeGenAdvSimdThreeSame('add',    calcAdvSimd3Add,     asSkip = ('1D',)),
                 A64No1CodeGenAdvSimdThreeSame('addp',   calcAdvSimd3Add,     asSkip = ('1D',), fPairElems = True),
                 A64No1CodeGenAdvSimdThreeSame('shadd',  calcAdvSimd3ShAdd,   asSkip = ('1D', '2D',)),

@@ -210,12 +210,14 @@
 #define IEM_MC_FETCH_FREG_U16(a_u16Dst, a_iFpReg)       (a_u16Dst) = iemFRegFetchU16(pVCpu, (a_iFpReg))
 #define IEM_MC_FETCH_FREG_U32(a_u32Dst, a_iFpReg)       (a_u32Dst) = iemFRegFetchU32(pVCpu, (a_iFpReg))
 #define IEM_MC_FETCH_FREG_U64(a_u64Dst, a_iFpReg)       (a_u64Dst) = iemFRegFetchU64(pVCpu, (a_iFpReg))
+#define IEM_MC_FETCH_FREG_S64(a_i64Dst, a_iFpReg)       (a_i64Dst) = (int64_t)iemFRegFetchU64(pVCpu, (a_iFpReg))
 #define IEM_MC_FETCH_FREG_U128(a_u128Dst, a_iFpReg)     iemFRegFetchU128(pVCpu, (a_iFpReg), &(a_u128Dst))
 
 #define IEM_MC_STORE_FREG_U8( a_iFpReg, a_u8Value)      iemFRegStoreU16(pVCpu, (a_iFpReg), (a_u8Value))
 #define IEM_MC_STORE_FREG_U16(a_iFpReg, a_u16Value)     iemFRegStoreU16(pVCpu, (a_iFpReg), (a_u16Value))
 #define IEM_MC_STORE_FREG_U32(a_iFpReg, a_u32Value)     iemFRegStoreU32(pVCpu, (a_iFpReg), (a_u32Value))
 #define IEM_MC_STORE_FREG_U64(a_iFpReg, a_u64Value)     iemFRegStoreU64(pVCpu, (a_iFpReg), (a_u64Value))
+#define IEM_MC_STORE_FREG_S64(a_iFpReg, a_i64Value)     iemFRegStoreU64(pVCpu, (a_iFpReg), (a_i64Value)) /* not sign extending! */
 #define IEM_MC_STORE_FREG_U128(a_iFpReg, a_u128Value)   iemFRegStoreU128(pVCpu, (a_iFpReg), &(a_u128Value))
 
 
@@ -1633,9 +1635,13 @@
         || !(IEM_MC_IF_FLAGS_EXPR & (a_fBit2))) {
 
 #define IEM_MC_IF_LOCAL_IS_Z(a_Local)                   if ((a_Local) == 0) {
+#define IEM_MC_IF_LOCAL_IS_NZ(a_Local)                  if ((a_Local) != 0) {
 #define IEM_MC_IF_2LOCS_MASK_EQ_U64(a_Local1, a_Local2, a_f64Mask) \
                                                         if (((a_Local1) & (a_f64Mask)) == ((a_Local2) & (a_f64Mask))) {
-#define IEM_MC_IF_2LOCS_GT_U64(a_Local1, a_Local2)      if ((a_Local1) >= (a_Local2)) { /* unsigned compare */
+#define IEM_MC_IF_2LOCS_GT_U64(a_uLocal1, a_uLocal2)    if ((a_uLocal1) >  (a_uLocal2)) { /* unsigned compare */
+#define IEM_MC_IF_2LOCS_GT_S64(a_iLocal1, a_iLocal2)    if ((a_iLocal1) >  (a_iLocal2)) { /* signed compare */
+#define IEM_MC_IF_2LOCS_GE_U64(a_uLocal1, a_uLocal2)    if ((a_uLocal1) >= (a_uLocal2)) { /* unsigned compare */
+#define IEM_MC_IF_2LOCS_GE_S64(a_iLocal1, a_iLocal2)    if ((a_iLocal1) >= (a_iLocal2)) { /* signed compare */
 #define IEM_MC_IF_GREG_BIT_SET(a_iGReg, a_iBitNo)       if (iemGRegFetchU64(pVCpu, (a_iGReg)) & RT_BIT_64(a_iBitNo)) {
 
 #define IEM_MC_ELSE()                                   } else {
