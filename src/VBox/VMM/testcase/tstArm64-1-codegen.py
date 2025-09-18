@@ -2556,6 +2556,7 @@ def calcAdvSimd3SqSub(cBitsElem, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
         fFpSr |= 1 << 27;
     return (iSum & fElemMask, fFpSr);
 
+
 def calcAdvSimd3CmEq(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
     if (uSrcElem1 & fElemMask) == (uSrcElem2 & fElemMask):
         return (fElemMask, fFpSr);
@@ -2585,6 +2586,19 @@ def calcAdvSimd3CmTst(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
     if (uSrcElem1 & uSrcElem2 & fElemMask) != 0:
         return (fElemMask, fFpSr);
     return (0, fFpSr);
+
+
+def calcAdvSimd3And(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (uSrcElem1 & uSrcElem2 & fElemMask, fFpSr);
+
+def calcAdvSimd3Bic(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return (uSrcElem1 & ~uSrcElem2 & fElemMask, fFpSr);
+
+def calcAdvSimd3Orr(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return ((uSrcElem1 | uSrcElem2) & fElemMask, fFpSr);
+
+def calcAdvSimd3Orn(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
+    return ((uSrcElem1 | ~uSrcElem2) & fElemMask, fFpSr);
 
 
 #
@@ -2738,6 +2752,11 @@ class Arm64No1CodeGen(object):
         if True: # pylint: disable=using-constant-test
             # C4.1.95.24 Advanced SIMD three same
             aoGenerators += [
+                A64No1CodeGenAdvSimdThreeSame('and',    calcAdvSimd3And,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('bic',    calcAdvSimd3Bic,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('orr',    calcAdvSimd3Orr,     asOnly = ('8B', '16B',)),
+                A64No1CodeGenAdvSimdThreeSame('orn',    calcAdvSimd3Orn,     asOnly = ('8B', '16B',)),
+
                 A64No1CodeGenAdvSimdThreeSame('cmeq',   calcAdvSimd3CmEq,    asSkip = ('1D',)),
                 A64No1CodeGenAdvSimdThreeSame('cmgt',   calcAdvSimd3CmGt,    asSkip = ('1D',)),
                 A64No1CodeGenAdvSimdThreeSame('cmge',   calcAdvSimd3CmGe,    asSkip = ('1D',)),
