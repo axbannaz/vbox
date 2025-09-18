@@ -183,8 +183,9 @@ static int rtFsWinMountpointsEnumWorker(bool fRemote, PFNRTFSMOUNTPOINTENUM pfnC
                 if (   dwErr != ERROR_NO_MORE_FILES
                     && dwErr != ERROR_PATH_NOT_FOUND
                     && dwErr != ERROR_UNRECOGNIZED_VOLUME
-                    && dwErr != ERROR_ACCESS_DENIED) /* Can happen for regular users, so just skip this stuff then. */
-                    rc = RTErrConvertFromWin32(GetLastError());
+                    && dwErr != ERROR_ACCESS_DENIED /* Can happen for regular users, so just skip this stuff then. */
+                    && dwErr != ERROR_NOT_READY)    /* Happens for optical drives without a medium (presumably also floppy disks but try to find a drive these days...). */
+                    rc = RTErrConvertFromWin32(dwErr);
             }
 
             if (RT_SUCCESS(rc))
