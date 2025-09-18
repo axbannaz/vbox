@@ -3795,6 +3795,9 @@ static struct
     uint64_t u64TsNsCmdStart;
     uint32_t cmdId;
 
+    uint32_t cBuffers;
+    uint32_t cCommands;
+
     uint32_t au32SvgaCmdInvocations[SVGA_3D_CMD_MAX];
     uint64_t au64SvgaCmdTotalTime[SVGA_3D_CMD_MAX];
     uint32_t au32VBSvgaCmdInvocations[VBSVGA_3D_CMD_MAX - VBSVGA_3D_CMD_BASE];
@@ -3851,8 +3854,8 @@ static void vmsvgaStatsLogRel(void)
             (g_vmsvgaCmdStats.au64VBSvgaCmdTotalTime[i] * 100) / u64NsTotal));
     }
 
-    LogRel(("VMSVGA: total commands: %RU64 ns\n", u64NsTotal));
-    LogRel(("VMSVGA: total buffers:  %RU64 ns\n", g_vmsvgaCmdStats.u64NsBuffers));
+    LogRel(("VMSVGA: total commands: %RU64 ns (%u commands)\n", u64NsTotal, g_vmsvgaCmdStats.cCommands));
+    LogRel(("VMSVGA: total buffers:  %RU64 ns (%u buffers)\n", g_vmsvgaCmdStats.u64NsBuffers, g_vmsvgaCmdStats.cBuffers));
     LogRel(("VMSVGA: total outside:  %RU64 ns\n", g_vmsvgaCmdStats.u64NsOutside));
     LogRel(("VMSVGA: command stats end\n"));
 }
@@ -3861,6 +3864,7 @@ static void vmsvgaStatsCmdBegin(uint32_t cmdId)
 {
     g_vmsvgaCmdStats.cmdId = cmdId;
     g_vmsvgaCmdStats.u64TsNsCmdStart = RTTimeNanoTS();
+    g_vmsvgaCmdStats.cCommands += 1;
 }
 
 static void vmsvgaStatsCmdEnd(uint32_t cmdId)
@@ -3905,6 +3909,7 @@ static void vmsvgaStatsBufferBegin(void)
     }
 
     g_vmsvgaCmdStats.u64TsNsBufferStart = u64NsNow;
+    g_vmsvgaCmdStats.cBuffers += 1;
 }
 
 static void vmsvgaStatsBufferEnd(void)
