@@ -1856,10 +1856,10 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 #                   the guest additions facility (101 == AdditionsFacilityStatus_Terminated) but starting the service
                 #                   fails with:
                 # tdAddBasic1: 18:11:44.002520  tst-xppro, 1 cpu, NestedPaging, none, Guest Control, Preparations, Stopping VBoxService: TESTING
-                # tdAddBasic1: 18:11:44.033670 stdout: 
+                # tdAddBasic1: 18:11:44.033670 stdout:
                 # tdAddBasic1: 18:11:44.033670 stdout: SERVICE_NAME: VBoxService
-                # tdAddBasic1: 18:11:44.033670 stdout:         TYPE               : 10  WIN32_OWN_PROCESS 
-                # tdAddBasic1: 18:11:44.033670 stdout:         STATE              : 3  STOP_PENDING 
+                # tdAddBasic1: 18:11:44.033670 stdout:         TYPE               : 10  WIN32_OWN_PROCESS
+                # tdAddBasic1: 18:11:44.033670 stdout:         STATE              : 3  STOP_PENDING
                 # tdAddBasic1: 18:11:44.033670 stdout:                                 (STOPPABLE,NOT_PAUSABLE,ACCEPTS_SHUTDOWN)
                 # tdAddBasic1: 18:11:44.033670 stdout:         WIN32_EXIT_CODE    : 0   (0x0)
                 # tdAddBasic1: 18:11:44.033670 stdout:         SERVICE_EXIT_CODE  : 0   (0x0)
