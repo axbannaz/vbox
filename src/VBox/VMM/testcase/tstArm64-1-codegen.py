@@ -2455,6 +2455,134 @@ g_kdCfgToElemInfo = {
 };
 
 
+class A64No1CodeGenAdvSimdAccross(A64No1CodeGenFprBase):
+    """
+    C4.1.95.22 Advanced SIMD across lanes
+    """
+    def __init__(self, sInstr, fnCalc, uFactor = 1, asSkip = None, asOnly = None, fWithFlags = False):
+        A64No1CodeGenFprBase.__init__(self, sInstr + '_advsimd_across', sInstr, 16);
+        self.fnCalc     = fnCalc;
+        self.uFactor    = uFactor;
+        self.asCfgs     = list(g_kdCfgToElemInfo.keys()) if not asOnly else list(asOnly);
+        if asSkip:
+            for sCfg in asSkip:
+                self.asCfgs.remove(sCfg);
+        self.fWithFlags = fWithFlags;
+
+    kddFactorAndCfgToRegPfx = {
+        1: {
+            '8B':  'b',
+            '16B': 'b',
+            '4H':  'h',
+            '8H':  'h',
+            '2S':  's',
+            '4S':  's',
+            '1D':  'd',
+            '2D':  'd',
+        },
+        2: {
+            '8B':  'h',
+            '16B': 'h',
+            '4H':  's',
+            '8H':  's',
+            '2S':  'd',
+            '4S':  'd',
+            #'1D':  '',
+            #'2D':  '',
+        },
+    };
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        iCfg = 0;
+        for _ in range(oOptions.cTestsPerInstruction):
+            # Retrieve the vector configuration for this iteration and advance it.
+            sCfg = self.asCfgs[iCfg];
+            iCfg = (iCfg + 1) % len(self.asCfgs);
+            (_, cBitsElem, cElems, fElemMask) = g_kdCfgToElemInfo[sCfg];
+
+            # Get source values and calculate the result.
+            (uSrc, iRegSrc) = self.allocFprAndLoadRandUBits();
+
+            # Calc result.
+            fFpSrIn = 0; ## @todo IEM doesn't handle random values right (RES0 bits are implicitly masked out).
+            (uRes, fFpSrOut) = self.fnCalc(cBitsElem, fElemMask, None, uSrc & fElemMask, fFpSrIn);
+            for iElem in range(1, cElems):
+                uSrcElem = (uSrc >> (iElem * cBitsElem)) & fElemMask;
+                (uRes, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uRes, uSrcElem, fFpSrIn);
+                fFpSrOut |= fFpSrElem;
+            (uRes, fFpSrElem) = self.fnCalc(cBitsElem, fElemMask, uRes, None, fFpSrIn);
+
+            # Load FPSR.
+            if self.fWithFlags:
+                self.emitFpSrLoad(fFpSrIn);
+
+            # Emit the test instruction and result checks.
+            iRegDst = self.oFprAllocator.alloc(uRes);
+            self.emitInstr(self.sInstr, '%s%u, v%u.%s'
+                           % (self.kddFactorAndCfgToRegPfx[self.uFactor][sCfg], iRegDst, iRegSrc, sCfg,));
+
+            if self.fWithFlags:
+                self.emitFpSrCheck(fFpSrOut);
+            self.emitFprValCheck(iRegDst, uRes);
+
+            self.oFprAllocator.freeList((iRegDst, iRegSrc));
+
+def calcAdvSimdAcrossAddV(_, fElemMask, uResult, uSrcElem, fFpSr):
+    if uResult is None:
+        uResult = uSrcElem;
+    elif uSrcElem is not None:
+        uResult += uSrcElem;
+    uResult &= fElemMask;
+    return (uResult, fFpSr);
+
+def calcAdvSimdAcrossUAddLV(cBitsElem, fElemMask, uResult, uSrcElem, fFpSr):
+    if uResult is None:
+        uResult = uSrcElem;
+    elif uSrcElem is not None:
+        uResult += uSrcElem;
+    uResult &= fElemMask | (fElemMask << cBitsElem);
+    return (uResult, fFpSr);
+
+def calcAdvSimdAcrossUMaxV(_, fElemMask, uResult, uSrcElem, fFpSr):
+    _  = fElemMask;
+    if uResult is None:
+        uResult = uSrcElem;
+    elif uSrcElem is not None and uSrcElem > uResult:
+        return (uSrcElem, fFpSr);
+    return (uResult, fFpSr);
+
+def calcAdvSimdAcrossUMinV(_, fElemMask, uResult, uSrcElem, fFpSr):
+    _  = fElemMask;
+    if uResult is None:
+        uResult = uSrcElem;
+    elif uSrcElem is not None and uSrcElem < uResult:
+        return (uSrcElem, fFpSr);
+    return (uResult, fFpSr);
+
+def calcAdvSimdAcrossSAddLV(cBitsElem, fElemMask, iResult, uSrcElem, fFpSr):
+    if iResult is None:
+        iResult  = bitsSignedToInt(cBitsElem, uSrcElem);
+    elif uSrcElem is not None:
+        iResult += bitsSignedToInt(cBitsElem, uSrcElem);
+    else:
+        iResult &= fElemMask | (fElemMask << cBitsElem);
+    return (iResult, fFpSr);
+
+def calcAdvSimdAcrossSMaxV(cBitsElem, _, uResult, uSrcElem, fFpSr):
+    if uResult is None:
+        uResult  = uSrcElem
+    elif uSrcElem is not None and bitsSignedToInt(cBitsElem, uSrcElem) > bitsSignedToInt(cBitsElem, uResult):
+        uResult = uSrcElem;
+    return (uResult, fFpSr);
+
+def calcAdvSimdAcrossSMinV(cBitsElem, _, uResult, uSrcElem, fFpSr):
+    if uResult is None:
+        uResult  = uSrcElem
+    elif uSrcElem is not None and bitsSignedToInt(cBitsElem, uSrcElem) < bitsSignedToInt(cBitsElem, uResult):
+        uResult = uSrcElem;
+    return (uResult, fFpSr);
+
+
 class A64No1CodeGenAdvSimdThreeSame(A64No1CodeGenFprBase):
     """
     C4.1.95.24 Advanced SIMD three same
@@ -2636,7 +2764,6 @@ def calcAdvSimd3UMin(_, fElemMask, uSrcElem1, uSrcElem2, fFpSr):
     return (min(uSrcElem1 & fElemMask, uSrcElem2 & fElemMask), fFpSr);
 
 
-
 #
 # Result calculation functions.
 #
@@ -2784,6 +2911,18 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         #
         aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # C4.1.95.22 Advanced SIMD across lanes
+            aoGenerators += [
+                A64No1CodeGenAdvSimdAccross(  'saddlv', calcAdvSimdAcrossSAddLV, asSkip = ('2S', '1D', '2D',), uFactor = 2),
+                A64No1CodeGenAdvSimdAccross(  'smaxv',  calcAdvSimdAcrossSMaxV,  asSkip = ('2S', '1D', '2D',)),
+                A64No1CodeGenAdvSimdAccross(  'sminv',  calcAdvSimdAcrossSMinV,  asSkip = ('2S', '1D', '2D',)),
+                A64No1CodeGenAdvSimdAccross(  'addv',   calcAdvSimdAcrossAddV,   asSkip = ('2S', '1D', '2D',)),
+                A64No1CodeGenAdvSimdAccross(  'uaddlv', calcAdvSimdAcrossUAddLV, asSkip = ('2S', '1D', '2D',), uFactor = 2),
+                A64No1CodeGenAdvSimdAccross(  'umaxv',  calcAdvSimdAcrossUMaxV,  asSkip = ('2S', '1D', '2D',)),
+                A64No1CodeGenAdvSimdAccross(  'uminv',  calcAdvSimdAcrossUMinV,  asSkip = ('2S', '1D', '2D',)),
+            ];
 
         if True: # pylint: disable=using-constant-test
             # C4.1.95.24 Advanced SIMD three same
