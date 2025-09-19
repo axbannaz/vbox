@@ -726,7 +726,7 @@ private:
       * Window key press for start menu opening. This works orthogonal to left clicks.*/
     void               modifierKeyPressRelease(UISoftKeyboardKey *pKey, bool fRelease);
     bool               loadPhysicalLayout(const QString &strLayoutFileName, KeyboardRegion keyboardRegion = KeyboardRegion_Main);
-    bool               loadKeyboardLayout(const QString &strLayoutName);
+    QUuid              loadKeyboardLayout(const QString &strLayoutName);
     void               prepareObjects();
     void               prepareColorThemes();
     UISoftKeyboardPhysicalLayout *findPhysicalLayout(const QUuid &uuid);
@@ -3142,21 +3142,21 @@ bool UISoftKeyboardWidget::loadPhysicalLayout(const QString &strLayoutFileName, 
     return true;
 }
 
-bool UISoftKeyboardWidget::loadKeyboardLayout(const QString &strLayoutFileName)
+QUuid UISoftKeyboardWidget::loadKeyboardLayout(const QString &strLayoutFileName)
 {
     if (strLayoutFileName.isEmpty())
-        return false;
+        return QUuid();
 
     UIKeyboardLayoutReader keyboardLayoutReader;
 
     UISoftKeyboardLayout newLayout;
     if (!keyboardLayoutReader.parseFile(strLayoutFileName, newLayout))
-        return false;
+        return QUuid();
 
     UISoftKeyboardPhysicalLayout *pPhysicalLayout = findPhysicalLayout(newLayout.physicalLayoutUuid());
     /* If no pyhsical layout with the UUID the keyboard layout refers is found then cancel loading the keyboard layout: */
     if (!pPhysicalLayout)
-        return false;
+        return QUuid();
 
     /* Make sure we have unique lay1out UUIDs: */
     int iCount = 0;
@@ -3166,11 +3166,11 @@ bool UISoftKeyboardWidget::loadKeyboardLayout(const QString &strLayoutFileName)
             ++iCount;
     }
     if (iCount > 1)
-        return false;
+        return QUuid();
 
     newLayout.setSourceFilePath(strLayoutFileName);
     addLayout(newLayout);
-    return true;
+    return newLayout.uid();
 }
 
 UISoftKeyboardPhysicalLayout *UISoftKeyboardWidget::findPhysicalLayout(const QUuid &uuid)
@@ -3215,8 +3215,9 @@ void UISoftKeyboardWidget::loadLayouts()
 
     /* Add keyboard layouts from resources: */
     QStringList keyboardLayoutNames;
-    keyboardLayoutNames << ":/us_international.xml"
-                        << ":/german.xml"
+    /* Remember us international layout uid: */
+    QUuid uUSInternationalId = loadKeyboardLayout(":/us_international.xml");
+    keyboardLayoutNames << ":/german.xml"
                         << ":/us.xml"
                         << ":/greek.xml"
                         << ":/japanese.xml"
@@ -3243,7 +3244,10 @@ void UISoftKeyboardWidget::loadLayouts()
         iterator.value().setEditedBuNotSaved(false);
     /* Block sigCurrentLayoutChange since it causes saving set layout to exra data: */
     blockSignals(true);
-    setCurrentLayout(m_layouts.firstKey());
+    if (!uUSInternationalId.isNull())
+        setCurrentLayout(uUSInternationalId);
+    else
+        setCurrentLayout(m_layouts.firstKey());
     blockSignals(false);
     updateLockKeyStates();
 }
