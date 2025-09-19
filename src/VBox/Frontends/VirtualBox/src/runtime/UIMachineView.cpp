@@ -1176,6 +1176,9 @@ void UIMachineView::sltMousePointerShapeChange()
 {
     /* Fetch the shape and the mask: */
     QPixmap pixmapShape = uimachine()->cursorShapePixmap();
+    /* We can't do anything if shape is null itself: */
+    if (pixmapShape.isNull())
+        return;
     QPixmap pixmapMask = uimachine()->cursorMaskPixmap();
     const QPoint hotspot = uimachine()->cursorHotspot();
     int iXHot = hotspot.x();
