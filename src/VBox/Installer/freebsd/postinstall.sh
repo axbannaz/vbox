@@ -27,7 +27,6 @@
 #
 
 PATH_TMP="/tmp"
-PATH_TMP_MODS="$PATH_TMP/vbox_mods"
 PATH_INST="/usr/local/lib/virtualbox"
 PATH_KERN_SRC="/usr/src/sys"
 FILE_VBOXDRV="$PATH_INST/vboxdrv.tar.gz"
@@ -41,7 +40,18 @@ fi
 echo "Compiling kernel modules, please wait..."
 
 # Create temporary directory
-mkdir -p $PATH_TMP_MODS
+num=0
+while true; do
+  PATH_TMP_MODS="$PATH_TMP/vbox_mods.$num"
+  if mkdir -m 0755 "$PATH_TMP_MODS" 2> /dev/null; then
+    break
+  fi
+  num=`expr $num + 1`
+  if  [ $num -gt 200 ]; then
+    echo "Could not find a valid tmp directory"
+    exit 1
+  fi
+done
 
 # Unpack archive
 tar -C $PATH_TMP_MODS -xf  $FILE_VBOXDRV
