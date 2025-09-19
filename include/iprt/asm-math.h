@@ -200,6 +200,53 @@ DECLINLINE(uint64_t) ASMMult2xU64Ret2xU64(uint64_t u64F1, uint64_t u64F2, uint64
 }
 
 
+DECLINLINE(int64_t) ASMMult2xS64Ret2xS64(int64_t i64F1, int64_t i64F2, int64_t *pi64ProdHi)
+{
+#if defined(RT_ARCH_AMD64) && (RT_INLINE_ASM_GNU_STYLE || RT_INLINE_ASM_USES_INTRIN)
+# if RT_INLINE_ASM_GNU_STYLE
+    int64_t i64Low, i64High;
+    __asm__ __volatile__("imulq %%rdx"
+                         : "=a" (i64Low), "=d" (i64High)
+                         : "0" (i64F1), "1" (i64F2));
+    *pi64ProdHi = i64High;
+    return i64Low;
+# elif RT_INLINE_ASM_USES_INTRIN
+    return _mul128(i64F1, i64F2, pi64ProdHi);
+# else
+#  error "hmm"
+# endif
+#else  /* generic: */
+    /*
+     * Signed multiplication is done by performing unsigned multiplication of
+     * the absolute factors and applying the right sign to the product.
+     */
+    uint64_t uProdHi;
+    uint64_t uProdLo;
+    if (i64F1 >= 0)
+    {
+        /* If both positive, do unsigned multiplication. */
+        if (i64F2 >= 0)
+            return (int64_t)ASMMult2xU64Ret2xU64((uint64_t)i64F1, (uint64_t)i64F2, (uint64_t *)pi64ProdHi);
+        i64F2 = -i64F2;
+    }
+    /* If both negative, negate the factors and do unsigned multiplication. */
+    else if (i64F2 < 0)
+        return (int64_t)ASMMult2xU64Ret2xU64((uint64_t)-i64F1, (uint64_t)-i64F2, (uint64_t *)pi64ProdHi);
+    else
+        i64F1 = -i64F1;
+    uProdLo = ASMMult2xU64Ret2xU64((uint64_t)i64F1, (uint64_t)i64F2, &uProdHi);
+
+    /* Negate the result */
+    if (uProdLo != 0)
+    {
+        *pi64ProdHi = (int64_t)(UINT64_MAX - uProdHi);
+        return (int64_t)(UINT64_C(0) - uProdLo);
+    }
+    *pi64ProdHi = (int64_t)(UINT64_C(0) - uProdHi);
+    return 0;
+#endif
+}
+
 
 /**
  * Divides a 64-bit unsigned by a 32-bit unsigned returning an unsigned 32-bit result.
