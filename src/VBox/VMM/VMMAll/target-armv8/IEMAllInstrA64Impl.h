@@ -30,6 +30,7 @@
 
 
 #include "IEMInlineMem-armv8.h"
+#include <iprt/asm-math.h>
 
 
 /*
@@ -8524,31 +8525,151 @@
  */
 
 /* MADD  <Wd>, <Wn>, <Wm>, <Wa> (ffe08000/1b000000) */
-//#define IEM_INSTR_IMPL_A64__MADD_32A_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__MADD_32A_dp_3src(Rd, Rn, Ra, Rm) \
+    if (Ra == 31) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint32_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+        IEM_MC_LOCAL(uint32_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U32(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint32_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+        IEM_MC_LOCAL(uint32_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U32(uTmp, uTmp2); \
+        IEM_MC_FETCH_GREG_U32(uTmp2, Ra); \
+        IEM_MC_ADD_2LOCS_U32(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* MSUB  <Wd>, <Wn>, <Wm>, <Wa> (ffe08000/1b008000) */
-//#define IEM_INSTR_IMPL_A64__MSUB_32A_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__MSUB_32A_dp_3src(Rd, Rn, Ra, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint32_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Rn); \
+    IEM_MC_LOCAL(uint32_t, uTmp2); \
+    IEM_MC_FETCH_GREG_U32(uTmp2, Rm); \
+    IEM_MC_MUL_2LOCS_U32(uTmp2, uTmp); \
+    IEM_MC_FETCH_GREG_U32(uTmp, Ra); \
+    IEM_MC_SUB_2LOCS_U32(uTmp, uTmp2); \
+    IEM_MC_STORE_GREG_U32(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* MADD  <Xd>, <Xn>, <Xm>, <Xa> (ffe08000/9b000000) */
-//#define IEM_INSTR_IMPL_A64__MADD_64A_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__MADD_64A_dp_3src(Rd, Rn, Ra, Rm) \
+    if (Ra == 31) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_FETCH_GREG_U64(uTmp2, Ra); \
+        IEM_MC_ADD_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* MSUB  <Xd>, <Xn>, <Xm>, <Xa> (ffe08000/9b008000) */
-//#define IEM_INSTR_IMPL_A64__MSUB_64A_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__MSUB_64A_dp_3src(Rd, Rn, Ra, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uTmp2); \
+    IEM_MC_FETCH_GREG_U64(uTmp2, Rm); \
+    IEM_MC_MUL_2LOCS_U64(uTmp2, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Ra); \
+    IEM_MC_SUB_2LOCS_U64(uTmp, uTmp2); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SMADDL  <Xd>, <Wn>, <Wm>, <Xa> (ffe08000/9b200000) */
-//#define IEM_INSTR_IMPL_A64__SMADDL_64WA_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__SMADDL_64WA_dp_3src(Rd, Rn, Ra, Rm) \
+    if (Ra == 31) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32_SX_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32_SX_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32_SX_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32_SX_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_FETCH_GREG_U64(uTmp2, Ra); \
+        IEM_MC_ADD_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* SMSUBL  <Xd>, <Wn>, <Wm>, <Xa> (ffe08000/9b208000) */
-//#define IEM_INSTR_IMPL_A64__SMSUBL_64WA_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__SMSUBL_64WA_dp_3src(Rd, Rn, Ra, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32_SX_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uTmp2); \
+    IEM_MC_FETCH_GREG_U32_SX_U64(uTmp2, Rm); \
+    IEM_MC_MUL_2LOCS_U64(uTmp2, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Ra); \
+    IEM_MC_SUB_2LOCS_U64(uTmp, uTmp2); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* SMULH  <Xd>, <Xn>, <Xm> (ffe0fc00/9b407c00) */
-//#define IEM_INSTR_IMPL_A64__SMULH_64_dp_3src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__SMULH_64_dp_3src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(int64_t, iTmp); \
+    IEM_MC_FETCH_GREG_S64(iTmp, Rn); \
+    IEM_MC_LOCAL(int64_t, iTmp2); \
+    IEM_MC_FETCH_GREG_S64(iTmp2, Rm); \
+    IEM_MC_MULH_2LOCS_S64(iTmp, iTmp2); \
+    IEM_MC_STORE_GREG_U64(Rd, iTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* MADDPT  <Xd>, <Xn>, <Xm>, <Xa> (ffe08000/9b600000) */
@@ -8560,15 +8681,61 @@
 
 
 /* UMADDL  <Xd>, <Wn>, <Wm>, <Xa> (ffe08000/9ba00000) */
-//#define IEM_INSTR_IMPL_A64__UMADDL_64WA_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__UMADDL_64WA_dp_3src(Rd, Rn, Ra, Rm) \
+    if (Ra == 31) \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } \
+    else \
+    { \
+        IEM_MC_BEGIN(0, 0); \
+        IEM_MC_LOCAL(uint64_t, uTmp); \
+        IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp, Rn); \
+        IEM_MC_LOCAL(uint64_t, uTmp2); \
+        IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp2, Rm); \
+        IEM_MC_MUL_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_FETCH_GREG_U64(uTmp2, Ra); \
+        IEM_MC_ADD_2LOCS_U64(uTmp, uTmp2); \
+        IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+        IEM_MC_ADVANCE_PC_AND_FINISH(); \
+        IEM_MC_END(); \
+    } ((void)0)
 
 
 /* UMSUBL  <Xd>, <Wn>, <Wm>, <Xa> (ffe08000/9ba08000) */
-//#define IEM_INSTR_IMPL_A64__UMSUBL_64WA_dp_3src(Rd, Rn, Ra, Rm)
+#define IEM_INSTR_IMPL_A64__UMSUBL_64WA_dp_3src(Rd, Rn, Ra, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uTmp2); \
+    IEM_MC_FETCH_GREG_U32_ZX_U64(uTmp2, Rm); \
+    IEM_MC_MUL_2LOCS_U64(uTmp2, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Ra); \
+    IEM_MC_SUB_2LOCS_U64(uTmp, uTmp2); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* UMULH  <Xd>, <Xn>, <Xm> (ffe0fc00/9bc07c00) */
-//#define IEM_INSTR_IMPL_A64__UMULH_64_dp_3src(Rd, Rn, Rm)
+#define IEM_INSTR_IMPL_A64__UMULH_64_dp_3src(Rd, Rn, Rm) \
+    IEM_MC_BEGIN(0, 0); \
+    IEM_MC_LOCAL(uint64_t, uTmp); \
+    IEM_MC_FETCH_GREG_U64(uTmp, Rn); \
+    IEM_MC_LOCAL(uint64_t, uTmp2); \
+    IEM_MC_FETCH_GREG_U64(uTmp2, Rm); \
+    IEM_MC_MULH_2LOCS_U64(uTmp, uTmp2); \
+    IEM_MC_STORE_GREG_U64(Rd, uTmp); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 

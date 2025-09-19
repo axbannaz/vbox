@@ -138,6 +138,7 @@
 #define IEM_MC_FETCH_GREG_U32_SX_U64(a_u64Dst, a_iGReg) (a_u64Dst) = (int32_t)iemGRegFetchU32(pVCpu, (a_iGReg))
 #define IEM_MC_FETCH_GREG_U64(a_u64Dst, a_iGReg)        (a_u64Dst) = iemGRegFetchU64(pVCpu, (a_iGReg))
 #define IEM_MC_FETCH_GREG_U64_ZX_U64                    IEM_MC_FETCH_GREG_U64
+#define IEM_MC_FETCH_GREG_S64(a_i64Dst, a_iGReg)        (a_i64Dst) = (int64_t)iemGRegFetchU64(pVCpu, (a_iGReg))
 #define IEM_MC_FETCH_GREG_PAIR_U32(a_u64Dst, a_iGRegLo, a_iGRegHi) do { \
         (a_u64Dst).s.Lo = iemGRegFetchU32(pVCpu, (a_iGRegLo)); \
         (a_u64Dst).s.Hi = iemGRegFetchU32(pVCpu, (a_iGRegHi)); \
@@ -157,7 +158,8 @@
 #define IEM_MC_STORE_GREG_U32(a_iGReg, a_u32Value)      iemGRegStoreU32(pVCpu, (a_iGReg), (uint32_t)(a_u32Value)) /* clear high bits. */
 #define IEM_MC_STORE_GREG_I32(a_iGReg, a_i32Value)      *iemGRegRefU64(pVCpu, (a_iGReg)) = (uint32_t)(a_i32Value) /* clear high bits. */
 #define IEM_MC_STORE_GREG_U64(a_iGReg, a_u64Value)      iemGRegStoreU64(pVCpu, (a_iGReg), (a_u64Value))
-#define IEM_MC_STORE_GREG_I64(a_iGReg, a_i64Value)      *iemGRegRefI64(pVCpu, (a_iGReg)) = (a_i64Value)
+#define IEM_MC_STORE_GREG_S64(a_iGReg, a_i64Value)      iemGRegStoreU64(pVCpu, (a_iGReg), (uint64_t)(a_i64Value))
+#define IEM_MC_STORE_GREG_I64                           IEM_MC_STORE_GREG_I64
 #define IEM_MC_STORE_GREG_U32_CONST                     IEM_MC_STORE_GREG_U32
 #define IEM_MC_STORE_GREG_U64_CONST                     IEM_MC_STORE_GREG_U64
 #define IEM_MC_STORE_GREG_PAIR_U32(a_iGRegLo, a_iGRegHi, a_u64Value) do { \
@@ -309,6 +311,11 @@
 
 #define IEM_MC_ROR_2LOCS_U32(a_u32Local, a_cShift)      do { (a_u32Local) = ASMRotateRightU32((a_u32Local), (a_cShift));  } while (0)
 #define IEM_MC_ROR_2LOCS_U64(a_u64Local, a_cShift)      do { (a_u64Local) = ASMRotateRightU64((a_u64Local), (a_cShift));  } while (0)
+
+#define IEM_MC_MUL_2LOCS_U32(a_u32Local, a_u32Factor2)  do { (a_u32Local) *= (a_u32Factor2); } while (0)
+#define IEM_MC_MUL_2LOCS_U64(a_u64Local, a_u64Factor2)  do { (a_u64Local) *= (a_u64Factor2); } while (0)
+#define IEM_MC_MULH_2LOCS_S64(a_i64Local, a_i64Factor2) do { (void)ASMMult2xS64Ret2xS64(a_i64Local, a_i64Factor2, &(a_i64Local) /*high*/); } while (0)
+#define IEM_MC_MULH_2LOCS_U64(a_u64Local, a_u64Factor2) do { (void)ASMMult2xU64Ret2xU64(a_u64Local, a_u64Factor2, &(a_u64Local) /*high*/); } while (0)
 
 
 #define IEM_MC_AND_GREG_U32(a_iGReg, a_u32Value) \

@@ -1386,6 +1386,72 @@ def calcAbs(cBits, uSrc):
     return uSrc & bitsOnes(cBits);
 
 
+class A64No1CodeGenData3Op(A64No1CodeGenBase):
+    """ C4.1.94.13 Data-processing (3 sources) """
+    def __init__(self, sInstr, fnCalc, acBits = (32, 64), fSrc1And2Are32Bit = False, fSrc3IsZero = False):
+        A64No1CodeGenBase.__init__(self, sInstr, sInstr, Arm64GprAllocator());
+        self.fnCalc = fnCalc;
+        self.acBits = acBits;
+        self.fSrc1And2Are32Bit = fSrc1And2Are32Bit;
+        self.fSrc3IsZero       = fSrc3IsZero; # zero and omitted
+
+    def generateBody(self, oOptions, cLeftToAllCheck):
+        for cBits in self.acBits:
+            cBitsIn1 = cBits if not self.fSrc1And2Are32Bit else 32;
+            cBitsIn2 = cBitsIn1;
+            for _ in range(oOptions.cTestsPerInstruction):
+                (uSrc1, iRegIn1) = self.allocGprAndLoadRandUBits();
+                (uSrc2, iRegIn2) = self.allocGprAndLoadRandUBits();
+                (uSrc3, iRegIn3) = self.allocGprAndLoadRandUBits() if not self.fSrc3IsZero else (0, -1);
+                uRes             = self.fnCalc(cBits, uSrc1, uSrc2, uSrc3);
+                iRegDst          = self.oGprAllocator.alloc(uRes);
+                if not self.fSrc3IsZero:
+                    self.emitInstr(self.sInstr,
+                                   '%s, %s, %s, %s'
+                                   % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBitsIn1][iRegIn1],
+                                      g_ddGprNamesZrByBits[cBitsIn2][iRegIn2], g_ddGprNamesZrByBits[cBits][iRegIn3]));
+                else:
+                    self.emitInstr(self.sInstr,
+                                   '%s, %s, %s'
+                                   % (g_ddGprNamesZrByBits[cBits][iRegDst], g_ddGprNamesZrByBits[cBitsIn1][iRegIn1],
+                                      g_ddGprNamesZrByBits[cBitsIn2][iRegIn2]));
+                self.emitGprValCheck(iRegDst, uRes);
+
+                self.oGprAllocator.freeList((iRegDst, iRegIn1, iRegIn2, iRegIn3,));
+                cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+def calcMAdd(cBits, uSrc1, uSrc2, uSrc3):
+    return ((uSrc1 * uSrc2) + uSrc3) & bitsOnes(cBits);
+
+def calcMSub(cBits, uSrc1, uSrc2, uSrc3):
+    return (uSrc3 - (uSrc1 * uSrc2)) & bitsOnes(cBits);
+
+def calcSMAddL(cBits, uSrc1, uSrc2, uSrc3):
+    #return ((bitsSignedToInt(32, uSrc1) * bitsSignedToInt(32, uSrc2)) + bitsSignedToInt(cBits, uSrc3)) & bitsOnes(cBits);
+    return (  ((bitsSignExtend(32, uSrc1, cBits) * bitsSignExtend(32, uSrc2, cBits)) + bitsSignedToInt(cBits, uSrc3))
+            & bitsOnes(cBits));
+
+def calcSMSubL(cBits, uSrc1, uSrc2, uSrc3):
+    #return (bitsSignedToInt(cBits, uSrc3) - (bitsSignedToInt(32, uSrc1) * bitsSignedToInt(32, uSrc2))) & bitsOnes(cBits);
+    return (  (bitsSignedToInt(cBits, uSrc3) - (bitsSignExtend(32, uSrc1, cBits) * bitsSignExtend(32, uSrc2, cBits)))
+            & bitsOnes(cBits));
+
+def calcSMulH(cBits, uSrc1, uSrc2, uSrc3):
+    return (  (   (  (bitsSignExtend(cBits, uSrc1, cBits * 2) * bitsSignExtend(cBits, uSrc2, cBits * 2))
+                   + bitsSignedToInt(cBits, uSrc3))
+               >> cBits)
+            & bitsOnes(cBits));
+
+def calcUMAddL(cBits, uSrc1, uSrc2, uSrc3):
+    return (((uSrc1 & bitsOnes(32)) * (uSrc2 & bitsOnes(32))) + uSrc3) & bitsOnes(cBits);
+
+def calcUMSubL(cBits, uSrc1, uSrc2, uSrc3):
+    return (uSrc3 - ((uSrc1 & bitsOnes(32)) * (uSrc2 & bitsOnes(32)))) & bitsOnes(cBits);
+
+def calcUMulH(cBits, uSrc1, uSrc2, uSrc3):
+    return (((uSrc1 * uSrc2) + uSrc3) >> cBits) & bitsOnes(cBits);
+
+
 #
 # Branches.
 #
@@ -2911,6 +2977,19 @@ class Arm64No1CodeGen(object):
         # Instantiate the generators.
         #
         aoGenerators = [];
+
+        if True: # pylint: disable=using-constant-test
+            # C4.1.94.13 Data-processing - 3 sources
+            aoGenerators += [
+                A64No1CodeGenData3Op(         'madd',   calcMAdd),
+                A64No1CodeGenData3Op(         'msub',   calcMSub),
+                A64No1CodeGenData3Op(         'smaddl', calcSMAddL, fSrc1And2Are32Bit = True, acBits = (64,)),
+                A64No1CodeGenData3Op(         'smsubl', calcSMSubL, fSrc1And2Are32Bit = True, acBits = (64,)),
+                A64No1CodeGenData3Op(         'smulh',  calcSMulH,  fSrc3IsZero       = True, acBits = (64,)),
+                A64No1CodeGenData3Op(         'umaddl', calcUMAddL, fSrc1And2Are32Bit = True, acBits = (64,)),
+                A64No1CodeGenData3Op(         'umsubl', calcUMSubL, fSrc1And2Are32Bit = True, acBits = (64,)),
+                A64No1CodeGenData3Op(         'umulh',  calcUMulH,  fSrc3IsZero       = True, acBits = (64,)),
+            ];
 
         if True: # pylint: disable=using-constant-test
             # C4.1.95.22 Advanced SIMD across lanes
