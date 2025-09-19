@@ -39,6 +39,35 @@ echo *** Environment BEGIN >> %MY_LOG_FILE%
 set >> %MY_LOG_FILE%
 echo *** Environment END >> %MY_LOG_FILE%
 
+rem
+rem Parse arguments.
+rem
+set MY_VBOX_XP_OR_OLDER=0
+
+:argument_loop
+if ".%1" == "."             goto no_more_arguments
+
+if ".%1" == ".--xp-or-older" goto opt_x
+if ".%1" == ".--vista-or-newer" goto opt_v
+echo syntax error: Unknown option: %1
+goto end_failed
+
+:argument_loop_next_with_value
+shift
+shift
+goto argument_loop
+
+:opt_x
+set MY_VBOX_XP_OR_OLDER=1
+shift
+goto argument_loop
+
+:opt_v
+set MY_VBOX_XP_OR_OLDER=0
+shift
+goto argument_loop
+
+:no_more_arguments
 @@VBOX_COND_HAS_PROXY@@
 set PROXY=@@VBOX_INSERT_PROXY@@
 set HTTP_PROXY=%PROXY%
@@ -134,10 +163,16 @@ echo *** Running: netsh firewall add portopening TCP 5042 "TestExecService 5042"
 netsh firewall add portopening TCP 5042 "TestExecService 5042" >> %MY_LOG_FILE% 2>&1
 echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
 
-rem Update the registry to autorun the service and make sure we've got autologon.
-echo *** Running: reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v NTConfiguration /d %SystemDrive%\Apps\vboxtxs.cmd /f >> %MY_LOG_FILE%
-reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v NTConfiguration /d %SystemDrive%\Apps\vboxtxs.cmd /f >> %MY_LOG_FILE% 2>&1
-echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
+if "%MY_VBOX_XP_OR_OLDER%"=="1" (
+    rem Update the registry to autorun the service and make sure we've got autologon.
+    echo *** Running: reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v NTConfiguration /d %SystemDrive%\Apps\vboxtxs.cmd /f >> %MY_LOG_FILE%
+    reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Run /v NTConfiguration /d %SystemDrive%\Apps\vboxtxs.cmd /f >> %MY_LOG_FILE% 2>&1
+    echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
+) else (
+    echo *** Running: schtasks /create /sc ONLOGON /tn TestExecService /tr %SystemDrive%\Apps\vboxtxs.cmd /rl HIGHEST >> %MY_LOG_FILE%
+    schtasks /create /sc ONLOGON /tn TestExecService /tr %SystemDrive%\Apps\vboxtxs.cmd /rl HIGHEST
+    echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
+)
 
 echo *** Running: reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v PowerdownAfterShutdown /d 1 /f >> %MY_LOG_FILE%
 reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v PowerdownAfterShutdown /d 1 /f >> %MY_LOG_FILE% 2>&1
@@ -147,11 +182,6 @@ echo *** Running: reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion
 reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v ForceAutoLogon /d 1 /f >> %MY_LOG_FILE% 2>&1
 echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
 rem  AutoAdminLogon too if administrator?
-
-rem Disable UAC
-echo *** Running: reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >> %MY_LOG_FILE%
-reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >> %MY_LOG_FILE% 2>&1
-echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
 
 @@VBOX_COND_END@@
 
@@ -171,5 +201,20 @@ rem
 if exist a:\autounattend.xml ren a:\autounattend.xml autounattend-disabled.xml
 rem rem @todo eject DVD install media
 
+if "%MY_VBOX_XP_OR_OLDER%"=="0" (
+    rem Start the created TestExecutionService now as it would only be automatically started on the next reboot
+    echo *** Running: schtasks /run /tn TestExecService >> %MY_LOG_FILE%
+    schtasks /run /tn TestExecService
+    echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
+)
+
 echo *** done >> %MY_LOG_FILE%
+goto end
+
+:end_failed
+echo *** Failed! >> %MY_LOG_FILE%
+echo * Failed!
+exit /b 1
+
+:end
 
