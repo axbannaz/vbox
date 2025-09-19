@@ -1437,10 +1437,6 @@ void UIMachineLogic::cleanupHandlers()
 
 void UIMachineLogic::cleanupSessionConnections()
 {
-    /* We should stop watching for VBoxSVC availability changes: */
-    disconnect(gpGlobalSession, &UIGlobalSession::sigVBoxSVCAvailabilityChange,
-               this, &UIMachineLogic::sltHandleVBoxSVCAvailabilityChange);
-
     /* We should stop watching for machine UI initialization signal: */
     disconnect(uimachine(), &UIMachine::sigInitialized, this, &UIMachineLogic::sltHandleMachineInitialized);
 
