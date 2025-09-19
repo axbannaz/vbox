@@ -967,6 +967,8 @@ HRESULT Unattended::i_innerDetectIsoOSWindows(RTVFS hVfsIso, DETECTBUFFER *pBuf)
                                     {
                                         LogRel2(("Unattended: happy with mDetectedImages[%u]\n", i));
                                         mEnmOsType = mDetectedImages[i].mOSType;
+                                        RTMemTmpFree(pachXmlBuf);
+                                        RTVfsFileRelease(hVfsFile);
                                         return S_OK;
                                     }
                                 }
