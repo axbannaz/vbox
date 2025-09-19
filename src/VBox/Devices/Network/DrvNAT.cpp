@@ -220,10 +220,10 @@ static void drvNATNotifyNATThread(PDRVNAT pThis, const char *pszWho);
 static int  drvNATTimersAdjustTimeoutDown(PDRVNAT pThis, int cMsTimeout);
 static void drvNATTimersRunExpired(PDRVNAT pThis);
 static DECLCALLBACK(int) drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void *opaque);
-static DECLCALLBACK(int64_t) drvNAT_ClockGetNsCb(void *opaque);
+static int64_t drvNAT_ClockGetNsCb(void *opaque);
 static DECLCALLBACK(int) drvNAT_GetREventsCb(int idx, void *opaque);
-static DECLCALLBACK(int) drvNATNotifyApplyPortForwardCommand(PDRVNAT pThis, bool fRemove, bool fUdp, const char *pszHostIp,
-                                                             uint16_t u16HostPort, const char *pszGuestIp, uint16_t u16GuestPort);
+static int drvNATNotifyApplyPortForwardCommand(PDRVNAT pThis, bool fRemove, bool fUdp, const char *pszHostIp,
+                                               uint16_t u16HostPort, const char *pszGuestIp, uint16_t u16GuestPort);
 
 
 
@@ -1437,7 +1437,7 @@ static void drvNAT_UnregisterPoll(slirp_os_socket socket, void *opaque)
  *
  * @thread  NAT
  */
-static int drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void *opaque)
+static DECLCALLBACK(int) drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void *opaque)
 {
     PDRVNAT pThis = (PDRVNAT)opaque;
 
@@ -1473,7 +1473,7 @@ static int drvNAT_AddPollCb(slirp_os_socket hFd, int iEvents, void *opaque)
  *
  * @thread  NAT
  */
-static int drvNAT_GetREventsCb(int idx, void *opaque)
+static DECLCALLBACK(int) drvNAT_GetREventsCb(int idx, void *opaque)
 {
     PDRVNAT pThis = (PDRVNAT)opaque;
     struct pollfd* aPolls = pThis->aPolls;
