@@ -1624,8 +1624,11 @@ DECLCALLBACK(void) VBoxNetSlirpNAT::natServicePfRegister(VBoxNetSlirpNAT *pThis,
                 pNatPf->fPfrIPv6 ? "IPv6" : "IPv4",
                 pNatPf->szPfrName));
 
-    /* Free the rule in any case. */
-    RTMemFree(pNatPf);
+    if (fRuntime)
+    {
+        /* Free the rule in any case. */
+        RTMemFree(pNatPf);
+    }
 }
 
 
