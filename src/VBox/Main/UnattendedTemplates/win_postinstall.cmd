@@ -148,6 +148,11 @@ reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v Forc
 echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
 rem  AutoAdminLogon too if administrator?
 
+rem Disable UAC
+echo *** Running: reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >> %MY_LOG_FILE%
+reg.exe ADD "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v EnableLUA /t REG_DWORD /d 0 /f >> %MY_LOG_FILE% 2>&1
+echo *** ERRORLEVEL: %ERRORLEVEL% >> %MY_LOG_FILE%
+
 @@VBOX_COND_END@@
 
 
