@@ -4885,6 +4885,10 @@ static DECLCALLBACK(int) rtFsIsoVol_Close(void *pvThis)
         pThis->pRootDir = NULL;
     }
 
+    if (pThis->Udf.VolInfo.paPartitions)
+        RTMemFree(pThis->Udf.VolInfo.paPartitions);
+    pThis->Udf.VolInfo.paPartitions = NULL;
+
     RTVfsFileRelease(pThis->hVfsBacking);
     pThis->hVfsBacking = NIL_RTVFSFILE;
 
