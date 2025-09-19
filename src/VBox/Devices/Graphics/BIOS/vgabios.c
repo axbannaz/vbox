@@ -355,14 +355,9 @@ void __cdecl int10_debugmsg(uint16_t DI, uint16_t SI, uint16_t BP, uint16_t SP, 
 
 static void vga_get_cursor_pos(uint8_t page, uint16_t STACK_BASED *scans, uint16_t STACK_BASED *loc)
 {
-    if (page > 7) {
-        *scans = 0;
-        *loc   = 0;
-    } else {
-        // FIXME should handle VGA 14/16 lines
-        *scans = read_word(BIOSMEM_SEG,BIOSMEM_CURSOR_TYPE);
-        *loc   = read_word(BIOSMEM_SEG,BIOSMEM_CURSOR_POS + page * 2);
-    }
+    // Return data from BDA regardless of current mode
+    *scans = read_word(BIOSMEM_SEG,BIOSMEM_CURSOR_TYPE);
+    *loc   = read_word(BIOSMEM_SEG,BIOSMEM_CURSOR_POS + page * 2);
 }
 
 /* Look for a glyph bitmap in a given font. */
@@ -744,7 +739,7 @@ static void biosfn_set_cursor_shape(uint8_t CH, uint8_t CL)
       cga_emu = !(read_byte(BIOSMEM_SEG, BIOSMEM_VIDEO_CTL) & 1);
 
       /* If CGA cursor emulation is on and this is a text mode, adjust.
-       * But if cursor star or end is bigger than 31, don't adjust.
+       * But if cursor start or end is bigger than 31, don't adjust.
        */
       /// @todo Figure out if this is a text mode
       if (cga_emu /* && text mode*/ && (CH < 32) && (CL < 32)) {
@@ -1125,6 +1120,7 @@ void biosfn_set_video_mode(uint8_t mode)
  write_word(BIOSMEM_SEG,BIOSMEM_CRTC_ADDRESS,crtc_addr);
  write_byte(BIOSMEM_SEG,BIOSMEM_NB_ROWS,vpt->theightm1);
  write_word(BIOSMEM_SEG,BIOSMEM_CHAR_HEIGHT,vpt->cheight);
+ write_word(BIOSMEM_SEG,BIOSMEM_CURSOR_TYPE,(vpt->crtc_regs[0xA] << 8) | vpt->crtc_regs[0xB]);
  write_byte(BIOSMEM_SEG,BIOSMEM_VIDEO_CTL,(0x60|noclearmem));
  write_byte(BIOSMEM_SEG,BIOSMEM_SWITCHES,0xF9);
 
@@ -1136,12 +1132,6 @@ void biosfn_set_video_mode(uint8_t mode)
      write_byte(BIOSMEM_SEG, BIOSMEM_CURRENT_MSR, cga_msr[mode]);           /* Like CGA reg. 0x3D8 */
      write_byte(BIOSMEM_SEG, BIOSMEM_CURRENT_PAL, mode == 6 ? 0x3F : 0x30); /* Like CGA reg. 0x3D9*/
  }
-
- // Set cursor shape
- if(vga_modes[line].class==TEXT)
-  {
-   biosfn_set_cursor_shape(0x06,0x07);
-  }
 
  /// @todo Could be optimized to a memset since only BDA needs updating.
  // Set cursor pos for page 0..7
@@ -1943,7 +1933,7 @@ static void release_font_access(void)
 
 static void set_scan_lines(uint8_t lines)
 {
- uint16_t crtc_addr,cols,vde;
+ uint16_t crtc_addr,cols,vde,cur_shape;
  uint8_t crtc_r9,ovl,rows;
 
  crtc_addr = read_word(BIOSMEM_SEG,BIOSMEM_CRTC_ADDRESS);
@@ -1951,14 +1941,18 @@ static void set_scan_lines(uint8_t lines)
  crtc_r9 = inb(crtc_addr+1);
  crtc_r9 = (crtc_r9 & 0xe0) | (lines - 1);
  outb(crtc_addr+1, crtc_r9);
- if(lines==8)
-  {
-   biosfn_set_cursor_shape(0x06,0x07);
-  }
- else
-  {
-   biosfn_set_cursor_shape(lines-4,lines-3);
-  }
+
+ /* set cursor shape; programs CRTC directly, never using emulation,
+  * since we know exactly what the cell height is.
+  */
+ cur_shape = ((lines - 2) << 8) | (lines - 1);
+ if(lines >= 14)
+     cur_shape -= 0x101;    // shift cursor up for tall cell
+
+ outw(crtc_addr, (cur_shape & 0xFF00) | 0xA);
+ outw(crtc_addr, (cur_shape << 8)     | 0xB);
+ write_word(BIOSMEM_SEG, BIOSMEM_CURSOR_TYPE, cur_shape);
+
  write_word(BIOSMEM_SEG,BIOSMEM_CHAR_HEIGHT, lines);
  outb(crtc_addr, 0x12);
  vde = inb(crtc_addr+1);
