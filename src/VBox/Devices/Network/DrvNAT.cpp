@@ -1666,8 +1666,8 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
     uint32_t uTmpMtu = 0;
     rc = pDrvIns->pHlpR3->pfnCFGMQueryU32Def(pCfg, "SlirpMTU", &uTmpMtu, 1500);
     AssertLogRelRCReturn(rc, rc);
-    if (uTmpMtu >= IPV4_MIN_MTU && uTmpMtu <= IPV4_MAX_MTU)
-        return PDMDrvHlpVMSetError(pDrvIns, rc, RT_SRC_POS,
+    if (uTmpMtu < IPV4_MIN_MTU || uTmpMtu > IPV4_MAX_MTU)
+        return PDMDrvHlpVMSetError(pDrvIns, VERR_INVALID_PARAMETER, RT_SRC_POS,
                                     N_("NAT#%d: Configuration error: MTU is not a valid length. "
                                         "Ensure that the MTU is at above the IPv4 minimum of 68 bytes "
                                         "and at or below the maximum of 65521.\n"), pDrvIns->iInstance);
@@ -1677,8 +1677,8 @@ static DECLCALLBACK(int) drvNATConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
     uint32_t uTmpMru = 0;
     rc = pDrvIns->pHlpR3->pfnCFGMQueryU32Def(pCfg, "SlirpMTU", &uTmpMru, 1500);
     AssertLogRelRCReturn(rc, rc);
-    if (uTmpMru >= IPV4_MIN_MTU && uTmpMru <= IPV4_MAX_MTU)
-        return PDMDrvHlpVMSetError(pDrvIns, rc, RT_SRC_POS,
+    if (uTmpMru < IPV4_MIN_MTU || uTmpMru > IPV4_MAX_MTU)
+        return PDMDrvHlpVMSetError(pDrvIns, VERR_INVALID_PARAMETER, RT_SRC_POS,
                                     N_("NAT#%d: Configuration error: MRU is not a valid length. "
                                         "Ensure that the MRU is at above the IPv4 minimum of 68 bytes "
                                         "and at or below the maximum of 65521.\n"), pDrvIns->iInstance);
