@@ -159,7 +159,7 @@
 #define IEM_MC_STORE_GREG_I32(a_iGReg, a_i32Value)      *iemGRegRefU64(pVCpu, (a_iGReg)) = (uint32_t)(a_i32Value) /* clear high bits. */
 #define IEM_MC_STORE_GREG_U64(a_iGReg, a_u64Value)      iemGRegStoreU64(pVCpu, (a_iGReg), (a_u64Value))
 #define IEM_MC_STORE_GREG_S64(a_iGReg, a_i64Value)      iemGRegStoreU64(pVCpu, (a_iGReg), (uint64_t)(a_i64Value))
-#define IEM_MC_STORE_GREG_I64                           IEM_MC_STORE_GREG_I64
+#define IEM_MC_STORE_GREG_I64                           IEM_MC_STORE_GREG_S64
 #define IEM_MC_STORE_GREG_U32_CONST                     IEM_MC_STORE_GREG_U32
 #define IEM_MC_STORE_GREG_U64_CONST                     IEM_MC_STORE_GREG_U64
 #define IEM_MC_STORE_GREG_PAIR_U32(a_iGRegLo, a_iGRegHi, a_u64Value) do { \
