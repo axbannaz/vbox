@@ -2245,7 +2245,7 @@ static void vmsvga3dCmdBindGBScreenTarget(PVGASTATECC pThisCC, SVGA3dCmdBindGBSc
                 rc = pSvgaR3State->pFuncsGBO->pfnScreenTargetBind(pThisCC, pScreen, pCmd->image.sid);
                 AssertRC(rc);
 #ifdef DX_NEW_HWSCREEN
-                if (RT_SUCCESS(rc))
+                if (RT_SUCCESS(rc) && pCmd->image.sid != SVGA_ID_INVALID)
                 {
                     SVGA3dRect rect;
                     rect.x = 0;
