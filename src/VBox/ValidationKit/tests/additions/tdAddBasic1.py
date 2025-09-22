@@ -574,7 +574,7 @@ class tdAddBasic1(vbox.TestDriver):                                         # py
             else:
                 reporter.log('Skipping guest reboot after Guest Additions installation as requested');
                 #
-                # For test VMs which feature a graphical desktop _and_ use the VBoxVGA graphics controller emulation 
+                # For test VMs which feature a graphical desktop _and_ use the VBoxVGA graphics controller emulation
                 # calling "/sbin/rcvboxadd status kernel" will report that the vboxvideo kernel module wasn't reloaded
                 # because Xorg will make use of any shipped vboxvideo driver (like tst-ubuntu-18_04_3-64 for instance)
                 # and prevent unloading the currently loaded vboxvideo driver.
