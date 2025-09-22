@@ -2258,50 +2258,45 @@ DECLINLINE(uint64_t) nemR3WinGetGReg(PVMCPU pVCpu, uint8_t uReg)
 NEM_TMPL_STATIC VBOXSTRICTRC
 nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit)
 {
-    uint64_t const uHostTsc = ASMReadTSC();
     Assert(pExit->MemoryAccess.Header.InterceptAccessType != 3);
 
     /*
      * Emulate the memory access, either access handler or special memory.
      */
-    WHV_INTERCEPT_MESSAGE_HEADER const *pHdr = &pExit->MemoryAccess.Header;
     PCEMEXITREC pExitRec = EMHistoryAddExit(pVCpu,
                                               pExit->MemoryAccess.Header.InterceptAccessType == WHvMemoryAccessWrite
                                             ? EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_WRITE)
                                             : EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_READ),
-                                            pHdr->Pc, uHostTsc);
-    nemR3WinCopyStateFromArmHeader(pVCpu, &pExit->MemoryAccess.Header);
+                                            pExit->MemoryAccess.Header.Pc, ASMReadTSC());
     RT_NOREF_PV(pExitRec);
-    int rc = nemHCWinCopyStateFromHyperV(pVM, pVCpu, IEM_CPUMCTX_EXTRN_MUST_MASK);
-    AssertRCReturn(rc, rc);
-
+    nemR3WinCopyStateFromArmHeader(pVCpu, &pExit->MemoryAccess.Header);
 #ifdef LOG_ENABLED
     uint8_t const cbInstr = pExit->MemoryAccess.InstructionByteCount;
-    RTGCPTR const GCPtrVa = pExit->MemoryAccess.Gva;
 #endif
     RTGCPHYS const GCPhys = pExit->MemoryAccess.Gpa;
     uint64_t const uIss   = pExit->MemoryAccess.Syndrome;
-    bool fIsv        = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_ISV);
-    bool fL2Fault    = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_S1PTW);
-    bool fWrite      = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_WNR);
-    bool f64BitReg   = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SF);
-    bool fSignExtend = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SSE);
-    uint8_t uReg     = ARMV8_EC_ISS_DATA_ABRT_SRT_GET(uIss);
-    uint8_t uAcc     = ARMV8_EC_ISS_DATA_ABRT_SAS_GET(uIss);
-    size_t cbAcc     = nemR3WinGetByteCountFromSas(uAcc);
-    LogFlowFunc(("fIsv=%RTbool fL2Fault=%RTbool fWrite=%RTbool f64BitReg=%RTbool fSignExtend=%RTbool uReg=%u uAcc=%u GCPtrDataAbrt=%RGv GCPhys=%RGp cbInstr=%u\n",
-                 fIsv, fL2Fault, fWrite, f64BitReg, fSignExtend, uReg, uAcc, GCPtrVa, GCPhys, cbInstr));
-
-    RT_NOREF(fL2Fault);
 
     VBOXSTRICTRC rcStrict;
-    if (fIsv)
+    /** @todo r=bird: Must check DFSC and/or LST to handle/reject(LST!=0) ST64BV,
+     *        LD64B, ST64B and ST64BV0.  Probably need to check that CM=0 as well
+     *        (so we don't confuse this with DC ZVA/VGA/GZVA, if that's at all
+     *        possible). */
+    if (uIss & ARMV8_EC_ISS_DATA_ABRT_ISV)
     {
-        EMHistoryAddExit(pVCpu,
-                         fWrite
-                         ? EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_WRITE)
-                         : EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_READ),
-                         pVCpu->cpum.GstCtx.Pc.u64, ASMReadTSC());
+        bool const fL2Fault    = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_S1PTW);
+        bool const fWrite      = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_WNR);
+        bool const f64BitReg   = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SF);
+        bool const fSignExtend = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SSE);
+        uint8_t const uReg     = ARMV8_EC_ISS_DATA_ABRT_SRT_GET(uIss);
+        uint8_t const uAcc     = ARMV8_EC_ISS_DATA_ABRT_SAS_GET(uIss);
+        size_t  const cbAcc    = nemR3WinGetByteCountFromSas(uAcc);
+        RT_NOREF(fL2Fault);
+        LogFlowFunc(("GCPtrDataAbrt=%RGv GCPhys=%RGp PC=%RGv cbInstr=%u uIss=%RX64 fIsv=true fL2Fault=%RTbool fWrite=%RTbool f64BitReg=%RTbool fSignExtend=%RTbool uReg=%u uAcc=%u\n",
+                     pExit->MemoryAccess.Gva, GCPhys, pExit->MemoryAccess.Header.Pc, cbInstr, uIss, fL2Fault, fWrite,
+                     f64BitReg, fSignExtend, uReg, uAcc));
+
+        int rc = nemHCWinCopyStateFromHyperV(pVM, pVCpu, CPUMCTX_EXTRN_GPRS_MASK | CPUMCTX_EXTRN_PC);
+        AssertRCReturn(rc, rc);
 
         uint64_t u64Val = 0;
         if (fWrite)
@@ -2311,6 +2306,8 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
             Log4(("MmioExit/%u: %08RX64: WRITE %RGp LB %u, %.*Rhxs -> rcStrict=%Rrc\n",
                   pVCpu->idCpu, pVCpu->cpum.GstCtx.Pc.u64, GCPhys, cbAcc, cbAcc,
                   &u64Val, VBOXSTRICTRC_VAL(rcStrict) ));
+            if (PGM_PHYS_RW_IS_SUCCESS(rcStrict))
+                pVCpu->cpum.GstCtx.Pc.u64 += sizeof(uint32_t);
         }
         else
         {
@@ -2318,12 +2315,29 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
             Log4(("MmioExit/%u: %08RX64: READ %RGp LB %u -> %.*Rhxs rcStrict=%Rrc\n",
                   pVCpu->idCpu, pVCpu->cpum.GstCtx.Pc.u64, GCPhys, cbAcc, cbAcc,
                   &u64Val, VBOXSTRICTRC_VAL(rcStrict) ));
-            if (rcStrict == VINF_SUCCESS)
+            if (PGM_PHYS_RW_IS_SUCCESS(rcStrict))
+            {
                 nemR3WinSetGReg(pVCpu, uReg, f64BitReg, fSignExtend, u64Val);
+                pVCpu->cpum.GstCtx.Pc.u64 += sizeof(uint32_t);
+            }
         }
     }
     else
     {
+        /* The following ASSUMES that the vCPU state is completely synced. */
+        LogFlowFunc(("GCPtrDataAbrt=%RGv GCPhys=%RGp PC=%RGv cbInstr=%u uIss=%RX64\n",
+                     pExit->MemoryAccess.Gva, GCPhys, pExit->MemoryAccess.Header.Pc, cbInstr, uIss));
+
+        int rc = nemHCWinCopyStateFromHyperV(pVM, pVCpu, IEM_CPUMCTX_EXTRN_MUST_MASK);
+        AssertRCReturn(rc, rc);
+
+#ifdef VBOX_WITH_IEM_TARGETING_ARM
+        /* Let IEM do the work.  TLBs must be invalidated, as we don't track that. */
+        IEMTlbInvalidateAll(pVCpu);
+        rcStrict = IEMExecOne(pVCpu);
+        LogFlowFunc(("IEMExecOne returns %Rrc\n", VBOXSTRICTRC_VAL(rcStrict) ));
+        return rcStrict;
+#else
         /** @todo Our UEFI firmware accesses the flash region with the following instruction
          *        when the NVRAM actually contains data:
          *             ldrb w9, [x6, #-0x0001]!
@@ -2331,13 +2345,10 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
          *        is a proper IEM implementation we just handle this here for now to avoid annoying
          *        users too much.
          */
-        /* The following ASSUMES that the vCPU state is completely synced. */
-
         /* Read instruction. */
-        RTGCPTR GCPtrPage = pVCpu->cpum.GstCtx.Pc.u64 & ~(RTGCPTR)GUEST_PAGE_OFFSET_MASK;
+        RTGCPTR const GCPtrPage = pVCpu->cpum.GstCtx.Pc.u64 & ~(RTGCPTR)GUEST_PAGE_OFFSET_MASK;
         const void *pvPageR3 = NULL;
         PGMPAGEMAPLOCK  PageMapLock;
-
         rcStrict = PGMPhysGCPtr2CCPtrReadOnly(pVCpu, GCPtrPage, &pvPageR3, &PageMapLock);
         if (rcStrict == VINF_SUCCESS)
         {
@@ -2345,7 +2356,7 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
             PGMPhysReleasePageMappingLock(pVCpu->pVMR3, &PageMapLock);
 
             DISSTATE Dis;
-            rcStrict = DISInstrWithPrefetchedBytes((uintptr_t)pVCpu->cpum.GstCtx.Pc.u64, DISCPUMODE_ARMV8_A64,  0 /*fFilter - none */,
+            rcStrict = DISInstrWithPrefetchedBytes((uintptr_t)pVCpu->cpum.GstCtx.Pc.u64, DISCPUMODE_ARMV8_A64, 0 /*fFilter - none */,
                                                    &u32Instr, sizeof(u32Instr), NULL, NULL, &Dis, NULL);
             if (rcStrict == VINF_SUCCESS)
             {
@@ -2362,11 +2373,13 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
                     Log4(("MmioExit/%u: %08RX64: READ %#RGp LB %u -> %.*Rhxs rcStrict=%Rrc\n",
                           pVCpu->idCpu, pVCpu->cpum.GstCtx.Pc.u64, GCPhys, sizeof(bVal), sizeof(bVal),
                           &bVal, VBOXSTRICTRC_VAL(rcStrict) ));
-                    if (rcStrict == VINF_SUCCESS)
+                    if (PGM_PHYS_RW_IS_SUCCESS(rcStrict))
                     {
                         nemR3WinSetGReg(pVCpu, Dis.aParams[0].armv8.Op.Reg.idReg, false /*f64BitReg*/, false /*fSignExtend*/, bVal);
                         /* Update the indexed register. */
                         pVCpu->cpum.GstCtx.aGRegs[Dis.aParams[1].armv8.Op.Reg.idReg].x += Dis.aParams[1].armv8.u.offBase;
+                        /* Update PC. */
+                        pVCpu->cpum.GstCtx.Pc.u64 += sizeof(uint32_t);
                     }
                 }
                 /*
@@ -2382,6 +2395,7 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
                          && Dis.aParams[2].armv8.Op.Reg.enmRegType == kDisOpParamArmV8RegType_Gpr_64Bit)
                 {
                     /** @todo This is tricky to handle if the first register read returns something else than VINF_SUCCESS... */
+                    /** @todo It's even more tricky, since PGM_PHYS_RW_IS_SUCCESS the right test. */
                     /* The fault address is already the final address. */
                     uint32_t u32Val1 = 0;
                     uint32_t u32Val2 = 0;
@@ -2395,16 +2409,16 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
                     {
                         nemR3WinSetGReg(pVCpu, Dis.aParams[0].armv8.Op.Reg.idReg, false /*f64BitReg*/, false /*fSignExtend*/, u32Val1);
                         nemR3WinSetGReg(pVCpu, Dis.aParams[1].armv8.Op.Reg.idReg, false /*f64BitReg*/, false /*fSignExtend*/, u32Val2);
+                        /* Update PC. */
+                        pVCpu->cpum.GstCtx.Pc.u64 += sizeof(uint32_t);
                     }
                 }
                 else
                     AssertFailedReturn(VERR_NOT_SUPPORTED);
             }
         }
+#endif /* !VBOX_WITH_IEM_TARGETING_ARM */
     }
-
-    if (rcStrict == VINF_SUCCESS)
-        pVCpu->cpum.GstCtx.Pc.u64 += sizeof(uint32_t); /** @todo Why is InstructionByteCount always 0? */
 
     return rcStrict;
 }
