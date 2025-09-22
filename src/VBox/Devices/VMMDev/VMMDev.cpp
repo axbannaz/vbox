@@ -185,6 +185,8 @@ static SSMFIELD const g_aSSMDISPLAYCHANGEDATAStateFields[] =
 static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
 {
     const char *pszOs;
+    /* The following test applies to guest OS types which have both a 32-bit
+     * and a 64-bit OS type. */
     switch (pGuestInfo->osType & ~VBOXOSTYPE_ArchitectureMask)
     {
         case VBOXOSTYPE_DOS:                              pszOs = "DOS";            break;
@@ -196,21 +198,15 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_WinNT:                            pszOs = "Windows NT";     break;
         case VBOXOSTYPE_WinNT3x:                          pszOs = "Windows NT 3.x"; break;
         case VBOXOSTYPE_WinNT4:                           pszOs = "Windows NT4";    break;
-        case VBOXOSTYPE_Win2k:                            pszOs = "Windows 2k";     break;
+        case VBOXOSTYPE_Win2k:                            pszOs = "Windows 2000";   break;
         case VBOXOSTYPE_WinXP:                            pszOs = "Windows XP";     break;
-        case VBOXOSTYPE_Win2k3:                           pszOs = "Windows 2k3";    break;
+        case VBOXOSTYPE_Win2k3:                           pszOs = "Windows Server 2003"; break;
         case VBOXOSTYPE_WinVista:                         pszOs = "Windows Vista";  break;
-        case VBOXOSTYPE_Win2k8:                           pszOs = "Windows 2k8";    break;
+        case VBOXOSTYPE_Win2k8:                           pszOs = "Windows Server 2008"; break;
         case VBOXOSTYPE_Win7:                             pszOs = "Windows 7";      break;
         case VBOXOSTYPE_Win8:                             pszOs = "Windows 8";      break;
-        case VBOXOSTYPE_Win2k12_x64 & ~VBOXOSTYPE_x64:    pszOs = "Windows 2k12";   break;
         case VBOXOSTYPE_Win81:                            pszOs = "Windows 8.1";    break;
         case VBOXOSTYPE_Win10:                            pszOs = "Windows 10";     break;
-        case VBOXOSTYPE_Win2k16_x64 & ~VBOXOSTYPE_x64:    pszOs = "Windows 2k16";   break;
-        case VBOXOSTYPE_Win2k19_x64 & ~VBOXOSTYPE_x64:    pszOs = "Windows 2k19";   break;
-        case VBOXOSTYPE_Win2k22_x64 & ~VBOXOSTYPE_x64:    pszOs = "Windows 2k22";   break;
-        case VBOXOSTYPE_Win2k25_x64 & ~VBOXOSTYPE_x64:    pszOs = "Windows 2k25";   break;
-        case VBOXOSTYPE_Win11_x64 & ~VBOXOSTYPE_x64:      pszOs = "Windows 11";     break;
         case VBOXOSTYPE_OS2:                              pszOs = "OS/2";           break;
         case VBOXOSTYPE_OS2Warp3:                         pszOs = "OS/2 Warp 3";    break;
         case VBOXOSTYPE_OS2Warp4:                         pszOs = "OS/2 Warp 4";    break;
@@ -235,7 +231,6 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_Debian11:                         pszOs = "Debian 11";      break;
         case VBOXOSTYPE_Debian12:                         pszOs = "Debian 12";      break;
         case VBOXOSTYPE_OpenSUSE:                         pszOs = "openSUSE";       break;
-        case VBOXOSTYPE_OpenSUSE_Leap_x64 & ~VBOXOSTYPE_x64: pszOs = "openSUSE Leap";      break;
         case VBOXOSTYPE_OpenSUSE_Tumbleweed:              pszOs = "openSUSE Tumbleweed";   break;
         case VBOXOSTYPE_SUSE_LE:                          pszOs = "SUSE Linux Enterprise"; break;
         case VBOXOSTYPE_FedoraCore:                       pszOs = "Fedora";         break;
@@ -249,9 +244,6 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_RedHat4:                          pszOs = "Red Hat 4";      break;
         case VBOXOSTYPE_RedHat5:                          pszOs = "Red Hat 5";      break;
         case VBOXOSTYPE_RedHat6:                          pszOs = "Red Hat 6";      break;
-        case VBOXOSTYPE_RedHat7_x64 & ~VBOXOSTYPE_x64:    pszOs = "Red Hat 7";      break;
-        case VBOXOSTYPE_RedHat8_x64 & ~VBOXOSTYPE_x64:    pszOs = "Red Hat 8";      break;
-        case VBOXOSTYPE_RedHat9_x64 & ~VBOXOSTYPE_x64:    pszOs = "Red Hat 9";      break;
         case VBOXOSTYPE_Turbolinux:                       pszOs = "TurboLinux";     break;
         case VBOXOSTYPE_Ubuntu:                           pszOs = "Ubuntu";         break;
         case VBOXOSTYPE_Ubuntu10_LTS:                     pszOs = "Ubuntu 10.04 LTS"; break;
@@ -269,15 +261,6 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_Ubuntu18_LTS:                     pszOs = "Ubuntu 18.04 LTS"; break;
         case VBOXOSTYPE_Ubuntu18:                         pszOs = "Ubuntu 18.10";   break;
         case VBOXOSTYPE_Ubuntu19:                         pszOs = "Ubuntu 19.x";    break;
-        case VBOXOSTYPE_Ubuntu20_LTS_x64 & ~VBOXOSTYPE_x64: pszOs = "Ubuntu 20.04 LTS"; break;
-        case VBOXOSTYPE_Ubuntu20_x64 & ~VBOXOSTYPE_x64:   pszOs = "Ubuntu 20.10";   break;
-        case VBOXOSTYPE_Ubuntu21_x64 & ~VBOXOSTYPE_x64:   pszOs = "Ubuntu 21.x";    break;
-        case VBOXOSTYPE_Ubuntu22_LTS_x64 & ~VBOXOSTYPE_x64: pszOs = "Ubuntu 22.04 LTS"; break;
-        case VBOXOSTYPE_Ubuntu22_x64 & ~VBOXOSTYPE_x64:   pszOs = "Ubuntu 22.10";   break;
-        case VBOXOSTYPE_Ubuntu23_x64 & ~VBOXOSTYPE_x64:   pszOs = "Ubuntu 23.04";   break;
-        case VBOXOSTYPE_Ubuntu231_x64 & ~VBOXOSTYPE_x64:  pszOs = "Ubuntu 23.10";   break;
-        case VBOXOSTYPE_Ubuntu24_LTS_x64 & ~VBOXOSTYPE_x64: pszOs = "Ubuntu 24.04";   break;
-        case VBOXOSTYPE_Ubuntu24_x64 & ~VBOXOSTYPE_x64:  pszOs = "Ubuntu 24.10";   break;
         case VBOXOSTYPE_Lubuntu:                          pszOs = "Lubuntu";        break;
         case VBOXOSTYPE_Xubuntu:                          pszOs = "Xubuntu";        break;
         case VBOXOSTYPE_Xandros:                          pszOs = "Xandros";        break;
@@ -285,9 +268,6 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_Oracle4:                          pszOs = "Oracle Linux 4"; break;
         case VBOXOSTYPE_Oracle5:                          pszOs = "Oracle Linux 5"; break;
         case VBOXOSTYPE_Oracle6:                          pszOs = "Oracle Linux 6"; break;
-        case VBOXOSTYPE_Oracle7_x64 & ~VBOXOSTYPE_x64:    pszOs = "Oracle Linux 7"; break;
-        case VBOXOSTYPE_Oracle8_x64 & ~VBOXOSTYPE_x64:    pszOs = "Oracle Linux 8"; break;
-        case VBOXOSTYPE_Oracle9_x64 & ~VBOXOSTYPE_x64:    pszOs = "Oracle Linux 9"; break;
         case VBOXOSTYPE_FreeBSD:                          pszOs = "FreeBSD";        break;
         case VBOXOSTYPE_OpenBSD:                          pszOs = "OpenBSD";        break;
         case VBOXOSTYPE_NetBSD:                           pszOs = "NetBSD";         break;
@@ -295,7 +275,6 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_Solaris:                          pszOs = "Solaris";        break;
         case VBOXOSTYPE_Solaris10U8_or_later:             pszOs = "Solaris 10";     break;
         case VBOXOSTYPE_OpenSolaris:                      pszOs = "OpenSolaris";    break;
-        case VBOXOSTYPE_Solaris11_x64 & ~VBOXOSTYPE_x64:  pszOs = "Solaris 11";     break;
         case VBOXOSTYPE_MacOS:                            pszOs = "Mac OS X";       break;
         case VBOXOSTYPE_MacOS106:                         pszOs = "Mac OS X 10.6";  break;
         case VBOXOSTYPE_MacOS107_x64 & ~VBOXOSTYPE_x64:   pszOs = "Mac OS X 10.7";  break;
@@ -306,8 +285,59 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
         case VBOXOSTYPE_MacOS1012_x64 & ~VBOXOSTYPE_x64:  pszOs = "macOS 10.12";    break;
         case VBOXOSTYPE_MacOS1013_x64 & ~VBOXOSTYPE_x64:  pszOs = "macOS 10.13";    break;
         case VBOXOSTYPE_Haiku:                            pszOs = "Haiku";          break;
-        case VBOXOSTYPE_VBoxBS_x64 & ~VBOXOSTYPE_x64:     pszOs = "VBox Bootsector"; break;
         default:                                          pszOs = "unknown";        break;
+    }
+    if (!strcmp(pszOs, "unknown"))
+    {
+        /* The following test applies to guest OS types which are 64-bit only. */
+        switch (pGuestInfo->osType)
+        {
+            case VBOXOSTYPE_Debian13_x64:                 pszOs = "Debian 13";      break;
+            case VBOXOSTYPE_Debian13_arm64:               pszOs = "Debian 13";      break;
+            case VBOXOSTYPE_Ubuntu20_LTS_x64:             pszOs = "Ubuntu 20.04 LTS"; break;
+            case VBOXOSTYPE_Ubuntu20_x64:                 pszOs = "Ubuntu 20.10";   break;
+            case VBOXOSTYPE_Ubuntu21_x64:                 pszOs = "Ubuntu 21.x";    break;
+            case VBOXOSTYPE_Ubuntu22_LTS_x64:             pszOs = "Ubuntu 22.04 LTS"; break;
+            case VBOXOSTYPE_Ubuntu22_x64:                 pszOs = "Ubuntu 22.10";   break;
+            case VBOXOSTYPE_Ubuntu22_arm64:               pszOs = "Ubuntu 22.10";   break;
+            case VBOXOSTYPE_Ubuntu23_x64:                 pszOs = "Ubuntu 23.04";   break;
+            case VBOXOSTYPE_Ubuntu23_arm64:               pszOs = "Ubuntu 23.04";   break;
+            case VBOXOSTYPE_Ubuntu231_x64:                pszOs = "Ubuntu 23.10";   break;
+            case VBOXOSTYPE_Ubuntu231_arm64:              pszOs = "Ubuntu 23.10";   break;
+            case VBOXOSTYPE_Ubuntu24_LTS_x64:             pszOs = "Ubuntu 24.04 LTS"; break;
+            case VBOXOSTYPE_Ubuntu24_LTS_arm64:           pszOs = "Ubuntu 24.04 LTS"; break;
+            case VBOXOSTYPE_Ubuntu24_x64:                 pszOs = "Ubuntu 24.10";   break;
+            case VBOXOSTYPE_Ubuntu24_arm64:               pszOs = "Ubuntu 24.10";   break;
+            case VBOXOSTYPE_Ubuntu25_x64:                 pszOs = "Ubuntu 25.04";   break;
+            case VBOXOSTYPE_Ubuntu25_arm64:               pszOs = "Ubuntu 25.04";   break;
+            case VBOXOSTYPE_RedHat7_x64:                  pszOs = "Red Hat 7";      break;
+            case VBOXOSTYPE_RedHat7_arm64:                pszOs = "Red Hat 7";      break;
+            case VBOXOSTYPE_RedHat8_x64:                  pszOs = "Red Hat 8";      break;
+            case VBOXOSTYPE_RedHat8_arm64:                pszOs = "Red Hat 8";      break;
+            case VBOXOSTYPE_RedHat9_x64:                  pszOs = "Red Hat 9";      break;
+            case VBOXOSTYPE_RedHat9_arm64:                pszOs = "Red Hat 9";      break;
+            case VBOXOSTYPE_RedHat10_x64:                 pszOs = "Red Hat 10";     break;
+            case VBOXOSTYPE_RedHat10_arm64:               pszOs = "Red Hat 10";     break;
+            case VBOXOSTYPE_Oracle7_x64:                  pszOs = "Oracle Linux 7"; break;
+            case VBOXOSTYPE_Oracle7_arm64:                pszOs = "Oracle Linux 7"; break;
+            case VBOXOSTYPE_Oracle8_x64:                  pszOs = "Oracle Linux 8"; break;
+            case VBOXOSTYPE_Oracle8_arm64:                pszOs = "Oracle Linux 8"; break;
+            case VBOXOSTYPE_Oracle9_x64:                  pszOs = "Oracle Linux 9"; break;
+            case VBOXOSTYPE_Oracle9_arm64:                pszOs = "Oracle Linux 9"; break;
+            case VBOXOSTYPE_Oracle10_x64:                 pszOs = "Oracle Linux 10"; break;
+            case VBOXOSTYPE_Oracle10_arm64:               pszOs = "Oracle Linux 10"; break;
+            case VBOXOSTYPE_OpenSUSE_Leap_x64:            pszOs = "openSUSE Leap";  break;
+            case VBOXOSTYPE_OpenSUSE_Leap_arm64:          pszOs = "openSUSE Leap";  break;
+            case VBOXOSTYPE_Solaris11_x64:                pszOs = "Solaris 11";     break;
+            case VBOXOSTYPE_VBoxBS_x64:                   pszOs = "VBox Bootsector"; break;
+            case VBOXOSTYPE_Win2k12_x64:                  pszOs = "Windows Server 2012"; break;
+            case VBOXOSTYPE_Win2k16_x64:                  pszOs = "Windows Server 2016"; break;
+            case VBOXOSTYPE_Win2k19_x64:                  pszOs = "Windows Server 2019"; break;
+            case VBOXOSTYPE_Win2k22_x64:                  pszOs = "Windows Server 2022"; break;
+            case VBOXOSTYPE_Win2k25_x64:                  pszOs = "Windows Server 2025"; break;
+            case VBOXOSTYPE_Win11_x64:                    pszOs = "Windows 11";     break;
+            default:                                      pszOs = "unknown";        break;
+        }
     }
     LogRel(("VMMDev: Guest Additions information report: Interface = 0x%08X osType = 0x%08X (%s, %u-bit)\n",
             pGuestInfo->interfaceVersion, pGuestInfo->osType, pszOs,

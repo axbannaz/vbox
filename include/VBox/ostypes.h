@@ -136,17 +136,17 @@ typedef enum VBOXOSTYPE
     VBOXOSTYPE_Win7_x64         = 0x37100,
     VBOXOSTYPE_Win8             = 0x38000,
     VBOXOSTYPE_Win8_x64         = 0x38100,
-    VBOXOSTYPE_Win2k12_x64      = 0x39100,
+    VBOXOSTYPE_Win2k12_x64      = 0x39100,  // 64-bit only
     VBOXOSTYPE_Win81            = 0x3A000,
     VBOXOSTYPE_Win81_x64        = 0x3A100,
     VBOXOSTYPE_Win10            = 0x3B000,
     VBOXOSTYPE_Win10_x64        = 0x3B100,
-    VBOXOSTYPE_Win2k16_x64      = 0x3C100,
-    VBOXOSTYPE_Win2k19_x64      = 0x3D100,
-    VBOXOSTYPE_Win11_x64        = 0x3E100,
-    VBOXOSTYPE_Win11_arm64      = 0x3E300,
-    VBOXOSTYPE_Win2k22_x64      = 0x3F100,
-    VBOXOSTYPE_Win2k25_x64      = 0x3F101,
+    VBOXOSTYPE_Win2k16_x64      = 0x3C100,  // 64-bit only
+    VBOXOSTYPE_Win2k19_x64      = 0x3D100,  // 64-bit only
+    VBOXOSTYPE_Win11_x64        = 0x3E100,  // 64-bit only
+    VBOXOSTYPE_Win11_arm64      = 0x3E300,  // 64-bit only
+    VBOXOSTYPE_Win2k22_x64      = 0x3F100,  // 64-bit only
+    VBOXOSTYPE_Win2k25_x64      = 0x3F101,  // 64-bit only
 
     VBOXOSTYPE_OS2              = 0x40000,
     VBOXOSTYPE_OS2Warp3         = 0x41000,
@@ -160,6 +160,7 @@ typedef enum VBOXOSTYPE
      * @{ */
     VBOXOSTYPE_Linux            = 0x50000,
     VBOXOSTYPE_Linux_x64        = 0x50100,
+    VBOXOSTYPE_Linux_arm64      = 0x50300,
     VBOXOSTYPE_Linux22          = 0x51000,
     VBOXOSTYPE_Linux24          = 0x52000,
     VBOXOSTYPE_Linux24_x64      = 0x52100,
@@ -195,8 +196,10 @@ typedef enum VBOXOSTYPE
     VBOXOSTYPE_Debian12         = 0x5500a,
     VBOXOSTYPE_Debian12_x64     = 0x5510a,
     VBOXOSTYPE_Debian12_arm64   = 0x5530a,
-    VBOXOSTYPE_Debian_latest_x64 = VBOXOSTYPE_Debian12_x64,
-    VBOXOSTYPE_Debian_latest_arm64 = VBOXOSTYPE_Debian12_arm64,
+    VBOXOSTYPE_Debian13_x64     = 0x5510b,
+    VBOXOSTYPE_Debian13_arm64   = 0x5530b,
+    VBOXOSTYPE_Debian_latest_x64 = VBOXOSTYPE_Debian13_x64,
+    VBOXOSTYPE_Debian_latest_arm64 = VBOXOSTYPE_Debian13_arm64,
     VBOXOSTYPE_OpenSUSE         = 0x56000,
     VBOXOSTYPE_OpenSUSE_x64     = 0x56100,
     VBOXOSTYPE_OpenSUSE_Leap_x64         = 0x56101,  // 64-bit only
@@ -237,7 +240,9 @@ typedef enum VBOXOSTYPE
     VBOXOSTYPE_RedHat8_arm64    = 0x5A306,  // 64-bit only
     VBOXOSTYPE_RedHat9_x64      = 0x5A107,  // 64-bit only
     VBOXOSTYPE_RedHat9_arm64    = 0x5A307,  // 64-bit only
-    VBOXOSTYPE_RedHat_latest_x64 = VBOXOSTYPE_RedHat9_x64,
+    VBOXOSTYPE_RedHat10_x64     = 0x5A108,  // 64-bit only
+    VBOXOSTYPE_RedHat10_arm64   = 0x5A308,  // 64-bit only
+    VBOXOSTYPE_RedHat_latest_x64 = VBOXOSTYPE_RedHat10_x64,
     VBOXOSTYPE_Turbolinux       = 0x5B000,
     VBOXOSTYPE_Turbolinux_x64   = 0x5B100,
     VBOXOSTYPE_Ubuntu           = 0x5C000,
@@ -292,8 +297,10 @@ typedef enum VBOXOSTYPE
     VBOXOSTYPE_Ubuntu24_LTS_arm64 = 0x5C318,  // 64-bit only
     VBOXOSTYPE_Ubuntu24_x64     = 0x5C120,  // 64-bit only
     VBOXOSTYPE_Ubuntu24_arm64   = 0x5C320,  // 64-bit only
-    VBOXOSTYPE_Ubuntu_latest_x64 = VBOXOSTYPE_Ubuntu24_x64,
-    VBOXOSTYPE_Ubuntu_latest_arm64 = VBOXOSTYPE_Ubuntu24_arm64,
+    VBOXOSTYPE_Ubuntu25_x64     = 0x5C121,  // 64-bit only
+    VBOXOSTYPE_Ubuntu25_arm64   = 0x5C321,  // 64-bit only
+    VBOXOSTYPE_Ubuntu_latest_x64 = VBOXOSTYPE_Ubuntu25_x64,
+    VBOXOSTYPE_Ubuntu_latest_arm64 = VBOXOSTYPE_Ubuntu25_arm64,
     VBOXOSTYPE_Xandros          = 0x5D000,
     VBOXOSTYPE_Xandros_x64      = 0x5D100,
     VBOXOSTYPE_Oracle           = 0x5E000,
@@ -311,9 +318,11 @@ typedef enum VBOXOSTYPE
     VBOXOSTYPE_Oracle8_x64      = 0x5E105,  // 64-bit only
     VBOXOSTYPE_Oracle8_arm64    = 0x5E305,  // 64-bit only
     VBOXOSTYPE_Oracle9_x64      = 0x5E106,  // 64-bit only
-    VBOXOSTYPE_Oracle9_arm64    = 0x5E306,
-    VBOXOSTYPE_Oracle_latest_x64 = VBOXOSTYPE_Oracle9_x64,
-    VBOXOSTYPE_Oracle_latest_arm64 = VBOXOSTYPE_Oracle9_arm64,
+    VBOXOSTYPE_Oracle9_arm64    = 0x5E306,  // 64-bit only
+    VBOXOSTYPE_Oracle10_x64     = 0x5E107,  // 64-bit only
+    VBOXOSTYPE_Oracle10_arm64   = 0x5E307,  // 64-bit only
+    VBOXOSTYPE_Oracle_latest_x64 = VBOXOSTYPE_Oracle10_x64,
+    VBOXOSTYPE_Oracle_latest_arm64 = VBOXOSTYPE_Oracle10_arm64,
     /** @} */
     /** @name BSD and it's descendants
      * @{ */
