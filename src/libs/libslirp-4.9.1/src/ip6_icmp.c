@@ -488,7 +488,8 @@ static void ndp_input(struct mbuf *m, Slirp *slirp, struct ip6 *ip,
             /* Gratuitous NDP */
             ndp_table_add(slirp, ip->ip_src, eth->h_source);
 
-            ndp_send_ra(slirp);
+            if (!slirp->fDisableIPv6RA)
+                ndp_send_ra(slirp);
         }
         break;
 

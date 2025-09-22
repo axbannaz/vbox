@@ -710,6 +710,7 @@ Slirp *slirp_new(const SlirpConfig *cfg, const SlirpCb *callbacks, void *opaque)
     slirp->iSoMaxConn = cfg->iSoMaxConn;
     slirp->aRealNameservers = cfg->aRealNameservers;
     slirp->cRealNameservers = cfg->cRealNameservers;
+    slirp->fDisableIPv6RA = cfg->fDisableIPv6RA;
 #endif
 
     ip6_post_init(slirp);

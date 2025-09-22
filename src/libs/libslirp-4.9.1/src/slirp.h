@@ -224,6 +224,7 @@ struct Slirp {
     int iSoMaxConn;
     struct in_addr *aRealNameservers;
     size_t cRealNameservers;
+    bool fDisableIPv6RA;
 #endif
 };
 

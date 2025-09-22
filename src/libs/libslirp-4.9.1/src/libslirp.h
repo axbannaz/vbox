@@ -282,6 +282,11 @@ typedef struct SlirpConfig {
      * the backlog parameter of listen().
      */
     int iSoMaxConn;
+
+    /*
+     * Disable default route advertisements for IPv6
+     */
+    bool fDisableIPv6RA;
 #endif
 } SlirpConfig;
 
