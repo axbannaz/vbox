@@ -613,7 +613,8 @@ DECL_FORCE_INLINE(int) pgmGstQueryPageCheckPermissions(PPGMPTWALKFAST pWalk, ARM
     PGMWALKFAIL const fFailed = paPerm[idxPerm];
     if (fFailed == PGM_WALKFAIL_SUCCESS)
     {
-        pWalk->fInfo |= PGM_WALKINFO_SUCCEEDED;
+        pWalk->fInfo  |= PGM_WALKINFO_SUCCEEDED;
+        pWalk->fFailed = fFailed;
         return VINF_SUCCESS;
     }
 
@@ -632,6 +633,7 @@ static PGM_CTX_DECL(int) PGM_CTX(pgm,GstQueryPageFast)(PVMCPUCC pVCpu, RTGCPTR G
     AssertCompile(ARMV8_TCR_EL1_AARCH64_TG0_64KB    == ARMV8_TCR_EL1_AARCH64_TG1_64KB);
 
     pWalk->GCPtr = GCPtr;
+    pWalk->fInfo = 0;
 
     if RT_CONSTEXPR_IF(   a_GranuleSz        != ARMV8_TCR_EL1_AARCH64_TG0_INVALID
                        && a_InitialLookupLvl != PGM_MODE_ARMV8_INITIAL_LOOKUP_LVL_INVALID)
