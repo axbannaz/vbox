@@ -487,9 +487,8 @@ static void ndp_input(struct mbuf *m, Slirp *slirp, struct ip6 *ip,
             ntohs(ip->ip_pl) >= ICMP6_NDP_RS_MINLEN) {
             /* Gratuitous NDP */
             ndp_table_add(slirp, ip->ip_src, eth->h_source);
-#ifdef VBOX
+
             if (!slirp->fDisableIPv6RA)
-#endif
                 ndp_send_ra(slirp);
         }
         break;

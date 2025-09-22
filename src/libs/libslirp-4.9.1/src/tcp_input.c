@@ -363,9 +363,6 @@ findso:
         lhost4->sin_port = ti->ti_sport;
         fhost4 = (struct sockaddr_in *)&fhost;
         fhost4->sin_addr = ti->ti_dst;
-#ifdef VBOX
-        // fhost4->sin_addr.s_addr = htonl(2130706433);
-#endif
         fhost4->sin_port = ti->ti_dport;
         break;
     case AF_INET6:

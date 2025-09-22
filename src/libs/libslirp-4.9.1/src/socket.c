@@ -976,35 +976,6 @@ static bool sotranslate_out4(Slirp *s, struct socket *so, struct sockaddr_in *si
     }
 
 #ifdef VBOX
-    /* check for loopback map and correct if needed */
-    if (s->mLoopbackMap
-        && (so->so_faddr.s_addr & s->vnetwork_mask.s_addr) == s->vnetwork_addr.s_addr
-        && !s->disable_host_loopback )
-    {
-        uint32_t uFoundOff = 0;
-
-        for (int i = 0; i < s->mLoopbackMap->num_lomap; i++)
-        {
-            if ((so->so_faddr.s_addr & htonl(0x000000FF)) == htonl(s->mLoopbackMap->lomap[i].off))
-            {
-                uFoundOff = s->mLoopbackMap->lomap[i].off;
-
-                Log4Func(("Found loopback offset. Original dst %u mapped to offset %u\n",
-                          so->so_faddr.s_addr, uFoundOff));
-            }
-        }
-
-        if (uFoundOff == 0)
-            LogRel(("NAT Engine: Loopback map connection attempted and failed. "
-                    "Guest's expected destination, %u, has no mapping.\n", ntohl(sin->sin_addr.s_addr)));
-        else
-        {
-            sin->sin_addr.s_addr = (loopback_addr.s_addr & htonl(0xFFFFFF00)) | htonl(uFoundOff);
-            // so->so_faddr.s_addr = (loopback_addr.s_addr & htonl(0xFFFFFF00)) | htonl(uFoundOff);
-            // so->so_state |= SS_HOSTFWD;
-        }
-    }
-
     if (   s->fForwardBroadcast
         && (   so->so_faddr.s_addr == 0xffffffff
             || so->so_faddr.s_addr == (s->vnetwork_addr.s_addr | ~s->vnetwork_mask.s_addr)))

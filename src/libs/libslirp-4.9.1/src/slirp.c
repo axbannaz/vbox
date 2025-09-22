@@ -711,7 +711,6 @@ Slirp *slirp_new(const SlirpConfig *cfg, const SlirpCb *callbacks, void *opaque)
     slirp->aRealNameservers = cfg->aRealNameservers;
     slirp->cRealNameservers = cfg->cRealNameservers;
     slirp->fDisableIPv6RA = cfg->fDisableIPv6RA;
-    slirp->mLoopbackMap = cfg->mLoopbackMap;
 #endif
 
     ip6_post_init(slirp);
@@ -1244,18 +1243,6 @@ static void arp_input(Slirp *slirp, const uint8_t *pkt, int pkt_len)
                 if (ex_ptr->ex_addr.s_addr == ah->ar_tip)
                     goto arp_ok;
             }
-#ifdef VBOX
-            if (slirp->mLoopbackMap && ((ah->ar_tip & slirp->vnetwork_mask.s_addr) == slirp->vnetwork_addr.s_addr))
-            {
-                goto arp_ok;
-                // // code needs to be if ar_tip == ntohl(127.X.X.X) go see if we have an offset to match
-                // for (int i = 0; i < slirp->mLoopbackMap->num_lomap; i++)
-                // {
-                //     if ((ah->ar_tip) == (uint32_t)slirp->mLoopbackMap->lomap[i].loaddr)
-                //         goto arp_ok;
-                // }
-            }
-#endif
             return;
         arp_ok:
             memset(arp_reply, 0, sizeof(arp_reply));

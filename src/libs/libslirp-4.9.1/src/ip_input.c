@@ -103,7 +103,7 @@ void ip_input(struct mbuf *m)
      * if (ip->ip_sum) {
      */
     if (cksum(m, hlen)) {
-        // goto bad;
+        goto bad;
     }
 
     /*
@@ -448,44 +448,3 @@ void ip_stripoptions(register struct mbuf *m)
 
     ip->ip_hl = sizeof(struct ip) >> 2;
 }
-
-#ifdef VBOX
-
-/**
- * Checks loopback map. Guest makes outgoing conn to NATNet IP, maps to host 127.0.0.x.
- *
- * @param pSlirp
- * @param pPkt
- * @return int
- */
-int slirp_check_and_fix_loopback_map(Slirp *pSlirp, struct ip* pPkt)
-{
-    if (!pSlirp)
-        return -1;
-
-    if (pPkt || !((pPkt->ip_dst.s_addr & pSlirp->vnetwork_mask.s_addr) == pSlirp->vnetwork_addr.s_addr))
-        return -1;
-
-
-    uint32_t uFoundOff = 0;
-
-    for (int i = 0; i < pSlirp->mLoopbackMap->num_lomap; i++)
-    {
-        if ((uint32_t)pPkt->ip_dst.s_addr == (uint32_t)pSlirp->mLoopbackMap->lomap[i].loaddr)
-        {
-            uFoundOff = pSlirp->mLoopbackMap->lomap[i].off;
-
-            Log4Func(("Found loopback offset. Original dst %u mapped to offset %u\n",
-                      pPkt->ip_dst, uFoundOff));
-        }
-    }
-
-    // Modify packet destination and recompute checksum
-    // ip->ip_dst = (pSlirp->vnetwork_addr & htonl(0xFFFFFF00)) | htonl(uFoundOff);
-
-    // 3. profit???
-
-    return 0;
-}
-
-#endif
