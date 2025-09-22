@@ -64,6 +64,7 @@ typedef uint8_t IEMMODE;
                                                     | CPUMCTX_EXTRN_ELR \
                                                     | CPUMCTX_EXTRN_SP \
                                                     | CPUMCTX_EXTRN_PSTATE \
+                                                    | CPUMCTX_EXTRN_SYSREG_EL2 \
                                                     | CPUMCTX_EXTRN_SCTLR_TCR_TTBR )
 /** The CPUMCTX_EXTRN_XXX mask needed when injecting an exception/interrupt.
  * IEM will import missing bits, callers are encouraged to make these registers
