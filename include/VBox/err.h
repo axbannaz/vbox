@@ -2297,6 +2297,10 @@
 #define VERR_SVM_VMRUN_PRECOND_2                    (-4072)
 /** Precodition no 3 in hmR0SvmVmRun failed. */
 #define VERR_SVM_VMRUN_PRECOND_3                    (-4073)
+/** Host API has not set a valid physical address of host-state area. */
+#define VERR_SVM_HOST_SVME_NOT_ENABLED              (-4074)
+/** Host API has not enabled SVME bit in EFER MSR. */
+#define VERR_SVM_HOST_VM_HSAVE_PA_INVALID           (-4075)
 /** @} */
 
 

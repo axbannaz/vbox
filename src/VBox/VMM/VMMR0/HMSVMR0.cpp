@@ -505,43 +505,65 @@ static void hmR0SvmLogState(PVMCPUCC pVCpu, PCSVMVMCB pVmcb, const char *pszPref
 VMMR0DECL(int) SVMR0EnableCpu(PHMPHYSCPU pHostCpu, PVMCC pVM, void *pvCpuPage, RTHCPHYS HCPhysCpuPage, bool fEnabledByHost,
                               PCSUPHWVIRTMSRS pHwvirtMsrs)
 {
-    Assert(!fEnabledByHost);
-    Assert(HCPhysCpuPage && HCPhysCpuPage != NIL_RTHCPHYS);
-    Assert(RT_ALIGN_T(HCPhysCpuPage, _4K, RTHCPHYS) == HCPhysCpuPage);
-    Assert(pvCpuPage); NOREF(pvCpuPage);
     Assert(!RTThreadPreemptIsEnabled(NIL_RTTHREAD));
+    RT_NOREF(pHwvirtMsrs);
 
-    RT_NOREF2(fEnabledByHost, pHwvirtMsrs);
-
-    /* Paranoid: Disable interrupt as, in theory, interrupt handlers might mess with EFER. */
-    RTCCUINTREG const fEFlags = ASMIntDisableFlags();
-
-    /*
-     * We must turn on AMD-V and setup the host state physical address, as those MSRs are per CPU.
-     */
-    uint64_t u64HostEfer = ASMRdMsr(MSR_K6_EFER);
-    if (u64HostEfer & MSR_K6_EFER_SVME)
+    if (fEnabledByHost)
     {
-        /* If the VBOX_HWVIRTEX_IGNORE_SVM_IN_USE is active, then we blindly use AMD-V. */
-        if (   pVM
-            && pVM->hm.s.svm.fIgnoreInUseError)
-            pHostCpu->fIgnoreAMDVInUseError = true;
+        Assert(HCPhysCpuPage == NIL_RTHCPHYS); RT_NOREF(HCPhysCpuPage);
+        Assert(!pvCpuPage); RT_NOREF(pvCpuPage);
 
-        if (!pHostCpu->fIgnoreAMDVInUseError)
+        /* Verify that AMD-V is enabled in the EFER MSR. */
+        uint64_t const u64HostEfer = ASMRdMsr(MSR_K6_EFER);
+        if (u64HostEfer & MSR_K6_EFER_SVME)
         {
-            ASMSetFlags(fEFlags);
-            return VERR_SVM_IN_USE;
+            /* Verify the host-save physical page address is plausible. */
+            RTHCPHYS const HCPhys = ASMRdMsr(MSR_K8_VM_HSAVE_PA);
+            if (   HCPhys
+                && !(HCPhys & X86_PAGE_4K_OFFSET_MASK))
+            { /* likely */ }
+            else
+                return VERR_SVM_HOST_VM_HSAVE_PA_INVALID;
         }
+        else
+            return VERR_SVM_HOST_SVME_NOT_ENABLED;
     }
+    else
+    {
+        Assert(HCPhysCpuPage && HCPhysCpuPage != NIL_RTHCPHYS);
+        Assert(RT_ALIGN_T(HCPhysCpuPage, _4K, RTHCPHYS) == HCPhysCpuPage);
+        Assert(pvCpuPage); NOREF(pvCpuPage);
 
-    /* Turn on AMD-V in the EFER MSR. */
-    ASMWrMsr(MSR_K6_EFER, u64HostEfer | MSR_K6_EFER_SVME);
+        /* Paranoid: Disable interrupt as, in theory, interrupt handlers might mess with EFER. */
+        RTCCUINTREG const fEFlags = ASMIntDisableFlags();
 
-    /* Write the physical page address where the CPU will store the host state while executing the VM. */
-    ASMWrMsr(MSR_K8_VM_HSAVE_PA, HCPhysCpuPage);
+        /*
+         * We must turn on AMD-V and setup the host state physical address, as those MSRs are per CPU.
+         */
+        uint64_t u64HostEfer = ASMRdMsr(MSR_K6_EFER);
+        if (u64HostEfer & MSR_K6_EFER_SVME)
+        {
+            /* If the VBOX_HWVIRTEX_IGNORE_SVM_IN_USE is active, then we blindly use AMD-V. */
+            if (   pVM
+                && pVM->hm.s.svm.fIgnoreInUseError)
+                pHostCpu->fIgnoreAMDVInUseError = true;
 
-    /* Restore interrupts. */
-    ASMSetFlags(fEFlags);
+            if (!pHostCpu->fIgnoreAMDVInUseError)
+            {
+                ASMSetFlags(fEFlags);
+                return VERR_SVM_IN_USE;
+            }
+        }
+
+        /* Turn on AMD-V in the EFER MSR. */
+        ASMWrMsr(MSR_K6_EFER, u64HostEfer | MSR_K6_EFER_SVME);
+
+        /* Write the physical page address where the CPU will store the host state while executing the VM. */
+        ASMWrMsr(MSR_K8_VM_HSAVE_PA, HCPhysCpuPage);
+
+        /* Restore interrupts. */
+        ASMSetFlags(fEFlags);
+    }
 
     /*
      * Theoretically, other hypervisors may have used ASIDs, ideally we should flush all

@@ -292,7 +292,7 @@ static SUPFUNC g_aFunctions[] =
     SUPEXP_STK_OKAY(    1,  SUPR0FpuBegin),             /* not-arch-arm64 */
     SUPEXP_STK_OKAY(    1,  SUPR0FpuEnd),               /* not-arch-arm64 */
     SUPEXP_STK_BACK(    2,  SUPR0ChangeCR4),            /* not-arch-arm64 */
-    SUPEXP_STK_BACK(    1,  SUPR0EnableVTx),            /* not-arch-arm64 */
+    SUPEXP_STK_BACK(    1,  SUPR0EnableHwvirt),         /* not-arch-arm64 */
     SUPEXP_STK_OKAY(    1,  SUPR0GetCurrentGdtRw),      /* not-arch-arm64 */
     SUPEXP_STK_BACK(    3,  SUPR0GetHwvirtMsrs),        /* not-arch-arm64 */
     SUPEXP_STK_BACK(    1,  SUPR0GetSvmUsability),      /* not-arch-arm64 */
@@ -4310,18 +4310,19 @@ SUPR0_EXPORT_SYMBOL(SUPR0ChangeCR4);
  *
  * @param   fEnable         Whether to enable or disable.
  */
-SUPR0DECL(int) SUPR0EnableVTx(bool fEnable)
+SUPR0DECL(int) SUPR0EnableHwvirt(bool fEnable)
 {
 # if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
     return supdrvOSEnableVTx(fEnable);
 # elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
+    /** @todo Rename this to supdrvOSEnableHwvirt. */
     return supdrvOSEnableVTx(fEnable);
 # else
     RT_NOREF1(fEnable);
     return VERR_NOT_SUPPORTED;
 # endif
 }
-SUPR0_EXPORT_SYMBOL(SUPR0EnableVTx);
+SUPR0_EXPORT_SYMBOL(SUPR0EnableHwvirt);
 
 
 SUPR0DECL(int) SUPR0GetCurrentGdtRw(RTHCUINTPTR *pGdtRw)

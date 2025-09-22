@@ -473,7 +473,7 @@ static int supInitFake(PSUPDRVSESSION *ppSession)
         { "SUPR0MemFree",                           0, 0xefef000a },
         { "SUPR0Printf",                            0, 0xefef000b },
         { "SUPR0GetPagingMode",                     0, 0xefef000c },
-        { "SUPR0EnableVTx",                         0, 0xefef000e },
+        { "SUPR0EnableHwvirt",                      0, 0xefef000e },
         { "RTMemAlloc",                             0, 0xefef000f },
         { "RTMemAllocZ",                            0, 0xefef0010 },
         { "RTMemFree",                              0, 0xefef0011 },
