@@ -3998,8 +3998,9 @@ static int vmxHCImportGuestStateInner(PVMCPUCC pVCpu, PVMXVMCSINFO pVmcsInfo, ui
 {
     Assert(a_fWhat != 0); /* No AssertCompile as the assertion probably kicks in before the compiler (clang) discards it. */
     AssertCompile(!(a_fWhat & ~HMVMX_CPUMCTX_EXTRN_ALL));
-    Assert(   (pVCpu->cpum.GstCtx.fExtrn & a_fWhat) == a_fWhat
-           || (pVCpu->cpum.GstCtx.fExtrn & a_fWhat) == (a_fWhat & ~(CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS)));
+    AssertMsg(   (pVCpu->cpum.GstCtx.fExtrn & a_fWhat) == a_fWhat
+              || (pVCpu->cpum.GstCtx.fExtrn & a_fWhat) == (a_fWhat & ~(CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS)),
+              ("fExtrn=%#RX64 a_fWhat=%#RX64\n", pVCpu->cpum.GstCtx.fExtrn, a_fWhat));
 
     STAM_PROFILE_ADV_STOP(&VCPU_2_VMXSTATS(pVCpu).StatImportGuestState, x);
 
