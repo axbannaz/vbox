@@ -188,6 +188,12 @@ class VBoxNetSlirpNAT
     struct sockaddr_in m_src4;
     struct sockaddr_in6 m_src6;
 
+    /**
+     * Loopback map holders.
+     */
+    ip4_lomap m_lo2off[10];
+    ip4_lomap_desc m_loOptDescriptor;
+
     uint16_t m_u16Mtu;
 
     unsigned int nsock;
@@ -752,6 +758,123 @@ int VBoxNetSlirpNAT::initIPv4()
             LogRel(("Failed to parse \"%s\" IPv4 source address specification\n",
                     strSourceIp4.c_str()));
         }
+    }
+
+    /* Make host's loopback(s) available from inside the natnet */
+    initIPv4LoopbackMap();
+
+    return VINF_SUCCESS;
+}
+
+/**
+ * Init mapping from the natnet's IPv4 addresses to host's IPv4
+ * loopbacks.  Plural "loopbacks" because it's now quite common to run
+ * services on loopback addresses other than 127.0.0.1.  E.g. a
+ * caching dns proxy on 127.0.1.1 or 127.0.0.53.
+ */
+int VBoxNetSlirpNAT::initIPv4LoopbackMap()
+{
+    HRESULT hrc;
+    int rc;
+
+    com::SafeArray<BSTR> aStrLocalMappings;
+    hrc = m_net->COMGETTER(LocalMappings)(ComSafeArrayAsOutParam(aStrLocalMappings));
+    if (FAILED(hrc))
+    {
+        reportComError(m_net, "LocalMappings", hrc);
+        return VERR_GENERAL_FAILURE;
+    }
+
+    if (aStrLocalMappings.size() == 0)
+        return VINF_SUCCESS;
+
+
+    /* netmask in host order, to verify the offsets */
+    /** @todo r=jack: I'm doing this quickly. Come back and check that it's in correct byte order. */
+    uint32_t uMask = RT_N2H_U32(m_ProxyOptions.vnetmask.s_addr);
+
+
+    /*
+     * Process mappings of the form "127.x.y.z=off"
+     */
+    unsigned int dst = 0;      /* typeof(ip4_lomap_desc::num_lomap) */
+    for (size_t i = 0; i < aStrLocalMappings.size(); ++i)
+    {
+        com::Utf8Str strMapping(aStrLocalMappings[i]);
+        const char *pcszRule = strMapping.c_str();
+        LogRel(("IPv4 loopback mapping %zu: %s\n", i, pcszRule));
+
+        RTNETADDRIPV4 Loopback4;
+        char *pszNext;
+        rc = RTNetStrToIPv4AddrEx(pcszRule, &Loopback4, &pszNext);
+        if (RT_FAILURE(rc))
+        {
+            LogRel(("Failed to parse IPv4 address: %Rra\n", rc));
+            continue;
+        }
+
+        if (Loopback4.au8[0] != 127)
+        {
+            LogRel(("Not an IPv4 loopback address\n"));
+            continue;
+        }
+
+        if (rc != VWRN_TRAILING_CHARS)
+        {
+            LogRel(("Missing right hand side\n"));
+            continue;
+        }
+
+        pcszRule = RTStrStripL(pszNext);
+        if (*pcszRule != '=')
+        {
+            LogRel(("Invalid rule format\n"));
+            continue;
+        }
+
+        pcszRule = RTStrStripL(pcszRule+1);
+        if (*pszNext == '\0')
+        {
+            LogRel(("Empty right hand side\n"));
+            continue;
+        }
+
+        uint32_t u32Offset;
+        rc = RTStrToUInt32Ex(pcszRule, &pszNext, 10, &u32Offset);
+        if (rc != VINF_SUCCESS && rc != VWRN_TRAILING_SPACES)
+        {
+            LogRel(("Invalid offset\n"));
+            continue;
+        }
+
+        if (u32Offset <= 1 || u32Offset == ~uMask)
+        {
+            LogRel(("Offset maps to a reserved address\n"));
+            continue;
+        }
+
+        if ((u32Offset & uMask) != 0)
+        {
+            LogRel(("Offset exceeds the network size\n"));
+            continue;
+        }
+
+        if (dst >= RT_ELEMENTS(m_lo2off))
+        {
+            LogRel(("Ignoring the mapping, too many mappings already\n"));
+            continue;
+        }
+
+        m_lo2off[dst].loaddr = Loopback4.u;
+        m_lo2off[dst].off = u32Offset;
+        ++dst;
+    }
+
+    if (dst > 0)
+    {
+        m_loOptDescriptor.lomap = m_lo2off;
+        m_loOptDescriptor.num_lomap = dst;
+        m_ProxyOptions.mLoopbackMap = &m_loOptDescriptor;
     }
 
     return VINF_SUCCESS;

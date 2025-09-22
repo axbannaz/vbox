@@ -301,8 +301,8 @@ static void bootp_reply(Slirp *slirp,
             }
 #else
             *q++ = RFC1533_DNS;
-            *q++ = 4;
-            memcpy(q, &slirp->vnameserver_addr, 4);
+            *q++ = 4; // vbox r=jack: length? also they must increment one uint8_t here
+            memcpy(q, &slirp->vnameserver_addr, 4); // vbox r=jack: this is where the addresses go?
             q += 4;
 #endif
         }

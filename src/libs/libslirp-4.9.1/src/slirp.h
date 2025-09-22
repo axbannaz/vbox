@@ -225,6 +225,7 @@ struct Slirp {
     struct in_addr *aRealNameservers;
     size_t cRealNameservers;
     bool fDisableIPv6RA;
+    const struct ip4_lomap_desc *mLoopbackMap;
 #endif
 };
 

@@ -121,6 +121,24 @@ typedef enum SlirpTimerId {
     SLIRP_TIMER_NUM,
 } SlirpTimerId;
 
+#ifdef VBOX
+struct ip4_lomap
+{
+#ifndef RT_OS_WINDOWS
+    in_addr_t loaddr;
+#else
+    uint32_t loaddr;
+#endif
+    uint32_t off;
+};
+
+struct ip4_lomap_desc
+{
+    const struct ip4_lomap *lomap;
+    unsigned int num_lomap;
+};
+#endif
+
 /*
  * Callbacks from slirp, to be set by the application.
  *
@@ -287,6 +305,11 @@ typedef struct SlirpConfig {
      * Disable default route advertisements for IPv6
      */
     bool fDisableIPv6RA;
+
+    /*
+     * Loopback map.
+     */
+     const struct ip4_lomap_desc *mLoopbackMap;
 #endif
 } SlirpConfig;
 
