@@ -2525,8 +2525,6 @@ IEM_CIMPL_DEF_2(iemCImpl_retf, IEMMODE, enmEffOpSize, uint16_t, cbPop)
         else
             pVCpu->cpum.GstCtx.sp            = (uint16_t)NewOuterRsp.u;
 
-        iemRecalcExecModeAndCplAndAcFlags(pVCpu); /* Affects iemRegAddToRspEx and the setting of RSP/SP below.  */
-
         /** @todo check if the hidden bits are loaded correctly for 64-bit
          *        mode. */
     }
