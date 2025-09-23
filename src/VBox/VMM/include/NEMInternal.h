@@ -547,9 +547,10 @@ typedef struct NEMCPU
 
     /** @name Statistics
      * @{ */
-    STAMCOUNTER                 StatExitPortIo;
     STAMCOUNTER                 StatExitMemUnmapped;
+# if !defined(VBOX_VMM_TARGET_ARMV8)
     STAMCOUNTER                 StatExitMemIntercept;
+    STAMCOUNTER                 StatExitPortIo;
     STAMCOUNTER                 StatExitHalt;
     STAMCOUNTER                 StatExitInterruptWindow;
     STAMCOUNTER                 StatExitCpuId;
@@ -561,7 +562,14 @@ typedef struct NEMCPU
     STAMCOUNTER                 StatExitExceptionGpMesa;
     STAMCOUNTER                 StatExitExceptionUd;
     STAMCOUNTER                 StatExitExceptionUdHandled;
+# endif
+# if defined(VBOX_VMM_TARGET_ARMV8)
+    STAMCOUNTER                 StatExitMemUnmappedToIem;
+    STAMCOUNTER                 StatExitHypercall;
+    STAMCOUNTER                 StatExitCanceled;
+# endif
     STAMCOUNTER                 StatExitUnrecoverable;
+# if !defined(VBOX_VMM_TARGET_ARMV8)
     STAMCOUNTER                 StatGetMsgTimeout;
     STAMCOUNTER                 StatStopCpuSuccess;
     STAMCOUNTER                 StatStopCpuPending;
@@ -569,6 +577,7 @@ typedef struct NEMCPU
     STAMCOUNTER                 StatStopCpuPendingOdd;
     STAMCOUNTER                 StatCancelChangedState;
     STAMCOUNTER                 StatCancelAlertedThread;
+# endif
     STAMCOUNTER                 StatBreakOnCancel;
     STAMCOUNTER                 StatBreakOnFFPre;
     STAMCOUNTER                 StatBreakOnFFPost;
@@ -685,7 +694,7 @@ typedef struct NEMCPU
     STAMCOUNTER                 StatExitExcpWfxInsn;
     STAMCOUNTER                 StatExitExcpBrkInsn;
     STAMCOUNTER                 StatExitExcpSsFromLowerEl;
-#endif
+# endif
 # ifdef VBOX_WITH_STATISTICS
     STAMPROFILEADV              StatProfGstStateImport;
     STAMPROFILEADV              StatProfGstStateExport;
