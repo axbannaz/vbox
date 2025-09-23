@@ -49,7 +49,7 @@ struct sg_table *vbox_gem_prime_get_sg_table(struct drm_gem_object *obj)
 	return ERR_PTR(-ENOSYS);
 }
 
-#if RTLNX_VER_MAX(6,15,0)
+#if RTLNX_VER_MAX(6,15,0) && !RTLNX_RHEL_RANGE(9,7, 9,99)
 # if RTLNX_VER_MAX(3,18,0) && !RTLNX_RHEL_MAJ_PREREQ(7,2)
 struct drm_gem_object *vbox_gem_prime_import_sg_table(
 	struct drm_device *dev, size_t size, struct sg_table *table)

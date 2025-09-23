@@ -43,12 +43,16 @@
 # include <drm/drm_probe_helper.h>
 #endif
 
-#if RTLNX_VER_MIN(6,13,0) && defined(CONFIG_APERTURE_HELPERS)
+#if RTLNX_VER_MIN(6,13,0) && defined(CONFIG_APERTURE_HELPERS) || RTLNX_RHEL_RANGE(9,7, 9,99)
 # include <linux/aperture.h>
 #endif
 
 #if RTLNX_VER_RANGE(5,14,0, 6,13,0) || RTLNX_RHEL_RANGE(8,6, 8,99)
-# include <drm/drm_aperture.h>
+/** RHEL 9.7 is based on 5.14, however this header is not available
+ * there due to backports from newer kernels. */
+# if !RTLNX_RHEL_RANGE(9,7, 9,99)
+#  include <drm/drm_aperture.h>
+# endif
 #endif
 
 #include "version-generated.h"
@@ -98,7 +102,7 @@ static int vbox_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	}
 #endif
 
-# if RTLNX_VER_MIN(6,13,0) && defined(CONFIG_APERTURE_HELPERS)
+# if RTLNX_VER_MIN(6,13,0) && defined(CONFIG_APERTURE_HELPERS) || RTLNX_RHEL_RANGE(9,7, 9,99)
 	ret = aperture_remove_conflicting_pci_devices(pdev, driver.name);
 # elif RTLNX_VER_RANGE(5,14,0, 6,13,0) || RTLNX_RHEL_RANGE(8,6, 8,99)
 #  if RTLNX_VER_MIN(5,15,0) || RTLNX_RHEL_RANGE(8,7, 8,99) || RTLNX_RHEL_MIN(9,1) || RTLNX_SUSE_MAJ_PREREQ(15,4)
@@ -395,10 +399,10 @@ static struct drm_driver driver = {
 #endif
 	.name = DRIVER_NAME,
 	.desc = DRIVER_DESC,
-#if RTLNX_VER_MAX(6,14,0)
+#if RTLNX_VER_MAX(6,14,0) && !RTLNX_RHEL_RANGE(9,7, 9,99)
 	.date = DRIVER_DATE,
 #endif
-#if RTLNX_VER_MIN(6,15,0)
+#if RTLNX_VER_MIN(6,15,0) || RTLNX_RHEL_RANGE(9,7, 9,99)
 	.fbdev_probe = vboxfb_create,
 #endif
 	.major = DRIVER_MAJOR,
@@ -420,7 +424,7 @@ static struct drm_driver driver = {
 	.prime_fd_to_handle = drm_gem_prime_fd_to_handle,
 #endif
 	.gem_prime_import = drm_gem_prime_import,
-#if RTLNX_VER_MAX(6,15,0)
+#if RTLNX_VER_MAX(6,15,0) && !RTLNX_RHEL_RANGE(9,7, 9,99)
 	.gem_prime_import_sg_table = vbox_gem_prime_import_sg_table,
 #endif
 #if RTLNX_VER_MAX(6,6,0) && !RTLNX_RHEL_RANGE(9,4, 9,99) && !RTLNX_SUSE_MAJ_PREREQ(15, 6)
