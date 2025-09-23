@@ -183,7 +183,11 @@ Additional things to do:"
                 $ sudo nvram boot-args="kext-dev-mode=1"
        And then run the following:
           $ sudo nvram boot-args="keepsyms=1"
-
+    8. Disable AVB/EAV mode for the ethernet connection as it can otherwise cause
+       unstable network connections.
+       Go to the System Settings panel -> Network -> Ethernet -> Details -> Hardware
+       Switch "Configure" from "Automatically" to "Manually" and disable "AVB/EAV mode"
+       at the bottom.
 Enjoy!
 EOF
 }
