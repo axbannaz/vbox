@@ -3724,10 +3724,6 @@ IEM_CIMPL_DEF_1(iemCImpl_iret_64bit, IEMMODE, enmEffOpSize)
     pVCpu->cpum.GstCtx.cs.Attr.u     = X86DESC_GET_HID_ATTR(&DescCS.Legacy);
     pVCpu->cpum.GstCtx.cs.u32Limit   = cbLimitCS;
     pVCpu->cpum.GstCtx.cs.u64Base    = X86DESC_BASE(&DescCS.Legacy);
-    if (pVCpu->cpum.GstCtx.cs.Attr.n.u1Long || pVCpu->cpum.GstCtx.cs.Attr.n.u1DefBig)
-        pVCpu->cpum.GstCtx.rsp       = uNewRsp;
-    else
-        pVCpu->cpum.GstCtx.sp        = (uint16_t)uNewRsp;
     pVCpu->cpum.GstCtx.ss.Sel        = uNewSs;
     pVCpu->cpum.GstCtx.ss.ValidSel   = uNewSs;
     if (!(uNewSs & X86_SEL_MASK_OFF_RPL))
@@ -3746,6 +3742,13 @@ IEM_CIMPL_DEF_1(iemCImpl_iret_64bit, IEMMODE, enmEffOpSize)
         pVCpu->cpum.GstCtx.ss.u64Base    = X86DESC_BASE(&DescSS.Legacy);
         Log2(("iret/64 new SS: base=%#RX64 lim=%#x attr=%#x\n", pVCpu->cpum.GstCtx.ss.u64Base, pVCpu->cpum.GstCtx.ss.u32Limit, pVCpu->cpum.GstCtx.ss.Attr.u));
     }
+
+    if (pVCpu->cpum.GstCtx.cs.Attr.n.u1Long)
+        pVCpu->cpum.GstCtx.rsp = uNewRsp;
+    else if (pVCpu->cpum.GstCtx.ss.Attr.n.u1DefBig)
+        pVCpu->cpum.GstCtx.rsp = (uint32_t)uNewRsp;
+    else
+        pVCpu->cpum.GstCtx.sp  = (uint16_t)uNewRsp;
 
     if (IEM_GET_CPL(pVCpu) != uNewCpl)
     {
