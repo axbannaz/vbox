@@ -336,6 +336,7 @@ static void vmmdevLogGuestOsInfo(VBoxGuestInfo *pGuestInfo)
             case VBOXOSTYPE_Win2k22_x64:                  pszOs = "Windows Server 2022"; break;
             case VBOXOSTYPE_Win2k25_x64:                  pszOs = "Windows Server 2025"; break;
             case VBOXOSTYPE_Win11_x64:                    pszOs = "Windows 11";     break;
+            case VBOXOSTYPE_Win11_arm64:                  pszOs = "Windows 11";     break;
             default:                                      pszOs = "unknown";        break;
         }
     }
