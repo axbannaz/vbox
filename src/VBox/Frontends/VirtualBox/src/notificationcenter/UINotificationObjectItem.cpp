@@ -197,10 +197,21 @@ void UINotificationObjectItem::paintEvent(QPaintEvent *pPaintEvent)
 {
     /* Prepare painter: */
     QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
     painter.setClipRect(pPaintEvent->rect());
     /* Acquire palette: */
     const bool fActive = isActiveWindow();
     QPalette pal = QApplication::palette();
+
+    /* Prepare effective frame rectangle: */
+#ifdef VBOX_WS_WIN
+    // WORKAROUND:
+    // Fixing off-by-one problem on Windows:
+    QRectF adjustedRect = rect().adjusted(0, 0, -1, -1);
+    QRectF effectiveRect = adjustedRect.translated(0.5, 0.5);
+#else
+    QRectF effectiveRect = rect();
+#endif
 
     /* Gather suitable colors: */
     QColor color = pal.color(fActive ? QPalette::Active : QPalette::Inactive, QPalette::Window);
@@ -223,7 +234,7 @@ void UINotificationObjectItem::paintEvent(QPaintEvent *pPaintEvent)
         grad.setColorAt(1, color2);
     }
     /* Fill background: */
-    painter.fillRect(rect(), grad);
+    painter.fillRect(effectiveRect, grad);
 
     /* If item is hovered: */
     if (m_fHovered)
@@ -233,7 +244,7 @@ void UINotificationObjectItem::paintEvent(QPaintEvent *pPaintEvent)
         /* Override painter pen: */
         painter.setPen(color3);
         /* Draw frame: */
-        painter.drawRect(rect());
+        painter.drawRect(effectiveRect);
     }
 }
 
