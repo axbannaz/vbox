@@ -549,7 +549,6 @@ typedef struct NEMCPU
      * @{ */
     STAMCOUNTER                 StatExitMemUnmapped;
 # if !defined(VBOX_VMM_TARGET_ARMV8)
-    STAMCOUNTER                 StatExitMemIntercept;
     STAMCOUNTER                 StatExitPortIo;
     STAMCOUNTER                 StatExitHalt;
     STAMCOUNTER                 StatExitInterruptWindow;
@@ -565,6 +564,8 @@ typedef struct NEMCPU
 # endif
 # if defined(VBOX_VMM_TARGET_ARMV8)
     STAMCOUNTER                 StatExitMemUnmappedToIem;
+    STAMCOUNTER                 StatExitMemIntercept;
+    STAMCOUNTER                 StatExitMemInterceptToIem;
     STAMCOUNTER                 StatExitHypercall;
     STAMCOUNTER                 StatExitCanceled;
 # endif
