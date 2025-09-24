@@ -64,9 +64,9 @@ class SubTstDrvImportExportEFIVM1(base.SubTestDriverBase):
     Sub-test driver for importing and exporting an EFI-based VM.
     """
     def __init__(self, oTstDrv):
-        base.SubTestDriverBase.__init__(self, oTstDrv, 'tst-ubuntu-wily-werewolf-EFI', 'Import and Export an EFI-based VM');
-        self.sVmName = 'tst-ubuntu-wily-werewolf-EFI';
-        self.asRsrcs = ['6.1/efi/ubuntu-15_10-efi-amd64.vdi'];
+        base.SubTestDriverBase.__init__(self, oTstDrv, 'tst-Windows-11-EFI', 'Import and Export an EFI-based VM');
+        self.sTestName = 'tdImportExport1';
+        self.sVmName = 'tst-' + self.sTestName;
 
     #
     # Overridden methods specified in the TestDriverBase class (testdriver/base.py).
@@ -75,22 +75,33 @@ class SubTstDrvImportExportEFIVM1(base.SubTestDriverBase):
     # Handle the action to execute the test itself.
     def testIt(self):
         """
-        Create a test VM using the Ubuntu 15.10 VDI and configure it to use EFI.
-        We also copy the associated NVRAM file from the test resources share to
-        the VM's machine folder.  This then sets things up for testing the export
-        of the VM into an OVF appliance which we then import into a new VM.  In
-        both the export and import scenarios we verify that the VM's NVRAM is
-        included in the OVA file on export and is placed in the VM's machine
+        Create a test VM using a Windows 11 VDI and configure it to use EFI.
+        We also copy the associated NVRAM file from the Validation Kit API tests
+        directory to the VM's machine folder.  This then sets things up for testing
+        the export of the VM into an OVF appliance which we then import into a new
+        VM.  In both the export and import scenarios we verify that the VM's NVRAM
+        is included in the OVA file on export and is placed in the VM's machine
         folder on import.
         """
         reporter.log('Creating test VM with EFI firmware: \'%s\'' % self.sVmName);
-        oVM = self.oTstDrv.createTestVM(self.sVmName, 1, sHd = '6.1/efi/ubuntu-15_10-efi-amd64.vdi',
-                                        sKind = 'Ubuntu15_64', fIoApic = True, sFirmwareType = 'efi',
+        oVM = self.oTstDrv.createTestVM(self.sVmName, 1, sKind = 'Windows11_64', sFirmwareType = 'efi',
                                         sDvdImage = self.oTstDrv.sVBoxValidationKitIso);
         if oVM is None:
             reporter.error('Error creating test VM: \'%s\'' % self.sVmName);
 
-        sNvramSrcPath = self.oTstDrv.getFullResourceName('6.1/efi/ubuntu-15_10-efi-amd64.nvram');
+        oSession = self.oTstDrv.openSession(oVM);
+        if oSession is None:
+            return False;
+
+        fRc = oSession.attachHd(os.path.join(g_ksValidationKitDir, 'tests', 'api', self.sTestName + '-t1.vdi'),
+                                fForceResource=False);
+        if fRc:
+            fRc = oSession.saveSettings(fClose=True);
+        oSession = None;
+        if not fRc:
+            return False;
+
+        sNvramSrcPath = os.path.join(g_ksValidationKitDir, 'tests', 'api', self.sTestName + '-t1.nvram');
         sNvramTargetPath = os.path.join(self.oTstDrv.oVBox.systemProperties.defaultMachineFolder, self.sVmName,
                                         self.sVmName + '.nvram');
         reporter.log('Copying NVRAM file from \'%s\' to \'%s\'' % (sNvramSrcPath, sNvramTargetPath));
@@ -107,7 +118,7 @@ class SubTstDrvImportExportEFIVM1(base.SubTestDriverBase):
     #
     def testExportVmWithEfiFirmware(self, oVM, sOvaPath):
         """
-        Export the Ubuntu 15.10 EFI-based VM into an OVF appliance and verify its
+        Export the Windows 11 EFI-based VM into an OVF appliance and verify its
         NVRAM file is present in the resultant OVA file.
         """
         reporter.testStart('testExportVmWithEfiFirmware');
@@ -167,7 +178,7 @@ class SubTstDrvImportExportEFIVM1(base.SubTestDriverBase):
 
     def testImportVmWithEfiFirmware(self, sOvaPath):
         """
-        Import the appliance containing the Ubuntu 15.10 EFI-based VM and then
+        Import the appliance containing the Windows 11 EFI-based VM and then
         verify the NVRAM file in the OVA file is properly extracted into the
         imported VM's machine folder.
         """
