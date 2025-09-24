@@ -149,11 +149,12 @@ inline C *unconst(const C *that)
  * @param a_rVector     The destination vector reference.
  * @param a_aSrcArray   The source array to assign to the vector.
  */
-#if RT_GNUC_PREREQ(13, 0) && !RT_GNUC_PREREQ(14, 0) && defined(VBOX_WITH_GCC_SANITIZER)
+#if RT_GNUC_PREREQ(13, 0) && !RT_GNUC_PREREQ(16, 0) && defined(VBOX_WITH_GCC_SANITIZER)
 /* Workaround for g++ 13.2 incorrectly failing on arrays with a single entry in ASAN builds.
    This is restricted to [13.0, 14.0), assuming the issue was introduced in the 13 cycle
    and will be fixed by the time 14 is done.  If 14 doesn't fix it, extend the range
-   version by version till it is fixed. */
+   version by version till it is fixed. 
+   Extended to 16.0 to deal with g++ 15.2.1 on Fedora 42. */
 # define RT_CPP_VECTOR_ASSIGN_ARRAY(a_rVector, a_aSrcArray) do { \
         _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wstringop-overread\""); \
         (a_rVector).assign(&a_aSrcArray[0], &a_aSrcArray[RT_ELEMENTS(a_aSrcArray)]); \
