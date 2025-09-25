@@ -465,6 +465,6 @@ static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
  */
 VMMR3_INT_DECL(void) GCMR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
 {
-    VMR3ReqPriorityCallWait(pVM, 0 /*idDstCpu*/, (PFNRT)gcmR3PatchGuest, 3, pVM, enmPatch);
+    VMR3ReqPriorityCallWait(pVM, 0 /*idDstCpu*/, (PFNRT)gcmR3PatchGuest, 2, pVM, enmPatch);
 }
 
