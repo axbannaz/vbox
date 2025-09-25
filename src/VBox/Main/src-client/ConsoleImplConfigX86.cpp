@@ -1995,7 +1995,7 @@ int Console::i_configConstructorX86(PUVM pUVM, PVM pVM, PCVMMR3VTABLE pVMM, Auto
             bool fLnxIoApicBugPatching = GetExtraDataBoth(virtualBox, pMachine,
                                                           "VBoxInternal2/LinuxIoApicPatching", &strTmp)->equals("1");
             if (fLnxIoApicBugPatching)
-                InsertConfigInteger(pCfg, "GcmPatchIdOnAcpiEnable", kGcmGstPatchId_LinuxIoApicBug);
+                InsertConfigInteger(pCfg, "GcmPatchIdOnAcpiEnable", (uint32_t)kGcmGstPatchId_LinuxIoApicBug);
 
             InsertConfigNode(pInst,    "LUN#0", &pLunL0);
             InsertConfigString(pLunL0, "Driver",               "ACPIHost");
