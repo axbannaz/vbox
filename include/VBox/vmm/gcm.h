@@ -59,7 +59,7 @@ VMMR3_INT_DECL(void)        GCMR3Reset(PVM pVM);
 typedef enum GCMGSTPATCHID
 {
     kGcmGstPatchId_Invalid        = 0,
-    kGcmGstPatchId_LinuxIoApicBug = 0xdead0001,
+    kGcmGstPatchId_LinuxIoApicBug = 0x0dead001,
     kGcmGstPatchId_32Bit_Hack     = 0x7ffffff
 } GCMGSTPATCHID;
 
