@@ -117,7 +117,7 @@ RT_CONCAT3(iemMemFetchDataPair,TMPL_MEM_FN_SUFF,SafeJmp)(PVMCPUCC pVCpu, RTGCPTR
     pVCpu->iem.s.DataTlb.cTlbSafeReadPath++;
 #  endif
     uint8_t              bUnmapInfo;
-    TMPL_MEM_TYPE const *pSrc = (TMPL_MEM_TYPE const *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(*pSrc), GCPtrMem,
+    TMPL_MEM_TYPE const *pSrc = (TMPL_MEM_TYPE const *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(TMPL_MEM_TYPE) * 2, GCPtrMem,
                                                                         IEM_ACCESS_DATA_R, TMPL_MEM_TYPE_ALIGN | TMPL_MEM_MAP_FLAGS_ADD);
     *pDst1 = pSrc[0];
     *pDst2 = pSrc[1];
@@ -132,7 +132,7 @@ RT_CONCAT3(iemMemFetchDataPair,TMPL_MEM_FN_SUFF,SafeJmp)(PVMCPUCC pVCpu, RTGCPTR
     pVCpu->iem.s.DataTlb.cTlbSafeReadPath++;
 #  endif
     uint8_t              bUnmapInfo;
-    TMPL_MEM_TYPE const *puSrc = (TMPL_MEM_TYPE const *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(*puSrc), GCPtrMem,
+    TMPL_MEM_TYPE const *puSrc = (TMPL_MEM_TYPE const *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(TMPL_MEM_TYPE) * 2, GCPtrMem,
                                                                          IEM_ACCESS_DATA_R, TMPL_MEM_TYPE_ALIGN | TMPL_MEM_MAP_FLAGS_ADD);
     TMPL_MEM_TYPE const  uRet1 = puSrc[0]; /** @todo combine these two if possible... */
     TMPL_MEM_TYPE const  uRet2 = puSrc[1];
@@ -239,7 +239,7 @@ void RT_CONCAT3(iemMemStoreDataPair,TMPL_MEM_FN_SUFF,SafeJmp)(PVMCPUCC pVCpu, RT
     Log6(("IEM WR " TMPL_MEM_FMT_DESC " %RGv: " TMPL_MEM_FMT_TYPE " " TMPL_MEM_FMT_TYPE "\n", GCPtrMem, uValue2, uValue2));
 # endif
     uint8_t        bUnmapInfo;
-    TMPL_MEM_TYPE *puDst = (TMPL_MEM_TYPE *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(*puDst), GCPtrMem,
+    TMPL_MEM_TYPE *puDst = (TMPL_MEM_TYPE *)iemMemMapSafeJmp(pVCpu, &bUnmapInfo, sizeof(TMPL_MEM_TYPE) * 2, GCPtrMem,
                                                              IEM_ACCESS_DATA_W, TMPL_MEM_TYPE_ALIGN | TMPL_MEM_MAP_FLAGS_ADD);
 # ifdef TMPL_MEM_BY_REF
     puDst[0] = *pValue1;
