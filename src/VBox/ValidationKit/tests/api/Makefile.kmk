@@ -67,7 +67,9 @@ endif
 ValidationKitTestsApi_SOURCES := \
 	$(wildcard \
 		$(PATH_SUB_CURRENT)/*.ova \
-		)
+		) \
+	$(PATH_SUB_CURRENT)/tdImportExport1-t1.nvram \
+	$(PATH_SUB_CURRENT)/tdImportExport1-t1.vdi
 
 VBOX_VALIDATIONKIT_PYTHON_SOURCES += $(ValidationKitTestsApi_EXEC_SOURCES)
 
