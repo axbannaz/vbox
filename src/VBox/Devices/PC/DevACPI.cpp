@@ -587,9 +587,12 @@ typedef struct ACPISTATER3
     /** The size of the custom table binary. */
     uint64_t            acbCustBin[MAX_CUST_TABLES];
 
-    /** GCM patch ID to ty for the guest if configured and ACPI
+    /** GCM patch ID to try for the guest if configured and ACPI
      * is enabled for the first time. */
     GCMGSTPATCHID       enmGcmPatch;
+    /** Configured GCM patch ID to try for the guest if configured and ACPI
+     * is enabled for the first time. */
+    GCMGSTPATCHID       enmGcmPatchCfg;
 } ACPISTATER3;
 /** Pointer to the ring-3 ACPI device state. */
 typedef ACPISTATER3 *PACPISTATER3;
@@ -4255,6 +4258,8 @@ static DECLCALLBACK(void) acpiR3Reset(PPDMDEVINS pDevIns)
     acpiR3UpdateSMBusHandlers(pDevIns, pThis, SMB_PORT_BASE);
     acpiR3SMBusPCIBIOSFake(pDevIns, pThis);
     acpiR3SMBusResetDevice(pThis);
+
+    pThisCC->enmGcmPatch = pThisCC->enmGcmPatchCfg;
 }
 
 /**
@@ -4625,9 +4630,10 @@ static DECLCALLBACK(int) acpiR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFG
         return PDMDEV_SET_ERROR(pDevIns, rc, N_("Configuration error: Failed to read \"TpmMmioAddress\""));
 #endif
 
-    rc = pHlp->pfnCFGMQueryU32Def(pCfg, "GcmPatchIdOnAcpiEnable", (uint32_t *)&pThisCC->enmGcmPatch, kGcmGstPatchId_Invalid);
+    rc = pHlp->pfnCFGMQueryU32Def(pCfg, "GcmPatchIdOnAcpiEnable", (uint32_t *)&pThisCC->enmGcmPatchCfg, kGcmGstPatchId_Invalid);
     if (RT_FAILURE(rc))
         return PDMDEV_SET_ERROR(pDevIns, rc, N_("Configuration error: Failed to read \"GcmPatchId\""));
+    pThisCC->enmGcmPatch = pThisCC->enmGcmPatchCfg;
 
 
     /* Try to attach the other CPUs */
