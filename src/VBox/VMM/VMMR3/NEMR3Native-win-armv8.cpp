@@ -2257,6 +2257,8 @@ DECLINLINE(uint64_t) nemR3WinGetGReg(PVMCPU pVCpu, uint8_t uReg)
  * @param   pVM             The cross context VM structure.
  * @param   pVCpu           The cross context per CPU structure.
  * @param   pExit           The VM exit information to handle.
+ * @param   fUnmappedExit   Set if WHvRunVpExitReasonUnmappedGpa,
+ *                          clear if WHvRunVpExitReasonGpaIntercept.
  * @sa      nemHCWinHandleMessageMemory
  */
 NEM_TMPL_STATIC VBOXSTRICTRC
