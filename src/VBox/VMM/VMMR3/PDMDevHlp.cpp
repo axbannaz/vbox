@@ -39,6 +39,7 @@
 #include <VBox/vmm/pgm.h>
 #include <VBox/vmm/iom.h>
 #include <VBox/vmm/dbgf.h>
+#include <VBox/vmm/gcm.h>
 #include <VBox/vmm/ssm.h>
 #include <VBox/vmm/vmapi.h>
 #include <VBox/vmm/vmm.h>
@@ -4955,6 +4956,24 @@ static DECLCALLBACK(PGIMMMIO2REGION) pdmR3DevHlp_GIMGetMmio2Regions(PPDMDEVINS p
 }
 
 
+/** @interface_method_impl{PDMDEVHLPR3,pfnGCMTriggerPatch} */
+static DECLCALLBACK(void) pdmR3DevHlp_GCMTriggerPatch(PPDMDEVINS pDevIns, GCMGSTPATCHID enmPatch)
+{
+    PDMDEV_ASSERT_DEVINS(pDevIns);
+
+    LogFlow(("pdmR3DevHlp_GCMTriggerPatch: caller='%s'/%d: enmPatch=%#x\n",
+             pDevIns->pReg->szName, pDevIns->iInstance, enmPatch));
+
+#ifdef VBOX_VMM_TARGET_X86
+    GCMR3PatchGuest(pDevIns->Internal.s.pVMR3, enmPatch);
+#else
+    AssertFailed(); /** @todo */
+#endif
+
+    LogFlow(("pdmR3DevHlp_GCMTriggerPatch: caller='%s'/%d: returns\n", pDevIns->pReg->szName, pDevIns->iInstance));
+}
+
+
 /**
  * The device helper structure for trusted devices.
  */
@@ -5351,6 +5370,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTrusted =
     pdmR3DevHlp_GIMDeviceRegister,
     pdmR3DevHlp_GIMGetDebugSetup,
     pdmR3DevHlp_GIMGetMmio2Regions,
+    pdmR3DevHlp_GCMTriggerPatch,
     PDM_DEVHLPR3_VERSION /* the end */
 };
 
@@ -5752,6 +5772,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpTracing =
     pdmR3DevHlp_GIMDeviceRegister,
     pdmR3DevHlp_GIMGetDebugSetup,
     pdmR3DevHlp_GIMGetMmio2Regions,
+    pdmR3DevHlp_GCMTriggerPatch,
     PDM_DEVHLPR3_VERSION /* the end */
 };
 #endif /* VBOX_WITH_DBGF_TRACING */
@@ -6481,6 +6502,7 @@ const PDMDEVHLPR3 g_pdmR3DevHlpUnTrusted =
     pdmR3DevHlp_Untrusted_GIMDeviceRegister,
     pdmR3DevHlp_Untrusted_GIMGetDebugSetup,
     pdmR3DevHlp_Untrusted_GIMGetMmio2Regions,
+    pdmR3DevHlp_GCMTriggerPatch,
     PDM_DEVHLPR3_VERSION /* the end */
 };
 

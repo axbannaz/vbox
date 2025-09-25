@@ -59,6 +59,7 @@
 #include <VBox/vmm/dbgf.h>
 #include <VBox/vmm/pgm.h> /* PGMR3HandlerPhysicalTypeRegister() argument types. */
 #include <VBox/vmm/gim.h>
+#include <VBox/vmm/gcm.h>
 #include <VBox/err.h>  /* VINF_EM_DBG_STOP, also 120+ source files expecting this. */
 #include <VBox/msi.h>
 #include <iprt/stdarg.h>
@@ -2403,7 +2404,7 @@ typedef const PDMRTCHLP *PCPDMRTCHLP;
 /** @} */
 
 /** Current PDMDEVHLPR3 version number. */
-#define PDM_DEVHLPR3_VERSION                PDM_VERSION_MAKE_PP(0xffe7, 67, 0)
+#define PDM_DEVHLPR3_VERSION                PDM_VERSION_MAKE_PP(0xffe7, 68, 0)
 
 /**
  * PDM Device API.
@@ -5070,6 +5071,14 @@ typedef struct PDMDEVHLPR3
      *          returned pointer.
      */
     DECLR3CALLBACKMEMBER(PGIMMMIO2REGION, pfnGIMGetMmio2Regions,(PPDMDEVINS pDevIns, uint32_t *pcRegions));
+
+    /**
+     * Triggers a GCM guest detection and patching for the given ID.
+     *
+     * @param   pDevIns         Pointer to the GIM device instance.
+     * @param   enmPatch        An individual ID identifying the patching.
+     */
+    DECLR3CALLBACKMEMBER(void, pfnGCMTriggerPatch,(PPDMDEVINS pDevIns, GCMGSTPATCHID enmPatch));
 
     /** @} */
 
@@ -9676,6 +9685,19 @@ DECLINLINE(PGIMMMIO2REGION) PDMDevHlpGIMGetMmio2Regions(PPDMDEVINS pDevIns, uint
 {
     return pDevIns->CTX_SUFF(pHlp)->pfnGIMGetMmio2Regions(pDevIns, pcRegions);
 }
+
+#ifdef IN_RING3
+
+/**
+ * @copydoc PDMDEVHLPR3::pfnGCMTriggerPatch
+ */
+DECLINLINE(void) PDMDevHlpGCMTriggerPatch(PPDMDEVINS pDevIns, GCMGSTPATCHID enmPatch)
+{
+    pDevIns->CTX_SUFF(pHlp)->pfnGCMTriggerPatch(pDevIns, enmPatch);
+}
+
+#endif
+
 
 #ifdef IN_RING3
 

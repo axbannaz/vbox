@@ -64,6 +64,7 @@
 *   Header Files                                                                                                                 *
 *********************************************************************************************************************************/
 #define LOG_GROUP LOG_GROUP_GCM
+#include <VBox/vmm/dbgf.h>
 #include <VBox/vmm/gcm.h>
 #include <VBox/vmm/ssm.h>
 #include "GCMInternal.h"
@@ -398,5 +399,72 @@ VMMR3_INT_DECL(int) GCMR3Term(PVM pVM)
 VMMR3_INT_DECL(void) GCMR3Reset(PVM pVM)
 {
     RT_NOREF(pVM);
+}
+
+
+/**
+ * EMT worker function for GCMR3PatchGuest.
+ *
+ * @param   pUVM        The user mode VM handle.
+ * @param   enmPatch    The ID identifying the patch.
+ */
+static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
+{
+    PUVM pUVM = pVM->pUVM;
+
+    if (enmPatch == kGcmGstPatchId_LinuxIoApicBug)
+    {
+        DBGFR3PlugInLoadAll(pVM->pUVM); /* Need to load all plugins first. */
+
+        /* Need to call the guest OS digger to resovle symbols first. */
+        LogRel(("GCM: Triggered guest specific patching to workaround IO-APIC issue\n"));
+        char szName[32]; RT_ZERO(szName);
+        int rc = DBGFR3OSDetect(pUVM, &szName[0], sizeof(szName));
+        if (rc == VINF_SUCCESS)
+        {
+            LogRel(("GCM:    Detected guest OS %s\n", szName));
+
+            /* Get at the timer_irq_works() function address. */
+            RTDBGSYMBOL Sym;
+            rc = DBGFR3AsSymbolByName(pUVM, DBGF_AS_KERNEL, "timer_irq_works", &Sym, NULL /*phMod*/);
+            if (RT_SUCCESS(rc))
+            {
+                LogRel(("GCM:    \"timer_irq_works()\" is at address %RGv\n", Sym.Value));
+                /* Write the patch (same for 32-bit and 64-bit) and overwrite the entire function. */
+                uint8_t abPatch[] =
+                {
+                    0xfb,                         /* sti */
+                    0xb8, 0x01, 0x00, 0x00, 0x00, /* mov eax, 0x1 */
+                    0xc3                          /* ret */
+                };
+                DBGFADDRESS Addr;
+                rc = DBGFR3MemWrite(pUVM, 0 /*idCpu*/, DBGFR3AddrFromFlat(pUVM, &Addr, Sym.Value), &abPatch[0], sizeof(abPatch));
+                if (RT_SUCCESS(rc))
+                    LogRel(("GCM:    Successfully overwritten \"timer_irq_works()\" to always return true, good luck!\n"));
+                else
+                    LogRel(("GCM:    Overwriting \"timer_irq_works()\" failed with %Rrc\n", rc));
+            }
+            else
+                LogRel(("GCM:    Querying the \"timer_irq_works()\" symbol address failed with %Rrc\n", rc));
+        }
+        else
+            LogRel(("GCM:    Detecting the guest OS failed with %Rrc\n", rc));
+    }
+    else
+        AssertFailed();
+}
+
+
+/**
+ * Triggers a guest patch attempt to workaround an issue identified by the given patch ID.
+ *
+ * @param   pVM      The cross context VM structure.
+ * @param   enmPatch The ID identifying the patch.
+ *
+ * @thread any
+ */
+VMMR3_INT_DECL(void) GCMR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
+{
+    VMR3ReqPriorityCallWait(pVM, 0 /*idDstCpu*/, (PFNRT)gcmR3PatchGuest, 3, pVM, enmPatch);
 }
 

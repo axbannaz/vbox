@@ -55,6 +55,15 @@ RT_C_DECLS_BEGIN
 VMMR3_INT_DECL(int)         GCMR3Init(PVM pVM);
 VMMR3_INT_DECL(int)         GCMR3Term(PVM pVM);
 VMMR3_INT_DECL(void)        GCMR3Reset(PVM pVM);
+
+typedef enum GCMGSTPATCHID
+{
+    kGcmGstPatchId_Invalid        = 0,
+    kGcmGstPatchId_LinuxIoApicBug = 0xdead0001,
+    kGcmGstPatchId_32Bit_Hack     = 0x7ffffff
+} GCMGSTPATCHID;
+
+VMMR3_INT_DECL(void)        GCMR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch);
 /** @} */
 #endif /* IN_RING3 */
 
