@@ -1319,79 +1319,53 @@ static VBOXSTRICTRC tpmMmioCrbWriteInt(PPDMDEVINS pDevIns, PDEVTPM pThis, PDEVTP
  */
 static DECLCALLBACK(VBOXSTRICTRC) tpmMmioCrbRead(PPDMDEVINS pDevIns, void *pvUser, RTGCPHYS off, void *pv, uint32_t cb)
 {
-    PDEVTPM const   pThis  = PDMDEVINS_2_DATA(pDevIns, PDEVTPM);
-#ifdef LOG_ENABLED
-    RTGCPHYS        offOrg = off;
-    void * const    pvOrg  = pv;
-    uint32_t const  cbOrg  = cb;
-#endif
+    PDEVTPM const pThis = PDMDEVINS_2_DATA(pDevIns, PDEVTPM);
     RT_NOREF(pvUser);
     Assert(pThis->fCrb);
 
+    /* Check IOMMMIO_FLAGS_READ_DWORD ASSUMPTIONS: */
+    Assert(cb == sizeof(uint32_t));
+    Assert((off & 3) == 0);
+
     /*
-     * Need to loop here since we're registered as a passthru handler.
+     * Determin the locality and register.
      */
-    do
+    uint32_t const uReg = tpmGetRegisterFromOffset(off);
+    Assert((uReg & 3) == 0);
+    uint8_t const  bLoc = tpmGetLocalityFromOffset(off);
+    Assert(bLoc < RT_ELEMENTS(pThis->aLoc)); /* (This is a function of the MMIO registration.) */
+    PDEVTPMLOCALITY const pLoc = &pThis->aLoc[bLoc];
+
+    /*
+     * Special path for the data buffer.
+     *
+     * Since the buffer is a multiple of DWORDs in size, we don't need to concern
+     * ourselves too much with off + cb considerations.  For now, we return the
+     * following buffer content, should cbCmdResp not be a multiple of 4 as well.
+     */
+    uint32_t const offCmdResp = uReg - TPM_CRB_LOCALITY_REG_DATA_BUFFER;
+    uint32_t const cbCmdResp  = RT_MIN(pThis->cbCmdResp, TPM_DATA_BUFFER_SIZE_MAX); /* paranoia */
+    if (   offCmdResp < cbCmdResp
+        && bLoc == pThis->bLoc
+        && pThis->enmState == DEVTPMSTATE_CMD_COMPLETION)
     {
-        uint32_t const uReg = tpmGetRegisterFromOffset(off);
-        uint8_t const bLoc = tpmGetLocalityFromOffset(off);
-        Assert(bLoc < RT_ELEMENTS(pThis->aLoc)); /* (This is a function of the MMIO registration.) */
-        PDEVTPMLOCALITY pLoc = &pThis->aLoc[bLoc];
+        AssertCompile((TPM_CRB_LOCALITY_REG_DATA_BUFFER & 3) == 0);
+        AssertCompile(((TPM_CRB_LOCALITY_REG_DATA_BUFFER + TPM_DATA_BUFFER_SIZE_MAX) & 3) == 0);
+        uint32_t u32 = *(uint32_t const *)&pThis->abCmdResp[offCmdResp]; /* aligned */
+        *(uint32_t *)pv = u32;
+        LogFlowFunc(("%RGp (LB %#x) -> bLoc=%u offCmdResp=%u -> %#010x\n", off, cb, bLoc, offCmdResp, u32));
+    }
+    /*
+     * The register space is divided into 32-bit parts.  Since we've registered
+     * this as a DWORD-only callback, there is little extrat to do here.
+     */
+    else
+    {
+        uint32_t const u32 = tpmMmioCrbReadInt(pDevIns, pThis, pLoc, bLoc, uReg);
+        *(uint32_t *)pv = u32;
+        LogFlowFunc(("%RGp (LB %#x) -> bLoc=%u uReg=%#x -> %#x\n", off, cb, bLoc, uReg, u32));
+    }
 
-        uint32_t cbThis;
-
-        /* Special path for the data buffer. */
-        uint32_t const offCmdResp = uReg - TPM_CRB_LOCALITY_REG_DATA_BUFFER;
-        uint32_t const cbCmdResp  = RT_MIN(pThis->cbCmdResp, TPM_DATA_BUFFER_SIZE_MAX); /* paranoia */
-        if (   offCmdResp < cbCmdResp
-            && bLoc == pThis->bLoc
-            && pThis->enmState == DEVTPMSTATE_CMD_COMPLETION)
-        {
-            cbThis = cbCmdResp - offCmdResp;
-            if (cbThis >= cb)
-            {
-                memcpy(pv, &pThis->abCmdResp[offCmdResp], cb);
-                cbThis = cb;
-            }
-            else
-            {
-                uint32_t const cbCmdRespMax = TPM_DATA_BUFFER_SIZE_MAX - offCmdResp;
-                memcpy(pv, &pThis->abCmdResp[offCmdResp], cbThis);
-                if (cbCmdRespMax > cbThis)
-                {
-                    /** @todo Is this zero'ed, read as-is or as 0xFFs?  Going with zeros for now
-                     * as that seems safer (original code would just read beyond cbCmdResp). */
-                    RT_BZERO((uint8_t *)pv + cbThis, cbCmdRespMax - cbThis);
-                    cbThis = cbCmdRespMax;
-                }
-            }
-        }
-        else
-        {
-            /* The register space is divided into 32-bit parts. */
-            uint32_t const uRegAligned = uReg & ~UINT32_C(0x3);
-            uint32_t const cBitsShift  = (uReg & UINT32_C(0x3)) * 8;
-            uint32_t const u32 = tpmMmioCrbReadInt(pDevIns, pThis, pLoc, bLoc, uRegAligned);
-            cbThis = RT_MIN(cb, UINT32_C(4) - (uReg & UINT32_C(3)));
-            switch (cbThis)
-            {
-                case 4: *(uint32_t *)pv = u32; break;
-                case 1: *(uint8_t  *)pv = (uint8_t )(u32 >> cBitsShift); break;
-                case 2: *(uint16_t *)pv = (uint16_t)(u32 >> cBitsShift); break;
-                case 3:
-                    *(uint16_t *)pv = (uint16_t)(u32 >> cBitsShift);
-                    *(uint8_t  *)pv = (uint8_t)(u32 >> (cBitsShift + 16));
-                    break;
-            }
-        }
-
-        /* Advance. */
-        pv   = (uint8_t *)pv + cbThis;
-        off += cbThis;
-        cb  -= cbThis;
-    } while (cb > 0);
-
-    LogFlowFunc(("%RGp LB %#x: %.*Rhxs\n", offOrg, cbOrg, cbOrg, pvOrg));
     return VINF_SUCCESS;
 }
 
@@ -1899,7 +1873,7 @@ static DECLCALLBACK(int) tpmR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFGM
      */
     if (pThis->fCrb)
         rc = PDMDevHlpMmioCreateAndMap(pDevIns, pThis->GCPhysMmio, TPM_MMIO_SIZE, tpmMmioCrbWrite, tpmMmioCrbRead,
-                                       IOMMMIO_FLAGS_READ_PASSTHRU | IOMMMIO_FLAGS_WRITE_PASSTHRU,
+                                       IOMMMIO_FLAGS_READ_DWORD | IOMMMIO_FLAGS_WRITE_PASSTHRU,
                                        "TPM MMIO", &pThis->hMmio);
     else
         rc = PDMDevHlpMmioCreateAndMap(pDevIns, pThis->GCPhysMmio, TPM_MMIO_SIZE, tpmMmioFifoWrite, tpmMmioFifoRead,
