@@ -426,26 +426,62 @@ static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
 
             /* Get at the timer_irq_works() function address. */
             RTDBGSYMBOL Sym;
-            rc = DBGFR3AsSymbolByName(pUVM, DBGF_AS_KERNEL, "timer_irq_works", &Sym, NULL /*phMod*/);
+            /*
+             * Try to just set the no_timer_check variable to 1 first if it exists, then we don't need
+             * to patch code.
+             */
+            rc = DBGFR3AsSymbolByName(pUVM, DBGF_AS_KERNEL, "no_timer_check", &Sym, NULL /*phMod*/);
             if (RT_SUCCESS(rc))
             {
-                LogRel(("GCM:    \"timer_irq_works()\" is at address %RGv\n", Sym.Value));
-                /* Write the patch (same for 32-bit and 64-bit) and overwrite the entire function. */
-                uint8_t abPatch[] =
-                {
-                    0xfb,                         /* sti */
-                    0xb8, 0x01, 0x00, 0x00, 0x00, /* mov eax, 0x1 */
-                    0xc3                          /* ret */
-                };
+                LogRel(("GCM:    \"no_timer_check\" is at address %RGv\n", Sym.Value));
+
+                int iNoTimerCheck;
                 DBGFADDRESS Addr;
-                rc = DBGFR3MemWrite(pUVM, 0 /*idCpu*/, DBGFR3AddrFromFlat(pUVM, &Addr, Sym.Value), &abPatch[0], sizeof(abPatch));
+                rc = DBGFR3MemRead(pUVM, 0 /*idCpu*/, DBGFR3AddrFromFlat(pUVM, &Addr, Sym.Value), &iNoTimerCheck, sizeof(iNoTimerCheck));
                 if (RT_SUCCESS(rc))
-                    LogRel(("GCM:    Successfully overwritten \"timer_irq_works()\" to always return true, good luck!\n"));
+                {
+                    if (!iNoTimerCheck)
+                    {
+                        iNoTimerCheck = 1;
+                        rc = DBGFR3MemRead(pUVM, 0 /*idCpu*/, &Addr, &iNoTimerCheck, sizeof(iNoTimerCheck));
+                        if (RT_SUCCESS(rc))
+                            LogRel(("GCM:    no_timer_check enabled successfully, good luck!\n"));
+                        else
+                            LogRel(("GCM:    Setting no_timer_check to 1 failed with %Rrc\n", rc));
+                    }
+                    else
+                        LogRel(("GCM:    no_timer_check is already enabled, doing nothing, good luck!\n"));
+                }
                 else
-                    LogRel(("GCM:    Overwriting \"timer_irq_works()\" failed with %Rrc\n", rc));
+                    LogRel(("GCM:    Reading \"no_timer_check\" failed with %Rrc\n", rc));
+            }
+            else if (rc == VERR_NOT_FOUND)
+            {
+                LogRel(("GCM:    Couldn't find \"no_timer_check\", trying \"timer_irq_works\"\n"));
+
+                rc = DBGFR3AsSymbolByName(pUVM, DBGF_AS_KERNEL, "timer_irq_works", &Sym, NULL /*phMod*/);
+                if (RT_SUCCESS(rc))
+                {
+                    LogRel(("GCM:    \"timer_irq_works()\" is at address %RGv\n", Sym.Value));
+                    /* Write the patch (same for 32-bit and 64-bit) and overwrite the entire function. */
+                    uint8_t abPatch[] =
+                    {
+                        0xfb,                         /* sti */
+                        0xb8, 0x01, 0x00, 0x00, 0x00, /* mov eax, 0x1 */
+                        0xc3                          /* ret */
+                    };
+                    DBGFADDRESS Addr;
+                    rc = DBGFR3MemWrite(pUVM, 0 /*idCpu*/, DBGFR3AddrFromFlat(pUVM, &Addr, Sym.Value), &abPatch[0], sizeof(abPatch));
+                    if (RT_SUCCESS(rc))
+                        LogRel(("GCM:    Successfully overwritten \"timer_irq_works()\" to always return true, good luck!\n"));
+                    else
+                        LogRel(("GCM:    Overwriting \"timer_irq_works()\" failed with %Rrc\n", rc));
+                }
+                else
+                    LogRel(("GCM:    Querying the \"timer_irq_works()\" symbol address failed with %Rrc\n", rc));
             }
             else
-                LogRel(("GCM:    Querying the \"timer_irq_works()\" symbol address failed with %Rrc\n", rc));
+                LogRel(("GCM:    Querying the \"no_timer_check\" symbol address failed with %Rrc\n", rc));
         }
         else
             LogRel(("GCM:    Detecting the guest OS failed with %Rrc\n", rc));
