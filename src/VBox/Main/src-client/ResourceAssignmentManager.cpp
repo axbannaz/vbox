@@ -179,7 +179,7 @@ HRESULT ResourceAssignmentManager::State::ensureAdditionalRegions(uint32_t cRegi
 void ResourceAssignmentManager::State::setRegion(PRESOURCEREGION pRegion, const char *pszName, RESOURCEREGIONTYPE enmType,
                                                  RTGCPHYS GCPhysStart, RTGCPHYS GCPhysEnd)
 {
-    strncpy(&pRegion->szName[0], pszName, sizeof(pRegion->szName));
+    strncpy(&pRegion->szName[0], pszName, sizeof(pRegion->szName) - 1);
     pRegion->szName[sizeof(pRegion->szName) - 1] = '\0';
     pRegion->enmType     = enmType;
     pRegion->GCPhysStart = GCPhysStart;
