@@ -4967,6 +4967,7 @@ static DECLCALLBACK(void) pdmR3DevHlp_GCMTriggerPatch(PPDMDEVINS pDevIns, GCMGST
 #ifdef VBOX_VMM_TARGET_X86
     GCMR3PatchGuest(pDevIns->Internal.s.pVMR3, enmPatch);
 #else
+    RT_NOREF(pDevIns, enmPatch);
     AssertFailed(); /** @todo */
 #endif
 
