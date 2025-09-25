@@ -549,7 +549,8 @@ class tdGuestOsInstTest1(vbox.TestDriver):
             UnattendedVm(oSet, 'tst-ubuntu-16.04.5-32', 'Ubuntu',    '6.0/uaisos/ubuntu-16.04.5-desktop-i386.iso'),  # >=4.5GiB
             UnattendedVm(oSet, 'tst-ubuntu-16.04.6-64', 'Ubuntu_64', '6.0/uaisos/ubuntu-16.04.6-desktop-amd64.iso'), # >=5GiB
             UnattendedVm(oSet, 'tst-ubuntu-16.04.6-32', 'Ubuntu',    '6.0/uaisos/ubuntu-16.04.6-desktop-i386.iso'),  # >=4.5GiB
-            UnattendedVm(oSet, 'tst-ubuntu-16.10-64',   'Ubuntu_64', '6.0/uaisos/ubuntu-16.10-desktop-amd64.iso'),   # >=5.5GiB
+            UnattendedVm(oSet, 'tst-ubuntu-16.10-64',   'Ubuntu_64', '6.0/uaisos/ubuntu-16.10-desktop-amd64.iso',    # >=5.5GiB
+                         UnattendedVm.kfLinuxIoApic),
             ## @todo 16.10-32 doesn't ask for an IP, so it always fails.
             #UnattendedVm(oSet, 'tst-ubuntu-16.10-32',   'Ubuntu',    '6.0/uaisos/ubuntu-16.10-desktop-i386.iso'),   # >=5.5GiB?
             UnattendedVm(oSet, 'tst-ubuntu-17.04-64',   'Ubuntu_64', '6.0/uaisos/ubuntu-17.04-desktop-amd64.iso'),   # >=5GiB
