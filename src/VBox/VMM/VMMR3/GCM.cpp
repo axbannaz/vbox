@@ -455,7 +455,7 @@ static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
                 else
                     LogRel(("GCM:    Reading \"no_timer_check\" failed with %Rrc\n", rc));
             }
-            else if (rc == VERR_NOT_FOUND)
+            else if (rc == VERR_SYMBOL_NOT_FOUND)
             {
                 LogRel(("GCM:    Couldn't find \"no_timer_check\", trying \"timer_irq_works\"\n"));
 
