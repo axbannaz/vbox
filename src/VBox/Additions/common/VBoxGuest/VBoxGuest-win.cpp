@@ -270,18 +270,23 @@ static decltype(HalGetBusDataByOffset)         *g_pfnHalGetBusDataByOffset = NUL
 static decltype(HalSetBusDataByOffset)         *g_pfnHalSetBusDataByOffset = NULL;
 #endif
 /** Pointer to the KeRegisterBugCheckCallback routine (in the NT kernel).
- * Introduced in Windows 3.50. */
+ * Introduced in NT 3.50. */
 static decltype(KeRegisterBugCheckCallback)    *g_pfnKeRegisterBugCheckCallback = NULL;
 /** Pointer to the KeRegisterBugCheckCallback routine (in the NT kernel).
- * Introduced in Windows 3.50. */
+ * Introduced in NT 3.50. */
 static decltype(KeDeregisterBugCheckCallback)  *g_pfnKeDeregisterBugCheckCallback = NULL;
 /** Pointer to the KiBugCheckData array (in the NT kernel).
- * Introduced in Windows 4. */
+ * Introduced in NT 4. */
 static uintptr_t const                         *g_pauKiBugCheckData = NULL;
 /** Set if the callback was successfully registered and needs deregistering.  */
 static bool                                     g_fBugCheckCallbackRegistered = false;
 /** The bugcheck callback record. */
 static KBUGCHECK_CALLBACK_RECORD                g_BugCheckCallbackRec;
+#ifdef RT_ARCH_X86
+/** Pointer to the ZwOpenProcessTokenEx routine (in the NT kernel).
+ * Introduced in XP (NT 5.10). */
+static decltype(ZwOpenProcessTokenEx)          *g_pfnZwOpenProcessTokenEx = NULL;
+#endif
 
 
 
@@ -441,6 +446,9 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDrvObj, PUNICODE_STRING pRegPath)
             g_pauKiBugCheckData               = (uintptr_t const *)                       RTR0DbgKrnlInfoGetSymbol(hKrnlInfo, NULL, "KiBugCheckData");
             g_pfnPoCallDriver                 = (decltype(PoCallDriver) *)                RTR0DbgKrnlInfoGetSymbol(hKrnlInfo, NULL, "PoCallDriver");
             g_pfnPoStartNextPowerIrp          = (decltype(PoStartNextPowerIrp) *)         RTR0DbgKrnlInfoGetSymbol(hKrnlInfo, NULL, "PoStartNextPowerIrp");
+#ifdef RT_ARCH_X86
+            g_pfnZwOpenProcessTokenEx         = (decltype(ZwOpenProcessTokenEx) *)        RTR0DbgKrnlInfoGetSymbol(hKrnlInfo, NULL, "ZwOpenProcessTokenEx");
+#endif
 #ifdef TARGET_NT4
             if (g_enmVGDrvNtVer > VGDRVNTVER_WINNT4)
 #endif
@@ -2627,8 +2635,21 @@ static uint32_t vgdrvNtCalcRequestorFlags(void)
                         | VMMDEV_REQUESTOR_CON_DONT_KNOW
                         | VMMDEV_REQUESTOR_TRUST_NOT_GIVEN
                         | VMMDEV_REQUESTOR_NO_USER_DEVICE;
+
+    /*
+     * Open the process token.  Use Ex API variant w/ OBJ_KERNEL_HANDLE when
+     * possible to avoid driver verifier complaints.
+     */
     HANDLE   hToken = NULL;
-    NTSTATUS rcNt = ZwOpenProcessToken(NtCurrentProcess(), TOKEN_QUERY, &hToken);
+    NTSTATUS rcNt;
+#ifndef RT_ARCH_X86
+    rcNt = ZwOpenProcessTokenEx(NtCurrentProcess(), TOKEN_QUERY, OBJ_KERNEL_HANDLE, &hToken);
+#else
+    if (g_pfnZwOpenProcessTokenEx)
+        rcNt = g_pfnZwOpenProcessTokenEx(NtCurrentProcess(), TOKEN_QUERY, OBJ_KERNEL_HANDLE, &hToken);
+    else
+        rcNt = ZwOpenProcessToken(NtCurrentProcess(), TOKEN_QUERY, &hToken);
+#endif
     if (NT_SUCCESS(rcNt))
     {
         union
