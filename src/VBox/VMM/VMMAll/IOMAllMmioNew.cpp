@@ -207,9 +207,10 @@ static VBOXSTRICTRC iomMmioDoComplicatedWrite(PVM pVM, PVMCPU pVCpu, CTX_SUFF(PI
         uint32_t u32MissingValue = 0;
         if (fReadMissing && cbThisPart != 4)
         {
-            VBOXSTRICTRC rc2 = pRegEntry->pfnReadCallback(pRegEntry->pDevIns, pRegEntry->pvUser,
-                                                          !(pRegEntry->fFlags & IOMMMIO_FLAGS_ABS)
-                                                          ? offRegion & ~(RTGCPHYS)3 : (GCPhys & ~(RTGCPHYS)3),
+            RTGCPHYS offArgRead = (!(pRegEntry->fFlags & IOMMMIO_FLAGS_ABS) ? offRegion & ~(RTGCPHYS)3 : (GCPhys & ~(RTGCPHYS)3))
+                                | (!(pRegEntry->fFlags & IOMMMIO_FLAGS_SET_HI_OFF_BIT_READING_MISSING)
+                                   ? 0 : IOMMMIO_OFF_F_READING_MISSING_BYTES);
+            VBOXSTRICTRC rc2 = pRegEntry->pfnReadCallback(pRegEntry->pDevIns, pRegEntry->pvUser, offArgRead,
                                                           &u32MissingValue, sizeof(u32MissingValue));
             switch (VBOXSTRICTRC_VAL(rc2))
             {

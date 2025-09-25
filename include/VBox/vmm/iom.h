@@ -167,8 +167,12 @@ RT_C_DECLS_BEGIN
  * @note New-style only, is implicit in old-style interface.  */
 #define IOMMMIO_FLAGS_ABS                               UINT32_C(0x00001000)
 
+/** Set the high bit of 'off' when doing reads of missing bytes in a write.
+ * @sa IOMMMIO_OFF_F_READING_MISSING_BYTES  */
+#define IOMMMIO_FLAGS_SET_HI_OFF_BIT_READING_MISSING    UINT32_C(0x00002000)
+
 /** Mask of valid flags. */
-#define IOMMMIO_FLAGS_VALID_MASK                        UINT32_C(0x00001373)
+#define IOMMMIO_FLAGS_VALID_MASK                        UINT32_C(0x00003373)
 /** @} */
 
 /**
@@ -180,6 +184,10 @@ RT_C_DECLS_BEGIN
     (   ((a_fFlags) & IOMMMIO_FLAGS_WRITE_MODE) == IOMMMIO_FLAGS_WRITE_DWORD_QWORD_ZEROED \
      || ((a_fFlags) & IOMMMIO_FLAGS_WRITE_MODE) == IOMMMIO_FLAGS_WRITE_DWORD_QWORD_READ_MISSING \
      || ((a_fFlags) & IOMMMIO_FLAGS_WRITE_MODE) == IOMMMIO_FLAGS_WRITE_ONLY_DWORD_QWORD )
+
+/** Flag set in the 'off' parameter when reading missing bytes for a write
+ *  and IOMMMIO_FLAGS_SET_HI_OFF_BIT_READING_MISSING was given. */
+#define IOMMMIO_OFF_F_READING_MISSING_BYTES             RT_BIT_64(63)
 
 
 /**
@@ -415,6 +423,8 @@ typedef FNIOMMMIOFILL *PFNIOMMMIOFILL;
  * @param   pvUser      User argument.
  * @param   off         Offset into the mapping of the read,
  *                      or the physical address if IOMMMIO_FLAGS_ABS is active.
+ *                      IOMMMIO_OFF_F_READING_MISSING_BYTES may be ORed in when
+ *                      IOMMMIO_FLAGS_SET_HI_OFF_BIT_READING_MISSING is used.
  * @param   pv          Where to store the result.
  * @param   cb          Number of bytes read.
  * @remarks Caller enters the device critical section.
