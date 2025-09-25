@@ -226,6 +226,10 @@ g_kdaParavirtProvidersSupported = {
     g_ksGuestOsTypeWindows : ( g_ksParavirtProviderNone, g_ksParavirtProviderHyperV, )
 }
 
+## @name Flags for working around quirks of certain guests.
+## @{
+g_kfQuirkLinuxIoApic = 0x0001; ##< Patches the guest to avoid IO-APIC related guest panis during boot
+## @}
 
 # pylint: enable=line-too-long
 
@@ -262,7 +266,8 @@ class BaseTestVm(object):
                  fVmmDevTestingPart = None,                 # type: bool
                  fVmmDevTestingMmio = False,                # type: bool
                  iGroup = 1,                                # type: int
-                 fIsaExts = 0                               # type: int
+                 fIsaExts = 0,                              # type: int
+                 fQuirks  = 0                               # type: int
                  ):
         self.oSet                    = oSet                 # type: TestVmSet
         self.sVmName                 = sVmName;
@@ -276,6 +281,7 @@ class BaseTestVm(object):
         self.asParavirtModesSupOrg   = asParavirtModesSup;  # HACK ALERT! Trick to make the 'effing random mess not get in the
                                                             # way of actively selecting virtualization modes.
         self.fIsaExts                = fIsaExts;
+        self.fQuirks                 = fQuirks;
 
         self.fSkip                   = False;               # All VMs are included in the configured set by default.
         self.fSnapshotRestoreCurrent = False;               # Whether to restore execution on the current snapshot.
@@ -1067,7 +1073,8 @@ class TestVm(object):                                       # pylint: disable=to
                  fSecureBoot = False,                       # type: bool
                  sUefiMokPathPrefix = None,                 # type: str
                  sPlatformArchitecture = 'x86',             # type: str
-                 fIsaExts = 0                               # type: int
+                 fIsaExts = 0,                              # type: int
+                 fQuirks = 0                                # type: int
                  ):
         self.oSet                    = oSet;
         self.sVmName                 = sVmName;
@@ -1100,6 +1107,7 @@ class TestVm(object):                                       # pylint: disable=to
         self.sUefiMokPathPrefix      = sUefiMokPathPrefix;
         self.sPlatformArchitecture   = sPlatformArchitecture;
         self.fIsaExts                = fIsaExts;
+        self.fQuirks                 = fQuirks;
 
         self.fSnapshotRestoreCurrent = False;        # Whether to restore execution on the current snapshot.
         self.fSkip                   = False;        # All VMs are included in the configured set by default.
@@ -1383,6 +1391,11 @@ class TestVm(object):                                       # pylint: disable=to
                             self.sCom1RawFile = self._generateRawPortFilename(oTestDrv, '-com1-', '.out');
                             utils.noxcptDeleteFile(self.sCom1RawFile);
                             fRc = oSession.setupSerialToRawFile(0, self.sCom1RawFile);
+
+                        # Apply any quirks being set.
+                        if fRc and self.fQuirks != 0:
+                            if self.fQuirks & g_kfQuirkLinuxIoApic:
+                                fRc = oSession.setExtraData('VBoxInternal2/LinuxIoApicPatching', '1');
 
                         # Make life simpler for child classes.
                         if fRc:
@@ -2235,14 +2248,16 @@ class TestVmManager(object):
         #       asParavirtModesSup = [g_ksParavirtProviderKVM,]),
         # Note: Has ancient Guest Additions 3.0.14 installed already.
         TestVm('tst-rhel5',                 kfGrpSmoke,           sHd = '3.0/tcp/rhel5.vdi',
-               sKind = 'RedHat', acCpusSup = range(1, 33), fIoApic = True, sNic0AttachType = 'nat'),
+               sKind = 'RedHat', acCpusSup = range(1, 33), fIoApic = True, sNic0AttachType = 'nat',
+               fQuirks = g_kfQuirkLinuxIoApic),
         TestVm('tst-arch',                  kfGrpStandard,        sHd = '4.2/usb/tst-arch.vdi',
                sKind = 'ArchLinux_64', acCpusSup = range(1, 33), fIoApic = True, sNic0AttachType = 'nat'),
         # disabled 2019-03-08 klaus - fails all over the place and pollutes the test results
         #TestVm('tst-ubuntu-1804-64',   kfGrpStdSmoke,        sHd = '4.2/ubuntu-1804/t-ubuntu-1804-64.vdi',
         #       sKind = 'Ubuntu_64', acCpusSup = range(1, 33), fIoApic = True),
         TestVm('tst-ol76-64',   kfGrpStdSmoke,        sHd = '4.2/ol76/t-ol76-64.vdi',
-               sKind = 'Oracle_64', acCpusSup = range(1, 33), fIoApic = True),
+               sKind = 'Oracle_64', acCpusSup = range(1, 33), fIoApic = True,
+               fQuirks = g_kfQuirkLinuxIoApic),
         TestVm('tst-ubuntu-20_04-64-amdvi',     kfGrpStdSmoke,    sHd = '6.1/ubuntu-20_04-64-updated_by_ksenia.vdi',
                sKind = 'Ubuntu_64', acCpusSup = range(1, 33), fIoApic = True,
                asParavirtModesSup = [g_ksParavirtProviderKVM,], sNic0AttachType = 'nat', sChipsetType = 'ich9',
