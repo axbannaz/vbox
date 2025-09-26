@@ -4313,10 +4313,9 @@ SUPR0_EXPORT_SYMBOL(SUPR0ChangeCR4);
 SUPR0DECL(int) SUPR0EnableHwvirt(bool fEnable)
 {
 # if defined(RT_OS_DARWIN) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    return supdrvOSEnableVTx(fEnable);
+    return supdrvOSEnableHwvirt(fEnable);
 # elif defined(RT_OS_LINUX) && (defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86))
-    /** @todo Rename this to supdrvOSEnableHwvirt. */
-    return supdrvOSEnableVTx(fEnable);
+    return supdrvOSEnableHwvirt(fEnable);
 # else
     RT_NOREF1(fEnable);
     return VERR_NOT_SUPPORTED;

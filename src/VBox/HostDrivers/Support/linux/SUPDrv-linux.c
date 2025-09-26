@@ -1649,9 +1649,9 @@ int VBOXCALL    supdrvOSMsrProberModify(RTCPUID idCpu, PSUPMSRPROBER pReq)
 
 
 /**
- * @copydoc SUPR0EnableVTx
+ * @copydoc SUPR0EnableHwvirt
  */
-int VBOXCALL supdrvOSEnableVTx(bool fEnable)
+int VBOXCALL supdrvOSEnableHwvirt(bool fEnable)
 {
 #ifdef SUPDRV_LINUX_HAS_KVM_VMX_API
     if (fEnable)

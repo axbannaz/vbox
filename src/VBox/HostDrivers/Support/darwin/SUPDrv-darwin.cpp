@@ -1108,9 +1108,9 @@ static DECLCALLBACK(void) vboxdrvDarwinVmxEnableFix(RTCPUID idCpu, void *pvUser1
 
 
 /**
- * @copydoc SUPR0EnableVTx
+ * @copydoc SUPR0EnableHwvirt
  */
-int VBOXCALL supdrvOSEnableVTx(bool fEnable)
+int VBOXCALL supdrvOSEnableHwvirt(bool fEnable)
 {
 # ifdef VBOX_WITH_HOST_VMX
     int rc;
