@@ -1320,7 +1320,7 @@ static VBOXSTRICTRC tpmMmioCrbWriteInt(PPDMDEVINS pDevIns, PDEVTPM pThis, PDEVTP
 static DECLCALLBACK(VBOXSTRICTRC) tpmMmioCrbRead(PPDMDEVINS pDevIns, void *pvUser, RTGCPHYS off, void *pv, uint32_t cb)
 {
     PDEVTPM const pThis = PDMDEVINS_2_DATA(pDevIns, PDEVTPM);
-    RT_NOREF(pvUser);
+    RT_NOREF(pvUser, cb);
     Assert(pThis->fCrb);
 
     /* Check IOMMMIO_FLAGS_READ_DWORD ASSUMPTIONS: */
@@ -1390,8 +1390,7 @@ static DECLCALLBACK(VBOXSTRICTRC) tpmMmioCrbRead(PPDMDEVINS pDevIns, void *pvUse
 static DECLCALLBACK(VBOXSTRICTRC) tpmMmioCrbWrite(PPDMDEVINS pDevIns, void *pvUser, RTGCPHYS off, void const *pv, uint32_t cb)
 {
     PDEVTPM pThis  = PDMDEVINS_2_DATA(pDevIns, PDEVTPM);
-    RT_NOREF(pvUser);
-
+    RT_NOREF(pvUser, cb);
     Assert(pThis->fCrb);
 
     /* Check IOMMMIO_FLAGS_READ_DWORD ASSUMPTIONS: */
