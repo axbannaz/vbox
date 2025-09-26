@@ -162,6 +162,7 @@ static RTSOCKET txsTcpSetClient(RTSOCKET hTcpClient)
  */
 static DECLCALLBACK(int) txsTcpServerConnectThread(RTTHREAD hSelf, void *pvUser)
 {
+    RTThreadUserSignal(g_hThreadTcpServer); /* Notify we are up. */
     RTSOCKET hTcpClient;
     int rc = RTTcpServerListen2(g_pTcpServer, &hTcpClient);
     Log(("txsTcpConnectServerThread: RTTcpServerListen2 -> %Rrc\n", rc));
@@ -329,8 +330,12 @@ static int txsTcpConnect(void)
                                 RTTHREADFLAGS_WAITABLE, "tcpconn");
         }
         if (g_hThreadTcpServer == NIL_RTTHREAD && RT_SUCCESS(rc))
+        {
             rc = RTThreadCreate(&g_hThreadTcpServer, txsTcpServerConnectThread, NULL, 0, RTTHREADTYPE_DEFAULT,
                                 RTTHREADFLAGS_WAITABLE, "tcpserv");
+            if (RT_SUCCESS(rc))
+                RTThreadUserWait(g_hThreadTcpServer, RT_INDEFINITE_WAIT);
+        }
 
         RTCritSectEnter(&g_TcpCritSect);
 
@@ -366,13 +371,13 @@ static int txsTcpConnect(void)
  */
 static DECLCALLBACK(void) txsTcpNotifyReboot(void)
 {
-    Log(("txsTcpNotifyReboot: RTTcpServerDestroy(%p)\n", g_pTcpServer));
+    Log(("txsTcpNotifyReboot: RTTcpServerShutdown(%p)\n", g_pTcpServer));
     if (g_pTcpServer)
     {
-        int rc = RTTcpServerDestroy(g_pTcpServer);
+        /* This will wake up the listener thread. */
+        int rc = RTTcpServerShutdown(g_pTcpServer);
         if (RT_FAILURE(rc))
-            RTMsgInfo("RTTcpServerDestroy failed in txsTcpNotifyReboot: %Rrc", rc);
-        g_pTcpServer = NULL;
+            RTMsgInfo("RTTcpServerShutdown failed in txsTcpNotifyReboot: %Rrc", rc);
     }
 }
 
@@ -631,11 +636,10 @@ static DECLCALLBACK(void) txsTcpTerm(void)
     /* Shut down the server (will wake up thread). */
     if (g_pTcpServer)
     {
-        Log(("txsTcpTerm: Destroying server...\n"));
-        int rc = RTTcpServerDestroy(g_pTcpServer);
+        Log(("txsTcpTerm: Shutting down server...\n"));
+        int rc = RTTcpServerShutdown(g_pTcpServer);
         if (RT_FAILURE(rc))
             RTMsgInfo("RTTcpServerDestroy failed in txsTcpTerm: %Rrc", rc);
-        g_pTcpServer        = NULL;
     }
 
     /* Shut down client */
@@ -665,6 +669,19 @@ static DECLCALLBACK(void) txsTcpTerm(void)
 
     /* Wait for the thread (they should've had some time to quit by now). */
     txsTcpConnectWaitOnThreads(15000);
+
+    /*
+     * Now that we are sure that the listening thread has shut down and isn't
+     * accessing the the server state anymore it can finally be destroyed.
+     */
+    if (g_pTcpServer)
+    {
+        Log(("txsTcpTerm: Destroying server...\n"));
+        int rc = RTTcpServerDestroy(g_pTcpServer);
+        if (RT_FAILURE(rc))
+            RTMsgInfo("RTTcpServerDestroy failed in txsTcpTerm: %Rrc", rc);
+        g_pTcpServer = NULL; /* Now we can invalidate the pointer. */
+    }
 
     /* Finally, clean up the critical section. */
     if (RTCritSectIsInitialized(&g_TcpCritSect))
