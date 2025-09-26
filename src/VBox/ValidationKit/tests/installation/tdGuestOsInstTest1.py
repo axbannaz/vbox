@@ -80,6 +80,7 @@ class InstallTestVm(vboxtestvms.TestVm):
     kfIdeIrqDelay           = 0x80;
     kfUbuntuNewAmdBug       = 0x100;
     kfNoWin81Paravirt       = 0x200;
+    kfLinuxIoApic           = 0x400; ##< Patch the Linux guest to work around IO-APIC issues.
     ## @}
 
     ## IRQ delay extra data config for win2k VMs.
@@ -88,6 +89,8 @@ class InstallTestVm(vboxtestvms.TestVm):
     ## Install ISO path relative to the testrsrc root.
     ksIsoPathBase    = os.path.join('4.2', 'isos');
 
+    ## IO-APIC related workaround for older Linux VMs.
+    kasLinuxIoApic     = [ 'VBoxInternal2/LinuxIoApicPatching:1', ];
 
     def __init__(self, oSet, sVmName, sKind, sInstallIso, sHdCtrlNm, cGbHdd, fFlags):
         vboxtestvms.TestVm.__init__(self, sVmName, oSet = oSet, sKind = sKind, sHddControllerType = sHdCtrlNm,
@@ -104,7 +107,9 @@ class InstallTestVm(vboxtestvms.TestVm):
         self.iOptRamAdjust  = 0;
         self.asExtraData    = [];
         if fFlags & self.kfIdeIrqDelay:
-            self.asExtraData = self.kasIdeIrqDelay;
+            self.asExtraData += self.kasIdeIrqDelay;
+        if fFlags & self.kfLinuxIoApic:
+            self.asExtraData += self.kasLinuxIoApic;
 
     def detatchAndDeleteHd(self, oTestDrv):
         """
@@ -234,7 +239,7 @@ class tdGuestOsInstTest1(vbox.TestDriver):
         oSet.aoTestVms.extend([
             # pylint: disable=line-too-long
             InstallTestVm(oSet, 'tst-fedora4',      'Fedora',           'fedora4-txs.iso',          InstallTestVm.ksIdeController,   8, InstallTestVm.kf32Bit),
-            InstallTestVm(oSet, 'tst-fedora5',      'Fedora',           'fedora5-txs.iso',          InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApicSmp),
+            InstallTestVm(oSet, 'tst-fedora5',      'Fedora',           'fedora5-txs.iso',          InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApicSmp | InstallTestVm.kfLinuxIoApic),
             InstallTestVm(oSet, 'tst-fedora6',      'Fedora',           'fedora6-txs.iso',          InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqIoApic),
             InstallTestVm(oSet, 'tst-fedora7',      'Fedora',           'fedora7-txs.iso',          InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqIoApic),
             InstallTestVm(oSet, 'tst-fedora9',      'Fedora',           'fedora9-txs.iso',          InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
@@ -242,17 +247,17 @@ class tdGuestOsInstTest1(vbox.TestDriver):
             InstallTestVm(oSet, 'tst-fedora18',     'Fedora',           'fedora18-txs.iso',         InstallTestVm.ksScsiController,  8, InstallTestVm.kf32Bit),
             InstallTestVm(oSet, 'tst-ols6',         'Oracle',           'ols6-i386-txs.iso',        InstallTestVm.ksSataController, 12, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae),
             InstallTestVm(oSet, 'tst-ols6-64',      'Oracle_64',        'ols6-x86_64-txs.iso',      InstallTestVm.ksSataController, 12, InstallTestVm.kf64Bit),
-            InstallTestVm(oSet, 'tst-rhel5',        'RedHat',           'rhel5-txs.iso',            InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApic),
+            InstallTestVm(oSet, 'tst-rhel5',        'RedHat',           'rhel5-txs.iso',            InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApic | InstallTestVm.kfLinuxIoApic),
             InstallTestVm(oSet, 'tst-suse102',      'OpenSUSE',         'opensuse102-txs.iso',      InstallTestVm.ksIdeController,   8, InstallTestVm.kf32Bit | InstallTestVm.kfReqIoApic),
             ## @todo InstallTestVm(oSet, 'tst-ubuntu606',    'Ubuntu',           'ubuntu606-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
             ## @todo InstallTestVm(oSet, 'tst-ubuntu710',    'Ubuntu',           'ubuntu710-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
             InstallTestVm(oSet, 'tst-ubuntu804',    'Ubuntu',           'ubuntu804-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApic),
             InstallTestVm(oSet, 'tst-ubuntu804-64', 'Ubuntu_64',        'ubuntu804-amd64-txs.iso',  InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit),
-            InstallTestVm(oSet, 'tst-ubuntu904',    'Ubuntu',           'ubuntu904-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae),
-            InstallTestVm(oSet, 'tst-ubuntu904-64', 'Ubuntu_64',        'ubuntu904-amd64-txs.iso',  InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit),
+            InstallTestVm(oSet, 'tst-ubuntu904',    'Ubuntu',           'ubuntu904-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae | InstallTestVm.kfLinuxIoApic),
+            InstallTestVm(oSet, 'tst-ubuntu904-64', 'Ubuntu_64',        'ubuntu904-amd64-txs.iso',  InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit | InstallTestVm.kfLinuxIoApic),
             #InstallTestVm(oSet, 'tst-ubuntu1404',   'Ubuntu',           'ubuntu1404-txs.iso',       InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae), bird: Is 14.04 one of the 'older ones'?
-            InstallTestVm(oSet, 'tst-ubuntu1404',   'Ubuntu',           'ubuntu1404-txs.iso',       InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae),
-            InstallTestVm(oSet, 'tst-ubuntu1404-64','Ubuntu_64',        'ubuntu1404-amd64-txs.iso', InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit),
+            InstallTestVm(oSet, 'tst-ubuntu1404',   'Ubuntu',           'ubuntu1404-txs.iso',       InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfReqPae | InstallTestVm.kfLinuxIoApic),
+            InstallTestVm(oSet, 'tst-ubuntu1404-64','Ubuntu_64',        'ubuntu1404-amd64-txs.iso', InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit | InstallTestVm.kfLinuxIoApic),
             InstallTestVm(oSet, 'tst-debian7',      'Debian',           'debian-7.0.0-txs.iso',     InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
             InstallTestVm(oSet, 'tst-debian7-64',   'Debian_64',        'debian-7.0.0-x64-txs.iso', InstallTestVm.ksScsiController,  8, InstallTestVm.kf64Bit),
             InstallTestVm(oSet, 'tst-vista-64',     'WindowsVista_64',  'vista-x64-txs.iso',        InstallTestVm.ksSataController, 25, InstallTestVm.kf64Bit),
