@@ -689,7 +689,10 @@ typedef struct NEMCPU
 # ifdef VBOX_VMM_TARGET_ARMV8
     STAMCOUNTER                 StatExitCanceled;
     STAMCOUNTER                 StatExitVTimerActivated;
+    STAMCOUNTER                 StatExitExcp;
     STAMCOUNTER                 StatExitExcpDataAbort;
+    STAMCOUNTER                 StatExitExcpDataAbortDirty;
+    STAMCOUNTER                 StatExitExcpDataAbortToIem;
     STAMCOUNTER                 StatExitExcpSysInsn;
     STAMCOUNTER                 StatExitExcpHvcSmcInsn;
     STAMCOUNTER                 StatExitExcpWfxInsn;

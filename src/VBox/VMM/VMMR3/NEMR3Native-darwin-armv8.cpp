@@ -1327,15 +1327,18 @@ static int nemR3DarwinStatisticsRegister(PVM pVM, VMCPUID idCpu, PNEMCPU pNemCpu
            NEM_REG_STAT(a_pVar, STAMTYPE_PROFILE, STAMVISIBILITY_USED, STAMUNIT_TICKS_PER_CALL, a_szNmFmt, a_szDesc)
 #define NEM_REG_COUNTER(a, b, desc) NEM_REG_STAT(a, STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, b, desc)
 
-    NEM_REG_COUNTER(&pNemCpu->StatExitAll,               "/NEM/CPU%u/Exit/All",             "Total exits (including nested-guest exits).");
+    NEM_REG_COUNTER(&pNemCpu->StatExitAll,               "/NEM/CPU%u/Exit",                 "Total exits (including nested-guest exits).");
     NEM_REG_COUNTER(&pNemCpu->StatExitCanceled,          "/NEM/CPU%u/Exit/Canceled",        "Exits caused by poking EMT");
     NEM_REG_COUNTER(&pNemCpu->StatExitVTimerActivated,   "/NEM/CPU%u/Exit/VTimerActivated", "The VTimer activated and an interrupt needs to be injected.");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpDataAbort,     "/NEM/CPU%u/Exit/ExcpDataAbort",   "Exception - Data Abort (usually MMIO accesses)");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSysInsn,       "/NEM/CPU%u/Exit/ExcpSysInsn",     "Exception - system register read/write.");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpHvcSmcInsn,    "/NEM/CPU%u/Exit/HvcSmcInsn",      "Exception - HVC/SMC instruction encountered.");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpWfxInsn,       "/NEM/CPU%u/Exit/WFxInsn",         "Exception - WFx instruction encountered.");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpBrkInsn,       "/NEM/CPU%u/Exit/BrkInsn",         "Exception - BRK instruction encountered.");
-    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSsFromLowerEl, "/NEM/CPU%u/Exit/SsFromLowerEl",   "Exception - Single Step exception from lower EL.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcp,              "/NEM/CPU%u/Exit/Excp",            "Exception - All");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpDataAbort,     "/NEM/CPU%u/Exit/Excp/DataAbort",  "Exception - Data Abort (usually MMIO accesses)");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpDataAbortDirty,"/NEM/CPU%u/Exit/Excp/DataAbort/Dirty", "For dirty region tracking rather than MMIO.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpDataAbortToIem,"/NEM/CPU%u/Exit/Excp/DataAbort/ToIem", "Handled by IEM rather than via ISS info.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSysInsn,       "/NEM/CPU%u/Exit/Excp/SysInsn",    "Exception - system register read/write.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpHvcSmcInsn,    "/NEM/CPU%u/Exit/Excp/HvcSmcInsn", "Exception - HVC/SMC instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpWfxInsn,       "/NEM/CPU%u/Exit/Excp/WFxInsn",    "Exception - WFx instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpBrkInsn,       "/NEM/CPU%u/Exit/Excp/BrkInsn",    "Exception - BRK instruction encountered.");
+    NEM_REG_COUNTER(&pNemCpu->StatExitExcpSsFromLowerEl, "/NEM/CPU%u/Exit/Excp/SsFromLowerEl", "Exception - Single Step exception from lower EL.");
 
     return VINF_SUCCESS;
 
@@ -1933,7 +1936,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
 
     RT_NOREF(fL2Fault, GCPtrDataAbrt);
 
-    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbort);
+    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbort);
 
     if (fWrite)
     {
@@ -1955,6 +1958,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
             if (   GCPhysDataAbrt >= pMmio2Region->GCPhysStart
                 && GCPhysDataAbrt <= pMmio2Region->GCPhysLast)
             {
+                STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbortDirty);
                 pMmio2Region->fDirty = true;
 
                 uint8_t u2State;
@@ -1998,6 +2002,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
     }
     else
     {
+        STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbortToIem);
+
         /** @todo Our UEFI firmware accesses the flash region with the following instruction
          *        when the NVRAM actually contains data:
          *             ldrb w9, [x6, #-0x0001]!
@@ -2132,7 +2138,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedSysInsn(PVM pVM, PVMCPU
     LogFlowFunc(("fRead=%RTbool uCRm=%u uReg=%u uCRn=%u uOp1=%u uOp2=%u uOp0=%u idSysReg=%#x\n",
                  fRead, uCRm, uReg, uCRn, uOp1, uOp2, uOp0, idSysReg));
 
-    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSysInsn);
+    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSysInsn);
 
     /** @todo EMEXITTYPE_MSR_READ/EMEXITTYPE_MSR_WRITE are misnomers. */
     EMHistoryAddExit(pVCpu,
@@ -2184,7 +2190,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedHvcInsn(PVM pVM, PVMCPU
     uint16_t u16Imm = ARMV8_EC_ISS_AARCH64_TRAPPED_HVC_INSN_IMM_GET(uIss);
     LogFlowFunc(("u16Imm=%#RX16\n", u16Imm));
 
-    STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpHvcSmcInsn);
+    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpHvcSmcInsn);
 
 #if 0 /** @todo For later */
     EMHistoryAddExit(pVCpu,
@@ -2284,6 +2290,56 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedHvcInsn(PVM pVM, PVMCPU
 
 
 /**
+ * Works on the trapped WF* instructions
+ *
+ * @returns VBox strict status code.
+ * @param   pVM             The cross context VM structure.
+ * @param   pVCpu           The cross context virtual CPU structure of the
+ *                          calling EMT.
+ * @param   fInsn32Bit      Instruction size, set if 32-bit, clear if 16-bit.
+ */
+static VBOXSTRICTRC nemR3DarwinHandleExitExceptionTrappedWfx(PVM pVM, PVMCPU pVCpu, bool fInsn32Bit)
+{
+    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpWfxInsn);
+
+    /* No need to halt if there is an interrupt pending already. */
+    if (VMCPU_FF_IS_ANY_SET(pVCpu, (VMCPU_FF_INTERRUPT_IRQ | VMCPU_FF_INTERRUPT_FIQ)))
+    {
+        LogFlowFunc(("IRQ | FIQ set => VINF_SUCCESS\n"));
+        pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
+        return VINF_SUCCESS;
+    }
+
+    /* Set the vTimer expiration in order to get out of the halt at the right point in time. */
+    if (   (pVCpu->cpum.GstCtx.CntvCtlEl0 & ARMV8_CNTV_CTL_EL0_AARCH64_ENABLE)
+        && !(pVCpu->cpum.GstCtx.CntvCtlEl0 & ARMV8_CNTV_CTL_EL0_AARCH64_IMASK))
+    {
+        uint64_t cTicksVTimer = mach_absolute_time() - pVM->nem.s.u64VTimerOff;
+
+        /* Check whether it expired and start executing guest code. */
+        if (cTicksVTimer >= pVCpu->cpum.GstCtx.CntvCValEl0)
+        {
+            LogFlowFunc(("Guest timer expired (cTicksVTimer=%RU64 CntvCValEl0=%RU64) => VINF_SUCCESS\n",
+                         cTicksVTimer, pVCpu->cpum.GstCtx.CntvCValEl0));
+            pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
+            return VINF_SUCCESS;
+        }
+
+        uint64_t cTicksVTimerToExpire = pVCpu->cpum.GstCtx.CntvCValEl0 - cTicksVTimer;
+        uint64_t cNanoSecsVTimerToExpire = ASMMultU64ByU32DivByU32(cTicksVTimerToExpire, RT_NS_1SEC, (uint32_t)pVM->nem.s.u64CntFrqHz);
+        LogFlowFunc(("Set vTimer activation to cNanoSecsVTimerToExpire=%#RX64 (CntvCValEl0=%#RX64, u64VTimerOff=%#RX64 cTicksVTimer=%#RX64 u64CntFrqHz=%#RX64)\n",
+                     cNanoSecsVTimerToExpire, pVCpu->cpum.GstCtx.CntvCValEl0, pVM->nem.s.u64VTimerOff, cTicksVTimer, pVM->nem.s.u64CntFrqHz));
+        TMCpuSetVTimerNextActivation(pVCpu, cNanoSecsVTimerToExpire);
+    }
+    else
+        TMCpuSetVTimerNextActivation(pVCpu, UINT64_MAX);
+
+    pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
+    return VINF_EM_HALT;
+}
+
+
+/**
  * Handles an exception VM exit.
  *
  * @returns VBox strict status code.
@@ -2313,47 +2369,10 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
         case ARMV8_ESR_EL2_EC_AARCH64_SMC_INSN:
             return nemR3DarwinHandleExitExceptionTrappedHvcInsn(pVM, pVCpu, uIss, true);
         case ARMV8_ESR_EL2_EC_TRAPPED_WFX:
-        {
-            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpWfxInsn);
-
-            /* No need to halt if there is an interrupt pending already. */
-            if (VMCPU_FF_IS_ANY_SET(pVCpu, (VMCPU_FF_INTERRUPT_IRQ | VMCPU_FF_INTERRUPT_FIQ)))
-            {
-                LogFlowFunc(("IRQ | FIQ set => VINF_SUCCESS\n"));
-                pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
-                return VINF_SUCCESS;
-            }
-
-            /* Set the vTimer expiration in order to get out of the halt at the right point in time. */
-            if (   (pVCpu->cpum.GstCtx.CntvCtlEl0 & ARMV8_CNTV_CTL_EL0_AARCH64_ENABLE)
-                && !(pVCpu->cpum.GstCtx.CntvCtlEl0 & ARMV8_CNTV_CTL_EL0_AARCH64_IMASK))
-            {
-                uint64_t cTicksVTimer = mach_absolute_time() - pVM->nem.s.u64VTimerOff;
-
-                /* Check whether it expired and start executing guest code. */
-                if (cTicksVTimer >= pVCpu->cpum.GstCtx.CntvCValEl0)
-                {
-                    LogFlowFunc(("Guest timer expired (cTicksVTimer=%RU64 CntvCValEl0=%RU64) => VINF_SUCCESS\n",
-                                 cTicksVTimer, pVCpu->cpum.GstCtx.CntvCValEl0));
-                    pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
-                    return VINF_SUCCESS;
-                }
-
-                uint64_t cTicksVTimerToExpire = pVCpu->cpum.GstCtx.CntvCValEl0 - cTicksVTimer;
-                uint64_t cNanoSecsVTimerToExpire = ASMMultU64ByU32DivByU32(cTicksVTimerToExpire, RT_NS_1SEC, (uint32_t)pVM->nem.s.u64CntFrqHz);
-                LogFlowFunc(("Set vTimer activation to cNanoSecsVTimerToExpire=%#RX64 (CntvCValEl0=%#RX64, u64VTimerOff=%#RX64 cTicksVTimer=%#RX64 u64CntFrqHz=%#RX64)\n",
-                             cNanoSecsVTimerToExpire, pVCpu->cpum.GstCtx.CntvCValEl0, pVM->nem.s.u64VTimerOff, cTicksVTimer, pVM->nem.s.u64CntFrqHz));
-                TMCpuSetVTimerNextActivation(pVCpu, cNanoSecsVTimerToExpire);
-            }
-            else
-                TMCpuSetVTimerNextActivation(pVCpu, UINT64_MAX);
-
-            pVCpu->cpum.GstCtx.Pc.u64 += fInsn32Bit ? sizeof(uint32_t) : sizeof(uint16_t);
-            return VINF_EM_HALT;
-        }
+            return nemR3DarwinHandleExitExceptionTrappedWfx(pVM, pVCpu, fInsn32Bit);
         case ARMV8_ESR_EL2_EC_AARCH64_BRK_INSN:
         {
-            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpBrkInsn);
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpBrkInsn);
 
             VBOXSTRICTRC rcStrict = DBGFTrap03Handler(pVCpu->CTX_SUFF(pVM), pVCpu, &pVCpu->cpum.GstCtx);
             /** @todo Forward genuine guest traps to the guest by either single stepping instruction with debug exception trapping turned off
@@ -2363,15 +2382,14 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
         }
         case ARMV8_ESR_EL2_SS_EXCEPTION_FROM_LOWER_EL:
         {
-            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSsFromLowerEl);
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpSsFromLowerEl);
             return VINF_EM_DBG_STEPPED;
         }
         case ARMV8_ESR_EL2_EC_UNKNOWN:
         default:
             LogRel(("NEM/Darwin: Unknown Exception Class in syndrome: uEc=%u{%s} uIss=%#RX32 fInsn32Bit=%RTbool\n",
                     uEc, nemR3DarwinEsrEl2EcStringify(uEc), uIss, fInsn32Bit));
-            AssertReleaseFailed();
-            return VERR_NOT_IMPLEMENTED;
+            AssertLogRelMsgFailedReturn(("uEc=%u uIss=%#RX32 fInsn32Bit=%RTbool\n", uEc, uIss, fInsn32Bit), VERR_NEM_IPE_9);
     }
 
     return VINF_SUCCESS;
@@ -2388,30 +2406,32 @@ static VBOXSTRICTRC nemR3DarwinHandleExitException(PVM pVM, PVMCPU pVCpu, const 
  */
 static VBOXSTRICTRC nemR3DarwinHandleExit(PVM pVM, PVMCPU pVCpu)
 {
+    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitAll);
+
     int rc = nemR3DarwinCopyStateFromHv(pVM, pVCpu, NEM_DARWIN_CPUMCTX_EXTRN_MASK_FOR_IEM);
-    if (RT_FAILURE(rc))
-        return rc;
+    AssertRCReturn(rc, rc);
 
 #ifdef LOG_ENABLED
     if (LogIs3Enabled())
         nemR3DarwinLogState(pVM, pVCpu);
 #endif
 
-    STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitAll);
-
     hv_vcpu_exit_t *pExit = pVCpu->nem.s.pHvExit;
     switch (pExit->reason)
     {
         case HV_EXIT_REASON_CANCELED:
         {
-            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
             return VINF_EM_RAW_INTERRUPT;
         }
         case HV_EXIT_REASON_EXCEPTION:
+        {
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcp);
             return nemR3DarwinHandleExitException(pVM, pVCpu, pExit);
+        }
         case HV_EXIT_REASON_VTIMER_ACTIVATED:
         {
-            STAM_COUNTER_INC(&pVCpu->nem.s.StatExitVTimerActivated);
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitVTimerActivated);
 
             LogFlowFunc(("vTimer got activated\n"));
             TMCpuSetVTimerNextActivation(pVCpu, UINT64_MAX);
@@ -2419,11 +2439,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExit(PVM pVM, PVMCPU pVCpu)
             return PDMGicSetPpi(pVCpu, pVM->nem.s.u32GicPpiVTimer, true /*fAsserted*/);
         }
         default:
-            AssertReleaseFailed();
-            break;
+            AssertLogRelMsgFailedReturn(("reason=%#x\n", pExit->reason), VERR_NEM_IPE_0);
     }
-
-    return VERR_INVALID_STATE;
 }
 
 
