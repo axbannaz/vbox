@@ -553,9 +553,7 @@ if1of ($(KBUILD_TARGET_ARCH), arm64)
  VBOX_WITH_IEM_NATIVE_RECOMPILER := 1
 endif
 # Enable the IEM arm64 interpreter.
-if1of ($(KBUILD_TARGET_ARCH), amd64)
- VBOX_WITH_IEM_TARGETING_ARM := 1
-endif
+VBOX_WITH_IEM_TARGETING_ARM := 1
 # Enable native NEM on windows and macOS.
 if1of ($(KBUILD_TARGET), win darwin)
  VBOX_WITH_NATIVE_NEM = 1
