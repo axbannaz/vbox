@@ -405,7 +405,7 @@ VMMR3_INT_DECL(void) GCMR3Reset(PVM pVM)
 /**
  * EMT worker function for GCMR3PatchGuest.
  *
- * @param   pUVM        The user mode VM handle.
+ * @param   pVM         The cross context VM structure.
  * @param   enmPatch    The ID identifying the patch.
  */
 static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
