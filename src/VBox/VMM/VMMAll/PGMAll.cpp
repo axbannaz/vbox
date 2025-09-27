@@ -3930,8 +3930,14 @@ VMMDECL(PGMMODE) PGMGetGuestMode(PVMCPU pVCpu)
 {
 #if defined(VBOX_VMM_TARGET_X86)
     return pVCpu->pgm.s.enmGuestMode;
+
 #elif defined(VBOX_VMM_TARGET_ARMV8)
-    return pVCpu->pgm.s.aenmGuestMode[1]; /** @todo Add parameter to select exception level. */
+    PGMMODE enmMode = pVCpu->pgm.s.aenmGuestMode[1]; /** @todo Add parameter to select exception level. */
+    /* HACK ALERT! Use EL1 mode if EL2 is NONE. */ /** @todo check if EL2 is enabled or not. */
+    if (enmMode == PGMMODE_NONE && pVCpu->pgm.s.aenmGuestMode[0] != PGMMODE_NONE)
+        enmMode = pVCpu->pgm.s.aenmGuestMode[0];
+    return enmMode;
+
 #else
 # error "Port me"
 #endif
