@@ -1546,10 +1546,11 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
     Note! SP can be used as base register (but not destination).
     """
 
-    def __init__(self, sInstr, fnCalc, cbMem = 1, cBits = None, sType = None, sBaseName = None):
+    def __init__(self, sInstr, fnCalc = calcLdUnsigned, cbMem = 1, cBits = None, sType = None, cbAlign = 1, sBaseName = None):
         assert sType in { 'preidx', 'postidx', 'unscaled' };
         A64No1CodeGenLdBase.__init__(self, (sBaseName or sInstr) + '_' + sType, sInstr, fnCalc, cbMem, cBits);
         self.sType = sType;
+        self.cbAlign = cbAlign;
 
     def generateBodyLd(self, oOptions, cLeftToAllCheck, iRegSlot0Ptr):
         # Generate loads from different loads with various immediate values.
@@ -1557,6 +1558,7 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
             uImm9       = randUBits(9);                  # (signed)
             iOffset     = bitsSignedToInt(9, uImm9);
             idxMemSlot  = randURange(0, 256 - self.cbMem);
+            idxMemSlot -= idxMemSlot & (self.cbAlign - 1);
             idxPreSlot  = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
 
             iRegBase    = self.oGprAllocator.allocEx(fReg31IsSp = True);
@@ -1565,6 +1567,9 @@ class A64No1CodeGenLdImm9(A64No1CodeGenLdBase):
                 idxMemSlot -= idxPreSlot & 15
                 if idxMemSlot < 0:
                     idxMemSlot += 16;
+                if self.cbAlign > 1 and (idxMemSlot & (self.cbAlign - 1)) and self.sType != 'postidx':
+                    iOffset    -= idxMemSlot & (self.cbAlign - 1);
+                    idxMemSlot -= idxMemSlot & (self.cbAlign - 1);
                 idxPreSlot = idxMemSlot - iOffset if self.sType != 'postidx' else idxMemSlot;
                 assert (abs(idxPreSlot) & 15) == 0;
 
@@ -1794,6 +1799,65 @@ class A64No1CodeGenLdRegFp(A64No1CodeGenFprBase, A64No1CodeGenLdReg):
     def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
         self.emitFprValCheck(iRegDst, uExpected);
         self.oFprAllocator.free(iRegDst);
+
+
+class A64No1CodeGenLdMemOp(A64No1CodeGenLdBase):
+    """
+    LDAPR and such.
+
+    Note! SP can be used as base register (but not destination).
+    """
+
+    def __init__(self, sInstr, fnCalc = calcLdUnsigned, cbMem = 1, cbAlign = None, cBits = None, offWriteback = 0, sName = None):
+        if cBits is None:
+            cBits = 64 if cbMem == 8 else 32;
+        A64No1CodeGenLdBase.__init__(self, sName or sInstr, sInstr, fnCalc, cbMem, cBits);
+        self.cbAlign      = cbAlign or cbMem;
+        self.offWriteback = offWriteback;
+        assert offWriteback == 0;
+
+    def generateBodyLd(self, oOptions, cLeftToAllCheck, iRegSlot0Ptr):
+        # Generate loads from different slots.
+        for i in range(oOptions.cTestsPerInstruction):
+            idxMemSlot  = randURange(0, 256 - self.cbMem);
+            idxMemSlot -= idxMemSlot & (self.cbAlign - 1);
+
+            iRegBase    = self.oGprAllocator.allocEx(fReg31IsSp = True);
+            sRegBase    = g_dGpr64NamesSp[iRegBase];
+            if iRegBase == 31 and (idxMemSlot & 15) != 0: # SP value must be 16 byte aligned in most host OS contexts.
+                idxMemSlot -= idxMemSlot & 15
+
+            uSrc        = self.getSlotValue(idxMemSlot, self.cbMem);
+            uRes        = self.fnCalc(self.cBits, uSrc, self.cbMem);
+            self.emitCommentLine('i=%u idxMemSlot=%#x uRes=%#x' % (i, idxMemSlot, uRes,));
+
+            # Calculate the base address, load index and perform the load instruction.
+            self.emitBaseRegAddrCalc(sRegBase, iRegSlot0Ptr, idxMemSlot)
+            iRegBaseCp  = self.emitBaseAddrSaveInNewRegAlloc(sRegBase);
+            iRegDst     = self.emitLdInstrAndAllocDst(sRegBase, self.offWriteback, uRes);
+
+            # Check the offset.
+            self.emitBaseAddrCheckAgainstRegAndFreeIt(sRegBase, iRegBaseCp);
+
+            # Check the value.
+            self.emitLdValCheckAndFreeDst(iRegDst, uRes);
+
+            self.oGprAllocator.free(iRegBase);
+            cLeftToAllCheck = self.maybeEmitAllGprChecks(cLeftToAllCheck, oOptions);
+
+    def emitLdInstrAndAllocDst(self, sRegBase, offWriteback, uExpected):
+        iRegDst = self.oGprAllocator.alloc(uExpected);
+        if offWriteback == 0:
+            self.emitInstr(self.sInstr, '%s, [%s]' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase,));
+        elif offWriteback > 0:
+            self.emitInstr(self.sInstr, '%s, [%s], #%u' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, offWriteback,));
+        else:
+            self.emitInstr(self.sInstr, '%s, [%s, #%u]!' % (g_ddGprNamesZrByBits[self.cBits][iRegDst], sRegBase, offWriteback,));
+        return iRegDst;
+
+    def emitLdValCheckAndFreeDst(self, iRegDst, uExpected):
+        self.emitGprValCheck(iRegDst, uExpected);
+        self.oGprAllocator.free(iRegDst);
 
 
 class A64No1CodeGenLdLiteral(A64No1CodeGenLdBase):
@@ -3284,6 +3348,25 @@ class Arm64No1CodeGen(object):
                 A64No1CodeGenLdImm9(     'ldursb', calcLdSigned,  cbMem =  1, cBits =  64, sType = 'unscaled'),
             ];
 
+            # FEAT_LRCPC & FEAT_LRCPC2 instructions.
+            aoGenerators += [
+                A64No1CodeGenLdMemOp('ldapr',    cbMem = 8, cbAlign = 8),
+                A64No1CodeGenLdMemOp('ldapr',    cbMem = 4, cbAlign = 4),
+                A64No1CodeGenLdMemOp('ldaprh',   cbMem = 2, cbAlign = 2),
+                A64No1CodeGenLdMemOp('ldaprb',   cbMem = 1, cbAlign = 1),
+
+                A64No1CodeGenLdImm9( 'ldapur',   cbMem = 8, cbAlign = 8, sType = 'unscaled'),
+                A64No1CodeGenLdImm9( 'ldapur',   cbMem = 4, cbAlign = 4, sType = 'unscaled'),
+                A64No1CodeGenLdImm9( 'ldapurh',  cbMem = 2, cbAlign = 2, sType = 'unscaled'),
+                A64No1CodeGenLdImm9( 'ldapurb',  cbMem = 1, cbAlign = 1, sType = 'unscaled'),
+                A64No1CodeGenLdImm9( 'ldapursb', cbMem = 1, cbAlign = 1, sType = 'unscaled', cBits = 32, fnCalc = calcLdSigned),
+                A64No1CodeGenLdImm9( 'ldapursb', cbMem = 1, cbAlign = 1, sType = 'unscaled', cBits = 64, fnCalc = calcLdSigned),
+                A64No1CodeGenLdImm9( 'ldapursh', cbMem = 2, cbAlign = 2, sType = 'unscaled', cBits = 32, fnCalc = calcLdSigned),
+                A64No1CodeGenLdImm9( 'ldapursh', cbMem = 2, cbAlign = 2, sType = 'unscaled', cBits = 64, fnCalc = calcLdSigned),
+                A64No1CodeGenLdImm9( 'ldapursw', cbMem = 4, cbAlign = 4, sType = 'unscaled', cBits = 64, fnCalc = calcLdSigned),
+            ];
+
+
         if True: # pylint: disable=using-constant-test
             # Add & Sub
             aoGenerators += [
@@ -3338,6 +3421,9 @@ class Arm64No1CodeGen(object):
             '/* Automatically Generated. Do not edit! Seed: %#x */' % (oOptions.iRandSeed,),
             '#include <iprt/asmdefs-arm.h>',
             '',
+            '#ifdef RT_OS_WINDOWS',
+            '.arch_extension rcpc3',
+            '#endif',
             '',
             '',
             '/*',

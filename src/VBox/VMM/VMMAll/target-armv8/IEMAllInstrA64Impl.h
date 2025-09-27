@@ -10244,15 +10244,42 @@
 
 
 /* LDAPURB  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/19400000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURB_32_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURB_32_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_ZX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDAPURSB  <Xt>, [<Xn|SP>{, #<simm>}] (ffe00c00/19800000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURSB_64_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURSB_64_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_SX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDAPURSB  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/19c00000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURSB_32_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURSB_32_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint32_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_SX_U32(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U32(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STLURH  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/59000000) */
@@ -10260,15 +10287,42 @@
 
 
 /* LDAPURH  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/59400000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURH_32_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURH_32_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_ZX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDAPURSH  <Xt>, [<Xn|SP>{, #<simm>}] (ffe00c00/59800000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURSH_64_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURSH_64_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_SX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDAPURSH  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/59c00000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURSH_32_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURSH_32_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint32_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_SX_U32(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U32(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STLUR  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/99000000) */
@@ -10276,11 +10330,29 @@
 
 
 /* LDAPUR  <Wt>, [<Xn|SP>{, #<simm>}] (ffe00c00/99400000) */
-//#define IEM_INSTR_IMPL_A64__LDAPUR_32_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPUR_32_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32_ZX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDAPURSW  <Xt>, [<Xn|SP>{, #<simm>}] (ffe00c00/99800000) */
-//#define IEM_INSTR_IMPL_A64__LDAPURSW_64_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPURSW_64_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32_SX_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* STLUR  <Xt>, [<Xn|SP>{, #<simm>}] (ffe00c00/d9000000) */
@@ -10288,7 +10360,16 @@
 
 
 /* LDAPUR  <Xt>, [<Xn|SP>{, #<simm>}] (ffe00c00/d9400000) */
-//#define IEM_INSTR_IMPL_A64__LDAPUR_64_ldapstl_unscaled(Rt, Rn, imm9)
+#define IEM_INSTR_IMPL_A64__LDAPUR_64_ldapstl_unscaled(Rt, Rn, imm9) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_ADD_CONST_U64_TO_ADDR(uAddr, IEM_SIGN_EXTEND_TO_U64(imm9, 9, 0)); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U64(uValue, uAddr, IEM_SPECIAL_MEM_F_ALIGN_NATURAL | (Rt != 31 ? IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC : IEM_SPECIAL_MEM_F_ORDERING_RELAXED) );  /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 
@@ -14403,7 +14484,15 @@
 
 
 /* LDAPRB  <Wt>, [<Xn|SP>{ , #0}] (fffffc00/38bfc000) */
-//#define IEM_INSTR_IMPL_A64__LDAPRB_32L_memop(Rt, Rn)
+#define IEM_INSTR_IMPL_A64__LDAPRB_32L_memop(Rt, Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_ZX_U64(uValue, uAddr, (Rt != 31 ? IEM_MEM_ORDERING_ACQUIRE_PC : IEM_MEM_ORDERING_RELAXED) | IEM_SPECIAL_MEM_F_ALIGN_NATURAL); /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDADDALB  <Ws>, <Wt>, [<Xn|SP>] (ffe0fc00/38e00000) */
@@ -14599,7 +14688,15 @@
 
 
 /* LDAPRH  <Wt>, [<Xn|SP>{ , #0}] (fffffc00/78bfc000) */
-//#define IEM_INSTR_IMPL_A64__LDAPRH_32L_memop(Rt, Rn)
+#define IEM_INSTR_IMPL_A64__LDAPRH_32L_memop(Rt, Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_ZX_U64(uValue, uAddr, (Rt != 31 ? IEM_MEM_ORDERING_ACQUIRE_PC : IEM_MEM_ORDERING_RELAXED) | IEM_SPECIAL_MEM_F_ALIGN_NATURAL); /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDADDALH  <Ws>, <Wt>, [<Xn|SP>] (ffe0fc00/78e00000) */
@@ -14759,7 +14856,15 @@
 
 
 /* LDAPR  <Wt>, [<Xn|SP>{ , #0}] (fffffc00/b8bfc000) */
-//#define IEM_INSTR_IMPL_A64__LDAPR_32L_memop(Rt, Rn)
+#define IEM_INSTR_IMPL_A64__LDAPR_32L_memop(Rt, Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32_ZX_U64(uValue, uAddr, (Rt != 31 ? IEM_MEM_ORDERING_ACQUIRE_PC : IEM_MEM_ORDERING_RELAXED) | IEM_SPECIAL_MEM_F_ALIGN_NATURAL); /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDADDAL  <Ws>, <Wt>, [<Xn|SP>] (ffe0fc00/b8e00000) */
@@ -14923,7 +15028,15 @@
 
 
 /* LDAPR  <Xt>, [<Xn|SP>{ , #0}] (fffffc00/f8bfc000) */
-//#define IEM_INSTR_IMPL_A64__LDAPR_64L_memop(Rt, Rn)
+#define IEM_INSTR_IMPL_A64__LDAPR_64L_memop(Rt, Rn) \
+    IEM_MC_BEGIN(0, IEM_CIMPL_F_MEM); \
+    IEM_MC_LOCAL(uint64_t, uAddr); \
+    IEM_MC_FETCH_GREG_SP_CHECK_ALIGN_U64(uAddr, Rn); \
+    IEM_MC_LOCAL(uint64_t, uValue); \
+    IEM_MC_SPECIAL_FETCH_MEM_FLAT_U64(uValue, uAddr, (Rt != 31 ? IEM_MEM_ORDERING_ACQUIRE_PC : IEM_MEM_ORDERING_RELAXED) | IEM_SPECIAL_MEM_F_ALIGN_NATURAL); /** @todo tagchecked=true */ \
+    IEM_MC_STORE_GREG_U64(Rt, uValue); \
+    IEM_MC_ADVANCE_PC_AND_FINISH(); \
+    IEM_MC_END()
 
 
 /* LDADDAL  <Xs>, <Xt>, [<Xn|SP>] (ffe0fc00/f8e00000) */

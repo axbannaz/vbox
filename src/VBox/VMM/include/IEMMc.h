@@ -560,6 +560,50 @@
     iemMemFlatStoreDataU256NoAcJmp(pVCpu, (a_GCPtrMem), &(a_u256Value))
 
 
+/** Relaxed (normal) ordering. */
+#define IEM_SPECIAL_MEM_F_ORDERING_RELAXED          0x00
+/** Load-AcquirePC (RCpc). */
+#define IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE_PC       0x01
+/** Load-Acquire (RCsc). */
+#define IEM_SPECIAL_MEM_F_ORDERING_ACQUIRE          0x02
+/** Store-Release (RCsc). */
+#define IEM_SPECIAL_MEM_F_ORDERING_RELEASE          0x03
+/** Naturally align special fetch or store. */
+#define IEM_SPECIAL_MEM_F_ALIGN_NATURAL             0x10
+
+/* Loads w/ ordering. */
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8(a_u8Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u8Dst) = iemMemFlatFetchDataU8Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16(a_u16Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u16Dst) = iemMemFlatFetchDataU16Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32(a_u32Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u32Dst) = iemMemFlatFetchDataU32Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = iemMemFlatFetchDataU64Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U128(a_u128Dst, a_GCPtrMem, a_OrderingAlign) \
+    iemMemFlatFetchDataU128Jmp(pVCpu, &(a_u128Dst), (a_GCPtrMem))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U256(a_u256Dst, a_GCPtrMem, a_OrderingAlign) \
+    iemMemFlatFetchDataU256NoAcJmp(pVCpu, &(a_u256Dst), (a_GCPtrMem))
+
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_ZX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = iemMemFlatFetchDataU8Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_ZX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = iemMemFlatFetchDataU16Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32_ZX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = iemMemFlatFetchDataU32Jmp(pVCpu, (a_GCPtrMem)))
+
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_SX_U32(a_u32Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u32Dst) = (int32_t)(int8_t)iemMemFlatFetchDataU8Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U8_SX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = (int64_t)(int8_t)iemMemFlatFetchDataU8Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_SX_U32(a_u32Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u32Dst) = (int32_t)(int16_t)iemMemFlatFetchDataU16Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U16_SX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = (int64_t)(int16_t)iemMemFlatFetchDataU16Jmp(pVCpu, (a_GCPtrMem)))
+#define IEM_MC_SPECIAL_FETCH_MEM_FLAT_U32_SX_U64(a_u64Dst, a_GCPtrMem, a_OrderingAlign) \
+    ((a_u64Dst) = (int64_t)(int32_t)iemMemFlatFetchDataU32Jmp(pVCpu, (a_GCPtrMem)))
+
+
 /* 8-bit */
 
 /**
