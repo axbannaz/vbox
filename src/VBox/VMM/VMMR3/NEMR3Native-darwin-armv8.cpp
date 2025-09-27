@@ -1923,6 +1923,7 @@ DECLINLINE(uint64_t) nemR3DarwinGetGReg(PVMCPU pVCpu, uint8_t uReg)
 static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCpu, uint32_t uIss, bool fInsn32Bit,
                                                             RTGCPTR GCPtrDataAbrt, RTGCPHYS GCPhysDataAbrt)
 {
+    uint64_t const uTsc = ASMReadTSC();
     bool fIsv        = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_ISV);
     bool fL2Fault    = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_S1PTW);
     bool fWrite      = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_WNR);
@@ -1938,6 +1939,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
 
     STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbort);
 
+    bool fDirtyTracking = false;
     if (fWrite)
     {
         /*
@@ -1951,6 +1953,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
          * which doesn't produce a valid instruction syndrome requiring restarting the instruction after enabling
          * write access again (due to a missing interpreter right now).
          */
+        /** @todo r=bird: there must be more efficient way of doing this...
+         *        like assuming there are no duplicates? Track max slot ID. */
         for (uint32_t idSlot = 0; idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking); idSlot++)
         {
             PNEMHVMMIO2REGION pMmio2Region = &pVM->nem.s.aMmio2DirtyTracking[idSlot];
@@ -1959,6 +1963,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
                 && GCPhysDataAbrt <= pMmio2Region->GCPhysLast)
             {
                 STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbortDirty);
+                /** @todo EMHistoryAddExit (need type) */
                 pMmio2Region->fDirty = true;
 
                 uint8_t u2State;
@@ -1968,19 +1973,24 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
                 /* Restart the instruction if there is no instruction syndrome available. */
                 if (RT_FAILURE(rc) || !fIsv)
                     return rc;
+                fDirtyTracking = true;
             }
         }
+    }
+
+    if (!fDirtyTracking)
+    {
+        PCEMEXITREC pExitRec = EMHistoryAddExit(pVCpu,
+                                                  fWrite
+                                                ? EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_WRITE)
+                                                : EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_READ),
+                                                pVCpu->cpum.GstCtx.Pc.u64, uTsc);
+        RT_NOREF_PV(pExitRec);
     }
 
     VBOXSTRICTRC rcStrict;
     if (fIsv)
     {
-        EMHistoryAddExit(pVCpu,
-                         fWrite
-                         ? EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_WRITE)
-                         : EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_READ),
-                         pVCpu->cpum.GstCtx.Pc.u64, ASMReadTSC());
-
         uint64_t u64Val = 0;
         if (fWrite)
         {
@@ -2004,6 +2014,15 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
     {
         STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbortToIem);
 
+#ifdef VBOX_WITH_IEM_TARGETING_ARM
+        /* Let IEM do the work.  TLBs must be invalidated, as we don't track that. */
+        int rc = nemR3DarwinCopyStateFromHv(pVM, pVCpu, IEM_CPUMCTX_EXTRN_MUST_MASK);
+        AssertRCReturn(rc, rc);
+        IEMTlbInvalidateAll(pVCpu);
+        rcStrict = IEMExecOne(pVCpu);
+        LogFlowFunc(("IEMExecOne returns %Rrc\n", VBOXSTRICTRC_VAL(rcStrict) ));
+        return rcStrict;
+#else
         /** @todo Our UEFI firmware accesses the flash region with the following instruction
          *        when the NVRAM actually contains data:
          *             ldrb w9, [x6, #-0x0001]!
@@ -2106,6 +2125,7 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
                                                 VERR_NEM_IPE_2);
             }
         }
+#endif /* !VBOX_WITH_IEM_TARGETING_ARM */
     }
 
     if (rcStrict == VINF_SUCCESS)
