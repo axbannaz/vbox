@@ -1945,9 +1945,10 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
          */
         /** @todo r=bird: there must be more efficient way of doing this...
          *        like assuming there are no duplicates? Track max slot ID. */
-        for (uint32_t idSlot = 0; idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking); idSlot++)
+        uint32_t const idxMax = RT_MIN(RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking), pVM->nem.s.idxMmio2DirtyTrackingEnd);
+        for (uint32_t idSlot = 0; idSlot < idxMax; idSlot++)
         {
-            PNEMHVMMIO2REGION pMmio2Region = &pVM->nem.s.aMmio2DirtyTracking[idSlot];
+            PNEMHVMMIO2REGION const pMmio2Region = &pVM->nem.s.aMmio2DirtyTracking[idSlot];
 
             if (   GCPhysDataAbrt >= pMmio2Region->GCPhysStart
                 && GCPhysDataAbrt <= pMmio2Region->GCPhysLast)
@@ -2931,6 +2932,20 @@ VMMR3_INT_DECL(bool) NEMR3IsMmio2DirtyPageTrackingSupported(PVM pVM)
     return true;
 }
 
+#ifdef VBOX_WITH_PGM_NEM_MODE
+/**
+ * Recalculates the idxMmio2DirtyTrackingEnd variable.
+ */
+static void nemR3DarwinArmRecalcMmio2DirtyTrackingEnd(PVM pVM)
+{
+    uint32_t idxMax = 0;
+    for (uint32_t idxSlot = 0; idxSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking); idxSlot++)
+        if (   pVM->nem.s.aMmio2DirtyTracking[idxSlot].GCPhysStart != 0
+            || pVM->nem.s.aMmio2DirtyTracking[idxSlot].GCPhysLast != 0)
+            idxMax = idxSlot + 1;
+    pVM->nem.s.idxMmio2DirtyTrackingEnd = idxMax;
+}
+#endif
 
 VMMR3_INT_DECL(int) NEMR3NotifyPhysMmioExMapEarly(PVM pVM, RTGCPHYS GCPhys, RTGCPHYS cb, uint32_t fFlags,
                                                   void *pvRam, void *pvMmio2, uint8_t *pu2State, uint32_t *puNemRange)
@@ -2968,32 +2983,28 @@ VMMR3_INT_DECL(int) NEMR3NotifyPhysMmioExMapEarly(PVM pVM, RTGCPHYS GCPhys, RTGC
         Assert(fFlags & NEM_NOTIFY_PHYS_MMIO_EX_F_MMIO2);
 
         /* We need to set up our own dirty tracking due to Hypervisor.framework only working on host page sized aligned regions. */
-        uint32_t fProt = NEM_PAGE_PROT_READ | NEM_PAGE_PROT_EXECUTE;
+        uint32_t idSlot = UINT32_MAX;
+        uint32_t fProt  = NEM_PAGE_PROT_READ | NEM_PAGE_PROT_EXECUTE;
         if (fFlags & NEM_NOTIFY_PHYS_MMIO_EX_F_TRACK_DIRTY_PAGES)
         {
             /* Find a slot for dirty tracking. */
-            PNEMHVMMIO2REGION pMmio2Region = NULL;
-            uint32_t idSlot;
             for (idSlot = 0; idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking); idSlot++)
-            {
                 if (   pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysStart == 0
                     && pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysLast == 0)
                 {
-                    pMmio2Region = &pVM->nem.s.aMmio2DirtyTracking[idSlot];
+                    pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysStart = GCPhys;
+                    pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysLast  = GCPhys + cb - 1;
+                    pVM->nem.s.aMmio2DirtyTracking[idSlot].fDirty      = false;
+                    *puNemRange = idSlot;
+                    if (idSlot >= pVM->nem.s.idxMmio2DirtyTrackingEnd)
+                        pVM->nem.s.idxMmio2DirtyTrackingEnd = idSlot + 1;
                     break;
                 }
-            }
-
-            if (!pMmio2Region)
+            if (idSlot >= RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking))
             {
                 LogRel(("NEMR3NotifyPhysMmioExMapEarly: Out of dirty tracking structures -> VERR_NEM_MAP_PAGES_FAILED\n"));
                 return VERR_NEM_MAP_PAGES_FAILED;
             }
-
-            pMmio2Region->GCPhysStart = GCPhys;
-            pMmio2Region->GCPhysLast  = GCPhys + cb - 1;
-            pMmio2Region->fDirty      = false;
-            *puNemRange = idSlot;
         }
         else
             fProt |= NEM_PAGE_PROT_WRITE;
@@ -3003,6 +3014,12 @@ VMMR3_INT_DECL(int) NEMR3NotifyPhysMmioExMapEarly(PVM pVM, RTGCPHYS GCPhys, RTGC
         {
             LogRel(("NEMR3NotifyPhysMmioExMapEarly: GCPhys=%RGp LB %RGp fFlags=%#x pvMmio2=%p: Map -> rc=%Rrc\n",
                     GCPhys, cb, fFlags, pvMmio2, rc));
+            if (idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking))
+            {
+                pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysStart = 0;
+                pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysLast  = 0;
+                nemR3DarwinArmRecalcMmio2DirtyTrackingEnd(pVM);
+            }
             return VERR_NEM_MAP_PAGES_FAILED;
         }
     }
@@ -3053,13 +3070,17 @@ VMMR3_INT_DECL(int) NEMR3NotifyPhysMmioExUnmap(PVM pVM, RTGCPHYS GCPhys, RTGCPHY
         if (fFlags & NEM_NOTIFY_PHYS_MMIO_EX_F_TRACK_DIRTY_PAGES)
         {
             /* Reset tracking structure. */
-            uint32_t idSlot = *puNemRange;
+            uint32_t const idSlot = *puNemRange;
             *puNemRange = UINT32_MAX;
 
             Assert(idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking));
-            pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysStart = 0;
-            pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysLast  = 0;
-            pVM->nem.s.aMmio2DirtyTracking[idSlot].fDirty      = false;
+            if (idSlot < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking))
+            {
+                pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysStart = 0;
+                pVM->nem.s.aMmio2DirtyTracking[idSlot].GCPhysLast  = 0;
+                pVM->nem.s.aMmio2DirtyTracking[idSlot].fDirty      = false;
+                nemR3DarwinArmRecalcMmio2DirtyTrackingEnd(pVM);
+            }
         }
     }
 
@@ -3097,7 +3118,8 @@ VMMR3_INT_DECL(int) NEMR3PhysMmio2QueryAndResetDirtyBitmap(PVM pVM, RTGCPHYS GCP
                                                            void *pvBitmap, size_t cbBitmap)
 {
     LogFlowFunc(("NEMR3PhysMmio2QueryAndResetDirtyBitmap: %RGp LB %RGp UnemRange=%u\n", GCPhys, cb, uNemRange));
-    Assert(uNemRange < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking));
+    AssertReturn(uNemRange < RT_ELEMENTS(pVM->nem.s.aMmio2DirtyTracking), VERR_NEM_IPE_5);
+    Assert(pVM->nem.s.aMmio2DirtyTracking[uNemRange].GCPhysLast != 0);
 
     /* Keep it simple for now and mark everything as dirty if it is. */
     int rc = VINF_SUCCESS;
