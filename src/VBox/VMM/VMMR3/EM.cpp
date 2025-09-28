@@ -140,7 +140,10 @@ VMMR3_INT_DECL(int) EMR3Init(PVM pVM)
      * try optimize these using IEM if there are other exits close by.  This
      * overrides the context specific settings. */
     bool fExitOptimizationEnabled = true;
-    rc = CFGMR3QueryBoolDef(pCfgEM, "ExitOptimizationEnabled", &fExitOptimizationEnabled, true);
+    /** @todo r=aeichner 2025-09-28 Temporarily changed to false to check whether this has a positive
+     *                              effect on the testboxes, some show weird guest hangs, and I have encountered
+     *                              similar things in the past where disabling this by default made a difference. */
+    rc = CFGMR3QueryBoolDef(pCfgEM, "ExitOptimizationEnabled", &fExitOptimizationEnabled, false);
     AssertLogRelRCReturn(rc, rc);
 
     /** @cfgm{/EM/ExitOptimizationEnabledR0, bool, true}
