@@ -1924,22 +1924,12 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
                                                             RTGCPTR GCPtrDataAbrt, RTGCPHYS GCPhysDataAbrt)
 {
     uint64_t const uTsc = ASMReadTSC();
-    bool fIsv        = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_ISV);
-    bool fL2Fault    = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_S1PTW);
-    bool fWrite      = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_WNR);
-    bool f64BitReg   = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SF);
-    bool fSignExtend = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SSE);
-    uint8_t uReg     = ARMV8_EC_ISS_DATA_ABRT_SRT_GET(uIss);
-    uint8_t uAcc     = ARMV8_EC_ISS_DATA_ABRT_SAS_GET(uIss);
-    size_t cbAcc     = nemR3DarwinGetByteCountFromSas(uAcc);
-    LogFlowFunc(("fIsv=%RTbool fL2Fault=%RTbool fWrite=%RTbool f64BitReg=%RTbool fSignExtend=%RTbool uReg=%u uAcc=%u GCPtrDataAbrt=%RGv GCPhysDataAbrt=%RGp\n",
-                 fIsv, fL2Fault, fWrite, f64BitReg, fSignExtend, uReg, uAcc, GCPtrDataAbrt, GCPhysDataAbrt));
-
-    RT_NOREF(fL2Fault, GCPtrDataAbrt);
+    RT_NOREF(GCPtrDataAbrt);
 
     STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbort);
 
     bool fDirtyTracking = false;
+    bool const fWrite = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_WNR);
     if (fWrite)
     {
         /*
@@ -1969,10 +1959,16 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
                 uint8_t u2State;
                 int rc = nemR3DarwinProtect(pMmio2Region->GCPhysStart, pMmio2Region->GCPhysLast - pMmio2Region->GCPhysStart + 1,
                                             NEM_PAGE_PROT_READ | NEM_PAGE_PROT_EXECUTE | NEM_PAGE_PROT_WRITE, &u2State);
+                AssertLogRelRCReturn(rc, rc);
 
                 /* Restart the instruction if there is no instruction syndrome available. */
-                if (RT_FAILURE(rc) || !fIsv)
-                    return rc;
+                if (   (uIss & (ARMV8_EC_ISS_DATA_ABRT_ISV | ARMV8_EC_ISS_DATA_ABRT_LST))
+                    != ARMV8_EC_ISS_DATA_ABRT_ISV) /* LST != 0 for LD64B/ST64B/ST64BV/ST64BV0 */
+                {
+                    LogFlowFunc(("GCPtrDataAbrt=%RGv GCPhysDataAbrt=%RGp PC=%RGv fInsn32Bit=%RTbool uIss=%RX32 - dirty - restarting\n",
+                                 GCPtrDataAbrt, GCPhysDataAbrt, pVCpu->cpum.GstCtx.Pc.u64, fInsn32Bit, uIss));
+                    return VINF_SUCCESS;
+                }
                 fDirtyTracking = true;
             }
         }
@@ -1989,8 +1985,19 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
     }
 
     VBOXSTRICTRC rcStrict;
-    if (fIsv)
+    if (   (uIss & (ARMV8_EC_ISS_DATA_ABRT_ISV | ARMV8_EC_ISS_DATA_ABRT_LST))
+        == ARMV8_EC_ISS_DATA_ABRT_ISV) /* LST != 0 for LD64B/ST64B/ST64BV/ST64BV0 */
     {
+        bool const fL2Fault    = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_S1PTW); RT_NOREF(fL2Fault);
+        bool const f64BitReg   = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SF);
+        bool const fSignExtend = RT_BOOL(uIss & ARMV8_EC_ISS_DATA_ABRT_SSE);
+        uint8_t const uReg     = ARMV8_EC_ISS_DATA_ABRT_SRT_GET(uIss);
+        uint8_t const uAcc     = ARMV8_EC_ISS_DATA_ABRT_SAS_GET(uIss);
+        size_t const cbAcc     = nemR3DarwinGetByteCountFromSas(uAcc);
+        LogFlowFunc(("GCPtrDataAbrt=%RGv GCPhysDataAbrt=%RGp PC=%RGv fInsn32Bit=%RTbool uIss=%RX32%s fIsv=true fL2Fault=%RTbool fWrite=%RTbool f64BitReg=%RTbool fSignExtend=%RTbool uReg=%u uAcc=%u(%u)\n",
+                     GCPtrDataAbrt, GCPhysDataAbrt, pVCpu->cpum.GstCtx.Pc.u64, fInsn32Bit, uIss,
+                     fDirtyTracking ? " - dirty -" : "", fL2Fault, fWrite, f64BitReg, fSignExtend, uReg, uAcc, cbAcc));
+
         uint64_t u64Val = 0;
         if (fWrite)
         {
@@ -2012,6 +2019,8 @@ static VBOXSTRICTRC nemR3DarwinHandleExitExceptionDataAbort(PVM pVM, PVMCPU pVCp
     }
     else
     {
+        LogFlowFunc(("GCPtrDataAbrt=%RGv GCPhysDataAbrt=%RGp PC=%RGv fInsn32Bit=%RTbool uIss=%RX32%s\n", GCPtrDataAbrt,
+                     GCPhysDataAbrt, pVCpu->cpum.GstCtx.Pc.u64, fInsn32Bit, uIss, fDirtyTracking ? " - dirty" : ""));
         STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitExcpDataAbortToIem);
 
 #ifdef VBOX_WITH_IEM_TARGETING_ARM
