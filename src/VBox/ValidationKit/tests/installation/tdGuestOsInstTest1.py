@@ -251,7 +251,7 @@ class tdGuestOsInstTest1(vbox.TestDriver):
             InstallTestVm(oSet, 'tst-suse102',      'OpenSUSE',         'opensuse102-txs.iso',      InstallTestVm.ksIdeController,   8, InstallTestVm.kf32Bit | InstallTestVm.kfReqIoApic),
             ## @todo InstallTestVm(oSet, 'tst-ubuntu606',    'Ubuntu',           'ubuntu606-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
             ## @todo InstallTestVm(oSet, 'tst-ubuntu710',    'Ubuntu',           'ubuntu710-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit),
-            InstallTestVm(oSet, 'tst-ubuntu804',    'Ubuntu',           'ubuntu804-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApic),
+            InstallTestVm(oSet, 'tst-ubuntu804',    'Ubuntu',           'ubuntu804-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae | InstallTestVm.kfReqIoApic | InstallTestVm.kfLinuxIoApic),
             InstallTestVm(oSet, 'tst-ubuntu804-64', 'Ubuntu_64',        'ubuntu804-amd64-txs.iso',  InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit),
             InstallTestVm(oSet, 'tst-ubuntu904',    'Ubuntu',           'ubuntu904-txs.iso',        InstallTestVm.ksSataController,  8, InstallTestVm.kf32Bit | InstallTestVm.kfUbuntuNewAmdBug | InstallTestVm.kfReqPae | InstallTestVm.kfLinuxIoApic),
             InstallTestVm(oSet, 'tst-ubuntu904-64', 'Ubuntu_64',        'ubuntu904-amd64-txs.iso',  InstallTestVm.ksSataController,  8, InstallTestVm.kf64Bit | InstallTestVm.kfLinuxIoApic),
