@@ -163,30 +163,25 @@ public:
     {
         /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
+        AssertPtrReturn(item()->model(), QAccessible::State());
 
         /* Compose the state: */
-        QAccessible::State state;
-        state.focusable = true;
-        state.selectable = true;
-
-        /* Compose the state of first selected-item: */
-        if (item() && item() == item()->model()->firstSelectedItem())
-        {
-            state.active = true;
-            state.focused = true;
-            state.selected = true;
-        }
-
-        /* Compose the state of group: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        myState.selectable = true;
+        if (item()->model()->firstSelectedItem() == item())
+            myState.focused = true;
+        if (item()->model()->selectedItems().contains(item()))
+            myState.selected = true;
         if (item()->type() == UIChooserNodeType_Group)
         {
-            state.expandable = true;
+            myState.expandable = true;
             if (!item()->toGroupItem()->isClosed())
-                state.expanded = true;
+                myState.expanded = true;
         }
 
         /* Return the state: */
-        return state;
+        return myState;
     }
 
     /** Returns a text for the passed @a enmTextRole. */
