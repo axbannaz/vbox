@@ -262,7 +262,6 @@ void UIChooserItemMachine::updateToolTip()
 
 QList<UIChooserItem*> UIChooserItemMachine::items(UIChooserNodeType) const
 {
-    AssertMsgFailed(("Machine graphics item do NOT support children!"));
     return QList<UIChooserItem*>();
 }
 
