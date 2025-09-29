@@ -26,6 +26,7 @@
  */
 
 /* Qt includes: */
+#include <QAccessibleInterface>
 #include <QDrag>
 #include <QGraphicsScene>
 #include <QGraphicsSceneContextMenuEvent>
@@ -437,6 +438,22 @@ void UIChooserModel::setCurrentItem(UIChooserItem *pItem)
 
     /* Set new current-item: */
     m_pCurrentItem = pItem;
+
+    /* Updating accessibility for newly chosen item if necessary: */
+    if (m_pCurrentItem && QAccessible::isActive())
+    {
+        /* Calculate index of item interface in parent interface: */
+        QAccessibleInterface *pIfaceItem = QAccessible::queryAccessibleInterface(m_pCurrentItem);
+        AssertPtrReturnVoid(pIfaceItem);
+        QAccessibleInterface *pIfaceParent = pIfaceItem->parent();
+        AssertPtrReturnVoid(pIfaceParent);
+        const int iIndexOfItem = pIfaceParent->indexOfChild(pIfaceItem);
+
+        /* Compose and send accessibility update event: */
+        QAccessibleEvent focusEvent(pIfaceParent, QAccessible::Focus);
+        focusEvent.setChild(iIndexOfItem);
+        QAccessible::updateAccessibility(&focusEvent);
+    }
 
     /* Disconnect old current-item (if any): */
     if (pOldCurrentItem)
