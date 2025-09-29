@@ -5732,10 +5732,13 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                     oWrapperProgress = vboxwrappers.ProgressWrapper(oCurProgress, self.oTstDrv.oVBoxMgr,
                                                                     self.oTstDrv, "gctrlUpGA");
                     oWrapperProgress.wait();
-                    assert oWrapperProgress.isCompleted();
-                    fRc = oWrapperProgress.isSuccess();
-                    if not fRc:
-                        oWrapperProgress.logResult(fIgnoreErrors = True);
+                    fRc = oWrapperProgress.isCompleted();
+                    if fRc:
+                        fRc = oWrapperProgress.isSuccess();
+                        if not fRc:
+                            oWrapperProgress.logResult(fIgnoreErrors = True);
+                    else:
+                        fRc = reporter.error('Timed out waiting for the guest additions update to complete');
                 else:
                     fRc = reporter.error('No progress object returned');
 
