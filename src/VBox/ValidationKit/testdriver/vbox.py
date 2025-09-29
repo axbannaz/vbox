@@ -3475,17 +3475,25 @@ class TestDriver(base.TestDriver):                                              
         # If the host is out of memory, just skip all the info collection as it
         # requires memory too and seems to wedge.
         #
-        sHostProcessInfo     = None;
-        sHostProcessInfoHung = None;
-        sLastScreenshotPath  = None;
-        sOsKernelLog         = None;
-        sVgaText             = None;
-        asMiscInfos          = [];
+        sHostProcessInfo       = None;
+        sHostProcessInfoHung   = None;
+        sLastScreenshotPath    = None;
+        sOsKernelLog           = None;
+        sVgaText               = None;
+        sGuestSampleReportPath = None;
+        asMiscInfos            = [];
 
         if not oSession.fHostMemoryLow:
             # Try to fetch the VM process info before meddling with its state.
             if self.fAlwaysUploadLogs or reporter.testErrorCount() > 0:
                 sHostProcessInfo = utils.processGetInfo(oSession.getPid(), fSudo = True);
+
+            # Create a guest sample report if appropriate/requested - this needs a running VM.
+            if self.fAlwaysUploadLogs or reporter.testErrorCount() > 0:
+                sGuestSampleReportPath = os.path.join(self.sScratchPath, "GuestSampleReport-%s.log" % oSession.sName);
+                fRc = oSession.takeGuestSample(sGuestSampleReportPath);
+                if fRc is not True:
+                    sGuestSampleReportPath = None;
 
             #
             # Pause the VM if we're going to take any screenshots or dig into the
@@ -3637,6 +3645,10 @@ class TestDriver(base.TestDriver):                                              
                 reporter.addLogFile(sLastScreenshotPath, 'screenshot/failure', 'Last VM screenshot');
             else:
                 reporter.addLogFile(sLastScreenshotPath, 'screenshot/success', 'Last VM screenshot');
+
+        # Add the guest sample report if it has been requested and taken successfully.
+        if sGuestSampleReportPath is not None:
+            reporter.addLogFile(sGuestSampleReportPath, 'process/report/guest', 'Guest sample report');
 
         # Add the guest OS log if it has been requested and taken successfully.
         if sOsKernelLog is not None:

@@ -3169,6 +3169,47 @@ class SessionWrapper(TdTaskBase):
 
         return sGuestStack;
 
+    def takeGuestSample(self, sSampleReportPath, cUsSampleInterval = 1000, cUsSampleTime = 10 * 1000 * 1000, cMsTimeout = 40 * 1000): #pylint: disable=line-too-long
+        """
+        Takes a guest sample report
+
+        Returns True on success.
+        Returns False on IMachineDebugger::takeGuestSample().
+        """
+        #
+        # Load all plugins first and try to detect the OS so we can
+        # get nicer stack traces.
+        #
+        try:
+            self.o.console.debugger.loadPlugIn('all');
+        except:
+            reporter.logXcpt('Unable to load debugger plugins');
+        else:
+            try:
+                sOsDetected = self.o.console.debugger.detectOS();
+                _ = sOsDetected;
+            except:
+                reporter.logXcpt('Failed to detect the guest OS');
+
+        # VM needs to be running
+        fPause = False;
+        if self.oVM.state is vboxcon.MachineState_Paused:
+            fPause = True;
+            self.o.console.resume();
+
+        try:
+            oProgressCom = self.o.console.debugger.takeGuestSample(sSampleReportPath, cUsSampleInterval, cUsSampleTime);
+            oProgress = ProgressWrapper(oProgressCom, self.oVBoxMgr, self.oTstDrv, 'Take Guest Sample Report');
+            oProgress.wait(cMsTimeout);
+            oProgress.logResult();
+        except:
+            reporter.logXcpt('IMachineDebugger::takeGuestSample failed');
+            return False;
+
+        if fPause:
+            self.o.console.pause();
+
+        return True;
 
     #
     # Other methods.

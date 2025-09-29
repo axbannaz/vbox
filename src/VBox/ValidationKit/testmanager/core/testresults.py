@@ -437,6 +437,7 @@ class TestResultFileData(ModelDataBase):
     ksKind_LogUninstaller           = 'log/uninstaller';
     ksKind_LogGuestKernel           = 'log/guest/kernel';
     ksKind_ProcessReportVm          = 'process/report/vm';
+    ksKind_ProcessReportGuest       = 'process/report/guest';
     ksKind_CrashReportVm            = 'crash/report/vm';
     ksKind_CrashDumpVm              = 'crash/dump/vm';
     ksKind_CrashReportSvc           = 'crash/report/svc';
@@ -463,6 +464,7 @@ class TestResultFileData(ModelDataBase):
         ksKind_LogUninstaller,
         ksKind_LogGuestKernel,
         ksKind_ProcessReportVm,
+        ksKind_ProcessReportGuest,
         ksKind_CrashReportVm,
         ksKind_CrashDumpVm,
         ksKind_CrashReportSvc,
