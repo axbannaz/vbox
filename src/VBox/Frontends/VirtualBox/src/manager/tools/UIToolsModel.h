@@ -208,6 +208,9 @@ private:
 
     /** @name General stuff.
       * @{ */
+        /** Handles request to select passed @a pItem. */
+        bool maybeSelectItem(UIToolsItem *pItem);
+
         /** Holds the tool class. */
         UIToolClass  m_enmClass;
 

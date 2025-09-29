@@ -406,6 +406,21 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
     /* Checking event-type: */
     switch (pEvent->type())
     {
+        /* Keyboard handler: */
+        case QEvent::KeyRelease:
+        {
+            /* Acquire event: */
+            QKeyEvent *pKeyEvent = static_cast<QKeyEvent*>(pEvent);
+            /* For the Space key release: */
+            if (pKeyEvent->key() == Qt::Key_Space)
+            {
+                /* Get focused item: */
+                UIToolsItem *pFocusedItem = qgraphicsitem_cast<UIToolsItem*>(scene()->focusItem());
+                if (pFocusedItem && pFocusedItem->isEnabled())
+                    return maybeSelectItem(pFocusedItem);
+            }
+            break;
+        }
         /* Mouse handler: */
         case QEvent::GraphicsSceneMouseRelease:
         {
@@ -418,41 +433,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 /* Which item we just clicked? Is it enabled? */
                 UIToolsItem *pClickedItem = qgraphicsitem_cast<UIToolsItem*>(pItemUnderMouse);
                 if (pClickedItem && pClickedItem->isEnabled())
-                {
-                    /* Handle known item classes: */
-                    switch (pClickedItem->itemClass())
-                    {
-                        case UIToolClass_Aux:
-                        {
-                            /* Handle known item types: */
-                            switch (pClickedItem->itemType())
-                            {
-                                case UIToolType_Toggle:
-                                {
-                                    /* Save the change: */
-                                    gEDataManager->setToolTextVisible(!m_fShowItemNames);
-                                    return true;
-                                }
-                                default:
-                                    break;
-                            }
-                            break;
-                        }
-                        case UIToolClass_Global:
-                        case UIToolClass_Machine:
-                        {
-                            /* Make clicked item the current one: */
-                            if (pClickedItem->isEnabled())
-                            {
-                                setCurrentItem(pClickedItem);
-                                return true;
-                            }
-                            break;
-                        }
-                        default:
-                            break;
-                    }
-                }
+                    return maybeSelectItem(pClickedItem);
             }
             break;
         }
@@ -709,4 +690,42 @@ void UIToolsModel::cleanup()
     /* Cleanup everything: */
     cleanupItems();
     cleanupScene();
+}
+
+bool UIToolsModel::maybeSelectItem(UIToolsItem *pItem)
+{
+    /* Handle known item classes: */
+    switch (pItem->itemClass())
+    {
+        case UIToolClass_Aux:
+        {
+            /* Handle known item types: */
+            switch (pItem->itemType())
+            {
+                case UIToolType_Toggle:
+                {
+                    /* Save the change: */
+                    gEDataManager->setToolTextVisible(!m_fShowItemNames);
+                    return true;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case UIToolClass_Global:
+        case UIToolClass_Machine:
+        {
+            /* Make clicked item the current one: */
+            if (pItem->isEnabled())
+            {
+                setCurrentItem(pItem);
+                return true;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return false;
 }
