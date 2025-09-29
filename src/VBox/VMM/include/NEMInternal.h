@@ -356,8 +356,12 @@ typedef struct NEM
     /** @} */
     /** Dirty tracking slots. */
     NEMHVMMIO2REGION            aMmio2DirtyTracking[8];
+    /** The end of valid aMmio2DirtyTracking entries. */
+    uint32_t                    idxMmio2DirtyTrackingEnd;
+    uint32_t                    u32Padding2;
     /** The vCPU config. */
     hv_vcpu_config_t            hVCpuCfg;
+
 # elif defined(VBOX_VMM_TARGET_X86)
     /** Set if hv_vm_space_create() was called successfully. */
     bool                        fCreatedAsid : 1;
