@@ -578,7 +578,11 @@ void UIToolsItem::prepare()
     /* Configure item options: */
     setOwnedByLayout(false);
     setAcceptHoverEvents(true);
+#ifndef VBOX_WS_MAC
+    setFocusPolicy(Qt::TabFocus);
+#else
     setFocusPolicy(Qt::NoFocus);
+#endif
     setFlag(QGraphicsItem::ItemIsSelectable, false);
 
     /* Prepare connections: */
@@ -812,6 +816,17 @@ void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) co
         /* Paint button finally: */
         paintRoundedButton(pPainter, subRect, cursorPosInItem, backgroundColor, iPadding);
     }
+
+#ifndef VBOX_WS_MAC
+    /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
+    if (hasFocus())
+    {
+        QStyleOptionFocusRect focusOption;
+        focusOption.rect = rectangle;
+        focusOption.backgroundColor = pal.color(QPalette::Window);
+        QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, pPainter);
+    }
+#endif /* !VBOX_WS_MAC */
 
     /* Restore painter: */
     pPainter->restore();
