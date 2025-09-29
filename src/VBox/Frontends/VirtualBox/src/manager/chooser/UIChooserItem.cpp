@@ -73,6 +73,20 @@ public:
         : QAccessibleObject(pObject)
     {}
 
+    /** Returns the role. */
+    virtual QAccessible::Role role() const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QAccessible::NoRole);
+
+        /* Return the role of group: */
+        if (item()->type() == UIChooserNodeType_Group)
+            return QAccessible::List;
+
+        /* ListItem by default: */
+        return QAccessible::ListItem;
+    }
+
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
@@ -81,6 +95,18 @@ public:
 
         /* Return the parent: */
         return QAccessible::queryAccessibleInterface(item()->model()->view());
+    }
+
+    /** Returns the rect. */
+    virtual QRect rect() const RT_OVERRIDE
+    {
+        /* Now goes the mapping: */
+        const QSize   itemSize         = item()->size().toSize();
+        const QPointF itemPosInScene   = item()->mapToScene(QPointF(0, 0));
+        const QPoint  itemPosInView    = item()->model()->view()->mapFromScene(itemPosInScene);
+        const QPoint  itemPosInScreen  = item()->model()->view()->mapToGlobal(itemPosInView);
+        const QRect   itemRectInScreen = QRect(itemPosInScreen, itemSize);
+        return itemRectInScreen;
     }
 
     /** Returns the number of children. */
@@ -121,49 +147,6 @@ public:
         return -1;
     }
 
-    /** Returns the rect. */
-    virtual QRect rect() const RT_OVERRIDE
-    {
-        /* Now goes the mapping: */
-        const QSize   itemSize         = item()->size().toSize();
-        const QPointF itemPosInScene   = item()->mapToScene(QPointF(0, 0));
-        const QPoint  itemPosInView    = item()->model()->view()->mapFromScene(itemPosInScene);
-        const QPoint  itemPosInScreen  = item()->model()->view()->mapToGlobal(itemPosInView);
-        const QRect   itemRectInScreen = QRect(itemPosInScreen, itemSize);
-        return itemRectInScreen;
-    }
-
-    /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QString());
-
-        switch (enmTextRole)
-        {
-            case QAccessible::Name:        return item()->name();
-            case QAccessible::Description: return item()->description();
-            default: break;
-        }
-
-        /* Null-string by default: */
-        return QString();
-    }
-
-    /** Returns the role. */
-    virtual QAccessible::Role role() const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QAccessible::NoRole);
-
-        /* Return the role of group: */
-        if (item()->type() == UIChooserNodeType_Group)
-            return QAccessible::List;
-
-        /* ListItem by default: */
-        return QAccessible::ListItem;
-    }
-
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
@@ -193,6 +176,23 @@ public:
 
         /* Return the state: */
         return state;
+    }
+
+    /** Returns a text for the passed @a enmTextRole. */
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QString());
+
+        switch (enmTextRole)
+        {
+            case QAccessible::Name:        return item()->name();
+            case QAccessible::Description: return item()->description();
+            default: break;
+        }
+
+        /* Null-string by default: */
+        return QString();
     }
 
 private:
