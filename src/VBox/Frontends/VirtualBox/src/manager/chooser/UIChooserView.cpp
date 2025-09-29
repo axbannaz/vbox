@@ -59,7 +59,12 @@ public:
 
     /** Constructs an accessibility interface passing @a pWidget to the base-class. */
     UIAccessibilityInterfaceForUIChooserView(QWidget *pWidget)
+#ifdef VBOX_WS_MAC
+        // WORKAROUND: macOS doesn't respect QAccessible::Tree/TreeItem roles.
+        : QAccessibleWidget(pWidget, QAccessible::List)
+#else
         : QAccessibleWidget(pWidget, QAccessible::Tree)
+#endif
     {}
 
     /** Returns a specialized accessibility interface type. */
@@ -67,8 +72,12 @@ public:
     {
         switch (enmType)
         {
+#ifdef VBOX_WS_MAC
+            /// @todo Fix selection interface for macOS first of all!
+#else
             case QAccessible::SelectionInterface:
                 return static_cast<QAccessibleSelectionInterface*>(this);
+#endif
             default:
                 break;
         }

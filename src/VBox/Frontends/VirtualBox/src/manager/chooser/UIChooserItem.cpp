@@ -76,7 +76,19 @@ public:
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE
     {
+#ifdef VBOX_WS_MAC
+        // WORKAROUND: macOS doesn't respect QAccessible::Tree/TreeItem roles.
+
+        /* Sanity check: */
+        AssertPtrReturn(item(), QAccessible::NoRole);
+
+        /* Return List for group item, ListItem for machine item: */
+        if (item()->type() == UIChooserNodeType_Group)
+            return QAccessible::List;
+        return QAccessible::ListItem;
+#else
         return QAccessible::TreeItem;
+#endif
     }
 
     /** Returns the parent. */
