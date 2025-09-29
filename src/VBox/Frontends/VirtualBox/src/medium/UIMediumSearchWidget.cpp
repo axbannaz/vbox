@@ -213,13 +213,6 @@ void UIMediumSearchWidget::sltRetranslateUI()
     }
 }
 
-void UIMediumSearchWidget::showEvent(QShowEvent *pEvent)
-{
-    if (m_pSearchTermLineEdit)
-        m_pSearchTermLineEdit->setFocus();
-    QWidget::showEvent(pEvent);
-}
-
 void UIMediumSearchWidget::markUnmarkItems(QList<QTreeWidgetItem*> &itemList, bool fMark)
 {
     foreach (QTreeWidgetItem* pItem, itemList)
