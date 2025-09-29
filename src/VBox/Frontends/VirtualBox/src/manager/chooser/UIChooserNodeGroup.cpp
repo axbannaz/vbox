@@ -116,7 +116,7 @@ QString UIChooserNodeGroup::fullName() const
 
 QString UIChooserNodeGroup::description() const
 {
-    return name();
+    return m_strDescription;
 }
 
 QString UIChooserNodeGroup::definition(bool fFull /* = false */) const
@@ -301,6 +301,9 @@ QUuid UIChooserNodeGroup::id() const
 
 void UIChooserNodeGroup::sltRetranslateUI()
 {
+    /* Update internal stuff: */
+    m_strDescription = tr("Machine Group");
+
     /* Update group-item: */
     if (item())
         item()->updateItem();
