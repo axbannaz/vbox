@@ -1504,7 +1504,7 @@ static DECLCALLBACK(VBOXSTRICTRC) tpmMmioFifoWrite(PPDMDEVINS pDevIns, void *pvU
     PDEVTPM pThis  = PDMDEVINS_2_DATA(pDevIns, PDEVTPM);
     RT_NOREF(pvUser);
 
-    Assert(pThis->fCrb);
+    Assert(!pThis->fCrb);
     Assert(!(off & (cb - 1))); /** @todo it's passthru, what do you expect... */
 
     uint32_t uReg = tpmGetRegisterFromOffset(off);
