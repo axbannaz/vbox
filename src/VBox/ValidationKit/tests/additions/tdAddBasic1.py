@@ -250,7 +250,8 @@ class tdAddBasic1(vbox.TestDriver):                                         # py
                 ## @todo Final test: Uninstallation.
 
                 # Download the TxS (Test Execution Service) log. This is not fatal when not being present.
-                if not fRc:
+                # The TXS session can be None if re-connecting after the reboot failed.
+                if not fRc and oTxsSession is not None:
                     self.txsDownloadFiles(oSession, oTxsSession,
                                           [ (oTestVm.pathJoin(self.getGuestTempDir(oTestVm), 'vbox-txs-release.log'),
                                                               'vbox-txs-%s.log' % oTestVm.sVmName) ],
