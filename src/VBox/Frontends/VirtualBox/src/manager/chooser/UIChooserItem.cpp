@@ -76,7 +76,7 @@ public:
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::NoRole);
 
         /* Return the role of group: */
@@ -90,7 +90,7 @@ public:
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
         /* Return the parent: */
@@ -100,6 +100,11 @@ public:
     /** Returns the rect. */
     virtual QRect rect() const RT_OVERRIDE
     {
+        /* Sanity check: */
+        AssertPtrReturn(item(), QRect());
+        AssertPtrReturn(item()->model(), QRect());
+        AssertPtrReturn(item()->model()->view(), QRect());
+
         /* Now goes the mapping: */
         const QSize   itemSize         = item()->size().toSize();
         const QPointF itemPosInScene   = item()->mapToScene(QPointF(0, 0));
@@ -112,27 +117,22 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
-        /* Return the number of group children: */
-        if (item()->type() == UIChooserNodeType_Group)
-            return item()->items().size();
-
-        /* Zero by default: */
-        return 0;
+        /* Return the number of item children: */
+        return item()->items().size();
     }
 
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(item(), 0);
 
         /* Return the child with the passed iIndex: */
-        return QAccessible::queryAccessibleInterface(item()->items().at(iIndex));
+        return QAccessible::queryAccessibleInterface(item()->items().value(iIndex));
     }
 
     /** Returns the index of the passed @a pChild. */
@@ -150,7 +150,7 @@ public:
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
 
         /* Compose the state: */
@@ -181,7 +181,7 @@ public:
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QString());
 
         switch (enmTextRole)

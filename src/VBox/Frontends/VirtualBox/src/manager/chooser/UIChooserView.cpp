@@ -65,46 +65,49 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
+        /* Sanity check: */
         AssertPtrReturn(view(), 0);
+        AssertPtrReturn(view()->model(), 0);
+        AssertPtrReturn(view()->model()->root(), 0);
 
-        /* Return the number of model children if model really assigned: */
-        return view()->model() ? view()->model()->root()->items().size() : 0;
+        /* Return the number of model's root children: */
+        return view()->model()->root()->items().size();
     }
 
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
-        AssertPtrReturn(view(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(view(), 0);
+        AssertPtrReturn(view()->model(), 0);
+        AssertPtrReturn(view()->model()->root(), 0);
 
-        /* Return the model child with the passed iIndex if model really assigned: */
-        return QAccessible::queryAccessibleInterface(view()->model() ? view()->model()->root()->items().at(iIndex) : 0);
+        /* Return the model's root child with the passed iIndex: */
+        return QAccessible::queryAccessibleInterface(view()->model()->root()->items().at(iIndex));
     }
 
-    /** Returns the index of passed @a pChild. */
+    /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
-        AssertPtrReturn(view(), -1);
-        /* Make sure child is valid: */
-        AssertReturn(pChild, -1);
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
 
         /* Acquire item itself: */
         UIChooserItem *pChildItem = qobject_cast<UIChooserItem*>(pChild->object());
 
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
+        AssertPtrReturn(pChildItem->parentItem(), -1);
+
         /* Return the index of item in it's parent: */
-        return   pChildItem && pChildItem->parentItem()
-               ? pChildItem->parentItem()->items().indexOf(pChildItem)
-               : -1;;
+        return pChildItem->parentItem()->items().indexOf(pChildItem);
     }
 
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
+        /* Sanity check: */
         AssertPtrReturn(view(), QString());
 
         /* Return view tool-tip: */
