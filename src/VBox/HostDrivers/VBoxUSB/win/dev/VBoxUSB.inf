@@ -56,10 +56,12 @@ DefaultDestDir = 12
 %ORACLE%=VBoxUSB@COMMA-NT-ARCH@
 
 [VBoxUSB@DOT-NT-ARCH@]
-%VBoxUSB_DrvDesc%=VBoxUSB,USB\VID_80EE&PID_CAFE
+%VBoxUSB_DrvDesc%=VBoxUSB_Drv,USB\VID_80EE&PID_CAFE
+
+[VBoxUSB_Drv@DOT-NT-ARCH@]
 CopyFiles=VBoxUSB_CopyFiles
 
-[VBoxUSB@DOT-NT-ARCH@.Services]
+[VBoxUSB_Drv@DOT-NT-ARCH@.Services]
 AddService=VBoxUSB,0x00000002,VBoxUSB_Service,VBoxUSB_AddReg
 
 [DefaultUninstall@DOT-NT-ARCH@.Services]
@@ -72,7 +74,7 @@ DisplayName    = %VBoxUSB_SvcDesc%
 ServiceType    = %SERVICE_TYPE_KERNEL_DRIVER%
 StartType      = %SERVICE_STARTTYPE_DEMAND%
 ErrorControl   = %SERVICE_ERRORCTL_NORMAL%
-ServiceBinary  = %10%\System32\Drivers\VBoxUSB.sys
+ServiceBinary  = %12%\VBoxUSB.sys
 LoadOrderGroup = Base
 
 [VBoxUSB_AddReg]
