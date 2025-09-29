@@ -42,7 +42,7 @@
 #include <iprt/assert.h>
 
 /** QAccessibleWidget extension used as an accessibility interface for Chooser-view. */
-class UIAccessibilityInterfaceForUIChooserView : public QAccessibleWidget
+class UIAccessibilityInterfaceForUIChooserView : public QAccessibleWidget, public QAccessibleSelectionInterface
 {
 public:
 
@@ -61,6 +61,20 @@ public:
     UIAccessibilityInterfaceForUIChooserView(QWidget *pWidget)
         : QAccessibleWidget(pWidget, QAccessible::Tree)
     {}
+
+    /** Returns a specialized accessibility interface type. */
+    virtual void *interface_cast(QAccessible::InterfaceType enmType) RT_OVERRIDE
+    {
+        switch (enmType)
+        {
+            case QAccessible::SelectionInterface:
+                return static_cast<QAccessibleSelectionInterface*>(this);
+            default:
+                break;
+        }
+
+        return 0;
+    }
 
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
@@ -135,6 +149,53 @@ public:
 
         /* Null string by default: */
         return QString();
+    }
+
+    /** Returns the total number of selected accessible items. */
+    virtual int selectedItemCount() const RT_OVERRIDE
+    {
+        /* For now we are interested in just first one selected item: */
+        return 1;
+    }
+
+    /** Returns the list of selected accessible items. */
+    virtual QList<QAccessibleInterface*> selectedItems() const RT_OVERRIDE
+    {
+        /* Sanity check: */
+        AssertPtrReturn(view(), QList<QAccessibleInterface*>());
+        AssertPtrReturn(view()->model(), QList<QAccessibleInterface*>());
+        AssertPtrReturn(view()->model()->firstSelectedItem(), QList<QAccessibleInterface*>());
+
+        /* For now we are interested in just first one selected item: */
+        return QList<QAccessibleInterface*>() << QAccessible::queryAccessibleInterface(view()->model()->firstSelectedItem());
+    }
+
+    /** Adds childItem to the selection. */
+    virtual bool select(QAccessibleInterface *) RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Removes childItem from the selection. */
+    virtual bool unselect(QAccessibleInterface *) RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Selects all accessible child items. */
+    virtual bool selectAll() RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Unselects all accessible child items. */
+    virtual bool clear() RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
     }
 
 private:
