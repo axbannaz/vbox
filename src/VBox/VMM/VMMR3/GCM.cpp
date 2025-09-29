@@ -443,7 +443,7 @@ static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
                     if (!iNoTimerCheck)
                     {
                         iNoTimerCheck = 1;
-                        rc = DBGFR3MemRead(pUVM, 0 /*idCpu*/, &Addr, &iNoTimerCheck, sizeof(iNoTimerCheck));
+                        rc = DBGFR3MemWrite(pUVM, 0 /*idCpu*/, &Addr, &iNoTimerCheck, sizeof(iNoTimerCheck));
                         if (RT_SUCCESS(rc))
                             LogRel(("GCM:    no_timer_check enabled successfully, good luck!\n"));
                         else
