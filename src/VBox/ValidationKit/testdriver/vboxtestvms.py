@@ -2364,7 +2364,8 @@ class TestVmManager(object):
 
         # Audio testing.
         TestVm('tst-audio-debian10-64',     kfGrpStdSmoke,       sHd = '6.1/audio/debian10-amd64-7.vdi',
-               sKind = 'Debian_64', acCpusSup = range(1, 33), fIoApic = True),
+               sKind = 'Debian_64', acCpusSup = range(1, 33), fIoApic = True,
+               fQuirks = g_kfQuirkLinuxIoApic),
 
         # DOS and Old Windows.
         AncientTestVm('tst-dos20',              sKind = 'DOS',
