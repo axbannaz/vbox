@@ -59,7 +59,7 @@ public:
 
     /** Constructs an accessibility interface passing @a pWidget to the base-class. */
     UIAccessibilityInterfaceForUIChooserView(QWidget *pWidget)
-        : QAccessibleWidget(pWidget, QAccessible::List)
+        : QAccessibleWidget(pWidget, QAccessible::Tree)
     {}
 
     /** Returns the number of children. */

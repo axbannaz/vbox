@@ -76,15 +76,7 @@ public:
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE
     {
-        /* Sanity check: */
-        AssertPtrReturn(item(), QAccessible::NoRole);
-
-        /* Return the role of group: */
-        if (item()->type() == UIChooserNodeType_Group)
-            return QAccessible::List;
-
-        /* ListItem by default: */
-        return QAccessible::ListItem;
+        return QAccessible::TreeItem;
     }
 
     /** Returns the parent. */
