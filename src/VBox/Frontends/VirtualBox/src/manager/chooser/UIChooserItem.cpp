@@ -138,13 +138,18 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Search for corresponding child: */
-        for (int i = 0; i < childCount(); ++i)
-            if (child(i) == pChild)
-                return i;
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
 
-        /* -1 by default: */
-        return -1;
+        /* Acquire item itself: */
+        UIChooserItem *pChildItem = qobject_cast<UIChooserItem*>(pChild->object());
+
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
+        AssertPtrReturn(pChildItem->parentItem(), -1);
+
+        /* Return the index of item in it's parent: */
+        return pChildItem->parentItem()->items().indexOf(pChildItem);
     }
 
     /** Returns the state. */
@@ -184,6 +189,7 @@ public:
         /* Sanity check: */
         AssertPtrReturn(item(), QString());
 
+        /* Text for known roles: */
         switch (enmTextRole)
         {
             case QAccessible::Name:        return item()->name();
