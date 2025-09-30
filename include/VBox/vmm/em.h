@@ -182,8 +182,8 @@ AssertCompileSize(EMEXITTYPE, 4);
 #define EMEXIT_F_UNFLATTENED_PC     UINT16_C(0x8000)    /**< The PC hasn't had CS.BASE added to it. */
 /** EMEXIT_F_KIND_EM: HM is calling (from ring-0).  Preemption is currently disabled or we're using preemption hooks. */
 #define EMEXIT_F_HM                 UINT16_C(0x0400)
-#define EMEXIT_F_XCPT_ERRCD         UINT16_C(0x0400)    /**< EMEXIT_F_KIND_XCPT: Additional record w/ the error code stored as PC. */
-#define EMEXIT_F_XCPT_CR2           UINT16_C(0x0200)    /**< EMEXIT_F_KIND_XCPT: Additional record w/ the CR3 value stored as PC. */
+/** EMEXIT_F_KIND_XCPT: Additional record w/ the CR3 value stored as PC. */
+#define EMEXIT_F_XCPT_CR2           UINT16_C(0x0400)
 /** Combines flags and exit type into EMHistoryAddExit() input. */
 #define EMEXIT_MAKE_FT(a_fFlags, a_uType)               ((a_fFlags) | (uint32_t)(a_uType))
 /** Combines flags, exit type and 32 bits of extra info into

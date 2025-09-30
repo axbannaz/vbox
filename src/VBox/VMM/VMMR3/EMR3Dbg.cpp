@@ -239,43 +239,43 @@ static const char *emR3HistoryGetExitName(uint16_t uFlagsAndType, uint32_t uInfo
         case EMEXIT_F_KIND_XCPT:
             switch (uFlagsAndType & EMEXIT_F_TYPE_MASK)
             {
-                case X86_XCPT_DE:               return "Xcpt #DE";
-                case X86_XCPT_DB:               return "Xcpt #DB";
-                case X86_XCPT_NMI:              return "Xcpt #NMI";
-                case X86_XCPT_BP:               return "Xcpt #BP";
-                case X86_XCPT_OF:               return "Xcpt #OF";
-                case X86_XCPT_BR:               return "Xcpt #BR";
-                case X86_XCPT_UD:               return "Xcpt #UD";
-                case X86_XCPT_NM:               return "Xcpt #NM";
-                case X86_XCPT_DF:               return "Xcpt #DF";
-                case X86_XCPT_CO_SEG_OVERRUN:   return "Xcpt #CO_SEG_OVERRUN";
-                case X86_XCPT_TS:               return "Xcpt #TS";
-                case X86_XCPT_NP:               return "Xcpt #NP";
-                case X86_XCPT_SS:               return "Xcpt #SS";
-                case X86_XCPT_GP:               return "Xcpt #GP";
-                case X86_XCPT_PF:               return "Xcpt #PF";
-                case X86_XCPT_MF:               return "Xcpt #MF";
-                case X86_XCPT_AC:               return "Xcpt #AC";
-                case X86_XCPT_MC:               return "Xcpt #MC";
-                case X86_XCPT_XF:               return "Xcpt #XF";
-                case X86_XCPT_VE:               return "Xcpt #VE";
-                case X86_XCPT_CP:               return "Xcpt #CP";
-                case X86_XCPT_VC:               return "Xcpt #VC";
-                case X86_XCPT_SX:               return "Xcpt #SX";
+                case X86_XCPT_DE:               pszExitName = "Xcpt #DE"; break;
+                case X86_XCPT_DB:               pszExitName = "Xcpt #DB"; break;
+                case X86_XCPT_NMI:              pszExitName = "Xcpt #NMI"; break;
+                case X86_XCPT_BP:               pszExitName = "Xcpt #BP"; break;
+                case X86_XCPT_OF:               pszExitName = "Xcpt #OF"; break;
+                case X86_XCPT_BR:               pszExitName = "Xcpt #BR"; break;
+                case X86_XCPT_UD:               pszExitName = "Xcpt #UD"; break;
+                case X86_XCPT_NM:               pszExitName = "Xcpt #NM"; break;
+                case X86_XCPT_DF:               pszExitName = "Xcpt #DF"; break;
+                case X86_XCPT_CO_SEG_OVERRUN:   pszExitName = "Xcpt #CO_SEG_OVERRUN"; break;
+                case X86_XCPT_TS:               pszExitName = "Xcpt #TS"; break;
+                case X86_XCPT_NP:               pszExitName = "Xcpt #NP"; break;
+                case X86_XCPT_SS:               pszExitName = "Xcpt #SS"; break;
+                case X86_XCPT_GP:               pszExitName = "Xcpt #GP"; break;
+                case X86_XCPT_PF:               pszExitName = "Xcpt #PF"; break;
+                case X86_XCPT_MF:               pszExitName = "Xcpt #MF"; break;
+                case X86_XCPT_AC:               pszExitName = "Xcpt #AC"; break;
+                case X86_XCPT_MC:               pszExitName = "Xcpt #MC"; break;
+                case X86_XCPT_XF:               pszExitName = "Xcpt #XF"; break;
+                case X86_XCPT_VE:               pszExitName = "Xcpt #VE"; break;
+                case X86_XCPT_CP:               pszExitName = "Xcpt #CP"; break;
+                case X86_XCPT_VC:               pszExitName = "Xcpt #VC"; break;
+                case X86_XCPT_SX:               pszExitName = "Xcpt #SX"; break;
 
-                case X86_XCPT_DF | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #DF ErrCd as PC";
-                case X86_XCPT_TS | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #TS ErrCd as PC";
-                case X86_XCPT_NP | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #NP ErrCd as PC";
-                case X86_XCPT_SS | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #SS ErrCd as PC";
-                case X86_XCPT_GP | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #GF ErrCd as PC";
-                case X86_XCPT_PF | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #PF ErrCd as PC";
-                case X86_XCPT_AC | EMEXIT_F_XCPT_ERRCD:  return "Xcpt #AC ErrCd as PC";
-
-                case X86_XCPT_PF | EMEXIT_F_XCPT_CR2:    return "Xcpt #PF CR2 as PC";
-
+                case X86_XCPT_PF | EMEXIT_F_XCPT_CR2: return "Xcpt #PF CR2 as PC";
                 default:
                     pszExitName = NULL;
                     break;
+            }
+            if (pszExitName)
+            {
+                if (uInfo != 0) /* We set bit 31 if there is an error code. */
+                {
+                    RTStrPrintf(pszFallback, cbFallback, "%s errcd=%#x", pszExitName, uInfo & ~RT_BIT_32(31));
+                    return pszFallback;
+                }
+                return pszExitName;
             }
             break;
 #endif

@@ -2540,10 +2540,9 @@ iemRaiseXcptOrInt(PVMCPUCC    pVCpu,
     {
         if (u8Vector < RT_ELEMENTS(pVCpu->iem.s.aStatXcpts))
             STAM_REL_COUNTER_INC(&pVCpu->iem.s.aStatXcpts[u8Vector]);
-        EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT(EMEXIT_F_KIND_XCPT, u8Vector),
+        EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT_EX(EMEXIT_F_KIND_XCPT, u8Vector,
+                                                  fFlags & IEM_XCPT_FLAGS_ERR ? uErr | RT_BIT_32(31) : 0),
                          pVCpu->cpum.GstCtx.rip + pVCpu->cpum.GstCtx.cs.u64Base, uTimestamp);
-        if (fFlags & IEM_XCPT_FLAGS_ERR)
-            EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT(EMEXIT_F_KIND_XCPT, u8Vector | EMEXIT_F_XCPT_ERRCD), uErr, uTimestamp);
         if (fFlags & IEM_XCPT_FLAGS_CR2)
             EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT(EMEXIT_F_KIND_XCPT, u8Vector | EMEXIT_F_XCPT_CR2), uCr2, uTimestamp);
         IEMTLBTRACE_XCPT(pVCpu, u8Vector, fFlags & IEM_XCPT_FLAGS_ERR ? uErr : 0, fFlags & IEM_XCPT_FLAGS_CR2 ? uCr2 : 0, fFlags);
