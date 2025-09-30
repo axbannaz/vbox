@@ -525,8 +525,7 @@ typedef struct XAPICPAGE
 /* #endif */
             uint8_t             uReserved0;
             uint8_t             u8MaxLvtEntry;
-            uint8_t             fEoiBroadcastSupression : 1;
-            uint8_t             u7Reserved1   : 7;
+            uint8_t             fEoiBroadcastSupression;
             uint32_t            u32Reserved0[3];
         } u;
         struct
@@ -900,8 +899,7 @@ typedef struct X2APICPAGE
             uint8_t             u8Version;
             uint8_t             u8Reserved0;
             uint8_t             u8MaxLvtEntry;
-            uint8_t             fEoiBroadcastSupression : 1;
-            uint8_t             u7Reserved1   : 7;
+            uint8_t             fEoiBroadcastSupression;
             uint32_t            u32Reserved0[3];
         } u;
         struct
