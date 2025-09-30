@@ -5731,7 +5731,7 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 if oCurProgress is not None:
                     oWrapperProgress = vboxwrappers.ProgressWrapper(oCurProgress, self.oTstDrv.oVBoxMgr,
                                                                     self.oTstDrv, "gctrlUpGA");
-                    oWrapperProgress.wait();
+                    oWrapperProgress.wait(5 * 60 * 1000);
                     fRc = oWrapperProgress.isCompleted();
                     if fRc:
                         fRc = oWrapperProgress.isSuccess();
