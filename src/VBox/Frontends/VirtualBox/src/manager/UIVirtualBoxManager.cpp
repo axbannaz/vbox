@@ -38,7 +38,6 @@
 #include <QStandardPaths>
 #include <QStatusBar>
 #include <QStyle>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWindow>
 #ifndef VBOX_WS_WIN
@@ -50,6 +49,7 @@
 #include "QIFileDialog.h"
 #include "QILineEdit.h"
 #include "QIRichTextLabel.h"
+#include "QITextEdit.h"
 #include "UIActionPoolManager.h"
 #include "UIAdvancedSettingsDialogSpecific.h"
 #include "UICloudConsoleManager.h"
@@ -169,7 +169,7 @@ private:
     /** Holds the help-viewer instance. */
     QIRichTextLabel   *m_pHelpViewer;
     /** Holds the text-editor instance. */
-    QTextEdit         *m_pTextEditor;
+    QITextEdit        *m_pTextEditor;
     /** Holds the button-box instance. */
     QIDialogButtonBox *m_pButtonBox;
 };
@@ -350,10 +350,10 @@ void UIAcquirePublicKeyDialog::prepareWidgets()
         }
 
         /* Prepare text-editor: */
-        m_pTextEditor = new QTextEdit(this);
+        m_pTextEditor = new QITextEdit(this);
         if (m_pTextEditor)
         {
-            connect(m_pTextEditor, &QTextEdit::textChanged, this, &UIAcquirePublicKeyDialog::sltRevalidate);
+            connect(m_pTextEditor, &QITextEdit::textChanged, this, &UIAcquirePublicKeyDialog::sltRevalidate);
             pLayout->addWidget(m_pTextEditor, 1);
         }
 
@@ -1914,7 +1914,7 @@ void UIVirtualBoxManager::sltHandleConsoleLogRead(const QString &strName, const 
         QVBoxLayout *pLayout = new QVBoxLayout(pWindow);
         if (pLayout)
         {
-            QTextEdit *pTextEdit = new QTextEdit(pWindow);
+            QITextEdit *pTextEdit = new QITextEdit(pWindow);
             if (pTextEdit)
             {
                 pTextEdit->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));

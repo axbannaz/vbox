@@ -771,6 +771,7 @@ UICommon_QT_MOCHDRS = \
 	src/extensions/QITableView.h \
 	src/extensions/QITableWidget.h \
 	src/extensions/QITabWidget.h \
+	src/extensions/QITextEdit.h \
 	src/extensions/QIToolBar.h \
 	src/extensions/QIToolButton.h \
 	src/extensions/QITreeView.h \
@@ -1331,6 +1332,7 @@ UICommon_SOURCES = \
 	src/extensions/QITableView.cpp \
 	src/extensions/QITableWidget.cpp \
 	src/extensions/QITabWidget.cpp \
+	src/extensions/QITextEdit.cpp \
 	src/extensions/QIToolBar.cpp \
 	src/extensions/QIToolButton.cpp \
 	src/extensions/QITreeView.cpp \

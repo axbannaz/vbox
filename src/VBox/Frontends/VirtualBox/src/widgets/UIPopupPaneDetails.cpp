@@ -28,9 +28,9 @@
 /* Qt includes: */
 #include <QCheckBox>
 #include <QTextDocument>
-#include <QTextEdit>
 
 /* GUI includes: */
+#include "QITextEdit.h"
 #include "UIAnimationFramework.h"
 #include "UIPopupPane.h"
 #include "UIPopupPaneDetails.h"
@@ -187,7 +187,7 @@ void UIPopupPaneDetails::prepare()
 void UIPopupPaneDetails::prepareContent()
 {
     /* Create text-editor: */
-    m_pTextEdit = new QTextEdit(this);
+    m_pTextEdit = new QITextEdit(this);
     if (m_pTextEdit)
     {
         /* Configure text-editor: */

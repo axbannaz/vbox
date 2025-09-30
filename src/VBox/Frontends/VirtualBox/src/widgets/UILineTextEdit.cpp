@@ -30,12 +30,12 @@
 #include <QFile>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
 
 /* GUI includes: */
 #include "QIFileDialog.h"
+#include "QITextEdit.h"
 #include "UICommon.h"
 #include "UILineTextEdit.h"
 #include "UITranslationEventListener.h"
@@ -50,7 +50,7 @@ UITextEditor::UITextEditor(QWidget *pParent /* = NULL */)
     pMainLayout->setContentsMargins(12, 12, 12, 12);
 
     /* We need a text editor */
-    m_pTextEdit = new QTextEdit(this);
+    m_pTextEdit = new QITextEdit(this);
     pMainLayout->addWidget(m_pTextEdit);
     /* and some buttons to interact with */
     m_pButtonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, Qt::Horizontal, this);

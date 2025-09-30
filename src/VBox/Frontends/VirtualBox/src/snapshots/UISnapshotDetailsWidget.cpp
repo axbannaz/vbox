@@ -40,13 +40,13 @@
 #include <QScrollArea>
 #include <QTabWidget>
 #include <QTextBrowser>
-#include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWindow>
 
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
 #include "QIFlowLayout.h"
+#include "QITextEdit.h"
 #include "UIConverter.h"
 #include "UIDesktopWidgetWatchdog.h"
 #include "UIDetailsGenerator.h"
@@ -427,7 +427,7 @@ void UISnapshotDetailsElement::prepare()
         layout()->setContentsMargins(iMetric, iMetric, iMetric, iMetric);
 
         /* Create text-browser if requested, text-edit otherwise: */
-        m_pTextEdit = m_fLinkSupport ? new QTextBrowser : new QTextEdit;
+        m_pTextEdit = m_fLinkSupport ? (QTextEdit*)(new QTextBrowser) : (QTextEdit*)(new QITextEdit);
         AssertPtrReturnVoid(m_pTextEdit);
         {
             /* Configure that we have: */
@@ -946,7 +946,7 @@ void UISnapshotDetailsWidget::prepareTabOptions()
             AssertPtrReturnVoid(pLayoutDescription);
             {
                 /* Create description browser: */
-                m_pBrowserDescription = new QTextEdit;
+                m_pBrowserDescription = new QITextEdit;
                 AssertPtrReturnVoid(m_pBrowserDescription);
                 {
                     /* Configure browser: */
@@ -956,7 +956,7 @@ void UISnapshotDetailsWidget::prepareTabOptions()
                     QSizePolicy policy(QSizePolicy::Expanding, QSizePolicy::Expanding);
                     policy.setHorizontalStretch(1);
                     m_pBrowserDescription->setSizePolicy(policy);
-                    connect(m_pBrowserDescription, &QTextEdit::textChanged,
+                    connect(m_pBrowserDescription, &QITextEdit::textChanged,
                             this, &UISnapshotDetailsWidget::sltHandleDescriptionChange);
 
                     /* Add into layout: */

@@ -25,10 +25,8 @@
  * SPDX-License-Identifier: GPL-3.0-only
  */
 
-/* Qt includes: */
-#include <QTextEdit>
-
 /* GUI includes: */
+#include "QITextEdit.h"
 #include "QITreeView.h"
 #include "UIApplianceImportEditorWidget.h"
 #include "UIMessageCenter.h"

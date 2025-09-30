@@ -49,10 +49,10 @@ class QLabel;
 class QLineEdit;
 class QScrollArea;
 class QTabWidget;
-class QTextEdit;
 class QVBoxLayout;
 class QWidget;
 class QIDialogButtonBox;
+class QITextEdit;
 class UISnapshotDetailsElement;
 
 
@@ -233,11 +233,11 @@ private:
     QLabel    *m_pErrorPaneName;
 
     /** Holds the description label instance. */
-    QLabel    *m_pLabelDescription;
+    QLabel     *m_pLabelDescription;
     /** Holds the description editor instance. */
-    QTextEdit *m_pBrowserDescription;
+    QITextEdit *m_pBrowserDescription;
     /** Holds the description error pane. */
-    QLabel    *m_pErrorPaneDescription;
+    QLabel     *m_pErrorPaneDescription;
 
     /** Holds the button-box instance. */
     QIDialogButtonBox *m_pButtonBox;

@@ -35,10 +35,10 @@
 #include <QLineEdit>
 #include <QRegularExpression>
 #include <QSpinBox>
-#include <QTextEdit>
 #include <QVBoxLayout>
 
 /* GUI includes: */
+#include "QITextEdit.h"
 #include "QITreeView.h"
 #include "UIGlobalSession.h"
 #include "UIGuestOSType.h"
@@ -1864,7 +1864,7 @@ UIApplianceEditorWidget::UIApplianceEditorWidget(QWidget *pParent /* = 0 */)
                 }
 
                 /* Create text-edit: */
-                m_pTextEditWarning = new QTextEdit;
+                m_pTextEditWarning = new QITextEdit;
                 {
                     /* Configure text-edit: */
                     m_pTextEditWarning->setReadOnly(true);

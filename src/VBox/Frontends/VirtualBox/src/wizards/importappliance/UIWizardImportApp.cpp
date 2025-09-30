@@ -31,13 +31,13 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QPushButton>
-#include <QTextEdit>
 #include <QTextStream>
 #include <QVBoxLayout>
 
 /* GUI includes: */
 #include "QIDialog.h"
 #include "QIFileDialog.h"
+#include "QITextEdit.h"
 #include "UICommon.h"
 #include "UIGlobalSession.h"
 #include "UINotificationCenter.h"
@@ -63,7 +63,7 @@ public:
             pMainLayout->setContentsMargins(12, 12, 12, 12);
             m_pCaption = new QLabel(this);
                 m_pCaption->setWordWrap(true);
-            m_pLicenseText = new QTextEdit(this);
+            m_pLicenseText = new QITextEdit(this);
                 m_pLicenseText->setReadOnly(true);
             m_pPrintButton = new QPushButton(this);
             m_pSaveButton = new QPushButton(this);
@@ -140,7 +140,7 @@ private:
 
     /* Variables: */
     QLabel *m_pCaption;
-    QTextEdit *m_pLicenseText;
+    QITextEdit *m_pLicenseText;
     QDialogButtonBox *m_pButtonBox;
     QPushButton *m_pPrintButton;
     QPushButton *m_pSaveButton;

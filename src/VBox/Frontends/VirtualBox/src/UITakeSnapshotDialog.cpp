@@ -37,6 +37,7 @@
 /* GUI includes: */
 #include "QIDialogButtonBox.h"
 #include "QILabel.h"
+#include "QITextEdit.h"
 #include "VBoxUtils.h"
 #include "UICommon.h"
 #include "UIDesktopWidgetWatchdog.h"
@@ -262,7 +263,7 @@ void UITakeSnapshotDialog::prepareContents()
             }
 
             /* Create description editor: */
-            m_pEditorDescription = new QTextEdit;
+            m_pEditorDescription = new QITextEdit;
             if (m_pEditorDescription)
             {
                 /* Configure editor: */

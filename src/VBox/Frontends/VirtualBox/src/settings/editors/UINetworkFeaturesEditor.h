@@ -44,8 +44,8 @@ class QCheckBox;
 class QComboBox;
 class QGridLayout;
 class QLabel;
-class QTextEdit;
 class QILineEdit;
+class QITextEdit;
 class QIToolButton;
 
 /** UIEditor sub-class used as a network features editor. */
@@ -174,7 +174,7 @@ private:
         /** Holds the generic properties label instance. */
         QLabel       *m_pLabelGenericProperties;
         /** Holds the generic properties editor instance. */
-        QTextEdit    *m_pEditorGenericProperties;
+        QITextEdit   *m_pEditorGenericProperties;
         /** Holds the cable connected check-box instance. */
         QCheckBox    *m_pCheckBoxCableConnected;
         /** Holds the port forwarding button instance. */

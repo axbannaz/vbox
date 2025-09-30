@@ -33,7 +33,6 @@
 #include <QSlider>
 #include <QStackedLayout>
 #include <QStyle>
-#include <QTextEdit>
 #include <QVBoxLayout>
 
 /* GUI includes: */
@@ -42,6 +41,7 @@
 #include "QILabel.h"
 #include "QILineEdit.h"
 #include "QITabWidget.h"
+#include "QITextEdit.h"
 #include "QIToolButton.h"
 #include "UIConverter.h"
 #include "UIIconPool.h"
@@ -412,7 +412,7 @@ void UIMediumDetailsWidget::prepareTabOptions()
                 pLayoutDescription->setContentsMargins(0, 0, 0, 0);
 
                 /* Create description editor: */
-                m_pEditorDescription = new QTextEdit;
+                m_pEditorDescription = new QITextEdit;
                 AssertPtrReturnVoid(m_pEditorDescription);
                 {
                     /* Configure editor: */
@@ -423,7 +423,7 @@ void UIMediumDetailsWidget::prepareTabOptions()
                                              + pTextDocument->documentMargin() * 2
                                              + m_pEditorDescription->frameWidth() * 2;
                     m_pEditorDescription->setMaximumHeight(iMinimumHeight);
-                    connect(m_pEditorDescription, &QTextEdit::textChanged,
+                    connect(m_pEditorDescription, &QITextEdit::textChanged,
                             this, &UIMediumDetailsWidget::sltDescriptionTextChanged);
                     /* Add into layout: */
                     pLayoutDescription->addWidget(m_pEditorDescription, 0, 0, 2, 1);

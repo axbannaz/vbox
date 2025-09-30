@@ -38,8 +38,8 @@
 #include <QPushButton>
 
 /* Qt forward declarations */
-class QTextEdit;
 class QDialogButtonBox;
+class QITextEdit;
 
 ////////////////////////////////////////////////////////////////////////////////
 // UITextEditor
@@ -61,7 +61,7 @@ private slots:
 
 private:
     /* Private member vars */
-    QTextEdit        *m_pTextEdit;
+    QITextEdit       *m_pTextEdit;
     QDialogButtonBox *m_pButtonBox;
     QPushButton      *m_pOpenButton;
 };

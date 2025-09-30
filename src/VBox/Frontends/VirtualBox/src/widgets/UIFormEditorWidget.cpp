@@ -36,7 +36,6 @@
 #include <QPushButton>
 #include <QSortFilterProxyModel>
 #include <QSpinBox>
-#include <QTextEdit>
 #include <QVBoxLayout>
 
 /* GUI includes: */
@@ -44,6 +43,7 @@
 #include "QIDialogButtonBox.h"
 #include "QIStyledItemDelegate.h"
 #include "QITableView.h"
+#include "QITextEdit.h"
 #include "UIFormEditorWidget.h"
 #include "UIGlobalSession.h"
 #include "UIIconPool.h"
@@ -1202,13 +1202,13 @@ void UIFormEditorModel::createTextDataEditor(const QModelIndex &index)
     if (pDialog)
     {
         /* We will need that pointer: */
-        QTextEdit *pEditor = 0;
+        QITextEdit *pEditor = 0;
         /* Create layout: */
         QVBoxLayout *pLayout = new QVBoxLayout(pDialog);
         if (pLayout)
         {
             /* Create text-editor: */
-            pEditor = new QTextEdit;
+            pEditor = new QITextEdit;
             if (pEditor)
             {
                 const TextData td = data(index, Qt::EditRole).value<TextData>();

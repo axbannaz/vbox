@@ -41,9 +41,9 @@
 /* Forward declarations: */
 class QLabel;
 class QLineEdit;
-class QTextEdit;
 class QIDialogButtonBox;
 class QILabel;
+class QITextEdit;
 
 /** QIDialog subclass for taking snapshot name/description. */
 class SHARED_LIBRARY_STUFF UITakeSnapshotDialog : public QIDialog
@@ -105,9 +105,9 @@ private:
     QLineEdit *m_pEditorName;
 
     /** Holds the description label instance. */
-    QLabel    *m_pLabelDescription;
+    QLabel     *m_pLabelDescription;
     /** Holds the description editor instance. */
-    QTextEdit *m_pEditorDescription;
+    QITextEdit *m_pEditorDescription;
 
     /** Holds the information label instance. */
     QILabel *m_pLabelInfo;

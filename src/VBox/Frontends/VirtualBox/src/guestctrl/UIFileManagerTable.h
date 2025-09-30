@@ -51,9 +51,9 @@ class QAction;
 class QFileInfo;
 class QILabel;
 class QILineEdit;
+class QITextEdit;
 class QGridLayout;
 class QSortFilterProxyModel;
-class QTextEdit;
 class QHBoxLayout;
 class QVBoxLayout;
 class UIActionPool;
@@ -129,7 +129,7 @@ public:
 private:
 
     QVBoxLayout *m_pMainLayout;
-    QTextEdit   *m_pInfoEdit;
+    QITextEdit  *m_pInfoEdit;
     QString      m_strProperty;
 };
 
