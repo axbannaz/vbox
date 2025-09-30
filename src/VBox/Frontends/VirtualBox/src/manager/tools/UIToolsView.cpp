@@ -148,6 +148,24 @@ void UIToolsView::resizeEvent(QResizeEvent *pEvent)
     model()->updateLayout();
 }
 
+void UIToolsView::focusInEvent(QFocusEvent *pEvent)
+{
+    /* Call to base-class: */
+    QIGraphicsView::focusInEvent(pEvent);
+
+    /* Notify listeners about focus-in event: */
+    emit sigFocusInEvent();
+}
+
+void UIToolsView::focusOutEvent(QFocusEvent *pEvent)
+{
+    /* Call to base-class: */
+    QIGraphicsView::focusOutEvent(pEvent);
+
+    /* Notify listeners about focus-out event: */
+    emit sigFocusOutEvent();
+}
+
 void UIToolsView::sltRetranslateUI()
 {
     setWhatsThis(tr("Contains a list of VirtualBox tools."));

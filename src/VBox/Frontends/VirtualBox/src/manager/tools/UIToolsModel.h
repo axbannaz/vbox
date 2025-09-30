@@ -178,6 +178,11 @@ private slots:
 
         /** Handles tool label visibility change event. */
         void sltHandleToolLabelsVisibilityChange(bool fVisible);
+
+        /** Handles view's focus-in event. */
+        void sltHandleViewFocusInEvent();
+        /** Handles view's focus-out event. */
+        void sltHandleViewFocusOutEvent();
     /** @} */
 
 private:

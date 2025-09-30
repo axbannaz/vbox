@@ -38,6 +38,7 @@
 #include "UILoggingDefs.h"
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
+#include "UIToolsView.h"
 #include "UITranslationEventListener.h"
 
 /* Other VBox includes: */
@@ -96,7 +97,22 @@ UIToolsView *UIToolsModel::view() const
 
 void UIToolsModel::setView(UIToolsView *pView)
 {
+    /* Disconnect old view: */
+    if (m_pView)
+    {
+        disconnect(m_pView, &UIToolsView::sigFocusInEvent, this, &UIToolsModel::sltHandleViewFocusInEvent);
+        disconnect(m_pView, &UIToolsView::sigFocusOutEvent, this, &UIToolsModel::sltHandleViewFocusOutEvent);
+    }
+
+    /* Assign the view: */
     m_pView = pView;
+
+    /* Connect new view: */
+    if (m_pView)
+    {
+        connect(m_pView, &UIToolsView::sigFocusInEvent, this, &UIToolsModel::sltHandleViewFocusInEvent);
+        connect(m_pView, &UIToolsView::sigFocusOutEvent, this, &UIToolsModel::sltHandleViewFocusOutEvent);
+    }
 }
 
 void UIToolsModel::setToolsType(UIToolType enmType)
@@ -411,14 +427,35 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
         {
             /* Acquire event: */
             QKeyEvent *pKeyEvent = static_cast<QKeyEvent*>(pEvent);
-            /* For the Space key release: */
-            if (pKeyEvent->key() == Qt::Key_Space)
+
+            /* Up key for Global tools, Left key for Machine tools: */
+            if (   (m_enmClass == UIToolClass_Global && pKeyEvent->key() == Qt::Key_Up)
+                || (m_enmClass == UIToolClass_Machine && pKeyEvent->key() == Qt::Key_Left))
             {
-                /* Get focused item: */
-                UIToolsItem *pFocusedItem = qgraphicsitem_cast<UIToolsItem*>(scene()->focusItem());
-                if (pFocusedItem && pFocusedItem->isEnabled())
-                    return maybeSelectItem(pFocusedItem);
+                /* Determine current-item position: */
+                const int iPosition = items().indexOf(currentItem(m_enmClass));
+                /* Determine 'previous' item: */
+                UIToolsItem *pPreviousItem = 0;
+                if (iPosition > 0 && iPosition < items().size())
+                    pPreviousItem = items().at(iPosition - 1);
+                if (pPreviousItem && pPreviousItem->isEnabled() && pPreviousItem->itemClass() != UIToolClass_Aux)
+                    return maybeSelectItem(pPreviousItem);
             }
+
+            /* Down key for Global tools, Right key for Machine tools: */
+            if (   (m_enmClass == UIToolClass_Global && pKeyEvent->key() == Qt::Key_Down)
+                || (m_enmClass == UIToolClass_Machine && pKeyEvent->key() == Qt::Key_Right))
+            {
+                /* Determine current-item position: */
+                const int iPosition = items().indexOf(currentItem(m_enmClass));
+                /* Determine 'next' item: */
+                UIToolsItem *pNextItem = 0;
+                if (iPosition >= 0 && iPosition < items().size() - 1)
+                    pNextItem = items().at(iPosition + 1);
+                if (pNextItem && pNextItem->isEnabled() && pNextItem->itemClass() != UIToolClass_Aux)
+                    return maybeSelectItem(pNextItem);
+            }
+
             break;
         }
         /* Mouse handler: */
@@ -487,6 +524,20 @@ void UIToolsModel::sltHandleToolLabelsVisibilityChange(bool fVisible)
         pItem->updateGeometry();
     /* Recalculate layout: */
     updateLayout();
+}
+
+void UIToolsModel::sltHandleViewFocusInEvent()
+{
+    /* Update currently selected item: */
+    if (UIToolsItem *pItem = m_mapCurrentItems.value(m_enmClass))
+        pItem->update();
+}
+
+void UIToolsModel::sltHandleViewFocusOutEvent()
+{
+    /* Update currently selected item: */
+    if (UIToolsItem *pItem = m_mapCurrentItems.value(m_enmClass))
+        pItem->update();
 }
 
 void UIToolsModel::prepare()
