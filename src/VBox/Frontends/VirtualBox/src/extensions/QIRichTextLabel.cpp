@@ -26,11 +26,9 @@
  */
 
 /* Qt includes: */
-#include <QAccessibleWidget>
 #include <QAction>
 #include <QApplication>
 #include <QClipboard>
-#include <QtMath>
 #include <QUrl>
 #include <QVBoxLayout>
 
@@ -41,67 +39,6 @@
 /* Other VBox includes: */
 #include "iprt/assert.h"
 
-/* Forward declarations: */
-class QIRichTextLabel;
-
-
-/** QAccessibleObject extension used as an accessibility interface for QIRichTextLabel. */
-class UIAccessibilityInterfaceForQIRichTextLabel : public QAccessibleWidget
-{
-public:
-
-    /** Returns an accessibility interface for passed @a strClassname and @a pObject. */
-    static QAccessibleInterface *pFactory(const QString &strClassname, QObject *pObject)
-    {
-        /* Creating QIRichTextLabel accessibility interface: */
-        if (pObject && strClassname == QLatin1String("QIRichTextLabel"))
-            return new UIAccessibilityInterfaceForQIRichTextLabel(qobject_cast<QWidget*>(pObject));
-
-        /* Null by default: */
-        return 0;
-    }
-
-    /** Constructs an accessibility interface passing @a pWidget to the base-class. */
-    UIAccessibilityInterfaceForQIRichTextLabel(QWidget *pWidget)
-        : QAccessibleWidget(pWidget, QAccessible::StaticText)
-    {}
-
-    /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE;
-
-private:
-
-    /** Returns corresponding QIRichTextLabel. */
-    QIRichTextLabel *label() const;
-};
-
-
-/*********************************************************************************************************************************
-*   Class UIAccessibilityInterfaceForQIRichTextLabel implementation.                                                             *
-*********************************************************************************************************************************/
-
-QString UIAccessibilityInterfaceForQIRichTextLabel::text(QAccessible::Text enmTextRole) const
-{
-    /* Make sure label still alive: */
-    AssertPtrReturn(label(), QString());
-
-    /* Return the description: */
-    if (enmTextRole == QAccessible::Description)
-        return label()->plainText();
-
-    /* Null-string by default: */
-    return QString();
-}
-
-QIRichTextLabel *UIAccessibilityInterfaceForQIRichTextLabel::label() const
-{
-    return qobject_cast<QIRichTextLabel*>(widget());
-}
-
-
-/*********************************************************************************************************************************
-*   Class QIRichTextLabel implementation.                                                                                        *
-*********************************************************************************************************************************/
 
 QIRichTextLabel::QIRichTextLabel(QWidget *pParent)
     : QWidget(pParent)
@@ -110,9 +47,6 @@ QIRichTextLabel::QIRichTextLabel(QWidget *pParent)
     , m_fCopyAvailable(false)
     , m_iMinimumTextWidth(0)
 {
-    /* Install QIRichTextLabel accessibility interface factory: */
-    QAccessible::installFactory(UIAccessibilityInterfaceForQIRichTextLabel::pFactory);
-
     /* Configure self: */
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 
