@@ -117,7 +117,6 @@ typedef struct HVAPICCPU
     uint64_t                    uApicBaseMsr;
     /** The error status register's internal state. */
     uint32_t                    uEsrInternal;
-    /** @} */
 
     /** @name The APIC timer.
      * @{ */
