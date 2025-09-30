@@ -77,6 +77,7 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
     kfNeedCom1              = 0x0008; ##< Need serial port, typically for satifying the windows kernel debugger.
 
     kfLinuxIoApic           = 0x0010; ##< Patch the Linux guest to work around IO-APIC issues.
+    kfWinGaTimesync         = 0x0020; ##< Don't set the host time when the timesync service starts as that breaks the task scheduler causing TXS to not start.
 
     kfIdeIrqDelay           = 0x1000;
     kfUbuntuNewAmdBug       = 0x2000;
@@ -104,6 +105,7 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
         self.fOptIoApic             = None;
         self.fOptPae                = None;
         self.fOptInstallAdditions   = False;
+        self.fOptNoTimesyncSetStart = False;
         self.asOptExtraData         = [];
         if fFlags & self.kfUbuntuAvx2Crash:
             self.asOptExtraData    += self.kasUbuntuAvx2Crash;
@@ -113,6 +115,8 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
             self.fCom1RawFile       = True;
         if fFlags & self.kfLinuxIoApic:
             self.asOptExtraData    += self.kasLinuxIoApic;
+        if fFlags & self.kfWinGaTimesync:
+            self.fOptNoTimesyncSetStart = True;
 
     def _unattendedConfigure(self, oIUnattended, oTestDrv): # type: (Any, vbox.TestDriver) -> bool
         """
@@ -329,6 +333,10 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
             reporter.log('Set extradata: %s => %s' % (sKey, sValue))
             fRc = oSession.setExtraData(sKey, sValue) and fRc;
 
+        if self.fOptNoTimesyncSetStart:
+            fRc = oSession.setGuestPropertyValue('/VirtualBox/GuestAdd/VBoxService/--timesync-no-set-start', '1') and fRc;
+            fRc = oSession.setGuestPropertyValue('/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', '43200000') and fRc; # 12 hours
+
         # Save the settings.
         fRc = fRc and oSession.saveSettings()
         fRc = oSession.close() and fRc;
@@ -499,36 +507,36 @@ class tdGuestOsInstTest1(vbox.TestDriver):
             UnattendedVm(oSet, 'tst-xpsp2-64',    'WindowsXP_64',    '6.0/uaisos/en_win_xp_pro_x64_with_sp2_vl_x13-41611.iso', UnattendedVm.kfKeyFile), # >=3GiB
             #fixme: UnattendedVm(oSet, 'tst-xpchk-64',    'WindowsXP_64',    '6.0/uaisos/en_windows_xp_professional_x64_chk.iso', UnattendedVm.kfKeyFile | UnattendedVm.kfNeedCom1), # >=3GiB
             # No key files needed:
-            UnattendedVm(oSet, 'tst-vista-32',    'WindowsVista',    '6.0/uaisos/en_windows_vista_ee_x86_dvd_vl_x13-17271.iso'),          # >=6GiB
-            UnattendedVm(oSet, 'tst-vista-64',    'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_x64_dvd_vl_x13-17316.iso'),  # >=8GiB
-            UnattendedVm(oSet, 'tst-vistasp1-32', 'WindowsVista',    '6.0/uaisos/en_windows_vista_enterprise_with_service_pack_1_x86_dvd_x14-55954.iso'), # >=6GiB
-            UnattendedVm(oSet, 'tst-vistasp1-64', 'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_with_service_pack_1_x64_dvd_x14-55934.iso'), # >=9GiB
-            UnattendedVm(oSet, 'tst-vistasp2-32', 'WindowsVista',    '6.0/uaisos/en_windows_vista_enterprise_sp2_x86_dvd_342329.iso'),    # >=7GiB
-            UnattendedVm(oSet, 'tst-vistasp2-64', 'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_sp2_x64_dvd_342332.iso'),    # >=10GiB
-            UnattendedVm(oSet, 'tst-w7-32',       'Windows7',        '6.0/uaisos/en_windows_7_enterprise_x86_dvd_x15-70745.iso'),         # >=6GiB
-            UnattendedVm(oSet, 'tst-w7-64',       'Windows7_64',     '6.0/uaisos/en_windows_7_enterprise_x64_dvd_x15-70749.iso'),         # >=10GiB
-            UnattendedVm(oSet, 'tst-w7sp1-32',    'Windows7',        '6.0/uaisos/en_windows_7_enterprise_with_sp1_x86_dvd_u_677710.iso'), # >=6GiB
-            UnattendedVm(oSet, 'tst-w7sp1-64',    'Windows7_64',     '6.0/uaisos/en_windows_7_enterprise_with_sp1_x64_dvd_u_677651.iso'), # >=8GiB
-            UnattendedVm(oSet, 'tst-w8-32',       'Windows8',        '6.0/uaisos/en_windows_8_enterprise_x86_dvd_917587.iso'),            # >=6GiB
-            UnattendedVm(oSet, 'tst-w8-64',       'Windows8_64',     '6.0/uaisos/en_windows_8_enterprise_x64_dvd_917522.iso'),            # >=9GiB
-            UnattendedVm(oSet, 'tst-w81-32',      'Windows81',       '6.0/uaisos/en_windows_8_1_enterprise_x86_dvd_2791510.iso'),         # >=5GiB
-            UnattendedVm(oSet, 'tst-w81-64',      'Windows81_64',    '6.0/uaisos/en_windows_8_1_enterprise_x64_dvd_2791088.iso'),         # >=8GiB
-            UnattendedVm(oSet, 'tst-w10-1507-32', 'Windows10',       '6.0/uaisos/en_windows_10_pro_10240_x86_dvd.iso'),                   # >=6GiB
-            UnattendedVm(oSet, 'tst-w10-1507-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_pro_10240_x64_dvd.iso'),                   # >=9GiB
-            UnattendedVm(oSet, 'tst-w10-1511-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1511_updated_feb_2016_x86_dvd_8378870.iso'),    # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1511-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1511_x64_dvd_7224901.iso'),                     # >=9GiB
-            UnattendedVm(oSet, 'tst-w10-1607-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1607_updated_jul_2016_x86_dvd_9060097.iso'),    # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1607-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1607_updated_jul_2016_x64_dvd_9054264.iso'),    # >=9GiB
-            UnattendedVm(oSet, 'tst-w10-1703-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1703_updated_march_2017_x86_dvd_10188981.iso'), # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1703-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1703_updated_march_2017_x64_dvd_10189290.iso'), # >=10GiB
-            UnattendedVm(oSet, 'tst-w10-1709-32', 'Windows10',       '6.0/uaisos/en_windows_10_multi-edition_vl_version_1709_updated_sept_2017_x86_dvd_100090759.iso'),  # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1709-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_multi-edition_vl_version_1709_updated_sept_2017_x64_dvd_100090741.iso'),  # >=10GiB
-            UnattendedVm(oSet, 'tst-w10-1803-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_editions_version_1803_updated_march_2018_x86_dvd_12063341.iso'), # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1803-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_editions_version_1803_updated_march_2018_x64_dvd_12063333.iso'), # >=10GiB
-            UnattendedVm(oSet, 'tst-w10-1809-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_edition_version_1809_updated_sept_2018_x86_dvd_2f92403b.iso'),   # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1809-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_edition_version_1809_updated_sept_2018_x64_dvd_f0b7dc68.iso'),   # >=10GiB
-            UnattendedVm(oSet, 'tst-w10-1903-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_editions_version_1903_x86_dvd_ca4f0f49.iso'), # >=7GiB
-            UnattendedVm(oSet, 'tst-w10-1903-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_editions_version_1903_x64_dvd_37200948.iso'), # >=10GiB
+            UnattendedVm(oSet, 'tst-vista-32',    'WindowsVista',    '6.0/uaisos/en_windows_vista_ee_x86_dvd_vl_x13-17271.iso',                                         UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-vista-64',    'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_x64_dvd_vl_x13-17316.iso',                                 UnattendedVm.kfWinGaTimesync), # >=8GiB
+            UnattendedVm(oSet, 'tst-vistasp1-32', 'WindowsVista',    '6.0/uaisos/en_windows_vista_enterprise_with_service_pack_1_x86_dvd_x14-55954.iso',                UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-vistasp1-64', 'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_with_service_pack_1_x64_dvd_x14-55934.iso',                UnattendedVm.kfWinGaTimesync), # >=9GiB
+            UnattendedVm(oSet, 'tst-vistasp2-32', 'WindowsVista',    '6.0/uaisos/en_windows_vista_enterprise_sp2_x86_dvd_342329.iso',                                   UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-vistasp2-64', 'WindowsVista_64', '6.0/uaisos/en_windows_vista_enterprise_sp2_x64_dvd_342332.iso',                                   UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w7-32',       'Windows7',        '6.0/uaisos/en_windows_7_enterprise_x86_dvd_x15-70745.iso',                                        UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-w7-64',       'Windows7_64',     '6.0/uaisos/en_windows_7_enterprise_x64_dvd_x15-70749.iso',                                        UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w7sp1-32',    'Windows7',        '6.0/uaisos/en_windows_7_enterprise_with_sp1_x86_dvd_u_677710.iso',                                UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-w7sp1-64',    'Windows7_64',     '6.0/uaisos/en_windows_7_enterprise_with_sp1_x64_dvd_u_677651.iso',                                UnattendedVm.kfWinGaTimesync), # >=8GiB
+            UnattendedVm(oSet, 'tst-w8-32',       'Windows8',        '6.0/uaisos/en_windows_8_enterprise_x86_dvd_917587.iso',                                           UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-w8-64',       'Windows8_64',     '6.0/uaisos/en_windows_8_enterprise_x64_dvd_917522.iso',                                           UnattendedVm.kfWinGaTimesync), # >=9GiB
+            UnattendedVm(oSet, 'tst-w81-32',      'Windows81',       '6.0/uaisos/en_windows_8_1_enterprise_x86_dvd_2791510.iso',                                        UnattendedVm.kfWinGaTimesync), # >=5GiB
+            UnattendedVm(oSet, 'tst-w81-64',      'Windows81_64',    '6.0/uaisos/en_windows_8_1_enterprise_x64_dvd_2791088.iso',                                        UnattendedVm.kfWinGaTimesync), # >=8GiB
+            UnattendedVm(oSet, 'tst-w10-1507-32', 'Windows10',       '6.0/uaisos/en_windows_10_pro_10240_x86_dvd.iso',                                                  UnattendedVm.kfWinGaTimesync), # >=6GiB
+            UnattendedVm(oSet, 'tst-w10-1507-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_pro_10240_x64_dvd.iso',                                                  UnattendedVm.kfWinGaTimesync), # >=9GiB
+            UnattendedVm(oSet, 'tst-w10-1511-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1511_updated_feb_2016_x86_dvd_8378870.iso',           UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1511-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1511_x64_dvd_7224901.iso',                            UnattendedVm.kfWinGaTimesync), # >=9GiB
+            UnattendedVm(oSet, 'tst-w10-1607-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1607_updated_jul_2016_x86_dvd_9060097.iso',           UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1607-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1607_updated_jul_2016_x64_dvd_9054264.iso',           UnattendedVm.kfWinGaTimesync), # >=9GiB
+            UnattendedVm(oSet, 'tst-w10-1703-32', 'Windows10',       '6.0/uaisos/en_windows_10_enterprise_version_1703_updated_march_2017_x86_dvd_10188981.iso',        UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1703-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_enterprise_version_1703_updated_march_2017_x64_dvd_10189290.iso',        UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w10-1709-32', 'Windows10',       '6.0/uaisos/en_windows_10_multi-edition_vl_version_1709_updated_sept_2017_x86_dvd_100090759.iso',  UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1709-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_multi-edition_vl_version_1709_updated_sept_2017_x64_dvd_100090741.iso',  UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w10-1803-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_editions_version_1803_updated_march_2018_x86_dvd_12063341.iso', UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1803-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_editions_version_1803_updated_march_2018_x64_dvd_12063333.iso', UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w10-1809-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_edition_version_1809_updated_sept_2018_x86_dvd_2f92403b.iso',   UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1809-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_edition_version_1809_updated_sept_2018_x64_dvd_f0b7dc68.iso',   UnattendedVm.kfWinGaTimesync), # >=10GiB
+            UnattendedVm(oSet, 'tst-w10-1903-32', 'Windows10',       '6.0/uaisos/en_windows_10_business_editions_version_1903_x86_dvd_ca4f0f49.iso',                    UnattendedVm.kfWinGaTimesync), # >=7GiB
+            UnattendedVm(oSet, 'tst-w10-1903-64', 'Windows10_64',    '6.0/uaisos/en_windows_10_business_editions_version_1903_x64_dvd_37200948.iso',                    UnattendedVm.kfWinGaTimesync), # >=10GiB
             #
             # Ubuntu
             #
