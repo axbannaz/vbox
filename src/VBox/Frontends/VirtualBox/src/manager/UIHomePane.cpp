@@ -178,6 +178,7 @@ void UIHomePane::prepare()
         m_pLabelGreetings = new QIRichTextLabel(this);
         if (m_pLabelGreetings)
         {
+            m_pLabelGreetings->setFocusPolicy(Qt::TabFocus);
             m_pLabelGreetings->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Minimum);
             connect(m_pLabelGreetings, &QIRichTextLabel::sigLinkClicked, this, &UIHomePane::sltHandleLinkActivated);
             pMainLayout->addWidget(m_pLabelGreetings, 0, 0);

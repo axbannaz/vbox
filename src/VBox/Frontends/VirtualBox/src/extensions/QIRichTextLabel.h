@@ -72,13 +72,14 @@ public:
     /** Defines word wrapping @a policy. */
     void setWordWrapMode(QTextOption::WrapMode policy);
 
-    /** Installs event filter for a passed @ pFilterObj. */
-    void installEventFilter(QObject *pFilterObj);
-
     /** Returns browser font. */
     QFont browserFont() const;
     /** Defines @a newFont for browser. */
     void setBrowserFont(const QFont &newFont);
+
+    /** Defines focus @a enmPolicy for the internal text-browser.
+      * @note Keep in mind that by historical reasons default policy is Qt::ClickFocus. */
+    void setFocusPolicy(Qt::FocusPolicy enmPolicy);
 
 public slots:
 
