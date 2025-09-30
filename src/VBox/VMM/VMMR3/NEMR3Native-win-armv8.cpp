@@ -2259,10 +2259,11 @@ DECLINLINE(uint64_t) nemR3WinGetGReg(PVMCPU pVCpu, uint8_t uReg)
  * @param   pExit           The VM exit information to handle.
  * @param   fUnmappedExit   Set if WHvRunVpExitReasonUnmappedGpa,
  *                          clear if WHvRunVpExitReasonGpaIntercept.
+ * @param   uTscExit        The host TSC value at the exit.
  * @sa      nemHCWinHandleMessageMemory
  */
 NEM_TMPL_STATIC VBOXSTRICTRC
-nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit, bool fUnmappedExit)
+nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit, bool fUnmappedExit, uint64_t uTscExit)
 {
     Assert(pExit->MemoryAccess.Header.InterceptAccessType != 3);
 
@@ -2273,7 +2274,7 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
                                               pExit->MemoryAccess.Header.InterceptAccessType == WHvMemoryAccessWrite
                                             ? EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_WRITE)
                                             : EMEXIT_MAKE_FT(EMEXIT_F_KIND_EM, EMEXITTYPE_MMIO_READ),
-                                            pExit->MemoryAccess.Header.Pc, ASMReadTSC());
+                                            pExit->MemoryAccess.Header.Pc, uTscExit);
     RT_NOREF_PV(pExitRec);
     nemR3WinCopyStateFromArmHeader(pVCpu, &pExit->MemoryAccess.Header);
 #ifdef LOG_ENABLED
@@ -2439,16 +2440,19 @@ nemR3WinHandleExitMemory(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT c
  * @param   pVM             The cross context VM structure.
  * @param   pVCpu           The cross context per CPU structure.
  * @param   pExit           The VM exit information to handle.
+ * @param   uTscExit        The host TSC value at the exit.
  * @sa      nemHCWinHandleMessageMemory
  */
 NEM_TMPL_STATIC VBOXSTRICTRC
-nemR3WinHandleExitHypercall(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit)
+nemR3WinHandleExitHypercall(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit, uint64_t uTscExit)
 {
+    EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT_EX(EMEXIT_F_KIND_EM, EMEXITTYPE_A64_HVC, pExit->Hypercall.Immediate),
+                     pExit->Hypercall.Header.Pc, uTscExit);
     VBOXSTRICTRC rcStrict = VINF_SUCCESS;
 
     /** @todo Raise exception to EL1 if PSCI not configured. */
     /** @todo Need a generic mechanism here to pass this to, GIM maybe?. */
-    uint32_t uFunId = pExit->Hypercall.Immediate;
+    uint32_t uFunId = pExit->Hypercall.Immediate; /** @todo r=bird: this is probably wrong, the value is 16-bit. */
     bool fHvc64 = RT_BOOL(uFunId & ARM_SMCCC_FUNC_ID_64BIT); RT_NOREF(fHvc64);
     uint32_t uEntity = ARM_SMCCC_FUNC_ID_ENTITY_GET(uFunId);
     uint32_t uFunNum = ARM_SMCCC_FUNC_ID_NUM_GET(uFunId);
@@ -2535,9 +2539,11 @@ nemR3WinHandleExitHypercall(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEX
  * @param   pVM             The cross context VM structure.
  * @param   pVCpu           The cross context per CPU structure.
  * @param   pExit           The VM exit information to handle.
+ * @param   uTscExit        The host TSC value at the exit.
  * @sa      nemHCWinHandleMessageUnrecoverableException
  */
-NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitUnrecoverableException(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit)
+NEM_TMPL_STATIC VBOXSTRICTRC
+nemR3WinHandleExitUnrecoverableException(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit, uint64_t uTscExit)
 {
 #if 0
     /*
@@ -2553,7 +2559,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitUnrecoverableException(PVMCC pVM,
      * Let IEM decide whether this is really it.
      */
     EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT(EMEXIT_F_KIND_NEM, NEMEXITTYPE_UNRECOVERABLE_EXCEPTION),
-                     pExit->UnrecoverableException.Header.Pc, ASMReadTSC());
+                     pExit->UnrecoverableException.Header.Pc, uTscExit);
     nemR3WinCopyStateFromArmHeader(pVCpu, &pExit->UnrecoverableException.Header);
     AssertReleaseFailed();
     RT_NOREF_PV(pVM);
@@ -2569,9 +2575,11 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitUnrecoverableException(PVMCC pVM,
  * @param   pVM             The cross context VM structure.
  * @param   pVCpu           The cross context per CPU structure.
  * @param   pExit           The VM exit information to handle.
+ * @param   uTscExit        The host TSC value at the exit.
  * @sa      nemHCWinHandleMessage
  */
-NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit)
+NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, MY_WHV_RUN_VP_EXIT_CONTEXT const *pExit,
+                                                uint64_t uTscExit)
 {
 #ifdef LOG_ENABLED
     if (LogIs3Enabled())
@@ -2587,11 +2595,11 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, MY_WH
     {
         case WHvRunVpExitReasonUnmappedGpa:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitMemUnmapped);
-            return nemR3WinHandleExitMemory(pVM, pVCpu, pExit, true /*fUnmappedExit*/);
+            return nemR3WinHandleExitMemory(pVM, pVCpu, pExit, true /*fUnmappedExit*/, uTscExit);
 
         case WHvRunVpExitReasonGpaIntercept:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitMemIntercept);
-            return nemR3WinHandleExitMemory(pVM, pVCpu, pExit, false /*fUnmappedExit*/);
+            return nemR3WinHandleExitMemory(pVM, pVCpu, pExit, false /*fUnmappedExit*/, uTscExit);
 
         case WHvRunVpExitReasonCanceled:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
@@ -2600,7 +2608,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, MY_WH
 
         case WHvRunVpExitReasonHypercall:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitHypercall);
-            return nemR3WinHandleExitHypercall(pVM, pVCpu, pExit);
+            return nemR3WinHandleExitHypercall(pVM, pVCpu, pExit, uTscExit);
 
         case 0x8001000c: /* WHvRunVpExitReasonArm64Reset */
         {
@@ -2616,7 +2624,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, MY_WH
 
         case WHvRunVpExitReasonUnrecoverableException:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitUnrecoverable);
-            return nemR3WinHandleExitUnrecoverableException(pVM, pVCpu, pExit);
+            return nemR3WinHandleExitUnrecoverableException(pVM, pVCpu, pExit, uTscExit);
 
         case WHvRunVpExitReasonUnsupportedFeature:
         case WHvRunVpExitReasonInvalidVpRegisterValue:
@@ -2716,7 +2724,8 @@ VMMR3_INT_DECL(VBOXSTRICTRC) NEMR3RunGC(PVM pVM, PVMCPU pVCpu)
                 HRESULT hrc = WHvRunVirtualProcessor(pVM->nem.s.hPartition, pVCpu->idCpu, &ExitReason, sizeof(ExitReason));
 
                 VMCPU_CMPXCHG_STATE(pVCpu, VMCPUSTATE_STARTED_EXEC_NEM, VMCPUSTATE_STARTED_EXEC_NEM_WAIT);
-                TMNotifyEndOfExecution(pVM, pVCpu, ASMReadTSC());
+                uint64_t const uTscExit = ASMReadTSC();
+                TMNotifyEndOfExecution(pVM, pVCpu, uTscExit);
 #ifdef LOG_ENABLED
                 if (LogIsFlowEnabled())
                 {
@@ -2744,7 +2753,7 @@ VMMR3_INT_DECL(VBOXSTRICTRC) NEMR3RunGC(PVM pVM, PVMCPU pVCpu)
                     /*
                      * Deal with the message.
                      */
-                    rcStrict = nemR3WinHandleExit(pVM, pVCpu, &ExitReason);
+                    rcStrict = nemR3WinHandleExit(pVM, pVCpu, &ExitReason, uTscExit);
                     if (rcStrict == VINF_SUCCESS)
                     { /* hopefully likely */ }
                     else

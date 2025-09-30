@@ -97,7 +97,7 @@ AssertCompileMemberAlignment(CLISTAT, Counter, 8);
  *          the flags+type in the available 16 bits made available.  The
  *          timestamp could likewise be shortened to accomodate the index, or
  *          we might skip the index entirely.  However, since we will have to
- *          deal with 56-bit wide PC address before long, there's not point.
+ *          deal with 56-bit wide PC address before long, there's no point.
  *
  *          On the upside, there are unused bits in both uFlagsAndType and the
  *          idxSlot fields if needed for anything.
@@ -107,11 +107,13 @@ typedef struct EMEXITENTRY
     /** The flat PC (CS:EIP/RIP) address of the exit.
      * UINT64_MAX if not available.  */
     uint64_t        uFlatPC;
-    /** The EMEXIT_MAKE_FLAGS_AND_TYPE */
-    uint32_t        uFlagsAndType;
+    /** The EMEXIT_MAKE_FT */
+    uint16_t        uFlagsAndType;
     /** The index into the exit slot hash table.
-     * UINT32_MAX if too many collisions and not entered into it. */
-    uint32_t        idxSlot;
+     * UINT16_MAX if too many collisions and not entered into it. */
+    uint16_t        idxSlot;
+    /** Extra exit details. */
+    uint32_t        uInfo;
     /** The TSC timestamp of the exit.
      * This is 0 if not timestamped. */
     uint64_t        uTimestamp;

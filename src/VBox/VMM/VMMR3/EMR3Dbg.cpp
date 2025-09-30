@@ -114,19 +114,28 @@ static DBGCCMD const g_aCmds[] =
  *
  * @returns Pointer to read-only name, NULL if unknown type.
  * @param   enmExitType     The exit type to name.
+ * @param   uInfo           Additional info to format.
+ * @param   pszFallback     Buffer for formatting a numeric fallback or name
+ *                          with extended information.
+ * @param   cbFallback      Size of fallback buffer.
  */
-VMM_INT_DECL(const char *) EMR3GetExitTypeName(EMEXITTYPE enmExitType)
+VMM_INT_DECL(const char *) EMR3GetExitTypeName(EMEXITTYPE enmExitType, uint32_t uInfo, char *pszFallback, size_t cbFallback)
 {
     switch (enmExitType)
     {
         case EMEXITTYPE_INVALID:            return "invalid";
+
+        /* Common: */
+        case EMEXITTYPE_MMIO:               return "MMIO access";
+        case EMEXITTYPE_MMIO_READ:          return "MMIO read";
+        case EMEXITTYPE_MMIO_WRITE:         return "MMIO write";
+
+        /* X86: */
+#ifdef VBOX_VMM_TARGET_X86
         case EMEXITTYPE_IO_PORT_READ:       return "I/O port read";
         case EMEXITTYPE_IO_PORT_WRITE:      return "I/O port write";
         case EMEXITTYPE_IO_PORT_STR_READ:   return "I/O port string read";
         case EMEXITTYPE_IO_PORT_STR_WRITE:  return "I/O port string write";
-        case EMEXITTYPE_MMIO:               return "MMIO access";
-        case EMEXITTYPE_MMIO_READ:          return "MMIO read";
-        case EMEXITTYPE_MMIO_WRITE:         return "MMIO write";
         case EMEXITTYPE_MSR_READ:           return "MSR read";
         case EMEXITTYPE_MSR_WRITE:          return "MSR write";
         case EMEXITTYPE_CPUID:              return "CPUID";
@@ -135,37 +144,77 @@ VMM_INT_DECL(const char *) EMR3GetExitTypeName(EMEXITTYPE enmExitType)
         case EMEXITTYPE_MOV_DRX:            return "MOV DRx";
         case EMEXITTYPE_VMREAD:             return "VMREAD";
         case EMEXITTYPE_VMWRITE:            return "VMWRITE";
+#else
+        case EMEXITTYPE_IO_PORT_READ:
+        case EMEXITTYPE_IO_PORT_WRITE:
+        case EMEXITTYPE_IO_PORT_STR_READ:
+        case EMEXITTYPE_IO_PORT_STR_WRITE:
+        case EMEXITTYPE_MSR_READ:
+        case EMEXITTYPE_MSR_WRITE:
+        case EMEXITTYPE_CPUID:
+        case EMEXITTYPE_RDTSC:
+        case EMEXITTYPE_MOV_CRX:
+        case EMEXITTYPE_MOV_DRX:
+        case EMEXITTYPE_VMREAD:
+        case EMEXITTYPE_VMWRITE:
+            break;
+#endif
 
-        /* Raw-mode only: */
-        case EMEXITTYPE_INVLPG:             return "INVLPG";
-        case EMEXITTYPE_LLDT:               return "LLDT";
-        case EMEXITTYPE_RDPMC:              return "RDPMC";
-        case EMEXITTYPE_CLTS:               return "CLTS";
-        case EMEXITTYPE_STI:                return "STI";
-        case EMEXITTYPE_INT:                return "INT";
-        case EMEXITTYPE_SYSCALL:            return "SYSCALL";
-        case EMEXITTYPE_SYSENTER:           return "SYSENTER";
-        case EMEXITTYPE_HLT:                return "HLT";
+        /* ARM64: */
+#ifdef VBOX_VMM_TARGET_ARMV8
+        case EMEXITTYPE_A64_MRS:
+        case EMEXITTYPE_A64_MSR:
+            /* ... S<op0>_<op1>_<Cn>_<Cm>_<op2> */
+            RTStrPrintf(pszFallback, cbFallback, "NEM ARM %s S%u_%u_%u_%u_%u",
+                        enmExitType == EMEXITTYPE_A64_MRS ? "MRS" : "MSR",
+                        ARMV8_AARCH64_SYSREG_ID_GET_OP0(uInfo),
+                        ARMV8_AARCH64_SYSREG_ID_GET_OP1(uInfo),
+                        ARMV8_AARCH64_SYSREG_ID_GET_CRN(uInfo),
+                        ARMV8_AARCH64_SYSREG_ID_GET_CRM(uInfo),
+                        ARMV8_AARCH64_SYSREG_ID_GET_OP2(uInfo));
+            return pszFallback;
+        case EMEXITTYPE_A64_HVC:
+            RTStrPrintf(pszFallback, cbFallback, "NEM ARM HVC %#x", uInfo);
+            return pszFallback;
+        case EMEXITTYPE_A64_HVC_SMCCC:
+            RTStrPrintf(pszFallback, cbFallback, "NEM ARM HVC/SMCC %#x", uInfo);
+            return pszFallback;
+        case EMEXITTYPE_A64_HVC_PSCI:
+            RTStrPrintf(pszFallback, cbFallback, "NEM ARM HVC/PSCI %#x", uInfo);
+            return pszFallback;
+#else
+        case EMEXITTYPE_A64_MRS:
+        case EMEXITTYPE_A64_MSR:
+        case EMEXITTYPE_A64_HVC:
+        case EMEXITTYPE_A64_HVC_SMCCC:
+        case EMEXITTYPE_A64_HVC_PSCI:
+            break;
+#endif
+        case EMEXITTYPE_END:
+            break;
     }
+    RT_NOREF(uInfo, pszFallback, cbFallback);
     return NULL;
 }
 
 
 /**
- * Translates flags+type into an exit name.
+ * Translates flags+type into an exit name, .
  *
  * @returns Exit name.
  * @param   uFlagsAndType   The exit to name.
- * @param   pszFallback     Buffer for formatting a numeric fallback.
+ * @param   uInfo           Additional info to format.
+ * @param   pszFallback     Buffer for formatting a numeric fallback or name
+ *                          with extended information.
  * @param   cbFallback      Size of fallback buffer.
  */
-static const char *emR3HistoryGetExitName(uint32_t uFlagsAndType, char *pszFallback, size_t cbFallback)
+static const char *emR3HistoryGetExitName(uint16_t uFlagsAndType, uint32_t uInfo, char *pszFallback, size_t cbFallback)
 {
     const char *pszExitName;
     switch (uFlagsAndType & EMEXIT_F_KIND_MASK)
     {
         case EMEXIT_F_KIND_EM:
-            pszExitName = EMR3GetExitTypeName((EMEXITTYPE)(uFlagsAndType & EMEXIT_F_TYPE_MASK));
+            pszExitName = EMR3GetExitTypeName((EMEXITTYPE)(uFlagsAndType & EMEXIT_F_TYPE_MASK), uInfo, pszFallback, cbFallback);
             break;
 
 #if defined(VBOX_VMM_TARGET_X86) && defined(VBOX_WITH_HWVIRT)
@@ -313,7 +362,7 @@ static DECLCALLBACK(void) emR3InfoExitHistory(PVM pVM, PCDBGFINFOHLP pHlp, const
          */
         pHlp->pfnPrintf(pHlp,
                         "CPU[%u]: VM-exit history:\n"
-                        "   Exit No.:     TSC timestamp / delta    RIP (Flat/*)      Exit    Name\n"
+                        "   Exit No.:     TSC timestamp / delta    RIP (Flat/*)      Exit   Name\n"
                         , pVCpu->idCpu);
 
         /*
@@ -340,30 +389,35 @@ static DECLCALLBACK(void) emR3InfoExitHistory(PVM pVM, PCDBGFINFOHLP pHlp, const
                 idx -= 1;
             PCEMEXITENTRY const pEntry = &pVCpu->em.s.aExitHistory[(uintptr_t)idx & 0xff];
 
-            /* Get the exit name. */
-            char        szExitName[16];
-            const char *pszExitName = emR3HistoryGetExitName(pEntry->uFlagsAndType, szExitName, sizeof(szExitName));
+            /* Get the exit name and any extra details. */
+            char        szExitName[80];
+            const char *pszExitName = emR3HistoryGetExitName(pEntry->uFlagsAndType, pEntry->uInfo,
+                                                             szExitName, sizeof(szExitName));
 
             /* Calc delta (negative if reverse order, positive ascending). */
             int64_t offDelta = uPrevTimestamp != 0 && pEntry->uTimestamp != 0 ? pEntry->uTimestamp - uPrevTimestamp : 0;
             uPrevTimestamp = pEntry->uTimestamp;
 
             char szPC[32];
+#ifdef VBOX_VMM_TARGET_X86
             if (!(pEntry->uFlagsAndType & (EMEXIT_F_CS_EIP | EMEXIT_F_UNFLATTENED_PC)))
+#endif
                 RTStrPrintf(szPC, sizeof(szPC), "%016RX64 ", pEntry->uFlatPC);
+#ifdef VBOX_VMM_TARGET_X86
             else if (pEntry->uFlagsAndType & EMEXIT_F_UNFLATTENED_PC)
                 RTStrPrintf(szPC, sizeof(szPC), "%016RX64*", pEntry->uFlatPC);
             else
                 RTStrPrintf(szPC, sizeof(szPC), "%04x:%08RX32*   ", (uint32_t)(pEntry->uFlatPC >> 32), (uint32_t)pEntry->uFlatPC);
+#endif
 
             /* Do the printing. */
-            if (pEntry->idxSlot == UINT32_MAX)
-                pHlp->pfnPrintf(pHlp, " %10RU64: %#018RX64/%+-9RI64 %s %#07x %s\n",
+            if (pEntry->idxSlot == UINT16_MAX)
+                pHlp->pfnPrintf(pHlp, " %10RU64: %#018RX64/%+-9RI64 %s %#06x %s\n",
                                 idx, pEntry->uTimestamp, offDelta, szPC, pEntry->uFlagsAndType, pszExitName);
             else
             {
                 /** @todo more on this later */
-                pHlp->pfnPrintf(pHlp, " %10RU64: %#018RX64/%+-9RI64 %s %#07x %s slot=%#x\n",
+                pHlp->pfnPrintf(pHlp, " %10RU64: %#018RX64/%+-9RI64 %s %#06x %s slot=%#x\n",
                                 idx, pEntry->uTimestamp, offDelta, szPC, pEntry->uFlagsAndType, pszExitName, pEntry->idxSlot);
             }
 

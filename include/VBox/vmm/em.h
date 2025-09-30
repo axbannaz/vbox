@@ -133,13 +133,17 @@ VMMRZ_INT_DECL(VBOXSTRICTRC)    EMRZSetPendingIoPortRead(PVMCPU pVCpu, RTIOPORT 
 typedef enum EMEXITTYPE
 {
     EMEXITTYPE_INVALID = 0,
+
+    /* Generic. */
+    EMEXITTYPE_MMIO,
+    EMEXITTYPE_MMIO_READ,
+    EMEXITTYPE_MMIO_WRITE,
+
+    /* X86: */
     EMEXITTYPE_IO_PORT_READ,
     EMEXITTYPE_IO_PORT_WRITE,
     EMEXITTYPE_IO_PORT_STR_READ,
     EMEXITTYPE_IO_PORT_STR_WRITE,
-    EMEXITTYPE_MMIO,
-    EMEXITTYPE_MMIO_READ,
-    EMEXITTYPE_MMIO_WRITE,
     EMEXITTYPE_MSR_READ,
     EMEXITTYPE_MSR_WRITE,
     EMEXITTYPE_CPUID,
@@ -149,18 +153,14 @@ typedef enum EMEXITTYPE
     EMEXITTYPE_VMREAD,
     EMEXITTYPE_VMWRITE,
 
-    /** @name Raw-mode only (for now), keep at end.
-     * @{  */
-    EMEXITTYPE_INVLPG,
-    EMEXITTYPE_LLDT,
-    EMEXITTYPE_RDPMC,
-    EMEXITTYPE_CLTS,
-    EMEXITTYPE_STI,
-    EMEXITTYPE_INT,
-    EMEXITTYPE_SYSCALL,
-    EMEXITTYPE_SYSENTER,
-    EMEXITTYPE_HLT
-    /** @} */
+    /* ARM64: */
+    EMEXITTYPE_A64_MRS,
+    EMEXITTYPE_A64_MSR,
+    EMEXITTYPE_A64_HVC,
+    EMEXITTYPE_A64_HVC_SMCCC,
+    EMEXITTYPE_A64_HVC_PSCI,
+
+    EMEXITTYPE_END
 } EMEXITTYPE;
 AssertCompileSize(EMEXITTYPE, 4);
 
@@ -170,22 +170,26 @@ AssertCompileSize(EMEXITTYPE, 4);
  * EMEXIT_MAKE_FT() macro.
  *
  * @{  */
-#define EMEXIT_F_TYPE_MASK          UINT32_C(0x00000fff)    /**< The exit type mask. */
-#define EMEXIT_F_KIND_EM            UINT32_C(0x00000000)    /**< EMEXITTYPE */
-#define EMEXIT_F_KIND_VMX           UINT32_C(0x00001000)    /**< VT-x exit codes. */
-#define EMEXIT_F_KIND_SVM           UINT32_C(0x00002000)    /**< SVM exit codes. */
-#define EMEXIT_F_KIND_NEM           UINT32_C(0x00003000)    /**< NEMEXITTYPE */
-#define EMEXIT_F_KIND_IEM           UINT32_C(0x00004000)    /**< IEM specific stuff. */
-#define EMEXIT_F_KIND_XCPT          UINT32_C(0x00005000)    /**< Exception numbers (IEM,raw-mode). */
-#define EMEXIT_F_KIND_MASK          UINT32_C(0x00007000)
-#define EMEXIT_F_CS_EIP             UINT32_C(0x00010000)    /**< The PC is EIP in the low dword and CS in the high. */
-#define EMEXIT_F_UNFLATTENED_PC     UINT32_C(0x00020000)    /**< The PC hasn't had CS.BASE added to it. */
-/** HM is calling (from ring-0).  Preemption is currently disabled or we're using preemption hooks. */
-#define EMEXIT_F_HM                 UINT32_C(0x00040000)
-#define EMEXIT_F_XCPT_ERRCD         UINT32_C(0x00000800)    /**< Additional record w/ the error code stored as PC. */
-#define EMEXIT_F_XCPT_CR2           UINT32_C(0x00000400)    /**< Additional record w/ the CR3 value stored as PC. */
+#define EMEXIT_F_TYPE_MASK          UINT16_C(0x07ff)    /**< The exit type mask. */
+#define EMEXIT_F_KIND_EM            UINT16_C(0x0000)    /**< EMEXITTYPE */
+#define EMEXIT_F_KIND_VMX           UINT16_C(0x1000)    /**< VT-x exit codes. */
+#define EMEXIT_F_KIND_SVM           UINT16_C(0x2000)    /**< SVM exit codes. */
+#define EMEXIT_F_KIND_NEM           UINT16_C(0x3000)    /**< NEMEXITTYPE */
+#define EMEXIT_F_KIND_IEM           UINT16_C(0x4000)    /**< IEM specific stuff. */
+#define EMEXIT_F_KIND_XCPT          UINT16_C(0x5000)    /**< Exception numbers (IEM,raw-mode). */
+#define EMEXIT_F_KIND_MASK          UINT16_C(0x7000)
+#define EMEXIT_F_CS_EIP             UINT16_C(0x0800)    /**< The PC is EIP in the low dword and CS in the high. */
+#define EMEXIT_F_UNFLATTENED_PC     UINT16_C(0x8000)    /**< The PC hasn't had CS.BASE added to it. */
+/** EMEXIT_F_KIND_EM: HM is calling (from ring-0).  Preemption is currently disabled or we're using preemption hooks. */
+#define EMEXIT_F_HM                 UINT16_C(0x0400)
+#define EMEXIT_F_XCPT_ERRCD         UINT16_C(0x0400)    /**< EMEXIT_F_KIND_XCPT: Additional record w/ the error code stored as PC. */
+#define EMEXIT_F_XCPT_CR2           UINT16_C(0x0200)    /**< EMEXIT_F_KIND_XCPT: Additional record w/ the CR3 value stored as PC. */
 /** Combines flags and exit type into EMHistoryAddExit() input. */
-#define EMEXIT_MAKE_FT(a_fFlags, a_uType)   ((a_fFlags) | (uint32_t)(a_uType))
+#define EMEXIT_MAKE_FT(a_fFlags, a_uType)               ((a_fFlags) | (uint32_t)(a_uType))
+/** Combines flags, exit type and 32 bits of extra info into
+ *  EMHistoryAddExit() input. */
+#define EMEXIT_MAKE_FT_EX(a_fFlags, a_uType, a_uInfo)   ( ((uint64_t)(a_uInfo) << 16) | EMEXIT_MAKE_FT(a_fFlags, a_uType) )
+
 /** @} */
 
 typedef enum EMEXITACTION
@@ -214,10 +218,10 @@ typedef struct EMEXITREC
     /** The flat PC of the exit. */
     uint64_t            uFlatPC;
     /** Flags and type, see EMEXIT_MAKE_FT. */
-    uint32_t            uFlagsAndType;
+    uint16_t            uFlagsAndType;
     /** The action to take (EMEXITACTION). */
     uint8_t             enmAction;
-    uint8_t             bUnused;
+    uint8_t             abUnused[3];
     /** Maximum number of instructions to execute without hitting an exit. */
     uint16_t            cMaxInstructionsWithoutExit;
     /** The exit number (EMCPU::iNextExit) at which it was last updated. */
@@ -231,7 +235,8 @@ typedef EMEXITREC *PEMEXITREC;
 /** Pointer to a const accumulative exit record. */
 typedef EMEXITREC const *PCEMEXITREC;
 
-VMM_INT_DECL(PCEMEXITREC)       EMHistoryAddExit(PVMCPUCC pVCpu, uint32_t uFlagsAndType, uint64_t uFlatPC, uint64_t uTimestamp);
+VMM_INT_DECL(PCEMEXITREC)       EMHistoryAddExit(PVMCPUCC pVCpu, uint64_t uFlagsAndTypeAndMore, uint64_t uFlatPC,
+                                                 uint64_t uTimestamp);
 #ifdef IN_RC
 VMMRC_INT_DECL(void)            EMRCHistoryAddExitCsEip(PVMCPU pVCpu, uint32_t uFlagsAndType, uint16_t uCs, uint32_t uEip,
                                                         uint64_t uTimestamp);
