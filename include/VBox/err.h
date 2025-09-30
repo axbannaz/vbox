@@ -3125,6 +3125,16 @@
 #define VERR_APIC_INTR_MASKED_BY_TPR                (-6701)
 /** APIC did not accept the interrupt. */
 #define VERR_APIC_INTR_DISCARDED                    (-6702)
+/** APIC initialization failed. */
+#define VERR_APIC_INIT_FAILED                       (-6703)
+/** APIC register/MSR write invalid. */
+#define VERR_APIC_WRITE_INVALID                     (-6704)
+/** APIC internal error \#0. */
+#define VERR_APIC_IPE_0                             (-6705)
+/** APIC internal error \#1. */
+#define VERR_APIC_IPE_1                             (-6706)
+/** APIC internal error \#2. */
+#define VERR_APIC_IPE_2                             (-6707)
 /** @} */
 
 /** @name NEM Status Codes

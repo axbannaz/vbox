@@ -419,6 +419,7 @@ NEM_TMPL_STATIC int nemHCWinCopyStateToHyperV(PVMCC pVM, PVMCPUCC pVCpu)
         if (   pVCpu->nem.s.fDesiredInterruptWindows
             && pVCpu->nem.s.fPicReadyForInterrupt)
         {
+            Assert(pVCpu->cpum.GstCtx.eflags.u & X86_EFL_IF);
             ADD_REG64(WHvRegisterPendingEvent, 0);
 
             uint8_t bInterrupt;
@@ -485,6 +486,9 @@ NEM_TMPL_STATIC int nemHCWinCopyStateToHyperV(PVMCC pVM, PVMCPUCC pVCpu)
                 return VERR_INTERNAL_ERROR;
             }
         }
+
+        if (pVCpu->CTX_SUFF(pVM)->nem.s.fLocalApicEmulation)
+            PDMApicExportState(pVCpu);
 
         pVCpu->cpum.GstCtx.fExtrn |= CPUMCTX_EXTRN_ALL | CPUMCTX_EXTRN_NEM_WIN_MASK | CPUMCTX_EXTRN_KEEPER_NEM;
         return VINF_SUCCESS;
@@ -890,7 +894,8 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
     if (fWhat & CPUMCTX_EXTRN_APIC_TPR)
     {
         Assert(aenmNames[iReg] == WHvX64RegisterCr8);
-        PDMApicSetTpr(pVCpu, (uint8_t)aValues[iReg].Reg64 << 4);
+        if (!pVCpu->CTX_SUFF(pVM)->nem.s.fLocalApicEmulation)
+            PDMApicSetTpr(pVCpu, (uint8_t)aValues[iReg].Reg64 << 4);
         iReg++;
     }
 
@@ -1077,7 +1082,7 @@ NEM_TMPL_STATIC int nemHCWinCopyStateFromHyperV(PVMCC pVM, PVMCPUCC pVCpu, uint6
 
             GET_REG64_LOG7(pVCpu->cpum.GstCtx.msrPAT, WHvX64RegisterPat, "MSR PAT");
 #if 0 /*def LOG_ENABLED*/ /** @todo something's wrong with HvX64RegisterMtrrCap? (AMD) */
-            GET_REG64_LOG7(pVCpu->cpum.GstCtx.msrPAT, WHvX64RegisterMsrMtrrCap);
+            GET_REG64_LOG7(pCtxMsrs->msr.MtrrCap, WHvX64RegisterMsrMtrrCap);
 #endif
             GET_REG64_LOG7(pCtxMsrs->msr.MtrrDefType,      WHvX64RegisterMsrMtrrDefType,     "MSR MTRR_DEF_TYPE");
             GET_REG64_LOG7(pCtxMsrs->msr.MtrrFix64K_00000, WHvX64RegisterMsrMtrrFix64k00000, "MSR MTRR_FIX_64K_00000");
@@ -1593,8 +1598,14 @@ DECLINLINE(VBOXSTRICTRC) nemHCWinImportStateIfNeededStrict(PVMCPUCC pVCpu, uint6
  */
 DECLINLINE(void) nemR3WinCopyStateFromX64Header(PVMCPUCC pVCpu, WHV_VP_EXIT_CONTEXT const *pExitCtx)
 {
+#if 0
+    /* Already saved, do nothing. */
+    if (!(pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT)))
+        return;
+#else
     Assert(   (pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT))
            ==                              (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT));
+#endif
 
     NEM_WIN_COPY_BACK_SEG(pVCpu->cpum.GstCtx.cs, pExitCtx->Cs);
     pVCpu->cpum.GstCtx.rip      = pExitCtx->Rip;
@@ -1602,7 +1613,10 @@ DECLINLINE(void) nemR3WinCopyStateFromX64Header(PVMCPUCC pVCpu, WHV_VP_EXIT_CONT
     pVCpu->nem.s.fLastInterruptShadow = CPUMUpdateInterruptShadowEx(&pVCpu->cpum.GstCtx,
                                                                     pExitCtx->ExecutionState.InterruptShadow,
                                                                     pExitCtx->Rip);
-    PDMApicSetTpr(pVCpu, pExitCtx->Cr8 << 4);
+    if (!pVCpu->CTX_SUFF(pVM)->nem.s.fLocalApicEmulation)
+        PDMApicSetTpr(pVCpu, pExitCtx->Cr8 << 4);
+    else
+        PDMApicImportState(pVCpu);
 
     pVCpu->cpum.GstCtx.fExtrn &= ~(CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT | CPUMCTX_EXTRN_APIC_TPR);
 }
@@ -2481,7 +2495,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, WHV_R
             return VINF_EM_HALT;
 
         case WHvRunVpExitReasonCanceled:
-            Log4(("CanceledExit/%u\n", pVCpu->idCpu));
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
             return VINF_SUCCESS;
 
         case WHvRunVpExitReasonX64InterruptWindow:
@@ -2505,6 +2519,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, WHV_R
             return nemR3WinHandleExitUnrecoverableException(pVM, pVCpu, pExit);
 
         case WHvRunVpExitReasonX64ApicEoi:
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitApicEoi);
             Assert(pVM->nem.s.fLocalApicEmulation);
             PDMIoApicBroadcastEoi(pVCpu->CTX_SUFF(pVM), pExit->ApicEoi.InterruptVector);
             return VINF_SUCCESS;
@@ -2514,6 +2529,13 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, WHV_R
             LogRel(("Unimplemented exit:\n%.*Rhxd\n", (int)sizeof(*pExit), pExit));
             AssertLogRelMsgFailedReturn(("Unexpected exit on CPU #%u: %#x\n%.32Rhxd\n",
                                          pVCpu->idCpu, pExit->ExitReason, pExit), VERR_NEM_IPE_3);
+
+        case WHvRunVpExitReasonX64ApicInitSipiTrap:
+            STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitApicSipiInitTrap);
+            Assert(pVM->cCpus > 1);
+            Assert(pVM->nem.s.fLocalApicEmulation);
+            nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
+            return PDMApicSetIcr(pVCpu, pExit->ApicInitSipi.ApicIcr);
 
         /* Undesired exits: */
         case WHvRunVpExitReasonNone:
@@ -2626,6 +2648,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemHCWinHandleInterruptFF(PVMCC pVM, PVMCPUCC pVCpu
             /* If only an APIC interrupt is pending, we need to know its priority. Otherwise we'll
              * likely get pointless deliverability notifications with IF=1 but TPR still too high.
              */
+            Assert(!pVM->nem.s.fLocalApicEmulation);
             bool    fPendingIntr = false;
             uint8_t bTpr = 0;
             uint8_t bPendingIntr = 0;

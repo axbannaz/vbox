@@ -322,8 +322,10 @@ typedef struct VMCPU
         /** APIC part. */
         union
         {
-# ifdef VMM_INCLUDED_SRC_include_APICInternal_h
+# if defined(VMM_INCLUDED_SRC_include_APICInternal_h)
             struct APICCPU      s;
+# elif defined(VMM_INCLUDED_SRC_include_APICHvInternal_h)
+            struct HVAPICCPU    s;
 # endif
             uint8_t             padding[3840];      /* multiple of 64 */
         } apic;
@@ -1638,8 +1640,10 @@ typedef struct VM
 #if defined(VBOX_VMM_TARGET_X86) || defined(VBOX_VMM_TARGET_AGNOSTIC)
         union
         {
-# ifdef VMM_INCLUDED_SRC_include_APICInternal_h
+# if defined(VMM_INCLUDED_SRC_include_APICInternal_h)
             struct APIC s;
+# elif defined(VMM_INCLUDED_SRC_include_APICHvInternal_h)
+            struct HVAPIC s;
 # endif
             uint8_t     padding[128];   /* multiple of 8 */
         } apic;

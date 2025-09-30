@@ -335,13 +335,29 @@ typedef struct PDMAPICBACKENDR3
 
     /**
      * Sets whether Hyper-V compatibility mode (MSR interface) is enabled or not.
-     * @see APICR3HvSetCompatMode for details.
+     * @see APICR3SetHvCompatMode for details.
      *
      * @returns VBox status code.
      * @param   pVM                 The cross context VM structure.
      * @param   fHyperVCompatMode   Whether the compatibility mode is enabled.
      */
-    DECLR3CALLBACKMEMBER(int, pfnHvSetCompatMode, (PVMCC pVM, bool fHyperVCompatMode));
+    DECLR3CALLBACKMEMBER(int, pfnSetHvCompatMode, (PVMCC pVM, bool fHyperVCompatMode));
+
+    /**
+     * Imports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLR3CALLBACKMEMBER(VBOXSTRICTRC, pfnImportState, (PVMCPUCC pVCpu));
+
+    /**
+     * Exports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLR3CALLBACKMEMBER(VBOXSTRICTRC, pfnExportState, (PVMCPUCC pVCpu));
 
     /** @name Reserved for future (MBZ).
      * @{ */
@@ -353,8 +369,6 @@ typedef struct PDMAPICBACKENDR3
     DECLR3CALLBACKMEMBER(int, pfnReserved5, (void));
     DECLR3CALLBACKMEMBER(int, pfnReserved6, (void));
     DECLR3CALLBACKMEMBER(int, pfnReserved7, (void));
-    DECLR3CALLBACKMEMBER(int, pfnReserved8, (void));
-    DECLR3CALLBACKMEMBER(int, pfnReserved9, (void));
     /** @} */
 } PDMAPICBACKENDR3;
 /** Pointer to ring-3 APIC backend. */
@@ -592,6 +606,22 @@ typedef struct PDMAPICBACKENDR0
      */
     DECLR0CALLBACKMEMBER(int, pfnGetApicPageForCpu, (PCVMCPUCC pVCpu, PRTHCPHYS pHCPhys, PRTR0PTR pR0Ptr, PRTR3PTR pR3Ptr));
 
+    /**
+     * Imports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLR0CALLBACKMEMBER(VBOXSTRICTRC, pfnImportState, (PVMCPUCC pVCpu));
+
+    /**
+     * Exports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLR0CALLBACKMEMBER(VBOXSTRICTRC, pfnExportState, (PVMCPUCC pVCpu));
+
     /** @name Reserved for future (MBZ).
      * @{ */
     DECLR0CALLBACKMEMBER(int, pfnReserved0, (void));
@@ -602,8 +632,6 @@ typedef struct PDMAPICBACKENDR0
     DECLR0CALLBACKMEMBER(int, pfnReserved5, (void));
     DECLR0CALLBACKMEMBER(int, pfnReserved6, (void));
     DECLR0CALLBACKMEMBER(int, pfnReserved7, (void));
-    DECLR0CALLBACKMEMBER(int, pfnReserved8, (void));
-    DECLR0CALLBACKMEMBER(int, pfnReserved9, (void));
     /** @} */
 } PDMAPICBACKENDR0;
 /** Pointer to ring-0 APIC backend. */
@@ -830,6 +858,22 @@ typedef struct PDMAPICBACKENDRC
      */
     DECLRCCALLBACKMEMBER(VBOXSTRICTRC, pfnSetEoi, (PVMCPUCC pVCpu, uint32_t uEoi, bool fForceX2ApicBehaviour));
 
+    /**
+     * Imports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLRCCALLBACKMEMBER(VBOXSTRICTRC, pfnImportState, (PVMCPUCC pVCpu));
+
+    /**
+     * Exports the APIC state.
+     *
+     * @returns Strict VBox status code.
+     * @param   pVCpu   The cross context virtual CPU structure.
+     */
+    DECLRCCALLBACKMEMBER(VBOXSTRICTRC, pfnExportState, (PVMCPUCC pVCpu));
+
     /** @name Reserved for future (MBZ).
      * @{ */
     DECLRCCALLBACKMEMBER(int, pfnReserved0, (void));
@@ -843,8 +887,6 @@ typedef struct PDMAPICBACKENDRC
     DECLRCCALLBACKMEMBER(int, pfnReserved8, (void));
     DECLRCCALLBACKMEMBER(int, pfnReserved9, (void));
     DECLRCCALLBACKMEMBER(int, pfnReserved10, (void));
-    DECLRCCALLBACKMEMBER(int, pfnReserved11, (void));
-    DECLRCCALLBACKMEMBER(int, pfnReserved12, (void));
     /** @} */
 } PDMAPICBACKENDRC;
 /** Pointer to raw-mode context APIC backend. */
@@ -881,6 +923,9 @@ VMM_INT_DECL(int)           PDMApicRegisterBackend(PVMCC pVM, PDMAPICBACKENDTYPE
 VMM_INT_DECL(void)          PDMApicUpdatePendingInterrupts(PVMCPUCC pVCpu);
 VMM_INT_DECL(int)           PDMApicGetTpr(PCVMCPUCC pVCpu, uint8_t *pu8Tpr, bool *pfPending, uint8_t *pu8PendingIntr);
 VMM_INT_DECL(int)           PDMApicSetTpr(PVMCPUCC pVCpu, uint8_t u8Tpr);
+VMM_INT_DECL(VBOXSTRICTRC)  PDMApicSetIcr(PVMCPUCC pVCpu, uint64_t uIcr);
+VMM_INT_DECL(int)           PDMApicImportState(PVMCPUCC pVCpu);
+VMM_INT_DECL(int)           PDMApicExportState(PVMCPUCC pVCpu);
 VMM_INT_DECL(bool)          PDMApicIsEnabled(PCVMCPUCC pVCpu);
 VMM_INT_DECL(VBOXSTRICTRC)  PDMApicReadMsr(PVMCPUCC pVCpu, uint32_t u32Reg, uint64_t *pu64Value);
 VMM_INT_DECL(VBOXSTRICTRC)  PDMApicWriteMsr(PVMCPUCC pVCpu, uint32_t u32Reg, uint64_t u64Value);
@@ -899,7 +944,7 @@ VMM_INT_DECL(int)           PDMR0ApicGetApicPageForCpu(PCVMCPUCC pVCpu, PRTHCPHY
 /** @name Hyper-V interface (Ring-3 and all-context API).
  * @{ */
 #ifdef IN_RING3
-VMMR3_INT_DECL(int)         PDMR3ApicHvSetCompatMode(PVM pVM, bool fHyperVCompatMode);
+VMMR3_INT_DECL(int)         PDMR3ApicSetHvCompatMode(PVM pVM, bool fHyperVCompatMode);
 #endif
 VMM_INT_DECL(void)          PDMApicHvSendInterrupt(PVMCPUCC pVCpu, uint8_t uVector, bool fAutoEoi, XAPICTRIGGERMODE enmTriggerMode);
 VMM_INT_DECL(VBOXSTRICTRC)  PDMApicHvSetTpr(PVMCPUCC pVCpu, uint8_t uTpr);

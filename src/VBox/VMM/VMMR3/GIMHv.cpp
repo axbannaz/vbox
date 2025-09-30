@@ -597,7 +597,7 @@ VMMR3_INT_DECL(int) gimR3HvInitCompleted(PVM pVM)
      * has finished inserting/removing the x2APIC MSR range.
      */
     if (pHv->uHyperHints & GIM_HV_HINT_X2APIC_MSRS)
-        PDMR3ApicHvSetCompatMode(pVM, true);
+        PDMR3ApicSetHvCompatMode(pVM, true);
 
     return rc;
 }

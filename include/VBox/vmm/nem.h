@@ -73,6 +73,9 @@ VMMR3_INT_DECL(void) NEMR3NotifyFF(PVM pVM, PVMCPU pVCpu, uint32_t fFlags);
 #if defined(VBOX_VMM_TARGET_ARMV8) && defined(RT_OS_WINDOWS)
 VMMR3_INT_DECL(int)  NEMR3Halt(PVM pVM, PVMCPU pVCpu);
 #endif
+#if defined(VBOX_VMM_TARGET_X86) && defined(RT_OS_WINDOWS)
+VMMR3_INT_DECL(int) NEMR3WinGetPartitionHandle(PVM pVM, PRTHCUINTPTR pHCPtrHandle);
+#endif
 
 /**
  * Checks if dirty page tracking for MMIO2 ranges is supported.

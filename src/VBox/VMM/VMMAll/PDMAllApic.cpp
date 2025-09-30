@@ -108,6 +108,20 @@ VMM_INT_DECL(int) PDMApicSetTpr(PVMCPUCC pVCpu, uint8_t u8Tpr)
 
 
 /**
+ * Sets the Interrupt Command Register (ICR).
+ *
+ * @returns Strict VBox status code.
+ * @param   pVCpu       The cross context virtual CPU structure.
+ * @param   uIcr        The ICR value to set.
+ */
+VMM_INT_DECL(VBOXSTRICTRC) PDMApicSetIcr(PVMCPUCC pVCpu, uint64_t uIcr)
+{
+    AssertReturn(PDMCPU_TO_APICBACKEND(pVCpu)->pfnSetIcr, VERR_INVALID_POINTER);
+    return PDMCPU_TO_APICBACKEND(pVCpu)->pfnSetIcr(pVCpu, uIcr, VINF_CPUM_R3_MSR_WRITE);
+}
+
+
+/**
  * Returns whether the APIC hardware enabled or not.
  *
  * @returns @c true if enabled, @c false otherwise.
@@ -300,10 +314,10 @@ VMM_INT_DECL(int) PDMR0ApicGetApicPageForCpu(PCVMCPUCC pVCpu, PRTHCPHYS pHCPhys,
  * @param   pVM                 The cross context VM structure.
  * @param   fHyperVCompatMode   Whether the compatibility mode is enabled.
  */
-VMMR3_INT_DECL(int) PDMR3ApicHvSetCompatMode(PVM pVM, bool fHyperVCompatMode)
+VMMR3_INT_DECL(int) PDMR3ApicSetHvCompatMode(PVM pVM, bool fHyperVCompatMode)
 {
-    AssertReturn(PDM_TO_APICBACKEND(pVM)->pfnHvSetCompatMode, VERR_INVALID_POINTER);
-    return PDM_TO_APICBACKEND(pVM)->pfnHvSetCompatMode(pVM, fHyperVCompatMode);
+    AssertReturn(PDM_TO_APICBACKEND(pVM)->pfnSetHvCompatMode, VERR_INVALID_POINTER);
+    return PDM_TO_APICBACKEND(pVM)->pfnSetHvCompatMode(pVM, fHyperVCompatMode);
 }
 #endif /* IN_RING3 */
 
@@ -368,8 +382,12 @@ VMM_INT_DECL(uint8_t) PDMApicHvGetTpr(PVMCPUCC pVCpu)
  */
 VMM_INT_DECL(VBOXSTRICTRC) PDMApicHvSetIcr(PVMCPUCC pVCpu, uint64_t uIcr)
 {
-    AssertReturn(PDMCPU_TO_APICBACKEND(pVCpu)->pfnSetIcr, VERR_INVALID_POINTER);
-    return PDMCPU_TO_APICBACKEND(pVCpu)->pfnSetIcr(pVCpu, uIcr, VINF_CPUM_R3_MSR_WRITE);
+    /*
+     * Currently we can join with PDMApicSetIcr() but in the future the APIC backend might need
+     * to distinguish between NEM Hyper-V APIC call from a paravirtualized Hyper-V call. When
+     * that is case we would need to introduce pfnSetHvIcr and call that from here.
+     */
+    return PDMApicSetIcr(pVCpu, uIcr);
 }
 
 
@@ -418,6 +436,32 @@ VMMR3_INT_DECL(void) PDMR3ApicInitIpi(PVMCPU pVCpu)
 
 
 /**
+ * Imports the APIC state.
+ *
+ * @returns Strict VBox status code.
+ * @param   pVCpu   The cross context virtual CPU structure.
+ */
+VMM_INT_DECL(VBOXSTRICTRC) PDMApicImportState(PVMCPUCC pVCpu)
+{
+    AssertReturn(PDMCPU_TO_APICBACKEND(pVCpu)->pfnImportState, VERR_INVALID_PARAMETER);
+    return PDMCPU_TO_APICBACKEND(pVCpu)->pfnImportState(pVCpu);
+}
+
+
+/**
+ * Exports the APIC state.
+ *
+ * @returns Strict VBox status code.
+ * @param   pVCpu   The cross context virtual CPU structure.
+ */
+VMM_INT_DECL(VBOXSTRICTRC) PDMApicExportState(PVMCPUCC pVCpu)
+{
+    AssertReturn(PDMCPU_TO_APICBACKEND(pVCpu)->pfnExportState, VERR_INVALID_PARAMETER);
+    return PDMCPU_TO_APICBACKEND(pVCpu)->pfnExportState(pVCpu);
+}
+
+
+/**
  * Registers a PDM APIC backend.
  *
  * @returns VBox status code.
@@ -455,7 +499,7 @@ VMM_INT_DECL(int) PDMApicRegisterBackend(PVMCC pVM, PDMAPICBACKENDTYPE enmBacken
     AssertPtrReturn(pBackend->pfnBusDeliver,                VERR_INVALID_POINTER);
     AssertPtrReturn(pBackend->pfnSetEoi,                    VERR_INVALID_POINTER);
 #if defined(IN_RING3)
-    AssertPtrReturn(pBackend->pfnHvSetCompatMode,           VERR_INVALID_POINTER);
+    AssertPtrReturn(pBackend->pfnSetHvCompatMode,           VERR_INVALID_POINTER);
 #elif defined(IN_RING0)
     AssertPtrReturn(pBackend->pfnGetApicPageForCpu,         VERR_INVALID_POINTER);
 #endif

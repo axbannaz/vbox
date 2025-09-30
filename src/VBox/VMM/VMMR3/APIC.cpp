@@ -193,6 +193,7 @@ static const SSMFIELD g_aX2ApicPageFields[] =
  */
 static void apicR3SetCpuIdFeatureLevel(PVM pVM, PDMAPICMODE enmMode)
 {
+    /** @todo Merge with apicR3HvSetCpuIdFeatureLevel. */
     switch (enmMode)
     {
         case PDMAPICMODE_NONE:
@@ -217,9 +218,9 @@ static void apicR3SetCpuIdFeatureLevel(PVM pVM, PDMAPICMODE enmMode)
 
 
 /**
- * @interface_method_impl{PDMAPICBACKEND,pfnHvSetCompatMode}
+ * @interface_method_impl{PDMAPICBACKEND,pfnSetHvCompatMode}
  */
-DECLCALLBACK(int) apicR3HvSetCompatMode(PVM pVM, bool fHyperVCompatMode)
+DECLCALLBACK(int) apicR3SetHvCompatMode(PVM pVM, bool fHyperVCompatMode)
 {
     PAPIC pApic = VM_TO_APIC(pVM);
     if (pApic->fHyperVCompatMode ^ fHyperVCompatMode)
@@ -325,9 +326,9 @@ static DECLCALLBACK(void) apicR3Info(PVM pVM, PCDBGFINFOHLP pHlp, const char *ps
     PCXAPICPAGE  pXApicPage  = VMCPU_TO_CXAPICPAGE(pVCpu);
     PCX2APICPAGE pX2ApicPage = VMCPU_TO_CX2APICPAGE(pVCpu);
 
-    uint64_t const uBaseMsr  = pApicCpu->uApicBaseMsr;
-    APICMODE const enmMode   = apicGetMode(uBaseMsr);
-    bool const   fX2ApicMode = XAPIC_IN_X2APIC_MODE(pVCpu);
+    uint64_t const  uBaseMsr = pApicCpu->uApicBaseMsr;
+    XAPICMODE const enmMode  = apicGetMode(uBaseMsr);
+    bool const   fX2ApicMode = XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr);
 
     pHlp->pfnPrintf(pHlp, "APIC%u:\n", pVCpu->idCpu);
     pHlp->pfnPrintf(pHlp, "  APIC Base MSR                 = %#RX64 (Addr=%#RX64%s%s%s)\n", uBaseMsr,
@@ -961,7 +962,7 @@ static DECLCALLBACK(int) apicR3SaveExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM)
         pHlp->pfnSSMPutU32(pSSM, pApicCpu->uEsrInternal);
 
         /* Save the APIC page. */
-        if (XAPIC_IN_X2APIC_MODE(pVCpu))
+        if (XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr))
             pHlp->pfnSSMPutStruct(pSSM, (const void *)pApicCpu->pvApicPageR3, &g_aX2ApicPageFields[0]);
         else
             pHlp->pfnSSMPutStruct(pSSM, (const void *)pApicCpu->pvApicPageR3, &g_aXApicPageFields[0]);
@@ -1041,7 +1042,7 @@ static DECLCALLBACK(int) apicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uin
             pHlp->pfnSSMGetU32(pSSM, &pApicCpu->uEsrInternal);
 
             /* Load the APIC page. */
-            if (XAPIC_IN_X2APIC_MODE(pVCpu))
+            if (XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr))
                 pHlp->pfnSSMGetStruct(pSSM, pApicCpu->pvApicPageR3, &g_aX2ApicPageFields[0]);
             else
                 pHlp->pfnSSMGetStruct(pSSM, pApicCpu->pvApicPageR3, &g_aXApicPageFields[0]);

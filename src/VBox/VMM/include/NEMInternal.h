@@ -264,6 +264,8 @@ typedef struct NEM
     bool                        fExtendedCpuIdExit : 1;
     /** WHvRunVpExitReasonException is supported. */
     bool                        fExtendedXcptExit : 1;
+    /** WHvRunVpExitReasonX64ApicInitSipiTrap is supported. */
+    bool                        fExtendedApicInitSipiTrap : 1;
     /** Copy of WHV_CAPABILITY_FEATURES::SpeculationControl. */
     bool                        fSpeculationControl : 1;
     /** Whether to export/import IA32_SPEC_CTRL. */
@@ -496,6 +498,9 @@ typedef struct NEMCPU
 # if 0
     STAMCOUNTER                 StatExitCpuId;
     STAMCOUNTER                 StatExitUnrecoverable;
+    STAMCOUNTER                 StatExitApicEoi;
+    STAMCOUNTER                 StatExitApicSipiInitTrap;
+    STAMCOUNTER                 StatExitCanceled;
     STAMCOUNTER                 StatGetMsgTimeout;
     STAMCOUNTER                 StatStopCpuSuccess;
     STAMCOUNTER                 StatStopCpuPending;
@@ -565,6 +570,9 @@ typedef struct NEMCPU
     STAMCOUNTER                 StatExitExceptionGpMesa;
     STAMCOUNTER                 StatExitExceptionUd;
     STAMCOUNTER                 StatExitExceptionUdHandled;
+    STAMCOUNTER                 StatExitApicEoi;
+    STAMCOUNTER                 StatExitApicSipiInitTrap;
+    STAMCOUNTER                 StatExitCanceled;
 # endif
 # if defined(VBOX_VMM_TARGET_ARMV8)
     STAMCOUNTER                 StatExitMemUnmappedToIem;

@@ -160,8 +160,8 @@ static decltype(WHvCreateVirtualProcessor) *        g_pfnWHvCreateVirtualProcess
 static decltype(WHvDeleteVirtualProcessor) *        g_pfnWHvDeleteVirtualProcessor;
 static decltype(WHvRunVirtualProcessor) *           g_pfnWHvRunVirtualProcessor;
 static decltype(WHvCancelRunVirtualProcessor) *     g_pfnWHvCancelRunVirtualProcessor;
-static decltype(WHvGetVirtualProcessorRegisters) *  g_pfnWHvGetVirtualProcessorRegisters;
-static decltype(WHvSetVirtualProcessorRegisters) *  g_pfnWHvSetVirtualProcessorRegisters;
+decltype(WHvGetVirtualProcessorRegisters) *  g_pfnWHvGetVirtualProcessorRegisters;
+decltype(WHvSetVirtualProcessorRegisters) *  g_pfnWHvSetVirtualProcessorRegisters;
 static decltype(WHvResumePartitionTime)            *g_pfnWHvResumePartitionTime;
 static decltype(WHvSuspendPartitionTime)           *g_pfnWHvSuspendPartitionTime;
 decltype(WHvGetVirtualProcessorXsaveState) *        g_pfnWHvGetVirtualProcessorXsaveState = NULL;
@@ -736,6 +736,7 @@ static int nemR3WinInitCheckCapabilities(PVM pVM, PRTERRINFO pErrInfo)
     pVM->nem.s.fExtendedMsrExit   = RT_BOOL(Caps.ExtendedVmExits.X64MsrExit);
     pVM->nem.s.fExtendedCpuIdExit = RT_BOOL(Caps.ExtendedVmExits.X64CpuidExit);
     pVM->nem.s.fExtendedXcptExit  = RT_BOOL(Caps.ExtendedVmExits.ExceptionExit);
+    pVM->nem.s.fExtendedApicInitSipiTrap = RT_BOOL(Caps.ExtendedVmExits.X64ApicInitSipiExitTrap);
     /** @todo RECHECK: WHV_EXTENDED_VM_EXITS typedef. */
 
     /*
@@ -1372,7 +1373,6 @@ static int nemR3WinInitCreatePartition(PVM pVM, PRTERRINFO pErrInfo)
         hrc = WHvSetPartitionProperty(hPartition, WHvPartitionPropertyCodeExtendedVmExits, &Property, sizeof(Property));
         if (SUCCEEDED(hrc))
         {
-            RT_ZERO(Property);
             /*
              * If the APIC is enabled and LocalApicEmulation is supported we'll use Hyper-V's APIC emulation
              * for best performance.
@@ -1380,39 +1380,66 @@ static int nemR3WinInitCreatePartition(PVM pVM, PRTERRINFO pErrInfo)
             PCFGMNODE pCfgmApic = CFGMR3GetChild(CFGMR3GetRoot(pVM), "/Devices/apic");
             if (   pCfgmApic
                 && pVM->nem.s.fLocalApicEmulation
-                && 0) /** @todo Finish */
+                && 0) /** @todo Fix issues in Hyper-V APIC backend before activating. */
             {
                 /* If setting this fails log an error but continue. */
+                RT_ZERO(Property);
                 Property.LocalApicEmulationMode = WHvX64LocalApicEmulationModeXApic;
-                hrc = WHvSetPartitionProperty(hPartition, WHvPartitionPropertyCodeLocalApicEmulationMode  , &Property, sizeof(Property));
+                hrc = WHvSetPartitionProperty(hPartition, WHvPartitionPropertyCodeLocalApicEmulationMode, &Property, sizeof(Property));
                 if (FAILED(hrc))
                 {
-                    LogRel(("NEM: Failed setting WHvPartitionPropertyCodeLocalApicEmulationMode to WHvX64LocalApicEmulationModeXApic: %Rhrc (Last=%#x/%u)",
+                    LogRel(("NEM: Failed setting WHvPartitionPropertyCodeLocalApicEmulationMode to WHvX64LocalApicEmulationModeXApic: %Rhrc (Last=%#x/%u)\n",
                             hrc, RTNtLastStatusValue(), RTNtLastErrorValue()));
                     pVM->nem.s.fLocalApicEmulation = false;
                 }
                 else
                 {
-                    /* Rewrite the configuration tree to point to our APIC emulation. */
-                    PCFGMNODE pCfgmDev = CFGMR3GetChild(CFGMR3GetRoot(pVM), "/Devices");
-                    Assert(pCfgmDev);
-
-                    PCFGMNODE pCfgmApicHv = NULL;
-                    rc = CFGMR3InsertNode(pCfgmDev, "apic-nem", &pCfgmApicHv);
-                    if (RT_SUCCESS(rc))
+                    /* For SMP VMs we need INIT-SIPI VM-exits to initialize APs (non-BSPs). */
+                    if (pVM->cCpus > 1)
                     {
-                        rc = CFGMR3CopyTree(pCfgmApicHv, pCfgmApic, CFGM_COPY_FLAGS_IGNORE_EXISTING_KEYS | CFGM_COPY_FLAGS_IGNORE_EXISTING_VALUES);
-                        if (RT_SUCCESS(rc))
-                            CFGMR3RemoveNode(pCfgmApic);
+                        if (pVM->nem.s.fExtendedApicInitSipiTrap)
+                        {
+                            RT_ZERO(Property);
+                            Property.ExtendedVmExits.X64CpuidExit            = pVM->nem.s.fExtendedCpuIdExit;
+                            Property.ExtendedVmExits.X64MsrExit              = pVM->nem.s.fExtendedMsrExit;
+                            Property.ExtendedVmExits.ExceptionExit           = pVM->nem.s.fExtendedXcptExit;
+                            Property.ExtendedVmExits.X64ApicInitSipiExitTrap = pVM->nem.s.fExtendedApicInitSipiTrap;
+                            hrc = WHvSetPartitionProperty(hPartition, WHvPartitionPropertyCodeExtendedVmExits, &Property, sizeof(Property));
+                            if (FAILED(hrc))
+                                LogRel(("NEM: Failed setting WHvPartitionPropertyCodeExtendedVmExits with X64ApicInitSipiExitTrap: %Rhrc (Last=%#x/%u)",
+                                        hrc, RTNtLastStatusValue(), RTNtLastErrorValue()));
+                        }
+                        else
+                        {
+                            LogRel(("NEM: X64ApicInitSipiExitTrap not supported, required by Hyper-V APIC backend for SMP VMs\n"));
+                            hrc = E_NOINTERFACE;
+                            Assert(FAILED(hrc)); /* Paranoia. */
+                        }
                     }
+                    if (FAILED(hrc))
+                        pVM->nem.s.fLocalApicEmulation = false;
+                    else
+                    {
+                        /* Rewrite the configuration tree to point to our APIC emulation. */
+                        PCFGMNODE pCfgmDev = CFGMR3GetChild(CFGMR3GetRoot(pVM), "/Devices");
+                        Assert(pCfgmDev);
 
-                    if (RT_FAILURE(rc))
-                        rc = RTErrInfoSetF(pErrInfo, rc, "Failed replace APIC device config with Hyper-V one");
+                        PCFGMNODE pCfgmApicHv = NULL;
+                        rc = CFGMR3InsertNode(pCfgmDev, "apic-nem", &pCfgmApicHv);
+                        if (RT_SUCCESS(rc))
+                        {
+                            rc = CFGMR3CopyTree(pCfgmApicHv, pCfgmApic, CFGM_COPY_FLAGS_IGNORE_EXISTING_KEYS | CFGM_COPY_FLAGS_IGNORE_EXISTING_VALUES);
+                            if (RT_SUCCESS(rc))
+                                CFGMR3RemoveNode(pCfgmApic);
+                        }
+
+                        if (RT_FAILURE(rc))
+                            rc = RTErrInfoSetF(pErrInfo, rc, "Failed replace APIC device config with Hyper-V one");
+                    }
                 }
             }
             else
                 pVM->nem.s.fLocalApicEmulation = false;
-
 
             if (RT_SUCCESS(rc))
             {
@@ -1421,7 +1448,8 @@ static int nemR3WinInitCreatePartition(PVM pVM, PRTERRINFO pErrInfo)
                  */
                 pVM->nem.s.fCreatedEmts     = false;
                 pVM->nem.s.hPartition       = hPartition;
-                LogRel(("NEM: Created partition %p.\n", hPartition));
+                LogRel(("NEM: Created partition %p. APIC emulation mode: %s\n", hPartition,
+                        pVM->nem.s.fLocalApicEmulation ? "Hyper-V" : "VirtualBox"));
                 return VINF_SUCCESS;
             }
         }
@@ -1599,6 +1627,9 @@ DECLHIDDEN(int) nemR3NativeInit(PVM pVM, bool fFallback, bool fForced)
                         STAMR3RegisterF(pVM, &pNemCpu->StatExitExceptionUd,     STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of #UD exits",                    "/NEM/CPU%u/ExitExceptionUd", idCpu);
                         STAMR3RegisterF(pVM, &pNemCpu->StatExitExceptionUdHandled, STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of handled #UD exits",         "/NEM/CPU%u/ExitExceptionUdHandled", idCpu);
                         STAMR3RegisterF(pVM, &pNemCpu->StatExitUnrecoverable,   STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of unrecoverable exits",          "/NEM/CPU%u/ExitUnrecoverable", idCpu);
+                        STAMR3RegisterF(pVM, &pNemCpu->StatExitApicEoi,         STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of APIC EOI exits",               "/NEM/CPU%u/ExitApicEoi", idCpu);
+                        STAMR3RegisterF(pVM, &pNemCpu->StatExitApicSipiInitTrap,STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of APIC SIPI/INIT trap exits",    "/NEM/CPU%u/ExitApicSipiInit", idCpu);
+                        STAMR3RegisterF(pVM, &pNemCpu->StatExitCanceled,        STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of canceled exits (host interrupt?)", "/NEM/CPU%u/ExitCanceled", idCpu);
                         STAMR3RegisterF(pVM, &pNemCpu->StatGetMsgTimeout,       STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of get message timeouts/alerts",  "/NEM/CPU%u/GetMsgTimeout", idCpu);
                         STAMR3RegisterF(pVM, &pNemCpu->StatStopCpuSuccess,      STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of successful CPU stops",         "/NEM/CPU%u/StopCpuSuccess", idCpu);
                         STAMR3RegisterF(pVM, &pNemCpu->StatStopCpuPending,      STAMTYPE_COUNTER, STAMVISIBILITY_ALWAYS, STAMUNIT_OCCURENCES, "Number of pending CPU stops",            "/NEM/CPU%u/StopCpuPending", idCpu);
@@ -2301,6 +2332,15 @@ VMMR3_INT_DECL(void) NEMR3NotifySetA20(PVMCPU pVCpu, bool fEnabled)
 #else
     RT_NOREF(pVCpu, fEnabled);
 #endif
+}
+
+
+VMMR3_INT_DECL(int) NEMR3WinGetPartitionHandle(PVM pVM, PRTHCUINTPTR pHCPtrHandle)
+{
+    AssertPtrReturn(pVM, VERR_INVALID_PARAMETER);
+    AssertPtrReturn(pHCPtrHandle, VERR_INVALID_PARAMETER);
+    *pHCPtrHandle = (RTHCUINTPTR)pVM->nem.s.hPartition;
+    return VINF_SUCCESS;
 }
 
 
