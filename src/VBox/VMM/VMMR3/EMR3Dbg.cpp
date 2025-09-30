@@ -132,31 +132,31 @@ VMM_INT_DECL(const char *) EMR3GetExitTypeName(EMEXITTYPE enmExitType, uint32_t 
 
         /* X86: */
 #ifdef VBOX_VMM_TARGET_X86
-        case EMEXITTYPE_IO_PORT_READ:       return "I/O port read";
-        case EMEXITTYPE_IO_PORT_WRITE:      return "I/O port write";
-        case EMEXITTYPE_IO_PORT_STR_READ:   return "I/O port string read";
-        case EMEXITTYPE_IO_PORT_STR_WRITE:  return "I/O port string write";
-        case EMEXITTYPE_MSR_READ:           return "MSR read";
-        case EMEXITTYPE_MSR_WRITE:          return "MSR write";
-        case EMEXITTYPE_CPUID:              return "CPUID";
-        case EMEXITTYPE_RDTSC:              return "RDTSC";
-        case EMEXITTYPE_MOV_CRX:            return "MOV CRx";
-        case EMEXITTYPE_MOV_DRX:            return "MOV DRx";
-        case EMEXITTYPE_VMREAD:             return "VMREAD";
-        case EMEXITTYPE_VMWRITE:            return "VMWRITE";
+        case EMEXITTYPE_X86_PIO_READ:       return "I/O port read";
+        case EMEXITTYPE_X86_PIO_WRITE:      return "I/O port write";
+        case EMEXITTYPE_X86_PIO_STR_READ:   return "I/O port string read";
+        case EMEXITTYPE_X86_PIO_STR_WRITE:  return "I/O port string write";
+        case EMEXITTYPE_X86_MSR_READ:       return "MSR read";
+        case EMEXITTYPE_X86_MSR_WRITE:      return "MSR write";
+        case EMEXITTYPE_X86_CPUID:          return "CPUID";
+        case EMEXITTYPE_X86_RDTSC:          return "RDTSC";
+        case EMEXITTYPE_X86_MOV_CRX:        return "MOV CRx";
+        case EMEXITTYPE_X86_MOV_DRX:        return "MOV DRx";
+        case EMEXITTYPE_X86_VMREAD:         return "VMREAD";
+        case EMEXITTYPE_X86_VMWRITE:        return "VMWRITE";
 #else
-        case EMEXITTYPE_IO_PORT_READ:
-        case EMEXITTYPE_IO_PORT_WRITE:
-        case EMEXITTYPE_IO_PORT_STR_READ:
-        case EMEXITTYPE_IO_PORT_STR_WRITE:
-        case EMEXITTYPE_MSR_READ:
-        case EMEXITTYPE_MSR_WRITE:
-        case EMEXITTYPE_CPUID:
-        case EMEXITTYPE_RDTSC:
-        case EMEXITTYPE_MOV_CRX:
-        case EMEXITTYPE_MOV_DRX:
-        case EMEXITTYPE_VMREAD:
-        case EMEXITTYPE_VMWRITE:
+        case EMEXITTYPE_X86_PIO_READ:
+        case EMEXITTYPE_X86_PIO_WRITE:
+        case EMEXITTYPE_X86_PIO_STR_READ:
+        case EMEXITTYPE_X86_PIO_STR_WRITE:
+        case EMEXITTYPE_X86_MSR_READ:
+        case EMEXITTYPE_X86_MSR_WRITE:
+        case EMEXITTYPE_X86_CPUID:
+        case EMEXITTYPE_X86_RDTSC:
+        case EMEXITTYPE_X86_MOV_CRX:
+        case EMEXITTYPE_X86_MOV_DRX:
+        case EMEXITTYPE_X86_VMREAD:
+        case EMEXITTYPE_X86_VMWRITE:
             break;
 #endif
 
