@@ -684,8 +684,6 @@ static void apicGetDestCpuSet(PVMCC pVM, uint32_t fDestMask, uint32_t fBroadcast
  *
  * @returns VBox status code.
  * @param   pVCpu           The cross context virtual CPU structure.
- * @param   rcRZ            The return code if the operation cannot be
- *                          performed in the current context.
  */
 static VBOXSTRICTRC apicR3HvSendIpi(PVMCPUCC pVCpu)
 {
