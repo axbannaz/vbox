@@ -134,8 +134,8 @@ public:
         /** Returns tool-pane instance. */
         UIToolPane *toolPane() const;
 
-        /** Returns menu tool type for the @a enmClass specified. */
-        UIToolType menuToolType(UIToolClass enmClass) const;
+        /** Returns menu tool type. */
+        UIToolType menuToolType() const;
         /** Defines menu tool @a enmType. */
         void setMenuToolType(UIToolType enmType);
 

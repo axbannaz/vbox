@@ -161,7 +161,7 @@ public:
         state.selectable = true;
 
         /* Compose the state of current item: */
-        if (item() && item() == item()->model()->currentItem(item()->itemClass()))
+        if (item() && item() == item()->model()->currentItem())
         {
             state.active = true;
             state.focused = true;
@@ -448,7 +448,7 @@ int UIToolsItem::minimumWidthHint() const
      * 2. machine item selected: */
     const bool fCondition1 = m_enmClass == UIToolClass_Global && model()->showItemNames();
     const bool fCondition2 = m_enmClass == UIToolClass_Machine && (   model()->showItemNames()
-                                                                   || model()->currentItem(itemClass()) == this);
+                                                                   || model()->currentItem() == this);
     if (fCondition1 || fCondition2)
     {
         iProposedWidth += m_nameSize.width();
@@ -513,7 +513,7 @@ void UIToolsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *)
         const bool fCondition0 = m_enmClass == UIToolClass_Aux;
         const bool fCondition1 = m_enmClass == UIToolClass_Global && !model()->showItemNames();
         const bool fCondition2 = m_enmClass == UIToolClass_Machine && !model()->showItemNames()
-                                                                   && model()->currentItem(itemClass()) != this;
+                                                                   && model()->currentItem() != this;
         if (fCondition0 || fCondition1 || fCondition2)
         {
             const QPointF posAtScene = mapToScene(rect().topRight() + QPoint(3, -3));
@@ -613,7 +613,7 @@ void UIToolsItem::prepareConnections()
 void UIToolsItem::cleanup()
 {
     /* If that item is current: */
-    if (model()->currentItem(itemClass()) == this)
+    if (model()->currentItem() == this)
     {
         /* Unset the current item: */
         model()->setCurrentItem(0);
@@ -711,7 +711,7 @@ void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) co
     const QPalette pal = QApplication::palette();
 
     /* Selection background: */
-    if (model()->currentItem(itemClass()) == this)
+    if (model()->currentItem() == this)
     {
         /* Acquire background color: */
         const QColor selectionColor = uiCommon().isInDarkMode()
@@ -887,7 +887,7 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
          * 2. machine item selected: */
         const bool fCondition1 = m_enmClass == UIToolClass_Global && model()->showItemNames();
         const bool fCondition2 = m_enmClass == UIToolClass_Machine && (   model()->showItemNames()
-                                                                       || model()->currentItem(itemClass()) == this);
+                                                                       || model()->currentItem() == this);
         if (fCondition1 || fCondition2)
         {
             /* Acquire font: */

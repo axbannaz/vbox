@@ -117,14 +117,13 @@ void UIToolsModel::setView(UIToolsView *pView)
 
 void UIToolsModel::setToolsType(UIToolType enmType)
 {
-    const UIToolClass enmClass = UIToolStuff::castTypeToClass(enmType);
-    if (!currentItem(enmClass) || currentItem(enmClass)->itemType() != enmType)
+    if (!currentItem() || currentItem()->itemType() != enmType)
         setCurrentItem(item(enmType));
 }
 
-UIToolType UIToolsModel::toolsType(UIToolClass enmClass) const
+UIToolType UIToolsModel::toolsType() const
 {
-    return currentItem(enmClass) ? currentItem(enmClass)->itemType() : UIToolType_Invalid;
+    return currentItem() ? currentItem()->itemType() : UIToolType_Invalid;
 }
 
 void UIToolsModel::setItemsEnabled(bool fEnabled)
@@ -142,16 +141,14 @@ bool UIToolsModel::isItemsEnabled() const
     return m_fItemsEnabled;
 }
 
-void UIToolsModel::setRestrictedToolTypes(UIToolClass enmClass, const QList<UIToolType> &types)
+void UIToolsModel::setRestrictedToolTypes(const QList<UIToolType> &types)
 {
-    if (m_mapRestrictedToolTypes.value(enmClass) != types)
+    if (m_listRestrictedToolTypes != types)
     {
-        m_mapRestrictedToolTypes[enmClass] = types;
+        m_listRestrictedToolTypes = types;
         foreach (UIToolsItem *pItem, items())
         {
-            if (pItem->itemClass() != enmClass)
-                continue;
-            const bool fRestricted = m_mapRestrictedToolTypes.value(enmClass).contains(pItem->itemType());
+            const bool fRestricted = m_listRestrictedToolTypes.contains(pItem->itemType());
             pItem->setHiddenByReason(fRestricted, UIToolsItem::HidingReason_Restricted);
         }
 
@@ -160,11 +157,6 @@ void UIToolsModel::setRestrictedToolTypes(UIToolClass enmClass, const QList<UITo
         sltItemMinimumWidthHintChanged();
         sltItemMinimumHeightHintChanged();
     }
-}
-
-QList<UIToolType> UIToolsModel::restrictedToolTypes(UIToolClass enmClass) const
-{
-    return m_mapRestrictedToolTypes.value(enmClass);
 }
 
 QVariant UIToolsModel::data(int iKey) const
@@ -184,55 +176,33 @@ QVariant UIToolsModel::data(int iKey) const
 
 void UIToolsModel::setCurrentItem(UIToolsItem *pItem)
 {
-    /* Valid item passed? */
-    if (pItem)
-    {
-        /* What's the item class? */
-        const UIToolClass enmClass = pItem->itemClass();
+    /* Is there something changed? */
+    if (currentItem() == pItem)
+        return;
 
-        /* Is there something changed? */
-        if (m_mapCurrentItems.value(enmClass) == pItem)
-            return;
+    /* Remember old current item: */
+    UIToolsItem *pOldCurrentItem = currentItem();
+    /* Set new item as current: */
+    m_pCurrentItem = pItem;
 
-        /* Remember old current-item: */
-        UIToolsItem *pOldCurrentItem = m_mapCurrentItems.value(enmClass);
-        /* Set new item as current: */
-        m_mapCurrentItems[enmClass] = pItem;
+    /* Rebuild whole layout if names hidden for machine tools: */
+    if (   !showItemNames()
+        && m_enmClass == UIToolClass_Machine)
+        updateLayout();
 
-        /* Rebuild whole layout if names hidden for machine tools: */
-        if (   !showItemNames()
-            && m_enmClass == UIToolClass_Machine)
-            updateLayout();
+    /* Update old&new items (if any): */
+    if (pOldCurrentItem)
+        pOldCurrentItem->update();
+    if (currentItem())
+        currentItem()->update();
 
-        /* Update old item (if any): */
-        if (pOldCurrentItem)
-            pOldCurrentItem->update();
-        /* Update new item: */
-        m_mapCurrentItems.value(enmClass)->update();
-
-        /* Notify about selection change: */
-        emit sigSelectionChanged(toolsType(enmClass));
-    }
-    /* Null item passed? */
-    else
-    {
-        /* Is there something changed? */
-        if (   !m_mapCurrentItems.value(UIToolClass_Global)
-            && !m_mapCurrentItems.value(UIToolClass_Machine))
-            return;
-
-        /* Clear all current items: */
-        m_mapCurrentItems[UIToolClass_Global] = 0;
-        m_mapCurrentItems[UIToolClass_Machine] = 0;
-
-        /* Notify about selection change: */
-        emit sigSelectionChanged(UIToolType_Invalid);
-    }
+    /* Notify about selection change: */
+    emit sigSelectionChanged(toolsType());
 }
 
-UIToolsItem *UIToolsModel::currentItem(UIToolClass enmClass) const
+UIToolsItem *UIToolsModel::currentItem() const
 {
-    return m_mapCurrentItems.value(enmClass);
+    return m_pCurrentItem;
 }
 
 QList<UIToolsItem*> UIToolsModel::items() const
@@ -433,7 +403,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 || (m_enmClass == UIToolClass_Machine && pKeyEvent->key() == Qt::Key_Left))
             {
                 /* Determine current-item position: */
-                const int iPosition = items().indexOf(currentItem(m_enmClass));
+                const int iPosition = items().indexOf(currentItem());
                 /* Determine 'previous' item: */
                 UIToolsItem *pPreviousItem = 0;
                 if (iPosition > 0 && iPosition < items().size())
@@ -447,7 +417,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 || (m_enmClass == UIToolClass_Machine && pKeyEvent->key() == Qt::Key_Right))
             {
                 /* Determine current-item position: */
-                const int iPosition = items().indexOf(currentItem(m_enmClass));
+                const int iPosition = items().indexOf(currentItem());
                 /* Determine 'next' item: */
                 UIToolsItem *pNextItem = 0;
                 if (iPosition >= 0 && iPosition < items().size() - 1)
@@ -529,15 +499,15 @@ void UIToolsModel::sltHandleToolLabelsVisibilityChange(bool fVisible)
 void UIToolsModel::sltHandleViewFocusInEvent()
 {
     /* Update currently selected item: */
-    if (UIToolsItem *pItem = m_mapCurrentItems.value(m_enmClass))
-        pItem->update();
+    if (currentItem())
+        currentItem()->update();
 }
 
 void UIToolsModel::sltHandleViewFocusOutEvent()
 {
     /* Update currently selected item: */
-    if (UIToolsItem *pItem = m_mapCurrentItems.value(m_enmClass))
-        pItem->update();
+    if (currentItem())
+        currentItem()->update();
 }
 
 void UIToolsModel::prepare()
@@ -702,14 +672,14 @@ void UIToolsModel::saveCurrentItems()
     {
         case UIToolClass_Global:
         {
-            if (UIToolsItem *pItem = currentItem(UIToolClass_Global))
-                enmTypeGlobal = pItem->itemType();
+            if (currentItem())
+                enmTypeGlobal = currentItem()->itemType();
             break;
         }
         case UIToolClass_Machine:
         {
-            if (UIToolsItem *pItem = currentItem(UIToolClass_Machine))
-                enmTypeMachine = pItem->itemType();
+            if (currentItem())
+                enmTypeMachine = currentItem()->itemType();
             break;
         }
         default:

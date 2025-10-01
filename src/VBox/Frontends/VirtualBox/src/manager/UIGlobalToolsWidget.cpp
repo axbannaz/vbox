@@ -69,10 +69,10 @@ UIMachineToolsWidget *UIGlobalToolsWidget::machineToolsWidget() const
     return toolPane()->machineToolsWidget();
 }
 
-UIToolType UIGlobalToolsWidget::menuToolType(UIToolClass enmClass) const
+UIToolType UIGlobalToolsWidget::menuToolType() const
 {
     AssertPtrReturn(toolMenu(), UIToolType_Invalid);
-    return toolMenu()->toolsType(enmClass);
+    return toolMenu()->toolsType();
 }
 
 void UIGlobalToolsWidget::setMenuToolType(UIToolType enmType)
@@ -152,7 +152,7 @@ void UIGlobalToolsWidget::sltHandleMachineRegistrationChanged(const QUuid &, con
 {
     /* On any VM registered switch from Home to Machines: */
     AssertPtrReturnVoid(toolMenu());
-    if (fRegistered && toolMenu()->toolsType(UIToolClass_Global) == UIToolType_Home)
+    if (fRegistered && toolMenu()->toolsType() == UIToolType_Home)
         setMenuToolType(UIToolType_Machines);
 }
 
@@ -195,12 +195,12 @@ void UIGlobalToolsWidget::sltHandleToolMenuUpdate()
                         << UIToolType_Network;
 
     /* Make sure no restricted tool is selected: */
-    if (restrictedTypes.contains(toolMenu()->toolsType(UIToolClass_Global)))
+    if (restrictedTypes.contains(toolMenu()->toolsType()))
         setMenuToolType(UIToolType_Home);
 
     /* Hide restricted tools in the menu: */
     const QList restrictions(restrictedTypes.begin(), restrictedTypes.end());
-    toolMenu()->setRestrictedToolTypes(UIToolClass_Global, restrictions);
+    toolMenu()->setRestrictedToolTypes(restrictions);
 
     /* Close all restricted tools (besides the Machines): */
     foreach (const UIToolType &enmRestrictedType, restrictedTypes)
@@ -318,7 +318,7 @@ void UIGlobalToolsWidget::prepareConnections()
 void UIGlobalToolsWidget::loadSettings()
 {
     /* Acquire & select tool currently chosen in the menu: */
-    sltHandleToolsMenuIndexChange(toolMenu()->toolsType(UIToolClass_Global));
+    sltHandleToolsMenuIndexChange(toolMenu()->toolsType());
 
     /* Update tools restrictions: */
     sltHandleToolMenuUpdate();

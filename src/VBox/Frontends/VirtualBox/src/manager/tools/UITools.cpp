@@ -59,9 +59,9 @@ void UITools::setToolsType(UIToolType enmType)
     m_pToolsModel->setToolsType(enmType);
 }
 
-UIToolType UITools::toolsType(UIToolClass enmClass) const
+UIToolType UITools::toolsType() const
 {
-    return m_pToolsModel->toolsType(enmClass);
+    return m_pToolsModel->toolsType();
 }
 
 void UITools::setItemsEnabled(bool fEnabled)
@@ -74,9 +74,9 @@ bool UITools::isItemsEnabled() const
     return m_pToolsModel->isItemsEnabled();
 }
 
-void UITools::setRestrictedToolTypes(UIToolClass enmClass, const QList<UIToolType> &types)
+void UITools::setRestrictedToolTypes(const QList<UIToolType> &types)
 {
-    m_pToolsModel->setRestrictedToolTypes(enmClass, types);
+    m_pToolsModel->setRestrictedToolTypes(types);
 }
 
 void UITools::prepare()
