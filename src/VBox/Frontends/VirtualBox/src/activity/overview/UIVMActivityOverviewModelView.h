@@ -153,6 +153,7 @@ private slots:
     void sltMachineStateChanged(const QUuid &uId, const KMachineState state);
     void sltMachineRegistered(const QUuid &uId, bool fRegistered);
     void sltLocalVMUpdateTimeout();
+    void sltDetachCOM();
 
 private:
 
