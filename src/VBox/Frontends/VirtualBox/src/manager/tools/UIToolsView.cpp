@@ -64,41 +64,47 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
+        /* Sanity check: */
         AssertPtrReturn(view(), 0);
+        AssertPtrReturn(view()->model(), 0);
 
-        /* Return the number of children: */
+        /* Return the number of model's children: */
         return view()->model()->items().size();
     }
 
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
-        AssertPtrReturn(view(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(view(), 0);
+        AssertPtrReturn(view()->model(), 0);
 
-        /* Return the child with the passed iIndex: */
+        /* Return the model's child with the passed iIndex: */
         return QAccessible::queryAccessibleInterface(view()->model()->items().at(iIndex));
     }
 
     /** Returns the index of passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
+
+        /* Acquire item itself: */
+        UIToolsItem *pChildItem = qobject_cast<UIToolsItem*>(pChild->object());
+
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
         AssertPtrReturn(view(), -1);
-        /* Make sure child is valid: */
-        AssertReturn(pChild, -1);
 
         /* Return the index of passed model child: */
-        return view()->model()->items().indexOf(qobject_cast<UIToolsItem*>(pChild->object()));
+        return view()->model()->items().indexOf(pChildItem);
     }
 
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Make sure view still alive: */
+        /* Sanity check: */
         AssertPtrReturn(view(), QString());
 
         /* Return view tool-tip: */

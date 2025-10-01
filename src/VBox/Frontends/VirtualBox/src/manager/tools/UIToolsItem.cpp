@@ -71,18 +71,16 @@ public:
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QAccessible::NoRole);
-
-        /* ListItem by default: */
         return QAccessible::ListItem;
     }
 
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
+        AssertPtrReturn(item()->model(), 0);
+        AssertPtrReturn(item()->model()->view(), 0);
 
         /* Return the parent: */
         return QAccessible::queryAccessibleInterface(item()->model()->view());
@@ -91,6 +89,11 @@ public:
     /** Returns the rect. */
     virtual QRect rect() const RT_OVERRIDE
     {
+        /* Sanity check: */
+        AssertPtrReturn(item(), QRect());
+        AssertPtrReturn(item()->model(), QRect());
+        AssertPtrReturn(item()->model()->view(), QRect());
+
         /* Now goes the mapping: */
         const QSize   itemSize         = item()->size().toSize();
         const QPointF itemPosInScene   = item()->mapToScene(QPointF(0, 0));
@@ -103,9 +106,6 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), 0);
-
         /* Zero: */
         return 0;
     }
@@ -113,9 +113,6 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), 0);
-
         /* Null: */
         return 0;
     }
@@ -135,8 +132,9 @@ public:
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
+        AssertPtrReturn(item()->model(), QAccessible::State());
 
         /* Compose the state: */
         QAccessible::State state;
@@ -158,9 +156,10 @@ public:
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QString());
 
+        /* Text for known roles: */
         switch (enmTextRole)
         {
             case QAccessible::Name:        return item()->name();
