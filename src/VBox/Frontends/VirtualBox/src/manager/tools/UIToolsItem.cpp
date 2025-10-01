@@ -118,14 +118,9 @@ public:
     }
 
     /** Returns the index of the passed @a pChild. */
-    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
+    virtual int indexOfChild(const QAccessibleInterface*) const RT_OVERRIDE
     {
-        /* Search for corresponding child: */
-        for (int i = 0; i < childCount(); ++i)
-            if (child(i) == pChild)
-                return i;
-
-        /* -1 by default: */
+        /* -1: */
         return -1;
     }
 
