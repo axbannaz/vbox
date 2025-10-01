@@ -101,6 +101,22 @@ public:
         return view()->model()->items().indexOf(pChildItem);
     }
 
+    /** Returns the state. */
+    virtual QAccessible::State state() const RT_OVERRIDE
+    {
+        /* Sanity check: */
+        AssertPtrReturn(view(), QAccessible::State());
+
+        /* Compose the state: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        if (view()->hasFocus())
+            myState.focused = true;
+
+        /* Return the state: */
+        return myState;
+    }
+
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
