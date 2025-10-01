@@ -622,6 +622,7 @@ class VirtualTestSheriff(object): # pylint: disable=too-few-public-methods
     ktReason_Add_ShFl_Automount                        = ( 'Additions',         'Automounting' );
     ktReason_Add_ShFl_FsPerf                           = ( 'Additions',         'FsPerf' );
     ktReason_Add_ShFl_FsPerf_Abend                     = ( 'Additions',         'FsPerf abend' );
+    ktReason_Add_ShFl_FsPerf_VERR_SHARING_VIOLATION    = ( 'Additions',         'FsPerf VERR_SHARING_VIOLATION' );
     ktReason_Add_GstCtl                                = ( 'Additions',         'GstCtl' );
     ktReason_Add_GstCtl_Preparations                   = ( 'Additions',         'GstCtl preparations' );
     ktReason_Add_GstCtl_SessionBasics                  = ( 'Additions',         'Session basics' );
@@ -1288,7 +1289,10 @@ class VirtualTestSheriff(object): # pylint: disable=too-few-public-methods
             elif sResultLog.find('FlushViewOfFile') >= 0:
                 enmReason = self.ktReason_Add_FlushViewOfFile;
         elif sParentName == 'Shared Folders' and oFailedResult.sName == 'Running FsPerf':
-            enmReason = self.ktReason_Add_ShFl_FsPerf;  ## Maybe it would be better to be more specific...
+            if sResultLog.find('expected VINF_SUCCESS, got VERR_SHARING_VIOLATION') >= 0:
+                enmReason = self.ktReason_Add_ShFl_FsPerf_VERR_SHARING_VIOLATION;
+            else:
+                enmReason = self.ktReason_Add_ShFl_FsPerf;  ## Maybe it would be better to be more specific...
 
         if enmReason is not None:
             return oCaseFile.noteReasonForId(enmReason, oFailedResult.idTestResult);
