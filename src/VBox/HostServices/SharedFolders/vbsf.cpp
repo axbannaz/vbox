@@ -2439,6 +2439,17 @@ int vbsfRemove(SHFLCLIENTDATA *pClient, SHFLROOT root, PCSHFLSTRING pPath, uint3
                 else
                     rc = RTDirRemove(pszFullPath);
 
+                /** @todo r=aeichner 2025-10-01 Temporarily for investigating an error on the testboxes. */
+                if (RT_FAILURE(rc))
+                {
+                    if (flags & SHFL_REMOVE_SYMLINK)
+                        LogRel(("RTSymlinkDelete(%s, 0) -> %Rrc", pszFullPath, rc));
+                    else if (flags & SHFL_REMOVE_FILE)
+                        LogRel(("RTFileDelete(%s) -> %Rrc", pszFullPath, rc));
+                    else
+                        LogRel(("RTDirRemove(%s) -> %Rrc", pszFullPath, rc));
+                }
+
 #if 0 //ndef RT_OS_WINDOWS
                 /* There are a few adjustments to be made here: */
                 if (   rc == VERR_FILE_NOT_FOUND
