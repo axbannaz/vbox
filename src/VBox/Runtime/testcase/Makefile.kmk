@@ -129,6 +129,7 @@ ifdef VBOX_WITH_TESTCASES # The whole file
   	tstRTPath \
   	tstRTPathGlob \
   	tstRTPathQueryInfo \
+  	tstRTPathQueryProcessesUsing \
   	tstRTPathUnlink \
   	tstRTPipe \
   	tstRTPoll \
@@ -826,6 +827,9 @@ ifdef VBOX_WITH_TESTCASES # The whole file
 
  tstRTPathQueryInfo_TEMPLATE = VBoxR3TstExe
  tstRTPathQueryInfo_SOURCES = tstRTPathQueryInfo.cpp
+
+ tstRTPathQueryProcessesUsing_TEMPLATE = VBoxR3TstExe
+ tstRTPathQueryProcessesUsing_SOURCES = tstRTPathQueryProcessesUsing.cpp
 
  tstRTPathUnlink_TEMPLATE = VBoxR3TstExe
  tstRTPathUnlink_SOURCES = tstRTPathUnlink.cpp

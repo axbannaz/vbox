@@ -1451,6 +1451,30 @@ RTR3DECL(int) RTPathQueryInfo(const char *pszPath, PRTFSOBJINFO pObjInfo, RTFSOB
 RTR3DECL(int) RTPathQueryInfoEx(const char *pszPath, PRTFSOBJINFO pObjInfo, RTFSOBJATTRADD enmAdditionalAttribs, uint32_t fFlags);
 
 /**
+ * Tries to gather and return all process IDs (excluding the one calling this method) accessing the given path.
+ *
+ * @returns IPRT status code.
+ * @retval  VERR_NOT_SUPPORTED if this is not supported on the calling host.
+ * @retval  VINF_BUFFER_OVERFLOW if there wasn't enough room in paPids to store all process IDs.
+ *          However the available space is filled with process IDs and pcProcesses is set to the space required.
+ * @param   pszPath                 Path to the file system object.
+ * @param   fFlags                  Combination of RTPATH_QUERY_PROC_F_XXX flags.
+ * @param   pcProcesses             The number of process IDs paPids can hold and where to return the number of processes found
+ *                                  on return.
+ * @param   paPids                  Pointer to an array where to store the the found process IDs.
+ *
+ * @note This is a best effort and might not be able to get all processes because of access rights. It will not return an error
+ *       for many errors happening while trying to get at the requested information.
+ */
+RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, uint32_t *pcProcesses, PRTPROCESS paPids);
+
+/** @name RTPATH_QUERY_PROC_F_XXX - RTPathQueryProcessesUsing flags
+ *  @{ */
+/** For directories also return processes which access an object in the given directory (and further sub directories). */
+#define RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ RT_BIT_32(0)
+/** @} */
+
+/**
  * Changes the mode flags of a file system object.
  *
  * The API requires at least one of the mode flag sets (Unix/Dos) to

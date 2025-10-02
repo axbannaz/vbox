@@ -1893,6 +1893,7 @@
 # define RTPathPurgeFilename                            RT_MANGLER(RTPathPurgeFilename)
 # define RTPathQueryInfo                                RT_MANGLER(RTPathQueryInfo)
 # define RTPathQueryInfoEx                              RT_MANGLER(RTPathQueryInfoEx)
+# define RTPathQueryProcessesUsing                      RT_MANGLER(RTPathQueryProcessesUsing)
 # define RTPathReal                                     RT_MANGLER(RTPathReal)
 # define RTPathRealDup                                  RT_MANGLER(RTPathRealDup)
 # define RTPathRename                                   RT_MANGLER(RTPathRename)
