@@ -45,6 +45,7 @@
 #include <iprt/message.h>
 #include <iprt/process.h>
 #include <iprt/stream.h>
+#include <iprt/string.h>
 #include <iprt/test.h>
 
 
@@ -117,9 +118,21 @@ int main(int argc, char **argv)
                     if (RT_SUCCESS(rc))
                     {
                         RTPrintf("%s%s:\n", argv[i], rc == VINF_BUFFER_OVERFLOW ? " (truncated)" : "");
-
                         for (uint32_t idx = 0; idx < (rc == VINF_BUFFER_OVERFLOW ? RT_ELEMENTS(aPids) : cProcs); idx++)
-                            RTPrintf("   <%RU32>\n", aPids[idx]);
+                        {
+                            char szName[RTPATH_MAX];
+                            rc = RTProcQueryExecutablePath(aPids[idx], szName, sizeof(szName), NULL);
+                            if (RT_SUCCESS(rc))
+                            {
+                                RTPrintf("   pid %RU32 - %s\n", aPids[idx], szName);
+
+                                size_t cbNeeded = 0;
+                                RTTESTI_CHECK_RC(RTProcQueryExecutablePath(aPids[idx], NULL, 0, &cbNeeded), VERR_BUFFER_OVERFLOW);
+                                RTTESTI_CHECK(cbNeeded == strlen(szName) + 1);
+                            }
+                            else
+                                RTPrintf("   pid %RU32 (RTProcQueryExecutablePath -> %Rrc)\n", aPids[idx], rc);
+                        }
                     }
                     else
                         RTPrintf("RTPathQueryProcessesUsing(%s,,,) ->  %Rrc\n", argv[i], rc);

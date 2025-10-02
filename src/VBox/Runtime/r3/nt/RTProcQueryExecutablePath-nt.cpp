@@ -60,9 +60,8 @@
  */
 static int rtProcQueryExecutablePathWorker(RTPROCESS hProcess, uint8_t **ppbBuf)
 {
-    int rc = VINF_SUCCESS;
     HANDLE hNtProcess = INVALID_HANDLE_VALUE;
-    NTSTATUS rcNt = ERROR_SUCCESS;
+    NTSTATUS rcNt = STATUS_SUCCESS;
     if (   hProcess == NIL_RTPROCESS
         || hProcess == RTProcSelf())
         hNtProcess = NtCurrentProcess();
@@ -80,13 +79,14 @@ static int rtProcQueryExecutablePathWorker(RTPROCESS hProcess, uint8_t **ppbBuf)
             rcNt = NtOpenProcess(&hNtProcess, PROCESS_QUERY_INFORMATION, &ObjAttrs, &ClientId);
     }
 
+    int rc = VINF_SUCCESS;
     if (NT_SUCCESS(rcNt))
     {
-        ULONG   cbBuf  = _1K;
+        ULONG    cbBuf = _1K;
         uint8_t *pbBuf = (uint8_t *)RTMemTmpAlloc(cbBuf);
         if (pbBuf)
         {
-            ULONG cbNeeded;
+            ULONG cbNeeded = 0;
             rcNt = NtQueryInformationProcess(hNtProcess, ProcessImageFileName, pbBuf, cbBuf, &cbNeeded);
             if (rcNt == STATUS_INFO_LENGTH_MISMATCH)
             {
@@ -101,21 +101,28 @@ static int rtProcQueryExecutablePathWorker(RTPROCESS hProcess, uint8_t **ppbBuf)
                     rc = VERR_NO_TMP_MEMORY;
             }
 
-            if (   NT_SUCCESS(rcNt)
-                && RT_SUCCESS(rc))
+            if (NT_SUCCESS(rcNt))
+            {
+                AssertRC(rc);
                 *ppbBuf = pbBuf;
+                pbBuf = NULL;
+            }
             else if (RT_SUCCESS(rc))
+            {
+                RTMemTmpFree(pbBuf);
                 rc = RTErrConvertFromNtStatus(rcNt);
+            }
+            else
+                Assert(!pbBuf);
         }
         else
             rc = VERR_NO_TMP_MEMORY;
+
+        if (hNtProcess != NtCurrentProcess())
+            NtClose(hNtProcess);
     }
     else
         rc = RTErrConvertFromNtStatus(rcNt);
-
-    if (   hNtProcess != NtCurrentProcess()
-        && hNtProcess != INVALID_HANDLE_VALUE)
-        NtClose(hNtProcess);
 
     return rc;
 }
@@ -126,22 +133,31 @@ RTR3DECL(int) RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath, s
     AssertReturn(   (pszExecPath && cbExecPath > 0)
                  || (!pszExecPath && !cbExecPath), VERR_INVALID_PARAMETER);
     AssertReturn(pcbExecPath || pszExecPath, VERR_INVALID_PARAMETER);
+    if (pcbExecPath)
+        *pcbExecPath = 0;
 
-    uint8_t *pbBuf;
+    uint8_t *pbBuf = NULL;
     int rc = rtProcQueryExecutablePathWorker(hProcess, &pbBuf);
     if (RT_SUCCESS(rc))
     {
-        UNICODE_STRING *pNtNameProc = (UNICODE_STRING *)pbBuf;
+        UNICODE_STRING *pNtNameProc   = (UNICODE_STRING *)pbBuf;
+        size_t const    cwcNtNameProc = pNtNameProc->Length / sizeof(RTUTF16);
 
-        *pcbExecPath = RTUtf16CalcUtf8Len(pNtNameProc->Buffer) + 1;
-        if (*pcbExecPath <= cbExecPath)
+        if (pszExecPath)
         {
-            rc = RTUtf16ToUtf8Ex(pNtNameProc->Buffer, RTSTR_MAX, &pszExecPath, cbExecPath, pcbExecPath);
+            rc = RTUtf16ToUtf8Ex(pNtNameProc->Buffer, cwcNtNameProc, &pszExecPath, cbExecPath, pcbExecPath);
             if (pcbExecPath)
                 *pcbExecPath += 1;
         }
         else
-            rc = VERR_BUFFER_OVERFLOW;
+        {
+            rc = RTUtf16CalcUtf8LenEx(pNtNameProc->Buffer, cwcNtNameProc, pcbExecPath);
+            if (RT_SUCCESS(rc))
+            {
+                *pcbExecPath += 1;
+                rc = VERR_BUFFER_OVERFLOW;
+            }
+        }
 
         RTMemTmpFree(pbBuf);
     }
@@ -153,13 +169,14 @@ RTR3DECL(int) RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath, s
 RTR3DECL(int) RTProcQueryExecutablePathA(RTPROCESS hProcess, char **ppszExecPath)
 {
     AssertPtrReturn(ppszExecPath, VERR_INVALID_POINTER);
+    *ppszExecPath = NULL;
 
-    uint8_t *pbBuf;
+    uint8_t *pbBuf = NULL;
     int rc = rtProcQueryExecutablePathWorker(hProcess, &pbBuf);
     if (RT_SUCCESS(rc))
     {
         UNICODE_STRING *pNtNameProc = (UNICODE_STRING *)pbBuf;
-        rc = RTUtf16ToUtf8(pNtNameProc->Buffer, ppszExecPath);
+        rc = RTUtf16ToUtf8Ex(pNtNameProc->Buffer, pNtNameProc->Length / sizeof(RTUTF16), ppszExecPath, RTSTR_MAX, NULL);
         RTMemTmpFree(pbBuf);
     }
 

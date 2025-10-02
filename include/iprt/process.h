@@ -489,7 +489,11 @@ RTR3DECL(int)   RTProcQueryUsernameA(RTPROCESS hProcess, char **ppszUser);
  * @param   cbExecPath   The size of the executable path buffer.
  * @param   pcbExecPath  Where to store the executable path length on success
  *                       or the required buffer size if VERR_BUFFER_OVERFLOW
- *                       is returned.
+ *                       is returned.  Optional.
+ *
+ * @note    On Windows, the returned path is currently an NT path.  We assume
+ *          this isn't too much of a problem at present as this is mostly for
+ *          informational use.
  */
 RTR3DECL(int)   RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath, size_t cbExecPath, size_t *pcbExecPath);
 
@@ -500,6 +504,10 @@ RTR3DECL(int)   RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath,
  * @param   hProcess     The process handle to query the executable path for.
  * @param   ppszExecPath Where to store the pointer to the string containing
  *                       the executable path on success. Free with RTStrFree().
+ *
+ * @note    On Windows, the returned path is currently an NT path.  We assume
+ *          this isn't too much of a problem at present as this is mostly for
+ *          informational use.
  */
 RTR3DECL(int)   RTProcQueryExecutablePathA(RTPROCESS hProcess, char **ppszExecPath);
 
