@@ -2356,14 +2356,14 @@ static int rtProcPosixCreateInner(const char *pszNativeExec, const char * const 
              * Change group and user if requested.
              */
 #if 1 /** @todo This needs more work, see suplib/hardening. */
-            if (pszAsUser)
-            {
-                int ret = initgroups(pszAsUser, gid);
-                if (ret)
-                    rtProcPosixForkStatusPipeWrite(fdStatusPipeW, RTErrConvertFromErrno(errno), 126, fFlags);
-            }
             if (gid != ~(gid_t)0)
             {
+                if (pszAsUser)
+                {
+                    if (initgroups(pszAsUser, gid))
+                        rtProcPosixForkStatusPipeWrite(fdStatusPipeW, RTErrConvertFromErrno(errno), 126, fFlags);
+                }
+
                 if (setgid(gid))
                     rtProcPosixForkStatusPipeWrite(fdStatusPipeW, RTErrConvertFromErrno(errno), 126, fFlags);
             }
