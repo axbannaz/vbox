@@ -42,7 +42,7 @@
 
 #include <iprt/process.h>
 #include <iprt/assert.h>
-#include <iprt/err.h>
+#include <iprt/errcore.h>
 
 
 RTR3DECL(int) RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath, size_t cbExecPath, size_t *pcbExecPath)
