@@ -2454,21 +2454,25 @@ int vbsfRemove(SHFLCLIENTDATA *pClient, SHFLROOT root, PCSHFLSTRING pPath, uint3
                         /* Try to get at the process IDs using that path. */
                         RTPROCESS aPids[32];
                         uint32_t cProcs = RT_ELEMENTS(aPids);
-                        int rc2 = RTPathQueryProcessesUsing(pszFullPath, RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ, &cProcs, &aPids[0]);
+                        uint32_t const fFlags = RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ | RTPATH_QUERY_PROC_F_SKIP_MAPPINGS;
+                        int rc2 = RTPathQueryProcessesUsing(pszFullPath, fFlags, &cProcs, &aPids[0]);
                         if (RT_SUCCESS(rc2))
                         {
-                            for (uint32_t i = 0; i < cProcs; i++)
-                            {
-                                char *pszProc = NULL;
-                                rc2 = RTProcQueryExecutablePathA(aPids[i], &pszProc);
-                                if (RT_SUCCESS(rc2))
+                            if (!cProcs)
+                                LogRel(("RTPathQueryProcessesUsing(%s,,,) -> %Rrc, found 0 processes accessing the file\n", pszFullPath, rc2));
+                            else
+                                for (uint32_t i = 0; i < cProcs; i++)
                                 {
-                                    LogRel(("    [%u]: <%RU32>:%s\n", i, aPids[i], pszProc));
-                                    RTStrFree(pszProc);
+                                    char *pszProc = NULL;
+                                    rc2 = RTProcQueryExecutablePathA(aPids[i], &pszProc);
+                                    if (RT_SUCCESS(rc2))
+                                    {
+                                        LogRel(("    [%u]: <%RU32>:%s\n", i, aPids[i], pszProc));
+                                        RTStrFree(pszProc);
+                                    }
+                                    else
+                                        LogRel(("    [%u]: <%RU32>\n", i, aPids[i]));
                                 }
-                                else
-                                    LogRel(("    [%u]: <%RU32>\n", i, aPids[i]));
-                            }
                         }
                         else
                             LogRel(("RTPathQueryProcessesUsing(%s,,,) -> %Rrc", pszFullPath, rc2));
