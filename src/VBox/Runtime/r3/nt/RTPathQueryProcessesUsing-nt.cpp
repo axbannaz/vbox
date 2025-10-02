@@ -43,7 +43,7 @@
 #include "internal-r3-nt.h"
 
 #include <iprt/path.h>
-#include <iprt/err.h>
+#include <iprt/errcore.h>
 #include <iprt/mem.h>
 #include <iprt/string.h>
 #include <iprt/utf16.h>
@@ -237,3 +237,4 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
     RTNtPathFree(&NtName, NULL);
     return rcRet;
 }
+
