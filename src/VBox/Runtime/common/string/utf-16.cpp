@@ -530,7 +530,7 @@ static int rtUtf16LittleCalcUtf8Length(PCRTUTF16 pwsz, size_t cwc, size_t *pcch)
  */
 static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t cch, size_t *pcch)
 {
-    unsigned char  *pwch = (unsigned char *)psz;
+    unsigned char  *puch = (unsigned char *)psz;
     int             rc = VINF_SUCCESS;
     while (cwc > 0)
     {
@@ -549,7 +549,7 @@ static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t 
                     break;
                 }
                 cch--;
-                *pwch++ = (unsigned char)wc;
+                *puch++ = (unsigned char)wc;
             }
             else if (wc < 0x800)
             {
@@ -560,8 +560,8 @@ static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t 
                     break;
                 }
                 cch -= 2;
-                *pwch++ = 0xc0 | (wc >> 6);
-                *pwch++ = 0x80 | (wc & 0x3f);
+                *puch++ = 0xc0 | (wc >> 6);
+                *puch++ = 0x80 | (wc & 0x3f);
             }
             else if (wc < 0xfffe)
             {
@@ -572,9 +572,9 @@ static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t 
                     break;
                 }
                 cch -= 3;
-                *pwch++ = 0xe0 | (wc >> 12);
-                *pwch++ = 0x80 | ((wc >> 6) & 0x3f);
-                *pwch++ = 0x80 | (wc & 0x3f);
+                *puch++ = 0xe0 | (wc >> 12);
+                *puch++ = 0x80 | ((wc >> 6) & 0x3f);
+                *puch++ = 0x80 | (wc & 0x3f);
             }
             else
             {
@@ -615,16 +615,16 @@ static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t 
                 break;
             }
             cch -= 4;
-            *pwch++ = 0xf0 | (CodePoint >> 18);
-            *pwch++ = 0x80 | ((CodePoint >> 12) & 0x3f);
-            *pwch++ = 0x80 | ((CodePoint >>  6) & 0x3f);
-            *pwch++ = 0x80 | (CodePoint & 0x3f);
+            *puch++ = 0xf0 | (CodePoint >> 18);
+            *puch++ = 0x80 | ((CodePoint >> 12) & 0x3f);
+            *puch++ = 0x80 | ((CodePoint >>  6) & 0x3f);
+            *puch++ = 0x80 | (CodePoint & 0x3f);
         }
     }
 
     /* done */
-    *pwch = '\0';
-    *pcch = (char *)pwch - psz;
+    *puch = '\0';
+    *pcch = (char *)puch - psz;
     return rc;
 }
 
@@ -644,7 +644,7 @@ static int rtUtf16BigRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t 
  */
 static int rtUtf16LittleRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size_t cch, size_t *pcch)
 {
-    unsigned char  *pwch = (unsigned char *)psz;
+    unsigned char  *puch = (unsigned char *)psz;
     int             rc = VINF_SUCCESS;
     while (cwc > 0)
     {
@@ -663,7 +663,7 @@ static int rtUtf16LittleRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size
                     break;
                 }
                 cch--;
-                *pwch++ = (unsigned char)wc;
+                *puch++ = (unsigned char)wc;
             }
             else if (wc < 0x800)
             {
@@ -674,8 +674,8 @@ static int rtUtf16LittleRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size
                     break;
                 }
                 cch -= 2;
-                *pwch++ = 0xc0 | (wc >> 6);
-                *pwch++ = 0x80 | (wc & 0x3f);
+                *puch++ = 0xc0 | (wc >> 6);
+                *puch++ = 0x80 | (wc & 0x3f);
             }
             else if (wc < 0xfffe)
             {
@@ -686,9 +686,9 @@ static int rtUtf16LittleRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size
                     break;
                 }
                 cch -= 3;
-                *pwch++ = 0xe0 | (wc >> 12);
-                *pwch++ = 0x80 | ((wc >> 6) & 0x3f);
-                *pwch++ = 0x80 | (wc & 0x3f);
+                *puch++ = 0xe0 | (wc >> 12);
+                *puch++ = 0x80 | ((wc >> 6) & 0x3f);
+                *puch++ = 0x80 | (wc & 0x3f);
             }
             else
             {
@@ -729,16 +729,16 @@ static int rtUtf16LittleRecodeAsUtf8(PCRTUTF16 pwsz, size_t cwc, char *psz, size
                 break;
             }
             cch -= 4;
-            *pwch++ = 0xf0 | (CodePoint >> 18);
-            *pwch++ = 0x80 | ((CodePoint >> 12) & 0x3f);
-            *pwch++ = 0x80 | ((CodePoint >>  6) & 0x3f);
-            *pwch++ = 0x80 | (CodePoint & 0x3f);
+            *puch++ = 0xf0 | (CodePoint >> 18);
+            *puch++ = 0x80 | ((CodePoint >> 12) & 0x3f);
+            *puch++ = 0x80 | ((CodePoint >>  6) & 0x3f);
+            *puch++ = 0x80 | (CodePoint & 0x3f);
         }
     }
 
     /* done */
-    *pwch = '\0';
-    *pcch = (char *)pwch - psz;
+    *puch = '\0';
+    *pcch = (char *)puch - psz;
     return rc;
 }
 
