@@ -60,24 +60,33 @@ static void basicTest(void)
     RTTESTI_CHECK_RC_RETV(RTFileOpen(&hFile, pszExePath, RTFILE_O_OPEN | RTFILE_O_READ | RTFILE_O_DENY_NONE), VINF_SUCCESS);
 
     RTPROCESS aPids[512];
-    uint32_t  cPids = RT_ELEMENTS(aPids);
-    int rc = RTPathQueryProcessesUsing(pszExePath, 0 /*fFlags*/, &cPids, &aPids[0]);
-    if (rc != VERR_NOT_SUPPORTED)
+    uint32_t  cPids;
+
+    for (uint32_t iVar = 0; iVar < 3; iVar++)
     {
-        RTTESTI_CHECK_RC(rc, VINF_SUCCESS);
-        if (RT_SUCCESS(rc))
+        cPids = RT_ELEMENTS(aPids);
+        int rc = RTPathQueryProcessesUsing(pszExePath, iVar < 1 ? RTPATH_QUERY_PROC_F_SKIP_MAPPINGS : 0, &cPids, &aPids[0]);
+        if (rc != VERR_NOT_SUPPORTED)
         {
-            RTTESTI_CHECK(cPids < RT_ELEMENTS(aPids));
-            RTPROCESS const pidSelf = RTProcSelf();
-            uint32_t        cFound  = 0;
-            for (uint32_t idx = 0; idx < cPids; idx++)
-                if (aPids[idx] == pidSelf)
-                    cFound++;
-            RTTESTI_CHECK(cFound > 0);
+            RTTESTI_CHECK_RC(rc, VINF_SUCCESS);
+            if (RT_SUCCESS(rc))
+            {
+                RTTESTI_CHECK(cPids < RT_ELEMENTS(aPids));
+                RTPROCESS const pidSelf = RTProcSelf();
+                uint32_t        cFound  = 0;
+                for (uint32_t idx = 0; idx < cPids; idx++)
+                    if (aPids[idx] == pidSelf)
+                        cFound++;
+                if (cFound == 0)
+                    RTTestIFailed("iVar=%u", iVar);
+            }
+        }
+        if (iVar == 1)
+        {
+            RTFileClose(hFile);
+            hFile = NIL_RTFILE;
         }
     }
-
-    RTFileClose(hFile);
 }
 
 

@@ -1474,8 +1474,10 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
 #define RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ RT_BIT_32(0)
 /** Exclude the current process. */
 #define RTPATH_QUERY_PROC_F_EXCLUDE_SELF        RT_BIT_32(1)
+/** Exclude image mappings (windows). */
+#define RTPATH_QUERY_PROC_F_SKIP_MAPPINGS       RT_BIT_32(2)
 /** Valid flag mask.   */
-#define RTPATH_QUERY_PROC_F_VALID_MASK          UINT32_C(0x00000003)
+#define RTPATH_QUERY_PROC_F_VALID_MASK          UINT32_C(0x00000007)
 /** @} */
 
 /**

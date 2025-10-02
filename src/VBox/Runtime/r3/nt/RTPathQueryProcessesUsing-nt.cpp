@@ -103,6 +103,125 @@ static int rtNtPathResolveFinal(const char *pszPath, struct _UNICODE_STRING *pNt
 }
 
 
+DECLINLINE(bool) rtNtPathMatchName(UNICODE_STRING const *pThisNtName, uint32_t fFlags, UNICODE_STRING const *pNtName)
+{
+    if (  fFlags & RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ
+        ? pNtName->Length <= pThisNtName->Length
+        : pNtName->Length == pThisNtName->Length)
+        return RTUtf16NICmp(pNtName->Buffer, pThisNtName->Buffer, pNtName->Length / sizeof(RTUTF16)) == 0;
+    return false;
+}
+
+
+static bool rtNtPathScanProcessMappings(HANDLE hProcess, uint32_t fFlags, UNICODE_STRING const *pNtName)
+{
+    uintptr_t   uPrevBase = ~(uintptr_t)0;
+    uintptr_t   uPtrWhere = 0;
+    for (uint32_t i = 0; i < 16384; i++)
+    {
+        SIZE_T                      cbActual = 0;
+        MEMORY_BASIC_INFORMATION    MemInfo  = { 0, 0, 0, 0, 0, 0, 0 };
+        NTSTATUS rcNt = NtQueryVirtualMemory(hProcess,
+                                             (void const *)uPtrWhere,
+                                             MemoryBasicInformation,
+                                             &MemInfo,
+                                             sizeof(MemInfo),
+                                             &cbActual);
+        if (!NT_SUCCESS(rcNt))
+            break;
+
+        /*
+         * Image mapping?
+         */
+        if (    (uintptr_t)MemInfo.BaseAddress != uPrevBase
+            && (MemInfo.Type & (SEC_IMAGE | SEC_PROTECTED_IMAGE)) )
+        {
+            struct
+            {
+                /** The full unicode name. */
+                UNICODE_STRING  UniStr;
+                /** Buffer space. */
+                WCHAR           awcBuffer[1024];
+            } ImageName;
+            cbActual = 0;
+            rcNt = NtQueryVirtualMemory(hProcess, (void const *)uPtrWhere, MemorySectionName,
+                                        &ImageName, sizeof(ImageName) - sizeof(WCHAR), &cbActual);
+            if (NT_SUCCESS(rcNt))
+            {
+                if (rtNtPathMatchName(&ImageName.UniStr, fFlags, pNtName))
+                    return true;
+            }
+            else
+                AssertMsgFailed(("rcNt=%#x uPtrWhere=%p\n", rcNt, uPtrWhere));
+            uPrevBase = (uintptr_t)MemInfo.BaseAddress;
+        }
+
+        /*
+         * Advance (a bit paranoid).
+         */
+        uintptr_t const uPtrNext = uPtrWhere + MemInfo.RegionSize;
+        if (uPtrNext > uPtrWhere)
+            uPtrWhere = uPtrNext;
+        else
+            break;
+    }
+
+    return false;
+}
+
+
+static bool rtNtPathScanProcessHandles(HANDLE hProcess, uint32_t fFlags, UNICODE_STRING const *pNtName,
+                                       ULONG_PTR cHandles, SYSTEM_HANDLE_ENTRY_INFO_EX const *paHandles)
+{
+    for (ULONG_PTR i = 0; i < cHandles; i++)
+    {
+        /*
+         * Duplicate the handle into our process, get the path handle if it's a file
+         * and check if it matches the request.
+         */
+        HANDLE hDup;
+        HANDLE hProcSelf = NtCurrentProcess();
+        NTSTATUS rcNt = NtDuplicateObject(hProcess, paHandles[i].HandleValue, hProcSelf, &hDup, SYNCHRONIZE, 0, 0);
+        if (NT_SUCCESS(rcNt))
+        {
+            /* Continue if this is a disk file object as RTNtPathFromHandle (calling NtQueryObject()) might hang for anything else. */
+#if 0 /** @todo This also triggers for named pipes, causing RTNtPathFromHandle() to get stuck again, investigate what GetFileType() is doing. */
+            union
+            {
+                OBJECT_TYPE_INFORMATION TypeInfo;
+                uint8_t                 ab[128];
+            } ObjTypeInfo;
+            rcNt = NtQueryObject(hDup, ObjectTypeInformation,
+                                 &ObjTypeInfo, sizeof(ObjTypeInfo), NULL);
+            if (   NT_SUCCESS(rcNt)
+                && ObjTypeInfo.TypeInfo.TypeName.Length == sizeof(L"File") - sizeof(wchar_t)
+                && memcmp(ObjTypeInfo.TypeInfo.TypeName.Buffer, L"File", sizeof(L"File") - sizeof(wchar_t)) == 0)
+#else
+            if (GetFileType(hDup) == FILE_TYPE_DISK)
+#endif
+            {
+                UNICODE_STRING NtNameDup; RT_ZERO(NtNameDup);
+                int rc2 = RTNtPathFromHandle(&NtNameDup, hDup, 0);
+                if (RT_SUCCESS(rc2))
+                {
+                    bool const fMatch = rtNtPathMatchName(&NtNameDup, fFlags, pNtName);
+                    RTNtPathFree(&NtNameDup, NULL);
+                    if (fMatch)
+                    {
+                        NtClose(hDup);
+                        return true;
+                    }
+                }
+            }
+
+            NtClose(hDup);
+        }
+    }
+    return false;
+}
+
+
+
 RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, uint32_t *pcProcesses, PRTPROCESS paPids)
 {
     AssertReturn(!(fFlags & ~RTPATH_QUERY_PROC_F_VALID_MASK), VERR_INVALID_FLAGS);
@@ -154,7 +273,13 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
     }
 
     /*
-     * Examine the snapshot for handles and check each handle not belonging to the calling process.
+     * Examine the snapshot.
+     *
+     * Since the exe and dll images are typically not part of the listing, we
+     * also scan the process memory to locate image sections.  ASSUMING that
+     * the handles are chunked by PID (which they kind of have to be, since
+     * the kernel have to examine each process' handle table in turn), the
+     * outer loop will do blocks of handles belonging to the same process.
      */
     rcRet = VINF_SUCCESS;
 
@@ -163,101 +288,54 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
                                                    ? RTNtCurrentTeb()->ClientId.UniqueProcess : INVALID_HANDLE_VALUE;
     SYSTEM_HANDLE_INFORMATION_EX const *pInfo      = (SYSTEM_HANDLE_INFORMATION_EX const *)pbBuf;
     ULONG_PTR                           i          = pInfo->NumberOfHandles;
-    HANDLE                              hProcess   = NULL;
-    CLIENT_ID                           ClientId   = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
-
     AssertRelease(RT_UOFFSETOF_DYN(SYSTEM_HANDLE_INFORMATION_EX, Handles[i]) == cbNeeded);
     while (i-- > 0)
     {
-        SYSTEM_HANDLE_ENTRY_INFO_EX const *pHandleInfo = &pInfo->Handles[i];
-        if (pHandleInfo->UniqueProcessId != idProcess)
+        /*
+         * Determin how many handles we've got for this process.
+         */
+        ULONG_PTR const iLast        = i;
+        HANDLE const    idCurProcess = pInfo->Handles[i].UniqueProcessId;
+        while (i > 0 && pInfo->Handles[i - 1].UniqueProcessId == idCurProcess)
+            i--;
+
+        if (idCurProcess != idProcess)
         {
             /*
-             * If the process has changed, try open it.
-             * We typically see a block of handles from the same process, so this will
-             * speed things up quite a bit.  We also do negative caching here.
+             * Open the process.
+             *
+             * Try with full PROCESS_QUERY_INFORMATION first since we probably
+             * need that for the VA enumeration, then fall back on
+             * PROCESS_QUERY_LIMITED_INFORMATION if that fails.
              */
-            if (pHandleInfo->UniqueProcessId != ClientId.UniqueProcess)
-            {
-                if (hProcess)
-                {
-                    NtClose(hProcess);
-                    hProcess = NULL;
-                }
+            CLIENT_ID  ClientId;
+            ClientId.UniqueProcess = idCurProcess;
+            ClientId.UniqueThread  = NULL;
 
-                ClientId.UniqueProcess = pHandleInfo->UniqueProcessId;
-                ClientId.UniqueThread  = NULL;
+            OBJECT_ATTRIBUTES ObjAttrs;
+            InitializeObjectAttributes(&ObjAttrs, NULL, OBJ_CASE_INSENSITIVE, NULL, NULL);
 
-                OBJECT_ATTRIBUTES ObjAttrs;
-                InitializeObjectAttributes(&ObjAttrs, NULL, OBJ_CASE_INSENSITIVE, NULL, NULL);
-
+            HANDLE hProcess = NULL;
+            rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
+            if (!NT_SUCCESS(rcNt))
                 rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
-                if (!NT_SUCCESS(rcNt))
-                    rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
-                if (!NT_SUCCESS(rcNt))
-                {
-                    hProcess = NULL;
-                    continue;
-                }
-            }
-            else if (!hProcess)
-                continue;
-
-            /*
-             * Copy the handle into our process, get the path handle if it's a file
-             * and check if it matches the request.
-             */
-            HANDLE hDup;
-            HANDLE hProcSelf = NtCurrentProcess();
-            rcNt = NtDuplicateObject(hProcess, pHandleInfo->HandleValue, hProcSelf, &hDup, SYNCHRONIZE, 0, 0);
             if (NT_SUCCESS(rcNt))
             {
-                /* Continue if this is a disk file object as RTNtPathFromHandle (calling NtQueryObject()) might hang for anything else. */
-#if 0 /** @todo This also triggers for named pipes, causing RTNtPathFromHandle() to get stuck again, investigate what GetFileType() is doing. */
-                union
+                /*
+                 * Check if there is a matching handle or if the virtual address
+                 * space has a matching image mapping.
+                 */
+                if (   rtNtPathScanProcessHandles(hProcess, fFlags, &NtName, iLast + 1 - i, &pInfo->Handles[i])
+                    || (   !(fFlags & RTPATH_QUERY_PROC_F_SKIP_MAPPINGS)
+                        && rtNtPathScanProcessMappings(hProcess, fFlags, &NtName)))
                 {
-                    OBJECT_TYPE_INFORMATION TypeInfo;
-                    uint8_t                 ab[128];
-                } ObjTypeInfo;
-                rcNt = NtQueryObject(hDup, ObjectTypeInformation,
-                                     &ObjTypeInfo, sizeof(ObjTypeInfo), NULL);
-                if (   NT_SUCCESS(rcNt)
-                    && ObjTypeInfo.TypeInfo.TypeName.Length == sizeof(L"File") - sizeof(wchar_t)
-                    && memcmp(ObjTypeInfo.TypeInfo.TypeName.Buffer, L"File", sizeof(L"File") - sizeof(wchar_t)) == 0)
-#else
-                if (GetFileType(hDup) == FILE_TYPE_DISK)
-#endif
-                {
-                    UNICODE_STRING NtNameDup; RT_ZERO(NtNameDup);
-                    int rc2 = RTNtPathFromHandle(&NtNameDup, hDup, 0);
-                    if (RT_SUCCESS(rc2))
-                    {
-                        bool fMatch;
-                        if (fFlags & RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ)
-                            fMatch =    NtName.Length <= NtNameDup.Length
-                                     && RTUtf16NICmp(NtName.Buffer, NtNameDup.Buffer, NtName.Length / sizeof(RTUTF16)) == 0;
-                        else
-                            fMatch =    NtName.Length == NtNameDup.Length
-                                     && RTUtf16ICmp(NtName.Buffer, NtNameDup.Buffer) == 0;
-
-                        if (fMatch)
-                        {
-                            if (cProcesses < cMaxProcesses)
-                                paPids[cProcesses] = (RTPROCESS)(uintptr_t)ClientId.UniqueProcess;
-                            else
-                                rcRet = VINF_BUFFER_OVERFLOW;
-                            cProcesses++;
-
-                            /* Skip any subsequent handles with the same PID. */
-                            while (i > 0 && pInfo->Handles[i - 1].UniqueProcessId == ClientId.UniqueProcess)
-                                i--;
-                        }
-
-                        RTNtPathFree(&NtNameDup, NULL);
-                    }
+                    if (cProcesses < cMaxProcesses)
+                        paPids[cProcesses] = (RTPROCESS)(uintptr_t)idCurProcess;
+                    else
+                        rcRet = VINF_BUFFER_OVERFLOW;
+                    cProcesses++;
                 }
-
-                NtClose(hDup);
+                NtClose(hProcess);
             }
         }
     }
@@ -266,14 +344,6 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
      * Cleanup handle scanning.
      */
     RTMemFree(pbBuf);
-    if (hProcess)
-        NtClose(hProcess);
-
-    /*
-     * Scan file section sections.
-     */
-    /** @todo ?  */
-
     RTNtPathFree(&NtName, NULL);
 
     *pcProcesses = cProcesses;
