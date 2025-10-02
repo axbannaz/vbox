@@ -1081,6 +1081,7 @@ RuntimeBaseR3_SOURCES.win = \
 	r3/nt/RTPathQueryProcessesUsing-nt.cpp \
 	r3/nt/RTPathSetMode-r3-nt.cpp \
 	r3/nt/RTPathUnlink-r3-nt.cpp \
+	r3/nt/RTProcQueryExecutablePath-nt.cpp \
 	r3/nt/RTProcQueryParent-r3-nt.cpp \
 	nt/semevent-nt.cpp \
 	nt/RTSemEventGetResolution-nt.cpp \
@@ -1167,6 +1168,7 @@ RuntimeBaseR3_SOURCES.linux = \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
 	generic/RTProcDaemonize-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTSemEventMultiWait-2-ex-generic.cpp \
 	generic/RTSemEventMultiWaitNoResume-2-ex-generic.cpp \
 	generic/RTTimeLocalNow-generic.cpp \
@@ -1299,6 +1301,7 @@ RuntimeBaseR3_SOURCES.os2   = \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
 	generic/RTProcDaemonize-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTRandAdvCreateSystemFaster-generic.cpp \
 	generic/RTRandAdvCreateSystemTruer-generic.cpp \
 	generic/RTSystemQueryDmiString-generic.cpp \
@@ -1387,6 +1390,7 @@ RuntimeBaseR3_SOURCES.darwin = \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
 	generic/RTProcDaemonize-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTThreadGetAffinity-stub-generic.cpp \
 	generic/RTThreadSetAffinity-stub-generic.cpp \
 	generic/RTThreadSetAffinityToCpu-generic.cpp \
@@ -1495,6 +1499,7 @@ RuntimeBaseR3_SOURCES.freebsd = \
 	generic/RTLogWriteDebugger-generic.cpp \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTSemEventMultiWait-2-ex-generic.cpp \
 	generic/RTSemEventMultiWaitNoResume-2-ex-generic.cpp \
 	generic/RTSystemQueryDmiString-generic.cpp \
@@ -1585,6 +1590,7 @@ RuntimeBaseR3_SOURCES.netbsd = \
 	generic/RTLogWriteDebugger-generic.cpp \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTSemEventMultiWait-2-ex-generic.cpp \
 	generic/RTSemEventMultiWaitNoResume-2-ex-generic.cpp \
 	generic/RTSystemQueryDmiString-generic.cpp \
@@ -1675,6 +1681,7 @@ RuntimeBaseR3_SOURCES.solaris = \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
 	generic/RTProcDaemonize-generic.cpp \
 	generic/RTProcIsRunningByName-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTSemEventMultiWait-2-ex-generic.cpp \
 	generic/RTSemEventMultiWaitNoResume-2-ex-generic.cpp \
 	generic/RTThreadSetAffinityToCpu-generic.cpp \
@@ -1782,6 +1789,7 @@ RuntimeBaseR3_SOURCES.haiku = \
 	generic/RTPathGetCurrentOnDrive-generic.cpp \
 	generic/RTPathQueryProcessesUsing-generic.cpp \
 	generic/RTProcDaemonize-generic.cpp \
+	generic/RTProcQueryExectuablePath-generic.cpp \
 	generic/RTTimeLocalNow-generic.cpp \
 	generic/RTTimerCreate-generic.cpp \
 	generic/RTUuidCreate-generic.cpp \

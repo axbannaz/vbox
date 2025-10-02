@@ -478,6 +478,31 @@ RTR3DECL(int)   RTProcQueryUsername(RTPROCESS hProcess, char *pszUser, size_t cb
  */
 RTR3DECL(int)   RTProcQueryUsernameA(RTPROCESS hProcess, char **ppszUser);
 
+/**
+ * Query the executable path of the given process.
+ *
+ * @returns IPRT status code.
+ * @retval VERR_BUFFER_OVERFLOW if the given buffer size is to small for the executable path.
+ * @param   hProcess     The process handle to query the executable path for.
+ *                       NIL_PROCESS is an alias for the current process.
+ * @param   pszExecPath  Where to store the executable path on success.
+ * @param   cbExecPath   The size of the executable path buffer.
+ * @param   pcbExecPath  Where to store the executable path length on success
+ *                       or the required buffer size if VERR_BUFFER_OVERFLOW
+ *                       is returned.
+ */
+RTR3DECL(int)   RTProcQueryExecutablePath(RTPROCESS hProcess, char *pszExecPath, size_t cbExecPath, size_t *pcbExecPath);
+
+/**
+ * Query the executable path of the given process.
+ *
+ * @returns IPRT status code.
+ * @param   hProcess     The process handle to query the executable path for.
+ * @param   ppszExecPath Where to store the pointer to the string containing
+ *                       the executable path on success. Free with RTStrFree().
+ */
+RTR3DECL(int)   RTProcQueryExecutablePathA(RTPROCESS hProcess, char **ppszExecPath);
+
 #endif /* IN_RING3 */
 
 /** @} */
