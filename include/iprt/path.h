@@ -1472,6 +1472,10 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
  *  @{ */
 /** For directories also return processes which access an object in the given directory (and further sub directories). */
 #define RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ RT_BIT_32(0)
+/** Exclude the current process. */
+#define RTPATH_QUERY_PROC_F_EXCLUDE_SELF        RT_BIT_32(1)
+/** Valid flag mask.   */
+#define RTPATH_QUERY_PROC_F_VALID_MASK          UINT32_C(0x00000003)
 /** @} */
 
 /**

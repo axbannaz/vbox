@@ -105,6 +105,9 @@ static int rtNtPathResolveFinal(const char *pszPath, struct _UNICODE_STRING *pNt
 
 RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, uint32_t *pcProcesses, PRTPROCESS paPids)
 {
+    AssertReturn(!(fFlags & ~RTPATH_QUERY_PROC_F_VALID_MASK), VERR_INVALID_FLAGS);
+    uint32_t const cMaxProcesses = *pcProcesses;
+
     /*
      * Convert the input path.
      */
@@ -136,12 +139,16 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
             RTMemFree(pbBuf);
             pbBuf = (uint8_t *)RTMemAlloc(cbBuf);
             if (!pbBuf)
+            {
+                RTNtPathFree(&NtName, NULL);
                 return VERR_NO_MEMORY;
+            }
             rcNt = NtQuerySystemInformation(SystemExtendedHandleInformation, pbBuf, cbBuf, &cbNeeded);
         }
         if (!NT_SUCCESS(rcNt))
         {
             RTMemFree(pbBuf);
+            RTNtPathFree(&NtName, NULL);
             return RTErrConvertFromNtStatus(rcNt);
         }
     }
@@ -152,29 +159,54 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
     rcRet = VINF_SUCCESS;
 
     uint32_t                            cProcesses = 0;
-    HANDLE const                        idProcess  = RTNtCurrentTeb()->ClientId.UniqueProcess;
+    HANDLE const                        idProcess  = fFlags & RTPATH_QUERY_PROC_F_EXCLUDE_SELF
+                                                   ? RTNtCurrentTeb()->ClientId.UniqueProcess : INVALID_HANDLE_VALUE;
     SYSTEM_HANDLE_INFORMATION_EX const *pInfo      = (SYSTEM_HANDLE_INFORMATION_EX const *)pbBuf;
     ULONG_PTR                           i          = pInfo->NumberOfHandles;
+    HANDLE                              hProcess   = NULL;
+    CLIENT_ID                           ClientId   = { INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE };
+
     AssertRelease(RT_UOFFSETOF_DYN(SYSTEM_HANDLE_INFORMATION_EX, Handles[i]) == cbNeeded);
     while (i-- > 0)
     {
         SYSTEM_HANDLE_ENTRY_INFO_EX const *pHandleInfo = &pInfo->Handles[i];
         if (pHandleInfo->UniqueProcessId != idProcess)
         {
-            CLIENT_ID ClientId;
-            ClientId.UniqueProcess = pHandleInfo->UniqueProcessId;
-            ClientId.UniqueThread  = NULL;
+            /*
+             * If the process has changed, try open it.
+             * We typically see a block of handles from the same process, so this will
+             * speed things up quite a bit.  We also do negative caching here.
+             */
+            if (pHandleInfo->UniqueProcessId != ClientId.UniqueProcess)
+            {
+                if (hProcess)
+                {
+                    NtClose(hProcess);
+                    hProcess = NULL;
+                }
 
-            OBJECT_ATTRIBUTES ObjAttrs;
-            InitializeObjectAttributes(&ObjAttrs, NULL, OBJ_CASE_INSENSITIVE, NULL, NULL);
+                ClientId.UniqueProcess = pHandleInfo->UniqueProcessId;
+                ClientId.UniqueThread  = NULL;
 
-            HANDLE hProcess;
-            rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
-            if (!NT_SUCCESS(rcNt))
-                rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
-            if (!NT_SUCCESS(rcNt))
+                OBJECT_ATTRIBUTES ObjAttrs;
+                InitializeObjectAttributes(&ObjAttrs, NULL, OBJ_CASE_INSENSITIVE, NULL, NULL);
+
+                rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
+                if (!NT_SUCCESS(rcNt))
+                    rcNt = NtOpenProcess(&hProcess, PROCESS_QUERY_INFORMATION | PROCESS_DUP_HANDLE, &ObjAttrs, &ClientId);
+                if (!NT_SUCCESS(rcNt))
+                {
+                    hProcess = NULL;
+                    continue;
+                }
+            }
+            else if (!hProcess)
                 continue;
 
+            /*
+             * Copy the handle into our process, get the path handle if it's a file
+             * and check if it matches the request.
+             */
             HANDLE hDup;
             HANDLE hProcSelf = NtCurrentProcess();
             rcNt = NtDuplicateObject(hProcess, pHandleInfo->HandleValue, hProcSelf, &hDup, SYNCHRONIZE, 0, 0);
@@ -210,17 +242,15 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
 
                         if (fMatch)
                         {
-                            /* Query the process ID. */
-                            PROCESS_BASIC_INFORMATION ProcInf; RT_ZERO(ProcInf);
-                            rcNt = NtQueryInformationProcess(hProcess, ProcessBasicInformation, &ProcInf, sizeof(ProcInf), NULL);
-                            if (NT_SUCCESS(rcNt))
-                            {
-                                if (cProcesses < *pcProcesses)
-                                    paPids[cProcesses] = (RTPROCESS)(uintptr_t)ProcInf.UniqueProcessId;
-                                else
-                                    rcRet = VINF_BUFFER_OVERFLOW;
-                                cProcesses++;
-                            }
+                            if (cProcesses < cMaxProcesses)
+                                paPids[cProcesses] = (RTPROCESS)(uintptr_t)ClientId.UniqueProcess;
+                            else
+                                rcRet = VINF_BUFFER_OVERFLOW;
+                            cProcesses++;
+
+                            /* Skip any subsequent handles with the same PID. */
+                            while (i > 0 && pInfo->Handles[i - 1].UniqueProcessId == ClientId.UniqueProcess)
+                                i--;
                         }
 
                         RTNtPathFree(&NtNameDup, NULL);
@@ -229,15 +259,24 @@ RTR3DECL(int) RTPathQueryProcessesUsing(const char *pszPath, uint32_t fFlags, ui
 
                 NtClose(hDup);
             }
-
-            NtClose(hProcess);
         }
     }
-    RTMemFree(pbBuf);
 
-    *pcProcesses = cProcesses;
+    /*
+     * Cleanup handle scanning.
+     */
+    RTMemFree(pbBuf);
+    if (hProcess)
+        NtClose(hProcess);
+
+    /*
+     * Scan file section sections.
+     */
+    /** @todo ?  */
 
     RTNtPathFree(&NtName, NULL);
+
+    *pcProcesses = cProcesses;
     return rcRet;
 }
 

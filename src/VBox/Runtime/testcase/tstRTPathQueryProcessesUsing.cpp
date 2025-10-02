@@ -38,48 +38,95 @@
 /*********************************************************************************************************************************
 *   Header Files                                                                                                                 *
 *********************************************************************************************************************************/
-#include <iprt/cdefs.h>
 #include <iprt/path.h>
-#include <iprt/initterm.h>
+
+#include <iprt/file.h>
 #include <iprt/errcore.h>
-#include <iprt/stream.h>
 #include <iprt/message.h>
-#include <iprt/types.h>
+#include <iprt/process.h>
+#include <iprt/stream.h>
+#include <iprt/test.h>
+
+
+static void basicTest(void)
+{
+    RTTestISub("basics");
+
+    /*
+     * Open the executable and check that we can see that we've done so.
+     */
+    const char * const pszExePath = RTProcExecutablePath();
+    RTFILE             hFile      = NIL_RTFILE;
+    RTTESTI_CHECK_RC_RETV(RTFileOpen(&hFile, pszExePath, RTFILE_O_OPEN | RTFILE_O_READ | RTFILE_O_DENY_NONE), VINF_SUCCESS);
+
+    RTPROCESS aPids[512];
+    uint32_t  cPids = RT_ELEMENTS(aPids);
+    int rc = RTPathQueryProcessesUsing(pszExePath, 0 /*fFlags*/, &cPids, &aPids[0]);
+    if (rc != VERR_NOT_SUPPORTED)
+    {
+        RTTESTI_CHECK_RC(rc, VINF_SUCCESS);
+        if (RT_SUCCESS(rc))
+        {
+            RTTESTI_CHECK(cPids < RT_ELEMENTS(aPids));
+            RTPROCESS const pidSelf = RTProcSelf();
+            uint32_t        cFound  = 0;
+            for (uint32_t idx = 0; idx < cPids; idx++)
+                if (aPids[idx] == pidSelf)
+                    cFound++;
+            RTTESTI_CHECK(cFound > 0);
+        }
+    }
+
+    RTFileClose(hFile);
+}
 
 
 int main(int argc, char **argv)
 {
-    int rc = RTR3InitExe(argc, &argv, 0);
-    if (RT_FAILURE(rc))
-        return RTMsgInitFailure(rc);
-
-    /*
-     * Iterate arguments.
-     */
-    RTEXITCODE      rcExit               = RTEXITCODE_SUCCESS;
-    uint32_t        fFlags               = 0;
-    for (int i = 1; i < argc; i++)
+    RTTEST      hTest;
+    RTEXITCODE  rcExit = RTTestInitExAndCreate(argc, &argv, 0, "tstRTPathQueryProcessesUsing", &hTest);
+    if (rcExit == RTEXITCODE_SUCCESS)
     {
-        if (   argv[i][0] == '-'
-            && argv[i][1] == 's')
-            fFlags = RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ;
+        RTTestBanner(hTest);
+
+        /*
+         * If arguments given, do custom testing.
+         */
+        if (argc > 1)
+        {
+            uint32_t fFlags = 0;
+            for (int i = 1; i < argc; i++)
+            {
+                if (   argv[i][0] == '-'
+                    && argv[i][1] == 's')
+                    fFlags = RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ;
+                else
+                {
+                    RTPROCESS aPids[512];
+                    uint32_t cProcs = RT_ELEMENTS(aPids);
+                    int rc = RTPathQueryProcessesUsing(argv[i], fFlags, &cProcs, &aPids[0]);
+                    if (RT_SUCCESS(rc))
+                    {
+                        RTPrintf("%s%s:\n", argv[i], rc == VINF_BUFFER_OVERFLOW ? " (truncated)" : "");
+
+                        for (uint32_t idx = 0; idx < (rc == VINF_BUFFER_OVERFLOW ? RT_ELEMENTS(aPids) : cProcs); idx++)
+                            RTPrintf("   <%RU32>\n", aPids[idx]);
+                    }
+                    else
+                        RTPrintf("RTPathQueryProcessesUsing(%s,,,) ->  %Rrc\n", argv[i], rc);
+                }
+            }
+        }
+        /*
+         * Otherwise, automatic testing.
+         */
         else
         {
-            RTPROCESS aPids[512];
-            uint32_t cProcs = RT_ELEMENTS(aPids);
-            rc = RTPathQueryProcessesUsing(argv[i], fFlags, &cProcs, &aPids[0]);
-            if (RT_SUCCESS(rc))
-            {
-                RTPrintf("%s%s:\n", argv[i], rc == VINF_BUFFER_OVERFLOW ? " (truncated)" : "");
-
-                for (uint32_t idx = 0; idx < (rc == VINF_BUFFER_OVERFLOW ? RT_ELEMENTS(aPids) : cProcs); idx++)
-                    RTPrintf("   <%RU32>\n", aPids[idx]);
-            }
-            else
-                RTPrintf("RTPathQueryProcessesUsing(%s,,,) ->  %Rrc\n", argv[i], rc);
+            basicTest();
         }
-    }
 
+        rcExit = RTTestSummaryAndDestroy(hTest);
+    }
     return rcExit;
 }
 
