@@ -49,6 +49,7 @@
 #include <iprt/dir.h>
 #include <iprt/file.h>
 #include <iprt/path.h>
+#include <iprt/process.h>
 #include <iprt/string.h>
 #include <iprt/symlink.h>
 #include <iprt/uni.h>
@@ -2443,11 +2444,35 @@ int vbsfRemove(SHFLCLIENTDATA *pClient, SHFLROOT root, PCSHFLSTRING pPath, uint3
                 if (RT_FAILURE(rc))
                 {
                     if (flags & SHFL_REMOVE_SYMLINK)
-                        LogRel(("RTSymlinkDelete(%s, 0) -> %Rrc", pszFullPath, rc));
+                        LogRel(("RTSymlinkDelete(%s, 0) -> %Rrc\n", pszFullPath, rc));
                     else if (flags & SHFL_REMOVE_FILE)
-                        LogRel(("RTFileDelete(%s) -> %Rrc", pszFullPath, rc));
+                        LogRel(("RTFileDelete(%s) -> %Rrc\n", pszFullPath, rc));
                     else
-                        LogRel(("RTDirRemove(%s) -> %Rrc", pszFullPath, rc));
+                        LogRel(("RTDirRemove(%s) -> %Rrc\n", pszFullPath, rc));
+                    if (rc == VERR_SHARING_VIOLATION)
+                    {
+                        /* Try to get at the process IDs using that path. */
+                        RTPROCESS aPids[32];
+                        uint32_t cProcs = RT_ELEMENTS(aPids);
+                        int rc2 = RTPathQueryProcessesUsing(pszFullPath, RTPATH_QUERY_PROC_F_DIR_INCLUDE_SUB_OBJ, &cProcs, &aPids[0]);
+                        if (RT_SUCCESS(rc2))
+                        {
+                            for (uint32_t i = 0; i < cProcs; i++)
+                            {
+                                char *pszProc = NULL;
+                                rc2 = RTProcQueryExecutablePathA(aPids[i], &pszProc);
+                                if (RT_SUCCESS(rc2))
+                                {
+                                    LogRel(("    [0]: <%RU32>:%s\n", i, aPids[i], pszProc));
+                                    RTStrFree(pszProc);
+                                }
+                                else
+                                    LogRel(("    [0]: <%RU32>\n", i, aPids[i]));
+                            }
+                        }
+                        else
+                            LogRel(("RTPathQueryProcessesUsing(%s,,,) -> %Rrc", pszFullPath, rc2));
+                    }
                 }
 
 #if 0 //ndef RT_OS_WINDOWS
