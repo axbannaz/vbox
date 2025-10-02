@@ -262,6 +262,7 @@ class tdUnitTest1(vbox.TestDriver):
     # @note Stripped of extensions!
     kdTestCasesBlackListAsan = {
         'testcase/tstVMMR0CallHost-1': '',              # Triggers a stack overflow error on linux.amd64
+        'testcase/tstRTProcCreateEx' : '',              # Triggers on some linux hosts where a PAM module probably introduces a memory leak.
     }
 
     # Suffix exclude list.
