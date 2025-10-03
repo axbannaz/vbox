@@ -36,6 +36,7 @@
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QToolTip>
+#include <QWindow> // for windowHandle()
 
 /* GUI includes: */
 #include "UICommon.h"
