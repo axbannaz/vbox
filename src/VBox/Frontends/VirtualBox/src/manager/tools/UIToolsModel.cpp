@@ -242,6 +242,11 @@ bool UIToolsModel::showItemNames() const
 
 void UIToolsModel::updateLayout()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(scene());
+    if (scene()->views().isEmpty())
+        return;
+
     /* Prepare variables: */
     const int iMargin = data(ToolsModelData_Margin).toInt();
     const int iSpacing = data(ToolsModelData_Spacing).toInt();
