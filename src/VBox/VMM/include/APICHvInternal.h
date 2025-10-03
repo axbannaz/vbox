@@ -112,6 +112,8 @@ typedef struct HVAPICCPU
 {
     /** The APIC page virtual address - R3 ptr. */
     R3PTRTYPE(void *)           pvApicPageR3;
+    /** The APIC page passed to and used by Hyper-V - R3 ptr. */
+    R3PTRTYPE(void *)           pvHvPageR3;
 
     /** The APIC base MSR.*/
     uint64_t                    uApicBaseMsr;

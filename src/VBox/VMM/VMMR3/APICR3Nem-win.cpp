@@ -43,6 +43,7 @@
 #include <VBox/vmm/pdmdev.h>
 #include <VBox/vmm/ssm.h>
 #include <VBox/vmm/vm.h>
+#include <VBox/vmm/vmcc.h>
 #include <VBox/vmm/nem.h>
 #include <VBox/vmm/vmcpuset.h>
 
@@ -994,28 +995,24 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvImportState(PVMCPUCC pVCpu)
     RT_NOREF(pVCpu);
     AssertReleaseFailed();
 #else
-
-    RT_NOREF(pVCpu);
-
-#if 1
-    PXAPICPAGE    pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
-    PVMCC         pVM        = pVCpu->CTX_SUFF(pVM);
-    PHVAPIC       pHvApic    = VM_TO_HVAPIC(pVM);
-    VMCPUID const idCpu      = pVCpu->idCpu;
-    uint32_t      cbWritten  = 0;
+    PXAPICPAGE    pHvApicPage = (PXAPICPAGE)pVCpu->apic.s.pvHvPageR3;
+    PVMCC         pVM         = pVCpu->CTX_SUFF(pVM);
+    PHVAPIC       pHvApic     = VM_TO_HVAPIC(pVM);
+    VMCPUID const idCpu       = pVCpu->idCpu;
+    uint32_t      cbWritten   = 0;
     HRESULT       hrc;
 
     Assert(WHvGetVirtualProcessorInterruptControllerState2);
-    hrc = WHvGetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pXApicPage, sizeof(*pXApicPage),
+    hrc = WHvGetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pHvApicPage, sizeof(*pHvApicPage),
                                                           &cbWritten);
     AssertLogRelMsgReturn(SUCCEEDED(hrc), ("Failed to get the virtual-APIC page. hrc=%Rhrc\n", hrc), VERR_APIC_IPE_0);
-    Assert(cbWritten == sizeof(*pXApicPage));
+    Assert(cbWritten == sizeof(*pHvApicPage));
+
+    memcpy(pVCpu->apic.s.pvApicPageR3, pHvApicPage, sizeof(XAPICPAGE));
 
     /* Start or stop the APIC timer if needed. */
     //PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
-    //apicR3HvSetTimerIcr(pDevIns, pVCpu, VINF_SUCCESS, pXApicPage->timer_icr.u32InitialCount);
-#endif
-
+    //apicR3HvSetTimerIcr(pDevIns, pVCpu, VINF_SUCCESS, pHvApicPage->timer_icr.u32InitialCount);
 #endif
     return VINF_SUCCESS;
 }
@@ -1034,7 +1031,7 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvExportState(PVMCPUCC pVCpu)
     RT_NOREF(pVCpu);
 
 #if 1
-    //PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
+    PXAPICPAGE pHvApicPage = (PXAPICPAGE)pVCpu->apic.s.pvHvPageR3;
     //{
     //    uint32_t   uCcr    = 0;
     //    PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
@@ -1045,10 +1042,13 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvExportState(PVMCPUCC pVCpu)
     //        AssertMsgFailed(("Failed to get timer CCR. rc=%Rrc\n", VBOXSTRICTRC_VAL(rcStrict)));
     //}
 
-    //PVMCC    pVM      = pVCpu->CTX_SUFF(pVM);
-    //PHVAPIC  pHvApic  = VM_TO_HVAPIC(pVM);
+    memcpy(pHvApicPage, pVCpu->apic.s.pvApicPageR3, sizeof(XAPICPAGE));
+
+    //PVMCC    pVM        = pVCpu->CTX_SUFF(pVM);
+    //PHVAPIC  pHvApic    = VM_TO_HVAPIC(pVM);
+    //VMCPUID const idCpu = pVCpu->idCpu;
     //Assert(WHvSetVirtualProcessorInterruptControllerState2);
-    //HRESULT hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, pVCpu->idCpu, pXApicPage, sizeof(*pXApicPage));
+    //HRESULT hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pHvApicPage, sizeof(*pHvApicPage));
     //AssertLogRelMsgReturn(SUCCEEDED(hrc), ("Failed to set the virtual-APIC page. hrc=%Rhrc\n", hrc), VERR_APIC_IPE_1);
 #endif
 
@@ -1709,30 +1709,23 @@ DECLCALLBACK(void) apicR3HvReset(PPDMDEVINS pDevIns)
     PVM pVM = PDMDevHlpGetVM(pDevIns);
     VM_ASSERT_EMT0(pVM);
     VM_ASSERT_IS_NOT_RUNNING(pVM);
-    PHVAPIC pHvApic = VM_TO_HVAPIC(pVM);
+    WHV_PARTITION_HANDLE const hPartition = VM_TO_HVAPIC(pVM)->hPartition;
 
-    for (VMCPUID idCpu = 0; idCpu < pVM->cCpus; idCpu++)
+    VMCC_FOR_EACH_VMCPU(pVM)
     {
-        PVMCPU pVCpuDest = pVM->apCpusR3[idCpu];
-        PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpuDest);
+        apicR3HvResetCpu(pVCpu, true /*fResetApicBaseMsr*/);
 
-        apicR3HvResetCpu(pVCpuDest, true /*fResetApicBaseMsr*/);
-
-        PHVAPICCPU pHvApicCpu = VMCPU_TO_HVAPICCPU(pVCpuDest);
+        PHVAPICCPU pHvApicCpu = VMCPU_TO_HVAPICCPU(pVCpu);
         if (PDMDevHlpTimerIsActive(pDevIns, pHvApicCpu->hTimer))
             PDMDevHlpTimerStop(pDevIns, pHvApicCpu->hTimer);
 
-#if 1
         Assert(WHvSetVirtualProcessorInterruptControllerState2);  /* This is already checked in device construct. */
-        HRESULT const hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pXApicPage,
-                                                                            sizeof(*pXApicPage));
-        Assert(SUCCEEDED(hrc));
-        NOREF(hrc);
-#else
-        NOREF(pHvApic);
-        NOREF(pXApicPage);
-#endif
+        memcpy(pVCpu->apic.s.pvHvPageR3, pVCpu->apic.s.pvApicPageR3, sizeof(XAPICPAGE));
+        HRESULT const hrc = WHvSetVirtualProcessorInterruptControllerState2(hPartition, idCpu, pVCpu->apic.s.pvHvPageR3,
+                                                                            sizeof(XAPICPAGE));
+        Assert(SUCCEEDED(hrc)); NOREF(hrc);
     }
+    VMCC_FOR_EACH_VMCPU_END(pVM);
 }
 
 
@@ -1758,6 +1751,7 @@ DECLINLINE(void) apicR3HvFreePages(PVM pVM)
         PVMCPU     pVCpu         = pVM->apCpusR3[idCpu];
         PHVAPICCPU pHvApicCpu    = VMCPU_TO_HVAPICCPU(pVCpu);
         pHvApicCpu->pvApicPageR3 = NIL_RTR3PTR;
+        pHvApicCpu->pvHvPageR3   = NIL_RTR3PTR;
     }
 }
 
@@ -1861,7 +1855,7 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
      */
     AssertCompile(sizeof(XAPICPAGE) <= HOST_PAGE_SIZE);
     AssertCompile((sizeof(XAPICPAGE) % HOST_PAGE_SIZE) == 0);
-    size_t const cPages      = pVM->cCpus;
+    size_t const cPages      = pVM->cCpus * 2;
     void        *pvApicPages = NULL;
     rc = SUPR3PageAlloc(cPages, 0 /* fFlags */, &pvApicPages);
     AssertLogRelMsgRCReturn(rc, ("Failed to allocate %u page(s) for the virtual-APIC page(s), rc=%Rrc\n", cPages, rc), rc);
@@ -1873,22 +1867,27 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
     /*
      * Map the virtual-APIC pages to Hyper-V (for syncing the state).
      */
-    for (VMCPUID idCpu = 0; idCpu < pVM->cCpus; idCpu++)
+    VMCC_FOR_EACH_VMCPU(pVM)
     {
-        PVMCPU     pVCpu      = pVM->apCpusR3[idCpu];
         PHVAPICCPU pHvApicCpu = VMCPU_TO_HVAPICCPU(pVCpu);
-
-        Assert(pVCpu->idCpu == idCpu);
         Assert(pHvApicCpu->pvApicPageR3 == NIL_RTR3PTR);
+        Assert(pHvApicCpu->pvHvPageR3 == NIL_RTR3PTR);
 
-        pHvApicCpu->pvApicPageR3 = (void *)((uintptr_t)pvApicPages + idCpu * sizeof(XAPICPAGE));
+        size_t const offPage     = 2 * idCpu * sizeof(XAPICPAGE);
+        pHvApicCpu->pvHvPageR3   = (void *)((uintptr_t)pvApicPages + offPage);
+        pHvApicCpu->pvApicPageR3 = (void *)((uintptr_t)pvApicPages + offPage + sizeof(XAPICPAGE));
+
+        Assert(pHvApicCpu->pvHvPageR3 != NIL_RTR3PTR);
         Assert(pHvApicCpu->pvApicPageR3 != NIL_RTR3PTR);
 
-        PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
-        Assert(pXApicPage == (PXAPICPAGE)pHvApicCpu->pvApicPageR3);
-
-        /* Initialize the APIC page and the APIC base MSR. */
-        apicR3HvResetCpu(pVCpu, true /* fResetApicBaseMsr */);
+        /* Initialize the APIC page and the APIC base MSR and copy it over to the Hyper-V APIC page. */
+        PXAPICPAGE pHvApicPage = (PXAPICPAGE)pHvApicCpu->pvHvPageR3;
+        {
+            apicR3HvResetCpu(pVCpu, true /*fResetApicBaseMsr*/);
+            PCXAPICPAGE pXApicPage = (PCXAPICPAGE)pHvApicCpu->pvApicPageR3;
+            Assert(pHvApicPage != pXApicPage);
+            memcpy(pHvApicPage, pXApicPage, sizeof(XAPICPAGE));
+        }
 
         /*
          * We cannot use the new API (WHv[Get|Set]VirtualProcessorState) because the format of the
@@ -1935,8 +1934,8 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
 #endif
         if (WHvSetVirtualProcessorInterruptControllerState2)
         {
-            HRESULT const hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pXApicPage,
-                                                                                sizeof(*pXApicPage));
+            HRESULT const hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pHvApicPage,
+                                                                                sizeof(*pHvApicPage));
             if (FAILED(hrc))
             {
                 apicR3HvFreePages(pVM);
@@ -1948,10 +1947,13 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
             if (idCpu == 0)
             {
                 uint32_t cbWritten = 0;
-                hrc = WHvGetVirtualProcessorInterruptControllerState2(pHvApic->hPartition,
-                                                                      idCpu, pXApicPage, sizeof(*pXApicPage), &cbWritten);
-                Assert(SUCCEEDED(hrc));
-                LogRel(("APIC/WHv: Virtual-APIC page\n%.*Rhxd\n", sizeof(*pXApicPage), pXApicPage));
+                HRESULT const hrc2 = WHvGetVirtualProcessorInterruptControllerState2(pHvApic->hPartition,
+                                                                                     idCpu, pHvApicPage, sizeof(*pHvApicPage),
+                                                                                     &cbWritten);
+                Assert(SUCCEEDED(hrc2));
+                LogRel(("APIC/WHv: Virtual-APIC page\n%.*Rhxd\n", sizeof(*pHvApicPage), pHvApicPage));
+                if (memcmp(pHvApicCpu->pvHvPageR3, pHvApicCpu->pvApicPageR3, sizeof(XAPICPAGE)))
+                    LogRel(("APIC/WHv: The page content differs after passing it to Hyper-V!\n"));
             }
 #endif
         }
@@ -1971,6 +1973,7 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
                                   TMTIMER_FLAGS_NO_CRIT_SECT | TMTIMER_FLAGS_NO_RING0, pHvApicCpu->szTimerDesc, &pHvApicCpu->hTimer);
         AssertRCReturn(rc, rc);
     }
+    VMCC_FOR_EACH_VMCPU_END(pVM);
 
     /*
      * Register debugger info callbacks.
