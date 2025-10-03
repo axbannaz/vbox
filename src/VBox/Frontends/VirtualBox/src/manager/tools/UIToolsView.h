@@ -125,11 +125,6 @@ private:
       * @{ */
         /** Updates scene rectangle. */
         void updateSceneRect();
-
-#ifndef VBOX_WS_MAC
-        /** Returns a number shifter per 10% from @a i1 to @a i2. */
-        static int iShift10(int i1, int i2);
-#endif
     /** @} */
 
     /** @name General stuff.
