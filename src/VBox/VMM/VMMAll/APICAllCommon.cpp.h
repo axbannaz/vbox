@@ -331,6 +331,20 @@ static void apicCommonResetBaseMsr(PVMCPUCC pVCpu)
 # endif /* VMM_APIC_TEMPLATE_ALL_COMMON */
 
 
+/**
+ * Gets the timer shift value.
+ *
+ * @returns The timer shift value.
+ * @param   pXApicPage      The xAPIC page.
+ */
+DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
+{
+    /* See Intel spec. 10.5.4 "APIC Timer". */
+    uint32_t uShift = pXApicPage->timer_dcr.u.u2DivideValue0 | (pXApicPage->timer_dcr.u.u1DivideValue1 << 2);
+    return (uShift + 1) & 7;
+}
+
+
 # if defined(IN_RING3) && defined(VMM_APIC_TEMPLATE_R3_COMMON)
 /**
  * Sets the CPUID feature bits for the APIC mode.

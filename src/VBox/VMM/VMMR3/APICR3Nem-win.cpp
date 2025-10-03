@@ -127,20 +127,6 @@ static CPUMMSRRANGE const g_MsrRange_x2Apic_Invalid = X2APIC_MSRRANGE_INVALID(MS
 
 
 /**
- * Gets the timer shift value.
- *
- * @returns The timer shift value.
- * @param   pXApicPage      The xAPIC page.
- */
-DECLINLINE(uint8_t) apicR3HvGetTimerShift(PCXAPICPAGE pXApicPage)
-{
-    /* See Intel spec. 10.5.4 "APIC Timer". */
-    uint32_t uShift = pXApicPage->timer_dcr.u.u2DivideValue0 | (pXApicPage->timer_dcr.u.u1DivideValue1 << 2);
-    return (uShift + 1) & 7;
-}
-
-
-/**
  * @interface_method_impl{PDMAPICBACKEND,pfnIsEnabled}
  */
 static DECLCALLBACK(bool) apicR3HvIsEnabled(PCVMCPUCC pVCpu)
@@ -447,7 +433,7 @@ static void apicR3HvStartTimer(PVMCPUCC pVCpu, uint32_t uInitialCount)
     Assert(uInitialCount > 0);
 
     PCXAPICPAGE    pXApicPage   = VMCPU_TO_CXAPICPAGE(pVCpu);
-    uint8_t  const uTimerShift  = apicR3HvGetTimerShift(pXApicPage);
+    uint8_t  const uTimerShift  = apicCommonGetTimerShift(pXApicPage);
     uint64_t const cTicksToNext = (uint64_t)uInitialCount << uTimerShift;
 
     Log2(("APIC%u: apicStartTimer: uInitialCount=%#RX32 uTimerShift=%u cTicksToNext=%RU64\n", pVCpu->idCpu, uInitialCount,
@@ -594,7 +580,7 @@ static VBOXSTRICTRC apicR3HvGetTimerCcr(PPDMDEVINS pDevIns, PVMCPUCC pVCpu, int 
         {
             uint64_t const cTicksElapsed = PDMDevHlpTimerGet(pDevIns, hTimer) - pHvApicCpu->u64TimerInitial;
             PDMDevHlpTimerUnlockClock(pDevIns, hTimer);
-            uint8_t  const uTimerShift   = apicR3HvGetTimerShift(pXApicPage);
+            uint8_t  const uTimerShift   = apicCommonGetTimerShift(pXApicPage);
             uint64_t const uDelta        = cTicksElapsed >> uTimerShift;
             if (uInitialCount > uDelta)
                 *puValue = uInitialCount - uDelta;
@@ -1631,7 +1617,7 @@ static DECLCALLBACK(void) apicR3HvInfoTimer(PVM pVM, PCDBGFINFOHLP pHlp, const c
     pHlp->pfnPrintf(pHlp, "  ICR              = %#RX32\n", pXApicPage->timer_icr.u32InitialCount);
     pHlp->pfnPrintf(pHlp, "  CCR              = %#RX32\n", pXApicPage->timer_ccr.u32CurrentCount);
     pHlp->pfnPrintf(pHlp, "  DCR              = %#RX32\n", pXApicPage->timer_dcr.all.u32DivideValue);
-    //pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",    apicGetTimerShift(pXApicPage));
+    //pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",    apicCommonGetTimerShift(pXApicPage));
     //pHlp->pfnPrintf(pHlp, "  Timer initial TS = %#RU64\n", pApicCpu->u64TimerInitial);
     apicR3HvInfoLvtTimer(pVCpu, pHlp);
 }

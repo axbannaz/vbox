@@ -619,7 +619,7 @@ static DECLCALLBACK(void) apicR3InfoTimer(PVM pVM, PCDBGFINFOHLP pHlp, const cha
     pHlp->pfnPrintf(pHlp, "  ICR              = %#RX32\n", pXApicPage->timer_icr.u32InitialCount);
     pHlp->pfnPrintf(pHlp, "  CCR              = %#RX32\n", pXApicPage->timer_ccr.u32CurrentCount);
     pHlp->pfnPrintf(pHlp, "  DCR              = %#RX32\n", pXApicPage->timer_dcr.all.u32DivideValue);
-    pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",    apicGetTimerShift(pXApicPage));
+    pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",    apicCommonGetTimerShift(pXApicPage));
     pHlp->pfnPrintf(pHlp, "  Timer initial TS = %#RU64\n", pApicCpu->u64TimerInitial);
     apicR3InfoLvtTimer(pVCpu, pHlp);
 }
@@ -722,7 +722,7 @@ static void apicR3DumpState(PVMCPU pVCpu, const char *pszPrefix, uint32_t uVersi
             LogRel(("APIC%u: uIcr_Lo                  = %#RX32\n", pVCpu->idCpu, pXApicPage->icr_lo.all.u32IcrLo));
             LogRel(("APIC%u: uIcr_Hi                  = %#RX32\n", pVCpu->idCpu, pXApicPage->icr_hi.all.u32IcrHi));
             LogRel(("APIC%u: uTimerDcr                = %#RX32\n", pVCpu->idCpu, pXApicPage->timer_dcr.all.u32DivideValue));
-            LogRel(("APIC%u: uCountShift              = %#RX32\n", pVCpu->idCpu, apicGetTimerShift(pXApicPage)));
+            LogRel(("APIC%u: uCountShift              = %#RX32\n", pVCpu->idCpu, apicCommonGetTimerShift(pXApicPage)));
             LogRel(("APIC%u: uInitialCount            = %#RX32\n", pVCpu->idCpu, pXApicPage->timer_icr.u32InitialCount));
             LogRel(("APIC%u: u64InitialCountLoadTime  = %#RX64\n", pVCpu->idCpu, pApicCpu->u64TimerInitial));
             LogRel(("APIC%u: u64NextTime / TimerCCR   = %#RX64\n", pVCpu->idCpu, pXApicPage->timer_ccr.u32CurrentCount));
@@ -885,7 +885,7 @@ static int apicR3LoadLegacyVCpuData(PPDMDEVINS pDevIns, PVMCPU pVCpu, PSSMHANDLE
      * completely. The shift count can always be derived from the DCR.
      * See @bugref{8245#c98}.
      */
-    uint8_t const uTimerShift = apicGetTimerShift(pXApicPage);
+    uint8_t const uTimerShift = apicCommonGetTimerShift(pXApicPage);
 
     pHlp->pfnSSMGetU32(pSSM, &pXApicPage->timer_icr.u32InitialCount);
     pHlp->pfnSSMGetU64(pSSM, &pApicCpu->u64TimerInitial);
@@ -1032,7 +1032,7 @@ static DECLCALLBACK(int) apicR3LoadExec(PPDMDEVINS pDevIns, PSSMHANDLE pSSM, uin
             {
                 PCXAPICPAGE    pXApicPage    = VMCPU_TO_CXAPICPAGE(pVCpu);
                 uint32_t const uInitialCount = pXApicPage->timer_icr.u32InitialCount;
-                uint8_t const  uTimerShift   = apicGetTimerShift(pXApicPage);
+                uint8_t const  uTimerShift   = apicCommonGetTimerShift(pXApicPage);
                 apicHintTimerFreq(pDevIns, pApicCpu, uInitialCount, uTimerShift);
             }
 

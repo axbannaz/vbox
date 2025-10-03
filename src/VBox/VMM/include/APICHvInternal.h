@@ -1,6 +1,6 @@
 /* $Id$ */
 /** @file
- * APIC - Advanced Programmable Interrupt Controller - NEM Hyper-V backend.
+ * APIC - Advanced Programmable Interrupt Controller - NEM Hyper-V backend, Internal header.
  */
 
 /*

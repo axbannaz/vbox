@@ -1,6 +1,6 @@
 /* $Id$ */
 /** @file
- * APIC - Advanced Programmable Interrupt Controller.
+ * APIC - Advanced Programmable Interrupt Controller, Internal header.
  */
 
 /*
@@ -370,20 +370,6 @@ typedef APICCPU *PAPICCPU;
 /** Pointer to a const APIC VMCPU instance data. */
 typedef APICCPU const *PCAPICCPU;
 AssertCompileMemberAlignment(APICCPU, uApicBaseMsr, 8);
-
-/**
- * Gets the timer shift value.
- *
- * @returns The timer shift value.
- * @param   pXApicPage      The xAPIC page.
- */
-DECLINLINE(uint8_t) apicGetTimerShift(PCXAPICPAGE pXApicPage)
-{
-    /* See Intel spec. 10.5.4 "APIC Timer". */
-    uint32_t uShift = pXApicPage->timer_dcr.u.u2DivideValue0 | (pXApicPage->timer_dcr.u.u1DivideValue1 << 2);
-    return (uShift + 1) & 7;
-}
-
 
 const char                   *apicGetModeName(XAPICMODE enmMode);
 const char                   *apicGetDestFormatName(XAPICDESTFORMAT enmDestFormat);
