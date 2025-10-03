@@ -40,11 +40,15 @@
 
 /* GUI includes: */
 #include "UICommon.h"
+#include "UIIconPool.h"
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
 #include "UITranslationEventListener.h"
 #include "UIVirtualBoxManager.h"
+
+/* Other VBox includes: */
+#include "iprt/assert.h"
 
 
 /** QAccessibleObject extension used as an accessibility interface for Tools-view items. */
@@ -330,11 +334,11 @@ UIToolsItemAnimation::UIToolsItemAnimation(QObject *pTarget, const QByteArray &p
 *   Class UIToolsItem implementation.                                                                                            *
 *********************************************************************************************************************************/
 
-UIToolsItem::UIToolsItem(QGraphicsScene *pScene, const QIcon &icon, UIToolType enmType)
+UIToolsItem::UIToolsItem(QGraphicsScene *pScene, UIToolType enmType)
     : m_pScene(pScene)
-    , m_icon(icon)
     , m_enmType(enmType)
     , m_enmClass(UIToolStuff::castTypeToClass(itemType()))
+    , m_icon(typeToIcon(itemType()))
     , m_enmReason(HidingReason_Null)
     , m_fHovered(false)
     , m_iPreviousMinimumWidthHint(0)
@@ -621,6 +625,50 @@ void UIToolsItem::cleanup()
         /* Unset the current item: */
         model()->setCurrentItem(0);
     }
+}
+
+/* static */
+QIcon UIToolsItem::typeToIcon(UIToolType enmType)
+{
+    switch (enmType)
+    {
+        /* Aux tools: */
+        case UIToolType_Toggle:
+            return UIIconPool::iconSet(":/tools_menu_24px.png", ":/tools_menu_24px.png");
+
+        /* Global tools: */
+        case UIToolType_Home:
+            return UIIconPool::iconSet(":/welcome_screen_24px.png", ":/welcome_screen_24px.png");
+        case UIToolType_Machines:
+            return UIIconPool::iconSet(":/machine_details_manager_24px.png", ":/machine_details_manager_disabled_24px.png");
+        case UIToolType_Extensions:
+            return UIIconPool::iconSet(":/extension_pack_manager_24px.png", ":/extension_pack_manager_disabled_24px.png");
+        case UIToolType_Media:
+            return UIIconPool::iconSet(":/media_manager_24px.png", ":/media_manager_disabled_24px.png");
+        case UIToolType_Network:
+            return UIIconPool::iconSet(":/host_iface_manager_24px.png", ":/host_iface_manager_disabled_24px.png");
+        case UIToolType_Cloud:
+            return UIIconPool::iconSet(":/cloud_profile_manager_24px.png", ":/cloud_profile_manager_disabled_24px.png");
+        case UIToolType_Resources:
+            return UIIconPool::iconSet(":/resources_monitor_24px.png", ":/resources_monitor_disabled_24px.png");
+
+        /* Machine tools: */
+        case UIToolType_Details:
+            return UIIconPool::iconSet(":/machine_details_manager_24px.png", ":/machine_details_manager_disabled_24px.png");
+        case UIToolType_Snapshots:
+            return UIIconPool::iconSet(":/snapshot_manager_24px.png", ":/snapshot_manager_disabled_24px.png");
+        case UIToolType_Logs:
+            return UIIconPool::iconSet(":/vm_show_logs_24px.png", ":/vm_show_logs_disabled_24px.png");
+        case UIToolType_ResourceUse:
+            return UIIconPool::iconSet(":/performance_monitor_24px.png", ":/performance_monitor_disabled_24px.png");
+        case UIToolType_FileManager:
+            return UIIconPool::iconSet(":/file_manager_24px.png", ":/file_manager_disabled_24px.png");
+
+        default:
+            break;
+    }
+
+    AssertFailedReturn(QIcon());
 }
 
 QVariant UIToolsItem::data(int iKey) const

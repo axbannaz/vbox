@@ -35,7 +35,6 @@
 /* GUI includes: */
 #include "UICommon.h"
 #include "UIExtraDataManager.h"
-#include "UIIconPool.h"
 #include "UILoggingDefs.h"
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
@@ -538,74 +537,35 @@ void UIToolsModel::prepareItems()
         case UIToolClass_Global:
         {
             /* Home: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/welcome_screen_24px.png",
-                                                                    ":/welcome_screen_24px.png"),
-                                       UIToolType_Home);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Home);
             /* Machines: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/machine_details_manager_24px.png",
-                                                                    ":/machine_details_manager_disabled_24px.png"),
-                                       UIToolType_Machines);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Machines);
             /* Extensions: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/extension_pack_manager_24px.png",
-                                                                    ":/extension_pack_manager_disabled_24px.png"),
-                                       UIToolType_Extensions);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Extensions);
             /* Media: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/media_manager_24px.png",
-                                                                    ":/media_manager_disabled_24px.png"),
-                                       UIToolType_Media);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Media);
             /* Network: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/host_iface_manager_24px.png",
-                                                                    ":/host_iface_manager_disabled_24px.png"),
-                                       UIToolType_Network);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Network);
             /* Cloud: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/cloud_profile_manager_24px.png",
-                                                                    ":/cloud_profile_manager_disabled_24px.png"),
-                                       UIToolType_Cloud);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Cloud);
             /* Resources: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/resources_monitor_24px.png",
-                                                                    ":/resources_monitor_disabled_24px.png"),
-                                       UIToolType_Resources);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Resources);
             /* Toggle: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/tools_menu_24px.png",
-                                                                    ":/tools_menu_24px.png"),
-                                       UIToolType_Toggle);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Toggle);
             break;
         }
         case UIToolClass_Machine:
         {
             /* Details: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/machine_details_manager_24px.png",
-                                                                    ":/machine_details_manager_disabled_24px.png"),
-                                       UIToolType_Details);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Details);
             /* Snapshots: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/snapshot_manager_24px.png",
-                                                                    ":/snapshot_manager_disabled_24px.png"),
-                                       UIToolType_Snapshots);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Snapshots);
             /* Logs: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/vm_show_logs_24px.png",
-                                                                    ":/vm_show_logs_disabled_24px.png"),
-                                       UIToolType_Logs);
-
+            m_items << new UIToolsItem(scene(), UIToolType_Logs);
             /* Resource Use: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/performance_monitor_24px.png",
-                                                                    ":/performance_monitor_disabled_24px.png"),
-                                       UIToolType_ResourceUse);
-
+            m_items << new UIToolsItem(scene(), UIToolType_ResourceUse);
             /* File Manager: */
-            m_items << new UIToolsItem(scene(), UIIconPool::iconSet(":/file_manager_24px.png",
-                                                                    ":/file_manager_disabled_24px.png"),
-                                       UIToolType_FileManager);
-
+            m_items << new UIToolsItem(scene(), UIToolType_FileManager);
             break;
         }
         default:

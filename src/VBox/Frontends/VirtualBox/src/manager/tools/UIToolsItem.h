@@ -82,9 +82,8 @@ public:
 
     /** Constructs item on the basis of passed arguments.
       * @param  pScene   Brings the scene reference to add item to.
-      * @param  icon     Brings the item icon.
       * @param  enmType  Brings the item type. */
-    UIToolsItem(QGraphicsScene *pScene, const QIcon &icon, UIToolType enmType);
+    UIToolsItem(QGraphicsScene *pScene, UIToolType enmType);
     /** Destructs item. */
     virtual ~UIToolsItem() RT_OVERRIDE;
 
@@ -183,6 +182,9 @@ private:
 
     /** @name Item stuff.
       * @{ */
+        /** Retuns icon for @a enmType specified. */
+        static QIcon typeToIcon(UIToolType enmType);
+
         /** Returns abstractly stored data value for certain @a iKey. */
         QVariant data(int iKey) const;
     /** @} */
@@ -239,13 +241,13 @@ private:
       * @{ */
         /** Holds the passed item scene. */
         QGraphicsScene   *m_pScene;
-        /** Holds the passed item icon. */
-        const QIcon       m_icon;
         /** Holds the passed item type. */
         const UIToolType  m_enmType;
 
         /** Holds the item class (based on type). */
         const UIToolClass  m_enmClass;
+        /** Holds the item icon (based on type). */
+        const QIcon        m_icon;
 
         /** Holds the item pixmap (based on icon). */
         QPixmap  m_pixmap;
