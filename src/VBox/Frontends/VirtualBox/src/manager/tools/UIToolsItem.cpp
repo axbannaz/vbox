@@ -588,9 +588,6 @@ void UIToolsItem::prepare()
     setFocusPolicy(Qt::NoFocus);
     setFlag(QGraphicsItem::ItemIsSelectable, false);
 
-    /* Prepare connections: */
-    prepareConnections();
-
     /* Init: */
     updatePixmap();
     updateNameSize();
@@ -598,23 +595,14 @@ void UIToolsItem::prepare()
     /* Create animation engine: */
     m_pAnimationEngine = new UIToolsItemAnimationEngine(this);
 
+    /* Manager => this connections: */
+    connect(gpManager, &UIVirtualBoxManager::sigWindowRemapped,
+            this, &UIToolsItem::sltHandleWindowRemapped);
+
     /* Apply language settings: */
     sltRetranslateUI();
     connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
             this, &UIToolsItem::sltRetranslateUI);
-}
-
-void UIToolsItem::prepareConnections()
-{
-    /* This => model connections: */
-    connect(this, &UIToolsItem::sigMinimumWidthHintChanged,
-            model(), &UIToolsModel::sltItemMinimumWidthHintChanged);
-    connect(this, &UIToolsItem::sigMinimumHeightHintChanged,
-            model(), &UIToolsModel::sltItemMinimumHeightHintChanged);
-
-    /* Manager => this connections: */
-    connect(gpManager, &UIVirtualBoxManager::sigWindowRemapped,
-            this, &UIToolsItem::sltHandleWindowRemapped);
 }
 
 void UIToolsItem::cleanup()

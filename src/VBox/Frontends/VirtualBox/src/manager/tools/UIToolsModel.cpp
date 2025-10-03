@@ -567,6 +567,12 @@ void UIToolsModel::prepareItem(UIToolType enmType)
     UIToolsItem *pItem = new UIToolsItem(scene(), enmType);
     if (pItem)
     {
+        /* Prepare item's connections: */
+        connect(pItem, &UIToolsItem::sigMinimumWidthHintChanged,
+                this, &UIToolsModel::sltItemMinimumWidthHintChanged);
+        connect(pItem, &UIToolsItem::sigMinimumHeightHintChanged,
+                this, &UIToolsModel::sltItemMinimumHeightHintChanged);
+
         /* Append item to the list: */
         m_items << pItem;
     }

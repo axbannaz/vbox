@@ -173,9 +173,6 @@ private:
       * @{ */
         /** Prepares all. */
         void prepare();
-        /** Prepares connections. */
-        void prepareConnections();
-
         /** Cleanups all. */
         void cleanup();
     /** @} */
