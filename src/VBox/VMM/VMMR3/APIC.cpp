@@ -185,36 +185,12 @@ static const SSMFIELD g_aX2ApicPageFields[] =
 };
 
 
-/**
- * Sets the CPUID feature bits for the APIC mode.
- *
- * @param   pVM             The cross context VM structure.
- * @param   enmMode         The APIC mode.
+/*
+ * Instantiate the APIC R3-context common code.
  */
-static void apicR3SetCpuIdFeatureLevel(PVM pVM, PDMAPICMODE enmMode)
-{
-    /** @todo Merge with apicR3HvSetCpuIdFeatureLevel. */
-    switch (enmMode)
-    {
-        case PDMAPICMODE_NONE:
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            break;
-
-        case PDMAPICMODE_APIC:
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            break;
-
-        case PDMAPICMODE_X2APIC:
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            break;
-
-        default:
-            AssertMsgFailed(("Unknown/invalid APIC mode: %d\n", (int)enmMode));
-    }
-}
+#define VMM_APIC_TEMPLATE_R3_COMMON
+#include "../VMMAll/APICAllCommon.cpp.h"
+#undef VMM_APIC_TEMPLATE_R3_COMMON
 
 
 /**
@@ -1472,7 +1448,7 @@ DECLCALLBACK(int) apicR3Construct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE p
     }
 
     /* Tell CPUM about the APIC feature level so it can adjust APICBASE MSR GP mask and CPUID bits. */
-    apicR3SetCpuIdFeatureLevel(pVM, pApic->enmMaxMode);
+    apicR3CommonSetCpuIdFeatureLevel(pVM, pApic->enmMaxMode);
 
     /* Finally, initialize the state. */
     rc = apicR3InitState(pVM);

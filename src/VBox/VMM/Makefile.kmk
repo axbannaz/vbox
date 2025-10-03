@@ -190,6 +190,7 @@ VBoxVMM_SOURCES  = \
 	VMMR3/VMMTests.cpp \
 	VMMR3/HM.cpp \
 	VMMAll/APICAll.cpp \
+	VMMAll/APICAllCommon.cpp.h \
 	VMMAll/CPUMAllCpuId.cpp \
 	VMMAll/CPUMAllRegs.cpp \
 	VMMAll/CPUMAllMsrs.cpp \
@@ -320,6 +321,7 @@ ifdef VBOX_WITH_NATIVE_NEM
 
  VBoxVMM_SOURCES.win.amd64 += \
  	VMMR3/NEMR3Native-win.cpp \
+ 	VMMAll/APICAllCommon.cpp.h \
  	VMMR3/APICR3Nem-win.cpp
 
  VBoxVMM_DEFS.win.amd64   += VBOX_WITH_NATIVE_NEM

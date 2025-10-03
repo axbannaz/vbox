@@ -115,6 +115,17 @@ static CPUMMSRRANGE const g_MsrRange_x2Apic_Invalid = X2APIC_MSRRANGE_INVALID(MS
 #undef X2APIC_MSRRANGE
 #undef X2APIC_MSRRANGE_GP
 
+
+/*
+ * Instantiate the APIC all-context common code.
+ */
+#define VMM_APIC_TEMPLATE_ALL_COMMON
+#define VMM_APIC_TEMPLATE_R3_COMMON
+#include "../VMMAll/APICAllCommon.cpp.h"
+#undef VMM_APIC_TEMPLATE_ALL_COMMON
+#undef VMM_APIC_TEMPLATE_R3_COMMON
+
+
 /**
  * Gets the timer shift value.
  *
@@ -150,61 +161,7 @@ static DECLCALLBACK(bool) apicR3HvIsEnabled(PCVMCPUCC pVCpu)
 static DECLCALLBACK(void) apicR3HvInitIpi(PVMCPUCC pVCpu)
 {
     VMCPU_ASSERT_EMT_OR_NOT_RUNNING(pVCpu);
-    PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
-
-    /** @todo Merge with apicInitIpi. */
-    /*
-     * See Intel spec. 10.4.7.3 "Local APIC State After an INIT Reset (Wait-for-SIPI State)"
-     * and AMD spec 16.3.2 "APIC Registers".
-     *
-     * The reason we don't simply zero out the entire APIC page and only set the non-zero members
-     * is because there are some registers that are not touched by the INIT IPI (e.g. version)
-     * operation and this function is only a subset of the reset operation.
-     */
-    RT_ZERO(pXApicPage->irr);
-    RT_ZERO(pXApicPage->irr);
-    RT_ZERO(pXApicPage->isr);
-    RT_ZERO(pXApicPage->tmr);
-    RT_ZERO(pXApicPage->icr_hi);
-    RT_ZERO(pXApicPage->icr_lo);
-    RT_ZERO(pXApicPage->ldr);
-    RT_ZERO(pXApicPage->tpr);
-    RT_ZERO(pXApicPage->ppr);
-    RT_ZERO(pXApicPage->timer_icr);
-    RT_ZERO(pXApicPage->timer_ccr);
-    RT_ZERO(pXApicPage->timer_dcr);
-
-    pXApicPage->dfr.u.u4Model        = XAPICDESTFORMAT_FLAT;
-    pXApicPage->dfr.u.u28ReservedMb1 = UINT32_C(0xfffffff);
-
-    /** @todo CMCI. */
-
-    RT_ZERO(pXApicPage->lvt_timer);
-    pXApicPage->lvt_timer.u.u1Mask = 1;
-
-#if XAPIC_HARDWARE_VERSION == XAPIC_HARDWARE_VERSION_P4
-    RT_ZERO(pXApicPage->lvt_thermal);
-    pXApicPage->lvt_thermal.u.u1Mask = 1;
-#endif
-
-    RT_ZERO(pXApicPage->lvt_perf);
-    pXApicPage->lvt_perf.u.u1Mask = 1;
-
-    RT_ZERO(pXApicPage->lvt_lint0);
-    pXApicPage->lvt_lint0.u.u1Mask = 1;
-
-    RT_ZERO(pXApicPage->lvt_lint1);
-    pXApicPage->lvt_lint1.u.u1Mask = 1;
-
-    RT_ZERO(pXApicPage->lvt_error);
-    pXApicPage->lvt_error.u.u1Mask = 1;
-
-    RT_ZERO(pXApicPage->svr);
-    pXApicPage->svr.u.u8SpuriousVector = 0xff;
-
-    /* The self-IPI register is reset to 0. See Intel spec. 10.12.5.1 "x2APIC States" */
-    PX2APICPAGE pX2ApicPage = VMCPU_TO_X2APICPAGE(pVCpu);
-    RT_ZERO(pX2ApicPage->self_ipi);
+    apicCommonInitIpi(pVCpu);
 }
 
 
@@ -355,330 +312,6 @@ static VBOXSTRICTRC apicR3HvSendIntr(PVMCC pVM, uint8_t uVector, XAPICDELIVERYMO
 
 
 /**
- * Checks if this APIC belongs to a logical destination.
- *
- * @returns true if the APIC belongs to the logical
- *          destination, false otherwise.
- * @param   pVCpu                   The cross context virtual CPU structure.
- * @param   fDest                   The destination mask.
- *
- * @thread  Any.
- */
-static bool apicR3HvIsLogicalDest(PVMCPUCC pVCpu, uint32_t fDest)
-{
-    /** @todo Merge. */
-    if (XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr))
-    {
-        /*
-         * Flat logical mode is not supported in x2APIC mode.
-         * In clustered logical mode, the 32-bit logical ID in the LDR is interpreted as follows:
-         *    - High 16 bits is the cluster ID.
-         *    - Low 16 bits: each bit represents a unique APIC within the cluster.
-         */
-        PCX2APICPAGE pX2ApicPage = VMCPU_TO_CX2APICPAGE(pVCpu);
-        uint32_t const u32Ldr    = pX2ApicPage->ldr.u32LogicalApicId;
-        if (X2APIC_LDR_GET_CLUSTER_ID(u32Ldr) == (fDest & X2APIC_LDR_CLUSTER_ID))
-            return RT_BOOL(u32Ldr & fDest & X2APIC_LDR_LOGICAL_ID);
-        return false;
-    }
-
-#if XAPIC_HARDWARE_VERSION == XAPIC_HARDWARE_VERSION_P4
-    /*
-     * In both flat and clustered logical mode, a destination mask of all set bits indicates a broadcast.
-     * See AMD spec. 16.6.1 "Receiving System and IPI Interrupts".
-     */
-    Assert(!XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr));
-    if ((fDest & XAPIC_LDR_FLAT_LOGICAL_ID) == XAPIC_LDR_FLAT_LOGICAL_ID)
-        return true;
-
-    PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpu);
-    XAPICDESTFORMAT enmDestFormat = (XAPICDESTFORMAT)pXApicPage->dfr.u.u4Model;
-    if (enmDestFormat == XAPICDESTFORMAT_FLAT)
-    {
-        /* The destination mask is interpreted as a bitmap of 8 unique logical APIC IDs. */
-        uint8_t const u8Ldr = pXApicPage->ldr.u.u8LogicalApicId;
-        return RT_BOOL(u8Ldr & fDest & XAPIC_LDR_FLAT_LOGICAL_ID);
-    }
-
-    /*
-     * In clustered logical mode, the 8-bit logical ID in the LDR is interpreted as follows:
-     *    - High 4 bits is the cluster ID.
-     *    - Low 4 bits: each bit represents a unique APIC within the cluster.
-     */
-    Assert(enmDestFormat == XAPICDESTFORMAT_CLUSTER);
-    uint8_t const u8Ldr = pXApicPage->ldr.u.u8LogicalApicId;
-    if (XAPIC_LDR_CLUSTERED_GET_CLUSTER_ID(u8Ldr) == (fDest & XAPIC_LDR_CLUSTERED_CLUSTER_ID))
-        return RT_BOOL(u8Ldr & fDest & XAPIC_LDR_CLUSTERED_LOGICAL_ID);
-    return false;
-#else
-# error "Implement Pentium and P6 family APIC architectures"
-#endif
-}
-
-
-/**
- * Figures out the set of destination CPUs for a given destination mode, format
- * and delivery mode setting.
- *
- * @param   pVM             The cross context VM structure.
- * @param   fDestMask       The destination mask.
- * @param   fBroadcastMask  The broadcast mask.
- * @param   enmDestMode     The destination mode.
- * @param   enmDeliveryMode The delivery mode.
- * @param   pDestCpuSet     The destination CPU set to update.
- */
-static void apicR3HvGetDestCpuSet(PVMCC pVM, uint32_t fDestMask, uint32_t fBroadcastMask, XAPICDESTMODE enmDestMode,
-                                  XAPICDELIVERYMODE enmDeliveryMode, PVMCPUSET pDestCpuSet)
-{
-    /** @todo Merge with apicGetDestCpuSet.  */
-    VMCPUSET_EMPTY(pDestCpuSet);
-
-    /*
-     * Physical destination mode only supports either a broadcast or a single target.
-     *    - Broadcast with lowest-priority delivery mode is not supported[1], we deliver it
-     *      as a regular broadcast like in fixed delivery mode.
-     *    - For a single target, lowest-priority delivery mode makes no sense. We deliver
-     *      to the target like in fixed delivery mode.
-     *
-     * [1] See Intel spec. 10.6.2.1 "Physical Destination Mode".
-     */
-    if (   enmDestMode == XAPICDESTMODE_PHYSICAL
-        && enmDeliveryMode == XAPICDELIVERYMODE_LOWEST_PRIO)
-    {
-        AssertMsgFailed(("APIC: Lowest-priority delivery using physical destination mode!"));
-        enmDeliveryMode = XAPICDELIVERYMODE_FIXED;
-    }
-
-    uint32_t const cCpus = pVM->cCpus;
-    if (enmDeliveryMode == XAPICDELIVERYMODE_LOWEST_PRIO)
-    {
-        Assert(enmDestMode == XAPICDESTMODE_LOGICAL);
-#if XAPIC_HARDWARE_VERSION == XAPIC_HARDWARE_VERSION_P4
-        VMCPUID idCpuLowestTpr = NIL_VMCPUID;
-        uint8_t u8LowestTpr    = UINT8_C(0xff);
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = pVM->CTX_SUFF(apCpus)[idCpu];
-            if (apicR3HvIsLogicalDest(pVCpuDst, fDestMask))
-            {
-                PCXAPICPAGE   pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpuDst);
-                uint8_t const u8Tpr      = pXApicPage->tpr.u8Tpr;         /* PAV */
-
-                /*
-                 * If there is a tie for lowest priority, the local APIC with the highest ID is chosen.
-                 * Hence the use of "<=" in the check below.
-                 * See AMD spec. 16.6.2 "Lowest Priority Messages and Arbitration".
-                 */
-                if (u8Tpr <= u8LowestTpr)
-                {
-                    u8LowestTpr    = u8Tpr;
-                    idCpuLowestTpr = idCpu;
-                }
-            }
-        }
-        if (idCpuLowestTpr != NIL_VMCPUID)
-            VMCPUSET_ADD(pDestCpuSet, idCpuLowestTpr);
-#else
-# error "Implement Pentium and P6 family APIC architectures"
-#endif
-        return;
-    }
-
-    /*
-     * x2APIC:
-     *    - In both physical and logical destination mode, a destination mask of 0xffffffff implies a broadcast[1].
-     * xAPIC:
-     *    - In physical destination mode, a destination mask of 0xff implies a broadcast[2].
-     *    - In both flat and clustered logical mode, a destination mask of 0xff implies a broadcast[3].
-     *
-     * [1] See Intel spec. 10.12.9 "ICR Operation in x2APIC Mode".
-     * [2] See Intel spec. 10.6.2.1 "Physical Destination Mode".
-     * [2] See AMD spec. 16.6.1 "Receiving System and IPI Interrupts".
-     */
-    if ((fDestMask & fBroadcastMask) == fBroadcastMask)
-    {
-        VMCPUSET_FILL(pDestCpuSet);
-        return;
-    }
-
-    if (enmDestMode == XAPICDESTMODE_PHYSICAL)
-    {
-        /* The destination mask is interpreted as the physical APIC ID of a single target. */
-#if 1
-        /* Since our physical APIC ID is read-only to software, set the corresponding bit in the CPU set. */
-        if (RT_LIKELY(fDestMask < cCpus))
-            VMCPUSET_ADD(pDestCpuSet, fDestMask);
-#else
-        /* The physical APIC ID may not match our VCPU ID, search through the list of targets. */
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = &pVM->aCpus[idCpu];
-            if (XAPIC_IN_X2APIC_MODE(pVCpuDst))
-            {
-                PCX2APICPAGE pX2ApicPage = VMCPU_TO_CX2APICPAGE(pVCpuDst);
-                if (pX2ApicPage->id.u32ApicId == fDestMask)
-                    VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-            }
-            else
-            {
-                PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpuDst);
-                if (pXApicPage->id.u8ApicId == (uint8_t)fDestMask)
-                    VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-            }
-        }
-#endif
-    }
-    else
-    {
-        Assert(enmDestMode == XAPICDESTMODE_LOGICAL);
-
-        /* A destination mask of all 0's implies no target APICs (since it's interpreted as a bitmap or partial bitmap). */
-        if (RT_UNLIKELY(!fDestMask))
-            return;
-
-        /* The destination mask is interpreted as a bitmap of software-programmable logical APIC ID of the target APICs. */
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = pVM->CTX_SUFF(apCpus)[idCpu];
-            if (apicR3HvIsLogicalDest(pVCpuDst, fDestMask))
-                VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-        }
-    }
-}
-
-
-/**
- * Figures out the set of destination CPUs for a given destination mode, format
- * and delivery mode setting.
- *
- * @param   pVM             The cross context VM structure.
- * @param   fDestMask       The destination mask.
- * @param   fBroadcastMask  The broadcast mask.
- * @param   enmDestMode     The destination mode.
- * @param   enmDeliveryMode The delivery mode.
- * @param   pDestCpuSet     The destination CPU set to update.
- */
-static void apicGetDestCpuSet(PVMCC pVM, uint32_t fDestMask, uint32_t fBroadcastMask, XAPICDESTMODE enmDestMode,
-                              XAPICDELIVERYMODE enmDeliveryMode, PVMCPUSET pDestCpuSet)
-{
-    VMCPUSET_EMPTY(pDestCpuSet);
-
-    /*
-     * Physical destination mode only supports either a broadcast or a single target.
-     *    - Broadcast with lowest-priority delivery mode is not supported[1], we deliver it
-     *      as a regular broadcast like in fixed delivery mode.
-     *    - For a single target, lowest-priority delivery mode makes no sense. We deliver
-     *      to the target like in fixed delivery mode.
-     *
-     * [1] See Intel spec. 10.6.2.1 "Physical Destination Mode".
-     */
-    if (   enmDestMode == XAPICDESTMODE_PHYSICAL
-        && enmDeliveryMode == XAPICDELIVERYMODE_LOWEST_PRIO)
-    {
-        AssertMsgFailed(("APIC: Lowest-priority delivery using physical destination mode!"));
-        enmDeliveryMode = XAPICDELIVERYMODE_FIXED;
-    }
-
-    uint32_t const cCpus = pVM->cCpus;
-    if (enmDeliveryMode == XAPICDELIVERYMODE_LOWEST_PRIO)
-    {
-        Assert(enmDestMode == XAPICDESTMODE_LOGICAL);
-#if XAPIC_HARDWARE_VERSION == XAPIC_HARDWARE_VERSION_P4
-        VMCPUID idCpuLowestTpr = NIL_VMCPUID;
-        uint8_t u8LowestTpr    = UINT8_C(0xff);
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = pVM->CTX_SUFF(apCpus)[idCpu];
-            if (apicR3HvIsLogicalDest(pVCpuDst, fDestMask))
-            {
-                PCXAPICPAGE   pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpuDst);
-                uint8_t const u8Tpr      = pXApicPage->tpr.u8Tpr;         /* PAV */
-
-                /*
-                 * If there is a tie for lowest priority, the local APIC with the highest ID is chosen.
-                 * Hence the use of "<=" in the check below.
-                 * See AMD spec. 16.6.2 "Lowest Priority Messages and Arbitration".
-                 */
-                if (u8Tpr <= u8LowestTpr)
-                {
-                    u8LowestTpr    = u8Tpr;
-                    idCpuLowestTpr = idCpu;
-                }
-            }
-        }
-        if (idCpuLowestTpr != NIL_VMCPUID)
-            VMCPUSET_ADD(pDestCpuSet, idCpuLowestTpr);
-#else
-# error "Implement Pentium and P6 family APIC architectures"
-#endif
-        return;
-    }
-
-    /*
-     * x2APIC:
-     *    - In both physical and logical destination mode, a destination mask of 0xffffffff implies a broadcast[1].
-     * xAPIC:
-     *    - In physical destination mode, a destination mask of 0xff implies a broadcast[2].
-     *    - In both flat and clustered logical mode, a destination mask of 0xff implies a broadcast[3].
-     *
-     * [1] See Intel spec. 10.12.9 "ICR Operation in x2APIC Mode".
-     * [2] See Intel spec. 10.6.2.1 "Physical Destination Mode".
-     * [2] See AMD spec. 16.6.1 "Receiving System and IPI Interrupts".
-     */
-    if ((fDestMask & fBroadcastMask) == fBroadcastMask)
-    {
-        VMCPUSET_FILL(pDestCpuSet);
-        return;
-    }
-
-    if (enmDestMode == XAPICDESTMODE_PHYSICAL)
-    {
-        /* The destination mask is interpreted as the physical APIC ID of a single target. */
-#if 1
-        /* Since our physical APIC ID is read-only to software, set the corresponding bit in the CPU set. */
-        if (RT_LIKELY(fDestMask < cCpus))
-            VMCPUSET_ADD(pDestCpuSet, fDestMask);
-#else
-        /* The physical APIC ID may not match our VCPU ID, search through the list of targets. */
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = &pVM->aCpus[idCpu];
-            if (XAPIC_IN_X2APIC_MODE(pVCpuDst))
-            {
-                PCX2APICPAGE pX2ApicPage = VMCPU_TO_CX2APICPAGE(pVCpuDst);
-                if (pX2ApicPage->id.u32ApicId == fDestMask)
-                    VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-            }
-            else
-            {
-                PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpuDst);
-                if (pXApicPage->id.u8ApicId == (uint8_t)fDestMask)
-                    VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-            }
-        }
-#endif
-    }
-    else
-    {
-        Assert(enmDestMode == XAPICDESTMODE_LOGICAL);
-
-        /* A destination mask of all 0's implies no target APICs (since it's interpreted as a bitmap or partial bitmap). */
-        if (RT_UNLIKELY(!fDestMask))
-            return;
-
-        /* The destination mask is interpreted as a bitmap of software-programmable logical APIC ID of the target APICs. */
-        for (VMCPUID idCpu = 0; idCpu < cCpus; idCpu++)
-        {
-            PVMCPUCC pVCpuDst = pVM->CTX_SUFF(apCpus)[idCpu];
-            if (apicR3HvIsLogicalDest(pVCpuDst, fDestMask))
-                VMCPUSET_ADD(pDestCpuSet, pVCpuDst->idCpu);
-        }
-    }
-}
-
-
-
-/**
  * Sends an Interprocessor Interrupt (IPI) using values from the Interrupt
  * Command Register (ICR).
  *
@@ -747,7 +380,7 @@ static VBOXSTRICTRC apicR3HvSendIpi(PVMCPUCC pVCpu)
                 fDest          = pXApicPage->icr_hi.u.u8Dest;
                 fBroadcastMask = XAPIC_ID_BROADCAST_MASK;
             }
-            apicR3HvGetDestCpuSet(pVM, fDest, fBroadcastMask, enmDestMode, enmDeliveryMode, &DestCpuSet);
+            apicCommonGetDestCpuSet(pVM, fDest, fBroadcastMask, enmDestMode, enmDeliveryMode, &DestCpuSet);
             break;
         }
 
@@ -1099,29 +732,10 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvWriteMsr(PVMCPUCC pVCpu, uint32_t u32R
  */
 static DECLCALLBACK(int) apicR3HvSetTpr(PVMCPUCC pVCpu, uint8_t u8Tpr, bool fForceX2ApicBehaviour)
 {
+    VMCPU_ASSERT_EMT_OR_NOT_RUNNING(pVCpu);
     RT_NOREF(fForceX2ApicBehaviour);
-
-#if 0
-    PHVAPIC pHvApic = VM_TO_HVAPIC(pVCpu->CTX_SUFF(pVM));
-    PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
-
-    uint32_t cbWritten = 0;
-    HRESULT hrc = WHvGetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, pVCpu->idCpu, pXApicPage, sizeof(*pXApicPage),
-                                                    &cbWritten);
-    AssertLogRelMsgReturn(SUCCEEDED(hrc), ("Failed to get the virtual-APIC page. hrc=%Rhrc\n", hrc), VERR_APIC_IPE_0);
-
-
-    pXApicPage->tpr.u8Tpr = u8Tpr;
-
-
-    WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, pVCpu->idCpu, pXApicPage, sizeof(*pXApicPage));
-    AssertLogRelMsgReturn(SUCCEEDED(hrc), ("Failed to set the virtual-APIC page. hrc=%Rhrc\n", hrc), VERR_APIC_IPE_0);
-#else
-
     PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
     pXApicPage->tpr.u8Tpr = u8Tpr;
-#endif
-
     return VINF_SUCCESS;
 }
 
@@ -1456,51 +1070,6 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvExportState(PVMCPUCC pVCpu)
 #endif
     return VINF_SUCCESS;
 }
-
-
-/**
- * Resets the APIC base MSR.
- *
- * @param   pVCpu   The cross context virtual CPU structure.
- */
-static void apicResetBaseMsr(PVMCPUCC pVCpu)
-{
-    /*
-     * Initialize the APIC base MSR. The APIC enable-bit is set upon power-up or reset[1].
-     *
-     * A Reset (in xAPIC and x2APIC mode) brings up the local APIC in xAPIC mode.
-     * An INIT IPI does -not- cause a transition between xAPIC and x2APIC mode[2].
-     *
-     * [1] See AMD spec. 14.1.3 "Processor Initialization State"
-     * [2] See Intel spec. 10.12.5.1 "x2APIC States".
-     */
-    VMCPU_ASSERT_EMT_OR_NOT_RUNNING(pVCpu);
-
-    /* Construct. */
-    PHVAPICCPU pHvApicCpu   = VMCPU_TO_HVAPICCPU(pVCpu);
-    PHVAPIC    pHvApic      = VM_TO_HVAPIC(pVCpu->CTX_SUFF(pVM));
-    uint64_t   uApicBaseMsr = MSR_IA32_APICBASE_ADDR;
-    if (pVCpu->idCpu == 0)
-        uApicBaseMsr |= MSR_IA32_APICBASE_BSP;
-
-    /* If the VM was configured with no APIC, don't enable xAPIC mode, obviously. */
-    if (pHvApic->enmMaxMode != PDMAPICMODE_NONE)
-    {
-        uApicBaseMsr |= MSR_IA32_APICBASE_EN;
-
-        /*
-         * While coming out of a reset the APIC is enabled and in xAPIC mode. If software had previously
-         * disabled the APIC (which results in the CPUID bit being cleared as well) we re-enable it here.
-         * See Intel spec. 10.12.5.1 "x2APIC States".
-         */
-        if (CPUMSetGuestCpuIdPerCpuApicFeature(pVCpu, true /*fVisible*/) == false)
-            LogRel(("APIC/WHv%u: Resetting mode to xAPIC\n", pVCpu->idCpu));
-    }
-
-    /* Commit. */
-    pHvApicCpu->uApicBaseMsr = uApicBaseMsr;
-}
-
 
 
 /**
@@ -2112,45 +1681,13 @@ static void apicR3HvResetCpu(PVMCPUCC pVCpu, bool fResetApicBaseMsr)
     /** @todo It isn't clear in the spec. where exactly the default base address
      *        is (re)initialized, atm we do it here in Reset. */
     if (fResetApicBaseMsr)
-        apicResetBaseMsr(pVCpu);
+        apicCommonResetBaseMsr(pVCpu);
 
     /*
      * Initialize the APIC ID register to xAPIC format.
      */
     RT_BZERO(&pXApicPage->id, sizeof(pXApicPage->id));
     pXApicPage->id.u8ApicId = pVCpu->idCpu;
-}
-
-
-/**
- * Sets the CPUID feature bits for the APIC mode.
- *
- * @param   pVM         The cross context VM structure.
- * @param   enmMode     The APIC mode.
- */
-static void apicR3HvSetCpuIdFeatureLevel(PVM pVM, PDMAPICMODE enmMode)
-{
-    /** @todo Merge with apicR3SetCpuIdFeatureLevel. */
-    switch (enmMode)
-    {
-        case PDMAPICMODE_NONE:
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            break;
-
-        case PDMAPICMODE_APIC:
-            CPUMR3ClearGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            break;
-
-        case PDMAPICMODE_X2APIC:
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_APIC);
-            CPUMR3SetGuestCpuIdFeature(pVM, CPUMCPUIDFEATURE_X2APIC);
-            break;
-
-        default:
-            AssertMsgFailed(("Unknown/invalid APIC mode: %d\n", (int)enmMode));
-    }
 }
 
 
@@ -2331,7 +1868,7 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
     }
 
     /* Tell CPUM about the APIC feature level so it can adjust APICBASE MSR GP mask and CPUID bits. */
-    apicR3HvSetCpuIdFeatureLevel(pVM, pHvApic->enmMaxMode);
+    apicR3CommonSetCpuIdFeatureLevel(pVM, pHvApic->enmMaxMode);
 
     /*
      * Allocate all the virtual-APIC pages.
@@ -2363,6 +1900,9 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
 
         PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
         Assert(pXApicPage == (PXAPICPAGE)pHvApicCpu->pvApicPageR3);
+
+        /* Initialize the APIC page and the APIC base MSR. */
+        apicR3HvResetCpu(pVCpu, true /* fResetApicBaseMsr */);
 
         /*
          * We cannot use the new API (WHv[Get|Set]VirtualProcessorState) because the format of the
@@ -2409,11 +1949,11 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
 #endif
         if (WHvSetVirtualProcessorInterruptControllerState2)
         {
-            apicR3HvResetCpu(pVCpu, true /* fResetApicBaseMsr */);
             HRESULT const hrc = WHvSetVirtualProcessorInterruptControllerState2(pHvApic->hPartition, idCpu, pXApicPage,
                                                                                 sizeof(*pXApicPage));
             if (FAILED(hrc))
             {
+                apicR3HvFreePages(pVM);
                 return VMR3SetError(pVM->pUVM, VERR_APIC_INIT_FAILED, RT_SRC_POS,
                                     "Failed to set the Hyper-V Virtual-APIC page. %Rhrc (Last=%#x/%u)",
                                     hrc, RTNtLastStatusValue(), RTNtLastErrorValue());
@@ -2431,7 +1971,7 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
         }
         else
         {
-            SUPR3PageFree(pvApicPages, cPages);
+            apicR3HvFreePages(pVM);
             return VMR3SetError(pVM->pUVM, VERR_APIC_INIT_FAILED,
                                 RT_SRC_POS, "No suitable Hyper-V virtual-APIC page API found.");
         }
@@ -2458,7 +1998,6 @@ DECLCALLBACK(int) apicR3HvConstruct(PPDMDEVINS pDevIns, int iInstance, PCFGMNODE
      */
     //rc = PDMDevHlpSSMRegister(pDevIns, GIC_NEM_SAVED_STATE_VERSION, 0 /*cbGuess*/, gicR3HvSaveExec, gicR3HvLoadExec);
     //AssertRCReturn(rc, rc);
-
 
     /*
      * Statistics.
