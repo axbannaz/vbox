@@ -322,6 +322,7 @@ void UIToolsView::prepareThis()
     model()->setView(this);
 
     /* Set minimum size-hint policy: */
+    setFocusPolicy(Qt::TabFocus);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     /* Setup frame: */
