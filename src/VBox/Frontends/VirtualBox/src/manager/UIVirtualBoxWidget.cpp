@@ -404,9 +404,6 @@ void UIVirtualBoxWidget::prepareWidgets()
 
     /* Update toolbar finally: */
     updateToolbar();
-
-    /* Bring the VM list to the focus: */
-    chooser()->setFocus();
 }
 
 void UIVirtualBoxWidget::prepareConnections()

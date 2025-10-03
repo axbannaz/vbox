@@ -462,11 +462,13 @@ void UIMachineToolsWidget::prepareWidgets()
 
             /* Add into layout: */
             pLayout->addWidget(m_pSplitter);
+
+            /* Bring the VM list to the focus, this have to be done after hierarchy is
+             * finalized for the parent, i.e. splitter is inserted into layout: */
+            if (chooser())
+                chooser()->setFocus();
         }
     }
-
-    /* Bring the VM list to the focus: */
-    chooser()->setFocus();
 }
 
 void UIMachineToolsWidget::prepareConnections()

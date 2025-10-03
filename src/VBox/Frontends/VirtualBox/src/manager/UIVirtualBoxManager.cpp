@@ -2527,8 +2527,17 @@ void UIVirtualBoxManager::prepareWidgets()
 {
     /* Prepare central-widget: */
     m_pWidget = new UIVirtualBoxWidget(this);
+    QWidget *pLastFocusedWidget = m_pWidget->focusWidget();
     if (m_pWidget)
+    {
+        /* Insert widget into QMainWindow: */
         setCentralWidget(m_pWidget);
+
+        /* Restore last focused widget lost during
+         * hierarchy change done by setCentralWidget: */
+        if (pLastFocusedWidget)
+            pLastFocusedWidget->setFocus();
+    }
 }
 
 void UIVirtualBoxManager::prepareConnections()
