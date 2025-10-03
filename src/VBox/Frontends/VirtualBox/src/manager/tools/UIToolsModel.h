@@ -207,11 +207,14 @@ private:
         void cleanup();
     /** @} */
 
-    /** @name General stuff.
+    /** @name Event handling stuff.
       * @{ */
         /** Handles request to trigger @a pItem. */
         bool triggerItem(UIToolsItem *pItem);
+    /** @} */
 
+    /** @name General stuff.
+      * @{ */
         /** Holds the passed tool class. */
         const UIToolClass  m_enmClass;
 
