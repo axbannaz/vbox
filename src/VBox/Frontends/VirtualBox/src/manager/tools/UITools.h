@@ -86,24 +86,6 @@ private:
       * @{ */
         /** Prepares all. */
         void prepare();
-        /** Prepares contents. */
-        void prepareContents();
-        /** Prepares model. */
-        void prepareModel();
-        /** Prepares view. */
-        void prepareView();
-        /** Prepares connections. */
-        void prepareConnections();
-
-        /** Inits model. */
-        void initModel();
-
-        /** Cleanups connections. */
-        void cleanupConnections();
-        /** Cleanups view. */
-        void cleanupView();
-        /** Cleanups model. */
-        void cleanupModel();
         /** Cleanups all. */
         void cleanup();
     /** @} */
@@ -114,7 +96,7 @@ private:
         const UIToolClass  m_enmClass;
 
         /** Holds the layout alignment. */
-        Qt::Alignment  m_enmAlignment;
+        const Qt::Alignment  m_enmAlignment;
 
         /** Holds the main layout instance. */
         QVBoxLayout  *m_pMainLayout;

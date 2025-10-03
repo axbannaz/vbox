@@ -37,8 +37,7 @@
 #include "iprt/assert.h"
 
 
-UITools::UITools(QWidget *pParent,
-                 UIToolClass enmClass)
+UITools::UITools(QWidget *pParent, UIToolClass enmClass)
     : QWidget(pParent, Qt::Widget)
     , m_enmClass(enmClass)
     , m_enmAlignment(m_enmClass == UIToolClass_Machine ? Qt::Horizontal : Qt::Vertical)
@@ -81,16 +80,6 @@ void UITools::setRestrictedToolTypes(const QList<UIToolType> &types)
 
 void UITools::prepare()
 {
-    /* Prepare everything: */
-    prepareContents();
-    prepareConnections();
-
-    /* Init model finally: */
-    initModel();
-}
-
-void UITools::prepareContents()
-{
     /* Setup own layout rules: */
     switch (m_enmAlignment)
     {
@@ -102,78 +91,50 @@ void UITools::prepareContents()
             break;
     }
 
-    /* Prepare main-layout: */
-    m_pMainLayout = new QVBoxLayout(this);
-    if (m_pMainLayout)
-    {
-        m_pMainLayout->setContentsMargins(1, 1, 1, 1);
-        m_pMainLayout->setSpacing(0);
-
-        /* Prepare model: */
-        prepareModel();
-    }
-}
-
-void UITools::prepareModel()
-{
     /* Prepare model: */
     m_pToolsModel = new UIToolsModel(this, m_enmClass);
     if (m_pToolsModel)
-        prepareView();
-}
-
-void UITools::prepareView()
-{
-    AssertPtrReturnVoid(m_pToolsModel);
-    AssertPtrReturnVoid(m_pMainLayout);
-
-    /* Prepare view: */
-    m_pToolsView = new UIToolsView(this, m_enmClass, m_pToolsModel);
-    if (m_pToolsView)
     {
-        m_pToolsView->show();
-        setFocusProxy(m_pToolsView);
+        /* Prepare main-layout: */
+        m_pMainLayout = new QVBoxLayout(this);
+        if (m_pMainLayout)
+        {
+            m_pMainLayout->setContentsMargins(1, 1, 1, 1);
+            m_pMainLayout->setSpacing(0);
 
-        /* Add into layout: */
-        m_pMainLayout->addWidget(m_pToolsView);
+            /* Prepare view: */
+            m_pToolsView = new UIToolsView(this, m_enmClass, m_pToolsModel);
+            if (m_pToolsView)
+            {
+                m_pToolsView->show();
+                setFocusProxy(m_pToolsView);
+
+                /* Add into layout: */
+                m_pMainLayout->addWidget(m_pToolsView);
+            }
+        }
+
+        /* Prepare model connections: */
+        connect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
+                this, &UITools::sigSelectionChanged);
+
+        /* Init model finally: */
+        m_pToolsModel->init();
     }
-}
-
-void UITools::prepareConnections()
-{
-    /* Model connections: */
-    connect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
-            this, &UITools::sigSelectionChanged);
-}
-
-void UITools::initModel()
-{
-    m_pToolsModel->init();
-}
-
-void UITools::cleanupConnections()
-{
-    /* Model connections: */
-    disconnect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
-               this, &UITools::sigSelectionChanged);
-}
-
-void UITools::cleanupView()
-{
-    delete m_pToolsView;
-    m_pToolsView = 0;
-}
-
-void UITools::cleanupModel()
-{
-    delete m_pToolsModel;
-    m_pToolsModel = 0;
 }
 
 void UITools::cleanup()
 {
-    /* Cleanup everything: */
-    cleanupConnections();
-    cleanupView();
-    cleanupModel();
+    /* Cleanup model connections: */
+    if (m_pToolsModel)
+        disconnect(m_pToolsModel, &UIToolsModel::sigSelectionChanged,
+                   this, &UITools::sigSelectionChanged);
+
+    /* Cleanup view: */
+    delete m_pToolsView;
+    m_pToolsView = 0;
+
+    /* Cleanup model: */
+    delete m_pToolsModel;
+    m_pToolsModel = 0;
 }
