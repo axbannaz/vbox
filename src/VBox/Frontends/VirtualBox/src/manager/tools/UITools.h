@@ -92,10 +92,10 @@ private:
 
     /** @name General stuff.
       * @{ */
-        /** Holds the tool class. */
+        /** Holds the passed tool class. */
         const UIToolClass  m_enmClass;
 
-        /** Holds the layout alignment. */
+        /** Holds the layout alignment (based on tool class). */
         const Qt::Alignment  m_enmAlignment;
 
         /** Holds the main layout instance. */
