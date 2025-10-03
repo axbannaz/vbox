@@ -1598,14 +1598,8 @@ DECLINLINE(VBOXSTRICTRC) nemHCWinImportStateIfNeededStrict(PVMCPUCC pVCpu, uint6
  */
 DECLINLINE(void) nemR3WinCopyStateFromX64Header(PVMCPUCC pVCpu, WHV_VP_EXIT_CONTEXT const *pExitCtx)
 {
-#if 0
-    /* Already saved, do nothing. */
-    if (!(pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT)))
-        return;
-#else
     Assert(   (pVCpu->cpum.GstCtx.fExtrn & (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT))
            ==                              (CPUMCTX_EXTRN_RIP | CPUMCTX_EXTRN_RFLAGS | CPUMCTX_EXTRN_CS | CPUMCTX_EXTRN_INHIBIT_INT));
-#endif
 
     NEM_WIN_COPY_BACK_SEG(pVCpu->cpum.GstCtx.cs, pExitCtx->Cs);
     pVCpu->cpum.GstCtx.rip      = pExitCtx->Rip;
@@ -2491,11 +2485,13 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExit(PVMCC pVM, PVMCPUCC pVCpu, WHV_R
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitHalt);
             EMHistoryAddExit(pVCpu, EMEXIT_MAKE_FT(EMEXIT_F_KIND_NEM, NEMEXITTYPE_HALT),
                              pExit->VpContext.Rip + pExit->VpContext.Cs.Base, ASMReadTSC());
+            nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
             Log4(("HaltExit/%u\n", pVCpu->idCpu));
             return VINF_EM_HALT;
 
         case WHvRunVpExitReasonCanceled:
             STAM_REL_COUNTER_INC(&pVCpu->nem.s.StatExitCanceled);
+            nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
             return VINF_SUCCESS;
 
         case WHvRunVpExitReasonX64InterruptWindow:
