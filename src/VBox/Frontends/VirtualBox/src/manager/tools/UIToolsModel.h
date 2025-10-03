@@ -191,6 +191,8 @@ private:
         void prepareScene();
         /** Prepares items. */
         void prepareItems();
+        /** Prepare item for @a enmType. */
+        void prepareItem(UIToolType enmType);
         /** Prepare connections. */
         void prepareConnections();
 

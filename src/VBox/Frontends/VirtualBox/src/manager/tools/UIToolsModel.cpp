@@ -536,41 +536,39 @@ void UIToolsModel::prepareItems()
     {
         case UIToolClass_Global:
         {
-            /* Home: */
-            m_items << new UIToolsItem(scene(), UIToolType_Home);
-            /* Machines: */
-            m_items << new UIToolsItem(scene(), UIToolType_Machines);
-            /* Extensions: */
-            m_items << new UIToolsItem(scene(), UIToolType_Extensions);
-            /* Media: */
-            m_items << new UIToolsItem(scene(), UIToolType_Media);
-            /* Network: */
-            m_items << new UIToolsItem(scene(), UIToolType_Network);
-            /* Cloud: */
-            m_items << new UIToolsItem(scene(), UIToolType_Cloud);
-            /* Resources: */
-            m_items << new UIToolsItem(scene(), UIToolType_Resources);
-            /* Toggle: */
-            m_items << new UIToolsItem(scene(), UIToolType_Toggle);
+            prepareItem(UIToolType_Home);
+            prepareItem(UIToolType_Machines);
+            prepareItem(UIToolType_Extensions);
+            prepareItem(UIToolType_Media);
+            prepareItem(UIToolType_Network);
+            prepareItem(UIToolType_Cloud);
+            prepareItem(UIToolType_Resources);
+            prepareItem(UIToolType_Toggle);
             break;
         }
         case UIToolClass_Machine:
         {
-            /* Details: */
-            m_items << new UIToolsItem(scene(), UIToolType_Details);
-            /* Snapshots: */
-            m_items << new UIToolsItem(scene(), UIToolType_Snapshots);
-            /* Logs: */
-            m_items << new UIToolsItem(scene(), UIToolType_Logs);
-            /* Resource Use: */
-            m_items << new UIToolsItem(scene(), UIToolType_ResourceUse);
-            /* File Manager: */
-            m_items << new UIToolsItem(scene(), UIToolType_FileManager);
+            prepareItem(UIToolType_Details);
+            prepareItem(UIToolType_Snapshots);
+            prepareItem(UIToolType_Logs);
+            prepareItem(UIToolType_ResourceUse);
+            prepareItem(UIToolType_FileManager);
             break;
         }
         default:
             AssertFailedReturnVoid();
             break;
+    }
+}
+
+void UIToolsModel::prepareItem(UIToolType enmType)
+{
+    /* Prepare item: */
+    UIToolsItem *pItem = new UIToolsItem(scene(), enmType);
+    if (pItem)
+    {
+        /* Append item to the list: */
+        m_items << pItem;
     }
 }
 
