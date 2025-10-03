@@ -36,7 +36,6 @@
 #include <QStyle>
 #include <QStyleOptionGraphicsItem>
 #include <QToolTip>
-#include <QWindow>
 
 /* GUI includes: */
 #include "UICommon.h"
@@ -333,8 +332,8 @@ UIToolsItemAnimation::UIToolsItemAnimation(QObject *pTarget, const QByteArray &p
 UIToolsItem::UIToolsItem(QGraphicsScene *pScene, const QIcon &icon, UIToolType enmType)
     : m_pScene(pScene)
     , m_icon(icon)
-    , m_enmClass(UIToolStuff::castTypeToClass(enmType))
     , m_enmType(enmType)
+    , m_enmClass(UIToolStuff::castTypeToClass(itemType()))
     , m_enmReason(HidingReason_Null)
     , m_fHovered(false)
     , m_iPreviousMinimumWidthHint(0)
@@ -352,7 +351,11 @@ UIToolsItem::~UIToolsItem()
 
 UIToolsModel *UIToolsItem::model() const
 {
-    UIToolsModel *pModel = qobject_cast<UIToolsModel*>(QIGraphicsWidget::scene()->parent());
+    /* Sanity check: */
+    AssertPtrReturn(m_pScene, 0);
+
+    /* Acquire model from parent scene: */
+    UIToolsModel *pModel = qobject_cast<UIToolsModel*>(m_pScene->parent());
     AssertMsg(pModel, ("Incorrect graphics scene parent set!"));
     return pModel;
 }
@@ -360,7 +363,7 @@ UIToolsModel *UIToolsItem::model() const
 void UIToolsItem::setName(const QString &strName)
 {
     /* If name changed: */
-    if (m_strName != strName)
+    if (name() != strName)
     {
         /* Update linked values: */
         m_strName = strName;
@@ -411,6 +414,9 @@ void UIToolsItem::updateGeometry()
 
 int UIToolsItem::minimumWidthHint() const
 {
+    /* Sanity check: */
+    AssertPtrReturn(model(), 0);
+
     /* Prepare variables: */
     const int iMargin = data(ToolsItemData_Margin).toInt();
     const int iSpacing = data(ToolsItemData_Spacing).toInt();
@@ -422,7 +428,7 @@ int UIToolsItem::minimumWidthHint() const
     iProposedWidth += 2 * iMargin;
 #ifdef VBOX_WS_MAC
     /* Additional margin for non-Machine items (Global & Aux): */
-    if (m_enmClass == UIToolClass_Machine)
+    if (itemClass() == UIToolClass_Machine)
         iProposedWidth += iMargin;
     else
         iProposedWidth += 2 * iMargin;
@@ -437,9 +443,9 @@ int UIToolsItem::minimumWidthHint() const
     /* Take into account label size for non-Aux tools
      * 1. if text labels requested or
      * 2. machine item selected: */
-    const bool fCondition1 = m_enmClass == UIToolClass_Global && model()->showItemNames();
-    const bool fCondition2 = m_enmClass == UIToolClass_Machine && (   model()->showItemNames()
-                                                                   || model()->currentItem() == this);
+    const bool fCondition1 = itemClass() == UIToolClass_Global && model()->showItemNames();
+    const bool fCondition2 = itemClass() == UIToolClass_Machine && (   model()->showItemNames()
+                                                                    || model()->currentItem() == this);
     if (fCondition1 || fCondition2)
     {
         iProposedWidth += m_nameSize.width();
@@ -493,18 +499,23 @@ void UIToolsItem::showEvent(QShowEvent *pEvent)
 
 void UIToolsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *)
 {
-    if (!m_fHovered)
+    if (!isHovered())
     {
+        /* Sanity check: */
+        AssertPtrReturnVoid(model());
+        AssertPtrReturnVoid(model()->view());
+        AssertPtrReturnVoid(model()->view()->parentWidget());
+
         m_fHovered = true;
 
         /* Show tooltip for all tools
          * 0. for Aux unconditionally
          * 1. for Global if text labels hidden
          * 2. For Machine if text labels hidden and item isn't selected: */
-        const bool fCondition0 = m_enmClass == UIToolClass_Aux;
-        const bool fCondition1 = m_enmClass == UIToolClass_Global && !model()->showItemNames();
-        const bool fCondition2 = m_enmClass == UIToolClass_Machine && !model()->showItemNames()
-                                                                   && model()->currentItem() != this;
+        const bool fCondition0 = itemClass() == UIToolClass_Aux;
+        const bool fCondition1 = itemClass() == UIToolClass_Global && !model()->showItemNames();
+        const bool fCondition2 = itemClass() == UIToolClass_Machine && !model()->showItemNames()
+                                                                    && model()->currentItem() != this;
         if (fCondition0 || fCondition1 || fCondition2)
         {
             const QPointF posAtScene = mapToScene(rect().topRight() + QPoint(3, -3));
@@ -521,7 +532,7 @@ void UIToolsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *)
 
 void UIToolsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent *)
 {
-    if (m_fHovered)
+    if (isHovered())
     {
         m_fHovered = false;
         update();
@@ -560,7 +571,7 @@ void UIToolsItem::sltHandleWindowRemapped()
 void UIToolsItem::prepare()
 {
     /* Add item to the scene: */
-    AssertMsg(m_pScene, ("Incorrect scene passed!"));
+    AssertPtrReturnVoid(m_pScene);
     m_pScene->addItem(this);
 
     /* Install Tools-view item accessibility interface factory: */
@@ -625,7 +636,7 @@ QVariant UIToolsItem::data(int iKey) const
         case ToolsItemData_Spacing:
         {
             const int iHint = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
-            return m_enmClass == UIToolClass_Machine ? iHint / 4 : iHint / 2;
+            return itemClass() == UIToolClass_Machine ? iHint / 4 : iHint / 2;
         }
         case ToolsItemData_Padding:
         {
@@ -683,7 +694,7 @@ void UIToolsItem::updateNameSize()
 {
     /* Calculate new name size: */
     const QFontMetrics fm(data(Qt::FontRole).value<QFont>(), model()->paintDevice());
-    const QSize nameSize = QSize(fm.horizontalAdvance(m_strName), fm.height());
+    const QSize nameSize = QSize(fm.horizontalAdvance(name()), fm.height());
 
     /* Update linked values: */
     if (m_nameSize != nameSize)
@@ -779,7 +790,7 @@ void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) co
     }
 
     /* Hovering background for widget: */
-    else if (m_fHovered)
+    else if (isHovered())
     {
         /* Prepare variables: */
         const int iMargin = data(ToolsItemData_Margin).toInt();
@@ -798,7 +809,7 @@ void UIToolsItem::paintBackground(QPainter *pPainter, const QRect &rectangle) co
         subRect.setWidth(subRect.height());
 #ifdef VBOX_WS_MAC
         /* Take into account additional margin for non-Machine items (Global & Aux): */
-        if (m_enmClass == UIToolClass_Machine)
+        if (itemClass() == UIToolClass_Machine)
             subRect.moveTopLeft(rectangle.topLeft() + QPoint(1.5 * iMargin - iPadding, iMargin - iPadding));
         else
             subRect.moveTopLeft(rectangle.topLeft() + QPoint(2 * iMargin - iPadding, iMargin - iPadding));
@@ -839,7 +850,7 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
 #ifdef VBOX_WS_MAC
         /* Take into account additional margin for non-Machine items (Global & Aux): */
         int iPixmapX = 0;
-        if (m_enmClass == UIToolClass_Machine)
+        if (itemClass() == UIToolClass_Machine)
             iPixmapX = 1.5 * iMargin;
         else
             iPixmapX = 2 * iMargin;
@@ -858,13 +869,13 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
     }
 
     /* Paint right column: */
-    if (m_enmClass != UIToolClass_Aux)
+    if (itemClass() != UIToolClass_Aux)
     {
         /* Prepare variables: */
 #ifdef VBOX_WS_MAC
         /* Take into account additional margin for non-Machine items (Global & Aux): */
         int iNameX = 0;
-        if (m_enmClass == UIToolClass_Machine)
+        if (itemClass() == UIToolClass_Machine)
             iNameX = 1.5 * iMargin + m_pixmapSize.width() + 2 * iSpacing;
         else
             iNameX = 2 * iMargin + m_pixmapSize.width() + 2 * iSpacing;
@@ -876,9 +887,9 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
         /* Paint name for non-Aux tools
          * 1. if text labels requested or
          * 2. machine item selected: */
-        const bool fCondition1 = m_enmClass == UIToolClass_Global && model()->showItemNames();
-        const bool fCondition2 = m_enmClass == UIToolClass_Machine && (   model()->showItemNames()
-                                                                       || model()->currentItem() == this);
+        const bool fCondition1 = itemClass() == UIToolClass_Global && model()->showItemNames();
+        const bool fCondition2 = itemClass() == UIToolClass_Machine && (   model()->showItemNames()
+                                                                        || model()->currentItem() == this);
         if (fCondition1 || fCondition2)
         {
             /* Acquire font: */
@@ -894,14 +905,14 @@ void UIToolsItem::paintToolInfo(QPainter *pPainter, const QRect &rectangle) cons
                       /* Paint device: */
                       model()->paintDevice(),
                       /* Text to paint: */
-                      m_strName);
+                      name());
 
             /* Paint animated underline: */
             if (hoveringProgress())
             {
                 QFontMetrics fm(fnt);
                 const double fRatio = (double)hoveringProgress() / 100;
-                const int iLength = fRatio * fm.horizontalAdvance(m_strName);
+                const int iLength = fRatio * fm.horizontalAdvance(name());
                 pPainter->drawLine(QPoint(iNameX, iNameY + fm.height()),
                                    QPoint(iNameX + iLength, iNameY + fm.height()));
             }
@@ -933,15 +944,6 @@ void UIToolsItem::paintText(QPainter *pPainter, QPoint point,
     point += QPoint(0, fm.ascent());
 
     /* Draw text: */
-    // QPainterPath textPath;
-    // textPath.addText(0, 0, font, strText);
-    // textPath.translate(point);
-    // pPainter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing);
-    // pPainter->setPen(QPen(uiCommon().isInDarkMode() ? Qt::black : Qt::white, 2, Qt::SolidLine, Qt::RoundCap));
-    // pPainter->drawPath(QPainterPathStroker().createStroke(textPath));
-    // pPainter->setBrush(uiCommon().isInDarkMode() ? Qt::white: Qt::black);
-    // pPainter->setPen(Qt::NoPen);
-    // pPainter->drawPath(textPath);
     pPainter->drawText(point, strText);
 
     /* Restore painter: */

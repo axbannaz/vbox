@@ -38,7 +38,7 @@
 
 /* GUI includes: */
 #include "QIGraphicsWidget.h"
-#include "UITools.h"
+#include "UIExtraDataDefs.h"
 
 /* Forward declaration: */
 class QGraphicsScene;
@@ -92,9 +92,6 @@ public:
       * @{ */
         /** Returns model reference. */
         UIToolsModel *model() const;
-
-        /** Returns item icon. */
-        QIcon icon() const { return m_icon; }
 
         /** Returns item name. */
         QString name() const { return m_strName; }
@@ -240,28 +237,29 @@ private:
 
     /** @name Item stuff.
       * @{ */
-        /** Holds the item parent. */
-        QGraphicsScene *m_pScene;
-        /** Holds the item icon. */
-        QIcon           m_icon;
-        /** Holds the item name. */
-        QString         m_strName;
-        /** Holds the item class. */
-        UIToolClass     m_enmClass;
-        /** Holds the item type. */
-        UIToolType      m_enmType;
+        /** Holds the passed item scene. */
+        QGraphicsScene   *m_pScene;
+        /** Holds the passed item icon. */
+        const QIcon       m_icon;
+        /** Holds the passed item type. */
+        const UIToolType  m_enmType;
 
-        /** Holds the item pixmap. */
+        /** Holds the item class (based on type). */
+        const UIToolClass  m_enmClass;
+
+        /** Holds the item pixmap (based on icon). */
         QPixmap  m_pixmap;
+
+        /** Holds the item name. */
+        QString  m_strName;
+        /** Holds the item description. */
+        QString  m_strDescription;
 
         /** Holds the hiding reason. */
         HidingReason  m_enmReason;
 
         /** Holds whether item is hovered. */
         bool  m_fHovered;
-
-        /** Holds item description. */
-        QString  m_strDescription;
     /** @} */
 
     /** @name Layout stuff.
