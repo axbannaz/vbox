@@ -89,7 +89,7 @@ public:
         void init();
 
         /** Returns the scene reference. */
-        QGraphicsScene *scene() const;
+        QGraphicsScene *scene() const { return m_pScene; }
         /** Returns the paint device reference. */
         QPaintDevice *paintDevice() const;
 
@@ -97,19 +97,19 @@ public:
         QGraphicsItem *itemAt(const QPointF &position) const;
 
         /** Returns tools-view reference. */
-        UIToolsView *view() const;
+        UIToolsView *view() const { return m_pView; }
         /** Defines tools @a pView reference. */
         void setView(UIToolsView *pView);
 
-        /** Defines current tools @a enmType. */
-        void setToolsType(UIToolType enmType);
         /** Returns current tools type. */
         UIToolType toolsType() const;
+        /** Defines current tools @a enmType. */
+        void setToolsType(UIToolType enmType);
 
+        /** Returns whether tool items enabled.*/
+        bool isItemsEnabled() const { return m_fItemsEnabled; }
         /** Defines whether tool items @a fEnabled.*/
         void setItemsEnabled(bool fEnabled);
-        /** Returns whether tool items enabled.*/
-        bool isItemsEnabled() const;
 
         /** Defines restricted tool @a types. */
         void setRestrictedToolTypes(const QList<UIToolType> &types);
@@ -127,15 +127,15 @@ public:
         UIToolsItem *item(UIToolType enmType) const;
 
         /** Returns whether we should show item names. */
-        bool showItemNames() const;
+        bool showItemNames() const { return m_fShowItemNames; }
     /** @} */
 
     /** @name Selection stuff.
       * @{ */
-        /** Defines current @a pItem. */
-        void setCurrentItem(UIToolsItem *pItem);
         /** Returns current item. */
         UIToolsItem *currentItem() const;
+        /** Defines current @a pItem. */
+        void setCurrentItem(UIToolsItem *pItem);
     /** @} */
 
     /** @name Layout stuff.
@@ -209,19 +209,20 @@ private:
 
     /** @name General stuff.
       * @{ */
-        /** Handles request to select passed @a pItem. */
-        bool maybeSelectItem(UIToolsItem *pItem);
+        /** Handles request to trigger @a pItem. */
+        bool triggerItem(UIToolsItem *pItem);
 
-        /** Holds the tool class. */
+        /** Holds the passed tool class. */
         const UIToolClass  m_enmClass;
 
-        /** Holds the layout alignment. */
-        Qt::Alignment  m_enmAlignment;
+        /** Holds the layout alignment (based on tool class). */
+        const Qt::Alignment  m_enmAlignment;
+
+        /** Holds the scene instance. */
+        QGraphicsScene *m_pScene;
 
         /** Holds the view reference. */
-        UIToolsView    *m_pView;
-        /** Holds the scene reference. */
-        QGraphicsScene *m_pScene;
+        UIToolsView *m_pView;
 
         /** Holds whether items enabled. */
         bool  m_fItemsEnabled;

@@ -50,8 +50,8 @@ UIToolsModel::UIToolsModel(QObject *pParent, UIToolClass enmClass)
     : QObject(pParent)
     , m_enmClass(enmClass)
     , m_enmAlignment(m_enmClass == UIToolClass_Machine ? Qt::Horizontal : Qt::Vertical)
-    , m_pView(0)
     , m_pScene(0)
+    , m_pView(0)
     , m_fItemsEnabled(true)
     , m_fShowItemNames(gEDataManager->isToolTextVisible())
 {
@@ -74,11 +74,6 @@ void UIToolsModel::init()
     loadCurrentItems();
 }
 
-QGraphicsScene *UIToolsModel::scene() const
-{
-    return m_pScene;
-}
-
 QPaintDevice *UIToolsModel::paintDevice() const
 {
     if (scene() && !scene()->views().isEmpty())
@@ -89,11 +84,6 @@ QPaintDevice *UIToolsModel::paintDevice() const
 QGraphicsItem *UIToolsModel::itemAt(const QPointF &position) const
 {
     return scene() ? scene()->itemAt(position, QTransform()) : 0;
-}
-
-UIToolsView *UIToolsModel::view() const
-{
-    return m_pView;
 }
 
 void UIToolsModel::setView(UIToolsView *pView)
@@ -116,15 +106,15 @@ void UIToolsModel::setView(UIToolsView *pView)
     }
 }
 
+UIToolType UIToolsModel::toolsType() const
+{
+    return currentItem() ? currentItem()->itemType() : UIToolType_Invalid;
+}
+
 void UIToolsModel::setToolsType(UIToolType enmType)
 {
     if (!currentItem() || currentItem()->itemType() != enmType)
         setCurrentItem(item(enmType));
-}
-
-UIToolType UIToolsModel::toolsType() const
-{
-    return currentItem() ? currentItem()->itemType() : UIToolType_Invalid;
 }
 
 void UIToolsModel::setItemsEnabled(bool fEnabled)
@@ -135,11 +125,6 @@ void UIToolsModel::setItemsEnabled(bool fEnabled)
         foreach (UIToolsItem *pItem, items())
             pItem->setEnabled(m_fItemsEnabled);
     }
-}
-
-bool UIToolsModel::isItemsEnabled() const
-{
-    return m_fItemsEnabled;
 }
 
 void UIToolsModel::setRestrictedToolTypes(const QList<UIToolType> &types)
@@ -173,6 +158,24 @@ QVariant UIToolsModel::data(int iKey) const
         default: break;
     }
     return QVariant();
+}
+
+QList<UIToolsItem*> UIToolsModel::items() const
+{
+    return m_items;
+}
+
+UIToolsItem *UIToolsModel::item(UIToolType enmType) const
+{
+    foreach (UIToolsItem *pItem, items())
+        if (pItem->itemType() == enmType)
+            return pItem;
+    return 0;
+}
+
+UIToolsItem *UIToolsModel::currentItem() const
+{
+    return m_pCurrentItem;
 }
 
 void UIToolsModel::setCurrentItem(UIToolsItem *pItem)
@@ -215,29 +218,6 @@ void UIToolsModel::setCurrentItem(UIToolsItem *pItem)
 
     /* Notify about selection change: */
     emit sigSelectionChanged(toolsType());
-}
-
-UIToolsItem *UIToolsModel::currentItem() const
-{
-    return m_pCurrentItem;
-}
-
-QList<UIToolsItem*> UIToolsModel::items() const
-{
-    return m_items;
-}
-
-UIToolsItem *UIToolsModel::item(UIToolType enmType) const
-{
-    foreach (UIToolsItem *pItem, items())
-        if (pItem->itemType() == enmType)
-            return pItem;
-    return 0;
-}
-
-bool UIToolsModel::showItemNames() const
-{
-    return m_fShowItemNames;
 }
 
 void UIToolsModel::updateLayout()
@@ -431,7 +411,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 if (iPosition > 0 && iPosition < items().size())
                     pPreviousItem = items().at(iPosition - 1);
                 if (pPreviousItem && pPreviousItem->isEnabled() && pPreviousItem->itemClass() != UIToolClass_Aux)
-                    return maybeSelectItem(pPreviousItem);
+                    return triggerItem(pPreviousItem);
             }
 
             /* Down key for Global tools, Right key for Machine tools: */
@@ -445,7 +425,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 if (iPosition >= 0 && iPosition < items().size() - 1)
                     pNextItem = items().at(iPosition + 1);
                 if (pNextItem && pNextItem->isEnabled() && pNextItem->itemClass() != UIToolClass_Aux)
-                    return maybeSelectItem(pNextItem);
+                    return triggerItem(pNextItem);
             }
 
             break;
@@ -462,7 +442,7 @@ bool UIToolsModel::eventFilter(QObject *pWatched, QEvent *pEvent)
                 /* Which item we just clicked? Is it enabled? */
                 UIToolsItem *pClickedItem = qgraphicsitem_cast<UIToolsItem*>(pItemUnderMouse);
                 if (pClickedItem && pClickedItem->isEnabled())
-                    return maybeSelectItem(pClickedItem);
+                    return triggerItem(pClickedItem);
             }
             break;
         }
@@ -735,7 +715,7 @@ void UIToolsModel::cleanup()
     cleanupScene();
 }
 
-bool UIToolsModel::maybeSelectItem(UIToolsItem *pItem)
+bool UIToolsModel::triggerItem(UIToolsItem *pItem)
 {
     /* Handle known item classes: */
     switch (pItem->itemClass())
