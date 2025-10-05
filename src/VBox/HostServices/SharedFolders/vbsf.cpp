@@ -2459,7 +2459,32 @@ int vbsfRemove(SHFLCLIENTDATA *pClient, SHFLROOT root, PCSHFLSTRING pPath, uint3
                         if (RT_SUCCESS(rc2))
                         {
                             if (!cProcs)
+                            {
                                 LogRel(("RTPathQueryProcessesUsing(%s,,,) -> %Rrc, found 0 processes accessing the file\n", pszFullPath, rc2));
+#ifdef RT_OS_WINDOWS
+                                /* Try a few times on Windows, there seems to be a race during high load, see https://github.com/python/cpython/issues/84324 . */
+                                uint32_t cTries = 5;
+                                do
+                                {
+                                    if (flags & SHFL_REMOVE_SYMLINK)
+                                        rc = RTSymlinkDelete(pszFullPath, 0);
+                                    else if (flags & SHFL_REMOVE_FILE)
+                                        rc = RTFileDelete(pszFullPath);
+                                    else
+                                        rc = RTDirRemove(pszFullPath);
+                                    if (RT_SUCCESS(rc))
+                                        break;
+                                    RTThreadSleep(100);
+                                } while (--cTries > 0 && rc == VERR_SHARING_VIOLATION);
+
+                                if (flags & SHFL_REMOVE_SYMLINK)
+                                    LogRel(("RTSymlinkDelete(%s, 0) -> %Rrc\n", pszFullPath, rc));
+                                else if (flags & SHFL_REMOVE_FILE)
+                                    LogRel(("RTFileDelete(%s) -> %Rrc\n", pszFullPath, rc));
+                                else
+                                    LogRel(("RTDirRemove(%s) -> %Rrc\n", pszFullPath, rc));
+#endif
+                            }
                             else
                                 for (uint32_t i = 0; i < cProcs; i++)
                                 {
