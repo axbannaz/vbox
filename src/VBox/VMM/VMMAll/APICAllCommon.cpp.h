@@ -51,7 +51,6 @@ DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
 }
 
 
-# ifdef VMM_APIC_TEMPLATE_USES_INFO_FUNCS
 /**
  * Gets the APIC mode given the base MSR value.
  *
@@ -78,6 +77,8 @@ static XAPICMODE apicCommonGetMode(uint64_t uApicBaseMsr)
     return enmMode;
 }
 
+
+# ifdef VMM_APIC_TEMPLATE_USES_INFO_FUNCS
 
 /**
  * Gets the descriptive APIC mode.
