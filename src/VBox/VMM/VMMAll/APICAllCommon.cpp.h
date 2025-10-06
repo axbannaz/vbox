@@ -37,7 +37,184 @@
 #endif
 
 
+/**
+ * Gets the timer shift value.
+ *
+ * @returns The timer shift value.
+ * @param   pXApicPage      The xAPIC page.
+ */
+DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
+{
+    /* See Intel spec. 10.5.4 "APIC Timer". */
+    uint32_t uShift = pXApicPage->timer_dcr.u.u2DivideValue0 | (pXApicPage->timer_dcr.u.u1DivideValue1 << 2);
+    return (uShift + 1) & 7;
+}
+
+
+/**
+ * Gets the APIC mode given the base MSR value.
+ *
+ * @returns The APIC mode.
+ * @param   uApicBaseMsr        The APIC Base MSR value.
+ */
+static XAPICMODE apicCommonGetMode(uint64_t uApicBaseMsr)
+{
+    uint32_t const  uMode   = (uApicBaseMsr >> 10) & UINT64_C(3);
+    XAPICMODE const enmMode = (XAPICMODE)uMode;
+#ifdef VBOX_STRICT
+    /* Paranoia. */
+    switch (uMode)
+    {
+        case XAPICMODE_DISABLED:
+        case XAPICMODE_INVALID:
+        case XAPICMODE_XAPIC:
+        case XAPICMODE_X2APIC:
+            break;
+        default:
+            AssertMsgFailed(("Invalid mode"));
+    }
+#endif
+    return enmMode;
+}
+
+
+/**
+ * Gets the descriptive APIC mode.
+ *
+ * @returns The name.
+ * @param   enmMode     The xAPIC mode.
+ */
+static const char *apicCommonGetModeName(XAPICMODE enmMode)
+{
+    switch (enmMode)
+    {
+        case XAPICMODE_DISABLED:  return "Disabled";
+        case XAPICMODE_XAPIC:     return "xAPIC";
+        case XAPICMODE_X2APIC:    return "x2APIC";
+        default:                  break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the descriptive destination format name.
+ *
+ * @returns The destination format name.
+ * @param   enmDestFormat       The destination format.
+ */
+static const char *apicCommonGetDestFormatName(XAPICDESTFORMAT enmDestFormat)
+{
+    switch (enmDestFormat)
+    {
+        case XAPICDESTFORMAT_FLAT:      return "Flat";
+        case XAPICDESTFORMAT_CLUSTER:   return "Cluster";
+        default:                        break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the descriptive delivery mode name.
+ *
+ * @returns The delivery mode name.
+ * @param   enmDeliveryMode     The delivery mode.
+ */
+static const char *apicCommonGetDeliveryModeName(XAPICDELIVERYMODE enmDeliveryMode)
+{
+    switch (enmDeliveryMode)
+    {
+        case XAPICDELIVERYMODE_FIXED:        return "Fixed";
+        case XAPICDELIVERYMODE_LOWEST_PRIO:  return "Lowest-priority";
+        case XAPICDELIVERYMODE_SMI:          return "SMI";
+        case XAPICDELIVERYMODE_NMI:          return "NMI";
+        case XAPICDELIVERYMODE_INIT:         return "INIT";
+        case XAPICDELIVERYMODE_STARTUP:      return "SIPI";
+        case XAPICDELIVERYMODE_EXTINT:       return "ExtINT";
+        default:                             break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the descriptive destination mode name.
+ *
+ * @returns The destination mode name.
+ * @param   enmDestMode     The destination mode.
+ */
+static const char *apicCommonGetDestModeName(XAPICDESTMODE enmDestMode)
+{
+    switch (enmDestMode)
+    {
+        case XAPICDESTMODE_PHYSICAL:  return "Physical";
+        case XAPICDESTMODE_LOGICAL:   return "Logical";
+        default:                      break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the descriptive trigger mode name.
+ *
+ * @returns The trigger mode name.
+ * @param   enmTriggerMode     The trigger mode.
+ */
+static const char *apicCommonGetTriggerModeName(XAPICTRIGGERMODE enmTriggerMode)
+{
+    switch (enmTriggerMode)
+    {
+        case XAPICTRIGGERMODE_EDGE:     return "Edge";
+        case XAPICTRIGGERMODE_LEVEL:    return "Level";
+        default:                        break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the destination shorthand name.
+ *
+ * @returns The destination shorthand name.
+ * @param   enmDestShorthand     The destination shorthand.
+ */
+static const char *apicCommonGetDestShorthandName(XAPICDESTSHORTHAND enmDestShorthand)
+{
+    switch (enmDestShorthand)
+    {
+        case XAPICDESTSHORTHAND_NONE:           return "None";
+        case XAPICDESTSHORTHAND_SELF:           return "Self";
+        case XAPIDDESTSHORTHAND_ALL_INCL_SELF:  return "All including self";
+        case XAPICDESTSHORTHAND_ALL_EXCL_SELF:  return "All excluding self";
+        default:                                break;
+    }
+    return "Invalid";
+}
+
+
+/**
+ * Gets the timer mode name.
+ *
+ * @returns The timer mode name.
+ * @param   enmTimerMode         The timer mode.
+ */
+static const char *apicCommonGetTimerModeName(XAPICTIMERMODE enmTimerMode)
+{
+    switch (enmTimerMode)
+    {
+        case XAPICTIMERMODE_ONESHOT:        return "One-shot";
+        case XAPICTIMERMODE_PERIODIC:       return "Periodic";
+        case XAPICTIMERMODE_TSC_DEADLINE:   return "TSC deadline";
+        default:                            break;
+    }
+    return "Invalid";
+}
+
+
 # ifdef VMM_APIC_TEMPLATE_ALL_COMMON
+
 /**
  * @copydoc{PDMAPICBACKENDR3::pfnInitIpi}
  */
@@ -329,21 +506,6 @@ static void apicCommonResetBaseMsr(PVMCPUCC pVCpu)
     ASMAtomicWriteU64(&pVCpu->apic.s.uApicBaseMsr, uApicBaseMsr);
 }
 # endif /* VMM_APIC_TEMPLATE_ALL_COMMON */
-
-
-/**
- * Gets the timer shift value.
- *
- * @returns The timer shift value.
- * @param   pXApicPage      The xAPIC page.
- */
-DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
-{
-    /* See Intel spec. 10.5.4 "APIC Timer". */
-    uint32_t uShift = pXApicPage->timer_dcr.u.u2DivideValue0 | (pXApicPage->timer_dcr.u.u1DivideValue1 << 2);
-    return (uShift + 1) & 7;
-}
-
 
 # if defined(IN_RING3) && defined(VMM_APIC_TEMPLATE_R3_COMMON)
 /**

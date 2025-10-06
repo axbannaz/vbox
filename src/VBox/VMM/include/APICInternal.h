@@ -371,15 +371,7 @@ typedef APICCPU *PAPICCPU;
 typedef APICCPU const *PCAPICCPU;
 AssertCompileMemberAlignment(APICCPU, uApicBaseMsr, 8);
 
-const char                   *apicGetModeName(XAPICMODE enmMode);
-const char                   *apicGetDestFormatName(XAPICDESTFORMAT enmDestFormat);
-const char                   *apicGetDeliveryModeName(XAPICDELIVERYMODE enmDeliveryMode);
-const char                   *apicGetDestModeName(XAPICDESTMODE enmDestMode);
-const char                   *apicGetTriggerModeName(XAPICTRIGGERMODE enmTriggerMode);
-const char                   *apicGetDestShorthandName(XAPICDESTSHORTHAND enmDestShorthand);
-const char                   *apicGetTimerModeName(XAPICTIMERMODE enmTimerMode);
 void                          apicHintTimerFreq(PPDMDEVINS pDevIns, PAPICCPU pApicCpu, uint32_t uInitialCount, uint8_t uTimerShift);
-XAPICMODE                     apicGetMode(uint64_t uApicBaseMsr);
 
 DECLCALLBACK(VBOXSTRICTRC)    apicReadMmio(PPDMDEVINS pDevIns, void *pvUser, RTGCPHYS off, void *pv, unsigned cb);
 DECLCALLBACK(VBOXSTRICTRC)    apicWriteMmio(PPDMDEVINS pDevIns, void *pvUser, RTGCPHYS off, void const *pv, unsigned cb);

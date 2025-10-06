@@ -1037,7 +1037,18 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvExportState(PVMCPUCC pVCpu)
     //    PPDMDEVINS pDevIns = VMCPU_TO_DEVINS(pVCpu);
     //    VBOXSTRICTRC rcStrict = apicR3HvGetTimerCcr(pDevIns, pVCpu, VINF_SUCCESS, &uCcr);
     //    if (RT_SUCCESS(rcStrict))
+    //    {
+    //        PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
     //        pXApicPage->timer_ccr.u32CurrentCount = uCcr;
+    //
+    //        PHVAPICCPU pHvApicCpu = VMCPU_TO_HVAPICCPU(pVCpu);
+    //        rcStrict = PDMDevHlpTimerLockClock(pDevIns, pHvApicCpu->hTimer, VINF_SUCCESS);
+    //        if (RT_SUCCESS(rcStrict))
+    //        {
+    //            apicR3HvStopTimer(pVCpu);
+    //            PDMDevHlpTimerUnlockClock(pDevIns, pHvApicCpu->hTimer);
+    //        }
+    //    }
     //    else
     //        AssertMsgFailed(("Failed to get timer CCR. rc=%Rrc\n", VBOXSTRICTRC_VAL(rcStrict)));
     //}
@@ -1056,184 +1067,6 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvExportState(PVMCPUCC pVCpu)
 #endif
     return VINF_SUCCESS;
 }
-
-
-/**
- * Gets the descriptive APIC mode.
- *
- * @returns The name.
- * @param   enmMode     The xAPIC mode.
- */
-const char *apicHvGetModeName(XAPICMODE enmMode)
-{
-    /** @todo Merge with APICAll. */
-    switch (enmMode)
-    {
-        case XAPICMODE_DISABLED:  return "Disabled";
-        case XAPICMODE_XAPIC:     return "xAPIC";
-        case XAPICMODE_X2APIC:    return "x2APIC";
-        default:                  break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive destination format name.
- *
- * @returns The destination format name.
- * @param   enmDestFormat       The destination format.
- */
-const char *apicHvGetDestFormatName(XAPICDESTFORMAT enmDestFormat)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmDestFormat)
-    {
-        case XAPICDESTFORMAT_FLAT:      return "Flat";
-        case XAPICDESTFORMAT_CLUSTER:   return "Cluster";
-        default:                        break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive delivery mode name.
- *
- * @returns The delivery mode name.
- * @param   enmDeliveryMode     The delivery mode.
- */
-const char *apicHvGetDeliveryModeName(XAPICDELIVERYMODE enmDeliveryMode)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmDeliveryMode)
-    {
-        case XAPICDELIVERYMODE_FIXED:        return "Fixed";
-        case XAPICDELIVERYMODE_LOWEST_PRIO:  return "Lowest-priority";
-        case XAPICDELIVERYMODE_SMI:          return "SMI";
-        case XAPICDELIVERYMODE_NMI:          return "NMI";
-        case XAPICDELIVERYMODE_INIT:         return "INIT";
-        case XAPICDELIVERYMODE_STARTUP:      return "SIPI";
-        case XAPICDELIVERYMODE_EXTINT:       return "ExtINT";
-        default:                             break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive destination mode name.
- *
- * @returns The destination mode name.
- * @param   enmDestMode     The destination mode.
- */
-const char *apicHvGetDestModeName(XAPICDESTMODE enmDestMode)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmDestMode)
-    {
-        case XAPICDESTMODE_PHYSICAL:  return "Physical";
-        case XAPICDESTMODE_LOGICAL:   return "Logical";
-        default:                      break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive trigger mode name.
- *
- * @returns The trigger mode name.
- * @param   enmTriggerMode     The trigger mode.
- */
-const char *apicHvGetTriggerModeName(XAPICTRIGGERMODE enmTriggerMode)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmTriggerMode)
-    {
-        case XAPICTRIGGERMODE_EDGE:     return "Edge";
-        case XAPICTRIGGERMODE_LEVEL:    return "Level";
-        default:                        break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the destination shorthand name.
- *
- * @returns The destination shorthand name.
- * @param   enmDestShorthand     The destination shorthand.
- */
-const char *apicHvGetDestShorthandName(XAPICDESTSHORTHAND enmDestShorthand)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmDestShorthand)
-    {
-        case XAPICDESTSHORTHAND_NONE:           return "None";
-        case XAPICDESTSHORTHAND_SELF:           return "Self";
-        case XAPIDDESTSHORTHAND_ALL_INCL_SELF:  return "All including self";
-        case XAPICDESTSHORTHAND_ALL_EXCL_SELF:  return "All excluding self";
-        default:                                break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the timer mode name.
- *
- * @returns The timer mode name.
- * @param   enmTimerMode         The timer mode.
- */
-const char *apicHvGetTimerModeName(XAPICTIMERMODE enmTimerMode)
-{
-    /** @todo Merge with APICAll. */
-
-    switch (enmTimerMode)
-    {
-        case XAPICTIMERMODE_ONESHOT:        return "One-shot";
-        case XAPICTIMERMODE_PERIODIC:       return "Periodic";
-        case XAPICTIMERMODE_TSC_DEADLINE:   return "TSC deadline";
-        default:                            break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the APIC mode given the base MSR value.
- *
- * @returns The APIC mode.
- * @param   uApicBaseMsr        The APIC Base MSR value.
- */
-XAPICMODE apicHvGetMode(uint64_t uApicBaseMsr)
-{
-    /** @todo Merge with APICAll. */
-
-    uint32_t const  uMode   = (uApicBaseMsr >> 10) & UINT64_C(3);
-    XAPICMODE const enmMode = (XAPICMODE)uMode;
-#ifdef VBOX_STRICT
-    /* Paranoia. */
-    switch (uMode)
-    {
-        case XAPICMODE_DISABLED:
-        case XAPICMODE_INVALID:
-        case XAPICMODE_XAPIC:
-        case XAPICMODE_X2APIC:
-            break;
-        default:
-            AssertMsgFailed(("Invalid mode"));
-    }
-#endif
-    return enmMode;
-}
-
 
 
 /**
@@ -1304,14 +1137,14 @@ static DECLCALLBACK(void) apicR3HvInfo(PVM pVM, PCDBGFINFOHLP pHlp, const char *
     PCX2APICPAGE pX2ApicPage = VMCPU_TO_CX2APICPAGE(pVCpu);
 
     uint64_t const  uBaseMsr = pHvApicCpu->uApicBaseMsr;
-    XAPICMODE const enmMode  = apicHvGetMode(uBaseMsr);
+    XAPICMODE const enmMode  = apicCommonGetMode(uBaseMsr);
     bool const   fX2ApicMode = XAPIC_IN_X2APIC_MODE(pVCpu->apic.s.uApicBaseMsr);
 
     pHlp->pfnPrintf(pHlp, "APIC%u:\n", pVCpu->idCpu);
     pHlp->pfnPrintf(pHlp, "  APIC Base MSR                 = %#RX64 (Addr=%#RX64%s%s%s)\n", uBaseMsr,
                     MSR_IA32_APICBASE_GET_ADDR(uBaseMsr), uBaseMsr & MSR_IA32_APICBASE_EN ? " en" : "",
                     uBaseMsr & MSR_IA32_APICBASE_BSP ? " bsp" : "", uBaseMsr & MSR_IA32_APICBASE_EXTD ? " extd" : "");
-    pHlp->pfnPrintf(pHlp, "  Mode                          = %u (%s)\n", enmMode, apicHvGetModeName(enmMode));
+    pHlp->pfnPrintf(pHlp, "  Mode                          = %u (%s)\n", enmMode, apicCommonGetModeName(enmMode));
     if (fX2ApicMode)
         pHlp->pfnPrintf(pHlp, "  APIC ID                       = %u (%#x)\n", pX2ApicPage->id.u32ApicId,
                                                                               pX2ApicPage->id.u32ApicId);
@@ -1338,7 +1171,7 @@ static DECLCALLBACK(void) apicR3HvInfo(PVM pVM, PCDBGFINFOHLP pHlp, const char *
     {
         pHlp->pfnPrintf(pHlp, "  DFR                           = %#x\n",  pXApicPage->dfr.all.u32Dfr);
         pHlp->pfnPrintf(pHlp, "    Model                         = %#x (%s)\n", pXApicPage->dfr.u.u4Model,
-                        apicHvGetDestFormatName((XAPICDESTFORMAT)pXApicPage->dfr.u.u4Model));
+                        apicCommonGetDestFormatName((XAPICDESTFORMAT)pXApicPage->dfr.u.u4Model));
     }
     pHlp->pfnPrintf(pHlp, "  SVR                           = %#x\n", pXApicPage->svr.all.u32Svr);
     pHlp->pfnPrintf(pHlp, "    Vector                        = %u (%#x)\n", pXApicPage->svr.u.u8SpuriousVector,
@@ -1361,16 +1194,16 @@ static DECLCALLBACK(void) apicR3HvInfo(PVM pVM, PCDBGFINFOHLP pHlp, const char *
     pHlp->pfnPrintf(pHlp, "    Vector                        = %u (%#x)\n", pXApicPage->icr_lo.u.u8Vector,
                                                                             pXApicPage->icr_lo.u.u8Vector);
     pHlp->pfnPrintf(pHlp, "    Delivery Mode                 = %#x (%s)\n", pXApicPage->icr_lo.u.u3DeliveryMode,
-                    apicHvGetDeliveryModeName((XAPICDELIVERYMODE)pXApicPage->icr_lo.u.u3DeliveryMode));
+                    apicCommonGetDeliveryModeName((XAPICDELIVERYMODE)pXApicPage->icr_lo.u.u3DeliveryMode));
     pHlp->pfnPrintf(pHlp, "    Destination Mode              = %#x (%s)\n", pXApicPage->icr_lo.u.u1DestMode,
-                    apicHvGetDestModeName((XAPICDESTMODE)pXApicPage->icr_lo.u.u1DestMode));
+                    apicCommonGetDestModeName((XAPICDESTMODE)pXApicPage->icr_lo.u.u1DestMode));
     if (!fX2ApicMode)
         pHlp->pfnPrintf(pHlp, "    Delivery Status               = %u\n",       pXApicPage->icr_lo.u.u1DeliveryStatus);
     pHlp->pfnPrintf(pHlp, "    Level                         = %u\n",       pXApicPage->icr_lo.u.u1Level);
     pHlp->pfnPrintf(pHlp, "    Trigger Mode                  = %u (%s)\n",  pXApicPage->icr_lo.u.u1TriggerMode,
-                    apicHvGetTriggerModeName((XAPICTRIGGERMODE)pXApicPage->icr_lo.u.u1TriggerMode));
+                    apicCommonGetTriggerModeName((XAPICTRIGGERMODE)pXApicPage->icr_lo.u.u1TriggerMode));
     pHlp->pfnPrintf(pHlp, "    Destination shorthand         = %#x (%s)\n", pXApicPage->icr_lo.u.u2DestShorthand,
-                    apicHvGetDestShorthandName((XAPICDESTSHORTHAND)pXApicPage->icr_lo.u.u2DestShorthand));
+                    apicCommonGetDestShorthandName((XAPICDESTSHORTHAND)pXApicPage->icr_lo.u.u2DestShorthand));
     pHlp->pfnPrintf(pHlp, "  ICR High                      = %#x\n",      pXApicPage->icr_hi.all.u32IcrHi);
     pHlp->pfnPrintf(pHlp, "    Destination field/mask        = %#x\n",      fX2ApicMode ? pX2ApicPage->icr_hi.u32IcrHi
                                                                           : pXApicPage->icr_hi.u.u8Dest);
@@ -1592,7 +1425,7 @@ static void apicR3HvInfoLvtTimer(PVMCPU pVCpu, PCDBGFINFOHLP pHlp)
     pHlp->pfnPrintf(pHlp, "  Delivery status    = %u\n",       pXApicPage->lvt_timer.u.u1DeliveryStatus);
     pHlp->pfnPrintf(pHlp, "  Masked             = %RTbool\n",  XAPIC_LVT_IS_MASKED(uLvtTimer));
     pHlp->pfnPrintf(pHlp, "  Timer Mode         = %#x (%s)\n", pXApicPage->lvt_timer.u.u2TimerMode,
-                    apicHvGetTimerModeName((XAPICTIMERMODE)pXApicPage->lvt_timer.u.u2TimerMode));
+                    apicCommonGetTimerModeName((XAPICTIMERMODE)pXApicPage->lvt_timer.u.u2TimerMode));
 }
 
 

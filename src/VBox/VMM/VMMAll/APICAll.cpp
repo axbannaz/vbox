@@ -262,168 +262,6 @@ static int apicMsrAccessError(PVMCPUCC pVCpu, uint32_t u32Reg, APICMSRACCESS enm
 
 
 /**
- * Gets the descriptive APIC mode.
- *
- * @returns The name.
- * @param   enmMode     The xAPIC mode.
- */
-const char *apicGetModeName(XAPICMODE enmMode)
-{
-    switch (enmMode)
-    {
-        case XAPICMODE_DISABLED:  return "Disabled";
-        case XAPICMODE_XAPIC:     return "xAPIC";
-        case XAPICMODE_X2APIC:    return "x2APIC";
-        default:                  break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive destination format name.
- *
- * @returns The destination format name.
- * @param   enmDestFormat       The destination format.
- */
-const char *apicGetDestFormatName(XAPICDESTFORMAT enmDestFormat)
-{
-    switch (enmDestFormat)
-    {
-        case XAPICDESTFORMAT_FLAT:      return "Flat";
-        case XAPICDESTFORMAT_CLUSTER:   return "Cluster";
-        default:                        break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive delivery mode name.
- *
- * @returns The delivery mode name.
- * @param   enmDeliveryMode     The delivery mode.
- */
-const char *apicGetDeliveryModeName(XAPICDELIVERYMODE enmDeliveryMode)
-{
-    switch (enmDeliveryMode)
-    {
-        case XAPICDELIVERYMODE_FIXED:        return "Fixed";
-        case XAPICDELIVERYMODE_LOWEST_PRIO:  return "Lowest-priority";
-        case XAPICDELIVERYMODE_SMI:          return "SMI";
-        case XAPICDELIVERYMODE_NMI:          return "NMI";
-        case XAPICDELIVERYMODE_INIT:         return "INIT";
-        case XAPICDELIVERYMODE_STARTUP:      return "SIPI";
-        case XAPICDELIVERYMODE_EXTINT:       return "ExtINT";
-        default:                             break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive destination mode name.
- *
- * @returns The destination mode name.
- * @param   enmDestMode     The destination mode.
- */
-const char *apicGetDestModeName(XAPICDESTMODE enmDestMode)
-{
-    switch (enmDestMode)
-    {
-        case XAPICDESTMODE_PHYSICAL:  return "Physical";
-        case XAPICDESTMODE_LOGICAL:   return "Logical";
-        default:                      break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the descriptive trigger mode name.
- *
- * @returns The trigger mode name.
- * @param   enmTriggerMode     The trigger mode.
- */
-const char *apicGetTriggerModeName(XAPICTRIGGERMODE enmTriggerMode)
-{
-    switch (enmTriggerMode)
-    {
-        case XAPICTRIGGERMODE_EDGE:     return "Edge";
-        case XAPICTRIGGERMODE_LEVEL:    return "Level";
-        default:                        break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the destination shorthand name.
- *
- * @returns The destination shorthand name.
- * @param   enmDestShorthand     The destination shorthand.
- */
-const char *apicGetDestShorthandName(XAPICDESTSHORTHAND enmDestShorthand)
-{
-    switch (enmDestShorthand)
-    {
-        case XAPICDESTSHORTHAND_NONE:           return "None";
-        case XAPICDESTSHORTHAND_SELF:           return "Self";
-        case XAPIDDESTSHORTHAND_ALL_INCL_SELF:  return "All including self";
-        case XAPICDESTSHORTHAND_ALL_EXCL_SELF:  return "All excluding self";
-        default:                                break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the timer mode name.
- *
- * @returns The timer mode name.
- * @param   enmTimerMode         The timer mode.
- */
-const char *apicGetTimerModeName(XAPICTIMERMODE enmTimerMode)
-{
-    switch (enmTimerMode)
-    {
-        case XAPICTIMERMODE_ONESHOT:        return "One-shot";
-        case XAPICTIMERMODE_PERIODIC:       return "Periodic";
-        case XAPICTIMERMODE_TSC_DEADLINE:   return "TSC deadline";
-        default:                            break;
-    }
-    return "Invalid";
-}
-
-
-/**
- * Gets the APIC mode given the base MSR value.
- *
- * @returns The APIC mode.
- * @param   uApicBaseMsr        The APIC Base MSR value.
- */
-XAPICMODE apicGetMode(uint64_t uApicBaseMsr)
-{
-    uint32_t const  uMode   = (uApicBaseMsr >> 10) & UINT64_C(3);
-    XAPICMODE const enmMode = (XAPICMODE)uMode;
-#ifdef VBOX_STRICT
-    /* Paranoia. */
-    switch (uMode)
-    {
-        case XAPICMODE_DISABLED:
-        case XAPICMODE_INVALID:
-        case XAPICMODE_XAPIC:
-        case XAPICMODE_X2APIC:
-            break;
-        default:
-            AssertMsgFailed(("Invalid mode"));
-    }
-#endif
-    return enmMode;
-}
-
-
-/**
  * @interface_method_impl{PDMAPICBACKEND,pfnIsEnabled}
  */
 static DECLCALLBACK(bool) apicIsEnabled(PCVMCPUCC pVCpu)
@@ -740,7 +578,7 @@ static VBOXSTRICTRC apicSendIntr(PVMCC pVM, PVMCPUCC pVCpu, uint8_t uVector, XAP
         default:
         {
             AssertMsgFailed(("APIC: apicSendIntr: Unsupported delivery mode %#x (%s)\n", enmDeliveryMode,
-                             apicGetDeliveryModeName(enmDeliveryMode)));
+                             apicCommonGetDeliveryModeName(enmDeliveryMode)));
             break;
         }
     }
@@ -822,7 +660,7 @@ DECLINLINE(VBOXSTRICTRC) apicSendIpi(PVMCPUCC pVCpu, int rcRZ)
             || enmDeliveryMode == XAPICDELIVERYMODE_NMI
             || enmDeliveryMode == XAPICDELIVERYMODE_INIT))
     {
-        Log2(("APIC%u: %s level de-assert unsupported, ignoring!\n", pVCpu->idCpu, apicGetDeliveryModeName(enmDeliveryMode)));
+        Log2(("APIC%u: %s level de-assert unsupported, ignoring!\n", pVCpu->idCpu, apicCommonGetDeliveryModeName(enmDeliveryMode)));
         return VINF_SUCCESS;
     }
 #else
@@ -2089,12 +1927,12 @@ static DECLCALLBACK(int) apicSetBaseMsr(PVMCPUCC pVCpu, uint64_t u64BaseMsr)
 
     PAPICCPU  pApicCpu   = VMCPU_TO_APICCPU(pVCpu);
     PAPIC     pApic      = VM_TO_APIC(pVCpu->CTX_SUFF(pVM));
-    XAPICMODE enmOldMode = apicGetMode(pApicCpu->uApicBaseMsr);
-    XAPICMODE enmNewMode = apicGetMode(u64BaseMsr);
+    XAPICMODE enmOldMode = apicCommonGetMode(pApicCpu->uApicBaseMsr);
+    XAPICMODE enmNewMode = apicCommonGetMode(u64BaseMsr);
     uint64_t  uBaseMsr   = pApicCpu->uApicBaseMsr;
 
     Log2(("APIC%u: apicSetBaseMsr: u64BaseMsr=%#RX64 enmNewMode=%s enmOldMode=%s\n", pVCpu->idCpu, u64BaseMsr,
-          apicGetModeName(enmNewMode), apicGetModeName(enmOldMode)));
+          apicCommonGetModeName(enmNewMode), apicCommonGetModeName(enmOldMode)));
 
     /*
      * We do not support re-mapping the APIC base address because:
@@ -2354,8 +2192,8 @@ static DECLCALLBACK(int) apicBusDeliver(PVMCC pVM, uint8_t uDest, uint8_t uDestM
     uint32_t          fBroadcastMask  = UINT32_C(0xff);
 
     Log2(("APIC: apicBusDeliver: fDestMask=%#x enmDestMode=%s enmTriggerMode=%s enmDeliveryMode=%s uVector=%#x uSrcTag=%#x\n",
-          fDestMask, apicGetDestModeName(enmDestMode), apicGetTriggerModeName(enmTriggerMode),
-          apicGetDeliveryModeName(enmDeliveryMode), uVector, uSrcTag));
+          fDestMask, apicCommonGetDestModeName(enmDestMode), apicCommonGetTriggerModeName(enmTriggerMode),
+          apicCommonGetDeliveryModeName(enmDeliveryMode), uVector, uSrcTag));
 
     bool     fIntrAccepted;
     VMCPUSET DestCpuSet;
@@ -2496,7 +2334,7 @@ static DECLCALLBACK(VBOXSTRICTRC) apicSetLocalInterrupt(PVMCPUCC pVCpu, uint8_t 
                 default:
                 {
                     AssertMsgFailed(("APIC%u: LocalInterrupt: Invalid delivery mode %#x (%s) on LINT%d\n", pVCpu->idCpu,
-                                     enmDeliveryMode, apicGetDeliveryModeName(enmDeliveryMode), u8Pin));
+                                     enmDeliveryMode, apicCommonGetDeliveryModeName(enmDeliveryMode), u8Pin));
                     rcStrict = VERR_INTERNAL_ERROR_3;
                     break;
                 }
