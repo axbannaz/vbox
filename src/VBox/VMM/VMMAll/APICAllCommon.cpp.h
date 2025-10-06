@@ -32,10 +32,6 @@
 # pragma once
 #endif
 
-#if !defined(VMM_APIC_TEMPLATE_ALL_COMMON) && !defined(VMM_APIC_TEMPLATE_R3_COMMON) && !defined(VMM_APIC_TEMPLATE_USES_INFO_FUNCS)
-# error "You must specify APIC all-context and/or APIC R3-context common code to include."
-#endif
-
 
 /**
  * Gets the timer shift value.
@@ -51,6 +47,7 @@ DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
 }
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_MODE
 /**
  * Gets the APIC mode given the base MSR value.
  *
@@ -76,10 +73,10 @@ static XAPICMODE apicCommonGetMode(uint64_t uApicBaseMsr)
 #endif
     return enmMode;
 }
+#endif
 
 
-# ifdef VMM_APIC_TEMPLATE_USES_INFO_FUNCS
-
+#ifdef VMM_APIC_TEMPLATE_GET_MODE_NAME
 /**
  * Gets the descriptive APIC mode.
  *
@@ -97,8 +94,10 @@ static const char *apicCommonGetModeName(XAPICMODE enmMode)
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_DEST_FORMAT_NAME
 /**
  * Gets the descriptive destination format name.
  *
@@ -115,8 +114,10 @@ static const char *apicCommonGetDestFormatName(XAPICDESTFORMAT enmDestFormat)
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_DELIVERY_MODE_NAME
 /**
  * Gets the descriptive delivery mode name.
  *
@@ -138,8 +139,10 @@ static const char *apicCommonGetDeliveryModeName(XAPICDELIVERYMODE enmDeliveryMo
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_DEST_MODE_NAME
 /**
  * Gets the descriptive destination mode name.
  *
@@ -156,8 +159,10 @@ static const char *apicCommonGetDestModeName(XAPICDESTMODE enmDestMode)
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_TRIGGER_MODE_NAME
 /**
  * Gets the descriptive trigger mode name.
  *
@@ -174,8 +179,10 @@ static const char *apicCommonGetTriggerModeName(XAPICTRIGGERMODE enmTriggerMode)
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_DEST_SHORTHAND_NAME
 /**
  * Gets the destination shorthand name.
  *
@@ -194,8 +201,10 @@ static const char *apicCommonGetDestShorthandName(XAPICDESTSHORTHAND enmDestShor
     }
     return "Invalid";
 }
+#endif
 
 
+#ifdef VMM_APIC_TEMPLATE_GET_TIMER_MODE_NAME
 /**
  * Gets the timer mode name.
  *
@@ -213,10 +222,10 @@ static const char *apicCommonGetTimerModeName(XAPICTIMERMODE enmTimerMode)
     }
     return "Invalid";
 }
-# endif /* VMM_APIC_TEMPLATE_USES_INFO_FUNCS */
+#endif
 
 
-# ifdef VMM_APIC_TEMPLATE_ALL_COMMON
+#ifdef VMM_APIC_TEMPLATE_ALL_COMMON
 /**
  * @copydoc{PDMAPICBACKENDR3::pfnInitIpi}
  */
@@ -507,9 +516,10 @@ static void apicCommonResetBaseMsr(PVMCPUCC pVCpu)
     /* Commit. */
     ASMAtomicWriteU64(&pVCpu->apic.s.uApicBaseMsr, uApicBaseMsr);
 }
-# endif /* VMM_APIC_TEMPLATE_ALL_COMMON */
+#endif /* VMM_APIC_TEMPLATE_ALL_COMMON */
 
-# if defined(IN_RING3) && defined(VMM_APIC_TEMPLATE_R3_COMMON)
+
+#if defined(IN_RING3) && defined(VMM_APIC_TEMPLATE_R3_COMMON)
 /**
  * Sets the CPUID feature bits for the APIC mode.
  *
@@ -540,7 +550,8 @@ static void apicR3CommonSetCpuIdFeatureLevel(PVM pVM, PDMAPICMODE enmMode)
             AssertMsgFailed(("Unknown/invalid APIC mode: %d\n", (int)enmMode));
     }
 }
-# endif /* IN_RING3 && VMM_APIC_TEMPLATE_R3_COMMON */
+#endif /* IN_RING3 && VMM_APIC_TEMPLATE_R3_COMMON */
+
 
 #endif /* VMM_INCLUDED_SRC_VMMAll_APICAllCommon_cpp_h */
 
