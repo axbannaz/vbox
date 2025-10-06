@@ -88,7 +88,11 @@ static DECLCALLBACK(int) drvRawFilePoll(PPDMISTREAM pInterface, uint32_t fEvts, 
         return VINF_SUCCESS;
     }
 
-    return RTSemEventWait(pThis->hSemEvtPoll, cMillies);
+    int rc = RTSemEventWait(pThis->hSemEvtPoll, cMillies);
+    if (RT_SUCCESS(rc))
+        rc = VERR_INTERRUPTED;
+
+    return rc;
 }
 
 
