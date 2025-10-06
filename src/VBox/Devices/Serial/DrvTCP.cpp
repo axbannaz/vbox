@@ -34,6 +34,7 @@
 #define LOG_GROUP LOG_GROUP_DRV_TCP
 #include <VBox/vmm/pdmdrv.h>
 #include <iprt/assert.h>
+#include <iprt/critsect.h>
 #include <iprt/file.h>
 #include <iprt/stream.h>
 #include <iprt/alloc.h>
@@ -102,6 +103,9 @@ typedef struct DRVTCP
     bool volatile       fShutdown;
     /** Flag to signal whether the thread was woken up from external. */
     bool volatile       fWokenUp;
+
+    /** Critical section protecting the wakeup pipe write end. */
+    RTCRITSECT          CritSectPipeWakeW;
 } DRVTCP, *PDRVTCP;
 
 
@@ -122,10 +126,14 @@ typedef struct DRVTCP
  */
 static int drvTcpPollerKickEx(PDRVTCP pThis, uint8_t bReason, const void *pvData, size_t cbData)
 {
+    RTCritSectEnter(&pThis->CritSectPipeWakeW);
+
     size_t cbWritten = 0;
     int rc = RTPipeWriteBlocking(pThis->hPipeWakeW, &bReason, 1, &cbWritten);
     if (RT_SUCCESS(rc))
         rc = RTPipeWriteBlocking(pThis->hPipeWakeW, pvData, cbData, &cbWritten);
+
+    RTCritSectLeave(&pThis->CritSectPipeWakeW);
     return rc;
 }
 
@@ -139,8 +147,11 @@ static int drvTcpPollerKickEx(PDRVTCP pThis, uint8_t bReason, const void *pvData
  */
 static int drvTcpPollerKick(PDRVTCP pThis, uint8_t bReason)
 {
+    RTCritSectEnter(&pThis->CritSectPipeWakeW);
     size_t cbWritten = 0;
-    return RTPipeWriteBlocking(pThis->hPipeWakeW, &bReason, 1, &cbWritten);
+    int rc = RTPipeWriteBlocking(pThis->hPipeWakeW, &bReason, 1, &cbWritten);
+    RTCritSectLeave(&pThis->CritSectPipeWakeW);
+    return rc;
 }
 
 
@@ -553,6 +564,9 @@ static DECLCALLBACK(void) drvTCPDestruct(PPDMDRVINS pDrvIns)
         else
             LogRel(("DrvTCP%d: listen thread did not terminate (%Rrc)\n", pDrvIns->iInstance, rc));
     }
+
+    if (RTCritSectIsInitialized(&pThis->CritSectPipeWakeW))
+        RTCritSectDelete(&pThis->CritSectPipeWakeW);
 }
 
 
@@ -608,6 +622,11 @@ static DECLCALLBACK(int) drvTCPConstruct(PPDMDRVINS pDrvIns, PCFGMNODE pCfg, uin
     if (RT_FAILURE(rc))
         return PDMDrvHlpVMSetError(pDrvIns, rc, RT_SRC_POS,
                                    N_("Configuration error: querying \"IsServer\" resulted in %Rrc"), rc);
+
+    rc = RTCritSectInit(&pThis->CritSectPipeWakeW);
+    if (RT_FAILURE(rc))
+        return PDMDrvHlpVMSetError(pDrvIns, rc, RT_SRC_POS,
+                                   N_("DrvTCP#%d: Failed to create critical section"), pDrvIns->iInstance);
 
     rc = RTPipeCreate(&pThis->hPipeWakeR, &pThis->hPipeWakeW, 0 /* fFlags */);
     if (RT_FAILURE(rc))
