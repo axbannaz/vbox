@@ -580,7 +580,7 @@ static DECLCALLBACK(void) dbgfR3SampleReportTakeSample(PRTTIMER pTimer, void *pv
         for (uint32_t i = 0; i < pThis->pUVM->cCpus; i++)
         {
             int rc = VMR3ReqCallU(pThis->pUVM, i, NULL /*ppReq*/, 0 /*cMillies*/,
-                                  VMREQFLAGS_NO_WAIT | VMREQFLAGS_POKE | VMREQFLAGS_PRIORITY,
+                                  VMREQFLAGS_VOID | VMREQFLAGS_NO_WAIT | VMREQFLAGS_POKE,
                                   (PFNRT)dbgfR3SampleReportSample, 1, pThis);
             AssertRC(rc);
             if (RT_FAILURE(rc))
