@@ -78,7 +78,7 @@ static const uint32_t g_au32LvtExtValidMask[] =
  * Instantiate the APIC all-context common code.
  */
 #define VMM_APIC_TEMPLATE_ALL_COMMON
-#ifdef LOG_ENABLED
+#ifdef RT_STRICT
 /* We currently only use the info functions in debug builds (log, debug asserts). */
 # define VMM_APIC_TEMPLATE_USES_INFO_FUNCS
 #endif
