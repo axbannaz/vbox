@@ -551,10 +551,11 @@ static DECLCALLBACK(void) dbgfR3SampleReportTakeSample(PRTTIMER pTimer, void *pv
 {
     PDBGFSAMPLEREPORTINT pThis = (PDBGFSAMPLEREPORTINT)pvUser;
 
+    bool fLast = false;
     if (pThis->cSampleUsLeft != UINT32_MAX)
     {
         int rc = VINF_SUCCESS;
-        uint64_t cUsSampled = iTick * pThis->cSampleIntervalUs; /** @todo Wrong if the timer resolution is different from what we've requested. */
+        uint64_t const cUsSampled = iTick * pThis->cSampleIntervalUs; /** @todo Wrong if the timer resolution is different from what we've requested. */
 
         /* Update progress. */
         if (pThis->pfnProgress)
@@ -571,11 +572,12 @@ static DECLCALLBACK(void) dbgfR3SampleReportTakeSample(PRTTIMER pTimer, void *pv
                                 DBGFSAMPLEREPORTSTATE_RUNNING);
 
             rc = RTTimerStop(pTimer); AssertRC(rc); RT_NOREF(rc);
+            fLast = true;
         }
     }
 
     uint32_t const cEmtsOld = ASMAtomicAddU32(&pThis->cEmtsActive, pThis->pUVM->cCpus);
-    if (!cEmtsOld)
+    if (!cEmtsOld || fLast)
     {
         for (uint32_t i = 0; i < pThis->pUVM->cCpus; i++)
         {
