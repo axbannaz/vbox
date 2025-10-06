@@ -295,6 +295,7 @@ private:
     void resetDiskIOInfoLabel();
     virtual void prepareWidgets() RT_OVERRIDE;
     void configureCOMPerformanceCollector();
+    template <typename T> void detachCOMResource(T &comObject);
 
     bool m_fGuestAdditionsAvailable;
     CMachine m_comMachine;

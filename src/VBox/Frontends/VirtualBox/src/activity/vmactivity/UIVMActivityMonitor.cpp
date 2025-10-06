@@ -1460,8 +1460,17 @@ void UIVMActivityMonitorLocal::sltGuestAdditionsStateChange()
     enableDisableGuestAdditionDependedWidgets(m_fGuestAdditionsAvailable);
 }
 
+template <typename T> void UIVMActivityMonitorLocal::detachCOMResource(T &comObject)
+{
+    if (!comObject.isNull())
+        comObject.detach();
+}
+
 void UIVMActivityMonitorLocal::sltClearCOMData()
 {
+    detachCOMResource(m_comGuest);
+    detachCOMResource(m_comMachineDebugger);
+
     if (!m_comConsole.isNull() && m_comConsole.isOk() && m_comConsole.GetEventSource().isOk())
     {
         if (!m_pQtConsoleListener.isNull())
@@ -1474,12 +1483,13 @@ void UIVMActivityMonitorLocal::sltClearCOMData()
     }
 
     if (!m_comSession.isNull())
-    {
         m_comSession.UnlockMachine();
-        m_comSession.detach();
-    }
-    if (!m_comConsole.isNull())
-        m_comConsole.detach();
+    detachCOMResource(m_comSession);
+
+    detachCOMResource(m_comMachine);
+    detachCOMResource(m_comConsole);
+    detachCOMResource(m_performanceCollector);
+    detachCOMResource(m_comConsole);
 }
 
 void UIVMActivityMonitorLocal::reset()
