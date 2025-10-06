@@ -32,7 +32,7 @@
 # pragma once
 #endif
 
-#if !defined(VMM_APIC_TEMPLATE_ALL_COMMON) && !defined(VMM_APIC_TEMPLATE_R3_COMMON)
+#if !defined(VMM_APIC_TEMPLATE_ALL_COMMON) && !defined(VMM_APIC_TEMPLATE_R3_COMMON) && !defined(VMM_APIC_TEMPLATE_USES_INFO_FUNCS)
 # error "You must specify APIC all-context and/or APIC R3-context common code to include."
 #endif
 
@@ -51,6 +51,7 @@ DECL_FORCE_INLINE(uint8_t) apicCommonGetTimerShift(PCXAPICPAGE pXApicPage)
 }
 
 
+# ifdef VMM_APIC_TEMPLATE_USES_INFO_FUNCS
 /**
  * Gets the APIC mode given the base MSR value.
  *
@@ -211,10 +212,10 @@ static const char *apicCommonGetTimerModeName(XAPICTIMERMODE enmTimerMode)
     }
     return "Invalid";
 }
+# endif /* VMM_APIC_TEMPLATE_USES_INFO_FUNCS */
 
 
 # ifdef VMM_APIC_TEMPLATE_ALL_COMMON
-
 /**
  * @copydoc{PDMAPICBACKENDR3::pfnInitIpi}
  */
