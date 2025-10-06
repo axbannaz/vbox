@@ -70,6 +70,8 @@ typedef struct DRVCHAR
     volatile bool               fShutdown;
     /** Flag whether data is available from the device/driver above as notified by the driver. */
     volatile bool               fAvailWrExt;
+    /** Flag whether the poller was kicked. */
+    volatile bool               fPollerKicked;
     /** Internal copy of the flag which gets reset when there is no data anymore. */
     bool                        fAvailWrInt;
     /** I/O thread. */
@@ -130,7 +132,10 @@ static DECLCALLBACK(int) drvCharDataAvailWrNotify(PPDMISERIALCONNECTOR pInterfac
     int rc = VINF_SUCCESS;
     bool fAvailOld = ASMAtomicXchgBool(&pThis->fAvailWrExt, true);
     if (!fAvailOld)
-        rc = pThis->pDrvStream->pfnPollInterrupt(pThis->pDrvStream);
+    {
+        if (!ASMAtomicXchgBool(&pThis->fPollerKicked, true))
+            rc = pThis->pDrvStream->pfnPollInterrupt(pThis->pDrvStream);
+    }
 
     return rc;
 }
@@ -153,7 +158,11 @@ static DECLCALLBACK(int) drvCharReadRdr(PPDMISERIALCONNECTOR pInterface, void *p
     *pcbRead = cbToRead;
     size_t cbOld = ASMAtomicSubZ(&pThis->cbRemaining, cbToRead);
     if (!(cbOld - cbToRead)) /* Kick the I/O thread to fetch new data. */
-        rc = pThis->pDrvStream->pfnPollInterrupt(pThis->pDrvStream);
+    {
+        if (   !ASMAtomicXchgBool(&pThis->fPollerKicked, true)
+            && RTThreadSelf() != pThis->pThrdIo->Thread)
+            rc = pThis->pDrvStream->pfnPollInterrupt(pThis->pDrvStream);
+    }
     STAM_COUNTER_ADD(&pThis->StatBytesRead, cbToRead);
 
     LogFlowFunc(("-> %Rrc\n", rc));
@@ -342,6 +351,8 @@ static DECLCALLBACK(int) drvCharIoLoop(PPDMDRVINS pDrvIns, PPDMTHREAD pThread)
         }
         else if (rc != VERR_INTERRUPTED)
             LogRelMax(10, ("Char#%d: Polling failed with %Rrc\n", pDrvIns->iInstance, rc));
+
+        ASMAtomicXchgBool(&pThis->fPollerKicked, false);
     }
 
     return VINF_SUCCESS;
@@ -360,6 +371,7 @@ static DECLCALLBACK(int) drvCharIoLoopWakeup(PPDMDRVINS pDrvIns, PPDMTHREAD pThr
     PDRVCHAR pThis = (PDRVCHAR)pThread->pvUser;
 
     RT_NOREF(pDrvIns);
+    ASMAtomicXchgBool(&pThis->fPollerKicked, true);
     return pThis->pDrvStream->pfnPollInterrupt(pThis->pDrvStream);
 }
 
