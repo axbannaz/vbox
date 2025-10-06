@@ -774,6 +774,24 @@ static void apicR3CommonDbgInfoLvt(PCVMCPUCC pVCpu, PCDBGFINFOHLP pHlp)
 }
 
 
+static void apicR3CommonDbgInfoLvtTimer(PCVMCPUCC pVCpu, PCDBGFINFOHLP pHlp)
+{
+    PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpu);
+    uint32_t const uLvtTimer = pXApicPage->lvt_timer.all.u32LvtTimer;
+    pHlp->pfnPrintf(pHlp, "VCPU[%u] Local APIC timer:\n",      pVCpu->idCpu);
+    pHlp->pfnPrintf(pHlp, "  ICR              = %#RX32\n",     pXApicPage->timer_icr.u32InitialCount);
+    pHlp->pfnPrintf(pHlp, "  CCR              = %#RX32\n",     pXApicPage->timer_ccr.u32CurrentCount);
+    pHlp->pfnPrintf(pHlp, "  DCR              = %#RX32\n",     pXApicPage->timer_dcr.all.u32DivideValue);
+    pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",        apicCommonGetTimerShift(pXApicPage));
+    pHlp->pfnPrintf(pHlp, "LVT Timer          = %#RX32\n",     uLvtTimer);
+    pHlp->pfnPrintf(pHlp, "  Vector             = %u (%#x)\n", pXApicPage->lvt_timer.u.u8Vector, pXApicPage->lvt_timer.u.u8Vector);
+    pHlp->pfnPrintf(pHlp, "  Delivery status    = %u\n",       pXApicPage->lvt_timer.u.u1DeliveryStatus);
+    pHlp->pfnPrintf(pHlp, "  Masked             = %RTbool\n",  XAPIC_LVT_IS_MASKED(uLvtTimer));
+    pHlp->pfnPrintf(pHlp, "  Timer Mode         = %#x (%s)\n", pXApicPage->lvt_timer.u.u2TimerMode,
+                    apicR3CommonGetTimerModeName((XAPICTIMERMODE)pXApicPage->lvt_timer.u.u2TimerMode));
+}
+
+
 static void apicR3CommonDbgInfo(PVMCPUCC pVCpu, PCDBGFINFOHLP pHlp, uint64_t uBaseMsr)
 {
     PCXAPICPAGE  pXApicPage  = VMCPU_TO_CXAPICPAGE(pVCpu);

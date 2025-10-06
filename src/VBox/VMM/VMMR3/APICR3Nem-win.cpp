@@ -1099,28 +1099,7 @@ static DECLCALLBACK(void) apicR3HvInfoLvt(PVM pVM, PCDBGFINFOHLP pHlp, const cha
     PVMCPU pVCpu = VMMGetCpu(pVM);
     if (!pVCpu)
         pVCpu = pVM->apCpusR3[0];
-
     apicR3CommonDbgInfoLvt(pVCpu, pHlp);
-}
-
-
-
-/**
- * Helper for dumping the LVT timer.
- *
- * @param   pVCpu   The cross context virtual CPU structure.
- * @param   pHlp    The debug output helper.
- */
-static void apicR3HvInfoLvtTimer(PVMCPU pVCpu, PCDBGFINFOHLP pHlp)
-{
-    PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpu);
-    uint32_t const uLvtTimer = pXApicPage->lvt_timer.all.u32LvtTimer;
-    pHlp->pfnPrintf(pHlp, "LVT Timer          = %#RX32\n",   uLvtTimer);
-    pHlp->pfnPrintf(pHlp, "  Vector             = %u (%#x)\n", pXApicPage->lvt_timer.u.u8Vector, pXApicPage->lvt_timer.u.u8Vector);
-    pHlp->pfnPrintf(pHlp, "  Delivery status    = %u\n",       pXApicPage->lvt_timer.u.u1DeliveryStatus);
-    pHlp->pfnPrintf(pHlp, "  Masked             = %RTbool\n",  XAPIC_LVT_IS_MASKED(uLvtTimer));
-    pHlp->pfnPrintf(pHlp, "  Timer Mode         = %#x (%s)\n", pXApicPage->lvt_timer.u.u2TimerMode,
-                    apicR3CommonGetTimerModeName((XAPICTIMERMODE)pXApicPage->lvt_timer.u.u2TimerMode));
 }
 
 
@@ -1137,17 +1116,7 @@ static DECLCALLBACK(void) apicR3HvInfoTimer(PVM pVM, PCDBGFINFOHLP pHlp, const c
     PVMCPU pVCpu = VMMGetCpu(pVM);
     if (!pVCpu)
         pVCpu = pVM->apCpusR3[0];
-
-    PCXAPICPAGE pXApicPage = VMCPU_TO_CXAPICPAGE(pVCpu);
-    //PHVAPICCPU  pHvApicCpu = VMCPU_TO_HVAPICCPU(pVCpu);
-
-    pHlp->pfnPrintf(pHlp, "VCPU[%u] Local APIC timer:\n", pVCpu->idCpu);
-    pHlp->pfnPrintf(pHlp, "  ICR              = %#RX32\n", pXApicPage->timer_icr.u32InitialCount);
-    pHlp->pfnPrintf(pHlp, "  CCR              = %#RX32\n", pXApicPage->timer_ccr.u32CurrentCount);
-    pHlp->pfnPrintf(pHlp, "  DCR              = %#RX32\n", pXApicPage->timer_dcr.all.u32DivideValue);
-    //pHlp->pfnPrintf(pHlp, "    Timer shift    = %#x\n",    apicCommonGetTimerShift(pXApicPage));
-    //pHlp->pfnPrintf(pHlp, "  Timer initial TS = %#RU64\n", pApicCpu->u64TimerInitial);
-    apicR3HvInfoLvtTimer(pVCpu, pHlp);
+    apicR3CommonDbgInfoLvtTimer(pVCpu, pHlp);
 }
 
 
