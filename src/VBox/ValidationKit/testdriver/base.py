@@ -923,8 +923,8 @@ class TestDriverBase(object): # pylint: disable=too-many-instance-attributes
             elif self.sHost == 'solaris':   self.sResourcePath = "/mnt/testrsrc/";
             elif self.sHost == 'win':       self.sResourcePath = "T:/";
             else: raise GenError('unknown host OS "%s"' % (self.sHost));
-        self.sResourcePathCache = getDirEnv( 'TESTBOX_PATH_RESOURCES_CACHE');
-        self.cbResourceCacheMax = int(getEnv('TESTBOX_PATH_RESOURCES_CACHE_SIZE_MAX', '0'));
+        self.sResourcePathCache = getDirEnv(         'TESTBOX_PATH_RESOURCES_CACHE');
+        self.cbResourceCacheMax = int(os.environ.get('TESTBOX_PATH_RESOURCES_CACHE_SIZE_MAX', '0'));
 
         # PID file for the testdriver.
         self.sPidFile = os.path.join(self.sScratchPath, 'testdriver.pid');
