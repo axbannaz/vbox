@@ -983,7 +983,9 @@ class TestDriverBase(object): # pylint: disable=too-many-instance-attributes
         if     self.oLocalRsrcCache is None \
            and self.sResourcePathCache is not None \
            and self.cbResourceCacheMax != 0:
-            self.oLocalRsrcCache = resourcecache.LocalRsrcCache(self.sResourcePath, self.sResourcePathCache, self.cbResourceCacheMax);
+            self.oLocalRsrcCache = resourcecache.LocalRsrcCache(self.sResourcePath, \
+                                                                self.sResourcePathCache, \
+                                                                self.cbResourceCacheMax);
 
         if os.path.isabs(sName): ## @todo Hack. Need to deal properly with stuff in the validationkit.zip and similar.
             return sName;
