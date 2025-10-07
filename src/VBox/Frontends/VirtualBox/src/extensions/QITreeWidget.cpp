@@ -59,6 +59,17 @@ public:
         : QAccessibleObject(pObject)
     {}
 
+    /** Returns the role. */
+    virtual QAccessible::Role role() const RT_OVERRIDE
+    {
+        /* Return the role of item with children: */
+        if (childCount() > 0)
+            return QAccessible::List;
+
+        /* ListItem by default: */
+        return QAccessible::ListItem;
+    }
+
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
@@ -69,6 +80,31 @@ public:
         return item()->parentItem() ?
                QAccessible::queryAccessibleInterface(item()->parentItem()) :
                QAccessible::queryAccessibleInterface(item()->parentTree());
+    }
+
+    /** Returns the rect. */
+    virtual QRect rect() const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QRect());
+
+        /* Compose common region: */
+        QRegion region;
+
+        /* Append item rectangle: */
+        const QRect  itemRectInViewport = item()->parentTree()->visualItemRect(item());
+        const QSize  itemSize           = itemRectInViewport.size();
+        const QPoint itemPosInViewport  = itemRectInViewport.topLeft();
+        const QPoint itemPosInScreen    = item()->parentTree()->viewport()->mapToGlobal(itemPosInViewport);
+        const QRect  itemRectInScreen   = QRect(itemPosInScreen, itemSize);
+        region += itemRectInScreen;
+
+        /* Append children rectangles: */
+        for (int i = 0; i < childCount(); ++i)
+            region += child(i)->rect();
+
+        /* Return common region bounding rectangle: */
+        return region.boundingRect();
     }
 
     /** Returns the number of children. */
@@ -105,59 +141,6 @@ public:
         return -1;
     }
 
-    /** Returns the rect. */
-    virtual QRect rect() const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QRect());
-
-        /* Compose common region: */
-        QRegion region;
-
-        /* Append item rectangle: */
-        const QRect  itemRectInViewport = item()->parentTree()->visualItemRect(item());
-        const QSize  itemSize           = itemRectInViewport.size();
-        const QPoint itemPosInViewport  = itemRectInViewport.topLeft();
-        const QPoint itemPosInScreen    = item()->parentTree()->viewport()->mapToGlobal(itemPosInViewport);
-        const QRect  itemRectInScreen   = QRect(itemPosInScreen, itemSize);
-        region += itemRectInScreen;
-
-        /* Append children rectangles: */
-        for (int i = 0; i < childCount(); ++i)
-            region += child(i)->rect();
-
-        /* Return common region bounding rectangle: */
-        return region.boundingRect();
-    }
-
-    /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QString());
-
-        /* Return a text for the passed enmTextRole: */
-        switch (enmTextRole)
-        {
-            case QAccessible::Name: return item()->defaultText();
-            default: break;
-        }
-
-        /* Null-string by default: */
-        return QString();
-    }
-
-    /** Returns the role. */
-    virtual QAccessible::Role role() const RT_OVERRIDE
-    {
-        /* Return the role of item with children: */
-        if (childCount() > 0)
-            return QAccessible::List;
-
-        /* ListItem by default: */
-        return QAccessible::ListItem;
-    }
-
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
@@ -189,6 +172,23 @@ public:
 
         /* Return the state: */
         return state;
+    }
+
+    /** Returns a text for the passed @a enmTextRole. */
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QString());
+
+        /* Return a text for the passed enmTextRole: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name: return item()->defaultText();
+            default: break;
+        }
+
+        /* Null-string by default: */
+        return QString();
     }
 
 private:
