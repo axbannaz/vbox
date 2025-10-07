@@ -32,6 +32,7 @@
 
 /* GUI includes: */
 #include "QITreeWidget.h"
+#include "UIAccessible.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -216,6 +217,7 @@ class QIAccessibilityInterfaceForQITreeWidget
 #ifndef VBOX_WS_MAC
     , public QAccessibleSelectionInterface
 #endif
+    , public UIAccessibleAdvancedInterface
 {
 public:
 
@@ -252,6 +254,8 @@ public:
             case QAccessible::SelectionInterface:
                 return static_cast<QAccessibleSelectionInterface*>(this);
 #endif
+            case UIAccessible::Advanced:
+                return static_cast<UIAccessibleAdvancedInterface*>(this);
             default:
                 break;
         }
@@ -276,17 +280,17 @@ public:
         AssertReturn(iIndex >= 0, 0);
         AssertPtrReturn(tree(), 0);
 
-        if (iIndex >= childCount())
+        /* For Advanced interface enabled we have special processing: */
+        if (isEnabled())
         {
             // WORKAROUND:
-            // Normally I would assert here, but Qt5 accessibility code has
-            // a hard-coded architecture for a tree-widgets which we do not like
-            // but have to live with and this architecture enumerates children
-            // of all levels as children of level 0, so Qt5 can try to address
-            // our interface with index which surely out of bounds by our laws.
-            // So let's assume that's exactly such case and try to enumerate
-            // visible children like they are a part of the list, not tree.
-            // printf("Invalid index: %d\n", iIndex);
+            // Qt's qtreewidget class has no accessibility code, only parent-class has it.
+            // Parent qtreeview class has a piece of accessibility code we do not like.
+            // It's located in currentChanged() method and sends us iIndex calculated on
+            // the basis of current model-index, instead of current qtreewidgetitem index.
+            // So qtreeview enumerates all tree-widget rows/columns as children of level 0.
+            // We are locking interface for the case and have special handling.
+            //printf("Advanced iIndex: %d\n", iIndex);
 
             // Take into account we also have header with 'column count' indexes,
             // so we should start enumerating tree indexes since 'column count'.
@@ -314,6 +318,7 @@ public:
         }
 
         /* Return the child with the passed iIndex: */
+        //printf("iIndex = %d\n", iIndex);
         return QAccessible::queryAccessibleInterface(tree()->childItem(iIndex));
     }
 
@@ -598,6 +603,26 @@ void QITreeWidget::resizeEvent(QResizeEvent *pEvent)
 
     /* Notify listeners about resizing: */
     emit resized(pEvent->size(), pEvent->oldSize());
+}
+
+void QITreeWidget::currentChanged(const QModelIndex &current, const QModelIndex &previous)
+{
+    /* A call to base-class needs to be executed by advanced interface: */
+    UIAccessibleAdvancedInterfaceLocker locker(this);
+    Q_UNUSED(locker);
+
+    /* Call to base-class: */
+    QTreeWidget::currentChanged(current, previous);
+}
+
+void QITreeWidget::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    /* A call to base-class needs to be executed by advanced interface: */
+    UIAccessibleAdvancedInterfaceLocker locker(this);
+    Q_UNUSED(locker);
+
+    /* Call to base-class: */
+    QTreeWidget::selectionChanged(selected, deselected);
 }
 
 void QITreeWidget::filterItemsInternal(const QITreeWidgetItemFilter &filter, QTreeWidgetItem *pParent,

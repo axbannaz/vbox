@@ -1346,6 +1346,7 @@ UICommon_SOURCES = \
 	src/converter/UIConverterBackendCOM.cpp \
 	src/converter/UIConverterBackendGlobal.cpp \
 	src/globals/COMDefs.cpp \
+	src/globals/UIAccessible.cpp \
 	src/globals/UIActionPool.cpp \
 	src/globals/UIActionPoolManager.cpp \
 	src/globals/UIActionPoolRuntime.cpp \

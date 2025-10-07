@@ -97,7 +97,6 @@ public:
     virtual QString defaultText() const;
 };
 
-
 /** QTreeWidget subclass extending standard functionality. */
 class SHARED_LIBRARY_STUFF QITreeWidget : public QTreeWidget
 {
@@ -136,6 +135,15 @@ protected:
     /** Handles resize @a pEvent. */
     void resizeEvent(QResizeEvent *pEvent) RT_OVERRIDE RT_FINAL;
 
+protected slots:
+
+    /** This slot is called when a new item becomes the current item.
+      * The previous current item is specified by the @a previous index, and the new item by the @a current index. */
+    virtual void currentChanged(const QModelIndex &current, const QModelIndex &previous) RT_OVERRIDE RT_FINAL;
+    /** This slot is called when the selection is changed.
+      * The previous selection (which may be empty), is specified by @a deselected, and the new selection by @a selected. */
+    virtual void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) RT_OVERRIDE RT_FINAL;
+
 private:
 
     /** Recurses thru the subtree with a root @a pParent and appends a
@@ -146,6 +154,5 @@ private:
     /** Holds whether painting should be fully delegated to sub-class. */
     bool  m_fDelegatePaintingToSubclass;
 };
-
 
 #endif /* !FEQT_INCLUDED_SRC_extensions_QITreeWidget_h */
