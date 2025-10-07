@@ -48,7 +48,6 @@ import shutil;
 from collections import OrderedDict
 
 # Validation Kit imports.
-from common     import utils;
 from testdriver import reporter;
 
 
@@ -119,37 +118,37 @@ class LocalRsrcCache(object):
             self.oCacheLru.move_to_end(sCachePath, False);
             self.writeToc();
             return sCachePath;
-        else:
-            # Cache it
-            sResourcePath = os.path.join(self.sResourcePath, sName);
-            if os.path.exists(sResourcePath):
-                cbObj = os.path.getsize(sResourcePath);
-                # No point in caching if the object exceeds the limit
-                if cbObj > self.cbCacheMax:
-                    return sResourcePath;
 
-                # Need to make room in the cache?
-                if self.cbCache + cbObj > self.cbCacheMax:
-                    cbEvict = (self.cbCache + cbObj) - self.cbCacheMax;
-                    while cbEvict > 0:
-                        sCachedPath, cbCachedObj = self.oCacheLru.popitem(True);
-                        os.remove(os.path.join(self.sLocalCachePath, sCachedPath));
-                        self.cbCache = self.cbCache - cbCachedObj;
-                        cbEvict = cbEvict - min(cbEvict, cbCachedObj);
-
-                sCachedPath = os.path.join(self.sLocalCachePath, sName);
-                reporter.log('Caching %s (%d) at %s...' % (sResourcePath, cbObj, sCachedPath));
-
-                # Create all non existant sub-directories
-                sCacheDirPath = os.path.dirname(sCachedPath);
-                if not os.path.exists(sCacheDirPath):
-                    os.makedirs(sCacheDirPath);
-
-                shutil.copyfile(sResourcePath, sCachedPath);
-                self.oCacheLru[sName] = cbObj;
-                self.oCacheLru.move_to_end(sName, False);
-                self.writeToc();
-                return sCachedPath;
-            else:
+        # Cache it
+        sResourcePath = os.path.join(self.sResourcePath, sName);
+        if os.path.exists(sResourcePath):
+            cbObj = os.path.getsize(sResourcePath);
+            # No point in caching if the object exceeds the limit
+            if cbObj > self.cbCacheMax:
                 return sResourcePath;
+
+            # Need to make room in the cache?
+            if self.cbCache + cbObj > self.cbCacheMax:
+                cbEvict = (self.cbCache + cbObj) - self.cbCacheMax;
+                while cbEvict > 0:
+                    sCachedPath, cbCachedObj = self.oCacheLru.popitem(True);
+                    os.remove(os.path.join(self.sLocalCachePath, sCachedPath));
+                    self.cbCache = self.cbCache - cbCachedObj;
+                    cbEvict = cbEvict - min(cbEvict, cbCachedObj);
+
+            sCachedPath = os.path.join(self.sLocalCachePath, sName);
+            reporter.log('Caching %s (%d) at %s...' % (sResourcePath, cbObj, sCachedPath));
+
+            # Create all non existant sub-directories
+            sCacheDirPath = os.path.dirname(sCachedPath);
+            if not os.path.exists(sCacheDirPath):
+                os.makedirs(sCacheDirPath);
+
+            shutil.copyfile(sResourcePath, sCachedPath);
+            self.oCacheLru[sName] = cbObj;
+            self.oCacheLru.move_to_end(sName, False);
+            self.writeToc();
+            return sCachedPath;
+
+        return sResourcePath;
 
