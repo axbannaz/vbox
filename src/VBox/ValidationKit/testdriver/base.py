@@ -59,6 +59,7 @@ import unittest;
 from common                 import utils;
 from common.constants       import rtexitcode;
 from testdriver             import reporter;
+from testdriver             import resourcecache;
 if sys.platform == 'win32':
     from testdriver         import winbase;
 
@@ -878,6 +879,9 @@ class TestDriverBase(object): # pylint: disable=too-many-instance-attributes
         # Skipped status modifier (see end of innerMain()).
         self.fBadTestbox        = False;
 
+        # Optional local resource cache
+        self.oLocalRsrcCache    = None;
+
         #
         # Get our bearings and adjust the environment.
         #
@@ -919,6 +923,8 @@ class TestDriverBase(object): # pylint: disable=too-many-instance-attributes
             elif self.sHost == 'solaris':   self.sResourcePath = "/mnt/testrsrc/";
             elif self.sHost == 'win':       self.sResourcePath = "T:/";
             else: raise GenError('unknown host OS "%s"' % (self.sHost));
+        self.sResourcePathCache = getDirEnv( 'TESTBOX_PATH_RESOURCES_CACHE');
+        self.cbResourceCacheMax = int(getEnv('TESTBOX_PATH_RESOURCES_CACHE_SIZE_MAX', '0'));
 
         # PID file for the testdriver.
         self.sPidFile = os.path.join(self.sScratchPath, 'testdriver.pid');
@@ -972,8 +978,17 @@ class TestDriverBase(object): # pylint: disable=too-many-instance-attributes
         """
         Returns the full resource name.
         """
+
+        # Initialize the resource cache on the first attempt
+        if     self.oLocalRsrcCache is None \
+           and self.sResourcePathCache is not None \
+           and self.cbResourceCacheMax != 0:
+            self.oLocalRsrcCache = resourcecache.LocalRsrcCache(self.sResourcePath, self.sResourcePathCache, self.cbResourceCacheMax);
+
         if os.path.isabs(sName): ## @todo Hack. Need to deal properly with stuff in the validationkit.zip and similar.
             return sName;
+        if self.oLocalRsrcCache is not None:
+            return self.oLocalRsrcCache.getCachedResource(sName);
         return os.path.join(self.sResourcePath, sName);
 
     #

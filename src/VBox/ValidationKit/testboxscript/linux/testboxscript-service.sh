@@ -432,6 +432,9 @@ start() {
         if [ -n "${TESTBOXSCRIPT_TESTRSRC_PASSWD}" ]; then PARAMS="${PARAMS} --testrsrc-server-passwd '${TESTBOXSCRIPT_TESTRSRC_PASSWD}'"; fi
         if [ -n "${TESTBOXSCRIPT_TESTRSRC_MOUNTOPT}" ]; then PARAMS="${PARAMS} --testrsrc-server-mountopt '${TESTBOXSCRIPT_TESTRSRC_MOUNTOPT}'"; fi
 
+        if [ -n "${TESTBOXSCRIPT_TESTRSRC_CACHE_ROOT}"     ]; then PARAMS="${PARAMS} --testrsrc-cache-root     '${TESTBOXSCRIPT_TESTRSRC_CACHE_ROOT}'"; fi
+        if [ -n "${TESTBOXSCRIPT_TESTRSRC_CACHE_SIZE_MAX}" ]; then PARAMS="${PARAMS} --testrsrc-cache-size-max '${TESTBOXSCRIPT_TESTRSRC_CACHE_SIZE_MAX}'"; fi
+
         if [ -n "${TESTBOXSCRIPT_PYTHON}" ]; then
             my_start_daemon "${TESTBOXSCRIPT_USER}" "${TESTBOXSCRIPT_PYTHON}" "${binary}" ${PARAMS}
         else

@@ -199,6 +199,9 @@ class TestBoxScript(object):
         testboxcommons.log('Starting Test Box script (%s)' % (self._getScriptRev(),));
         testboxcommons.log('Test Manager URL: %s' % self._oOptions.sTestManagerUrl,)
         testboxcommons.log('Scratch root path: %s' % self._oOptions.sScratchRoot,)
+        if self._oOptions.sResourceCacheRoot is not None:
+            testboxcommons.log('Local resource cache root path: %s' % self._oOptions.sResourceCacheRoots,);
+            testboxcommons.log('Local resource cache maximum size: %s' % self._oOptions.sResourceCacheSizeMax,);
         for sItem in self._ddSignOnParams:                      # pylint: disable=consider-using-dict-items
             testboxcommons.log('Sign-On value %18s: %s' % (sItem, self._ddSignOnParams[sItem][self.VALUE]));
 
@@ -246,6 +249,9 @@ class TestBoxScript(object):
         os.environ['TESTBOX_TEST_SET_ID']       = '';
         os.environ['TESTBOX_TIMEOUT']           = '0';
         os.environ['TESTBOX_TIMEOUT_ABS']       = '0';
+        if self._oOptions.sResourceCacheRoot is not None:
+            os.environ['TESTBOX_PATH_RESOURCES_CACHE']          = self._oOptions.sResourceCacheRoot;
+            os.environ['TESTBOX_PATH_RESOURCES_CACHE_SIZE_MAX'] = self._oOptions.sResourceCacheSizeMax;
 
         if utils.getHostOs() == 'win':
             os.environ['COMSPEC']            = os.path.join(os.environ['SystemRoot'], 'System32', 'cmd.exe');
@@ -993,6 +999,14 @@ class TestBoxScript(object):
         parser.add_option("--scratch-root", metavar="<abs-path>",
                           dest="sScratchRoot",
                           help="Path to the scratch directory",
+                          default=None)
+        parser.add_option("--testrsrc-cache-root", metavar="<abs-path>",
+                          dest="sResourceCacheRoot",
+                          help="Path to the optional local resource cache directory",
+                          default=None)
+        parser.add_option("--testrsrc-cache-size-max", metavar="<size>",
+                          dest="sResourceCacheSizeMax",
+                          help="Maximum size of the local resource cache in bytes",
                           default=None)
         parser.add_option("--system-uuid", metavar="<uuid>",
                           dest="sSystemUuid",

@@ -415,7 +415,7 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
         #
         sInstallIso = self.sInstallIso
         if not os.path.isabs(sInstallIso):
-            sInstallIso = os.path.join(oTestDrv.sResourcePath, sInstallIso);
+            sInstallIso = oTestDrv.getFullResourceName(sInstallIso);
 
         try:
             oIUnattended.isoPath = sInstallIso;
