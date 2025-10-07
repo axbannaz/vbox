@@ -162,32 +162,28 @@ public:
     {
         /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
+        AssertPtrReturn(item()->treeWidget(), QAccessible::State());
 
         /* Compose the state: */
-        QAccessible::State state;
-        state.focusable = true;
-        state.selectable = true;
-
-        /* Compose the state of current item: */
-        if (   item()
-            && item() == QITreeWidgetItem::toItem(item()->treeWidget()->currentItem()))
-        {
-            state.active = true;
-            state.focused = true;
-            state.selected = true;
-        }
-
-        /* Compose the state of checked item: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        myState.selectable = true;
+        if (   item()->treeWidget()->hasFocus()
+            && QITreeWidgetItem::toItem(item()->treeWidget()->currentItem()) == item())
+            myState.focused = true;
+        if (   item()->treeWidget()->hasFocus()
+            && QITreeWidgetItem::toItem(item()->treeWidget()->currentItem()) == item())
+            myState.selected = true;
         if (   item()
             && item()->checkState(0) != Qt::Unchecked)
         {
-            state.checked = true;
+            myState.checked = true;
             if (item()->checkState(0) == Qt::PartiallyChecked)
-                state.checkStateMixed = true;
+                myState.checkStateMixed = true;
         }
 
         /* Return the state: */
-        return state;
+        return myState;
     }
 
     /** Returns a text for the passed @a enmTextRole. */
@@ -314,6 +310,22 @@ public:
 
         /* Return the index of child-item in parent-tree: */
         return tree()->indexOfTopLevelItem(pChildItem);
+    }
+
+    /** Returns the state. */
+    virtual QAccessible::State state() const RT_OVERRIDE
+    {
+        /* Sanity check: */
+        AssertPtrReturn(tree(), QAccessible::State());
+
+        /* Compose the state: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        if (tree()->hasFocus())
+            myState.focused = true;
+
+        /* Return the state: */
+        return myState;
     }
 
     /** Returns a text. */
