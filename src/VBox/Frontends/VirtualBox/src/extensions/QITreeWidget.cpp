@@ -143,13 +143,18 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Search for corresponding child: */
-        for (int iIndex = 0; iIndex < childCount(); ++iIndex)
-            if (child(iIndex) == pChild)
-                return iIndex;
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
 
-        /* -1 by default: */
-        return -1;
+        /* Acquire child-item itself: */
+        QITreeWidgetItem *pChildItem = qobject_cast<QITreeWidgetItem*>(pChild->object());
+
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
+        AssertPtrReturn(item(), -1);
+
+        /* Return the index of child-item in parent-item: */
+        return item()->indexOfChild(pChildItem);
     }
 
     /** Returns the state. */
@@ -299,13 +304,16 @@ public:
     {
         /* Sanity check: */
         AssertPtrReturn(pChild, -1);
+
+        /* Acquire child-item itself: */
+        QITreeWidgetItem *pChildItem = qobject_cast<QITreeWidgetItem*>(pChild->object());
+
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
         AssertPtrReturn(tree(), -1);
 
-        // WORKAROUND:
-        // Not yet sure how to handle this for tree widget with multiple columns, so this is a simple hack:
-        const QModelIndex index = tree()->itemIndex(qobject_cast<QITreeWidgetItem*>(pChild->object()));
-        const int iIndex = index.row();
-        return iIndex;
+        /* Return the index of child-item in parent-tree: */
+        return tree()->indexOfTopLevelItem(pChildItem);
     }
 
     /** Returns a text. */
