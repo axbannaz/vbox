@@ -456,12 +456,12 @@ void QITreeWidget::setSizeHintForItems(const QSize &sizeHint)
 
 int QITreeWidget::childCount() const
 {
-    return invisibleRootItem()->childCount();
+    return topLevelItemCount();
 }
 
 QITreeWidgetItem *QITreeWidget::childItem(int iIndex) const
 {
-    return invisibleRootItem()->child(iIndex) ? QITreeWidgetItem::toItem(invisibleRootItem()->child(iIndex)) : 0;
+    return topLevelItem(iIndex) ? QITreeWidgetItem::toItem(topLevelItem(iIndex)) : 0;
 }
 
 QModelIndex QITreeWidget::itemIndex(QTreeWidgetItem *pItem)
