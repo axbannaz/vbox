@@ -115,7 +115,8 @@ class LocalRsrcCache(object):
         sCachePath = os.path.join(self.sLocalCachePath, sName);
         if os.path.exists(sCachePath):
             # Resource is already cached, return this variant and place it at the top of the cache.
-            self.oCacheLru.move_to_end(sCachePath, False);
+            cbObj = self.oCacheLru.pop(sCachePath);
+            self.oCacheLru[sName] = cbObj;
             self.writeToc();
             return sCachePath;
 
@@ -146,7 +147,6 @@ class LocalRsrcCache(object):
 
             shutil.copyfile(sResourcePath, sCachedPath);
             self.oCacheLru[sName] = cbObj;
-            self.oCacheLru.move_to_end(sName, False);
             self.writeToc();
             return sCachedPath;
 
