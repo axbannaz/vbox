@@ -213,6 +213,9 @@ private:
 /** QAccessibleWidget extension used as an accessibility interface for QITreeWidget. */
 class QIAccessibilityInterfaceForQITreeWidget
     : public QAccessibleWidget
+#ifndef VBOX_WS_MAC
+    , public QAccessibleSelectionInterface
+#endif
 {
 public:
 
@@ -236,6 +239,25 @@ public:
         : QAccessibleWidget(pWidget, QAccessible::Tree)
 #endif
     {}
+
+    /** Returns a specialized accessibility interface type. */
+    virtual void *interface_cast(QAccessible::InterfaceType enmType) RT_OVERRIDE
+    {
+        const int iCase = static_cast<int>(enmType);
+        switch (iCase)
+        {
+#ifdef VBOX_WS_MAC
+            /// @todo Fix selection interface for macOS first of all!
+#else
+            case QAccessible::SelectionInterface:
+                return static_cast<QAccessibleSelectionInterface*>(this);
+#endif
+            default:
+                break;
+        }
+
+        return 0;
+    }
 
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
@@ -352,6 +374,56 @@ public:
         /* Null string by default: */
         return QString();
     }
+
+#ifndef VBOX_WS_MAC
+    /** Returns the total number of selected accessible items. */
+    virtual int selectedItemCount() const RT_OVERRIDE
+    {
+        /* For now we are interested in just first one selected item: */
+        return 1;
+    }
+
+    /** Returns the list of selected accessible items. */
+    virtual QList<QAccessibleInterface*> selectedItems() const RT_OVERRIDE
+    {
+        /* Sanity check: */
+        AssertPtrReturn(tree(), QList<QAccessibleInterface*>());
+
+        /* Get current item: */
+        QITreeWidgetItem *pCurrentItem = QITreeWidgetItem::toItem(tree()->currentItem());
+
+        /* For now we are interested in just first one selected item: */
+        return QList<QAccessibleInterface*>() << QAccessible::queryAccessibleInterface(pCurrentItem);
+    }
+
+    /** Adds childItem to the selection. */
+    virtual bool select(QAccessibleInterface *) RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Removes childItem from the selection. */
+    virtual bool unselect(QAccessibleInterface *) RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Selects all accessible child items. */
+    virtual bool selectAll() RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+
+    /** Unselects all accessible child items. */
+    virtual bool clear() RT_OVERRIDE
+    {
+        /// @todo implement
+        return false;
+    }
+#endif /* VBOX_WS_MAC */
 
 private:
 
