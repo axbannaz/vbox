@@ -328,17 +328,29 @@ public:
         return myState;
     }
 
-    /** Returns a text. */
-    virtual QString text(QAccessible::Text) const RT_OVERRIDE
+    /** Returns a text for the passed @a enmTextRole. */
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Sanity check: */
-        AssertPtrReturn(tree(), QString());
+        /* Text for known roles: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name:
+            {
+                /* Sanity check: */
+                AssertPtrReturn(tree(), QString());
 
-        /* Gather suitable text: */
-        QString strText = tree()->toolTip();
-        if (strText.isEmpty())
-            strText = tree()->whatsThis();
-        return strText;
+                /* Gather suitable text: */
+                QString strText = tree()->toolTip();
+                if (strText.isEmpty())
+                    strText = tree()->whatsThis();
+                return strText;
+            }
+            default:
+                break;
+        }
+
+        /* Null string by default: */
+        return QString();
     }
 
 private:
