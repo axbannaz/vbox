@@ -27,6 +27,7 @@
 
 /* Qt includes: */
 #include <QAccessibleInterface>
+#include <QWidget>
 
 /* GUI includes: */
 #include "UIAccessible.h"
