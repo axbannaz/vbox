@@ -73,20 +73,28 @@ public:
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
-        /* Return the parent: */
-        return item()->parentItem() ?
-               QAccessible::queryAccessibleInterface(item()->parentItem()) :
-               QAccessible::queryAccessibleInterface(item()->parentTree());
+        /* Return parent-item interface if any: */
+        if (QITreeWidgetItem *pParentItem = item()->parentItem())
+            return QAccessible::queryAccessibleInterface(pParentItem);
+
+        /* Return parent-tree interface if any: */
+        if (QITreeWidget *pParentTree = item()->parentTree())
+            return QAccessible::queryAccessibleInterface(pParentTree);
+
+        /* Null by default: */
+        return 0;
     }
 
     /** Returns the rect. */
     virtual QRect rect() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QRect());
+        AssertPtrReturn(item()->parentTree(), QRect());
+        AssertPtrReturn(item()->parentTree()->viewport(), QRect());
 
         /* Compose common region: */
         QRegion region;
@@ -110,7 +118,7 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
         /* Return the number of children: */
@@ -120,10 +128,9 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(item(), 0);
 
         /* Return the child with the passed iIndex: */
         return QAccessible::queryAccessibleInterface(item()->childItem(iIndex));
@@ -144,7 +151,7 @@ public:
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
 
         /* Compose the state: */
@@ -223,7 +230,7 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure tree still alive: */
+        /* Sanity check: */
         AssertPtrReturn(tree(), 0);
 
         /* Return the number of children: */
@@ -233,10 +240,10 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure tree still alive: */
-        AssertPtrReturn(tree(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0, 0);
+        AssertPtrReturn(tree(), 0);
+
         if (iIndex >= childCount())
         {
             // WORKAROUND:
@@ -281,10 +288,9 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Make sure tree still alive: */
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
         AssertPtrReturn(tree(), -1);
-        /* Make sure child is valid: */
-        AssertReturn(pChild, -1);
 
         // WORKAROUND:
         // Not yet sure how to handle this for tree widget with multiple columns, so this is a simple hack:
@@ -296,7 +302,7 @@ public:
     /** Returns a text. */
     virtual QString text(QAccessible::Text) const RT_OVERRIDE
     {
-        /* Make sure tree still alive: */
+        /* Sanity check: */
         AssertPtrReturn(tree(), QString());
 
         /* Gather suitable text: */
