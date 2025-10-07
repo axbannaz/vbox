@@ -494,6 +494,21 @@ VMMR3DECL(int) CPUMR3Term(PVM pVM)
     }
 #endif
 
+#if defined(RT_ARCH_X86) || defined(RT_ARCH_AMD64)
+    if (pVM->cpum.s.paHostLeavesR3)
+    {
+        RTMemFree(pVM->cpum.s.paHostLeavesR3);
+        pVM->cpum.s.paHostLeavesR3 = NULL;
+    }
+
+#elif defined(RT_ARCH_ARM64)
+    if (pVM->cpum.s.paHostIdRegsR3)
+    {
+        RTMemFree(pVM->cpum.s.paHostIdRegsR3);
+        pVM->cpum.s.paHostIdRegsR3 = NULL;
+    }
+#endif
+
     return cpumR3TermTarget(pVM);
 }
 
