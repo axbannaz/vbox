@@ -82,7 +82,7 @@ class LocalRsrcCache(object):
                         sPath = os.path.join(self.sLocalCachePath, sItem);
                         cbObj = os.path.getsize(sPath);
                         self.cbCache += cbObj;
-                        self.oCacheLru[sPath] = cbObj;
+                        self.oCacheLru[sItem] = cbObj;
                 else:
                     fRc = False;
         except:
