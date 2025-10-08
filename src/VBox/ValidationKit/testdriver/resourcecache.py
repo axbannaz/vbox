@@ -115,7 +115,7 @@ class LocalRsrcCache(object):
         sCachePath = os.path.join(self.sLocalCachePath, sName);
         if os.path.exists(sCachePath):
             # Resource is already cached, return this variant and place it at the top of the cache.
-            cbObj = self.oCacheLru.pop(sCachePath);
+            cbObj = self.oCacheLru.pop(sName);
             self.oCacheLru[sName] = cbObj;
             self.writeToc();
             return sCachePath;
