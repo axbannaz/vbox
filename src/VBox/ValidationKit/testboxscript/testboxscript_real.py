@@ -200,7 +200,7 @@ class TestBoxScript(object):
         testboxcommons.log('Test Manager URL: %s' % self._oOptions.sTestManagerUrl,)
         testboxcommons.log('Scratch root path: %s' % self._oOptions.sScratchRoot,)
         if self._oOptions.sResourceCacheRoot is not None:
-            testboxcommons.log('Local resource cache root path: %s' % self._oOptions.sResourceCacheRoots,);
+            testboxcommons.log('Local resource cache root path: %s' % self._oOptions.sResourceCacheRoot,);
             testboxcommons.log('Local resource cache maximum size: %s' % self._oOptions.sResourceCacheSizeMax,);
         for sItem in self._ddSignOnParams:                      # pylint: disable=consider-using-dict-items
             testboxcommons.log('Sign-On value %18s: %s' % (sItem, self._ddSignOnParams[sItem][self.VALUE]));
