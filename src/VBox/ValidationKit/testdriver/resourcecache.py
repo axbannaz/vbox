@@ -100,7 +100,7 @@ class LocalRsrcCache(object):
         Cleans up the cache, writing the TOC file.
         """
         asToc = [];
-        for sKey in self.oCacheLru.keys():
+        for sKey, _ in self.oCacheLru.items():
             asToc.append(sKey);
 
         sCacheToc = os.path.join(self.sLocalCachePath, 'cache-toc.json');
@@ -132,7 +132,7 @@ class LocalRsrcCache(object):
             if self.cbCache + cbObj > self.cbCacheMax:
                 cbEvict = (self.cbCache + cbObj) - self.cbCacheMax;
                 while cbEvict > 0:
-                    sCachedPath, cbCachedObj = self.oCacheLru.popitem(True);
+                    sCachedPath, cbCachedObj = self.oCacheLru.popitem(False);
                     os.remove(os.path.join(self.sLocalCachePath, sCachedPath));
                     self.cbCache = self.cbCache - cbCachedObj;
                     cbEvict = cbEvict - min(cbEvict, cbCachedObj);
