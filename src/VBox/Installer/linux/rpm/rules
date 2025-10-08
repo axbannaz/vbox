@@ -183,7 +183,7 @@ cfg_flags := $(if $(NOQT),--disable-qt,) \
     $(if $(VNC),--enable-vnc,) \
     $(if $(PATH_OUT_BASE),--out-base-dir=$(PATH_OUT_BASE),) \
     $(if $(filter el10 openSUSE156,$(rpmrel)),--build-libssl,) \
-    $(if $(filter el10 openSUSE156,$(rpmrel)),--disable-java,) \
+    $(if $(filter el10 openSUSE156 openSUSE160,$(rpmrel)),--disable-java,) \
     --disable-extpack
 
 bld_flags := LOCALCFG=$(instlin)/rpm/LocalConfig.kmk \
