@@ -53,13 +53,13 @@
  */
 KAVL_DECL(PKAVLNODECORE) KAVL_FN(GetBestFit)(PPKAVLNODECORE ppTree, KAVLKEY Key, bool fAbove)
 {
-    PKAVLNODECORE  pNode = KAVL_GET_POINTER_NULL(ppTree);
+    PKAVLNODECORE pNode = KAVL_GET_POINTER_NULL(ppTree);
     if (pNode)
     {
-        PKAVLNODECORE           pNodeLast = NULL;
+        PKAVLNODECORE pNodeLast = NULL;
         if (fAbove)
         {   /* pNode->Key >= Key */
-            while (KAVL_NE(pNode->Key, Key))
+            while (!KAVL_R_IS_IN_RANGE(pNode->Key, pNode->KeyLast, Key))
             {
                 if (KAVL_G(pNode->Key, Key))
                 {
@@ -82,7 +82,7 @@ KAVL_DECL(PKAVLNODECORE) KAVL_FN(GetBestFit)(PPKAVLNODECORE ppTree, KAVLKEY Key,
         }
         else
         {   /* pNode->Key <= Key */
-            while (KAVL_NE(pNode->Key, Key))
+            while (!KAVL_R_IS_IN_RANGE(pNode->Key, pNode->KeyLast, Key))
             {
                 if (KAVL_G(pNode->Key, Key))
                 {

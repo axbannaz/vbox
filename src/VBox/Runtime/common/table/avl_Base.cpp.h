@@ -134,6 +134,7 @@
 #ifndef KAVL_RANGE
 # define KAVL_R_IS_INTERSECTING(key1B, key2B, key1E, key2E) KAVL_E(key1B, key2B)
 # define KAVL_R_IS_IDENTICAL(key1B, key2B, key1E, key2E)    KAVL_E(key1B, key2B)
+# define KAVL_R_IS_IN_RANGE(key1B, key1E, key2)             KAVL_E(key1B, key2)
 #endif
 
 /** @def KAVL_DECL
