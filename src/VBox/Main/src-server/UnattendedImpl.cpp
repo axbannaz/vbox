@@ -2150,7 +2150,9 @@ HRESULT Unattended::i_innerDetectIsoOSLinuxFedora(RTVFS hVfsIso, DETECTBUFFER *p
         static struct { const char *pszFile; VBOXOSTYPE fArch; } const s_aArchSpecificFiles[] =
         {
             { "EFI/BOOT/grubaa64.efi", VBOXOSTYPE_arm64 },
+            { "EFI/BOOT/grubx64.efi", VBOXOSTYPE_x64 },
             { "EFI/BOOT/BOOTAA64.EFI", VBOXOSTYPE_arm64 },
+            { "EFI/BOOT/bootx64.EFI", VBOXOSTYPE_x64 },
         };
         PRTFSOBJINFO pObjInfo = (PRTFSOBJINFO)&pBuf->ab[0];
         AssertCompile(sizeof(*pBuf) > sizeof(*pObjInfo));
