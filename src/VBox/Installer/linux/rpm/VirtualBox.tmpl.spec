@@ -45,7 +45,7 @@ BuildRoot: %BUILDROOT%
 Requires:  %INITSCRIPTS% %LIBASOUND% %NETTOOLS% %LIBVULKAN%
 
 %if %{?rpm_suse:1}%{!?rpm_suse:0}
-%debug_package
+%global debug_package %{nil}
 %endif
 
 %MACROSPYTHON%
