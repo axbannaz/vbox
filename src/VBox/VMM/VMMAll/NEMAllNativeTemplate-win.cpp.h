@@ -1724,6 +1724,8 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitIoPort(PVMCC pVM, PVMCPUCC pVCpu,
            || pExit->IoPortAccess.AccessInfo.AccessSize == 2
            || pExit->IoPortAccess.AccessInfo.AccessSize == 4);
 
+    nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
+
     /*
      * Whatever we do, we must clear pending event injection upon resume.
      */
@@ -1763,10 +1765,7 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitIoPort(PVMCC pVM, PVMCPUCC pVCpu,
                       pExit->IoPortAccess.PortNumber, (uint32_t)pExit->IoPortAccess.Rax & fAndMask,
                       pExit->IoPortAccess.AccessInfo.AccessSize, VBOXSTRICTRC_VAL(rcStrict) ));
                 if (IOM_SUCCESS(rcStrict))
-                {
-                    nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
                     nemR3WinAdvanceGuestRipAndClearRF(pVCpu, &pExit->VpContext, 1);
-                }
             }
             else
             {
@@ -1784,7 +1783,6 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitIoPort(PVMCC pVM, PVMCPUCC pVCpu,
                         pVCpu->cpum.GstCtx.rax = uValue;
                     pVCpu->cpum.GstCtx.fExtrn &= ~CPUMCTX_EXTRN_RAX;
                     Log4(("IOExit/%u: RAX %#RX64 -> %#RX64\n", pVCpu->idCpu, pExit->IoPortAccess.Rax, pVCpu->cpum.GstCtx.rax));
-                    nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
                     nemR3WinAdvanceGuestRipAndClearRF(pVCpu, &pExit->VpContext, 1);
                 }
             }
@@ -1805,7 +1803,6 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitIoPort(PVMCC pVM, PVMCPUCC pVCpu,
              * experiments to figure out how it's communicated.  Alternatively, we can scan
              * the opcode bytes for possible evil prefixes.
              */
-            nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
             pVCpu->cpum.GstCtx.fExtrn &= ~(  CPUMCTX_EXTRN_RAX | CPUMCTX_EXTRN_RCX | CPUMCTX_EXTRN_RDI | CPUMCTX_EXTRN_RSI
                                            | CPUMCTX_EXTRN_DS  | CPUMCTX_EXTRN_ES);
             NEM_WIN_COPY_BACK_SEG(pVCpu->cpum.GstCtx.ds, pExit->IoPortAccess.Ds);
@@ -1843,7 +1840,6 @@ NEM_TMPL_STATIC VBOXSTRICTRC nemR3WinHandleExitIoPort(PVMCC pVM, PVMCPUCC pVCpu,
      * Frequent exit or something needing probing.
      * Get state and call EMHistoryExec.
      */
-    nemR3WinCopyStateFromX64Header(pVCpu, &pExit->VpContext);
     if (!pExit->IoPortAccess.AccessInfo.StringOp)
         pVCpu->cpum.GstCtx.fExtrn &= ~CPUMCTX_EXTRN_RAX;
     else
