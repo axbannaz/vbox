@@ -21413,53 +21413,6 @@ diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">Bem-vindo</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>Unidade</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Rede</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Nuvem</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Detalhes</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Capturas de Ecrã</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Registos</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Extensões</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">Atividades</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">Atividade</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Gestor de Ficheiros</translation>
-    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -21473,12 +21426,44 @@ diálogo de Configurações da MV.&lt;/p&gt;</translation>
         <translation type="unfinished">Máquinas</translation>
     </message>
     <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Extensões</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Unidade</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Rede</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Nuvem</translation>
+    </message>
+    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Details</source>
+        <translation type="unfinished">Detalhes</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Capturas de Ecrã</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Registos</translation>
+    </message>
+    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Gestor de Ficheiros</translation>
     </message>
 </context>
 <context>

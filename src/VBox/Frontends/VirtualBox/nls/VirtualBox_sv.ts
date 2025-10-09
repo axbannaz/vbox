@@ -13557,53 +13557,6 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">Välkommen</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>Media</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Nätverk</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Moln</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Detaljer</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Ögonblicksbilder</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Loggar</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Tillägg</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">Aktiviteter</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">Aktivitet</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Filhanterare</translation>
-    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -13617,12 +13570,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Tillägg</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Media</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Nätverk</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Moln</translation>
+    </message>
+    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Details</source>
+        <translation type="unfinished">Detaljer</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Ögonblicksbilder</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Loggar</translation>
+    </message>
+    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Filhanterare</translation>
     </message>
 </context>
 <context>

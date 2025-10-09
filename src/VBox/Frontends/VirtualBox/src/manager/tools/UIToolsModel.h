@@ -169,9 +169,6 @@ private slots:
         /** Handles request to commit data. */
         void sltHandleCommitData();
 
-        /** Handles translation event. */
-        void sltRetranslateUI();
-
         /** Handles tool label visibility change event. */
         void sltHandleToolLabelsVisibilityChange(bool fVisible);
 

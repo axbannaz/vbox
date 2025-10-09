@@ -19704,9 +19704,22 @@ preskočiť a pripojiť pevné disky neskôr pomocou dialógu Nastavenia virtuá
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
+    <message>
+        <source>Show text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation type="unfinished">Stroje</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Rozšírenia</translation>
+    </message>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>
@@ -19717,6 +19730,10 @@ preskočiť a pripojiť pevné disky neskôr pomocou dialógu Nastavenia virtuá
     </message>
     <message>
         <source>Cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -19732,32 +19749,12 @@ preskočiť a pripojiť pevné disky neskôr pomocou dialógu Nastavenia virtuá
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Rozšírenia</translation>
+        <source>Resource Use</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>File Manager</source>
         <translation type="unfinished">Správca súborov</translation>
-    </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Stroje</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Resource Use</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

@@ -18551,9 +18551,22 @@ You may wish to translate this more like &quot;Time remaining: %1&quot;</comment
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
+    <message>
+        <source>Show text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>
@@ -18564,6 +18577,10 @@ You may wish to translate this more like &quot;Time remaining: %1&quot;</comment
     </message>
     <message>
         <source>Cloud</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -18579,31 +18596,11 @@ You may wish to translate this more like &quot;Time remaining: %1&quot;</comment
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
+        <source>Resource Use</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Resource Use</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

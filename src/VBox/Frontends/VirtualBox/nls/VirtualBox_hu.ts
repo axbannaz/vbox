@@ -26092,64 +26092,57 @@ esetleg a &lt;b&gt;Létező&lt;/b&gt; gombbal a Virtuális lemezkezelőből.&lt;
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">Üdvözlet</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>Adathordozó</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Hálózat</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Felhő</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Részletek</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Pillanatkép</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Naplók</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Kiterjesztések</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Fájlkezelő</translation>
-    </message>
     <message>
         <source>Show text</source>
-        <translation>Szöüveg megjelenítése</translation>
+        <translation type="unfinished">Szöüveg megjelenítése</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>Kezdőlap</translation>
+        <translation type="unfinished">Kezdőlap</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation>Gépek</translation>
+        <translation type="unfinished">Gépek</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Kiterjesztések</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Adathordozó</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Hálózat</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Felhő</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation>Erőforrások</translation>
+        <translation type="unfinished">Erőforrások</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished">Részletek</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Pillanatkép</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Naplók</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation>Erőforráshasználat</translation>
+        <translation type="unfinished">Erőforráshasználat</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Fájlkezelő</translation>
     </message>
 </context>
 <context>

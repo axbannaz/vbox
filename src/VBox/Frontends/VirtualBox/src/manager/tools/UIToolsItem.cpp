@@ -563,7 +563,29 @@ void UIToolsItem::paint(QPainter *pPainter, const QStyleOptionGraphicsItem *pOpt
 
 void UIToolsItem::sltRetranslateUI()
 {
-    /* Update internal stuff: */
+    /* Translate item name: */
+    switch (itemType())
+    {
+        // Aux
+        case UIToolType_Toggle:      setName(tr("Show text")); break;
+        // Global
+        case UIToolType_Home:        setName(tr("Home")); break;
+        case UIToolType_Machines:    setName(tr("Machines")); break;
+        case UIToolType_Extensions:  setName(tr("Extensions")); break;
+        case UIToolType_Media:       setName(tr("Media")); break;
+        case UIToolType_Network:     setName(tr("Network")); break;
+        case UIToolType_Cloud:       setName(tr("Cloud")); break;
+        case UIToolType_Resources:   setName(tr("Resources")); break;
+        // Machine
+        case UIToolType_Details:     setName(tr("Details")); break;
+        case UIToolType_Snapshots:   setName(tr("Snapshots")); break;
+        case UIToolType_Logs:        setName(tr("Logs")); break;
+        case UIToolType_ResourceUse: setName(tr("Resource Use")); break;
+        case UIToolType_FileManager: setName(tr("File Manager")); break;
+        default: break;
+    }
+
+    /* Translate item description: */
     m_strDescription = tr("Tool item");
 }
 

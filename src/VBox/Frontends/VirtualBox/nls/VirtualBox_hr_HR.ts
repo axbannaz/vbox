@@ -14751,53 +14751,6 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">Dobrodošli</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>Medij</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Mreža</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Oblak</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Detalji</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Snimci</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Dnevnici</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Proširenja</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">Aktivnosti</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">Aktivnost</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Upravitelj Datoteka</translation>
-    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -14811,12 +14764,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Proširenja</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Medij</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Mreža</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Oblak</translation>
+    </message>
+    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Details</source>
+        <translation type="unfinished">Detalji</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Snimci</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Dnevnici</translation>
+    </message>
+    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Upravitelj Datoteka</translation>
     </message>
 </context>
 <context>

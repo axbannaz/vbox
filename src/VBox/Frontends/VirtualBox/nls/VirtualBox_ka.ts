@@ -14195,72 +14195,57 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">მოგესლამებათ</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>მედია</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>ქსელი</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>ღრუბელი</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>დეტალები</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>სწრაფი ასლები</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>ჟურნალი</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>გაფართოებები</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">ქმედებები</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">აქტივობა</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>ფაილების მმართველი</translation>
-    </message>
     <message>
         <source>Show text</source>
-        <translation>ტექსტის ჩვენება</translation>
+        <translation type="unfinished">ტექსტის ჩვენება</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>მთავარი</translation>
+        <translation type="unfinished">მთავარი</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation>მანქანები</translation>
+        <translation type="unfinished">მანქანები</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">გაფართოებები</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">მედია</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">ქსელი</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">ღრუბელი</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation>რესურსები</translation>
+        <translation type="unfinished">რესურსები</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished">დეტალები</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">სწრაფი ასლები</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">ჟურნალი</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation>რესურსების გამოყენება</translation>
+        <translation type="unfinished">რესურსების გამოყენება</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">ფაილების მმართველი</translation>
     </message>
 </context>
 <context>

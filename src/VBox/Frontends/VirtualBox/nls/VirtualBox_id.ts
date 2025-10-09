@@ -13549,53 +13549,6 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">Selamat Datang</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>Media</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Jaringan</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Cloud</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Rincian</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Snapshot</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Log</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Ekstensi</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">Aktivitas</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">Aktivitas</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Manajer Berkas</translation>
-    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -13609,12 +13562,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Ekstensi</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Media</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Jaringan</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Cloud</translation>
+    </message>
+    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Details</source>
+        <translation type="unfinished">Rincian</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Snapshot</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Log</translation>
+    </message>
+    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Manajer Berkas</translation>
     </message>
 </context>
 <context>

@@ -12388,60 +12388,57 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Media</source>
-        <translation>Ortam</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Ağ</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Bulut</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Ayrıntılar</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Anlık Görüntüler</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Günlükler</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Uzantılar</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Dosya Yöneticisi</translation>
-    </message>
     <message>
         <source>Show text</source>
-        <translation>Metni göster</translation>
+        <translation type="unfinished">Metni göster</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>Giriş</translation>
+        <translation type="unfinished">Giriş</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation>Makineler</translation>
+        <translation type="unfinished">Makineler</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Uzantılar</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Ortam</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Ağ</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Bulut</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation>Kaynaklar</translation>
+        <translation type="unfinished">Kaynaklar</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished">Ayrıntılar</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Anlık Görüntüler</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Günlükler</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation>Kaynak Kullanımı</translation>
+        <translation type="unfinished">Kaynak Kullanımı</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Dosya Yöneticisi</translation>
     </message>
 </context>
 <context>

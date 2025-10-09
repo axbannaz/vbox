@@ -12393,60 +12393,57 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Media</source>
-        <translation>Medien</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Netzwerk</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Cloud</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Details</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Sicherungspunkte</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Logs</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Erweiterungspakete</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Dateimanager</translation>
-    </message>
     <message>
         <source>Show text</source>
-        <translation>Zeige text</translation>
+        <translation type="unfinished">Zeige text</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>Startseite</translation>
+        <translation type="unfinished">Startseite</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation>Maschinen</translation>
+        <translation type="unfinished">Maschinen</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Erweiterungspakete</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Medien</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Netzwerk</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Cloud</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation>Resourcen</translation>
+        <translation type="unfinished">Resourcen</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished">Details</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Sicherungspunkte</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Logs</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation>Ressourcennutzung</translation>
+        <translation type="unfinished">Ressourcennutzung</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Dateimanager</translation>
     </message>
 </context>
 <context>

@@ -18255,53 +18255,6 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Welcome</source>
-        <translation type="vanished">환영합니다</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation>미디어</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>네트워크</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>클라우드</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>정보</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>스냅샷</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>로그</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>확장</translation>
-    </message>
-    <message>
-        <source>Activities</source>
-        <translation type="vanished">활동</translation>
-    </message>
-    <message>
-        <source>Activity</source>
-        <translation type="vanished">활동</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>파일 관리자</translation>
-    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -18315,12 +18268,44 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Extensions</source>
+        <translation type="unfinished">확장</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">미디어</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">네트워크</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">클라우드</translation>
+    </message>
+    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>Details</source>
+        <translation type="unfinished">정보</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">스냅샷</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">로그</translation>
+    </message>
+    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">파일 관리자</translation>
     </message>
 </context>
 <context>

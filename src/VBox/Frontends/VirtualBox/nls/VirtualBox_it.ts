@@ -12395,60 +12395,57 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
-    <message>
-        <source>Media</source>
-        <translation>Supporti</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation>Rete</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation>Cloud</translation>
-    </message>
-    <message>
-        <source>Details</source>
-        <translation>Dettagli</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation>Istantanee</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation>Registri</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation>Estensioni</translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation>Gestore file</translation>
-    </message>
     <message>
         <source>Show text</source>
-        <translation>Mostra testo</translation>
+        <translation type="unfinished">Mostra testo</translation>
     </message>
     <message>
         <source>Home</source>
-        <translation>Home</translation>
+        <translation type="unfinished">Home</translation>
     </message>
     <message>
         <source>Machines</source>
-        <translation>Macchine</translation>
+        <translation type="unfinished">Macchine</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Estensioni</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation type="unfinished">Supporti</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation type="unfinished">Rete</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation type="unfinished">Cloud</translation>
     </message>
     <message>
         <source>Resources</source>
-        <translation>Risorse</translation>
+        <translation type="unfinished">Risorse</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation type="unfinished">Dettagli</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation type="unfinished">Istantanee</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation type="unfinished">Registri</translation>
     </message>
     <message>
         <source>Resource Use</source>
-        <translation>Utilizzo delle risorse</translation>
+        <translation type="unfinished">Utilizzo delle risorse</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Gestore file</translation>
     </message>
 </context>
 <context>
