@@ -428,6 +428,8 @@ static DECLCALLBACK(void) gcmR3PatchGuest(PVM pVM, GCMGSTPATCHID enmPatch)
                                    | CPUMCTX_EXTRN_CR0  /* for mode */
                                    | CPUMCTX_EXTRN_EFER /* for mode */
                                    | CPUMCTX_EXTRN_DR7  /* for debugging - compulsory */
+                                   | CPUMCTX_EXTRN_GDTR /* for selector info */
+                                   | CPUMCTX_EXTRN_LDTR /* for selector info */
                                    | CPUMCTX_EXTRN_CR3 /* for page tables */
                                    | CPUMCTX_EXTRN_CR4 /* for mode paging mode */
                                    | CPUMCTX_EXTRN_DR7 /* for memory breakpoints */,
