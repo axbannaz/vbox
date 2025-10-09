@@ -4545,8 +4545,8 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
-        <translation>Máquina Virtual</translation>
+        <source>Virtual machine</source>
+        <translation>Máquina virtual</translation>
     </message>
 </context>
 <context>

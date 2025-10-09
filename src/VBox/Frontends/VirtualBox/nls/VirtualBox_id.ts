@@ -3107,8 +3107,8 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
-        <translation>Mesin Virtual</translation>
+        <source>Virtual machine</source>
+        <translation>Mesin virtual</translation>
     </message>
 </context>
 <context>

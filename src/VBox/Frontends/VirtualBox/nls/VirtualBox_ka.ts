@@ -3197,7 +3197,7 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
+        <source>Virtual machine</source>
         <translation>ვირტუალური მანქანა</translation>
     </message>
 </context>

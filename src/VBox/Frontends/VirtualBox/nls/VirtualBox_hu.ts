@@ -4240,7 +4240,7 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
+        <source>Virtual machine</source>
         <translation>Virtuális gép</translation>
     </message>
 </context>

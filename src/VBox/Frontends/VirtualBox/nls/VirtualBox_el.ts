@@ -3320,8 +3320,8 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
-        <translation>Εικονική Μηχανή</translation>
+        <source>Virtual machine</source>
+        <translation>Εικονική μηχανή</translation>
     </message>
 </context>
 <context>

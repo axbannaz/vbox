@@ -3224,7 +3224,7 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
+        <source>Virtual machine</source>
         <translation>虛擬機器</translation>
     </message>
 </context>

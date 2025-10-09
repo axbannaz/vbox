@@ -280,7 +280,7 @@ bool UIChooserNodeMachine::accessible() const
 void UIChooserNodeMachine::sltRetranslateUI()
 {
     /* Update internal stuff: */
-    m_strDescription = tr("Virtual Machine");
+    m_strDescription = tr("Virtual machine");
 
     /* Update machine-item: */
     if (item())

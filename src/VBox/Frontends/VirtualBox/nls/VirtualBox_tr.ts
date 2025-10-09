@@ -2894,8 +2894,8 @@
 <context>
     <name>UIChooserNodeMachine</name>
     <message>
-        <source>Virtual Machine</source>
-        <translation>Sanal Makine</translation>
+        <source>Virtual machine</source>
+        <translation>Sanal makine</translation>
     </message>
 </context>
 <context>
