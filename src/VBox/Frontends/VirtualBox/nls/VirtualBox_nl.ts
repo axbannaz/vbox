@@ -13579,6 +13579,53 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Welkom</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>Media</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>Netwerk</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>Cloud</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Details</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Snapshots</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Logs</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>Extenties</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">Activiteiten</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">Activiteit</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation>Bestandsmanager</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -13592,44 +13639,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Extenties</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Media</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">Netwerk</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">Cloud</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Details</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Snapshots</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Logs</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">Bestandsmanager</translation>
     </message>
 </context>
 <context>

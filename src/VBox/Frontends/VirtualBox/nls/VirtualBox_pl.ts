@@ -24420,6 +24420,49 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Powitanie</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>Nośniki</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>Sieć</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>Chmura</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Szczegóły</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Migawki</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Logi</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>Rozszerzenia</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">Aktywność</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation>Menedżer plików</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -24433,44 +24476,12 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
         <translation type="unfinished">Maszyny</translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Rozszerzenia</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Nośniki</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">Chmura</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Szczegóły</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Migawki</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Logi</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">Menedżer plików</translation>
     </message>
 </context>
 <context>

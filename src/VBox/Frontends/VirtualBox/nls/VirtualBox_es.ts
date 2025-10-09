@@ -27447,6 +27447,53 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Bienvenido</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>Medio</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>Red</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>Cloud</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Detalles</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Instantáneas</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Trazas</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>Extensiones</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">Actividades</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">Actividad</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation>Administrador de archivos</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -27460,44 +27507,12 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <translation type="unfinished">Máquinas</translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Extensiones</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Medio</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">Red</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">Cloud</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Detalles</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Instantáneas</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Trazas</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">Administrador de archivos</translation>
     </message>
 </context>
 <context>

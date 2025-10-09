@@ -17690,6 +17690,45 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Benvingut</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>Multimèdia</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>Xarxa</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>Núvol</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Detalls</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Instantànies</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Registres</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished">Extensions</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Gestor d&apos;arxius</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -17703,44 +17742,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Extensions</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Multimèdia</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">Xarxa</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">Núvol</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Detalls</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Instantànies</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Registres</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">Gestor d&apos;arxius</translation>
     </message>
 </context>
 <context>

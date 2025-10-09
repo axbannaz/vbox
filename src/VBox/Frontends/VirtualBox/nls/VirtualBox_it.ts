@@ -12395,57 +12395,60 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished">Mostra testo</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished">Home</translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Macchine</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Estensioni</translation>
-    </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
-        <translation type="unfinished">Supporti</translation>
+        <translation>Supporti</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Rete</translation>
+        <translation>Rete</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">Cloud</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished">Risorse</translation>
+        <translation>Cloud</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished">Dettagli</translation>
+        <translation>Dettagli</translation>
     </message>
     <message>
         <source>Snapshots</source>
-        <translation type="unfinished">Istantanee</translation>
+        <translation>Istantanee</translation>
     </message>
     <message>
         <source>Logs</source>
-        <translation type="unfinished">Registri</translation>
+        <translation>Registri</translation>
     </message>
     <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">Utilizzo delle risorse</translation>
+        <source>Extensions</source>
+        <translation>Estensioni</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">Gestore file</translation>
+        <translation>Gestore file</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>Mostra testo</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Home</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>Macchine</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>Risorse</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>Utilizzo delle risorse</translation>
     </message>
 </context>
 <context>

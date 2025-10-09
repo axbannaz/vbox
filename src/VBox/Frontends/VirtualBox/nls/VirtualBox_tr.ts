@@ -12388,57 +12388,60 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished">Metni göster</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished">Giriş</translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Makineler</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Uzantılar</translation>
-    </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
-        <translation type="unfinished">Ortam</translation>
+        <translation>Ortam</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Ağ</translation>
+        <translation>Ağ</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">Bulut</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished">Kaynaklar</translation>
+        <translation>Bulut</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished">Ayrıntılar</translation>
+        <translation>Ayrıntılar</translation>
     </message>
     <message>
         <source>Snapshots</source>
-        <translation type="unfinished">Anlık Görüntüler</translation>
+        <translation>Anlık Görüntüler</translation>
     </message>
     <message>
         <source>Logs</source>
-        <translation type="unfinished">Günlükler</translation>
+        <translation>Günlükler</translation>
     </message>
     <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">Kaynak Kullanımı</translation>
+        <source>Extensions</source>
+        <translation>Uzantılar</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">Dosya Yöneticisi</translation>
+        <translation>Dosya Yöneticisi</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>Metni göster</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Giriş</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>Makineler</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>Kaynaklar</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>Kaynak Kullanımı</translation>
     </message>
 </context>
 <context>

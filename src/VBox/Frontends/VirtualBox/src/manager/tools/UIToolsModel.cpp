@@ -39,6 +39,7 @@
 #include "UIToolsItem.h"
 #include "UIToolsModel.h"
 #include "UIToolsView.h"
+#include "UITranslationEventListener.h"
 
 /* Other VBox includes: */
 #include "iprt/assert.h"
@@ -458,6 +459,33 @@ void UIToolsModel::sltHandleCommitData()
     saveCurrentItems();
 }
 
+void UIToolsModel::sltRetranslateUI()
+{
+    foreach (UIToolsItem *pItem, m_items)
+    {
+        switch (pItem->itemType())
+        {
+            // Aux
+            case UIToolType_Toggle:      pItem->setName(tr("Show text")); break;
+            // Global
+            case UIToolType_Home:        pItem->setName(tr("Home")); break;
+            case UIToolType_Machines:    pItem->setName(tr("Machines")); break;
+            case UIToolType_Extensions:  pItem->setName(tr("Extensions")); break;
+            case UIToolType_Media:       pItem->setName(tr("Media")); break;
+            case UIToolType_Network:     pItem->setName(tr("Network")); break;
+            case UIToolType_Cloud:       pItem->setName(tr("Cloud")); break;
+            case UIToolType_Resources:   pItem->setName(tr("Resources")); break;
+            // Machine
+            case UIToolType_Details:     pItem->setName(tr("Details")); break;
+            case UIToolType_Snapshots:   pItem->setName(tr("Snapshots")); break;
+            case UIToolType_Logs:        pItem->setName(tr("Logs")); break;
+            case UIToolType_ResourceUse: pItem->setName(tr("Resource Use")); break;
+            case UIToolType_FileManager: pItem->setName(tr("File Manager")); break;
+            default: break;
+        }
+    }
+}
+
 void UIToolsModel::sltHandleToolLabelsVisibilityChange(bool fVisible)
 {
     /* Toggle the button: */
@@ -489,6 +517,9 @@ void UIToolsModel::prepare()
     prepareScene();
     prepareItems();
     prepareConnections();
+
+    /* Apply language settings: */
+    sltRetranslateUI();
 }
 
 void UIToolsModel::prepareScene()
@@ -552,6 +583,10 @@ void UIToolsModel::prepareConnections()
     /* UICommon connections: */
     connect(&uiCommon(), &UICommon::sigAskToCommitData,
             this, &UIToolsModel::sltHandleCommitData);
+
+    /* Translation stuff: */
+    connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
+            this, &UIToolsModel::sltRetranslateUI);
 
     /* Extra-data stuff: */
     connect(gEDataManager, &UIExtraDataManager::sigToolLabelsVisibilityChange,

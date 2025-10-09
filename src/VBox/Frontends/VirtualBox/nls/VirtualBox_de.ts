@@ -12393,57 +12393,60 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished">Zeige text</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished">Startseite</translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Maschinen</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Erweiterungspakete</translation>
-    </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
-        <translation type="unfinished">Medien</translation>
+        <translation>Medien</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Netzwerk</translation>
+        <translation>Netzwerk</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">Cloud</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished">Resourcen</translation>
+        <translation>Cloud</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished">Details</translation>
+        <translation>Details</translation>
     </message>
     <message>
         <source>Snapshots</source>
-        <translation type="unfinished">Sicherungspunkte</translation>
+        <translation>Sicherungspunkte</translation>
     </message>
     <message>
         <source>Logs</source>
-        <translation type="unfinished">Logs</translation>
+        <translation>Logs</translation>
     </message>
     <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">Ressourcennutzung</translation>
+        <source>Extensions</source>
+        <translation>Erweiterungspakete</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">Dateimanager</translation>
+        <translation>Dateimanager</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>Zeige text</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Startseite</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>Maschinen</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>Resourcen</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>Ressourcennutzung</translation>
     </message>
 </context>
 <context>

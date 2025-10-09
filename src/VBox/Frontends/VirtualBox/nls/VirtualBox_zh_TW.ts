@@ -14705,6 +14705,53 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">歡迎</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>媒體</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>網路</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>雲端</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>詳細資料</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>快照</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>日誌</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>擴充功能</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">啟用</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">活動</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation>檔案管理員</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -14718,44 +14765,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">擴充功能</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">媒體</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">網路</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">雲端</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">詳細資料</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">快照</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">日誌</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">檔案管理員</translation>
     </message>
 </context>
 <context>

@@ -24363,6 +24363,45 @@ And the size is not necessarily &quot;in megabytes&quot;, the slider chooses the
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Bienvenue</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>Support</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>Réseau</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>Cloud</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Détails</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Instantanés</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>Journaux</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation type="unfinished">Gestionnaire de fichiers</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -24376,44 +24415,12 @@ And the size is not necessarily &quot;in megabytes&quot;, the slider chooses the
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Support</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">Réseau</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">Cloud</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Détails</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Instantanés</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Journaux</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">Gestionnaire de fichiers</translation>
     </message>
 </context>
 <context>

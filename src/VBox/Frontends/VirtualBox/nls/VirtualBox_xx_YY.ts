@@ -12386,22 +12386,9 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished"></translation>
-    </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>
@@ -12412,10 +12399,6 @@
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -12431,11 +12414,31 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Resource Use</source>
+        <source>Extensions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <source>File Manager</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

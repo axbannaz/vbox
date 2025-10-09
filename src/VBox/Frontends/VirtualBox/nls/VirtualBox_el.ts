@@ -16110,57 +16110,72 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
-        <source>Show text</source>
-        <translation type="unfinished">Εμφάνιση κειμένου</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished">Αρχική Σελίδα</translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Μηχανές</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Επεκτάσεις</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">Μέσα</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">Δίκτυο</translation>
+        <source>Logs</source>
+        <translation>Καταγραφικά</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">Σύννεφο</translation>
+        <translation>Σύννεφο</translation>
     </message>
     <message>
-        <source>Resources</source>
-        <translation type="unfinished">Πηγές</translation>
+        <source>Media</source>
+        <translation>Μέσα</translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">Λεπτομέρειες</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished">Στιγμιότυπα</translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">Καταγραφικά</translation>
-    </message>
-    <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">Χρήση Πηγής</translation>
+        <source>Network</source>
+        <translation>Δίκτυο</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">Διαχειριστής Αρχείων</translation>
+        <translation>Διαχειριστής Αρχείων</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>Στιγμιότυπα</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>Λεπτομέρειες</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>Επεκτάσεις</translation>
+    </message>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">Καλώς ήρθατε</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">Δραστηριότητες</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">Δραστηριότητα</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>Εμφάνιση κειμένου</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Αρχική Σελίδα</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>Μηχανές</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>Πηγές</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>Χρήση Πηγής</translation>
     </message>
 </context>
 <context>

@@ -12401,57 +12401,60 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <source>Show text</source>
-        <translation type="unfinished">Показать текст</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">Машины</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">Плагины</translation>
-    </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
-        <translation type="unfinished">Носители</translation>
+        <translation>Носители</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">Сеть</translation>
+        <translation>Сеть</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">Облако</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished">Ресурсы</translation>
+        <translation>Облако</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished">Детали</translation>
+        <translation>Детали</translation>
     </message>
     <message>
         <source>Snapshots</source>
-        <translation type="unfinished"></translation>
+        <translation>Снимки</translation>
     </message>
     <message>
         <source>Logs</source>
-        <translation type="unfinished">Журналы</translation>
+        <translation>Журналы</translation>
     </message>
     <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">Ресурсы машины</translation>
+        <source>Extensions</source>
+        <translation>Плагины</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">Менеджер файлов</translation>
+        <translation>Менеджер файлов</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>Показать текст</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>Главная</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>Машины</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>Ресурсы</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>Ресурсы машины</translation>
     </message>
 </context>
 <context>

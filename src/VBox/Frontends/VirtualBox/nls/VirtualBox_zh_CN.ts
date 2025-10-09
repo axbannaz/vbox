@@ -24677,6 +24677,53 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
+    <message>
+        <source>Welcome</source>
+        <translation type="vanished">欢迎</translation>
+    </message>
+    <message>
+        <source>Media</source>
+        <translation>介质</translation>
+    </message>
+    <message>
+        <source>Network</source>
+        <translation>网络</translation>
+    </message>
+    <message>
+        <source>Cloud</source>
+        <translation>云服务</translation>
+    </message>
+    <message>
+        <source>Details</source>
+        <translation>明细</translation>
+    </message>
+    <message>
+        <source>Snapshots</source>
+        <translation>备份[系统快照]</translation>
+    </message>
+    <message>
+        <source>Logs</source>
+        <translation>日志</translation>
+    </message>
+    <message>
+        <source>Extensions</source>
+        <translation>扩展</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">活动</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">活动</translation>
+    </message>
+    <message>
+        <source>File Manager</source>
+        <translation>文件管理器</translation>
+    </message>
     <message>
         <source>Show text</source>
         <translation type="unfinished"></translation>
@@ -24690,44 +24737,12 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Extensions</source>
-        <translation type="unfinished">扩展</translation>
-    </message>
-    <message>
-        <source>Media</source>
-        <translation type="unfinished">介质</translation>
-    </message>
-    <message>
-        <source>Network</source>
-        <translation type="unfinished">网络</translation>
-    </message>
-    <message>
-        <source>Cloud</source>
-        <translation type="unfinished">云服务</translation>
-    </message>
-    <message>
         <source>Resources</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Details</source>
-        <translation type="unfinished">明细</translation>
-    </message>
-    <message>
-        <source>Snapshots</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Logs</source>
-        <translation type="unfinished">日志</translation>
-    </message>
-    <message>
         <source>Resource Use</source>
         <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>File Manager</source>
-        <translation type="unfinished">文件管理器</translation>
     </message>
 </context>
 <context>

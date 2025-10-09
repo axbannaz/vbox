@@ -27195,57 +27195,72 @@ step and attach hard disks later using the VM Settings dialog.&lt;/p&gt;</source
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
+</context>
+<context>
+    <name>UIToolsModel</name>
     <message>
-        <source>Show text</source>
-        <translation type="unfinished">テキストを表示</translation>
-    </message>
-    <message>
-        <source>Home</source>
-        <translation type="unfinished">ホーム</translation>
-    </message>
-    <message>
-        <source>Machines</source>
-        <translation type="unfinished">仮想マシン</translation>
-    </message>
-    <message>
-        <source>Extensions</source>
-        <translation type="unfinished">機能拡張</translation>
+        <source>Welcome</source>
+        <translation type="vanished">ようこそ</translation>
     </message>
     <message>
         <source>Media</source>
-        <translation type="unfinished">メディア</translation>
+        <translation>メディア</translation>
     </message>
     <message>
         <source>Network</source>
-        <translation type="unfinished">ネットワーク</translation>
+        <translation>ネットワーク</translation>
     </message>
     <message>
         <source>Cloud</source>
-        <translation type="unfinished">クラウド</translation>
-    </message>
-    <message>
-        <source>Resources</source>
-        <translation type="unfinished">リソース</translation>
+        <translation>クラウド</translation>
     </message>
     <message>
         <source>Details</source>
-        <translation type="unfinished">詳細</translation>
+        <translation>詳細</translation>
     </message>
     <message>
         <source>Snapshots</source>
-        <translation type="unfinished">スナップショット</translation>
+        <translation>スナップショット</translation>
     </message>
     <message>
         <source>Logs</source>
-        <translation type="unfinished">ログ</translation>
+        <translation>ログ</translation>
     </message>
     <message>
-        <source>Resource Use</source>
-        <translation type="unfinished">リソース使用状況</translation>
+        <source>Extensions</source>
+        <translation>機能拡張</translation>
+    </message>
+    <message>
+        <source>Activities</source>
+        <translation type="vanished">アクティビティ</translation>
+    </message>
+    <message>
+        <source>Activity</source>
+        <translation type="vanished">アクティビティ</translation>
     </message>
     <message>
         <source>File Manager</source>
-        <translation type="unfinished">ファイルマネージャー</translation>
+        <translation>ファイルマネージャー</translation>
+    </message>
+    <message>
+        <source>Show text</source>
+        <translation>テキストを表示</translation>
+    </message>
+    <message>
+        <source>Home</source>
+        <translation>ホーム</translation>
+    </message>
+    <message>
+        <source>Machines</source>
+        <translation>仮想マシン</translation>
+    </message>
+    <message>
+        <source>Resources</source>
+        <translation>リソース</translation>
+    </message>
+    <message>
+        <source>Resource Use</source>
+        <translation>リソース使用状況</translation>
     </message>
 </context>
 <context>
