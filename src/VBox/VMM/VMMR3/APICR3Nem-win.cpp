@@ -760,7 +760,7 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvSetIcr(PVMCPUCC pVCpu, uint64_t u64Icr
     VMCPU_ASSERT_EMT(pVCpu);
     RT_NOREF(rcRZ);
 
-#if 1
+#if 0
     /* Validate. */
     uint32_t const uLo = RT_LO_U32(u64Icr);
     uint32_t const uHi = RT_HI_U32(u64Icr);
@@ -778,7 +778,6 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvSetIcr(PVMCPUCC pVCpu, uint64_t u64Icr
     AssertMsgFailed(("Unexpected ICR write failed (%#RX64) in CPU %u\n", u64Icr, pVCpu->idCpu));
     return VERR_APIC_WRITE_INVALID;
 #else
-
     PXAPICPAGE pXApicPage = VMCPU_TO_XAPICPAGE(pVCpu);
     uint32_t const uLo = RT_LO_U32(u64Icr);
     uint32_t const uHi = RT_HI_U32(u64Icr);
@@ -789,9 +788,7 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvSetIcr(PVMCPUCC pVCpu, uint64_t u64Icr
 
         XAPICDELIVERYMODE const  enmDeliveryMode  = (XAPICDELIVERYMODE)pXApicPage->icr_lo.u.u3DeliveryMode;
         XAPICDESTMODE const      enmDestMode      = (XAPICDESTMODE)pXApicPage->icr_lo.u.u1DestMode;
-        //XAPICINITLEVEL const     enmInitLevel     = (XAPICINITLEVEL)pXApicPage->icr_lo.u.u1Level;
         XAPICTRIGGERMODE const   enmTriggerMode   = (XAPICTRIGGERMODE)pXApicPage->icr_lo.u.u1TriggerMode;
-        //XAPICDESTSHORTHAND const enmDestShorthand = (XAPICDESTSHORTHAND)pXApicPage->icr_lo.u.u2DestShorthand;
         uint8_t const            uDest            = pXApicPage->icr_hi.u.u8Dest;
         uint8_t const            uVector          = pXApicPage->icr_lo.u.u8Vector;
 
@@ -809,13 +806,11 @@ static DECLCALLBACK(VBOXSTRICTRC) apicR3HvSetIcr(PVMCPUCC pVCpu, uint64_t u64Icr
         Control.Vector          = uVector;
 
         HRESULT const hrc = WHvRequestInterrupt(pHvApic->hPartition, &Control, sizeof(Control));
-        if (FAILED(hrc))
-        {
-            AssertMsgFailed(("here\n"));
-            return VERR_APIC_INTR_DISCARDED;
-        }
+        if (SUCCEEDED(hrc))
+            return VINF_SUCCESS;
 
-        return VINF_SUCCESS;
+        AssertMsgFailed(("Failed to send IPI from CPU %u. Hi=%#RX32 Lo=%#RX32\n", pVCpu->idCpu, uHi, uLo));
+        return VERR_APIC_INTR_DISCARDED;
     }
 
     AssertMsgFailed(("Unexpected ICR write failed (%#RX64) in CPU %u\n", u64Icr, pVCpu->idCpu));
