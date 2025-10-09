@@ -24363,9 +24363,6 @@ And the size is not necessarily &quot;in megabytes&quot;, the slider chooses the
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Welcome</source>
         <translation type="vanished">Bienvenue</translation>

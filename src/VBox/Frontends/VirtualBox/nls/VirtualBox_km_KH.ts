@@ -18551,9 +18551,6 @@ You may wish to translate this more like &quot;Time remaining: %1&quot;</comment
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>

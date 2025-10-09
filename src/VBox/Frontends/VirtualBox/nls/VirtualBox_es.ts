@@ -27447,9 +27447,6 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Welcome</source>
         <translation type="vanished">Bienvenido</translation>

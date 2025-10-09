@@ -24217,9 +24217,6 @@ krok a připojit pevné disky později použitím dialogu Nastavení VM.&lt;/p&g
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>

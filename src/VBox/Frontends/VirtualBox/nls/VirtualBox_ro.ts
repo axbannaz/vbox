@@ -19043,9 +19043,6 @@ din listă apăsând butonul &lt;b&gt;Existent&lt;/b&gt; (pentru a invoca dialog
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Media</source>
         <translation type="unfinished"></translation>

@@ -27195,9 +27195,6 @@ step and attach hard disks later using the VM Settings dialog.&lt;/p&gt;</source
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Welcome</source>
         <translation type="vanished">ようこそ</translation>

@@ -24677,9 +24677,6 @@
         <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
-</context>
-<context>
-    <name>UIToolsModel</name>
     <message>
         <source>Welcome</source>
         <translation type="vanished">欢迎</translation>
