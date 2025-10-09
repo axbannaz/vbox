@@ -302,7 +302,7 @@ QUuid UIChooserNodeGroup::id() const
 void UIChooserNodeGroup::sltRetranslateUI()
 {
     /* Update internal stuff: */
-    m_strDescription = tr("Machine Group");
+    m_strDescription = tr("Machine group");
 
     /* Update group-item: */
     if (item())
