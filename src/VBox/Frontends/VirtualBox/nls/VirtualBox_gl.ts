@@ -3312,6 +3312,13 @@
     </message>
 </context>
 <context>
+    <name>UIChooserNodeGroup</name>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>UIChooserNodeMachine</name>
     <message>
         <source>Virtual Machine</source>
@@ -18510,6 +18517,13 @@ p, li { white-space: pre-wrap; }
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

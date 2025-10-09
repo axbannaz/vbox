@@ -4319,6 +4319,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">虚拟电脑编组</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -24665,6 +24669,13 @@
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>展开页面 &quot;%1&quot;</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

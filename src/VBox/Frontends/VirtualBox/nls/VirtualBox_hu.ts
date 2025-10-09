@@ -4232,6 +4232,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">Virtuális gép csoport</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -26080,6 +26084,13 @@ esetleg a &lt;b&gt;Létező&lt;/b&gt; gombbal a Virtuális lemezkezelőből.&lt;
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>Oldal kibontása: &quot;%1&quot;</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

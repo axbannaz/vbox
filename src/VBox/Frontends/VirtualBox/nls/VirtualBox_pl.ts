@@ -3866,6 +3866,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">Grupa maszyny wirtualnej</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -24408,6 +24412,13 @@ Będzie ona używana przez wszystkie moduły VirtualBox, aby móc rozróżnić t
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>Rozszerza stronę &quot;%1&quot;</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

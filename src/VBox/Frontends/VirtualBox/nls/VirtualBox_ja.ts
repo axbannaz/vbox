@@ -4470,6 +4470,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">仮想マシングループ</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -27183,6 +27187,13 @@ step and attach hard disks later using the VM Settings dialog.&lt;/p&gt;</source
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>&quot;%1&quot; ページを拡張する</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

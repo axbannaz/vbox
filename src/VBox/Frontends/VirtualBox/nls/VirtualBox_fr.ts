@@ -4131,6 +4131,10 @@
         <source>Virtual Machine group</source>
         <translation type="obsolete">Groupe de machine virtuelle</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -24350,6 +24354,13 @@ And the size is not necessarily &quot;in megabytes&quot;, the slider chooses the
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -3279,6 +3279,13 @@
     </message>
 </context>
 <context>
+    <name>UIChooserNodeGroup</name>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>UIChooserNodeMachine</name>
     <message>
         <source>Virtual Machine</source>
@@ -18535,6 +18542,13 @@ You may wish to translate this more like &quot;Time remaining: %1&quot;</comment
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -3699,6 +3699,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">Grupo da Máquina Virtual</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -21400,6 +21404,13 @@ diálogo de Configurações da MV.&lt;/p&gt;</translation>
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

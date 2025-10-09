@@ -3377,6 +3377,13 @@
     </message>
 </context>
 <context>
+    <name>UIChooserNodeGroup</name>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>UIChooserNodeMachine</name>
     <message>
         <source>Virtual Machine</source>
@@ -19027,6 +19034,13 @@ din listă apăsând butonul &lt;b&gt;Existent&lt;/b&gt; (pentru a invoca dialog
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

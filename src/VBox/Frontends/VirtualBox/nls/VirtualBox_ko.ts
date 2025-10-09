@@ -3377,6 +3377,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">가상 머신 그룹</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -18243,6 +18247,13 @@
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>&quot;%1&quot; 페이지를 확장합니다</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>

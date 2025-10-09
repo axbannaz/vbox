@@ -3792,6 +3792,13 @@
     </message>
 </context>
 <context>
+    <name>UIChooserNodeGroup</name>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>UIChooserNodeMachine</name>
     <message>
         <source>Virtual Machine</source>
@@ -24201,6 +24208,13 @@ krok a připojit pevné disky později použitím dialogu Nastavení VM.&lt;/p&g
     <name>UIToolBox</name>
     <message>
         <source>Expands the page &quot;%1&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

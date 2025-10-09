@@ -4469,6 +4469,10 @@
         <source>Virtual Machine group</source>
         <translation type="vanished">Grupo de máquina virtual</translation>
     </message>
+    <message>
+        <source>Machine group</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>UIChooserNodeMachine</name>
@@ -27435,6 +27439,13 @@ este paso y luego conectar los Discos Duros desde el diálogo de Configuración 
     <message>
         <source>Expands the page &quot;%1&quot;</source>
         <translation>Expande la página «%1»</translation>
+    </message>
+</context>
+<context>
+    <name>UIToolsItem</name>
+    <message>
+        <source>Tool item</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
