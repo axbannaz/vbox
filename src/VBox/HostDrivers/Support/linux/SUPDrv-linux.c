@@ -181,6 +181,9 @@ static int  supdrvLinuxLdrModuleNotifyCallback(struct notifier_block *pBlock,
  * Device extention & session data association structure.
  */
 static SUPDRVDEVEXT         g_DevExt;
+#ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
+static bool                 g_fUseKvmHwvirtApi;
+#endif
 
 /** Module parameter.
  * Not prefixed because the name is used by macros and the end of this file. */
@@ -340,6 +343,35 @@ DECLINLINE(RTUID) vboxdrvLinuxEuid(void)
 #endif
 
 
+#ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
+/**
+ * This is a hack/workaround that attempts to detect whether the kvm_intel/kvm_amd
+ * module is likely to be loaded. See @bugref{10963#c14} for details.
+ */
+static bool is_kvm_hwvirt_mod_likely_loaded(void)
+{
+    /*
+     * We don't disable preemption/interrupts here because we assume all CPUs will have
+     * the relevant bits identical in CR4 and EFER.
+     */
+    bool const     fIsIntel  = ASMIsIntelCpu() || ASMIsViaCentaurCpu() || ASMIsShanghaiCpu();
+    uint64_t const fVmxeMask = RT_BIT_64(13);
+    if (   fIsIntel
+        && (ASMGetCR4() & fVmxeMask))
+        return true;
+
+    bool const     fIsAmd    = ASMIsAmdCpu() || ASMIsHygonCpu();
+    uint32_t const idEfer    = 0xc0000080;
+    uint64_t const fSvmeMask = RT_BIT_64(12);
+    if (   fIsAmd
+        && (ASMRdMsr(idEfer) & fSvmeMask))
+           return true;
+
+    return false;
+}
+#endif
+
+
 /**
  * Initialize module.
  *
@@ -408,10 +440,12 @@ static int __init VBoxDrvLinuxInit(void)
                         if (rc2)
                             printk(KERN_WARNING "vboxdrv: failed to register module notifier! rc2=%d\n", rc2);
 #endif
+                        g_fUseKvmHwvirtApi = is_kvm_hwvirt_mod_likely_loaded();
+                        ASMCompilerBarrier();
 
-
-                        printk(KERN_INFO "vboxdrv: TSC mode is %s, tentative frequency %llu Hz\n",
-                               SUPGetGIPModeName(g_DevExt.pGip), g_DevExt.pGip->u64CpuHz);
+                        printk(KERN_INFO "vboxdrv: TSC mode is %s, tentative frequency %llu Hz. KVM is %s loaded.\n",
+                               SUPGetGIPModeName(g_DevExt.pGip), g_DevExt.pGip->u64CpuHz,
+                               g_fUseKvmHwvirtApi ? "likely" : "not likely");
                         LogFlow(("VBoxDrv::ModuleInit returning %#x\n", rc));
                         printk(KERN_DEBUG "vboxdrv: Successfully loaded version "
                                 VBOX_VERSION_STRING " r" RT_XSTR(VBOX_SVN_REV)
@@ -1656,15 +1690,19 @@ int VBOXCALL supdrvOSEnableHwvirt(bool fEnable)
 #ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
     if (fEnable)
     {
-        /* kvm_enable_virtualization() is guarded by kvm_usage_count reference counter inside a mutex. */
-        int const rc = kvm_enable_virtualization();
-        if (!rc)
-            return VINF_SUCCESS;
-        printk(KERN_ERR "vboxdrv: Failed to enable the KVM kernel API for acquiring VT-x. rc=%d\n", rc);
+        if (g_fUseKvmHwvirtApi)
+        {
+            /* kvm_enable_virtualization() is guarded by kvm_usage_count reference counter inside a mutex. */
+            int const rc = kvm_enable_virtualization();
+            if (!rc)
+                return VINF_SUCCESS;
+            printk(KERN_ERR "vboxdrv: Failed to enable the KVM kernel API for acquiring VMX/SVM. rc=%d\n", rc);
+        }
         return VERR_NOT_AVAILABLE;
     }
 
-    kvm_disable_virtualization();
+    if (g_fUseKvmHwvirtApi)
+        kvm_disable_virtualization();
     return VINF_SUCCESS;
 #endif
     return VERR_NOT_SUPPORTED;
