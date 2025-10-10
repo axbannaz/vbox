@@ -1093,6 +1093,50 @@ void UISettingsSelectorTreeView::cleanup()
 }
 
 
+/** QIListWidget sub-class for settings selector needs. */
+class UISelectorListWidget : public QIListWidget
+{
+public:
+
+    /** Constructs selector list-widget passing @a pParent to the base-class. */
+    UISelectorListWidget(QWidget *pParent)
+        : QIListWidget(pParent, true /* own painting routine */)
+    {
+        /* Proper size-policy: */
+        setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+    }
+
+    /** Calculates widget minimum size-hint. */
+    virtual QSize minimumSizeHint() const RT_OVERRIDE
+    {
+        /* Calculate largest column width: */
+        int iMaximumColumnWidth = 0;
+        int iCumulativeColumnHeight = 0;
+        for (int i = 0; i < childCount(); ++i)
+        {
+            QIListWidgetItem *pItem = childItem(i);
+            AssertPtrReturn(pItem, QSize());
+            const QSize itemSizeHint = pItem->sizeHint();
+            const int iHeightHint = itemSizeHint.height();
+            iMaximumColumnWidth = qMax(iMaximumColumnWidth, itemSizeHint.width() + iHeightHint /* to get the fancy shape */);
+            iCumulativeColumnHeight += iHeightHint;
+        }
+
+        /* Return list-widget size-hint: */
+        return QSize(iMaximumColumnWidth, iCumulativeColumnHeight);
+    }
+
+    /** Calculates widget size-hint. */
+    virtual QSize sizeHint() const RT_OVERRIDE
+    {
+        // WORKAROUND:
+        // By default QIListWidget uses own size-hint
+        // which we don't like and want to ignore:
+        return minimumSizeHint();
+    }
+};
+
+
 /*********************************************************************************************************************************
 *   Class UISettingsSelectorListWidget implementation.                                                                           *
 *********************************************************************************************************************************/
@@ -1149,10 +1193,6 @@ QWidget *UISettingsSelectorListWidget::addItem(const QString & /* strBigIcon */,
 
             /* Update list-widget item size accordingly: */
             pItem->setSizeHint(itemSizeHint(pItem));
-            /* Update list-widget size accordingly: */
-            const QSize sz = listSizeHint();
-            m_pListWidget->setFixedWidth(sz.width());
-            m_pListWidget->setMinimumHeight(sz.height());
         }
     }
     return pResult;
@@ -1183,10 +1223,6 @@ void UISettingsSelectorListWidget::setItemText(int iID, const QString &strText)
 
         /* Update list-widget item size accordingly: */
         pItem->setSizeHint(itemSizeHint(pItem));
-        /* Update list-widget size accordingly: */
-        const QSize sz = listSizeHint();
-        m_pListWidget->setFixedWidth(sz.width());
-        m_pListWidget->setMinimumHeight(sz.height());
     }
 }
 
@@ -1367,9 +1403,8 @@ void UISettingsSelectorListWidget::sltHandleCurrentItemChanged(QListWidgetItem *
 
 void UISettingsSelectorListWidget::prepare()
 {
-    /* Prepare the list-widget: */
-    m_pListWidget = new QIListWidget(qobject_cast<QWidget*>(parent()),
-                                     true /* we have own painting routine */);
+    /* Prepare the selector list-widget: */
+    m_pListWidget = new UISelectorListWidget(qobject_cast<QWidget*>(parent()));
     if (m_pListWidget)
     {
         /* Setup connections: */
@@ -1412,28 +1447,6 @@ QSize UISettingsSelectorListWidget::itemSizeHint(QListWidgetItem *pItem) const
 
     /* Return item size-hint: */
     return QSize(iMinimumWidth, iMinimumHeight);
-}
-
-QSize UISettingsSelectorListWidget::listSizeHint() const
-{
-    /* Sanity check: */
-    AssertPtrReturn(m_pListWidget, QSize());
-
-    /* Calculate largest column width: */
-    int iMaximumColumnWidth = 0;
-    int iCumulativeColumnHeight = 0;
-    for (int i = 0; i < m_pListWidget->childCount(); ++i)
-    {
-        QIListWidgetItem *pItem = m_pListWidget->childItem(i);
-        AssertPtrReturn(pItem, QSize());
-        const QSize itemSizeHint = pItem->sizeHint();
-        const int iHeightHint = itemSizeHint.height();
-        iMaximumColumnWidth = qMax(iMaximumColumnWidth, itemSizeHint.width() + iHeightHint /* to get the fancy shape */);
-        iCumulativeColumnHeight += iHeightHint;
-    }
-
-    /* Return list-widget size-hint: */
-    return QSize(iMaximumColumnWidth, iCumulativeColumnHeight);
 }
 
 

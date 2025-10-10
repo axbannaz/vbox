@@ -40,9 +40,9 @@
 /* Forward declarations: */
 class QSortFilterProxyModel;
 class QPainter;
-class QIListWidget;
 class QListWidgetItem;
 class UISelectorItem;
+class UISelectorListWidget;
 class UISelectorModel;
 class UISelectorTreeView;
 class UISettingsPage;
@@ -255,11 +255,9 @@ private:
 
     /** Calculates size-hint for @a pItem specified: */
     QSize itemSizeHint(QListWidgetItem *pItem) const;
-    /** Calculates size-hint for list-widget. */
-    QSize listSizeHint() const;
 
-    /** Holds the list-widget instance. */
-    QIListWidget *m_pListWidget;
+    /** Holds the selector list-widget instance. */
+    UISelectorListWidget *m_pListWidget;
 };
 
 
