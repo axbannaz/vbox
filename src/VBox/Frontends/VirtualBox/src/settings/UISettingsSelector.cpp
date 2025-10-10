@@ -41,6 +41,7 @@
 #include <QToolButton>
 
 /* GUI includes: */
+#include "QIListWidget.h"
 #include "QITabWidget.h"
 #include "QITreeView.h"
 #include "UICommon.h"
@@ -1089,6 +1090,346 @@ void UISettingsSelectorTreeView::cleanup()
     /* Cleanup the tree-view: */
     delete m_pTreeView;
     m_pTreeView = 0;
+}
+
+
+/*********************************************************************************************************************************
+*   Class UISettingsSelectorListWidget implementation.                                                                           *
+*********************************************************************************************************************************/
+
+UISettingsSelectorListWidget::UISettingsSelectorListWidget(QWidget *pParent /* = 0 */)
+    : UISettingsSelector(pParent)
+    , m_pListWidget(0)
+{
+    prepare();
+}
+
+UISettingsSelectorListWidget::~UISettingsSelectorListWidget()
+{
+    cleanup();
+}
+
+QWidget *UISettingsSelectorListWidget::widget() const
+{
+    return m_pListWidget;
+}
+
+QWidget *UISettingsSelectorListWidget::addItem(const QString & /* strBigIcon */,
+                                               const QString &strMediumIcon ,
+                                               const QString & /* strSmallIcon */,
+                                               int iID,
+                                               const QString &strLink,
+                                               UISettingsPage *pPage /* = 0 */,
+                                               int iParentID /* = -1 */)
+{
+    QWidget *pResult = 0;
+    if (pPage)
+    {
+        /* Adjust page a bit: */
+        pPage->setContentsMargins(0, 0, 0, 0);
+        if (pPage->layout())
+            pPage->layout()->setContentsMargins(0, 0, 0, 0);
+        pResult = pPage;
+
+        /* Add selector-item object: */
+        const QIcon icon = UIIconPool::iconSet(strMediumIcon);
+        UISelectorItem *pSelectorItem = new UISelectorItem(icon, iID, strLink, pPage, iParentID);
+        if (pSelectorItem)
+            m_list.append(pSelectorItem);
+
+        /* Sanity check: */
+        AssertPtrReturn(m_pListWidget, pResult);
+
+        /* Add list-widget item: */
+        QIListWidgetItem *pItem = new QIListWidgetItem(pSelectorItem->icon(), QString(), m_pListWidget);
+        if (pItem)
+        {
+            pItem->setProperty("p_ID", iID);
+            pItem->setProperty("p_link", strLink);
+
+            /* Update list-widget item size accordingly: */
+            pItem->setSizeHint(itemSizeHint(pItem));
+            /* Update list-widget size accordingly: */
+            m_pListWidget->setMinimumSize(listSizeHint());
+        }
+    }
+    return pResult;
+}
+
+void UISettingsSelectorListWidget::setItemVisible(int iID, bool fVisible)
+{
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pListWidget);
+
+    /* Make corresponding item fVisible: */
+    if (QIListWidgetItem *pItem = m_pListWidget->findItem("p_ID", iID))
+        pItem->setHidden(!fVisible);
+}
+
+void UISettingsSelectorListWidget::setItemText(int iID, const QString &strText)
+{
+    /* Call to base-class: */
+    UISettingsSelector::setItemText(iID, strText);
+
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pListWidget);
+
+    /* Assign the strText: */
+    if (QIListWidgetItem *pItem = m_pListWidget->findItem("p_ID", iID))
+    {
+        pItem->setText(strText);
+
+        /* Update list-widget item size accordingly: */
+        pItem->setSizeHint(itemSizeHint(pItem));
+        /* Update list-widget size accordingly: */
+        m_pListWidget->setMinimumSize(listSizeHint());
+    }
+}
+
+QString UISettingsSelectorListWidget::itemText(int iID) const
+{
+    /* Sanity check: */
+    AssertPtrReturn(m_pListWidget, QString());
+
+    /* Acquire corresponding item: */
+    QIListWidgetItem *pItem = m_pListWidget->findItem("p_ID", iID);
+
+    /* Return item text: */
+    return pItem ? pItem->text() : QString();
+}
+
+int UISettingsSelectorListWidget::currentId() const
+{
+    /* Sanity check: */
+    AssertPtrReturn(m_pListWidget, -1);
+
+    /* Acquire current item: */
+    QIListWidgetItem *pItem = QIListWidgetItem::toItem(m_pListWidget->currentItem());
+
+    /* Return item ID: */
+    return pItem ? pItem->property("p_ID").toInt() : -1;
+}
+
+int UISettingsSelectorListWidget::linkToId(const QString &strLink) const
+{
+    /* Sanity check: */
+    AssertPtrReturn(m_pListWidget, -1);
+
+    /* Acquire corresponding item: */
+    QIListWidgetItem *pItem = m_pListWidget->findItem("p_link", strLink);
+
+    /* Return item ID: */
+    return pItem ? pItem->property("p_ID").toInt() : -1;
+}
+
+void UISettingsSelectorListWidget::selectById(int iID, bool fSilently)
+{
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pListWidget);
+
+    /* Acquire corresponding item: */
+    QIListWidgetItem *pItem = m_pListWidget->findItem("p_ID", iID);
+
+    /* Select item if present: */
+    if (pItem)
+    {
+        if (fSilently)
+            m_pListWidget->blockSignals(true);
+        m_pListWidget->setCurrentItem(pItem);
+        if (fSilently)
+            m_pListWidget->blockSignals(false);
+    }
+}
+
+void UISettingsSelectorListWidget::sltHandleItemPainted(QListWidgetItem *pItem, QPainter *pPainter)
+{
+    /* Sanity checks: */
+    AssertPtrReturnVoid(pItem);
+    AssertPtrReturnVoid(pPainter);
+    AssertPtrReturnVoid(m_pListWidget);
+
+    /* Do nothing for hidden items: */
+    if (pItem->isHidden())
+        return;
+
+    /* Original rectangle: */
+    const QRect origRect = m_pListWidget->visualItemRect(pItem);
+
+    /* Some common variables: */
+    const QPalette pal = m_pListWidget->palette();
+    QRect itemRectangle = origRect;
+
+#ifndef VBOX_WS_MAC
+    /* Adjust rectangle to avoid painting artifacts: */
+    itemRectangle.setLeft(itemRectangle.left() + 2);
+    itemRectangle.setTop(itemRectangle.top() + 2);
+    itemRectangle.setRight(itemRectangle.right() - 2);
+    itemRectangle.setBottom(itemRectangle.bottom() - 2);
+
+    /* On non-macOS hosts we'll have to draw focus-frame ourselves: */
+    if (   m_pListWidget->currentItem() == pItem
+        && m_pListWidget->hasFocus())
+    {
+        QRect focusRect = origRect;
+        focusRect.setLeft(focusRect.left() + 1);
+        focusRect.setTop(focusRect.top() + 1);
+        focusRect.setRight(focusRect.right() - 1);
+        focusRect.setBottom(focusRect.bottom() - 1);
+        QStyleOptionFocusRect focusOption;
+        focusOption.initFrom(m_pListWidget);
+        focusOption.rect = focusRect;
+        focusOption.backgroundColor = pal.color(QPalette::Window);
+        QApplication::style()->drawPrimitive(QStyle::PE_FrameFocusRect, &focusOption, pPainter, m_pListWidget);
+    }
+#endif /* !VBOX_WS_MAC */
+
+    /* Draw background: */
+    QColor backColor;
+    if (m_pListWidget->currentItem() == pItem)
+    {
+        /* Prepare painter path: */
+        QPainterPath painterPath;
+        painterPath.lineTo(itemRectangle.width() - itemRectangle.height(), 0);
+        painterPath.lineTo(itemRectangle.width(),                          itemRectangle.height());
+        painterPath.lineTo(0,                                              itemRectangle.height());
+        painterPath.closeSubpath();
+        painterPath.translate(itemRectangle.topLeft());
+
+        /* Prepare painting gradient: */
+        backColor = pal.color(QPalette::Active, QPalette::Highlight);
+        const QColor bcTone1 = backColor.lighter(100);
+        const QColor bcTone2 = backColor.lighter(120);
+        QLinearGradient grad(itemRectangle.topLeft(), itemRectangle.bottomRight());
+        grad.setColorAt(0, bcTone1);
+        grad.setColorAt(1, bcTone2);
+
+        /* Paint fancy shape: */
+        pPainter->save();
+        pPainter->setClipPath(painterPath);
+        pPainter->setRenderHint(QPainter::Antialiasing);
+        pPainter->fillPath(painterPath, grad);
+        pPainter->strokePath(painterPath, uiCommon().isInDarkMode() ? backColor.lighter(120) : backColor.darker(110));
+        pPainter->restore();
+    }
+    else
+    {
+        /* Just init painting color: */
+        backColor = pal.color(QPalette::Active, QPalette::Window);
+    }
+
+    /* Some common variables: */
+    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 1.5;
+    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 1.5;
+
+    /* Draw icon: */
+    const QRect itemPixmapRect(iMargin, iMargin, iIconSize, iIconSize);
+    const QIcon itemIcon = pItem->icon();
+    const qreal fDpr = m_pListWidget->window() && m_pListWidget->window()->windowHandle()
+                     ? m_pListWidget->window()->windowHandle()->devicePixelRatio() : 1;
+    const QPixmap itemPixmap = itemIcon.pixmap(QSize(iIconSize, iIconSize), fDpr);
+    pPainter->save();
+    pPainter->translate(itemRectangle.topLeft());
+    pPainter->drawPixmap(itemPixmapRect, itemPixmap);
+    pPainter->restore();
+
+    /* Draw name: */
+    const int iSpacing = qMax(QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing), 5) * 2;
+    const QFont listFont = m_pListWidget->font();
+    const QFontMetrics fm(listFont);
+    const QColor foreground = suitableForegroundColor(pal, backColor);
+    const QSize itemsSizeHint = pItem->sizeHint();
+    int iNamePointX = iMargin + iIconSize + iSpacing;
+    int iNamePointY = itemsSizeHint.height() / 2 + fm.ascent() / 2 - 1 /* base line */;
+#ifndef VBOX_WS_MAC
+    iNamePointX -= 2 /* left */;
+    iNamePointY -= 2 /* top */;
+#endif
+    const QPoint namePoint(iNamePointX, iNamePointY);
+    const QString strName = pItem->text();
+    pPainter->save();
+    pPainter->translate(itemRectangle.topLeft());
+    pPainter->setPen(foreground);
+    pPainter->setFont(listFont);
+    pPainter->drawText(namePoint, strName);
+    pPainter->restore();
+}
+
+void UISettingsSelectorListWidget::sltHandleCurrentItemChanged(QListWidgetItem *pCurrentItem, QListWidgetItem *)
+{
+    /* Notify listeners: */
+    if (QIListWidgetItem *pItem = QIListWidgetItem::toItem(pCurrentItem))
+        emit sigCategoryChanged(pItem->property("p_ID").toInt());
+}
+
+void UISettingsSelectorListWidget::prepare()
+{
+    /* Prepare the list-widget: */
+    m_pListWidget = new QIListWidget(qobject_cast<QWidget*>(parent()),
+                                     true /* we have own painting routine */);
+    if (m_pListWidget)
+    {
+        /* Setup connections: */
+        connect(m_pListWidget, &QIListWidget::painted,
+                this, &UISettingsSelectorListWidget::sltHandleItemPainted);
+        connect(m_pListWidget, &QIListWidget::currentItemChanged,
+                this, &UISettingsSelectorListWidget::sltHandleCurrentItemChanged);
+    }
+}
+
+void UISettingsSelectorListWidget::cleanup()
+{
+    /* Cleanup the list-widget: */
+    delete m_pListWidget;
+    m_pListWidget = 0;
+}
+
+QSize UISettingsSelectorListWidget::itemSizeHint(QListWidgetItem *pItem) const
+{
+    /* Sanity check: */
+    AssertPtrReturn(m_pListWidget, QSize());
+
+    /* Calculate size-hint for passed pItem: */
+    const QFontMetrics fm(m_pListWidget->font());
+    const int iMargin = QApplication::style()->pixelMetric(QStyle::PM_LayoutLeftMargin) / 1.5;
+    const int iSpacing = qMax(QApplication::style()->pixelMetric(QStyle::PM_LayoutVerticalSpacing), 5) * 2;
+    const int iIconSize = QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize) * 1.5;
+    const QString strName = pItem->text();
+    const int iMinimumContentWidth = iIconSize /* icon width */
+                                   + iSpacing
+                                   + fm.horizontalAdvance(strName) /* name width */;
+    const int iMinimumContentHeight = qMax(fm.height() /* font height */,
+                                           iIconSize /* icon height */);
+    int iMinimumWidth = iMinimumContentWidth + iMargin * 2;
+    int iMinimumHeight = iMinimumContentHeight + iMargin * 2;
+#ifndef VBOX_WS_MAC
+    iMinimumWidth += 2 /* left */ + 2 /* right */;
+    iMinimumHeight += 2 /* top */ + 2 /* bottom */;
+#endif
+
+    /* Return item size-hint: */
+    return QSize(iMinimumWidth, iMinimumHeight);
+}
+
+QSize UISettingsSelectorListWidget::listSizeHint() const
+{
+    /* Sanity check: */
+    AssertPtrReturn(m_pListWidget, QSize());
+
+    /* Calculate largest column width: */
+    int iMaximumColumnWidth = 0;
+    int iCumulativeColumnHeight = 0;
+    for (int i = 0; i < m_pListWidget->childCount(); ++i)
+    {
+        QIListWidgetItem *pItem = m_pListWidget->childItem(i);
+        AssertPtrReturn(pItem, QSize());
+        const QSize itemSizeHint = pItem->sizeHint();
+        const int iHeightHint = itemSizeHint.height();
+        iMaximumColumnWidth = qMax(iMaximumColumnWidth, itemSizeHint.width() + iHeightHint /* to get the fancy shape */);
+        iCumulativeColumnHeight += iHeightHint;
+    }
+
+    /* Return list-widget size-hint: */
+    return QSize(iMaximumColumnWidth, iCumulativeColumnHeight);
 }
 
 

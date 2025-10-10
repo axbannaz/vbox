@@ -39,6 +39,9 @@
 
 /* Forward declarations: */
 class QSortFilterProxyModel;
+class QPainter;
+class QIListWidget;
+class QListWidgetItem;
 class UISelectorItem;
 class UISelectorModel;
 class UISelectorTreeView;
@@ -187,6 +190,76 @@ private:
     UISelectorModel       *m_pModel;
     /** Holds the proxy-model instance. */
     QSortFilterProxyModel *m_pModelProxy;
+};
+
+
+/** UISettingsSelector subclass providing settings dialog
+  * with the means to switch between settings pages.
+  * This one represented as list-widget. */
+class SHARED_LIBRARY_STUFF UISettingsSelectorListWidget : public UISettingsSelector
+{
+    Q_OBJECT;
+
+public:
+
+    /** Constructs settings selector passing @a pParent to the base-class. */
+    UISettingsSelectorListWidget(QWidget *pParent);
+    /** Destructs settings selector. */
+    virtual ~UISettingsSelectorListWidget() RT_OVERRIDE;
+
+    /** Returns the widget selector operates on. */
+    virtual QWidget *widget() const RT_OVERRIDE;
+
+    /** Adds a new selector item.
+      * @param  strBigIcon     Brings the big icon reference.
+      * @param  strMediumIcon  Brings the medium icon reference.
+      * @param  strSmallIcon   Brings the small icon reference.
+      * @param  iID            Brings the selector section ID.
+      * @param  strLink        Brings the selector section link.
+      * @param  pPage          Brings the selector section page reference.
+      * @param  iParentID      Brings the parent section ID or -1 if there is no parent. */
+    virtual QWidget *addItem(const QString &strBigIcon, const QString &strMediumIcon, const QString &strSmallIcon,
+                             int iID, const QString &strLink, UISettingsPage *pPage = 0, int iParentID = -1) RT_OVERRIDE;
+
+    /** Defines whether section with @a iID is @a fVisible. */
+    virtual void setItemVisible(int iID, bool fVisible) RT_OVERRIDE;
+
+    /** Defines the @a strText for section with @a iID. */
+    virtual void setItemText(int iID, const QString &strText) RT_OVERRIDE;
+    /** Returns the text for section with @a iID. */
+    virtual QString itemText(int iID) const RT_OVERRIDE;
+
+    /** Returns the current selector ID. */
+    virtual int currentId() const RT_OVERRIDE;
+
+    /** Returns the section ID for passed @a strLink. */
+    virtual int linkToId(const QString &strLink) const RT_OVERRIDE;
+
+    /** Make the section with @a iID current. */
+    virtual void selectById(int iID, bool fSilently) RT_OVERRIDE;
+
+private slots:
+
+    /** Handles selector @a pItem painting with @a pPainter specified. */
+    void sltHandleItemPainted(QListWidgetItem *pItem, QPainter *pPainter);
+
+    /** Handles selector item change from @a pPreviousItem to @a pCurrentItem. */
+    void sltHandleCurrentItemChanged(QListWidgetItem *pCurrentItem, QListWidgetItem *pPreviousItem);
+
+private:
+
+    /** Prepares all. */
+    void prepare();
+    /** Cleanups all. */
+    void cleanup();
+
+    /** Calculates size-hint for @a pItem specified: */
+    QSize itemSizeHint(QListWidgetItem *pItem) const;
+    /** Calculates size-hint for list-widget. */
+    QSize listSizeHint() const;
+
+    /** Holds the list-widget instance. */
+    QIListWidget *m_pListWidget;
 };
 
 
