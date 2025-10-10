@@ -1096,14 +1096,15 @@ void UISettingsSelectorTreeView::cleanup()
 /** QIListWidget sub-class for settings selector needs. */
 class UISelectorListWidget : public QIListWidget
 {
+    Q_OBJECT;
+
 public:
 
     /** Constructs selector list-widget passing @a pParent to the base-class. */
     UISelectorListWidget(QWidget *pParent)
         : QIListWidget(pParent, true /* own painting routine */)
     {
-        /* Proper size-policy: */
-        setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
+        prepare();
     }
 
     /** Calculates widget minimum size-hint. */
@@ -1133,6 +1134,20 @@ public:
         // By default QIListWidget uses own size-hint
         // which we don't like and want to ignore:
         return minimumSizeHint();
+    }
+
+private:
+
+    void prepare()
+    {
+        /* Configure list-widget: */
+#ifndef VBOX_WS_MAC
+        setFocusPolicy(Qt::TabFocus);
+#endif
+        setContextMenuPolicy(Qt::PreventContextMenu);
+        setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        setSizePolicy(QSizePolicy::Minimum, QSizePolicy::MinimumExpanding);
     }
 };
 
