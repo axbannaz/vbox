@@ -2578,6 +2578,7 @@ RuntimeBldProg_SOURCES          = \
 	common/table/avllu32.cpp \
 	common/table/avlpv.cpp \
 	common/table/avlrpv.cpp \
+	common/table/avlru64.cpp \
 	common/table/avlruintptr.cpp \
 	common/table/avlu32.cpp \
 	common/table/avluintptr.cpp \

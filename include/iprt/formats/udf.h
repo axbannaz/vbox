@@ -383,8 +383,11 @@ typedef UDFENTITYID const *PCUDFENTITYID;
 #define UDF_ENTITY_ID_IUVD_IMPLEMENTATION       "*UDF LV Info"
 
 /** Partition descriptor, partition contents field, set to indicate UDF
+ * (ECMA-167 2nd edition). Application ID suffix. */
+#define UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF_2   "+NSR02"
+/** Partition descriptor, partition contents field, set to indicate UDF
  * (ECMA-167 3rd edition). Application ID suffix. */
-#define UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF     "+NSR03"
+#define UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF_3   "+NSR03"
 /** Partition descriptor, partition contents field, set to indicate ISO-9660
  * (ECMA-119). Application ID suffix. */
 #define UDF_ENTITY_ID_PD_PARTITION_CONTENTS_ISO9660 "+CD001"
@@ -450,22 +453,22 @@ typedef UDFENTITYID const *PCUDFENTITYID;
  */
 typedef struct UDFTAG
 {
-    /** Tag identifier (UDF_TAG_ID_XXX). */
+    /** 0x00: Tag identifier (UDF_TAG_ID_XXX). */
     uint16_t        idTag;
-    /** Descriptor version. */
+    /** 0x02: Descriptor version. */
     uint16_t        uVersion;
-    /** Tag checksum.
+    /** 0x04: Tag checksum.
      * Sum of each byte in the structure with this field as zero.  */
     uint8_t         uChecksum;
-    /** Reserved, MBZ. */
+    /** 0x05: Reserved, MBZ. */
     uint8_t         bReserved;
-    /** Tag serial number. */
+    /** 0x06: Tag serial number. */
     uint16_t        uTagSerialNo;
-    /** Descriptor CRC. */
+    /** 0x08: Descriptor CRC. */
     uint16_t        uDescriptorCrc;
-    /** Descriptor CRC length. */
+    /** 0x0a: Descriptor CRC length. */
     uint16_t        cbDescriptorCrc;
-    /** The tag location (logical sector number). */
+    /** 0x0c: The tag location (logical sector number). */
     uint32_t        offTag;
 } UDFTAG;
 AssertCompileSize(UDFTAG, 16);
@@ -708,13 +711,14 @@ typedef struct UDFPARTITIONDESC
     /** 0x016: The partition number. */
     uint16_t        uPartitionNo;
     /** 0x018: Partition contents (UDF_ENTITY_ID_PD_PARTITION_CONTENTS_XXX). */
-    UDFENTITYID     PartitionContents;
-    /** 0x038: partition contents use (depends on the PartitionContents field). */
+    UDFENTITYID     idPartitionContents;
+    /** 0x038: partition contents use (depends on the idPartitionContents field). */
     union
     {
         /** Generic view. */
         uint8_t     ab[128];
-        /** UDF partition header descriptor (UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF). */
+        /** UDF partition header descriptor
+         *  (UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF_3). */
         UDFPARTITIONHDRDESC Hdr;
     } ContentsUse;
     /** 0x0b8: Access type (UDF_PART_ACCESS_TYPE_XXX).  */
@@ -739,6 +743,15 @@ AssertCompileSize(UDFPARTITIONDESC, 512);
 typedef UDFPARTITIONDESC *PUDFPARTITIONDESC;
 /** Pointer to a const UDF partitions descriptor. */
 typedef const UDFPARTITIONDESC *PCUDFPARTITIONDESC;
+
+/** @name UDF_PARTITION_FLAGS_XXX - UDF partition flags
+ *
+ * See @ecma167{3,10.5.3,56}.
+ *
+ * @{ */
+/** Space has been allocated for this partition. */
+#define UDF_PARTITION_FLAGS_ALLOCATED       UINT16_C(0x00000001)
+/** @} */
 
 /** @name UDF_PART_ACCESS_TYPE_XXX - UDF partition access types
  *
@@ -962,6 +975,34 @@ typedef UDFTERMINATINGDESC const *PCUDFTERMINATINGDESC;
 
 
 /**
+ * UDF LVID implementation use structure (@udf260{2.2.6.4,33}).
+ * This structure follows the two ECMA dictated tables in the LVID.
+ */
+typedef struct UDFLVIDIMPLUSEUDF
+{
+    /** 0x00: Implementation ID. */
+    UDFENTITYID     idImplementation;
+    /** 0x20: Number of files. */
+    uint32_t        cFiles;
+    /** 0x24: Number of directories. */
+    uint32_t        cDirs;
+    /** 0x28: Minimum UDF revision to read all the structures in the volume. */
+    uint16_t        uMinUdfRevisionRead;
+    /** 0x2a: Minimum UDF revision to successfully write to the volume. */
+    uint16_t        uMinUdfRevisionWrite;
+    /** 0x2c: Maximum UDF revision supported by the last writer. */
+    uint16_t        uMaxUdfRevisionWrite;
+    /** 0x2e: Implementation use. */
+    RT_FLEXIBLE_ARRAY_EXTENSION
+    uint8_t         abImplementationUse[RT_FLEXIBLE_ARRAY];
+} UDFLVIDIMPLUSEUDF;
+/** Pointer to an UDF LVID implemenation use structure. */
+typedef UDFLVIDIMPLUSEUDF *PUDFLVIDIMPLUSEUDF;
+/** Pointer to a const UDF LVID implemenation use structure. */
+typedef UDFLVIDIMPLUSEUDF const *PCUDFLVIDIMPLUSEUDF;
+
+
+/**
  * UDF logical volume integrity descriptor (LVID) (@ecma167{3,10.10,62},
  * @udf260{2.2.6,32}).
  */
@@ -975,22 +1016,34 @@ typedef struct UDFLOGICALVOLINTEGRITYDESC
     uint32_t        uIntegrityType;
     /** 0x20: The next integrity extent. */
     UDFEXTENTAD     NextIntegrityExtent;
-    /** 0x28: Number of partitions. */
+    /** 0x28: Logical volume contents use. */
+    union
+    {
+        struct
+        {
+            /** 0x28: Unique ID. */
+            uint64_t    idUnique;
+            /** 0x30: Reserved. */
+            uint8_t     abReserved[24];
+        } LVHdr;
+        uint8_t         abContentUse[32];
+    } ContentUse;
+    /** 0x48: Number of partitions. */
     uint32_t        cPartitions;
-    /** 0x2c: Length of implementation use. */
+    /** 0x4c: Length of implementation use. */
     uint32_t        cbImplementationUse;
     /**
-     * There are two tables each @a cPartitions in size.  The first is the free
-     * space table.  The second the size table.
+     * 0x50: There are two tables each @a cPartitions in size.  The first is the
+     * free space table.  The second the size table.
      *
      * Following these tables there are @a cbImplementationUse bytes of space for
-     * the implementation to use.
+     * the implementation to use.  With UDF this means UDFLVIDIMPLUSEUDF.
      */
     RT_FLEXIBLE_ARRAY_EXTENSION
-    uint32_t        aTables[RT_FLEXIBLE_ARRAY];
+    uint32_t        au32Tables[RT_FLEXIBLE_ARRAY];
 } UDFLOGICALVOLINTEGRITYDESC;
-AssertCompileMemberOffset(UDFLOGICALVOLINTEGRITYDESC, cbImplementationUse, 0x2c);
-AssertCompileMemberOffset(UDFLOGICALVOLINTEGRITYDESC, aTables, 0x30);
+AssertCompileMemberOffset(UDFLOGICALVOLINTEGRITYDESC, cbImplementationUse, 76);
+AssertCompileMemberOffset(UDFLOGICALVOLINTEGRITYDESC, au32Tables, 80);
 /** Pointer to an UDF logical volume integrity descriptor.   */
 typedef UDFLOGICALVOLINTEGRITYDESC *PUDFLOGICALVOLINTEGRITYDESC;
 /** Pointer to a const UDF logical volume integrity descriptor.   */

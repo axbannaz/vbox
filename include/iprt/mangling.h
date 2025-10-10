@@ -1178,6 +1178,7 @@
 # define RTFsIsoMakerSetPathOwnerId                     RT_MANGLER(RTFsIsoMakerSetPathOwnerId)
 # define RTFsIsoMakerSetSysAreaContent                  RT_MANGLER(RTFsIsoMakerSetSysAreaContent)
 # define RTFsIsoMakerSetStringProp                      RT_MANGLER(RTFsIsoMakerSetStringProp)
+# define RTFsIsoMakerSetUdfLevel                        RT_MANGLER(RTFsIsoMakerSetUdfLevel)
 # define RTFsIsoMakerGetObjIdxForPath                   RT_MANGLER(RTFsIsoMakerGetObjIdxForPath)
 # define RTFsIsoMakerObjEnableBootInfoTablePatching     RT_MANGLER(RTFsIsoMakerObjEnableBootInfoTablePatching)
 # define RTFsIsoMakerObjQueryDataSize                   RT_MANGLER(RTFsIsoMakerObjQueryDataSize)

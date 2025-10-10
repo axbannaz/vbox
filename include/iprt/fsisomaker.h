@@ -158,6 +158,16 @@ RTDECL(uint8_t) RTFsIsoMakerGetRockRidgeLevel(RTFSISOMAKER hIsoMaker);
 RTDECL(uint8_t) RTFsIsoMakerGetJolietRockRidgeLevel(RTFSISOMAKER hIsoMaker);
 
 /**
+ * Sets the UDF ECMA standard version/level.
+ *
+ * @returns IPRT status code
+ * @param   hIsoMaker           The ISO maker handle.
+ * @param   uEcmaLevel          The ECMA standard version (2 or 3), or 0 to
+ *                              disable UDF.
+ */
+RTDECL(int) RTFsIsoMakerSetUdfLevel(RTFSISOMAKER hIsoMaker, uint8_t uEcmaLevel);
+
+/**
  * Changes the file attribute (mode, owner, group) inherit style (from source).
  *
  * The strict style will use the exact attributes from the source, where as the

@@ -88,10 +88,16 @@
 
 /** @name UDF structure logging macros
  * @{ */
-#define UDF_LOG2_MEMBER(a_pStruct, a_szFmt, a_Member) \
-    Log2(("ISO/UDF:   %-32s %" a_szFmt "\n", #a_Member ":", (a_pStruct)->a_Member))
+#define UDF_LOG2_MEMBER(a_pStruct, a_szFmt, a_Member) UDF_LOG2_MEMBER2(a_szFmt, #a_Member, (a_pStruct)->a_Member)
+#define UDF_LOG2_MEMBER2(a_szFmt, a_szMember, a_MemberExpr) \
+    Log2(("ISO/UDF:   %-32s %" a_szFmt "\n", a_szMember ":", a_MemberExpr))
+#define UDF_LOG2_MEMBER2_HEX(a_cbMember, a_szMember, a_pvMember) \
+    Log2(((a_cbMember) <= 16 ? "ISO/UDF:   %-32s %.*Rhxs\n" : "ISO/UDF:   %-32s\n%.*RhxD\n", \
+          a_szMember ":", (a_cbMember), a_pvMember))
 #define UDF_LOG2_MEMBER_EX(a_pStruct, a_szFmt, a_Member, a_cchIndent) \
     Log2(("ISO/UDF:   %*s%-32s %" a_szFmt "\n", a_cchIndent, "", #a_Member ":", (a_pStruct)->a_Member))
+#define UDF_LOG2_MEMBER_ENUM(a_pStruct, a_szFmt, a_Member, a_fnToString) \
+    Log2(("ISO/UDF:   %-32s %" a_szFmt " (%s)\n", #a_Member ":", (a_pStruct)->a_Member, a_fnToString((a_pStruct)->a_Member) ))
 #define UDF_LOG2_MEMBER_ENTITY_ID_EX(a_pStruct, a_Member, a_cchIndent) \
     Log2(("ISO/UDF:   %*s%-32s '%.23s' fFlags=%#06x Suffix=%.8Rhxs\n", a_cchIndent, "", #a_Member ":", \
           (a_pStruct)->a_Member.achIdentifier, (a_pStruct)->a_Member.fFlags, &(a_pStruct)->a_Member.Suffix))
@@ -114,12 +120,13 @@
     Log2(("ISO/UDF:   %-32s block %#010RX32 in partition %#06RX16\n", #a_Member ":", \
           (a_pStruct)->a_Member.off, (a_pStruct)->a_Member.uPartitionNo))
 
-#define UDF_LOG2_MEMBER_TIMESTAMP(a_pStruct, a_Member) \
-    Log2(("ISO/UDF:   %-32s %04d-%02u-%02u %02u:%02u:%02u.%02u%02u%02u offUtc=%d type=%#x\n", #a_Member ":", \
-          (a_pStruct)->a_Member.iYear, (a_pStruct)->a_Member.uMonth, (a_pStruct)->a_Member.uDay, \
-          (a_pStruct)->a_Member.uHour, (a_pStruct)->a_Member.uMinute, (a_pStruct)->a_Member.uSecond, \
-          (a_pStruct)->a_Member.cCentiseconds, (a_pStruct)->a_Member.cHundredsOfMicroseconds, \
-          (a_pStruct)->a_Member.cMicroseconds, (a_pStruct)->a_Member.offUtcInMin, (a_pStruct)->a_Member.fType ))
+#define UDF_LOG2_MEMBER_TIMESTAMP(a_pStruct, a_Member) UDF_LOG2_MEMBER_TIMESTAMP2(#a_Member, (a_pStruct)->a_Member)
+#define UDF_LOG2_MEMBER_TIMESTAMP2(a_szMember, a_MemberExpr) \
+    Log2(("ISO/UDF:   %-32s %04d-%02u-%02u %02u:%02u:%02u.%02u%02u%02u offUtc=%d type=%#x\n", a_szMember ":", \
+          (a_MemberExpr).iYear, (a_MemberExpr).uMonth, (a_MemberExpr).uDay, \
+          (a_MemberExpr).uHour, (a_MemberExpr).uMinute, (a_MemberExpr).uSecond, \
+          (a_MemberExpr).cCentiseconds, (a_MemberExpr).cHundredsOfMicroseconds, \
+          (a_MemberExpr).cMicroseconds, (a_MemberExpr).offUtcInMin, (a_MemberExpr).fType ))
 #define UDF_LOG2_MEMBER_CHARSPEC(a_pStruct, a_Member) \
     do { \
         if (   (a_pStruct)->a_Member.uType == UDF_CHAR_SET_OSTA_COMPRESSED_UNICODE \
@@ -585,12 +592,12 @@ static int rtFsIsoVolUdfVpRead(PRTFSISOVOL pThis, uint32_t idxPart, uint32_t idx
                 rc = RTVfsFileReadAt(pThis->hVfsBacking, offByte + pPart->offByteLocation, pvBuf, cbToRead, NULL);
                 if (RT_SUCCESS(rc))
                 {
-                    Log3(("ISO/UDF: Read %#x bytes at %#RX64 (%#x:%#RX64)\n",
-                          cbToRead, offByte + pPart->offByteLocation, idxPart, offByte));
+                    Log3(("ISO/UDF: Read %#x bytes at %#RX64 (p%u/%#RX64(/%#RX64))\n",
+                          cbToRead, offByte + pPart->offByteLocation, idxPart, offByte, offByte >> pThis->Udf.VolInfo.cShiftBlock));
                     return VINF_SUCCESS;
                 }
-                Log(("ISO/UDF: Error reading %#x bytes at %#RX64 (%#x:%#RX64): %Rrc\n",
-                     cbToRead, offByte + pPart->offByteLocation, idxPart, offByte, rc));
+                Log(("ISO/UDF: Error reading %#x bytes at %#RX64 (p%u/%#RX64(/%#RX64)): %Rrc\n",
+                     cbToRead, offByte + pPart->offByteLocation, idxPart, offByte, offByte >> pThis->Udf.VolInfo.cShiftBlock, rc));
                 break;
 
             default:
@@ -1314,6 +1321,125 @@ static int rtFsIsoCore_UdfStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileTy
     return VINF_SUCCESS;
 }
 
+#ifdef LOG_ENABLED
+
+/**
+ * Translates UDFICBTAG::bFileType to a string for logging purposes.
+ */
+static const char *rtFsIsoUdfIcbFileTypeToString(uint8_t bFileType)
+{
+    switch (bFileType)
+    {
+        RT_CASE_RET_STR(UDF_FILE_TYPE_NOT_SPECIFIED);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_UNALLOCATED_SPACE_ENTRY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_PARTITION_INTEGRITY_ENTRY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_INDIRECT_ENTRY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_DIRECTORY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_REGULAR_FILE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_BLOCK_DEVICE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_CHARACTER_DEVICE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_EXTENDED_ATTRIBUTES);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_FIFO);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_SOCKET);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_TERMINAL_ENTRY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_SYMBOLIC_LINK);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_STREAM_DIRECTORY);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_VAT);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_REAL_TIME_FILE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_METADATA_FILE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_METADATA_MIRROR_FILE);
+        RT_CASE_RET_STR(UDF_FILE_TYPE_METADATA_BITMAP_FILE);
+        default: return "??";
+    }
+}
+
+/**
+ * Logs the extended embedded attributes in a file record.
+ */
+static void rtFsIsoCore_LogExtAttribs(uint8_t const *pbExtAttribs, size_t cbExtAttribs)
+{
+    PCUDFEXTATTRIBHDRDESC const pHdr = (PCUDFEXTATTRIBHDRDESC)pbExtAttribs;
+    if (   cbExtAttribs >= sizeof(UDFEXTATTRIBHDRDESC)
+        && pHdr->Tag.idTag == UDF_TAG_ID_EXTENDED_ATTRIB_HDR_DESC)
+    {
+        UDF_LOG2_MEMBER2("#06RX16", "EA.Hdr.Tag.uVersion", pHdr->Tag.uVersion);
+        UDF_LOG2_MEMBER2("#06RX16", "EA.Hdr.Tag.cbDescriptorCrc", pHdr->Tag.cbDescriptorCrc);
+        UDF_LOG2_MEMBER2("#010RX32", "EA.Hdr.offImplementationAttribs", pHdr->offImplementationAttribs);
+        UDF_LOG2_MEMBER2("#010RX32", "EA.Hdr.offApplicationAttribs", pHdr->offApplicationAttribs);
+        if (cbExtAttribs > RT_UOFFSETOF(UDFGEA, u))
+        {
+            PCUDFGEA const pGenEA  = (PCUDFGEA)(pHdr + 1);
+            UDF_LOG2_MEMBER2("#010RX32", "EA.uAttribType", pGenEA->uAttribType);
+            UDF_LOG2_MEMBER2("#04RX8",  "EA.uAttribSubtype", pGenEA->uAttribSubtype);
+            if (pGenEA->abReserved[0] || pGenEA->abReserved[1], pGenEA->abReserved[2])
+                UDF_LOG2_MEMBER2(".3Rhxs",  "EA.abReserved", pGenEA->abReserved);
+            UDF_LOG2_MEMBER2("#010RX32", "EA.cbAttrib", pGenEA->cbAttrib);
+
+            size_t const cbMaxEA = cbExtAttribs - RT_UOFFSETOF(UDFGEA, u);
+            size_t const cbEA    = RT_MIN(RT_MAX(pGenEA->cbAttrib, RT_UOFFSETOF(UDFGEA, u)) - RT_UOFFSETOF(UDFGEA, u), cbMaxEA);
+            switch (pGenEA->uAttribType)
+            {
+                case UDFEADATACHARSETINFO_ATTRIB_TYPE:
+                    if (   cbEA < RT_UOFFSETOF(UDFEADATACHARSETINFO, abEscSeqs)
+                        || cbEA - RT_UOFFSETOF(UDFEADATACHARSETINFO, abEscSeqs) < pGenEA->u.CharSetInfo.cbEscSeqs)
+                        break;
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.CharSetInfo.cbEscSeqs", pGenEA->u.CharSetInfo.cbEscSeqs);
+                    UDF_LOG2_MEMBER2("#04RX8",  "EA.CharSetInfo.bType", pGenEA->u.CharSetInfo.bType);
+                    UDF_LOG2_MEMBER2_HEX(pGenEA->u.CharSetInfo.cbEscSeqs, "EA.CharSetInfo.abEscSeqs", &pGenEA->u.CharSetInfo.abEscSeqs);
+                    return;
+                case UDFEADATAALTPERM_ATTRIB_TYPE:
+                    if (cbEA < sizeof(pGenEA->u.AltPerm))
+                        break;
+                    UDF_LOG2_MEMBER2("#06RX16",  "EA.AltPerm.idOwner", pGenEA->u.AltPerm.idOwner);
+                    UDF_LOG2_MEMBER2("#06RX16",  "EA.AltPerm.idGroup", pGenEA->u.AltPerm.idGroup);
+                    UDF_LOG2_MEMBER2("#06RX16",  "EA.AltPerm.fPermission", pGenEA->u.AltPerm.fPermission);
+                    return;
+                case UDFEADATAFILETIMES_ATTRIB_TYPE:
+                    if (   cbEA < RT_UOFFSETOF(UDFEADATAFILETIMES, aTimestamps)
+                        || cbEA - RT_UOFFSETOF(UDFEADATAFILETIMES, aTimestamps) < pGenEA->u.FileTimes.cbTimestamps)
+                        break;
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.FileTimes.cbTimestamps", pGenEA->u.FileTimes.cbTimestamps);
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.FileTimes.fFlags", pGenEA->u.FileTimes.fFlags);
+                    for (uint32_t iTs = 0, cTs = pGenEA->u.FileTimes.cbTimestamps / sizeof(UDFTIMESTAMP); iTs < cTs; iTs++)
+                        UDF_LOG2_MEMBER_TIMESTAMP2("EA.FileTimes.aTimestamps[]", pGenEA->u.FileTimes.aTimestamps[iTs]);
+                    return;
+                case UDFEADATAINFOTIMES_ATTRIB_TYPE:
+                    if (   cbEA < RT_UOFFSETOF(UDFEADATAINFOTIMES, aTimestamps)
+                        || cbEA - RT_UOFFSETOF(UDFEADATAINFOTIMES, aTimestamps) < pGenEA->u.InfoTimes.cbTimestamps)
+                        break;
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.InfoTimes.cbTimestamps", pGenEA->u.InfoTimes.cbTimestamps);
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.InfoTimes.fFlags", pGenEA->u.InfoTimes.fFlags);
+                    for (uint32_t iTs = 0, cTs = pGenEA->u.InfoTimes.cbTimestamps / sizeof(UDFTIMESTAMP); iTs < cTs; iTs++)
+                        UDF_LOG2_MEMBER_TIMESTAMP2("EA.InfoTimes.aTimestamps[]", pGenEA->u.InfoTimes.aTimestamps[iTs]);
+                    return;
+                case UDFEADATADEVICESPEC_ATTRIB_TYPE:
+                    if (cbEA < RT_UOFFSETOF(UDFEADATADEVICESPEC, abImplementationUse))
+                        break;
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.DeviceSpec.cbImplementationUse", pGenEA->u.DeviceSpec.cbImplementationUse);
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.DeviceSpec.uMajorDeviceNo", pGenEA->u.DeviceSpec.uMajorDeviceNo);
+                    UDF_LOG2_MEMBER2("#010RX32",  "EA.DeviceSpec.uMinorDeviceNo", pGenEA->u.DeviceSpec.uMinorDeviceNo);
+                    if (cbEA != RT_UOFFSETOF(UDFEADATADEVICESPEC, abImplementationUse))
+                        return;
+                    if (cbEA - RT_UOFFSETOF(UDFEADATADEVICESPEC, abImplementationUse) < pGenEA->u.DeviceSpec.cbImplementationUse)
+                        break;
+                    UDF_LOG2_MEMBER2_HEX(pGenEA->u.DeviceSpec.cbImplementationUse, "EA.DeviceSpec.cbImplementationUse:",
+                                         pGenEA->u.DeviceSpec.abImplementationUse);
+                    return;
+                case UDFEADATAIMPLUSE_ATTRIB_TYPE:
+                    break;
+                case UDFEADATAAPPUSE_ATTRIB_TYPE:
+                    break;
+            }
+            UDF_LOG2_MEMBER2_HEX(cbEA, "EA.abData:", pGenEA->u.abData);
+        }
+        else if (cbExtAttribs > sizeof(UDFEXTATTRIBHDRDESC))
+            UDF_LOG2_MEMBER2_HEX(cbExtAttribs - sizeof(*pHdr), "EA.UnknownPayload", pHdr + 1);
+    }
+    else
+        UDF_LOG2_MEMBER2_HEX(cbExtAttribs, "abExtAttribs", pbExtAttribs);
+}
+
+#endif /* LOG_ENABLED */
 
 /**
  * Initialize/update a core object structure from an UDF extended file entry.
@@ -1340,7 +1466,7 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
         UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[1]);
         UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.cMaxEntries);
         UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bReserved);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bFileType);
+        UDF_LOG2_MEMBER_ENUM(pFileEntry, "#04RX8", IcbTag.bFileType, rtFsIsoUdfIcbFileTypeToString);
         UDF_LOG2_MEMBER_LBADDR(pFileEntry,      IcbTag.ParentIcb);
         UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.fFlags);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uid);
@@ -1365,15 +1491,15 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
         UDF_LOG2_MEMBER(pFileEntry, "#018RX64", INodeId);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbExtAttribs);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbAllocDescs);
-        if (pFileEntry->cbExtAttribs > 0)
-            Log2((pFileEntry->cbExtAttribs <= 16 ? "ISO/UDF:   %-32s %.*Rhxs\n" : "ISO/UDF:   %-32s\n%.*RhxD\n",
-                  "abExtAttribs:", pFileEntry->cbExtAttribs, pFileEntry->abExtAttribs));
+        uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, pVol->cbBlock - RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs));
+        if (cbExtAttribs > 0)
+            rtFsIsoCore_LogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
         if (pFileEntry->cbAllocDescs > 0)
             switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
             {
                 case UDF_ICB_FLAGS_AD_TYPE_SHORT:
                 {
-                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs];
+                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[cbExtAttribs];
                     uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
                     for (uint32_t i = 0; i < cDescs; i++)
                         Log2(("ISO/UDF:   ShortAD[%u]:                      %#010RX32 LB %#010RX32; type=%u\n",
@@ -1382,7 +1508,7 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
                 }
                 case UDF_ICB_FLAGS_AD_TYPE_LONG:
                 {
-                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs];
+                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[cbExtAttribs];
                     uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
                     for (uint32_t i = 0; i < cDescs; i++)
                         Log2(("ISO/UDF:   LongAD[%u]:                       %#06RX16:%#010RX32 LB %#010RX32; type=%u iu=%.6Rhxs\n",
@@ -1393,7 +1519,7 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
                 default:
                     Log2(("ISO/UDF:   %-32s Type=%u\n%.*RhxD\n",
                           "abExtAttribs:", pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK,
-                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs]));
+                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[cbExtAttribs]));
                     break;
             }
     }
@@ -1496,7 +1622,7 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
         UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[1]);
         UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.cMaxEntries);
         UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bReserved);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bFileType);
+        UDF_LOG2_MEMBER_ENUM(pFileEntry, "#04RX8", IcbTag.bFileType, rtFsIsoUdfIcbFileTypeToString);
         UDF_LOG2_MEMBER_LBADDR(pFileEntry,      IcbTag.ParentIcb);
         UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.fFlags);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uid);
@@ -1517,15 +1643,15 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
         UDF_LOG2_MEMBER(pFileEntry, "#018RX64", INodeId);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbExtAttribs);
         UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbAllocDescs);
-        if (pFileEntry->cbExtAttribs > 0)
-            Log2((pFileEntry->cbExtAttribs <= 16 ? "ISO/UDF:   %-32s %.*Rhxs\n" : "ISO/UDF:   %-32s\n%.*RhxD\n",
-                  "abExtAttribs:", pFileEntry->cbExtAttribs, pFileEntry->abExtAttribs));
+        uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, pVol->cbBlock - RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs));
+        if (cbExtAttribs > 0)
+            rtFsIsoCore_LogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
         if (pFileEntry->cbAllocDescs > 0)
             switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
             {
                 case UDF_ICB_FLAGS_AD_TYPE_SHORT:
                 {
-                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs];
+                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[cbExtAttribs];
                     uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
                     for (uint32_t i = 0; i < cDescs; i++)
                         Log2(("ISO/UDF:   ShortAD[%u]:                      %#010RX32 LB %#010RX32; type=%u\n",
@@ -1534,7 +1660,7 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
                 }
                 case UDF_ICB_FLAGS_AD_TYPE_LONG:
                 {
-                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs];
+                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[cbExtAttribs];
                     uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
                     for (uint32_t i = 0; i < cDescs; i++)
                         Log2(("ISO/UDF:   LongAD[%u]:                       %#06RX16:%#010RX32 LB %#010RX32; type=%u iu=%.6Rhxs\n",
@@ -1545,7 +1671,7 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
                 default:
                     Log2(("ISO/UDF:   %-32s Type=%u\n%.*RhxD\n",
                           "abExtAttribs:", pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK,
-                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs]));
+                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[cbExtAttribs]));
                     break;
             }
     }
@@ -1589,7 +1715,7 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
                        pFileEntry->uRecordFormat, pFileEntry->fRecordDisplayAttribs, pFileEntry->cbRecord));
 
     /*
-     * Conver the file mode.
+     * Convert the file mode.
      */
     int rc = rtFsIsoCore_UdfStuffToFileMode(pFileEntry->IcbTag.fFlags, pFileEntry->IcbTag.bFileType,
                                             pFileEntry->fPermissions, &pCore->fAttrib);
@@ -5293,9 +5419,9 @@ static int rtFsIsoVolProcessUdfFileSetDescs(PRTFSISOVOL pThis, uint8_t *pbBuf, s
      * We assume there is a single file descriptor and don't bother checking what comes next.
      */
     PUDFFILESETDESC pFsd     = (PUDFFILESETDESC)pbBuf;
-    Assert(cbBuf > sizeof(*pFsd)); NOREF(cbBuf);
+    Assert(cbBuf > sizeof(*pFsd));
     RT_ZERO(*pFsd);
-    size_t          cbToRead = RT_MAX(pThis->Udf.VolInfo.FileSetDescriptor.cb, sizeof(*pFsd));
+    size_t const    cbToRead = RT_MIN(RT_MAX(pThis->Udf.VolInfo.FileSetDescriptor.cb, sizeof(*pFsd)), cbBuf);
     int rc = rtFsIsoVolUdfVpRead(pThis, pThis->Udf.VolInfo.FileSetDescriptor.Location.uPartitionNo,
                                  pThis->Udf.VolInfo.FileSetDescriptor.Location.off, 0, pFsd, cbToRead);
     if (RT_SUCCESS(rc))
@@ -5305,7 +5431,7 @@ static int rtFsIsoVolProcessUdfFileSetDescs(PRTFSISOVOL pThis, uint8_t *pbBuf, s
         if (RT_SUCCESS(rc))
         {
 #ifdef LOG_ENABLED
-            Log(("ISO/UDF: File set descriptor at %#RX32 (%#RX32:%#RX32)\n", pFsd->Tag.offTag,
+            Log(("ISO/UDF: File set descriptor at %#RX32 (p%u/%#RX32)\n", pFsd->Tag.offTag,
                  pThis->Udf.VolInfo.FileSetDescriptor.Location.uPartitionNo,
                  pThis->Udf.VolInfo.FileSetDescriptor.Location.off));
             if (LogIs2Enabled())
@@ -5515,7 +5641,7 @@ static int rtFsIsoVolProcessUdfVdsSeqInfo(PRTFSISOVOL pThis, PRTFSISOVDSINFO pIn
                     paPartMaps[cPartMaps].offByteLocation = (uint64_t)pPd->offLocation * pThis->cbSector;
                     paPartMaps[cPartMaps].fFlags          = pPd->fFlags;
                     paPartMaps[cPartMaps].uAccessType     = pPd->uAccessType;
-                    if (!UDF_ENTITY_ID_EQUALS(&pPd->PartitionContents, UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF))
+                    if (!UDF_ENTITY_ID_EQUALS(&pPd->idPartitionContents, UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF_3))
                         paPartMaps[cPartMaps].fHaveHdr    = false;
                     else
                     {
@@ -5880,8 +6006,8 @@ static int rtFsIsoVolProcessUdfPartitionDesc(PRTFSISOVDSINFO pInfo, PCUDFPARTITI
         UDF_LOG2_MEMBER(pDesc, "#010RX32", uVolumeDescSeqNo);
         UDF_LOG2_MEMBER(pDesc, "#06RX16", fFlags);
         UDF_LOG2_MEMBER(pDesc, "#06RX16", uPartitionNo);
-        UDF_LOG2_MEMBER_ENTITY_ID(pDesc, PartitionContents);
-        if (UDF_ENTITY_ID_EQUALS(&pDesc->PartitionContents, UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF))
+        UDF_LOG2_MEMBER_ENTITY_ID(pDesc, idPartitionContents);
+        if (UDF_ENTITY_ID_EQUALS(&pDesc->idPartitionContents, UDF_ENTITY_ID_PD_PARTITION_CONTENTS_UDF_3))
         {
             UDF_LOG2_MEMBER_SHORTAD(&pDesc->ContentsUse, Hdr.UnallocatedSpaceTable);
             UDF_LOG2_MEMBER_SHORTAD(&pDesc->ContentsUse, Hdr.UnallocatedSpaceBitmap);
@@ -6953,6 +7079,7 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
                      || enmState == kStateStart)
                  && MATCH_HDR(&Buf.VolDescHdr, UDF_EXT_VOL_DESC_TYPE, UDF_EXT_VOL_DESC_STD_ID_BEGIN, UDF_EXT_VOL_DESC_VERSION) )
         {
+            Log(("ISO/UDF: volume desc #%u: BEA01\n", iVolDesc));
             if (uUdfLevel == 0)
                 enmState = kStateUdfSeq;
             else
@@ -6960,13 +7087,20 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
         }
         else if (   enmState == kStateUdfSeq
                  && MATCH_HDR(&Buf.VolDescHdr, UDF_EXT_VOL_DESC_TYPE, UDF_EXT_VOL_DESC_STD_ID_NSR_02, UDF_EXT_VOL_DESC_VERSION) )
+        {
+            Log(("ISO/UDF: volume desc #%u: NSR02\n", iVolDesc));
             uUdfLevel = 2;
+        }
         else if (   enmState == kStateUdfSeq
                  && MATCH_HDR(&Buf.VolDescHdr, UDF_EXT_VOL_DESC_TYPE, UDF_EXT_VOL_DESC_STD_ID_NSR_03, UDF_EXT_VOL_DESC_VERSION) )
+        {
+            Log(("ISO/UDF: volume desc #%u: NSR03\n", iVolDesc));
             uUdfLevel = 3;
+        }
         else if (   enmState == kStateUdfSeq
                  && MATCH_HDR(&Buf.VolDescHdr, UDF_EXT_VOL_DESC_TYPE, UDF_EXT_VOL_DESC_STD_ID_BOOT, UDF_EXT_VOL_DESC_VERSION) )
         {
+            Log(("ISO/UDF: volume desc #%u: BOOT2\n", iVolDesc));
             if (offUdfBootVolDesc == UINT64_MAX)
                 offUdfBootVolDesc = iVolDesc * cbSector;
             else
@@ -6975,6 +7109,7 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
         else if (   enmState == kStateUdfSeq
                  && MATCH_HDR(&Buf.VolDescHdr, UDF_EXT_VOL_DESC_TYPE, UDF_EXT_VOL_DESC_STD_ID_TERM, UDF_EXT_VOL_DESC_VERSION) )
         {
+            Log(("ISO/UDF: volume desc #%u: TEA01\n", iVolDesc));
             if (uUdfLevel != 0)
                 enmState = kStateNoSeq;
             else
@@ -6984,10 +7119,14 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
          * Unknown, probably the end.
          */
         else if (enmState == kStateNoSeq)
+        {
+            Log(("IS9660: volume desc #%u: bDescType=%#x achStdId=%.5Rhxs bDescVers=%#x - stop\n",
+                 iVolDesc, Buf.VolDescHdr.bDescType, &Buf.VolDescHdr.achStdId[0], Buf.VolDescHdr.bDescVersion));
             break;
+        }
         else if (enmState == kStateStart)
-                return RTERRINFO_LOG_SET_F(pErrInfo, VERR_VFS_UNKNOWN_FORMAT,
-                                           "Not ISO? Unable to recognize volume descriptor signature: %.5Rhxs", Buf.VolDescHdr.achStdId);
+            return RTERRINFO_LOG_SET_F(pErrInfo, VERR_VFS_UNKNOWN_FORMAT,
+                                       "Not ISO? Unable to recognize volume descriptor signature: %.5Rhxs", Buf.VolDescHdr.achStdId);
         else if (enmState == kStateCdSeq)
         {
 #if 1
@@ -7038,7 +7177,7 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
      *       there really is rock ridge stuff in the primary volume as well as
      *       making sure there really is anything of value in the primary volume.
      */
-    if (uUdfLevel > 0)
+    if (uUdfLevel > 0 && !(fFlags & RTFSISO9660_F_NO_UDF))
     {
         pThis->enmType = RTFSISOVOLTYPE_UDF;
         rc = rtFsIsoDirShrd_NewUdf(pThis, NULL /*pParent*/, &pThis->Udf.VolInfo.RootDirIcb,
@@ -7046,6 +7185,7 @@ static int rtFsIsoVolTryInit(PRTFSISOVOL pThis, RTVFS hVfsSelf, RTVFSFILE hVfsBa
         /** @todo fall back on failure? */
         return rc;
     }
+
     if (bJolietUcs2Level != 0)
     {
         pThis->enmType = RTFSISOVOLTYPE_JOLIET;

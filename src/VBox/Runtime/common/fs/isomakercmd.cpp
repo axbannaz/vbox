@@ -262,6 +262,7 @@ typedef enum RTFSISOMAKERCMDOPT
     RTFSISOMAKERCMD_OPT_SYSTEM_ID,
     RTFSISOMAKERCMD_OPT_TRANS_TBL_NAME,
     RTFSISOMAKERCMD_OPT_UDF,
+    RTFSISOMAKERCMD_OPT_NO_UDF,
     RTFSISOMAKERCMD_OPT_UID,
     RTFSISOMAKERCMD_OPT_USE_FILE_VERSION,
     RTFSISOMAKERCMD_OPT_VOLUME_ID,
@@ -636,6 +637,7 @@ static const RTGETOPTDEF g_aRtFsIsoMakerOptions[] =
     { "--trans-tbl",                    'T',                                                RTGETOPT_REQ_NOTHING },
     DD("-table-name",                   RTFSISOMAKERCMD_OPT_TRANS_TBL_NAME,                 RTGETOPT_REQ_STRING  ),
     DD("-udf",                          RTFSISOMAKERCMD_OPT_UDF,                            RTGETOPT_REQ_NOTHING ),
+    DD("-no-udf",                       RTFSISOMAKERCMD_OPT_NO_UDF,                         RTGETOPT_REQ_NOTHING ),
     DD("-uid",                          RTFSISOMAKERCMD_OPT_UID,                            RTGETOPT_REQ_UINT32  ),
     DD("-use-fileversion",              RTFSISOMAKERCMD_OPT_USE_FILE_VERSION,               RTGETOPT_REQ_NOTHING ),
     { "--untranslated-filenames",       'U',                                                RTGETOPT_REQ_NOTHING },
@@ -1292,7 +1294,7 @@ static int rtFsIsoMakerCmdOptNameSetup(PRTFSISOMAKERCMDOPTS pOpts, const char *p
                 }
                 else if (IS_EQUAL("udf"))
                 {
-#if 0
+#if 1
                     fNameSpecifier |= RTFSISOMAKERCMDNAME_UDF;
                     fNamespaces |= fPrevMajor = RTFSISOMAKER_NAMESPACE_UDF;
 #else
@@ -2396,7 +2398,7 @@ static int rtFsIsoMakerCmdOptSetPrimaryRockLevel(PRTFSISOMAKERCMDOPTS pOpts, uin
  *
  * @returns IPRT status code
  * @param   pOpts           The ISO maker command instance.
- * @param   uLevel          The new rock ridge level.
+ * @param   uLevel          The Joliet UCS level.
  */
 static int rtFsIsoMakerCmdOptSetJolietUcs2Level(PRTFSISOMAKERCMDOPTS pOpts, uint8_t uLevel)
 {
@@ -2406,6 +2408,25 @@ static int rtFsIsoMakerCmdOptSetJolietUcs2Level(PRTFSISOMAKERCMDOPTS pOpts, uint
     if (rc == VERR_WRONG_ORDER)
         return rtFsIsoMakerCmdErrorRc(pOpts, rc, "Cannot change joliet UCS level to %d after having added files!", uLevel);
     return rtFsIsoMakerCmdErrorRc(pOpts, rc, "Failed to set joliet UCS level to %d: %Rrc", uLevel, rc);
+}
+
+
+/**
+ * Deals with: --udf, --no-udf
+ *
+ * @returns IPRT status code
+ * @param   pOpts           The ISO maker command instance.
+ * @param   fEnable         Whether to enable or disable UDF.
+ */
+static int rtFsIsoMakerCmdOptEnableUdf(PRTFSISOMAKERCMDOPTS pOpts, bool fEnable)
+{
+    int rc = RTFsIsoMakerSetUdfLevel(pOpts->hIsoMaker, fEnable ? 2 : 0);
+    if (RT_SUCCESS(rc))
+        return rc;
+    const char * const pszAction = fEnable ? "enable" : "disable";
+    if (rc == VERR_WRONG_ORDER)
+        return rtFsIsoMakerCmdErrorRc(pOpts, rc, "Cannot %s UDF after having added files!", pszAction);
+    return rtFsIsoMakerCmdErrorRc(pOpts, rc, "Failed to %s UDF: %Rrc", pszAction, rc);
 }
 
 
@@ -3312,6 +3333,14 @@ static int rtFsIsoMakerCmdParse(PRTFSISOMAKERCMDOPTS pOpts, unsigned cArgs, char
 
             case RTFSISOMAKERCMD_OPT_JOLIET_LEVEL:
                 rc = rtFsIsoMakerCmdOptSetJolietUcs2Level(pOpts, ValueUnion.u8);
+                break;
+
+            case RTFSISOMAKERCMD_OPT_UDF:
+                rc = rtFsIsoMakerCmdOptEnableUdf(pOpts, true);
+                break;
+
+            case RTFSISOMAKERCMD_OPT_NO_UDF:
+                rc = rtFsIsoMakerCmdOptEnableUdf(pOpts, false);
                 break;
 
 
