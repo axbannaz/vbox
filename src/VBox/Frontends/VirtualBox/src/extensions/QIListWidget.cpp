@@ -426,6 +426,16 @@ QList<QIListWidgetItem*> QIListWidget::findItems(const QString &strText, Qt::Mat
     return QIListWidgetItem::toList(QListWidget::findItems(strText, flags));
 }
 
+QIListWidgetItem *QIListWidget::findItem(const QString &strKey, const QVariant &vValue)
+{
+    /* Look for the first item having suitable property: */
+    for (int i = 0; i < childCount(); ++i)
+        if (QIListWidgetItem *pItem = childItem(i))
+            if (pItem->property(strKey.toUtf8().constData()) == vValue)
+                return pItem;
+    return 0;
+}
+
 void QIListWidget::paintEvent(QPaintEvent *pEvent)
 {
     /* Call to base-class if allowed: */

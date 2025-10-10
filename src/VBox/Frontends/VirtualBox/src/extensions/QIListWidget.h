@@ -108,6 +108,9 @@ public:
     /** Finds items with the text that matches the string text using the given flags. */
     QList<QIListWidgetItem*> findItems(const QString &text, Qt::MatchFlags flags) const;
 
+    /** Finds first item with the property @a strKey having @a vValue. */
+    QIListWidgetItem *findItem(const QString &strKey, const QVariant &vValue);
+
 protected:
 
     /** Handles paint @a pEvent. */
