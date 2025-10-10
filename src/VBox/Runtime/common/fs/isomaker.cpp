@@ -1303,6 +1303,11 @@ static void rtFsIsoMakerDestroy(PRTFSISOMAKERINT pThis)
 
     if (pThis->paCommonSources)
     {
+        for (uint32_t i = 0; i < pThis->cCommonSources; i++)
+        {
+            RTVfsFileRelease(pThis->paCommonSources[i]);
+            pThis->paCommonSources[i] = NIL_RTVFSFILE;
+        }
         RTMemFree(pThis->paCommonSources);
         pThis->paCommonSources = NULL;
     }
