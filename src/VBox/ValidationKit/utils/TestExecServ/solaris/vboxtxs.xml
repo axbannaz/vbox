@@ -69,7 +69,7 @@
     </dependency>
 
     <!-- start + stop methods -->
-    <exec_method type='method' name='start' exec='/opt/VBoxTest/testsuite/solaris/vboxtxs.sh' timeout_seconds='30' />
+    <exec_method type='method' name='start' exec='/opt/VBoxTest/validationkit/solaris/vboxtxs.sh' timeout_seconds='30' />
     <exec_method type='method' name='stop' exec=':kill' timeout_seconds='60' />
 
     <!-- Description -->
