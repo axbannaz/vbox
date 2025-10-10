@@ -293,6 +293,11 @@ class SubTstDrvAddSharedFolders1(base.SubTestDriverBase):
             elif utils.getHostOs() in [ 'linux', ]:
                 asArgs.append('--many-files=4096');
 
+            # On Windows hosts we get spurious VERR_SHARING_VIOLATION errors for the rmdir
+            # testcase without any process accessing it, so disable it there for now.
+            if utils.getHostOs() in [ 'win' ]:
+                asArgs.append('--no-mk-rm-dir');
+
             # Add the extra arguments from the command line and kick it off:
             asArgs.extend(self.asExtraArgs);
 
