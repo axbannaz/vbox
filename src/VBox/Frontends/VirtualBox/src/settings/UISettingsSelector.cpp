@@ -27,6 +27,7 @@
 
 /* Qt includes: */
 #include <QApplication>
+#include <QLayout>
 #include <QPainter>
 #include <QPainterPath>
 
