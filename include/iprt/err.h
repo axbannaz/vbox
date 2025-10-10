@@ -2581,7 +2581,7 @@
 /** Too many partition descriptors. */
 #define VERR_ISOFS_TOO_MANY_PDS                         (-25309)
 /** The logical volume descriptor has a too big partition map. */
-#define VERR_ISOFS_TOO_BIT_PARTMAP_IN_LVD               (-25310)
+#define VERR_ISOFS_TOO_BIG_PARTMAP_IN_LVD               (-25310)
 /** No primary volume descriptors found. */
 #define VERR_ISOFS_NO_PVD                               (-25311)
 /** No logical volume descriptors found. */

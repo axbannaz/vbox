@@ -556,6 +556,7 @@ RuntimeBaseR3_SOURCES      := \
 	common/fs/extvfs.cpp \
 	common/fs/fatvfs.cpp \
 	common/fs/isovfs.cpp \
+	common/fs/udfhlp.cpp \
 	common/fs/isomaker.cpp \
 	common/fs/isomakercmd.cpp \
 	common/fs/isomakerimport.cpp \
@@ -2447,6 +2448,7 @@ RuntimeBldProg_SOURCES          = \
 	common/fs/isomaker.cpp \
 	common/fs/isomakercmd.cpp \
 	common/fs/isomakerimport.cpp \
+	common/fs/udfhlp.cpp \
 	common/fs/isovfs.cpp \
 	common/fs/pdbvfs.cpp \
 	common/ldr/ldr.cpp \

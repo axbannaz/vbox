@@ -163,8 +163,10 @@ RTDECL(int) RTFsExtVolOpen(RTVFSFILE hVfsFileIn, uint32_t fMntFlags, uint32_t fE
 #define RTFSISO9660_F_NO_JOLIET     RT_BIT_32(1)
 /** Do not use the rock ridge extensions if present. */
 #define RTFSISO9660_F_NO_ROCK       RT_BIT_32(2)
+/** Do not use the UDF part if present. */
+#define RTFSISO9660_F_ONLY_UDF      RT_BIT_32(3)
 /** Valid ISO 9660 mount option mask.   */
-#define RTFSISO9660_F_VALID_MASK    UINT32_C(0x00000007)
+#define RTFSISO9660_F_VALID_MASK    UINT32_C(0x0000000f)
 /** Checks if @a a_fNoType is the only acceptable volume type. */
 #define RTFSISO9660_F_IS_ONLY_TYPE(a_fFlags, a_fNoType) \
     (   ((a_fFlags)   & (RTFSISO9660_F_NO_UDF | RTFSISO9660_F_NO_JOLIET | RTFSISO9660_F_NO_ROCK)) \

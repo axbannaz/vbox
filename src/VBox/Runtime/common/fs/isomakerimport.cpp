@@ -56,6 +56,9 @@
 #include <iprt/utf16.h>
 #include <iprt/vfs.h>
 #include <iprt/formats/iso9660.h>
+#include <iprt/formats/udf.h>
+
+#include "udfhlp.h"
 
 
 /*********************************************************************************************************************************
@@ -154,6 +157,15 @@ typedef struct RTFSISOMKIMPORTER
     /** The name of the TRANS.TBL in the import media (must ignore). */
     const char             *pszTransTbl;
 
+    /** UDF specific data. */
+    struct
+    {
+        /** Volume information. */
+        RTFSUDFVOLINFO      VolInfo;
+        /** The UDF level. */
+        uint8_t             uLevel;
+    } Udf;
+
     /** Pointer to the import results structure (output). */
     PRTFSISOMAKERIMPORTRESULTS pResults;
 
@@ -161,10 +173,13 @@ typedef struct RTFSISOMKIMPORTER
     union
     {
         uint8_t                     ab[ISO9660_SECTOR_SIZE];
+        uint64_t                    au64[ISO9660_SECTOR_SIZE];
         ISO9660VOLDESCHDR           VolDescHdr;
         ISO9660PRIMARYVOLDESC       PrimVolDesc;
         ISO9660SUPVOLDESC           SupVolDesc;
         ISO9660BOOTRECORDELTORITO   ElToritoDesc;
+        UDFANCHORVOLUMEDESCPTR      Avdp;
+        UDFTAG                      UdfTag;
     }                   uSectorBuf;
 
     /** Name buffer.  */
@@ -2113,6 +2128,55 @@ static int rtFsIsoImportProcessSupplementaryDesc(PRTFSISOMKIMPORTER pThis, PISO9
 }
 
 
+
+/*********************************************************************************************************************************
+*   UDF                                                                                                                          *
+*********************************************************************************************************************************/
+
+
+static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
+{
+    /*
+     * Check out the three standard AVDP locations and scan the Volume Descriptor
+     * Sequences they point at, stopping when we've got a working one.
+     */
+    int                     rcRet         = VINF_SUCCESS;
+    RTFSUDFHLPSEENSEQENCES  SeenSequences = {0};
+    RTFSUDFHLPCTX           Ctx;
+    Ctx.hVfsBacking         = pThis->hSrcFile;
+    Ctx.cbBacking           = pThis->cbSrcFile;
+    Ctx.cBackingSectors     = pThis->cBlocksInSrcFile;
+    Ctx.cbSector            = ISO9660_SECTOR_SIZE;
+    Ctx.cbMaxLogicalBlock   = _16K;
+    Ctx.pbBuf               = pThis->abBuf;
+    Ctx.cbBuf               = sizeof(pThis->abBuf);
+    Ctx.pErrInfo            = pThis->pErrInfo;
+
+    uint64_t const aoffAvdps[3] =
+    {
+        256 * ISO9660_SECTOR_SIZE,
+        pThis->cbSrcFile - 256 * ISO9660_SECTOR_SIZE,
+        pThis->cbSrcFile - ISO9660_SECTOR_SIZE
+    };
+    for (unsigned i = 0; i < RT_ELEMENTS(aoffAvdps); i++)
+    {
+        int rc = RTFsUdfHlpReadAndHandleUdfAvdp(&Ctx, aoffAvdps[i], &SeenSequences, &pThis->Udf.VolInfo);
+        if (RT_SUCCESS(rc))
+            return rc;
+        if (i == 0)
+            rcRet = rc;
+    }
+
+    return rcRet;
+}
+
+
+
+
+/*********************************************************************************************************************************
+*   El Torito                                                                                                                    *
+*********************************************************************************************************************************/
+
 /**
  * Checks out an El Torito boot image to see if it requires info table patching.
  *
@@ -2635,7 +2699,6 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                                 break;
                         }
 
-
                         /*
                          * Read the next volume descriptor and check the signature.
                          */
@@ -2667,9 +2730,61 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                                             (int)sizeof(pThis->uSectorBuf.VolDescHdr), &pThis->uSectorBuf.VolDescHdr);
                             break;
                         }
-                        /** @todo UDF support. */
                         if (pThis->uSectorBuf.VolDescHdr.bDescType == ISO9660VOLDESC_TYPE_TERMINATOR)
                             break;
+                    }
+
+                    /*
+                     * Look for UDF descriptors, starting with "BEA01".
+                     * With the exception of the completely unused "BOOT2" descriptor, these have no content.
+                     */
+                    if (   RT_SUCCESS(pThis->rc)
+                        && !(pThis->fFlags & RTFSISOMK_IMPORT_F_NO_UDF)
+                        &&    ISO9660VOLDESC_MAKE_U64_HDR_VALUE(pThis->uSectorBuf.au64[0])
+                           == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_BEGIN_))
+                    {
+                        for (;;)
+                        {
+                            iVolDesc++;
+                            if (iVolDesc < 32)
+                            {
+                                rc = RTVfsFileReadAt(hIsoFile, _32K + iVolDesc * ISO9660_SECTOR_SIZE,
+                                                     &pThis->uSectorBuf, sizeof(pThis->uSectorBuf), NULL);
+                                if (RT_SUCCESS(rc))
+                                {
+                                    uint64_t const u64Hdr = ISO9660VOLDESC_MAKE_U64_HDR_VALUE(pThis->uSectorBuf.au64[0]);
+                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_02_))
+                                    {
+                                        pThis->Udf.uLevel = 2;
+                                        continue;
+                                    }
+                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_03_))
+                                    {
+                                        pThis->Udf.uLevel = 3;
+                                        continue;
+                                    }
+                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_TERM_))
+                                        break;
+                                    LogRel(("RTFsIsoMakerImport: Warning! Unexpected VRS entry: %.7Rhxs!\n", &pThis->uSectorBuf));
+                                    AssertFailed();
+                                    if (u64Hdr != 0)
+                                        continue;
+                                }
+                                else
+                                    rtFsIsoImpError(pThis, rc, "Error reading the volume descriptor #%u at %#RX32: %Rrc",
+                                                    iVolDesc, _32K + iVolDesc * ISO9660_SECTOR_SIZE, rc);
+                            }
+                            else
+                                rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_TOO_MANY_VOL_DESCS,
+                                                "Parses at most 32 volume descriptors");
+                            pThis->Udf.uLevel = 0;
+                            break;
+                        }
+                        if (pThis->Udf.uLevel != 0)
+                        {
+                            rtFsIsoImportUdf(pThis);
+                            RTFsUdfHlpDestroyVolInfo(&pThis->Udf.VolInfo);
+                        }
                     }
 
                     /*

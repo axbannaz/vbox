@@ -359,6 +359,17 @@ typedef ISO9660VOLDESCHDR const *PCISO9660VOLDESCHDR;
 #define ISO9660VOLDESC_STD_ID_4             '1'
 
 
+/** Helper for making a 64-bit header constant from ISO9660VOLDESC_STD_ID and
+ *  UDF_EXT_VOL_DESC_STD_ID_XXX. */
+#define ISO9660VOLDESC_MAKE_U64_HDR_CONST(a_bType, a_IdMacroPrefix, a_bVersion) \
+    RT_MAKE_U64_FROM_U8(a_bType, a_IdMacroPrefix##0, a_IdMacroPrefix##1, a_IdMacroPrefix##2, \
+                        a_IdMacroPrefix##3, a_IdMacroPrefix##4, a_bVersion, 0)
+
+/** Helper for getting the value to compare ISO9660VOLDESC_MAKE_U64_HDR_CONST with.
+ * @note The @a a_u64Raw value is necessarily a byte larger than the actual
+ *       ISO9660VOLDESCHDR, so take care. */
+#define ISO9660VOLDESC_MAKE_U64_HDR_VALUE(a_u64Raw)  (RT_LE2H_U64(a_u64Raw) & UINT64_C(0x00ffffffffffffff))
+
 
 /**
  * ISO 9660 boot record (volume descriptor).
