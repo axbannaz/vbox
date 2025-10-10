@@ -1523,8 +1523,8 @@ void UIAdvancedSettingsDialog::prepareSelector()
         m_pLayoutMain->addWidget(m_pCheckBoxMode, 0, 0);
     }
 
-    /* Prepare classical tree-view selector: */
-    m_pSelector = new UISettingsSelectorTreeView(centralWidget());
+    /* Prepare classical list-widget selector: */
+    m_pSelector = new UISettingsSelectorListWidget(centralWidget());
     if (m_pSelector)
         m_pLayoutMain->addWidget(m_pSelector->widget(), 1, 0);
 
@@ -1539,7 +1539,7 @@ void UIAdvancedSettingsDialog::prepareSelector()
 
     /* Configure selector created above: */
     if (m_pSelector)
-        connect(m_pSelector, &UISettingsSelectorTreeView::sigCategoryChanged,
+        connect(m_pSelector, &UISettingsSelector::sigCategoryChanged,
                 this, &UIAdvancedSettingsDialog::sltCategoryChanged);
 }
 
