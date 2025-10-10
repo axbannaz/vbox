@@ -295,16 +295,6 @@ private:
 };
 
 
-/** Tree-widget column sections. */
-enum TreeWidgetSection
-{
-    TreeWidgetSection_Category = 0,
-    TreeWidgetSection_Id,
-    TreeWidgetSection_Link,
-    TreeWidgetSection_Max
-};
-
-
 /** Simple container of all the selector item data. */
 class UISelectorItem
 {
@@ -356,43 +346,6 @@ protected:
     UISettingsPage *m_pPage;
     /** Holds the item parent ID. */
     int m_iParentID;
-};
-
-
-/** UISelectorItem subclass used as tab-widget selector item. */
-class UISelectorActionItem : public UISelectorItem
-{
-public:
-
-    /** Constructs selector item.
-      * @param  icon       Brings the item icon.
-      * @param  iID        Brings the item ID.
-      * @param  strLink    Brings the item link.
-      * @param  pPage      Brings the item page reference.
-      * @param  iParentID  Brings the item parent ID.
-      * @param  pParent    Brings the item parent. */
-    UISelectorActionItem(const QIcon &icon, int iID, const QString &strLink, UISettingsPage *pPage, int iParentID, QObject *pParent)
-        : UISelectorItem(icon, iID, strLink, pPage, iParentID)
-        , m_pAction(new QAction(icon, QString(), pParent))
-        , m_pTabWidget(0)
-    {
-        m_pAction->setCheckable(true);
-    }
-
-    /** Returns the action instance. */
-    QAction *action() const { return m_pAction; }
-
-    /** Defines the @a pTabWidget instance. */
-    void setTabWidget(QTabWidget *pTabWidget) { m_pTabWidget = pTabWidget; }
-    /** Returns the tab-widget instance. */
-    QTabWidget *tabWidget() const { return m_pTabWidget; }
-
-protected:
-
-    /** Holds the action instance. */
-    QAction *m_pAction;
-    /** Holds the tab-widget instance. */
-    QTabWidget *m_pTabWidget;
 };
 
 
