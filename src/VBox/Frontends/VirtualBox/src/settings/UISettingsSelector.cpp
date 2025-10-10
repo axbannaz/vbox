@@ -1150,7 +1150,9 @@ QWidget *UISettingsSelectorListWidget::addItem(const QString & /* strBigIcon */,
             /* Update list-widget item size accordingly: */
             pItem->setSizeHint(itemSizeHint(pItem));
             /* Update list-widget size accordingly: */
-            m_pListWidget->setMinimumSize(listSizeHint());
+            const QSize sz = listSizeHint();
+            m_pListWidget->setFixedWidth(sz.width());
+            m_pListWidget->setMinimumHeight(sz.height());
         }
     }
     return pResult;
@@ -1182,7 +1184,9 @@ void UISettingsSelectorListWidget::setItemText(int iID, const QString &strText)
         /* Update list-widget item size accordingly: */
         pItem->setSizeHint(itemSizeHint(pItem));
         /* Update list-widget size accordingly: */
-        m_pListWidget->setMinimumSize(listSizeHint());
+        const QSize sz = listSizeHint();
+        m_pListWidget->setFixedWidth(sz.width());
+        m_pListWidget->setMinimumHeight(sz.height());
     }
 }
 
