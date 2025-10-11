@@ -154,7 +154,7 @@ typedef RTFSISOROCKNAMECOMP *PRTFSISOROCKNAMECOMP;
 typedef struct RTFSISOEXTENT
 {
     /** The disk or partition byte offset.
-     * This is set to UINT64_MAX for parts of sparse files that aren't  recorded.*/
+     * This is set to UINT64_MAX for parts of sparse files that aren't recorded.*/
     uint64_t            off;
     /** The size of the extent in bytes. */
     uint64_t            cbExtent;
@@ -929,6 +929,9 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
                     AssertFailedReturn(VERR_IPE_NOT_REACHED_DEFAULT_CASE);
             }
 
+            /** @todo the sequence is terminated when cb == 0! */
+            /** @todo uType == UDF_AD_TYPE_NEXT needs handling! */
+
             /* Check if we can extend the current extent.  This is useful since
                the descriptors can typically only cover 1GB. */
             uint64_t const off = (uint64_t)idxBlock << pVol->Udf.VolInfo.cShiftBlock;
@@ -937,7 +940,8 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
                     ?     uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED
                        && pCurExtent->off + pCurExtent->cbExtent == off
                        && pCurExtent->idxPart == idxPart
-                    :     uType != UDF_AD_TYPE_RECORDED_AND_ALLOCATED) )
+                    :     uType == UDF_AD_TYPE_FREE
+                       || uType == UDF_AD_TYPE_ONLY_ALLOCATED) )
                 pCurExtent->cbExtent += cb;
             else
             {

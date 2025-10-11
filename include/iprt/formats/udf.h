@@ -119,7 +119,9 @@ typedef UDFLBADDR const *PCUDFLBADDR;
 #define UDF_AD_TYPE_ONLY_ALLOCATED                  1
 /** Not recorded nor allocated. */
 #define UDF_AD_TYPE_FREE                            2
-/** Go figure. */
+/** Location of the an UDFALLOCATIONEXTENTDESC.
+ * This is used when the ICB doesn't contain suffient room for all the
+ * allocation descriptors. */
 #define UDF_AD_TYPE_NEXT                            3
 /** @} */
 
