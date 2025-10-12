@@ -63,6 +63,7 @@
 #include <iprt/formats/iso9660.h>
 #include <iprt/formats/udf.h>
 
+#include "isoextent.h"
 #include "udfhlp.h"
 
 
@@ -146,27 +147,6 @@ typedef struct RTFSISOROCKNAMECOMP
 } RTFSISOROCKNAMECOMP;
 /** Ponter to rock ridge name compare data. */
 typedef RTFSISOROCKNAMECOMP *PRTFSISOROCKNAMECOMP;
-
-
-/**
- * ISO extent (internal to the VFS not a disk structure).
- */
-typedef struct RTFSISOEXTENT
-{
-    /** The disk or partition byte offset.
-     * This is set to UINT64_MAX for parts of sparse files that aren't recorded.*/
-    uint64_t            off;
-    /** The size of the extent in bytes. */
-    uint64_t            cbExtent;
-    /** UDF virtual partition number, UINT32_MAX for ISO 9660. */
-    uint32_t            idxPart;
-    /** Reserved.   */
-    uint32_t            uReserved;
-} RTFSISOEXTENT;
-/** Pointer to an ISO 9660 extent. */
-typedef RTFSISOEXTENT *PRTFSISOEXTENT;
-/** Pointer to a const ISO 9660 extent. */
-typedef RTFSISOEXTENT const *PCRTFSISOEXTENT;
 
 
 /**
