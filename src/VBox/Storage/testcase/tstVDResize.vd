@@ -43,7 +43,7 @@ void main()
     createdisk("test-vmdk-mflat", true);
     create("test-vmdk-mflat", "base", "test-vmdk-mflat.vmdk", "Fixed", "VMDK", 2G, false, false);
     io("test-vmdk-mflat", false, 1, "seq", 64K, 1G, 2G, 1G, 100, "none");
-    resize("test-vmdk-mflat", 3000M);
+    resize("test-vmdk-mflat", 3G);
     io("test-vmdk-mflat", false, 1, "seq", 64K, 2G, 3G, 1G, 100, "none");
     close("test-vmdk-mflat", "single", true /* fDelete */);
     destroydisk("test-vmdk-mflat");
@@ -52,7 +52,7 @@ void main()
     createdisk("test-vmdk-sflat", true);
     create("test-vmdk-sflat", "base", "test-vmdk-sflat.vmdk", "vmdk-fixed-split", "VMDK", 2G, false, false);
     io("test-vmdk-sflat", false, 1, "seq", 64K, 1G, 2G, 1G, 100, "none");
-    resize("test-vmdk-sflat", 3000M);
+    resize("test-vmdk-sflat", 3G);
     io("test-vmdk-sflat", false, 1, "seq", 64K, 2G, 3G, 1G, 100, "none");
     close("test-vmdk-sflat", "single", true /* fDelete */);
     destroydisk("test-vmdk-sflat");
