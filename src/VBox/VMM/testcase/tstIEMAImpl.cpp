@@ -9948,7 +9948,7 @@ int main(int argc, char **argv)
      * If not using the IEMAllAImpl.asm code, this will be set to Intel.
      */
 #if (defined(RT_ARCH_X86) || defined(RT_ARCH_AMD64)) && !defined(IEM_WITHOUT_ASSEMBLY)
-    g_idxCpuEflFlavour = ASMIsAmdCpu() || ASMIsHygonCpu()
+    g_idxCpuEflFlavour = ASMIsAmdOrCompatibleCpu()
                        ? IEMTARGETCPU_EFL_BEHAVIOR_AMD
                        : IEMTARGETCPU_EFL_BEHAVIOR_INTEL;
 #else

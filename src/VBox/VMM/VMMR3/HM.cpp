@@ -807,7 +807,7 @@ static int hmR3InitFinalizeR3(PVM pVM)
 #endif
 
 #if defined(RT_ARCH_AMD64) || defined(RT_ARCH_X86)
-    bool const fCpuSupportsVmx = ASMIsIntelCpu() || ASMIsViaCentaurCpu() || ASMIsShanghaiCpu();
+    bool const fCpuSupportsVmx = ASMIsIntelOrCompatibleCpu();
 #else
     bool const fCpuSupportsVmx = false;
 #endif
