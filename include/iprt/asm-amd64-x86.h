@@ -1646,6 +1646,30 @@ DECLINLINE(bool) ASMIsHygonCpu(void)
 
 
 /**
+ * Tests if this is a genuine Intel CPU or compatible CPU (like VIA).
+ *
+ * @returns true/false.
+ * @remarks ASSUMES that cpuid is supported by the CPU.
+ */
+DECLINLINE(bool) ASMIsIntelOrCompatibleCpu(void)
+{
+    return ASMIsIntelCpu() || ASMIsViaCentaurCpu() || ASMIsShanghaiCpu();
+}
+
+
+/**
+ * Tests if this is an authentic AMD CPU or compatible CPU (like Hygon).
+ *
+ * @returns true/false.
+ * @remarks ASSUMES that cpuid is supported by the CPU.
+ */
+DECLINLINE(bool) ASMIsAmdOrCompatibleCpu(void)
+{
+    return ASMIsAmdCpu() || ASMIsHygonCpu();
+}
+
+
+/**
  * Get cr0.
  * @returns cr0.
  */
