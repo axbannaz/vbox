@@ -1329,7 +1329,7 @@ HRESULT VBoxNetSlirpNAT::HandleEvent(VBoxEventType_T aEventType, IEvent *pEvent)
                 for (size_t i = 0; i < m_ProxyOptions.cRealNameservers; i++)
                     m_ProxyOptions.aRealNameservers[i].s_addr = RT_H2N_U32(paDetachedRealNameservers[i].u);
 
-                slirp_set_RealNameservers(m_pSlirp, m_ProxyOptions.cRealNameservers, 
+                slirp_set_RealNameservers(m_pSlirp, m_ProxyOptions.cRealNameservers,
                                           m_ProxyOptions.aRealNameservers);
 
                 LogRel(("Transfered %d nameservers to NAT engine.\n", m_ProxyOptions.cRealNameservers));
