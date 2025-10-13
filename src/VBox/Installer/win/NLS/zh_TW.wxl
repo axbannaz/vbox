@@ -23,17 +23,17 @@
     SPDX-License-Identifier: GPL-3.0-only
 -->
 
-<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="zh_TW" Codepage="950" Language="2052">
+<WixLocalization xmlns="http://wixtoolset.org/schemas/v4/wxl" Culture="zh-TW" Codepage="65001" SummaryInformationCodepage="950">
     <String Id="LANG" Value="1028" />
-    <String Id="CODEPAGE" Value="950" />
+    <String Id="CODEPAGE" Value="65001" />
     <String Id="LangName" Value="正體中文" />
 
     <String Id="ButtonText_No" Value="否(&amp;N)" />
     <String Id="ButtonText_Yes" Value="是(&amp;Y)" />
     <String Id="ButtonText_Cancel" Value="取消(&amp;C)" />
-    <String Id="ButtonText_Next" Value="下一步(&amp;N) &gt;" />
-    <String Id="ButtonText_Back" Value="&lt; 上一步(&amp;B)" />
-    <String Id="ButtonText_Browse" Value="瀏覽(&amp;O)" />
+    <String Id="ButtonText_Next" Value="下一步(&amp;N)" />
+    <String Id="ButtonText_Back" Value="上一步(&amp;P)" />
+    <String Id="ButtonText_Browse" Value="變更(&amp;C)" />
     <String Id="ButtonText_OK" Value="確定(&amp;K)" />
     <String Id="ButtonText_Check" Value="檢查(&amp;C)" />
     <String Id="ButtonText_Install" Value="安裝(&amp;I)" />
@@ -46,7 +46,7 @@
     <String Id="ButtonText_Exit" Value="結束(&amp;X)" />
 
     <String Id="InstallModeCustom" Value="自訂" />
-    <String Id="Setup" Value="設定" />
+    <String Id="Setup" Value="安裝程式" />
 
     <!---->
 
@@ -64,13 +64,13 @@
 
     <!---->
 
-    <String Id="UsedByOtherApp" Value="It was detected an application which has been using currently installed VirtualBox version. You must remove this application before continuing installation. See the file dependency.dep in the VirtualBox installation directory for details." />
-    <String Id="NeedAdmin" Value="您需要有系統管理員特殊權限以安裝 （或解除安裝）[ProductName]！此安裝程式現在將中止。" />
+    <String Id="UsedByOtherApp" Value="偵測到某個應用程式正在使用目前安裝的 VirtualBox 版本。 您必須先移除這個應用程式才能繼續安裝。 請參閱 VirtualBox 安裝目錄中的 dependency.dep 檔案取得詳細資料。" />
+    <String Id="NeedAdmin" Value="您需要有系統管理員特殊權限以安裝 (或解除安裝) [ProductName]! 此安裝程式現在將關閉。" />
     <String Id="NeedMSCRT" Value="[ProductName] 需要先安裝 Microsoft Visual C++ 2019 可分發套件。 請安裝並重新啟動 [ProductName] 安裝。" />
-    <String Id="WrongOS" Value="此應用程式只能執行在 Windows 10 或以上。" />
-    <String Id="Only64Bit" Value="此應用程式只能執行在 64 位元的 Windows 系統。 請安裝 [ProductName] 的 32 位元版本！" />
-	<String Id="WrongPlatformArch" Value="This version of [ProductName] was developed for a different platform architecture and therefore cannot be installed. Please install a matching version of [ProductName]!" />
-    <String Id="InvalidTargetDir" Value="Invalid installation directory specified! Please use another installation directory to install [ProductName]. Refer to the [ProductName] manual for more information." />
+    <String Id="WrongOS" Value="[ProductName] 只能執行在 Windows 10 或以上。" />
+    <String Id="Only64Bit" Value="[ProductName] 只能執行在 64 位元的 Windows 系統。" />
+    <String Id="WrongPlatformArch" Value="這個版本的 [ProductName] 是為其它平台架構開發的，因此無法安裝。 請安裝符合版本的 [ProductName]!" />
+    <String Id="InvalidTargetDir" Value="指定的安裝目錄無效! 請使用另一個安裝目錄來安裝 [ProductName]。 參閱 [ProductName] 手冊取得詳細資訊。" />
 
     <!---->
 
@@ -78,8 +78,8 @@
 
     <!---->
 
-    <String Id="WelcomeDlg_Header" Value="歡迎使用 [ProductName] 安裝精靈" />
-    <String Id="WelcomeDlg_Body" Value="安裝精靈將在您的電腦安裝 [ProductName]。 按一下「下一步」繼續或「取消」結束安裝精靈。" />
+    <String Id="WelcomeDlg_Header" Value="歡迎使用 [ProductName] 安裝程式" />
+    <String Id="WelcomeDlg_Body" Value="安裝程式將在您的電腦安裝 [ProductName]。 按一下「下一步」繼續或「取消」結束安裝精靈。" />
 
     <!---->
 
@@ -90,9 +90,9 @@
 
     <!---->
 
-    <String Id="InvalidTargetDirDlg_Header" Value="Invalid installation directory" />
-    <String Id="InvalidTargetDirDlg_Desc1" Value="The chosen installation directory is invalid, as it does not meet the security requirements. Refer to the [ProductName] manual for more information." />
-    <String Id="InvalidTargetDirDlg_Desc2" Value="Please choose another directory for installing [ProductName]." />
+    <String Id="InvalidTargetDirDlg_Header" Value="安裝目錄無效" />
+    <String Id="InvalidTargetDirDlg_Desc1" Value="選擇的安裝目錄無效，因為它不符合安全要求。 有關詳細資訊，請參閱 [ProductName] 手冊。" />
+    <String Id="InvalidTargetDirDlg_Desc2" Value="請選擇另一個目錄來安裝 [ProductName]。" />
 
     <!---->
 
@@ -124,9 +124,9 @@
 
     <!---->
 
-    <String Id="CustomizeDlg_Location" Value="位置:" />
-    <String Id="CustomizeDlg_DiskUsage" Value="磁碟使用量(&amp;U)" />
-    <String Id="CustomizeDlg_SelFeatures" Value="選取您要安裝功能的方式。" />
+    <String Id="CustomizeDlg_Location" Value="安裝位置:" />
+    <String Id="CustomizeDlg_DiskUsage" Value="安裝磁碟空間" />
+    <String Id="CustomizeDlg_SelFeatures" Value="選取要安裝的功能" />
     <String Id="CustomizeDlg_IconTree" Value="按一下以下樹狀中圖示以變更安裝功能的方式。" />
     <String Id="CustomizeDlg_CustomSetup" Value="自訂安裝" />
     <String Id="CustomizeDlg_SelItemDesc" Value="CustomizeDlgItemDescription-CustomizeDlgItemDescription" />
@@ -136,10 +136,10 @@
     <!---->
 
     <String Id="Customize2Dlg_Header" Value="自訂" />
-    <String Id="Customize2Dlg_Desc" Value="請選擇以下選項:" />
-    <String Id="Customize2Dlg_CreateStartMenuEntries" Value="建立 [開始] 功能表項目" />
-    <String Id="Customize2Dlg_CreateDesktopShortcut" Value="在桌面建立捷徑" />
-    <String Id="Customize2Dlg_RegisterFileExtensions" Value="註冊檔案關聯" />
+    <String Id="Customize2Dlg_Desc" Value="選取一個或多個啟動選項" />
+    <String Id="Customize2Dlg_CreateStartMenuEntries" Value="加入到 [開始] 功能表" />
+    <String Id="Customize2Dlg_CreateDesktopShortcut" Value="建立桌面捷徑" />
+    <String Id="Customize2Dlg_RegisterFileExtensions" Value="開啟 .ova 或 .ovf 檔案時預設啟動" />
 
     <!---->
 
@@ -150,15 +150,15 @@
     <!---->
 
     <String Id="WarnDisconNetIfacesDlg_Title" Value="警告:" />
-    <String Id="WarnDisconNetIfacesDlg_Title2" Value="網路介面" />
-    <String Id="WarnDisconNetIfacesDlg_Desc" Value="安裝 [ProductName] 網路功能將重設您的網路連線並暫時中斷網路連線。" />
+    <String Id="WarnDisconNetIfacesDlg_Title2" Value="網路中斷連線" />
+    <String Id="WarnDisconNetIfacesDlg_Desc" Value="在安裝 [ProductName] 網路期間，您的網路將會中斷連線。 請確認所有需要網路連線的操作均已完成，然後再繼續。" />
 
     <!---->
 
     <String Id="WarnPythonDlg_Title" Value="缺少相依項" />
-    <String Id="WarnPythonDlg_Title2" Value="Python 核心 / win32api" />
-    <String Id="WarnPythonDlg_Desc" Value="安裝 [ProductName] Python 綁定需要先安裝 Python 核心包和 win32api 綁定。" />
-    <String Id="WarnPythonDlg_Desc2" Value="現在繼續安裝 [ProductName] Python 綁定時，需要稍後手動設定這些綁定。 有關詳細資訊，請參閱 [ProductName] SDK 手冊。" />
+    <String Id="WarnPythonDlg_Title2" Value="Python 核心和 win32api" />
+    <String Id="WarnPythonDlg_Desc" Value="安裝 [ProductName] Python 綁定需要安裝 Python 核心包和 win32api 綁定。" />
+    <String Id="WarnPythonDlg_Desc2" Value="您可以稍後安裝和組態這些組件。 有關說明，請參閱 [ProductName] SDK 程式設計指南。 或者，您也可以在繼續安裝 Oracle VirtualBox 之前先安裝它們。" />
 
     <!---->
 
@@ -178,22 +178,22 @@
 
     <!---->
 
-    <String Id="VerifyReadyDlg_ReadyToBegin" Value="安裝精靈準備好進行 [InstallMode] 安裝。" />
+    <String Id="VerifyReadyDlg_ReadyToBegin" Value="準備安裝 &quot;[InstallMode]&quot; 安裝類型。" />
     <String Id="VerifyReadyDlg_ReadyToInstall" Value="準備好安裝" />
 
     <!---->
 
-    <String Id="ExitDlg_ClickFinish" Value="按一下「完成」按鈕結束安裝精靈。" />
-    <String Id="ExitDlg_InstComplete" Value="[ProductName] 安裝完成。" />
-    <String Id="ExitDlg_StartVBox" Value="安裝後啟動 [ProductName]" />
+    <String Id="ExitDlg_ClickFinish" Value="您可能還需要 VirtualBox 擴充包。 請參閱 VirtualBox 使用者指南以了解更多資訊。" />
+    <String Id="ExitDlg_InstComplete" Value="[ProductName] 已安裝。" />
+    <String Id="ExitDlg_StartVBox" Value="啟動 [ProductName]?" />
 
     <!---->
 
-    <String Id="FatalErrorDlg_Title" Value="[ProductName] 安裝精靈提前結束" />
-    <String Id="FatalErrorDlg_Description1" Value="請重新啟動並重新運行（卸載）安裝，重試。" />
-    <String Id="FatalErrorDlg_Description2" Value="或者，查閱 [ProductName] 的論壇或文件。" />
-    <String Id="FatalErrorDlg_DescLogOpen" Value="打開日誌文件" />
-    <String Id="FatalErrorDlg_DescLogPath" Value="日誌檔案寫入：" />
+    <String Id="FatalErrorDlg_Title" Value="[ProductName] 安裝程式太早結束" />
+    <String Id="FatalErrorDlg_Description1" Value="請重新啟動電腦，然後重新執行 (解除) 安裝。" />
+    <String Id="FatalErrorDlg_Description2" Value="或者，查閱 [ProductName] 的討論區或文件。" />
+    <String Id="FatalErrorDlg_DescLogOpen" Value="開啟日誌檔案" />
+    <String Id="FatalErrorDlg_DescLogPath" Value="日誌檔案已寫入:" />
 
     <!---->
 
@@ -203,18 +203,18 @@
 
     <!---->
 
-    <String Id="UserExitDlg_Header" Value="[ProductName] 安裝精靈中斷" />
-    <String Id="UserExitDlg_Desc" Value="[ProductName] 安裝中斷。 您的系統未做修改。 若要稍後安裝此程式，請再次執行安裝。" />
-    <String Id="UserExitDlg_Footer" Value="按一下「完成」按鈕結束安裝精靈。" />
+    <String Id="UserExitDlg_Header" Value="[ProductName] 安裝程式中斷" />
+    <String Id="UserExitDlg_Desc" Value="[ProductName] 安裝已中斷。 您的系統未做修改。 若要稍後安裝此程式，請再次執行安裝。" />
+    <String Id="UserExitDlg_Footer" Value="按一下「完成」按鈕結束安裝程式。" />
 
     <!---->
 
-    <String Id="ProgressDlg_PleaseWait" Value="在安裝精靈安裝 [ProductName] 時請稍候。 這需要幾分鐘時間。" />
+    <String Id="ProgressDlg_PleaseWait" Value="安裝過程將需要幾分鐘" />
 
     <!---->
 
-    <String Id="ResumeDlg_Header" Value="正在繼續 [ProductName] 安裝精靈" />
-    <String Id="ResumeDlg_Desc" Value="安裝精靈將在您的電腦完成 [ProductName] 的安裝。 按一下「安裝」以繼續或「取消」結束安裝精靈。" />
+    <String Id="ResumeDlg_Header" Value="正在繼續 [ProductName] 安裝程式" />
+    <String Id="ResumeDlg_Desc" Value="安裝程式將在您的電腦完成 [ProductName] 的安裝。 按一下「安裝」以繼續或「取消」結束安裝精靈。" />
 
     <!---->
 
@@ -233,8 +233,8 @@
 
     <!---->
 
-    <String Id="MaintenanceWelcomeDlg_Header" Value="歡迎使用 [ProductName] 安裝精靈" />
-    <String Id="MaintenanceWelcomeDlg_Desc" Value="安裝精靈將允許您修復目前的安裝或從您的電腦移除 [ProductName]。 按一下「下一步」以繼續或「取消」結束安裝精靈。" />
+    <String Id="MaintenanceWelcomeDlg_Header" Value="歡迎使用 [ProductName] 安裝程式" />
+    <String Id="MaintenanceWelcomeDlg_Desc" Value="安裝程式將允許您修復目前的安裝或從您的電腦移除 [ProductName]。 按一下「下一步」以繼續或「取消」結束安裝程式。" />
 
     <!---->
 
@@ -258,7 +258,7 @@
     <!---->
 
     <String Id="VerifyRepairDlg_Header" Value="修復 [ProductName]" />
-    <String Id="VerifyRepairDlg_ReadyToBegin" Value="安裝精靈準備好開始修復 [ProductName]。" />
+    <String Id="VerifyRepairDlg_ReadyToBegin" Value="安裝程式準備好開始修復 [ProductName]。" />
     <String Id="VerifyRepairDlg_ClickRepair" Value="按一下「修復」以修復 [ProductName] 的安裝。 如果您要檢閱或變更任何安裝設定，按一下「上一步」。  按一下「取消」結束精靈。" />
 
     <!---->
@@ -267,7 +267,7 @@
 
     <!---->
 
-    <String Id="MsiRMFilesInUse_Text" Value="以下應用程式使用此安裝需要更新的檔案。 您可以讓安裝精靈關閉並嘗試重新啟動這些應用程式或稍後重新啟動電腦。" />
+    <String Id="MsiRMFilesInUse_Text" Value="以下應用程式使用此安裝需要更新的檔案。 您可以讓安裝程式關閉並嘗試重新啟動這些應用程式或稍後重新啟動電腦。" />
     <String Id="MsiRMFilesInUse_Description" Value="某些需要更新的檔案目前使用中。" />
     <String Id="MsiRMFilesInUse_Title" Value="檔案使用中" />
     <String Id="MsiRMFilesInUse_UseRM" Value="關閉應用程式並嘗試重新啟動它們。 (&amp;C)" />
@@ -277,10 +277,10 @@
     <String Id="Error0" Value="{{嚴重錯誤: }}" />
     <String Id="Error1" Value="{{錯誤 [1]。}}" />
     <String Id="Error2" Value="警告 [1]。" />
-    <String Id="Error3" />
+    <String Id="Error3" Value="錯誤 [1]。" />
     <String Id="Error4" Value="資訊 [1]。" />
     <String Id="Error5" Value="安裝程式安裝這個封裝時發生未預期的錯誤。 這可能表示這個封裝的問題。 錯誤碼 [1]。 {{引數: [2], [3], [4]}}" />
-    <String Id="Error6" />
+    <String Id="Error6" Value="" />
     <String Id="Error7" Value="{{磁碟已滿: }}" />
     <String Id="Error8" Value="動作 [Time]: [1]. [2]" />
     <String Id="Error9" Value="[ProductName]" />
@@ -362,7 +362,7 @@
     <String Id="Error1609" Value="套用安全性設定時發生錯誤。 [2] 不是有效的使用者或群組。 這會是安裝包的問題或連線到網路上網域控制站的問題。 檢查您的網路連線並按一下「重試」，或「取消」以結束安裝。 {{找不到使用者的 SID，系統錯誤 [3]}}" />
     <String Id="Error1701" Value="金鑰 [2] 是無效的，檢查您輸入的金鑰是否正確。" />
     <String Id="Error1702" Value="要繼續設定 [2] 之前，Installer 必須重新啟動您的系統，按「是」將立即重新啟動；如果您想要稍後手動重新啟動請按「否」。" />
-    <String Id="Error1703" Value="您必須重新啟動您的系統，對 [2] 所做的組態變更才會生效，按「是」立即重新啟動；如果您想要稍後手動重新啟動請按「否」。" />
+    <String Id="Error1703" Value="您必須重新啟動您的系統，對 [2] 所做的組態變更才會生效，按「是」立即重新啟動，如果您想要稍後手動重新啟動請按「否」。" />
     <String Id="Error1704" Value="安裝 [2] 目前已經暫停，您必須復原該安裝所做的變更才能繼續，您要復原這些變更嗎?" />
     <String Id="Error1705" Value="另一個安裝這個產品的程式正在進行中，您必須復原該安裝所做的變更才能繼續，您要復原這些變更嗎?" />
     <String Id="Error1706" Value="找不到產品 [2] 的安裝包。 嘗試使用安裝包 '[3]' 的有效副本嘗試再次安裝。" />
@@ -377,7 +377,7 @@
     <String Id="Error1715" Value="已經安裝 [2]" />
     <String Id="Error1716" Value="已經組態 [2]" />
     <String Id="Error1717" Value="已經移除 [2]" />
-    <String Id="Error1718" Value="數位簽章原則拒絕檔案 [2] 。" />
+    <String Id="Error1718" Value="數位簽章原則拒絕檔案 [2]。" />
     <String Id="Error1719" Value="無法存取 Windows Installer 服務。 如果您正執行在 Windows 安全模式，這將會發生。 請聯絡您的技術支援人員以取得協助。" />
     <String Id="Error1720" Value="這個 Windows Installer 封裝有問題。 完成這個安裝需要的指令碼無法執行。 聯絡您的支援人員或封裝供應商。 {{自訂動作 [2] 指令碼錯誤 [3]，[4]: [5] 行 [6]，欄 [7]，[8] }}" />
     <String Id="Error1721" Value="這個 Windows Installer 封裝有問題。 完成這個安裝需要的程式無法執行。 聯絡您的支援人員或封裝供應商。 {{動作 [2]，位置: [3]，命令: [4] }}" />
@@ -423,7 +423,7 @@
     <String Id="Error1924" Value="無法更新環境變數 '[2]'。 請確認您有足夠的特殊權限以修改環境變數。" />
     <String Id="Error1925" Value="您沒有足夠的特殊權限使電腦的所有使用者都完成此安裝。請以系統管理員權限登入，接著再重試此安裝。" />
     <String Id="Error1926" Value="無法設定檔案 '[3]' 的檔案安全性。 錯誤: [2]。 請確認您有足夠的特殊權限以修改此檔案的安全性權限。" />
-    <String Id="Error1927" Value="這台電腦並未安裝 Component Services (COM+ 1.0)。這項安裝需要有 Component Services 才能進行。Component Services 包含在 Windows 10 中。" />
+    <String Id="Error1927" Value="這台電腦並未安裝 Component Services (COM+ 1.0)。這項安裝需要有 Component Services 才能進行。Component Services 包含在 Windows XP 中。" />
     <String Id="Error1928" Value="登錄 COM+ 應用程式時發生錯誤。請聯絡您的支援人員以取得其他資訊。" />
     <String Id="Error1929" Value="解除 COM+ 應用程式登錄時發生錯誤。請聯絡您的支援人員以取得其他資訊。" />
     <String Id="Error1930" Value="無法變更服務 '[2]' ([3]) 的描述。" />
@@ -522,7 +522,7 @@
     <String Id="ProgressTextStartServicesTemplate" Value="服務: [1]" />
     <String Id="ProgressTextStopServices" Value="正在停止服務" />
     <String Id="ProgressTextStopServicesTemplate" Value="服務: [1]" />
-    <String Id="ProgressTextUnpublishComponents" Value="正在取消元件公佈" />
+    <String Id="ProgressTextUnpublishComponents" Value="正在取消發布合格元件" />
     <String Id="ProgressTextUnpublishComponentsTemplate" Value="元件 ID: [1], 公佈者: [2]" />
     <String Id="ProgressTextUnpublishFeatures" Value="正在取消功能公佈" />
     <String Id="ProgressTextUnpublishFeaturesTemplate" Value="功能: [1]" />
@@ -563,33 +563,33 @@
     <String Id="ProgressTextUnmoveFilesTemplate" Value="檔案: [1]， 目錄: [9]" />
     <String Id="ProgressTextUnpublishProduct" Value="正在取消發佈產品資訊" />
 
-    <String Id="ProgressTextCheckTargetDir" Value="Checking target directory ..." />
+    <String Id="ProgressTextCheckTargetDir" Value="正在檢查目標目錄…" />
 
-    <String Id="ProgressTextSupDrvInt" Value="Installing support driver ..." />
-    <String Id="ProgressTextSupDrvStart" Value="Starting support driver ..." />
-    <String Id="ProgressTextSupDrvUninst" Value="Uninstalling support driver ..." />
+    <String Id="ProgressTextSupDrvInt" Value="正在安裝支援驅動程式…" />
+    <String Id="ProgressTextSupDrvStart" Value="正在啟動支援驅動程式…" />
+    <String Id="ProgressTextSupDrvUninst" Value="正在解除安裝支援驅動程式…" />
 
-    <String Id="ProgressTextUSBDevDrvInst" Value="Installing USB device driver ..." />
-    <String Id="ProgressTextUSBDevDrvUninst" Value="Uninstalling USB device driver ..." />
-    <String Id="ProgressTextUSBMonDrvInst" Value="Installing USB monitor driver ..." />
-    <String Id="ProgressTextUSBMonDrvStart" Value="Starting USB monitor driver ..." />
-    <String Id="ProgressTextUSBMonDrvUninst" Value="Uninstalling USB monitor driver ..." />
+    <String Id="ProgressTextUSBDevDrvInst" Value="正在安裝 USB 裝置驅動程式…" />
+    <String Id="ProgressTextUSBDevDrvUninst" Value="正在解除安裝 USB 裝置驅動程式…" />
+    <String Id="ProgressTextUSBMonDrvInst" Value="正在安裝 USB 顯示器驅動程式…" />
+    <String Id="ProgressTextUSBMonDrvStart" Value="正在啟動 USB 顯示器驅動程式…" />
+    <String Id="ProgressTextUSBMonDrvUninst" Value="正在解除安裝 USB 顯示器驅動程式…" />
 
-    <String Id="ProgressTextNetAdp6Create" Value="Creating network adapter ..." />
-    <String Id="ProgressTextNetAdp6Remove" Value="Removing network adapter ..." />
-    <String Id="ProgressTextNetAdp6Update" Value="Updating network adapter ..." />
-    <String Id="ProgressTextNetAdp6Uninst" Value="Uninstalling network adapter ..." />
+    <String Id="ProgressTextNetAdp6Create" Value="正在建立網路介面卡…" />
+    <String Id="ProgressTextNetAdp6Remove" Value="正在移除網路介面卡…" />
+    <String Id="ProgressTextNetAdp6Update" Value="正在更新網路介面卡…" />
+    <String Id="ProgressTextNetAdp6Uninst" Value="正在解除安裝網路介面卡…" />
 
-    <String Id="ProgressTextNetLwfInst" Value="Installing network filter ..." />
-    <String Id="ProgressTextNetLwfRollbackInst" Value="Rolling back installation of network filter ..." />
-    <String Id="ProgressTextNetLwfUninst" Value="Uninstalling network filter ..." />
-    <String Id="ProgressTextNetLwfRollbackUninst" Value="Rolling back uninstallation of network filter ..." />
+    <String Id="ProgressTextNetLwfInst" Value="正在安裝網路篩選器…" />
+    <String Id="ProgressTextNetLwfRollbackInst" Value="正在回復網路篩選器的安裝…" />
+    <String Id="ProgressTextNetLwfUninst" Value="正在解除安裝網路篩選器…" />
+    <String Id="ProgressTextNetLwfRollbackUninst" Value="正在回復網路篩選器的解除安裝…" />
 
-    <String Id="UITextbytes" Value="位元組" />
+    <String Id="UITextbytes" Value="bytes" />
     <String Id="UITextGB" Value="GB" />
     <String Id="UITextKB" Value="KB" />
     <String Id="UITextMB" Value="MB" />
-    <String Id="UITextMenuAbsent" Value="整個功能將不可用" />
+    <String Id="UITextMenuAbsent" Value="不安裝" />
     <String Id="UITextMenuAdvertise" Value="需要時將安裝的功能" />
     <String Id="UITextMenuAllCD" Value="整個功能將會安裝成從 CD 上執行" />
     <String Id="UITextMenuAllLocal" Value="整個功能將會安裝到本機硬碟" />
