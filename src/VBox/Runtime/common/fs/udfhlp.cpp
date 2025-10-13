@@ -158,33 +158,39 @@ static void rtFsIsoUdfTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMESTAMP p
         RTTimeSpecSetNano(pTimeSpec, 0);
 }
 
+#endif /* maybe later */
 
 /**
- * Initalizes the allocation extends of a core structure.
+ * Gathers the allocation extents from an ICB.
  *
  * @returns IPRT status code
- * @param   pCore           The core structure.
+ * @param   pVolInfo        The volume information (partition map ++).
  * @param   pbAllocDescs    Pointer to the allocation descriptor data.
  * @param   cbAllocDescs    The size of the allocation descriptor data.
  * @param   fIcbTagFlags    The ICB tag flags.
  * @param   idxDefaultPart  The default data partition.
  * @param   offAllocDescs   The disk byte offset corresponding to @a pbAllocDesc
  *                          in case it's used as data storage (type 3).
- * @param   pVol            The volume instance data.
+ * @param   hVfsBacking     The backing file/device/whatever in case it's a a
+ *                          very large file.
+ * @param   pbBuf           The buffer, one logical block in size, for reading
+ *                          more allocation descriptors for large files.
+ * @param   pcExtents       Where to return the total number of extents being
+ *                          returned (both in pFirstExtent and ppaExtents).
+ * @param   pFirstExtent    The first extent.  Typically, we won't need more
+ *                          than this one.
+ * @param   papExtents      Where to return an array of additional extents.
  */
-static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
-                                              uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
-                                              PRTFSISOVOL pVol)
+DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
+                                               uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
+                                               RTVFSFILE hVfsBacking, uint8_t *pbBuf,
+                                               uint32_t *pcExtents, PRTFSISOEXTENT pFirstExtent, PRTFSISOEXTENT *ppaExtents)
 {
-    /*
-     * Just in case there are mutiple file entries in the ICB.
-     */
-    if (pCore->paExtents != NULL)
-    {
-        LogRelMax(45, ("ISO/UDF: Re-reading extents - multiple file entries?\n"));
-        RTMemFree(pCore->paExtents);
-        pCore->paExtents = NULL;
-    }
+    RT_NOREF(hVfsBacking, pbBuf); /** @todo UDF_AD_TYPE_NEXT */
+
+    *pcExtents  = 0;
+    *ppaExtents = NULL;
+    pFirstExtent->cbExtent = 0;
 
     /*
      * Figure the (minimal) size of an allocation descriptor, deal with the
@@ -194,10 +200,10 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
     switch (fIcbTagFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
     {
         case UDF_ICB_FLAGS_AD_TYPE_EMBEDDED:
-            pCore->cExtents             = 1;
-            pCore->FirstExtent.cbExtent = cbAllocDescs;
-            pCore->FirstExtent.off      = offAllocDescs;
-            pCore->FirstExtent.idxPart  = idxDefaultPart;
+            *pcExtents             = 1;
+            pFirstExtent->cbExtent = cbAllocDescs;
+            pFirstExtent->off      = offAllocDescs;
+            pFirstExtent->idxPart  = idxDefaultPart;
             return VINF_SUCCESS;
 
         case UDF_ICB_FLAGS_AD_TYPE_SHORT:       cbOneDesc = sizeof(UDFSHORTAD); break;
@@ -213,6 +219,8 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
         /*
          * Loop thru the allocation descriptors.
          */
+        uint32_t       cExtents   = 0;
+        PRTFSISOEXTENT paExtents  = NULL;
         PRTFSISOEXTENT pCurExtent = NULL;
         union
         {
@@ -267,7 +275,7 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
 
             /* Check if we can extend the current extent.  This is useful since
                the descriptors can typically only cover 1GB. */
-            uint64_t const off = (uint64_t)idxBlock << pVol->Udf.VolInfo.cShiftBlock;
+            uint64_t const off = (uint64_t)idxBlock << pVolInfo->cShiftBlock;
             if (   pCurExtent != NULL
                 && (   pCurExtent->off != UINT64_MAX
                     ?     uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED
@@ -279,25 +287,23 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
             else
             {
                 /* Allocate a new descriptor. */
-                if (pCore->cExtents == 0)
+                if (cExtents == 0)
                 {
-                    pCore->cExtents = 1;
-                    pCurExtent = &pCore->FirstExtent;
+                    cExtents   = 1;
+                    pCurExtent = pFirstExtent;
                 }
                 else
                 {
-                    void *pvNew = RTMemRealloc(pCore->paExtents, pCore->cExtents * sizeof(pCore->paExtents[0]));
+                    void *pvNew = RTMemRealloc(paExtents, cExtents * sizeof(paExtents[0]));
                     if (pvNew)
-                        pCore->paExtents = (PRTFSISOEXTENT)pvNew;
+                        paExtents = (PRTFSISOEXTENT)pvNew;
                     else
                     {
-                        RTMemFree(pCore->paExtents);
-                        pCore->paExtents = NULL;
-                        pCore->cExtents  = 0;
+                        RTMemFree(paExtents);
                         return VERR_NO_MEMORY;
                     }
-                    pCurExtent = &pCore->paExtents[pCore->cExtents - 1];
-                    pCore->cExtents++;
+                    pCurExtent = &paExtents[cExtents - 1];
+                    cExtents++;
                 }
 
                 /* Initialize it. */
@@ -318,25 +324,27 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
 
         if (cbAllocDescs > 0)
             LogRelMax(45,("ISO/UDF: Warning! %u bytes left in allocation descriptor: %.*Rhxs\n", cbAllocDescs, cbAllocDescs, uPtr.pb));
+
+        *pcExtents  = cExtents;
+        *ppaExtents = paExtents;
     }
     else
     {
         /*
          * Zero descriptors
          */
-        pCore->cExtents = 0;
-        pCore->FirstExtent.off      = UINT64_MAX;
-        pCore->FirstExtent.cbExtent = 0;
-        pCore->FirstExtent.idxPart  = UINT32_MAX;
+        *pcExtents             = 0;
+        pFirstExtent->off      = UINT64_MAX;
+        pFirstExtent->cbExtent = 0;
+        pFirstExtent->idxPart  = UINT32_MAX;
 
         if (cbAllocDescs > 0)
-            LogRelMax(45, ("ISO/UDF: Warning! Allocation descriptor area is shorted than one descriptor: %#u vs %#u: %.*Rhxs\n",
+            LogRelMax(45, ("ISO/UDF: Warning! Allocation descriptor area is shorter than one descriptor: %#u vs %#u: %.*Rhxs\n",
                            cbAllocDescs, cbOneDesc, cbAllocDescs, pbAllocDescs));
     }
     return VINF_SUCCESS;
 }
 
-#endif /* maybe later */
 
 /**
  * Converts ICB flags, ICB file type and file entry permissions to an IPRT file

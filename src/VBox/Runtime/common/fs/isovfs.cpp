@@ -755,184 +755,6 @@ static int rtFsIsoCore_InitFrom9660DirRec(PRTFSISOCORE pCore, PCISO9660DIRREC pD
 
 
 /**
- * Initalizes the allocation extends of a core structure.
- *
- * @returns IPRT status code
- * @param   pCore           The core structure.
- * @param   pbAllocDescs    Pointer to the allocation descriptor data.
- * @param   cbAllocDescs    The size of the allocation descriptor data.
- * @param   fIcbTagFlags    The ICB tag flags.
- * @param   idxDefaultPart  The default data partition.
- * @param   offAllocDescs   The disk byte offset corresponding to @a pbAllocDesc
- *                          in case it's used as data storage (type 3).
- * @param   pVol            The volume instance data.
- */
-static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
-                                              uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
-                                              PRTFSISOVOL pVol)
-{
-    /*
-     * Just in case there are mutiple file entries in the ICB.
-     */
-    if (pCore->paExtents != NULL)
-    {
-        LogRelMax(45, ("ISO/UDF: Re-reading extents - multiple file entries?\n"));
-        RTMemFree(pCore->paExtents);
-        pCore->paExtents = NULL;
-    }
-
-    /*
-     * Figure the (minimal) size of an allocation descriptor, deal with the
-     * embedded storage and invalid descriptor types.
-     */
-    uint32_t cbOneDesc;
-    switch (fIcbTagFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
-    {
-        case UDF_ICB_FLAGS_AD_TYPE_EMBEDDED:
-            pCore->cExtents             = 1;
-            pCore->FirstExtent.cbExtent = cbAllocDescs;
-            pCore->FirstExtent.off      = offAllocDescs;
-            pCore->FirstExtent.idxPart  = idxDefaultPart;
-            return VINF_SUCCESS;
-
-        case UDF_ICB_FLAGS_AD_TYPE_SHORT:       cbOneDesc = sizeof(UDFSHORTAD); break;
-        case UDF_ICB_FLAGS_AD_TYPE_LONG:        cbOneDesc = sizeof(UDFLONGAD); break;
-        case UDF_ICB_FLAGS_AD_TYPE_EXTENDED:    cbOneDesc = sizeof(UDFEXTAD); break;
-
-        default:
-            LogRelMax(45, ("ISO/UDF: Unknown allocation descriptor type %#x\n", fIcbTagFlags));
-            return VERR_ISO_FS_UNKNOWN_AD_TYPE;
-    }
-    if (cbAllocDescs >= cbOneDesc)
-    {
-        /*
-         * Loop thru the allocation descriptors.
-         */
-        PRTFSISOEXTENT pCurExtent = NULL;
-        union
-        {
-            uint8_t const  *pb;
-            PCUDFSHORTAD    pShort;
-            PCUDFLONGAD     pLong;
-            PCUDFEXTAD      pExt;
-        } uPtr;
-        uPtr.pb = pbAllocDescs;
-        do
-        {
-            /* Extract the information we need from the descriptor. */
-            uint32_t idxBlock;
-            uint32_t idxPart;
-            uint32_t cb;
-            uint8_t  uType;
-            switch (fIcbTagFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
-            {
-                case UDF_ICB_FLAGS_AD_TYPE_SHORT:
-                    uType    = uPtr.pShort->uType;
-                    cb       = uPtr.pShort->cb;
-                    idxBlock = uPtr.pShort->off;
-                    idxPart  = idxDefaultPart;
-                    cbAllocDescs -= sizeof(*uPtr.pShort);
-                    uPtr.pShort++;
-                    break;
-                case UDF_ICB_FLAGS_AD_TYPE_LONG:
-                    uType    = uPtr.pLong->uType;
-                    cb       = uPtr.pLong->cb;
-                    idxBlock = uPtr.pLong->Location.off;
-                    idxPart  = uPtr.pLong->Location.uPartitionNo;
-                    cbAllocDescs -= sizeof(*uPtr.pLong);
-                    uPtr.pLong++;
-                    break;
-                case UDF_ICB_FLAGS_AD_TYPE_EXTENDED:
-                    if (   uPtr.pExt->cbInformation > cbAllocDescs
-                        || uPtr.pExt->cbInformation < sizeof(*uPtr.pExt))
-                        return VERR_ISOFS_BAD_EXTAD;
-                    uType    = uPtr.pExt->uType;
-                    cb       = uPtr.pExt->cb;
-                    idxBlock = uPtr.pExt->Location.off;
-                    idxPart  = uPtr.pExt->Location.uPartitionNo;
-                    cbAllocDescs -= uPtr.pExt->cbInformation;
-                    uPtr.pb      += uPtr.pExt->cbInformation;
-                    break;
-                default:
-                    AssertFailedReturn(VERR_IPE_NOT_REACHED_DEFAULT_CASE);
-            }
-
-            /** @todo the sequence is terminated when cb == 0! */
-            /** @todo uType == UDF_AD_TYPE_NEXT needs handling! */
-
-            /* Check if we can extend the current extent.  This is useful since
-               the descriptors can typically only cover 1GB. */
-            uint64_t const off = (uint64_t)idxBlock << pVol->Udf.VolInfo.cShiftBlock;
-            if (   pCurExtent != NULL
-                && (   pCurExtent->off != UINT64_MAX
-                    ?     uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED
-                       && pCurExtent->off + pCurExtent->cbExtent == off
-                       && pCurExtent->idxPart == idxPart
-                    :     uType == UDF_AD_TYPE_FREE
-                       || uType == UDF_AD_TYPE_ONLY_ALLOCATED) )
-                pCurExtent->cbExtent += cb;
-            else
-            {
-                /* Allocate a new descriptor. */
-                if (pCore->cExtents == 0)
-                {
-                    pCore->cExtents = 1;
-                    pCurExtent = &pCore->FirstExtent;
-                }
-                else
-                {
-                    void *pvNew = RTMemRealloc(pCore->paExtents, pCore->cExtents * sizeof(pCore->paExtents[0]));
-                    if (pvNew)
-                        pCore->paExtents = (PRTFSISOEXTENT)pvNew;
-                    else
-                    {
-                        RTMemFree(pCore->paExtents);
-                        pCore->paExtents = NULL;
-                        pCore->cExtents  = 0;
-                        return VERR_NO_MEMORY;
-                    }
-                    pCurExtent = &pCore->paExtents[pCore->cExtents - 1];
-                    pCore->cExtents++;
-                }
-
-                /* Initialize it. */
-                if (uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED)
-                {
-                    pCurExtent->off     = off;
-                    pCurExtent->idxPart = idxPart;
-                }
-                else
-                {
-                    pCurExtent->off     = UINT64_MAX;
-                    pCurExtent->idxPart = UINT32_MAX;
-                }
-                pCurExtent->cbExtent    = cb;
-                pCurExtent->uReserved   = 0;
-            }
-        } while (cbAllocDescs >= cbOneDesc);
-
-        if (cbAllocDescs > 0)
-            LogRelMax(45,("ISO/UDF: Warning! %u bytes left in allocation descriptor: %.*Rhxs\n", cbAllocDescs, cbAllocDescs, uPtr.pb));
-    }
-    else
-    {
-        /*
-         * Zero descriptors
-         */
-        pCore->cExtents = 0;
-        pCore->FirstExtent.off      = UINT64_MAX;
-        pCore->FirstExtent.cbExtent = 0;
-        pCore->FirstExtent.idxPart  = UINT32_MAX;
-
-        if (cbAllocDescs > 0)
-            LogRelMax(45, ("ISO/UDF: Warning! Allocation descriptor area is shorted than one descriptor: %#u vs %#u: %.*Rhxs\n",
-                           cbAllocDescs, cbOneDesc, cbAllocDescs, pbAllocDescs));
-    }
-    return VINF_SUCCESS;
-}
-
-
-/**
  * @callback_method_impl{FNFSUDFREADICBEXFILENTRY,
  *      Initialize/update a core object structure from an UDF extended file entry.}
  */
@@ -963,14 +785,19 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO 
         /*
          * Convert extent info.
          */
-        rc = rtFsIsoCore_InitExtentsUdfIcbEntry(pCore,
-                                                &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs],
-                                                pFileEntry->cbAllocDescs,
-                                                pFileEntry->IcbTag.fFlags,
-                                                idxDefaultPart,
-                                                  ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
-                                                + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs,
-                                                RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo));
+        rc = RTFsUdfHlpGatherExtentsFromIcb(pVolInfo,
+                                            &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs],
+                                            pFileEntry->cbAllocDescs,
+                                            pFileEntry->IcbTag.fFlags,
+                                            idxDefaultPart,
+                                              ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
+                                            + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs)
+                                            + pFileEntry->cbExtAttribs,
+                                            RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo)->hVfsBacking,
+                                            (uint8_t *)pFileEntry,
+                                            &pCore->cExtents,
+                                            &pCore->FirstExtent,
+                                            &pCore->paExtents);
         if (RT_SUCCESS(rc))
         {
             /*
@@ -978,14 +805,6 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO 
              */
             return VINF_SUCCESS;
         }
-
-        /* Just in case. */
-        if (pCore->paExtents)
-        {
-            RTMemFree(pCore->paExtents);
-            pCore->paExtents = NULL;
-        }
-        pCore->cExtents = 0;
     }
     return rc;
 }
@@ -1016,6 +835,7 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
         pCore->BirthTime = pCore->ChangeTime;
     if (RTTimeSpecCompare(&pCore->BirthTime, &pCore->AccessTime) > 0)
         pCore->BirthTime = pCore->AccessTime;
+    /** @todo look for the birth time in the extended attributes (FileTimes). */
 
     /*
      * Convert the file mode.
@@ -1027,14 +847,19 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
         /*
          * Convert extent info.
          */
-        rc = rtFsIsoCore_InitExtentsUdfIcbEntry(pCore,
-                                                &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs],
-                                                pFileEntry->cbAllocDescs,
-                                                pFileEntry->IcbTag.fFlags,
-                                                idxDefaultPart,
-                                                  ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
-                                                + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs,
-                                                RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo));
+        rc = RTFsUdfHlpGatherExtentsFromIcb(pVolInfo,
+                                            &pFileEntry->abExtAttribs[pFileEntry->cbExtAttribs],
+                                            pFileEntry->cbAllocDescs,
+                                            pFileEntry->IcbTag.fFlags,
+                                            idxDefaultPart,
+                                              ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
+                                            + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs)
+                                            + pFileEntry->cbExtAttribs,
+                                            RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo)->hVfsBacking,
+                                            (uint8_t *)pFileEntry,
+                                            &pCore->cExtents,
+                                            &pCore->FirstExtent,
+                                            &pCore->paExtents);
         if (RT_SUCCESS(rc))
         {
             /*
@@ -1042,14 +867,6 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
              */
             return VINF_SUCCESS;
         }
-
-        /* Just in case. */
-        if (pCore->paExtents)
-        {
-            RTMemFree(pCore->paExtents);
-            pCore->paExtents = NULL;
-        }
-        pCore->cExtents = 0;
     }
     return rc;
 }
