@@ -1380,7 +1380,7 @@ static int nemR3WinInitCreatePartition(PVM pVM, PRTERRINFO pErrInfo)
             PCFGMNODE pCfgmApic = CFGMR3GetChild(CFGMR3GetRoot(pVM), "/Devices/apic");
             if (   pCfgmApic
                 && pVM->nem.s.fLocalApicEmulation
-                && 1) /** @todo Fix issues in Hyper-V APIC backend before activating. */
+                && 0) /** @todo Fix issues in Hyper-V APIC backend before activating. */
             {
                 /* If setting this fails log an error but continue. */
                 RT_ZERO(Property);
@@ -2341,24 +2341,6 @@ VMMR3_INT_DECL(int) NEMR3WinGetPartitionHandle(PVM pVM, PRTHCUINTPTR pHCPtrHandl
     AssertPtrReturn(pHCPtrHandle, VERR_INVALID_PARAMETER);
     *pHCPtrHandle = (RTHCUINTPTR)pVM->nem.s.hPartition;
     return VINF_SUCCESS;
-}
-
-
-VMMR3_INT_DECL(int) NEMR3Halt(PVM pVM, PVMCPU pVCpu)
-{
-    //Assert(pVCpu->idCpu > 1);
-    //Assert(EMGetState(pVCpu) == EMSTATE_WAIT_SIPI);
-
-    /*
-     * Force the vCPU to get out of the SIPI state and into the normal runloop
-     * as Hyper-V doesn't cause VM exits for PSCI calls so we wouldn't notice when
-     * when the guest brings APs online.
-     * Instead we force the EMT to run the vCPU through Hyper-V which manages the state.
-     */
-    RT_NOREF(pVM);
-    if (EMGetState(pVCpu) == EMSTATE_WAIT_SIPI)
-        EMSetState(pVCpu, EMSTATE_HALTED);
-    return VINF_EM_RESCHEDULE;
 }
 
 
