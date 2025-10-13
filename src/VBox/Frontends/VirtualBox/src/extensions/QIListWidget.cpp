@@ -268,16 +268,26 @@ public:
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        Q_UNUSED(enmTextRole);
+        /* Text for known roles: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name:
+            {
+                /* Sanity check: */
+                AssertPtrReturn(list(), QString());
 
-        /* Sanity check: */
-        AssertPtrReturn(list(), QString());
+                /* Gather suitable text: */
+                QString strText = list()->toolTip();
+                if (strText.isEmpty())
+                    strText = list()->whatsThis();
+                return strText;
+            }
+            default:
+                break;
+        }
 
-        /* Gather suitable text: */
-        QString strText = list()->toolTip();
-        if (strText.isEmpty())
-            strText = list()->whatsThis();
-        return strText;
+        /* Null string by default: */
+        return QString();
     }
 
 private:
