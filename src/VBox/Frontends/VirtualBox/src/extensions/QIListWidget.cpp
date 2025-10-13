@@ -38,7 +38,8 @@
 
 
 /** QAccessibleObject extension used as an accessibility interface for QIListWidgetItem. */
-class QIAccessibilityInterfaceForQIListWidgetItem : public QAccessibleObject
+class QIAccessibilityInterfaceForQIListWidgetItem
+    : public QAccessibleObject
 {
 public:
 
@@ -58,6 +59,13 @@ public:
         : QAccessibleObject(pObject)
     {}
 
+    /** Returns the role. */
+    virtual QAccessible::Role role() const RT_OVERRIDE
+    {
+        /* ListItem in any case: */
+        return QAccessible::ListItem;
+    }
+
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
@@ -66,6 +74,27 @@ public:
 
         /* Return the parent: */
         return QAccessible::queryAccessibleInterface(item()->parentList());
+    }
+
+    /** Returns the rect. */
+    virtual QRect rect() const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QRect());
+
+        /* Compose common region: */
+        QRegion region;
+
+        /* Append item rectangle: */
+        const QRect  itemRectInViewport = item()->parentList()->visualItemRect(item());
+        const QSize  itemSize           = itemRectInViewport.size();
+        const QPoint itemPosInViewport  = itemRectInViewport.topLeft();
+        const QPoint itemPosInScreen    = item()->parentList()->viewport()->mapToGlobal(itemPosInViewport);
+        const QRect  itemRectInScreen   = QRect(itemPosInScreen, itemSize);
+        region += itemRectInScreen;
+
+        /* Return common region bounding rectangle: */
+        return region.boundingRect();
     }
 
     /** Returns the number of children. */
@@ -97,51 +126,6 @@ public:
 
         /* -1 in any case: */
         return -1;
-    }
-
-    /** Returns the rect. */
-    virtual QRect rect() const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QRect());
-
-        /* Compose common region: */
-        QRegion region;
-
-        /* Append item rectangle: */
-        const QRect  itemRectInViewport = item()->parentList()->visualItemRect(item());
-        const QSize  itemSize           = itemRectInViewport.size();
-        const QPoint itemPosInViewport  = itemRectInViewport.topLeft();
-        const QPoint itemPosInScreen    = item()->parentList()->viewport()->mapToGlobal(itemPosInViewport);
-        const QRect  itemRectInScreen   = QRect(itemPosInScreen, itemSize);
-        region += itemRectInScreen;
-
-        /* Return common region bounding rectangle: */
-        return region.boundingRect();
-    }
-
-    /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
-    {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QString());
-
-        /* Return a text for the passed enmTextRole: */
-        switch (enmTextRole)
-        {
-            case QAccessible::Name: return item()->defaultText();
-            default: break;
-        }
-
-        /* Null-string by default: */
-        return QString();
-    }
-
-    /** Returns the role. */
-    virtual QAccessible::Role role() const RT_OVERRIDE
-    {
-        /* ListItem in any case: */
-        return QAccessible::ListItem;
     }
 
     /** Returns the state. */
@@ -177,6 +161,23 @@ public:
         return state;
     }
 
+    /** Returns a text for the passed @a enmTextRole. */
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QString());
+
+        /* Return a text for the passed enmTextRole: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name: return item()->defaultText();
+            default: break;
+        }
+
+        /* Null-string by default: */
+        return QString();
+    }
+
 private:
 
     /** Returns corresponding QIListWidgetItem. */
@@ -185,7 +186,8 @@ private:
 
 
 /** QAccessibleWidget extension used as an accessibility interface for QIListWidget. */
-class QIAccessibilityInterfaceForQIListWidget : public QAccessibleWidget
+class QIAccessibilityInterfaceForQIListWidget
+    : public QAccessibleWidget
 {
 public:
 
