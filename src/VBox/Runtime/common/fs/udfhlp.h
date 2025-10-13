@@ -340,7 +340,7 @@ DECLHIDDEN(int)  RTFsUdfHlpIcbStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFi
 DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMESTAMP pUdf);
 DECLHIDDEN(int)  RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
                                                 uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
-                                                RTVFSFILE hVfsBacking, uint8_t *pbBuf,
+                                                uint64_t cbMax, RTVFSFILE hVfsBacking, uint8_t *pbBuf,
                                                 uint32_t *pcExtents, PRTFSISOEXTENT pFirstExtent, PRTFSISOEXTENT *ppaExtents);
 
 

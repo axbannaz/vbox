@@ -755,6 +755,7 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO 
                                               ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
                                             + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs)
                                             + pFileEntry->cbExtAttribs,
+                                            pCore->cbObject,
                                             RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo)->hVfsBacking,
                                             (uint8_t *)pFileEntry,
                                             &pCore->cExtents,
@@ -817,6 +818,7 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
                                               ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
                                             + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs)
                                             + pFileEntry->cbExtAttribs,
+                                            pCore->cbObject,
                                             RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo)->hVfsBacking,
                                             (uint8_t *)pFileEntry,
                                             &pCore->cExtents,

@@ -169,6 +169,8 @@ DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMEST
  * @param   idxDefaultPart  The default data partition.
  * @param   offAllocDescs   The disk byte offset corresponding to @a pbAllocDesc
  *                          in case it's used as data storage (type 3).
+ * @param   cbMax           Maximum number of bytes we care to gather allocation
+ *                          descriptors for.
  * @param   hVfsBacking     The backing file/device/whatever in case it's a a
  *                          very large file.
  * @param   pbBuf           The buffer, one logical block in size, for reading
@@ -181,11 +183,9 @@ DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMEST
  */
 DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
                                                uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
-                                               RTVFSFILE hVfsBacking, uint8_t *pbBuf,
+                                               uint64_t cbMax, RTVFSFILE hVfsBacking, uint8_t *pbBuf,
                                                uint32_t *pcExtents, PRTFSISOEXTENT pFirstExtent, PRTFSISOEXTENT *ppaExtents)
 {
-    RT_NOREF(hVfsBacking, pbBuf); /** @todo UDF_AD_TYPE_NEXT */
-
     /*
      * Initialize return values for a no-extents return.
      */
@@ -222,6 +222,7 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
         /*
          * Loop thru the allocation descriptors.
          */
+        uint64_t       offData    = 0;
         uint32_t       cExtents   = 0;
         PRTFSISOEXTENT paExtents  = NULL;
         PRTFSISOEXTENT pCurExtent = NULL;
@@ -235,7 +236,9 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
         uPtr.pb = pbAllocDescs;
         do
         {
-            /* Extract the information we need from the descriptor. */
+            /*
+             * Extract the information we need from the descriptor.
+             */
             uint32_t idxBlock;
             uint32_t idxPart;
             uint32_t cb;
@@ -279,10 +282,10 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
             else
                 break;
 
-            /** @todo uType == UDF_AD_TYPE_NEXT needs handling! */
-
-            /* Check if we can extend the current extent.  This is useful since
-               the descriptors can typically only cover 1GB. */
+            /*
+             * Check if we can extend the current extent.  This is useful since
+             * the descriptors can typically only cover 1GB each.
+             */
             uint64_t const off = (uint64_t)idxBlock << pVolInfo->cShiftBlock;
             if (   pCurExtent != NULL
                 && (   pCurExtent->off != UINT64_MAX
@@ -291,20 +294,31 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
                        && pCurExtent->idxPart == idxPart
                     :     uType == UDF_AD_TYPE_FREE
                        || uType == UDF_AD_TYPE_ONLY_ALLOCATED) )
-                pCurExtent->cbExtent += cb;
-            else
             {
-                /* Allocate a new descriptor. */
+                pCurExtent->cbExtent += cb;
+                offData += cb;
+            }
+            else if (uType != UDF_AD_TYPE_NEXT)
+            {
+                /*
+                 * Allocate a new descriptor entry.
+                 */
                 if (cExtents == 0)
                 {
                     cExtents   = 1;
                     pCurExtent = pFirstExtent;
                 }
-                else
+                else if (cExtents < _64K && (offData < cbMax || (cExtents < 8 && offData < 16 * _1T)))
                 {
                     void *pvNew = RTMemRealloc(paExtents, cExtents * sizeof(paExtents[0]));
                     if (pvNew)
                         paExtents = (PRTFSISOEXTENT)pvNew;
+                    else if (offData > cbMax)
+                    {
+                        Log(("RTFsUdfHlpGatherExtentsFromIcb: offData=%#RX64 > cbMax=%#RX64 - ignore out of memory\n", offData, cbMax));
+                        cbAllocDescs = 0;
+                        break;
+                    }
                     else
                     {
                         RTMemFree(paExtents);
@@ -313,8 +327,22 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
                     pCurExtent = &paExtents[cExtents - 1];
                     cExtents++;
                 }
+                else if (offData >= cbMax)
+                {
+                    Log(("RTFsUdfHlpGatherExtentsFromIcb: offData=%#RX64 > cbMax=%#RX64 - stop gathering more extents\n", offData, cbMax));
+                    cbAllocDescs = 0;
+                    break;
+                }
+                else
+                {
+                    LogRelMax(64, ("RTFsUdfHlpGatherExtentsFromIcb: too many file fragment! offData=%#RX64\n", offData));
+                    RTMemFree(paExtents);
+                    return VERR_ISOFS_TOO_MANY_FILE_FRAGMENTS;
+                }
 
-                /* Initialize it. */
+                /*
+                 * Initialize the new entry.
+                 */
                 if (uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED)
                 {
                     pCurExtent->off     = off;
@@ -327,6 +355,58 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
                 }
                 pCurExtent->cbExtent    = cb;
                 pCurExtent->uReserved   = 0;
+                offData += cb;
+            }
+            else
+            {
+                /*
+                 * UDF_AD_TYPE_NEXT - read in the continuation block and validate it, and restart the loop.
+                 */
+                Log(("RTFsUdfHlpGatherExtentsFromIcb: UDF_AD_TYPE_NEXT: %u/%#RX64/%#RX32 LB %#x\n",
+                     idxPart, (uint64_t)idxBlock << pVolInfo->cShiftBlock, idxBlock, cb));
+                if (offData > cbMax)
+                {
+                    Log(("RTFsUdfHlpGatherExtentsFromIcb: offData=%#RX64 > cbMax=%#RX64 - skip UDF_AD_TYPE_NEXT\n", offData, cbMax));
+                    cbAllocDescs = 0;
+                    break;
+                }
+                int rc;
+                if (   cb <= pVolInfo->cbBlock
+                    && cb > RT_UOFFSETOF(UDFALLOCATIONEXTENTDESC, u))
+                {
+                    rc = RTFsUdfHlpVpRead(pVolInfo, hVfsBacking, idxPart, idxBlock, pbBuf, cb);
+                    if (RT_SUCCESS(rc))
+                    {
+                        if (cb < pVolInfo->cbBlock)
+                            RT_BZERO(&pbBuf[cb], pVolInfo->cbBlock - cb);
+
+                        PCUDFALLOCATIONEXTENTDESC pDesc = (PCUDFALLOCATIONEXTENTDESC)pbBuf;
+                        rc = RTFsUdfHlpValidateDescTagAndCrc(&pDesc->Tag, pVolInfo->cbBlock, UDF_TAG_ID_ALLOCATION_EXTENT_DESC,
+                                                             idxBlock, NULL);
+                        if (RT_SUCCESS(rc))
+                        {
+                            if (   pDesc->cbAllocDescs >= cbOneDesc
+                                && pDesc->cbAllocDescs >= pVolInfo->cbBlock - RT_UOFFSETOF(UDFALLOCATIONEXTENTDESC, u))
+                            {
+                                cbAllocDescs = pDesc->cbAllocDescs;
+                                pbAllocDescs = (uint8_t const *)&pDesc->u;
+                                uPtr.pb      = pbAllocDescs;
+                                Log(("RTFsUdfHlpGatherExtentsFromIcb: Restarting loop with next block: cbAllocDescs=%#x\n", cbAllocDescs));
+                                continue;
+                            }
+
+                            LogRelMax(45, ("ISO/UDF: Bogus UDFALLOCATIONEXTENTDESC::cbAllocDescs: %#x\n", pDesc->cbAllocDescs));
+                            rc = VERR_ISOFS_BOGUS_ALLOCATION_EXTENT_LENGTH;
+                        }
+                    }
+                }
+                else
+                {
+                    LogRelMax(45, ("ISO/UDF: Bogus UDF_AD_TYPE_NEXT length: %#x\n", cb));
+                    rc = VERR_ISOFS_BOGUS_NEXT_AD_LENGTH;
+                }
+                RTMemFree(paExtents);
+                return rc;
             }
         } while (cbAllocDescs >= cbOneDesc);
 

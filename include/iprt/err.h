@@ -2650,6 +2650,13 @@
 #define VERR_ISOFS_WRONG_FILE_TYPE                      (-25344)
 /** Unknow file type. */
 #define VERR_ISOFS_UNKNOWN_FILE_TYPE                    (-25345)
+/** Bogus length for continuation allocation descriptor. */
+#define VERR_ISOFS_BOGUS_NEXT_AD_LENGTH                 (-25346)
+/** Bogus allocation descriptor length field value in an allocation extent
+ *  descriptor. */
+#define VERR_ISOFS_BOGUS_ALLOCATION_EXTENT_LENGTH       (-25347)
+/** Too fragmented file. */
+#define VERR_ISOFS_TOO_MANY_FILE_FRAGMENTS              (-25348)
 
 /** Not implemented for UDF. */
 #define VERR_ISOFS_UDF_NOT_IMPLEMENTED                  (-25390)
