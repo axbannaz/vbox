@@ -335,5 +335,7 @@ DECLHIDDEN(int)  RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hV
                                          PFNFSUDFREADICBFILENTRY pfnFileEntry, PFNFSUDFREADICBEXFILENTRY pfnExFileEntry,
                                          void *pvUser, uint32_t *pcProcessed, uint32_t *pcIndirections, UDFLONGAD AllocDesc);
 
+DECLHIDDEN(int)  RTFsUdfHlpIcbStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileType, uint32_t fPermission, PRTFMODE pfAttrib);
+
 
 #endif /* !IPRT_INCLUDED_SRC_common_fs_udfhlp_h */

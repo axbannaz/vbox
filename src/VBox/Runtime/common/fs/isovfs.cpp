@@ -985,131 +985,6 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
 
 
 /**
- * Converts ICB flags, ICB file type and file entry permissions to an IPRT file
- * mode mask.
- *
- * @returns IPRT status ocde
- * @param   fIcbTagFlags    The ICB flags.
- * @param   bFileType       The ICB file type.
- * @param   fPermission     The file entry permission mask.
- * @param   pfAttrib        Where to return the IRPT file mode mask.
- */
-static int rtFsIsoCore_UdfStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileType, uint32_t fPermission, PRTFMODE pfAttrib)
-{
-    /*
-     * Type:
-     */
-    RTFMODE fAttrib;
-    switch (bFileType)
-    {
-        case UDF_FILE_TYPE_DIRECTORY:
-            fAttrib = RTFS_TYPE_DIRECTORY | RTFS_DOS_DIRECTORY;
-            break;
-
-        case UDF_FILE_TYPE_REGULAR_FILE:
-        case UDF_FILE_TYPE_REAL_TIME_FILE:
-            fAttrib = RTFS_TYPE_FILE;
-            break;
-
-        case UDF_FILE_TYPE_SYMBOLIC_LINK:
-            fAttrib = RTFS_TYPE_SYMLINK;
-            break;
-
-        case UDF_FILE_TYPE_BLOCK_DEVICE:
-            fAttrib = RTFS_TYPE_DEV_BLOCK;
-            break;
-        case UDF_FILE_TYPE_CHARACTER_DEVICE:
-            fAttrib = RTFS_TYPE_DEV_CHAR;
-            break;
-
-        case UDF_FILE_TYPE_FIFO:
-            fAttrib = RTFS_TYPE_FIFO;
-            break;
-
-        case UDF_FILE_TYPE_SOCKET:
-            fAttrib = RTFS_TYPE_SOCKET;
-            break;
-
-        case UDF_FILE_TYPE_STREAM_DIRECTORY:
-        case UDF_FILE_TYPE_EXTENDED_ATTRIBUTES:
-        case UDF_FILE_TYPE_TERMINAL_ENTRY:
-        case UDF_FILE_TYPE_VAT:
-        case UDF_FILE_TYPE_METADATA_FILE:
-        case UDF_FILE_TYPE_METADATA_MIRROR_FILE:
-        case UDF_FILE_TYPE_METADATA_BITMAP_FILE:
-        case UDF_FILE_TYPE_NOT_SPECIFIED:
-        case UDF_FILE_TYPE_INDIRECT_ENTRY:
-        case UDF_FILE_TYPE_UNALLOCATED_SPACE_ENTRY:
-        case UDF_FILE_TYPE_PARTITION_INTEGRITY_ENTRY:
-            LogRelMax(45, ("ISO/UDF: Warning! Wrong file type: %#x\n", bFileType));
-            return VERR_ISOFS_WRONG_FILE_TYPE;
-
-        default:
-            LogRelMax(45, ("ISO/UDF: Warning! Unknown file type: %#x\n", bFileType));
-            return VERR_ISOFS_UNKNOWN_FILE_TYPE;
-    }
-
-    /*
-     * Permissions:
-     */
-    if (fPermission & UDF_PERM_OTH_EXEC)
-        fAttrib |= RTFS_UNIX_IXOTH;
-    if (fPermission & UDF_PERM_OTH_READ)
-        fAttrib |= RTFS_UNIX_IROTH;
-    if (fPermission & UDF_PERM_OTH_WRITE)
-        fAttrib |= RTFS_UNIX_IWOTH;
-
-    if (fPermission & UDF_PERM_GRP_EXEC)
-        fAttrib |= RTFS_UNIX_IXGRP;
-    if (fPermission & UDF_PERM_GRP_READ)
-        fAttrib |= RTFS_UNIX_IRGRP;
-    if (fPermission & UDF_PERM_GRP_WRITE)
-        fAttrib |= RTFS_UNIX_IWGRP;
-
-    if (fPermission & UDF_PERM_USR_EXEC)
-        fAttrib |= RTFS_UNIX_IXUSR;
-    if (fPermission & UDF_PERM_USR_READ)
-        fAttrib |= RTFS_UNIX_IRUSR;
-    if (fPermission & UDF_PERM_USR_WRITE)
-        fAttrib |= RTFS_UNIX_IWUSR;
-
-    if (   !(fAttrib & (UDF_PERM_OTH_WRITE | UDF_PERM_GRP_WRITE | UDF_PERM_USR_WRITE))
-        && (fAttrib & (UDF_PERM_OTH_READ | UDF_PERM_GRP_READ | UDF_PERM_USR_READ)) )
-        fAttrib |= RTFS_DOS_READONLY;
-
-    /*
-     * Attributes:
-     */
-    if (fIcbTagFlags & UDF_ICB_FLAGS_ARCHIVE)
-        fAttrib |= RTFS_DOS_ARCHIVED;
-    if (fIcbTagFlags & UDF_ICB_FLAGS_SYSTEM)
-        fAttrib |= RTFS_DOS_SYSTEM;
-    if (fIcbTagFlags & UDF_ICB_FLAGS_ARCHIVE)
-        fAttrib |= RTFS_DOS_ARCHIVED;
-
-    if (fIcbTagFlags & UDF_ICB_FLAGS_SET_UID)
-        fAttrib |= RTFS_UNIX_ISUID;
-    if (fIcbTagFlags & UDF_ICB_FLAGS_SET_GID)
-        fAttrib |= RTFS_UNIX_ISGID;
-    if (fIcbTagFlags & UDF_ICB_FLAGS_STICKY)
-        fAttrib |= RTFS_UNIX_ISTXT;
-
-    /* Warn about weird flags. */
-    if (fIcbTagFlags & UDF_ICB_FLAGS_TRANSFORMED)
-        LogRelMax(45, ("ISO/UDF: Warning! UDF_ICB_FLAGS_TRANSFORMED!\n"));
-    if (fIcbTagFlags & UDF_ICB_FLAGS_MULTI_VERSIONS)
-        LogRelMax(45, ("ISO/UDF: Warning! UDF_ICB_FLAGS_MULTI_VERSIONS!\n"));
-    if (fIcbTagFlags & UDF_ICB_FLAGS_STREAM)
-        LogRelMax(45, ("ISO/UDF: Warning! UDF_ICB_FLAGS_STREAM!\n"));
-    if (fIcbTagFlags & UDF_ICB_FLAGS_RESERVED_MASK)
-        LogRelMax(45, ("ISO/UDF: Warning! UDF_ICB_FLAGS_RESERVED_MASK (%#x)!\n", fIcbTagFlags & UDF_ICB_FLAGS_RESERVED_MASK));
-
-    *pfAttrib = fAttrib;
-    return VINF_SUCCESS;
-}
-
-
-/**
  * @callback_method_impl{FNFSUDFREADICBEXFILENTRY,
  *      Initialize/update a core object structure from an UDF extended file entry.}
  */
@@ -1133,8 +1008,8 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO 
     /*
      * Conver the file mode.
      */
-    int rc = rtFsIsoCore_UdfStuffToFileMode(pFileEntry->IcbTag.fFlags, pFileEntry->IcbTag.bFileType,
-                                            pFileEntry->fPermissions, &pCore->fAttrib);
+    int rc = RTFsUdfHlpIcbStuffToFileMode(pFileEntry->IcbTag.fFlags, pFileEntry->IcbTag.bFileType,
+                                          pFileEntry->fPermissions, &pCore->fAttrib);
     if (RT_SUCCESS(rc))
     {
         /*
@@ -1197,8 +1072,8 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
     /*
      * Convert the file mode.
      */
-    int rc = rtFsIsoCore_UdfStuffToFileMode(pFileEntry->IcbTag.fFlags, pFileEntry->IcbTag.bFileType,
-                                            pFileEntry->fPermissions, &pCore->fAttrib);
+    int rc = RTFsUdfHlpIcbStuffToFileMode(pFileEntry->IcbTag.fFlags, pFileEntry->IcbTag.bFileType,
+                                          pFileEntry->fPermissions, &pCore->fAttrib);
     if (RT_SUCCESS(rc))
     {
         /*

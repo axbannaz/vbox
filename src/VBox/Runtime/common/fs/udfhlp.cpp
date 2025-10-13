@@ -336,6 +336,7 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
     return VINF_SUCCESS;
 }
 
+#endif /* maybe later */
 
 /**
  * Converts ICB flags, ICB file type and file entry permissions to an IPRT file
@@ -347,7 +348,7 @@ static int rtFsIsoCore_InitExtentsUdfIcbEntry(PRTFSISOCORE pCore, uint8_t const 
  * @param   fPermission     The file entry permission mask.
  * @param   pfAttrib        Where to return the IRPT file mode mask.
  */
-static int rtFsIsoCore_UdfStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileType, uint32_t fPermission, PRTFMODE pfAttrib)
+DECLHIDDEN(int) RTFsUdfHlpIcbStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileType, uint32_t fPermission, PRTFMODE pfAttrib)
 {
     /*
      * Type:
@@ -461,7 +462,6 @@ static int rtFsIsoCore_UdfStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileTy
     return VINF_SUCCESS;
 }
 
-#endif /* maybe later */
 #ifdef LOG_ENABLED
 
 /**
