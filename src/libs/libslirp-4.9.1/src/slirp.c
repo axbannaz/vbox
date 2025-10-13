@@ -768,6 +768,15 @@ void slirp_cleanup(Slirp *slirp)
     m_cleanup(slirp);
     tftp_cleanup(slirp);
 
+#ifdef VBOX
+    if (slirp->cRealNameservers)
+    {
+        RTMemFree(slirp->aRealNameservers);
+        slirp->cRealNameservers = 0;
+        slirp->aRealNameservers = NULL;
+    }
+#endif
+
     g_rand_free(slirp->grand);
 
     g_free(slirp->vdnssearch);
@@ -1773,18 +1782,15 @@ void slirp_set_disable_dns(Slirp *pSlirp, bool fDisableDNS)
     pSlirp->disable_dns = !!fDisableDNS;
 }
 
-/*
- * Sets the real nameserver array for VBox libslirp impl
- * NOTE: This doens't free the old one. Freeing is the
- * responsibility of the caller.
- */
-void slirp_set_aRealNameservers(Slirp *pSlirp, struct in_addr *aRealNameservers)
+void slirp_set_RealNameservers(Slirp *pSlirp, size_t cRealNameservers, struct in_addr *paRealNameservers)
 {
-    pSlirp->aRealNameservers = aRealNameservers;
-}
-
-void slirp_set_cRealNameservers(Slirp *pSlirp, size_t cRealNameservers)
-{
+    if (pSlirp->cRealNameservers)
+    {
+        RTMemFree(pSlirp->aRealNameservers);
+        pSlirp->cRealNameservers = 0;
+        pSlirp->aRealNameservers = NULL;
+    }
+    pSlirp->aRealNameservers = paRealNameservers;
     pSlirp->cRealNameservers = cRealNameservers;
 }
 

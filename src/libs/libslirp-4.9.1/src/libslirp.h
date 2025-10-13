@@ -441,8 +441,7 @@ char *slirp_get_vdomainname(Slirp *);
 int slirp_set_vdnssearch(Slirp *, const char * const *);
 void slirp_set_vnameserver(Slirp *, struct in_addr);
 void slirp_set_disable_dns(Slirp *, bool);
-void slirp_set_aRealNameservers(Slirp *, struct in_addr *);
-void slirp_set_cRealNameservers(Slirp *, size_t);
+void slirp_set_RealNameservers(Slirp *, size_t, struct in_addr *);
 #endif
 
 /* Debugging support: There are two methods for enabling debugging
