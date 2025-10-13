@@ -242,7 +242,7 @@ public:
 #endif
     {}
 
-    /** Returns a specialized accessibility interface type. */
+    /** Returns a specialized accessibility interface @a enmType. */
     virtual void *interface_cast(QAccessible::InterfaceType enmType) RT_OVERRIDE
     {
         const int iCase = static_cast<int>(enmType);

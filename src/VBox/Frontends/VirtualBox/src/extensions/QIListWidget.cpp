@@ -127,7 +127,7 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface*) const RT_OVERRIDE
     {
-        /* -1: */
+        /* -1 in any case: */
         return -1;
     }
 
@@ -267,7 +267,7 @@ public:
             if (list()->childItem(i) == pChildItem)
                 return i;
 
-        /* -1: */
+        /* -1 by default: */
         return -1;
     }
 
