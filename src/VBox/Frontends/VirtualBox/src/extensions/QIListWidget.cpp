@@ -125,11 +125,9 @@ public:
     }
 
     /** Returns the index of the passed @a pChild. */
-    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
+    virtual int indexOfChild(const QAccessibleInterface*) const RT_OVERRIDE
     {
-        Q_UNUSED(pChild);
-
-        /* -1 in any case: */
+        /* -1: */
         return -1;
     }
 
@@ -238,13 +236,21 @@ public:
     {
         /* Sanity check: */
         AssertReturn(pChild, -1);
+
+        /* Acquire child-item itself: */
+        QIListWidgetItem *pChildItem = qobject_cast<QIListWidgetItem*>(pChild->object());
+
+        /* Sanity check: */
+        AssertPtrReturn(pChildItem, -1);
         AssertPtrReturn(list(), -1);
 
-        // WORKAROUND:
-        // Not yet sure how to handle this for list widget with multiple columns, so this is a simple hack:
-        const QModelIndex index = list()->itemIndex(qobject_cast<QIListWidgetItem*>(pChild->object()));
-        const int iIndex = index.row();
-        return iIndex;
+        /* Return the index of child-item in parent-list: */
+        for (int i = 0; i < childCount(); ++i)
+            if (list()->childItem(i) == pChildItem)
+                return i;
+
+        /* -1: */
+        return -1;
     }
 
     /** Returns a text for the passed @a enmTextRole. */
