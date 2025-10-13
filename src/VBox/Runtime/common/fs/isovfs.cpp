@@ -1229,121 +1229,25 @@ static void rtFsIsoCore_LogExtAttribs(uint8_t const *pbExtAttribs, size_t cbExtA
 #endif /* LOG_ENABLED */
 
 /**
- * Initialize/update a core object structure from an UDF extended file entry.
- *
- * @returns IPRT status code
- * @param   pCore           The core object structure to initialize.
- * @param   pFileEntry      The file entry.
- * @param   idxDefaultPart  The default data partition.
- * @param   pcProcessed     Variable to increment on success.
- * @param   pVol            The volume instance.
+ * @callback_method_impl{FNFSUDFREADICBEXFILENTRY,
+ *      Initialize/update a core object structure from an UDF extended file entry.}
  */
-static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILEENTRY pFileEntry, uint32_t idxDefaultPart,
-                                                 uint32_t *pcProcessed, PRTFSISOVOL pVol)
+static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO pVolInfo, PCUDFEXFILEENTRY pFileEntry,
+                                                               uint16_t idxDefaultPart, void *pvUser)
 {
-#ifdef LOG_ENABLED
-    /*
-     * Log it.
-     */
-    if (LogIs2Enabled())
-    {
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32",  IcbTag.cEntiresBeforeThis);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.uStrategyType);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[0]);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[1]);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.cMaxEntries);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bReserved);
-        UDF_LOG2_MEMBER_ENUM(pFileEntry, "#04RX8", IcbTag.bFileType, rtFsIsoUdfIcbFileTypeToString);
-        UDF_LOG2_MEMBER_LBADDR(pFileEntry,      IcbTag.ParentIcb);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.fFlags);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uid);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", gid);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", fPermissions);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16", cHardlinks);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8", uRecordFormat);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8", fRecordDisplayAttribs);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbRecord);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", cbData);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", cbObject);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", cLogicalBlocks);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, AccessTime);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, ModificationTime);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, BirthTime);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, ChangeTime);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uCheckpoint);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uReserved);
-        UDF_LOG2_MEMBER_LONGAD(pFileEntry, ExtAttribIcb);
-        UDF_LOG2_MEMBER_LONGAD(pFileEntry, StreamDirIcb);
-        UDF_LOG2_MEMBER_ENTITY_ID(pFileEntry, idImplementation);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", INodeId);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbExtAttribs);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbAllocDescs);
-        uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, pVol->cbBlock - RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs));
-        if (cbExtAttribs > 0)
-            rtFsIsoCore_LogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
-        if (pFileEntry->cbAllocDescs > 0)
-            switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
-            {
-                case UDF_ICB_FLAGS_AD_TYPE_SHORT:
-                {
-                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[cbExtAttribs];
-                    uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
-                    for (uint32_t i = 0; i < cDescs; i++)
-                        Log2(("ISO/UDF:   ShortAD[%u]:                      %#010RX32 LB %#010RX32; type=%u\n",
-                              i, paDescs[i].off, paDescs[i].cb, paDescs[i].uType));
-                    break;
-                }
-                case UDF_ICB_FLAGS_AD_TYPE_LONG:
-                {
-                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[cbExtAttribs];
-                    uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
-                    for (uint32_t i = 0; i < cDescs; i++)
-                        Log2(("ISO/UDF:   LongAD[%u]:                       %#06RX16:%#010RX32 LB %#010RX32; type=%u iu=%.6Rhxs\n",
-                              i, paDescs[i].Location.uPartitionNo, paDescs[i].Location.off,
-                              paDescs[i].cb, paDescs[i].uType, &paDescs[i].ImplementationUse));
-                    break;
-                }
-                default:
-                    Log2(("ISO/UDF:   %-32s Type=%u\n%.*RhxD\n",
-                          "abExtAttribs:", pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK,
-                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[cbExtAttribs]));
-                    break;
-            }
-    }
-#endif
-
-    /*
-     * Basic sanity checking of what we use.
-     */
-    if (     RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs + pFileEntry->cbAllocDescs
-           > pVol->Udf.VolInfo.cbBlock
-        || (pFileEntry->cbExtAttribs & 3) != 0
-        || pFileEntry->cbExtAttribs >= pVol->Udf.VolInfo.cbBlock
-        || (pFileEntry->cbAllocDescs & 3) != 0
-        || pFileEntry->cbAllocDescs >= pVol->Udf.VolInfo.cbBlock)
-    {
-        LogRelMax(45, ("ISO/UDF: Extended file entry (ICB) is bad size values: cbAllocDesc=%#x cbExtAttribs=%#x (cbBlock=%#x)\n",
-                       pFileEntry->cbAllocDescs, pFileEntry->cbExtAttribs, pVol->Udf.VolInfo.cbBlock));
-        return VERR_ISOFS_BAD_FILE_ENTRY;
-    }
+    PRTFSISOCORE pCore = (PRTFSISOCORE)pvUser;
 
     //pCore->uid        = pFileEntry->uid;
     //pCore->gid        = pFileEntry->gid;
     //pCore->cHardlinks = RT_MIN(pFileEntry->cHardlinks, 1);
     pCore->cbObject     = pFileEntry->cbData;
-    //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVol->Udf.VolInfo.cShiftBlock;
+    //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVolInfo->cShiftBlock;
     pCore->idINode      = pFileEntry->INodeId;
 
     rtFsIsoUdfTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
     rtFsIsoUdfTimestamp2TimeSpec(&pCore->ModificationTime,  &pFileEntry->ModificationTime);
     rtFsIsoUdfTimestamp2TimeSpec(&pCore->BirthTime,         &pFileEntry->BirthTime);
     rtFsIsoUdfTimestamp2TimeSpec(&pCore->ChangeTime,        &pFileEntry->ChangeTime);
-
-    if (   pFileEntry->uRecordFormat
-        || pFileEntry->fRecordDisplayAttribs
-        || pFileEntry->cbRecord)
-        LogRelMax(45, ("ISO/UDF: uRecordFormat=%#x fRecordDisplayAttribs=%#x cbRecord=%#x\n",
-                       pFileEntry->uRecordFormat, pFileEntry->fRecordDisplayAttribs, pFileEntry->cbRecord));
 
     /*
      * Conver the file mode.
@@ -1360,15 +1264,14 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
                                                 pFileEntry->cbAllocDescs,
                                                 pFileEntry->IcbTag.fFlags,
                                                 idxDefaultPart,
-                                                  ((uint64_t)pFileEntry->Tag.offTag << pVol->Udf.VolInfo.cShiftBlock)
+                                                  ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
                                                 + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs,
-                                                pVol);
+                                                RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo));
         if (RT_SUCCESS(rc))
         {
             /*
              * We're good.
              */
-            *pcProcessed += 1;
             return VINF_SUCCESS;
         }
 
@@ -1385,105 +1288,20 @@ static int rtFsIsoCore_InitFromUdfIcbExFileEntry(PRTFSISOCORE pCore, PCUDFEXFILE
 
 
 /**
- * Initialize/update a core object structure from an UDF file entry.
- *
- * @returns IPRT status code
- * @param   pCore           The core object structure to initialize.
- * @param   pFileEntry      The file entry.
- * @param   idxDefaultPart  The default data partition.
- * @param   pcProcessed     Variable to increment on success.
- * @param   pVol            The volume instance.
+ * @callback_method_impl{FNFSUDFREADICBEXFILENTRY,
+ *      Initialize/update a core object structure from an UDF file entry.}
  */
-static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTRY pFileEntry, uint32_t idxDefaultPart,
-                                               uint32_t *pcProcessed, PRTFSISOVOL pVol)
-{
-#ifdef LOG_ENABLED
-    /*
-     * Log it.
-     */
-    if (LogIs2Enabled())
-    {
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32",  IcbTag.cEntiresBeforeThis);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.uStrategyType);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[0]);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.abStrategyParams[1]);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.cMaxEntries);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8",   IcbTag.bReserved);
-        UDF_LOG2_MEMBER_ENUM(pFileEntry, "#04RX8", IcbTag.bFileType, rtFsIsoUdfIcbFileTypeToString);
-        UDF_LOG2_MEMBER_LBADDR(pFileEntry,      IcbTag.ParentIcb);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16",  IcbTag.fFlags);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uid);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", gid);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", fPermissions);
-        UDF_LOG2_MEMBER(pFileEntry, "#06RX16", cHardlinks);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8", uRecordFormat);
-        UDF_LOG2_MEMBER(pFileEntry, "#04RX8", fRecordDisplayAttribs);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbRecord);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", cbData);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", cLogicalBlocks);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, AccessTime);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, ModificationTime);
-        UDF_LOG2_MEMBER_TIMESTAMP(pFileEntry, ChangeTime);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", uCheckpoint);
-        UDF_LOG2_MEMBER_LONGAD(pFileEntry, ExtAttribIcb);
-        UDF_LOG2_MEMBER_ENTITY_ID(pFileEntry, idImplementation);
-        UDF_LOG2_MEMBER(pFileEntry, "#018RX64", INodeId);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbExtAttribs);
-        UDF_LOG2_MEMBER(pFileEntry, "#010RX32", cbAllocDescs);
-        uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, pVol->cbBlock - RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs));
-        if (cbExtAttribs > 0)
-            rtFsIsoCore_LogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
-        if (pFileEntry->cbAllocDescs > 0)
-            switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
-            {
-                case UDF_ICB_FLAGS_AD_TYPE_SHORT:
-                {
-                    PCUDFSHORTAD paDescs = (PCUDFSHORTAD)&pFileEntry->abExtAttribs[cbExtAttribs];
-                    uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
-                    for (uint32_t i = 0; i < cDescs; i++)
-                        Log2(("ISO/UDF:   ShortAD[%u]:                      %#010RX32 LB %#010RX32; type=%u\n",
-                              i, paDescs[i].off, paDescs[i].cb, paDescs[i].uType));
-                    break;
-                }
-                case UDF_ICB_FLAGS_AD_TYPE_LONG:
-                {
-                    PCUDFLONGAD  paDescs = (PCUDFLONGAD)&pFileEntry->abExtAttribs[cbExtAttribs];
-                    uint32_t     cDescs  = pFileEntry->cbAllocDescs / sizeof(paDescs[0]);
-                    for (uint32_t i = 0; i < cDescs; i++)
-                        Log2(("ISO/UDF:   LongAD[%u]:                       %#06RX16:%#010RX32 LB %#010RX32; type=%u iu=%.6Rhxs\n",
-                              i, paDescs[i].Location.uPartitionNo, paDescs[i].Location.off,
-                              paDescs[i].cb, paDescs[i].uType, &paDescs[i].ImplementationUse));
-                    break;
-                }
-                default:
-                    Log2(("ISO/UDF:   %-32s Type=%u\n%.*RhxD\n",
-                          "abExtAttribs:", pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK,
-                          pFileEntry->cbAllocDescs, &pFileEntry->abExtAttribs[cbExtAttribs]));
-                    break;
-            }
-    }
-#endif
+static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pVolInfo, PCUDFFILEENTRY pFileEntry,
+                                                             uint16_t idxDefaultPart, void *pvUser)
 
-    /*
-     * Basic sanity checking of what we use.
-     */
-    if (     RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs + pFileEntry->cbAllocDescs
-           > pVol->Udf.VolInfo.cbBlock
-        || (pFileEntry->cbExtAttribs & 3) != 0
-        || pFileEntry->cbExtAttribs >= pVol->Udf.VolInfo.cbBlock
-        || (pFileEntry->cbAllocDescs & 3) != 0
-        || pFileEntry->cbAllocDescs >= pVol->Udf.VolInfo.cbBlock)
-    {
-        LogRelMax(45, ("ISO/UDF: File entry (ICB) is bad size values: cbAllocDesc=%#x cbExtAttribs=%#x (cbBlock=%#x)\n",
-                       pFileEntry->cbAllocDescs, pFileEntry->cbExtAttribs, pVol->Udf.VolInfo.cbBlock));
-        return VERR_ISOFS_BAD_FILE_ENTRY;
-    }
+{
+    PRTFSISOCORE pCore = (PRTFSISOCORE)pvUser;
 
     //pCore->uid        = pFileEntry->uid;
     //pCore->gid        = pFileEntry->gid;
     //pCore->cHardlinks = RT_MIN(pFileEntry->cHardlinks, 1);
     pCore->cbObject     = pFileEntry->cbData;
-    //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVol->Udf.VolInfo.cShiftBlock;
+    //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVolInfo->cShiftBlock;
     pCore->idINode      = pFileEntry->INodeId;
 
     rtFsIsoUdfTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
@@ -1494,12 +1312,6 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
         pCore->BirthTime = pCore->ChangeTime;
     if (RTTimeSpecCompare(&pCore->BirthTime, &pCore->AccessTime) > 0)
         pCore->BirthTime = pCore->AccessTime;
-
-    if (   pFileEntry->uRecordFormat
-        || pFileEntry->fRecordDisplayAttribs
-        || pFileEntry->cbRecord)
-        LogRelMax(45, ("ISO/UDF: uRecordFormat=%#x fRecordDisplayAttribs=%#x cbRecord=%#x\n",
-                       pFileEntry->uRecordFormat, pFileEntry->fRecordDisplayAttribs, pFileEntry->cbRecord));
 
     /*
      * Convert the file mode.
@@ -1516,15 +1328,14 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
                                                 pFileEntry->cbAllocDescs,
                                                 pFileEntry->IcbTag.fFlags,
                                                 idxDefaultPart,
-                                                  ((uint64_t)pFileEntry->Tag.offTag << pVol->Udf.VolInfo.cShiftBlock)
+                                                  ((uint64_t)pFileEntry->Tag.offTag << pVolInfo->cShiftBlock)
                                                 + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs,
-                                                pVol);
+                                                RT_FROM_MEMBER(pVolInfo, RTFSISOVOL, Udf.VolInfo));
         if (RT_SUCCESS(rc))
         {
             /*
              * We're good.
              */
-            *pcProcessed += 1;
             return VINF_SUCCESS;
         }
 
@@ -1538,138 +1349,6 @@ static int rtFsIsoCore_InitFromUdfIcbFileEntry(PRTFSISOCORE pCore, PCUDFFILEENTR
     }
     return rc;
 }
-
-
-/**
- * Recursive helper for rtFsIsoCore_InitFromUdfIcbAndFileIdDesc.
- *
- * @returns IRPT status code.
- * @param   pCore           The core structure to initialize.
- * @param   AllocDesc       The ICB allocation descriptor.
- * @param   pbBuf           The buffer, one logical block in size.
- * @param   cNestings       The number of recursive nestings (should be zero).
- * @param   pcProcessed     Variable to update when we've processed something
- *                          useful.
- * @param   pcIndirections  Variable tracing the number of indirections we've
- *                          taken during the processing.  This is used to
- *                          prevent us from looping forever on a bad chain
- * @param   pVol            The volue instance data.
- */
-static int rtFsIsoCore_InitFromUdfIcbRecursive(PRTFSISOCORE pCore, UDFLONGAD AllocDesc, uint8_t *pbBuf, uint32_t cNestings,
-                                               uint32_t *pcProcessed, uint32_t *pcIndirections, PRTFSISOVOL pVol)
-{
-    if (cNestings >= 8)
-        return VERR_ISOFS_TOO_DEEP_ICB_RECURSION;
-
-    for (;;)
-    {
-        if (*pcIndirections >= 32)
-            return VERR_ISOFS_TOO_MANY_ICB_INDIRECTIONS;
-
-        /*
-         * Check the basic validity of the allocation descriptor.
-         */
-        if (   AllocDesc.uType == UDF_AD_TYPE_RECORDED_AND_ALLOCATED
-            && AllocDesc.cb >= sizeof(UDFICBTAG) )
-        { /* likely */ }
-        else if (AllocDesc.uType != UDF_AD_TYPE_RECORDED_AND_ALLOCATED)
-        {
-            Log(("ISO/UDF: ICB has alloc type %d!\n", AllocDesc.uType));
-            return VINF_SUCCESS;
-        }
-        else
-        {
-            LogRelMax(45, ("ISO/UDF: ICB is too small: %u bytes\n", AllocDesc.cb));
-            return AllocDesc.cb == 0 ? VINF_SUCCESS : VERR_ISOFS_ICB_ENTRY_TOO_SMALL;
-        }
-
-        /*
-         * Process it block by block.
-         */
-        uint32_t cBlocks = (AllocDesc.cb + pVol->Udf.VolInfo.cbBlock - 1) >> pVol->Udf.VolInfo.cShiftBlock;
-        for (uint32_t idxBlock = 0; ; idxBlock++)
-        {
-            /*
-             * Read a block
-             */
-            size_t cbToRead = RT_MIN(pVol->Udf.VolInfo.cbBlock, AllocDesc.cb);
-            int rc = rtFsIsoVolUdfVpRead(pVol, AllocDesc.Location.uPartitionNo, AllocDesc.Location.off + idxBlock, 0,
-                                         pbBuf, cbToRead);
-            if (RT_FAILURE(rc))
-                return rc;
-            if (cbToRead < pVol->Udf.VolInfo.cbBlock)
-                RT_BZERO(&pbBuf[cbToRead], pVol->Udf.VolInfo.cbBlock - cbToRead);
-
-            /*
-             * Verify the TAG.
-             */
-            PUDFICBHDR pHdr = (PUDFICBHDR)pbBuf;
-            rc = RTFsUdfHlpValidateDescTagAndCrc(&pHdr->Tag, pVol->Udf.VolInfo.cbBlock, UINT16_MAX,
-                                                    AllocDesc.Location.off + idxBlock, NULL);
-            if (RT_FAILURE(rc))
-                return rc;
-
-            /*
-             * Do specific processing.
-             */
-            if (pHdr->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
-                rc = rtFsIsoCore_InitFromUdfIcbFileEntry(pCore, (PCUDFFILEENTRY)pHdr, AllocDesc.Location.uPartitionNo,
-                                                         pcProcessed, pVol);
-            else if (pHdr->Tag.idTag == UDF_TAG_ID_EXTENDED_FILE_ENTRY)
-                rc = rtFsIsoCore_InitFromUdfIcbExFileEntry(pCore, (PCUDFEXFILEENTRY)pHdr, AllocDesc.Location.uPartitionNo,
-                                                           pcProcessed, pVol);
-            else if (pHdr->Tag.idTag == UDF_TAG_ID_INDIRECT_ENTRY)
-            {
-                PUDFINDIRECTENTRY pIndir = (PUDFINDIRECTENTRY)pHdr;
-                *pcIndirections += 1;
-                if (pIndir->IndirectIcb.cb != 0)
-                {
-                    if (idxBlock + 1 == cBlocks)
-                    {
-                        AllocDesc = pIndir->IndirectIcb;
-                        Log2(("ISO/UDF: ICB: Indirect entry - looping: %x:%#010RX32 LB %#x; uType=%d\n",
-                              AllocDesc.Location.uPartitionNo, AllocDesc.Location.off, AllocDesc.cb, AllocDesc.uType));
-                        break;
-                    }
-                    Log2(("ISO/UDF: ICB: Indirect entry - recursing: %x:%#010RX32 LB %#x; uType=%d\n",
-                          pIndir->IndirectIcb.Location.uPartitionNo, pIndir->IndirectIcb.Location.off,
-                          pIndir->IndirectIcb.cb, pIndir->IndirectIcb.uType));
-                    rc = rtFsIsoCore_InitFromUdfIcbRecursive(pCore, pIndir->IndirectIcb, pbBuf, cNestings,
-                                                             pcProcessed, pcIndirections, pVol);
-                }
-                else
-                    Log(("ISO/UDF: zero length indirect entry\n"));
-            }
-            else if (pHdr->Tag.idTag == UDF_TAG_ID_TERMINAL_ENTRY)
-            {
-                Log2(("ISO/UDF: Terminal ICB entry\n"));
-                return VINF_SUCCESS;
-            }
-            else if (pHdr->Tag.idTag == UDF_TAG_ID_UNALLOCATED_SPACE_ENTRY)
-            {
-                Log2(("ISO/UDF: Unallocated space entry: skipping\n"));
-                /* Ignore since we don't do writing (UDFUNALLOCATEDSPACEENTRY) */
-            }
-            else
-            {
-                LogRelMax(90, ("ISO/UDF: Unknown ICB type %#x\n", pHdr->Tag.idTag));
-                return VERR_ISOFS_UNSUPPORTED_ICB;
-            }
-            if (RT_FAILURE(rc))
-                return rc;
-
-            /*
-             * Advance.
-             */
-            if (idxBlock + 1 >= cBlocks)
-                return VINF_SUCCESS;
-        }
-
-        /* If we get here, we've jumped thru an indirect entry. */
-    }
-    /* never reached */
-}
-
 
 
 /**
@@ -1699,7 +1378,7 @@ static int rtFsIsoCore_InitFromUdfIcbAndFileIdDesc(PRTFSISOCORE pCore, PCUDFLONG
     /*
      * Some size sanity checking.
      */
-    if (pAllocDesc->cb <= _64K)
+    if (pAllocDesc->cb <= _64K) /** @todo this isn't necessarily sane... */
     {
         if (pAllocDesc->cb >= sizeof(UDFICBHDR))
         { /* likely */ }
@@ -1725,7 +1404,9 @@ static int rtFsIsoCore_InitFromUdfIcbAndFileIdDesc(PRTFSISOCORE pCore, PCUDFLONG
     {
         uint32_t cProcessed = 0;
         uint32_t cIndirections = 0;
-        int rc = rtFsIsoCore_InitFromUdfIcbRecursive(pCore, *pAllocDesc, pbBuf, 0, &cProcessed, &cIndirections, pVol);
+        int rc = RTFsUdfReadIcbRecursive(&pVol->Udf.VolInfo, pVol->hVfsBacking, pbBuf, 0 /*cNestings*/,
+                                         rtFsIsoCore_InitFromUdfIcbFileEntry, rtFsIsoCore_InitFromUdfIcbExFileEntry, pCore,
+                                         &cProcessed, &cIndirections, *pAllocDesc);
         RTMemTmpFree(pbBuf);
         if (RT_SUCCESS(rc))
         {
