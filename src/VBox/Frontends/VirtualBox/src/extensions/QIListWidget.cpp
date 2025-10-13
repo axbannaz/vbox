@@ -69,18 +69,24 @@ public:
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
-        /* Return the parent: */
-        return QAccessible::queryAccessibleInterface(item()->parentList());
+        /* Return parent-list interface if any: */
+        if (QIListWidget *pParentList = item()->parentList())
+            return QAccessible::queryAccessibleInterface(pParentList);
+
+        /* Null by default: */
+        return 0;
     }
 
     /** Returns the rect. */
     virtual QRect rect() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QRect());
+        AssertPtrReturn(item()->parentList(), QRect());
+        AssertPtrReturn(item()->parentList()->viewport(), QRect());
 
         /* Compose common region: */
         QRegion region;
@@ -100,7 +106,7 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
         /* Zero in any case: */
@@ -110,10 +116,9 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(item(), 0);
 
         /* Null in any case: */
         return 0;
@@ -131,7 +136,7 @@ public:
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
 
         /* Compose the state: */
@@ -210,7 +215,7 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure list still alive: */
+        /* Sanity check: */
         AssertPtrReturn(list(), 0);
 
         /* Return the number of children: */
@@ -220,10 +225,9 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure list still alive: */
-        AssertPtrReturn(list(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0, 0);
+        AssertPtrReturn(list(), 0);
 
         /* Return the child with the passed iIndex: */
         return QAccessible::queryAccessibleInterface(list()->childItem(iIndex));
@@ -232,10 +236,9 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        /* Make sure list still alive: */
-        AssertPtrReturn(list(), -1);
-        /* Make sure child is valid: */
+        /* Sanity check: */
         AssertReturn(pChild, -1);
+        AssertPtrReturn(list(), -1);
 
         // WORKAROUND:
         // Not yet sure how to handle this for list widget with multiple columns, so this is a simple hack:
@@ -249,7 +252,7 @@ public:
     {
         Q_UNUSED(enmTextRole);
 
-        /* Make sure list still alive: */
+        /* Sanity check: */
         AssertPtrReturn(list(), QString());
 
         /* Gather suitable text: */
