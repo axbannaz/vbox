@@ -401,7 +401,7 @@ int main(int argc, char **argv)
      * Constants.
      */
     enum { kEflBeaviour_Intel = 0, kEflBeaviour_Amd }
-        const                   enmEflBehaviour = ASMIsAmdCpu() || ASMIsHygonCpu() ? kEflBeaviour_Amd : kEflBeaviour_Intel;
+        const                   enmEflBehaviour = ASMIsAmdOrCompatibleCpu() ? kEflBeaviour_Amd : kEflBeaviour_Intel;
     static const char * const   s_apszEflBehaviourTabNm[] = { "intel_", "amd_" };
 
     /*
