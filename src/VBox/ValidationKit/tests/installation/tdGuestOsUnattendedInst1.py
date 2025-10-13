@@ -278,7 +278,7 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
                 eNic0AttachType = vboxcon.NetworkAttachmentType_HostOnly;
 
             # Also use it for windows xp to prevent it from ever going online.
-            if self.sKind in ('WindowsXP','WindowsXP_64',):
+            if self.isWindows():
                 eNic0AttachType = vboxcon.NetworkAttachmentType_HostOnly;
 
         #
