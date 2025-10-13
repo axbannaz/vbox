@@ -305,7 +305,7 @@ Function ${un}W2K_${fn}Certs
     !else
   Push "SHA-1 timestamp root"
   Push "$%VBOX_GA_CERT_ROOT_SHA1_TS%"
-  Call ${un}W2K_InstallRootCert
+  Call ${un}W2K_${fn}RootCert
     !endif ; VBOX_WITH_VBOX_LEGACY_TS_CA
   !endif
 
