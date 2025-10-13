@@ -336,8 +336,8 @@ typedef FNFSUDFREADICBEXFILENTRY *PFNFSUDFREADICBEXFILENTRY;
 DECLHIDDEN(int)  RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVfsBacking, uint8_t *pbBuf, uint32_t cNestings,
                                          PFNFSUDFREADICBFILENTRY pfnFileEntry, PFNFSUDFREADICBEXFILENTRY pfnExFileEntry,
                                          void *pvUser, uint32_t *pcProcessed, uint32_t *pcIndirections, UDFLONGAD AllocDesc);
-
 DECLHIDDEN(int)  RTFsUdfHlpIcbStuffToFileMode(uint32_t fIcbTagFlags, uint8_t bFileType, uint32_t fPermission, PRTFMODE pfAttrib);
+DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMESTAMP pUdf);
 DECLHIDDEN(int)  RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
                                                 uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
                                                 RTVFSFILE hVfsBacking, uint8_t *pbBuf,

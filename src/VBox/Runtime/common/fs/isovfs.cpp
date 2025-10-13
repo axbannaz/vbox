@@ -609,44 +609,6 @@ static bool rtFsIso9660DateTime2TimeSpecIfValid(PRTTIMESPEC pTimeSpec, PCISO9660
 
 
 /**
- * Converts an UDF timestamp into an IPRT timesspec.
- *
- * @param   pTimeSpec       Where to return the IRPT time.
- * @param   pUdf            The UDF timestamp.
- */
-static void rtFsIsoUdfTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMESTAMP pUdf)
-{
-    /* Check the year range before we try convert anything as it's quite possible
-       that this is zero. */
-    if (   pUdf->iYear > 1678
-        && pUdf->iYear < 2262)
-    {
-        RTTIME Time;
-        Time.fFlags         = RTTIME_FLAGS_TYPE_UTC;
-        Time.offUTC         = 0;
-        Time.i32Year        = pUdf->iYear;
-        Time.u8Month        = RT_MIN(RT_MAX(pUdf->uMonth, 1), 12);
-        Time.u8MonthDay     = RT_MIN(RT_MAX(pUdf->uDay, 1), 31);
-        Time.u8WeekDay      = UINT8_MAX;
-        Time.u16YearDay     = 0;
-        Time.u8Hour         = RT_MIN(pUdf->uHour, 23);
-        Time.u8Minute       = RT_MIN(pUdf->uMinute, 59);
-        Time.u8Second       = RT_MIN(pUdf->uSecond, 59);
-        Time.u32Nanosecond  = pUdf->cCentiseconds           * UINT32_C(10000000)
-                            + pUdf->cHundredsOfMicroseconds *   UINT32_C(100000)
-                            + pUdf->cMicroseconds           *     UINT32_C(1000);
-        RTTimeImplode(pTimeSpec, RTTimeNormalize(&Time));
-
-        /* Only apply the UTC offset if it's within reasons. */
-        if (RT_ABS(pUdf->offUtcInMin) <= 13*60)
-            RTTimeSpecSubSeconds(pTimeSpec, pUdf->offUtcInMin * 60);
-    }
-    else
-        RTTimeSpecSetNano(pTimeSpec, 0);
-}
-
-
-/**
  * Initialization of a RTFSISOCORE structure from a directory record.
  *
  * @note    The RTFSISOCORE::pParentDir and RTFSISOCORE::Clusters members are
@@ -770,10 +732,10 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbExFileEntry(PCRTFSUDFVOLINFO 
     //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVolInfo->cShiftBlock;
     pCore->idINode      = pFileEntry->INodeId;
 
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->ModificationTime,  &pFileEntry->ModificationTime);
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->BirthTime,         &pFileEntry->BirthTime);
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->ChangeTime,        &pFileEntry->ChangeTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->ModificationTime,  &pFileEntry->ModificationTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->BirthTime,         &pFileEntry->BirthTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->ChangeTime,        &pFileEntry->ChangeTime);
 
     /*
      * Conver the file mode.
@@ -827,9 +789,9 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
     //pCore->cbAllocated = pFileEntry->cLogicalBlocks << pVolInfo->cShiftBlock;
     pCore->idINode      = pFileEntry->INodeId;
 
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->ModificationTime,  &pFileEntry->ModificationTime);
-    rtFsIsoUdfTimestamp2TimeSpec(&pCore->ChangeTime,        &pFileEntry->ChangeTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->AccessTime,        &pFileEntry->AccessTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->ModificationTime,  &pFileEntry->ModificationTime);
+    RTFsUdfHlpTimestamp2TimeSpec(&pCore->ChangeTime,        &pFileEntry->ChangeTime);
     pCore->BirthTime = pCore->ModificationTime;
     if (RTTimeSpecCompare(&pCore->BirthTime, &pCore->ChangeTime) > 0)
         pCore->BirthTime = pCore->ChangeTime;
