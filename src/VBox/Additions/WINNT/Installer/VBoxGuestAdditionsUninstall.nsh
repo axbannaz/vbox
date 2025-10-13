@@ -51,11 +51,11 @@ force_uninstall_unsupported_os:
     Call ${un}Vista_CallbackUninstall
     goto done_os_specific ; Needed because of force_uninstall_unsupported_os label.
 
-!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWin2000}
 
     Call ${un}W2K_CallbackUninstall
 
+!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWinNT4}
 
     Call ${un}NT4_CallbackUninstall
@@ -279,11 +279,11 @@ force_delete_unsupported_os:
     Call ${un}Vista_CallbackDeleteFiles
     goto done_os_specific ; Needed because of force_delete_unsupported_os label.
 
-!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWin2000}
 
     Call ${un}W2K_CallbackDeleteFiles
 
+!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWinNT4}
 
       Call ${un}NT4_CallbackDeleteFiles

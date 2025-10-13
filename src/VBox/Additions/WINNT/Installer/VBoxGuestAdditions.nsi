@@ -641,7 +641,6 @@ force_install_unsupported_os:
     Call Vista_CallbackExtractFiles
     Call Vista_CallbackInstall
 
-!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWin2000}
 
     Call W2K_CallbackPrepare
@@ -650,6 +649,7 @@ force_install_unsupported_os:
 
     Call W2K_CallbackExtractFiles
     Call W2K_CallbackInstall
+!if $%KBUILD_TARGET_ARCH% == "x86" ; 32-bit only
   ${ElseIf} ${AtLeastWinNT4}
 
     ; At least Service Pack 6 installed?
