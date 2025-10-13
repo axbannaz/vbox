@@ -354,13 +354,13 @@ static bool is_kvm_hwvirt_mod_likely_loaded(void)
      * We don't disable preemption/interrupts here because we assume all CPUs will have
      * the relevant bits identical in CR4 and EFER.
      */
-    bool const     fIsIntel  = ASMIsIntelCpu() || ASMIsViaCentaurCpu() || ASMIsShanghaiCpu();
+    bool const     fIsIntel  = ASMIsIntelOrCompatibleCpu();
     uint64_t const fVmxeMask = RT_BIT_64(13);
     if (   fIsIntel
         && (ASMGetCR4() & fVmxeMask))
         return true;
 
-    bool const     fIsAmd    = ASMIsAmdCpu() || ASMIsHygonCpu();
+    bool const     fIsAmd    = ASMIsAmdOrCompatibleCpu();
     uint32_t const idEfer    = 0xc0000080;
     uint64_t const fSvmeMask = RT_BIT_64(12);
     if (   fIsAmd
