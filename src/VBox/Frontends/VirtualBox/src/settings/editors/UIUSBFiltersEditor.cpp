@@ -63,6 +63,11 @@ class USBFilterItem : public QITreeWidgetItem, public UIDataUSBFilter
 
 public:
 
+    /** Casts QTreeWidgetItem* to USBFilterItem* if possible. */
+    static USBFilterItem *toItem(QTreeWidgetItem *pItem);
+    /** Casts const QTreeWidgetItem* to const USBFilterItem* if possible. */
+    static const USBFilterItem *toItem(const QTreeWidgetItem *pItem);
+
     /** Constructs top-level USB filter item. */
     USBFilterItem(QITreeWidget *pParent) : QITreeWidgetItem(pParent) {}
 
@@ -115,6 +120,38 @@ private:
 /*********************************************************************************************************************************
 *   Class USBFilterItem implementation.                                                                                          *
 *********************************************************************************************************************************/
+
+/* static */
+USBFilterItem *USBFilterItem::toItem(QTreeWidgetItem *pItem)
+{
+    /* Make sure alive QITreeWidgetItem passed: */
+    if (!pItem || pItem->type() != ItemType)
+        return 0;
+
+    /* Acquire casted QITreeWidgetItem: */
+    QITreeWidgetItem *pIntermediateItem = static_cast<QITreeWidgetItem*>(pItem);
+    if (!pIntermediateItem)
+        return 0;
+
+    /* Return proper USBFilterItem: */
+    return qobject_cast<USBFilterItem*>(pIntermediateItem);
+}
+
+/* static */
+const USBFilterItem *USBFilterItem::toItem(const QTreeWidgetItem *pItem)
+{
+    /* Make sure alive QITreeWidgetItem passed: */
+    if (!pItem || pItem->type() != ItemType)
+        return 0;
+
+    /* Acquire casted QITreeWidgetItem: */
+    const QITreeWidgetItem *pIntermediateItem = static_cast<const QITreeWidgetItem*>(pItem);
+    if (!pIntermediateItem)
+        return 0;
+
+    /* Return proper USBFilterItem: */
+    return qobject_cast<const USBFilterItem*>(pIntermediateItem);
+}
 
 void USBFilterItem::updateFields()
 {
@@ -253,10 +290,9 @@ QList<UIDataUSBFilter> UIUSBFiltersEditor::value() const
     QList<UIDataUSBFilter> result;
 
     /* Gather and cache new data: */
-    QTreeWidgetItem *pMainRootItem = m_pTreeWidget->invisibleRootItem();
-    for (int iFilterIndex = 0; iFilterIndex < pMainRootItem->childCount(); ++iFilterIndex)
+    for (int i = 0; i < m_pTreeWidget->childCount(); ++i)
     {
-        const USBFilterItem *pItem = static_cast<USBFilterItem*>(pMainRootItem->child(iFilterIndex));
+        const USBFilterItem *pItem = USBFilterItem::toItem(m_pTreeWidget->childItem(i));
         AssertPtr(pItem);
         if (pItem)
             result << *pItem;
@@ -457,7 +493,7 @@ void UIUSBFiltersEditor::sltEditFilter()
     AssertPtrReturnVoid(m_pTreeWidget);
 
     /* Check current filter item: */
-    USBFilterItem *pItem = static_cast<USBFilterItem*>(m_pTreeWidget->currentItem());
+    USBFilterItem *pItem = USBFilterItem::toItem(m_pTreeWidget->currentItem());
     AssertPtrReturnVoid(pItem);
 
     /* Configure USB filter details editor: */
@@ -549,7 +585,7 @@ void UIUSBFiltersEditor::sltMoveFilterDown()
 void UIUSBFiltersEditor::sltHandleActivityStateChange(QTreeWidgetItem *pChangedItem)
 {
     /* Check changed USB filter item: */
-    USBFilterItem *pItem = static_cast<USBFilterItem*>(pChangedItem);
+    USBFilterItem *pItem = USBFilterItem::toItem(pChangedItem);
     AssertPtrReturnVoid(pItem);
 
     /* Update corresponding item: */
