@@ -1597,38 +1597,108 @@ DECLHIDDEN(void) RTFsUdfHlpLogDirContent(uint8_t const *pbDir, size_t cbDir)
 #endif /* LOG_ENABLED */
 
 
-#if 0 /* maybe later */
-
-static int rtFsIsoVol_ReturnUdfDString(const char *pachSrc, size_t cchSrc, void *pvDst, size_t cbDst, size_t *pcbRet)
+/**
+ * Converts a dstring field value into a UTF-8 string buffer.
+ *
+ * @returns IPRT status code.
+ * @retval  VERR_BUFFER_OVERFLOW if insufficient buffer space. @a *pcbRet will
+ *          be set to the required buffer size.
+ * @param   pachSrc             The source dstring field.
+ * @param   cbSrc               The size of the source field.
+ * @param   pvDst               The destination buffer.  Can be NULL if @a cbDst
+ *                              is also zero.
+ * @param   cbDst               The destination buffer size.
+ * @param   pcbRet              The size of the converted string, in bytes,
+ *                              including the terminator character.
+ */
+DECLHIDDEN(int) RTFsUdfHlpDStringFieldToUtf8Buf(const char *pachSrc, size_t cbSrc, void *pvDst, size_t cbDst, size_t *pcbRet)
 {
+    AssertReturn(cbSrc < 256, VERR_INTERNAL_ERROR_3);
+    AssertReturn(cbSrc > 2, VERR_INTERNAL_ERROR_2);
+    Assert(pcbRet);
     char *pszDst = (char *)pvDst;
+
+    /*
+     * The last byte is supposed to contain the total encoded length.
+     */
+    size_t cbSrcEncoded = (uint8_t)pachSrc[cbSrc - 1];
+    AssertStmt(cbSrcEncoded < cbSrc, cbSrcEncoded = cbSrc - 1);
 
     if (pachSrc[0] == 8)
     {
-        size_t  const cchText   = RT_MIN((uint8_t)pachSrc[cchSrc - 1], cchSrc - 2);
-        size_t  const cchActual = RTStrNLen(&pachSrc[1], cchText);
-        *pcbRet = cchActual + 1;
-        int rc = RTStrCopyEx(pszDst, cbDst, &pachSrc[1], cchActual);
-        if (cbDst > 0)
-            RTStrPurgeEncoding(pszDst);
-        return rc;
+        /*
+         * Convert from unicode points 0..255 (latin-1) to UTF-8.
+         */
+        if (cbDst > 1)
+            pszDst[cbDst - 2] = '\0';
+
+        AssertStmt(cbSrcEncoded > 0, cbSrcEncoded = 1);
+        size_t  const         cbSrcText = cbSrcEncoded - 1;
+        uint8_t const * const pbSrcText = (uint8_t const *)&pachSrc[1];
+        size_t                offDst    = 0;
+        for (size_t offSrc = 0; offSrc < cbSrcText; offSrc++)
+        {
+            RTUNICP const uc = pbSrcText[offSrc++];
+            if (uc < 128)
+            {
+                if (uc > 0)
+                {
+                    if (offDst < cbDst)
+                        pszDst[offDst] = (char)uc;
+                    offDst++;
+                }
+                else
+                    break;
+            }
+            else
+            {
+                if (offDst + 1 < cbDst)
+                {
+                    pszDst[offDst]     = 0xc0 | (uc >> 6);
+                    pszDst[offDst + 1] = 0x80 | (uc & 0x3f);
+                }
+                offDst += 2;
+            }
+        }
+
+        /* terminate */
+        if (offDst < cbDst)
+            pszDst[offDst] = '\0';
+        else if (cbDst > 0)
+            pszDst[cbDst - 1] = '\0';
+
+        *pcbRet = ++offDst;
+        return offDst <= cbDst ? VINF_SUCCESS : VERR_BUFFER_OVERFLOW;
     }
 
     if (pachSrc[0] == 16)
     {
-        PCRTUTF16 pwszSrc = (PCRTUTF16)&pachSrc[1];
-        if (cchSrc > 0)
-            return RTUtf16BigToUtf8Ex(pwszSrc, (cchSrc - 2) / sizeof(RTUTF16), &pszDst, cchSrc, pcbRet);
-        int rc = RTUtf16CalcUtf8LenEx(pwszSrc, (cchSrc - 2) / sizeof(RTUTF16), pcbRet);
-        if (RT_SUCCESS(rc))
+        /*
+         * Convert UTF-16 to UTF-8.
+         *
+         * Note! We don't honor the specs wrt single trailing byte here. We
+         *       expect all codepoints to be encoded as 2 or 4 bytes.
+         */
+        AssertStmt(cbSrcEncoded > 0, cbSrcEncoded = 1);
+        *pcbRet = 0;
+        int       rc;
+        PCRTUTF16 pwszSrc = (PCRTUTF16)&pachSrc[1]; /* misaligned */
+        if (cbDst > 0)
+            rc = RTUtf16BigToUtf8Ex(pwszSrc, (cbSrcEncoded - 1) / sizeof(RTUTF16), &pszDst, cbDst, pcbRet);
+        else
         {
-            *pcbRet += 1;
-            return VERR_BUFFER_OVERFLOW;
+            rc = RTUtf16CalcUtf8LenEx(pwszSrc, (cbSrcEncoded - 1) / sizeof(RTUTF16), pcbRet);
+            if (RT_SUCCESS(rc))
+                rc = VERR_BUFFER_OVERFLOW;
         }
+        *pcbRet += 1;
         return rc;
     }
 
-    if (ASMMemIsZero(pachSrc, cchSrc))
+    /*
+     * Empty string, probably...
+     */
+    if (cbSrcEncoded <= 1)
     {
         *pcbRet = 1;
         if (cbDst >= 1)
@@ -1640,10 +1710,8 @@ static int rtFsIsoVol_ReturnUdfDString(const char *pachSrc, size_t cchSrc, void 
     }
 
     *pcbRet = 0;
-    return VERR_INVALID_UTF8_ENCODING; /** @todo better status here */
+    return VERR_ISOFS_BOGUS_UDF_DSTRING_FIELD;
 }
-
-#endif /* maybe later */
 
 
 /**

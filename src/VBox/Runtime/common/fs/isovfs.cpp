@@ -3897,51 +3897,6 @@ static DECLCALLBACK(int) rtFsIsoVol_QueryInfo(void *pvThis, PRTFSOBJINFO pObjInf
 }
 
 
-static int rtFsIsoVol_ReturnUdfDString(const char *pachSrc, size_t cchSrc, void *pvDst, size_t cbDst, size_t *pcbRet)
-{
-    char *pszDst = (char *)pvDst;
-
-    if (pachSrc[0] == 8)
-    {
-        size_t  const cchText   = RT_MIN((uint8_t)pachSrc[cchSrc - 1], cchSrc - 2);
-        size_t  const cchActual = RTStrNLen(&pachSrc[1], cchText);
-        *pcbRet = cchActual + 1;
-        int rc = RTStrCopyEx(pszDst, cbDst, &pachSrc[1], cchActual);
-        if (cbDst > 0)
-            RTStrPurgeEncoding(pszDst);
-        return rc;
-    }
-
-    if (pachSrc[0] == 16)
-    {
-        PCRTUTF16 pwszSrc = (PCRTUTF16)&pachSrc[1];
-        if (cchSrc > 0)
-            return RTUtf16BigToUtf8Ex(pwszSrc, (cchSrc - 2) / sizeof(RTUTF16), &pszDst, cchSrc, pcbRet);
-        int rc = RTUtf16CalcUtf8LenEx(pwszSrc, (cchSrc - 2) / sizeof(RTUTF16), pcbRet);
-        if (RT_SUCCESS(rc))
-        {
-            *pcbRet += 1;
-            return VERR_BUFFER_OVERFLOW;
-        }
-        return rc;
-    }
-
-    if (ASMMemIsZero(pachSrc, cchSrc))
-    {
-        *pcbRet = 1;
-        if (cbDst >= 1)
-        {
-            *pszDst = '\0';
-            return VINF_SUCCESS;
-        }
-        return VERR_BUFFER_OVERFLOW;
-    }
-
-    *pcbRet = 0;
-    return VERR_INVALID_UTF8_ENCODING; /** @todo better status here */
-}
-
-
 /**
  * For now this is a sanitized version of rtFsIsoVolGetMaybeUtf16Be, which is
  * probably not correct or anything, but will have to do for now.
@@ -4055,11 +4010,11 @@ static DECLCALLBACK(int) rtFsIsoVol_QueryInfoEx(void *pvThis, RTVFSQIEX enmInfo,
         case RTVFSQIEX_VOL_LABEL:
         case RTVFSQIEX_VOL_LABEL_ALT:
         {
-            if (pThis->enmType == RTFSISOVOLTYPE_UDF
+            if (   pThis->enmType == RTFSISOVOLTYPE_UDF
                 && (   enmInfo == RTVFSQIEX_VOL_LABEL
                     || pThis->offPrimaryVolDesc == 0))
-                return rtFsIsoVol_ReturnUdfDString(pThis->Udf.VolInfo.achLogicalVolumeID,
-                                                   sizeof(pThis->Udf.VolInfo.achLogicalVolumeID), pvInfo, cbInfo, pcbRet);
+                return RTFsUdfHlpDStringFieldToUtf8Buf(pThis->Udf.VolInfo.achLogicalVolumeID,
+                                                       sizeof(pThis->Udf.VolInfo.achLogicalVolumeID), pvInfo, cbInfo, pcbRet);
 
             bool const fPrimary = enmInfo == RTVFSQIEX_VOL_LABEL_ALT
                                || pThis->enmType == RTFSISOVOLTYPE_ISO9960;

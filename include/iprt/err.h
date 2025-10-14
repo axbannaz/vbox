@@ -2657,6 +2657,8 @@
 #define VERR_ISOFS_BOGUS_ALLOCATION_EXTENT_LENGTH       (-25347)
 /** Too fragmented file. */
 #define VERR_ISOFS_TOO_MANY_FILE_FRAGMENTS              (-25348)
+/** Bogus UDF dstring field value. */
+#define VERR_ISOFS_BOGUS_UDF_DSTRING_FIELD              (-25349)
 
 /** Not implemented for UDF. */
 #define VERR_ISOFS_UDF_NOT_IMPLEMENTED                  (-25390)

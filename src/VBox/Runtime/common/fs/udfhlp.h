@@ -343,5 +343,7 @@ DECLHIDDEN(int)  RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8
                                                 uint64_t cbMax, RTVFSFILE hVfsBacking, uint8_t *pbBuf,
                                                 uint32_t *pcExtents, PRTFSISOEXTENT pFirstExtent, PRTFSISOEXTENT *ppaExtents);
 
+DECLHIDDEN(int)  RTFsUdfHlpDStringFieldToUtf8Buf(const char *pachSrc, size_t cbSrc, void *pvDst, size_t cbDst, size_t *pcbRet);
+
 
 #endif /* !IPRT_INCLUDED_SRC_common_fs_udfhlp_h */
