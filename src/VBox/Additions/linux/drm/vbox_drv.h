@@ -302,6 +302,10 @@ struct vbox_private {
 	} ttm;
 
 	struct mutex hw_mutex; /* protects modeset and accel/vbva accesses */
+#if RTLNX_VER_MIN(6,18,0)
+	/** Replacement for struct drm_device .struct_mutex. */
+	struct mutex struct_mutex;
+#endif
 	/**
 	 * We decide whether or not user-space supports display hot-plug
 	 * depending on whether they react to a hot-plug event after the initial

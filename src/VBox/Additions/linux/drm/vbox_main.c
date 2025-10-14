@@ -181,7 +181,8 @@ int vbox_framebuffer_init(struct drm_device *dev,
 	int ret;
 
 #if RTLNX_VER_MIN(6,17,0)
-	drm_helper_mode_fill_fb_struct(dev, &vbox_fb->base, NULL, mode_cmd);
+	const struct drm_format_info *format = drm_get_format_info(dev, mode_cmd->pixel_format, 0);
+	drm_helper_mode_fill_fb_struct(dev, &vbox_fb->base, format, mode_cmd);
 #elif RTLNX_VER_MIN(4,11,0) || RTLNX_RHEL_MAJ_PREREQ(7,5)
 	drm_helper_mode_fill_fb_struct(dev, &vbox_fb->base, mode_cmd);
 #else
@@ -484,7 +485,9 @@ int vbox_driver_load(struct drm_device *dev, unsigned long flags)
 	vbox->dev = dev;
 
 	mutex_init(&vbox->hw_mutex);
-
+#if RTLNX_VER_MIN(6,18,0)
+	mutex_init(&vbox->struct_mutex);
+#endif
 	ret = vbox_hw_init(vbox);
 	if (ret)
 		return ret;
@@ -678,8 +681,16 @@ vbox_dumb_mmap_offset(struct drm_file *file,
 	struct drm_gem_object *obj;
 	int ret = 0;
 	struct vbox_bo *bo;
+	struct mutex *struct_mutex;
 
-	mutex_lock(&dev->struct_mutex);
+#if RTLNX_VER_MIN(6,18,0)
+	struct vbox_private *vbox = dev->dev_private;
+	struct_mutex = &vbox->struct_mutex;
+#else
+	struct_mutex = &dev->struct_mutex;
+#endif
+
+	mutex_lock(struct_mutex);
 #if RTLNX_VER_MIN(4,7,0) || RTLNX_RHEL_MAJ_PREREQ(7,4)
 	obj = drm_gem_object_lookup(file, handle);
 #else
@@ -704,6 +715,6 @@ vbox_dumb_mmap_offset(struct drm_file *file,
 	drm_gem_object_put(obj);
 
 out_unlock:
-	mutex_unlock(&dev->struct_mutex);
+	mutex_unlock(struct_mutex);
 	return ret;
 }
