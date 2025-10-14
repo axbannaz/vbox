@@ -769,6 +769,8 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
 #define RTFSISOMK_IMPORT_F_NO_J_ABSTRACT_FID    RT_BIT_32(23) /**< Don't import the abstract file ID joliet descriptor field. */
 #define RTFSISOMK_IMPORT_F_NO_J_BIBLIO_FID      RT_BIT_32(24) /**< Don't import the bibliographic file ID joliet descriptor field. */
 
+#define RTFSISOMK_IMPORT_F_NO_U_VOLUME_ID       RT_BIT_32(25) /**< Don't import the UDF volume ID (label). */
+
 #define RTFSISOMK_IMPORT_F_VALID_MASK           UINT32_C(0x01ffffff)
 /** @} */
 
