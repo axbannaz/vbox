@@ -27,7 +27,6 @@
 
 /* Qt includes: */
 #include <QApplication>
-#include <QHeaderView>
 #include <QHelpEvent>
 #include <QMenu>
 #include <QRegularExpression>
