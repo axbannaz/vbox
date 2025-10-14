@@ -136,8 +136,8 @@ private:
     QGridLayout      *m_pLayout;
     /** Holds the label instance. */
     QLabel           *m_pLabel;
-    /** Holds the table instance. */
-    UIBootListWidget *m_pTable;
+    /** Holds the list instance. */
+    UIBootListWidget *m_pList;
     /** Holds the toolbar instance. */
     QIToolBar        *m_pToolbar;
     /** Holds the move up action. */

@@ -38,9 +38,9 @@
 #include "UIConverter.h"
 #include "UIGlobalSession.h"
 #include "UIIconPool.h"
+#include "QIListWidget.h"
 #include "QIToolBar.h"
 #include "UITranslationEventListener.h"
-#include "QITreeWidget.h"
 
 /* COM includes: */
 #include "CMachine.h"
@@ -48,14 +48,14 @@
 #include "CPlatformProperties.h"
 
 
-/** QITreeWidgetItem extension for our UIBootListWidget. */
-class UIBootListWidgetItem : public QITreeWidgetItem
+/** QIListWidgetItem extension for our UIBootListWidget. */
+class UIBootListWidgetItem : public QIListWidgetItem
 {
     Q_OBJECT;
 
 public:
 
-    /** Constructs boot-table item of passed @a enmType. */
+    /** Constructs boot-list item of passed @a enmType. */
     UIBootListWidgetItem(KDeviceType enmType);
 
     /** Returns the item type. */
@@ -73,19 +73,19 @@ private:
 };
 
 
-/** QITreeWidget subclass used as system settings boot-table. */
-class UIBootListWidget : public QITreeWidget
+/** QIListWidget subclass used as system settings boot-list. */
+class UIBootListWidget : public QIListWidget
 {
     Q_OBJECT;
 
 signals:
 
-    /** Notifies listeners about current table row changed. */
-    void sigRowChanged();
+    /** Notifies listeners about current list item changed. */
+    void sigCurrentItemChanged();
 
 public:
 
-    /** Constructs boot-table passing @a pParent to the base-class. */
+    /** Constructs boot-list passing @a pParent to the base-class. */
     UIBootListWidget(QWidget *pParent = 0);
 
     /** Defines @a bootItems list. */
@@ -137,13 +137,13 @@ private:
 UIBootListWidgetItem::UIBootListWidgetItem(KDeviceType enmType)
     : m_enmType(enmType)
 {
-    setCheckState(0, Qt::Unchecked);
+    setCheckState(Qt::Unchecked);
     switch(enmType)
     {
-        case KDeviceType_Floppy:   setIcon(0, UIIconPool::iconSet(":/fd_16px.png")); break;
-        case KDeviceType_DVD:      setIcon(0, UIIconPool::iconSet(":/cd_16px.png")); break;
-        case KDeviceType_HardDisk: setIcon(0, UIIconPool::iconSet(":/hd_16px.png")); break;
-        case KDeviceType_Network:  setIcon(0, UIIconPool::iconSet(":/nw_16px.png")); break;
+        case KDeviceType_Floppy:   setIcon(UIIconPool::iconSet(":/fd_16px.png")); break;
+        case KDeviceType_DVD:      setIcon(UIIconPool::iconSet(":/cd_16px.png")); break;
+        case KDeviceType_HardDisk: setIcon(UIIconPool::iconSet(":/hd_16px.png")); break;
+        case KDeviceType_Network:  setIcon(UIIconPool::iconSet(":/nw_16px.png")); break;
         default: break; /* Shut up, MSC! */
     }
     sltRetranslateUI();
@@ -158,7 +158,7 @@ KDeviceType UIBootListWidgetItem::deviceType() const
 
 void UIBootListWidgetItem::sltRetranslateUI()
 {
-    setText(0, gpConverter->toString(m_enmType));
+    setText(gpConverter->toString(m_enmType));
 }
 
 
@@ -167,7 +167,7 @@ void UIBootListWidgetItem::sltRetranslateUI()
 *********************************************************************************************************************************/
 
 UIBootListWidget::UIBootListWidget(QWidget *pParent /* = 0 */)
-    : QITreeWidget(pParent)
+    : QIListWidget(pParent)
 {
     prepare();
 }
@@ -181,13 +181,13 @@ void UIBootListWidget::setBootItems(const UIBootItemDataList &bootItems)
     foreach (const UIBootItemData &data, bootItems)
     {
         UIBootListWidgetItem *pItem = new UIBootListWidgetItem(data.m_enmType);
-        pItem->setCheckState(0, data.m_fEnabled ? Qt::Checked : Qt::Unchecked);
-        addTopLevelItem(pItem);
+        pItem->setCheckState(data.m_fEnabled ? Qt::Checked : Qt::Unchecked);
+        addItem(pItem);
     }
 
     /* Make sure at least one is chosen: */
-    if (topLevelItemCount())
-        setCurrentItem(topLevelItem(0));
+    if (count())
+        setCurrentItem(item(0));
 
     /* That changes the size: */
     updateGeometry();
@@ -199,12 +199,12 @@ UIBootItemDataList UIBootListWidget::bootItems() const
     UIBootItemDataList bootItems;
 
     /* Enumerate all the items we have: */
-    for (int i = 0; i < topLevelItemCount(); ++i)
+    for (int i = 0; i < count(); ++i)
     {
-        QTreeWidgetItem *pItem = topLevelItem(i);
+        QListWidgetItem *pItem = item(i);
         UIBootItemData bootData;
         bootData.m_enmType = static_cast<UIBootListWidgetItem*>(pItem)->deviceType();
-        bootData.m_fEnabled = pItem->checkState(0) == Qt::Checked;
+        bootData.m_fEnabled = pItem->checkState() == Qt::Checked;
         bootItems << bootData;
     }
 
@@ -232,10 +232,10 @@ QSize UIBootListWidget::sizeHint() const
 QSize UIBootListWidget::minimumSizeHint() const
 {
     /* Try to get actual item count: */
-    int iItemCount = topLevelItemCount();
+    int iCount = count();
     /* [By default] calculate for 4 items: */
-    if (iItemCount < 1)
-        iItemCount = 4;
+    if (iCount < 1)
+        iCount = 4;
 
     /* Try to get actual size-hints for column/row: */
     int iColumnHint = sizeHintForColumn(0);
@@ -245,21 +245,21 @@ QSize UIBootListWidget::minimumSizeHint() const
     {
         QFontMetrics fm(font());
         iColumnHint = 15 * fm.averageCharWidth();
-        iRowHint = fm.height() + 2 * 3; /// @todo <= tree-widget item margin
+        iRowHint = fm.height() + 2 * 3; /// @todo <= list-widget item margin
     }
 
-    /* Take into account table frame as well: */
+    /* Take into account list frame as well: */
     const int iH = 2 * frameWidth();
     const int iW = iH;
 
-    /* Calculate tree-widget hint finally: */
-    return QSize(iColumnHint + iW, iRowHint * iItemCount + iH);
+    /* Calculate list-widget hint finally: */
+    return QSize(iColumnHint + iW, iRowHint * iCount + iH);
 }
 
 void UIBootListWidget::sltRetranslateUI()
 {
-    for (int i = 0; i < topLevelItemCount(); ++i)
-        static_cast<UIBootListWidgetItem*>(topLevelItem(i))->sltRetranslateUI();
+    for (int i = 0; i < count(); ++i)
+        static_cast<UIBootListWidgetItem*>(item(i))->sltRetranslateUI();
 }
 
 void UIBootListWidget::dropEvent(QDropEvent *pEvent)
@@ -270,14 +270,14 @@ void UIBootListWidget::dropEvent(QDropEvent *pEvent)
         case QAbstractItemView::AboveItem:
         case QAbstractItemView::BelowItem:
             /* Call to base-class: */
-            QITreeWidget::dropEvent(pEvent);
+            QIListWidget::dropEvent(pEvent);
             break;
         default:
             break;
     }
 
     /* Separately notify listeners: */
-    emit sigRowChanged();
+    emit sigCurrentItemChanged();
 }
 
 QModelIndex UIBootListWidget::moveCursor(QAbstractItemView::CursorAction cursorAction, Qt::KeyboardModifiers fModifiers)
@@ -314,18 +314,16 @@ QModelIndex UIBootListWidget::moveCursor(QAbstractItemView::CursorAction cursorA
                 break;
         }
     }
-    return QITreeWidget::moveCursor(cursorAction, fModifiers);
+    return QIListWidget::moveCursor(cursorAction, fModifiers);
 }
 
 void UIBootListWidget::prepare()
 {
-    header()->hide();
-    setRootIsDecorated(false);
     setDragDropMode(QAbstractItemView::InternalMove);
     setSelectionMode(QAbstractItemView::SingleSelection);
     setDropIndicatorShown(true);
     connect(this, &UIBootListWidget::currentItemChanged,
-            this, &UIBootListWidget::sigRowChanged);
+            this, &UIBootListWidget::sigCurrentItemChanged);
     connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
             this, &UIBootListWidget::sltRetranslateUI);
 }
@@ -342,11 +340,11 @@ QModelIndex UIBootListWidget::moveItemTo(const QModelIndex &index, int iRow)
 
     QPersistentModelIndex oldIndex(index);
     UIBootListWidgetItem *pItem = static_cast<UIBootListWidgetItem*>(itemFromIndex(oldIndex));
-    insertTopLevelItem(iRow, new UIBootListWidgetItem(pItem->deviceType()));
-    topLevelItem(iRow)->setCheckState(0, pItem->checkState(0));
+    insertItem(iRow, new UIBootListWidgetItem(pItem->deviceType()));
+    item(iRow)->setCheckState(pItem->checkState());
     QPersistentModelIndex newIndex = model()->index(iRow, 0);
-    delete takeTopLevelItem(oldIndex.row());
-    setCurrentItem(topLevelItem(newIndex.row()));
+    delete takeItem(oldIndex.row());
+    setCurrentItem(item(newIndex.row()));
     return QModelIndex(newIndex);
 }
 
@@ -481,7 +479,7 @@ UIBootOrderEditor::UIBootOrderEditor(QWidget *pParent /* = 0 */)
     : UIEditor(pParent, true /* show in basic mode? */)
     , m_pLayout(0)
     , m_pLabel(0)
-    , m_pTable(0)
+    , m_pList(0)
     , m_pToolbar(0)
     , m_pMoveUp(0)
     , m_pMoveDown(0)
@@ -491,13 +489,13 @@ UIBootOrderEditor::UIBootOrderEditor(QWidget *pParent /* = 0 */)
 
 void UIBootOrderEditor::setValue(const UIBootItemDataList &guiValue)
 {
-    if (m_pTable)
-        m_pTable->setBootItems(guiValue);
+    if (m_pList)
+        m_pList->setBootItems(guiValue);
 }
 
 UIBootItemDataList UIBootOrderEditor::value() const
 {
-    return m_pTable ? m_pTable->bootItems() : UIBootItemDataList();
+    return m_pList ? m_pList->bootItems() : UIBootItemDataList();
 }
 
 int UIBootOrderEditor::minimumLabelHorizontalHint() const
@@ -514,7 +512,7 @@ void UIBootOrderEditor::setMinimumLayoutIndent(int iIndent)
 bool UIBootOrderEditor::eventFilter(QObject *pObject, QEvent *pEvent)
 {
     /* Skip events sent to unrelated objects: */
-    if (m_pTable && pObject != m_pTable)
+    if (m_pList && pObject != m_pList)
         return UIEditor::eventFilter(pObject, pEvent);
 
     /* Handle only required event types: */
@@ -540,9 +538,9 @@ void UIBootOrderEditor::sltRetranslateUI()
 {
     if (m_pLabel)
         m_pLabel->setText(tr("&Boot Device Order (BIOS only)"));
-    if (m_pTable)
-        m_pTable->setToolTip(tr("VM will attempt to boot from checked devices, in order. "
-                                "Note: only supported for BIOS firmware type, i.e. when below UEFI option is off."));
+    if (m_pList)
+        m_pList->setToolTip(tr("VM will attempt to boot from checked devices, in order. "
+                               "Note: only supported for BIOS firmware type, i.e. when below UEFI option is off."));
     if (m_pMoveUp)
         m_pMoveUp->setToolTip(tr("Move device up in boot order"));
     if (m_pMoveDown)
@@ -575,26 +573,26 @@ void UIBootOrderEditor::prepare()
             m_pLayout->addWidget(m_pLabel, 0, 0);
         }
 
-        /* Create table layout: */
-        QHBoxLayout *pTableLayout = new QHBoxLayout;
-        if (pTableLayout)
+        /* Create list layout: */
+        QHBoxLayout *pListLayout = new QHBoxLayout;
+        if (pListLayout)
         {
-            pTableLayout->setContentsMargins(0, 0, 0, 0);
-            pTableLayout->setSpacing(1);
+            pListLayout->setContentsMargins(0, 0, 0, 0);
+            pListLayout->setSpacing(1);
 
-            /* Create table: */
-            m_pTable = new UIBootListWidget(this);
-            if (m_pTable)
+            /* Create list: */
+            m_pList = new UIBootListWidget(this);
+            if (m_pList)
             {
-                setFocusProxy(m_pTable);
+                setFocusProxy(m_pList);
                 if (m_pLabel)
-                    m_pLabel->setBuddy(m_pTable);
-                m_pTable->setAlternatingRowColors(true);
-                m_pTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-                m_pTable->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-                connect(m_pTable, &UIBootListWidget::sigRowChanged,
+                    m_pLabel->setBuddy(m_pList);
+                m_pList->setAlternatingRowColors(true);
+                m_pList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                m_pList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+                connect(m_pList, &UIBootListWidget::sigCurrentItemChanged,
                         this, &UIBootOrderEditor::sltHandleCurrentBootItemChange);
-                pTableLayout->addWidget(m_pTable);
+                pListLayout->addWidget(m_pList);
             }
 
             /* Create tool-bar: */
@@ -607,18 +605,18 @@ void UIBootOrderEditor::prepare()
                 /* Create Up action: */
                 m_pMoveUp = m_pToolbar->addAction(UIIconPool::iconSet(":/list_moveup_16px.png",
                                                                       ":/list_moveup_disabled_16px.png"),
-                                                  QString(), m_pTable, &UIBootListWidget::sltMoveItemUp);
+                                                  QString(), m_pList, &UIBootListWidget::sltMoveItemUp);
                 /* Create Down action: */
                 m_pMoveDown = m_pToolbar->addAction(UIIconPool::iconSet(":/list_movedown_16px.png",
                                                                         ":/list_movedown_disabled_16px.png"),
-                                                    QString(), m_pTable, &UIBootListWidget::sltMoveItemDown);
+                                                    QString(), m_pList, &UIBootListWidget::sltMoveItemDown);
 
-                /* Add tool-bar into table layout: */
-                pTableLayout->addWidget(m_pToolbar);
+                /* Add tool-bar into list layout: */
+                pListLayout->addWidget(m_pToolbar);
             }
 
-            /* Add table layout to main layout: */
-            m_pLayout->addLayout(pTableLayout, 0, 1, 4, 1);
+            /* Add list layout to main layout: */
+            m_pLayout->addLayout(pListLayout, 0, 1, 4, 1);
         }
     }
 
@@ -631,12 +629,13 @@ void UIBootOrderEditor::prepare()
 void UIBootOrderEditor::updateActionAvailability()
 {
     /* Update move up/down actions: */
-    QTreeWidgetItem *pCurrentTopLevelItem = m_pTable->currentItem();
-    const int iCurrentTopLevelItem = m_pTable->indexOfTopLevelItem(pCurrentTopLevelItem);
-    if (m_pTable && m_pMoveUp && iCurrentTopLevelItem != -1)
-        m_pMoveUp->setEnabled(m_pTable->hasFocus() && iCurrentTopLevelItem > 0);
-    if (m_pTable && m_pMoveDown && iCurrentTopLevelItem != -1)
-        m_pMoveDown->setEnabled(m_pTable->hasFocus() && iCurrentTopLevelItem < m_pTable->topLevelItemCount() - 1);
+    QListWidgetItem *pCurrentItem = m_pList->currentItem();
+    const QModelIndex idx = m_pList->indexFromItem(pCurrentItem);
+    const int iCurrentItem = idx.row();
+    if (m_pList && m_pMoveUp && iCurrentItem != -1)
+        m_pMoveUp->setEnabled(m_pList->hasFocus() && iCurrentItem > 0);
+    if (m_pList && m_pMoveDown && iCurrentItem != -1)
+        m_pMoveDown->setEnabled(m_pList->hasFocus() && iCurrentItem < m_pList->count() - 1);
 }
 
 #include "UIBootOrderEditor.moc"
