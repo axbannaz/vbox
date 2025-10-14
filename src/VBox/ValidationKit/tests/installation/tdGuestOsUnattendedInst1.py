@@ -277,17 +277,18 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
                     or 'debian' in self.sKind.lower()):
                 eNic0AttachType = vboxcon.NetworkAttachmentType_HostOnly;
 
-            # Also use it for windows xp to prevent it from ever going online.
+            # Also use it for Windows to prevent it from ever going online.
             if self.isWindows():
                 eNic0AttachType = vboxcon.NetworkAttachmentType_HostOnly;
 
         #
-        # Use host-only networks instead of host-only adapters for trunk builds on Mac OS.
+        # Use NAT instead of host-only adapters on macOS because we can't find the
+        # guest's IP address without having the guest additions installed, which is not
+        # always the case.
         #
         if     eNic0AttachType   == vboxcon.NetworkAttachmentType_HostOnly \
-           and utils.getHostOs() == 'darwin' \
-           and oTestDrv.fpApiVer >= 7.0:
-            eNic0AttachType = vboxcon.NetworkAttachmentType_HostOnlyNetwork;
+           and utils.getHostOs() == 'darwin':
+            eNic0AttachType = vboxcon.NetworkAttachmentType_NAT;
 
         return vboxtestvms.BaseTestVm._createVmDoIt(self, oTestDrv, eNic0AttachType, sDvdImage); # pylint: disable=protected-access
 
