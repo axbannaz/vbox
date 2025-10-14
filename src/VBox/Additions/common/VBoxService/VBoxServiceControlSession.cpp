@@ -2187,11 +2187,26 @@ static int vgsvcGstCtrlSessionHandleFsObjQueryInfo(const PVBOXSERVICECTRLSESSION
     char               szPath[RTPATH_MAX];
     GSTCTLFSOBJATTRADD enmAttrAdd;
     uint32_t           fFlags;
-    RTFSOBJINFO        objInfoRuntime;
 
     int rc = VbglR3GuestCtrlFsObjGetQueryInfo(pHostCtx, szPath, sizeof(szPath), &enmAttrAdd, &fFlags);
     if (RT_SUCCESS(rc))
     {
+        RTFSOBJINFO objInfoRuntime;
+        RT_ZERO(objInfoRuntime);
+
+        /*
+         * For now we ASSUME that RTFSOBJINFO == GSTCTLFSOBJINFO, which implies that we simply can cast RTFSOBJINFO
+         * to GSTCTLFSOBJINFO. This might change in the future, however, so be extra cautious here.
+         *
+         * Ditto for RTFSOBJATTR == GSTCTLFSOBJATTR.
+         */
+        AssertCompileSize(objInfoRuntime, sizeof(GSTCTLFSOBJINFO));
+        AssertCompile    (RT_OFFSETOF(GSTCTLFSOBJINFO, cbObject) == RT_OFFSETOF(GSTCTLFSOBJINFO, cbObject));
+        AssertCompile    (RT_OFFSETOF(GSTCTLFSOBJINFO, Attr)     == RT_OFFSETOF(GSTCTLFSOBJINFO, Attr));
+        AssertCompileSize(RTFSOBJATTR, sizeof(GSTCTLFSOBJATTR));
+
+        PGSTCTLFSOBJINFO pObjInfo = (PGSTCTLFSOBJINFO)&objInfoRuntime;
+
         uint32_t fFlagsRuntime = 0;
 
         if (!(fFlags & ~GSTCTL_PATH_F_VALID_MASK))
@@ -2232,31 +2247,26 @@ static int vgsvcGstCtrlSessionHandleFsObjQueryInfo(const PVBOXSERVICECTRLSESSION
 
 #undef CASE_ATTR_ADD_VAL
 
-            /*
-             * For now we ASSUME that RTFSOBJINFO == GSTCTLFSOBJINFO, which implies that we simply can cast RTFSOBJINFO
-             * to GSTCTLFSOBJINFO. This might change in the future, however, so be extra cautious here.
-             *
-             * Ditto for RTFSOBJATTR == GSTCTLFSOBJATTR.
-             */
-            AssertCompileSize(objInfoRuntime, sizeof(GSTCTLFSOBJINFO));
-            AssertCompile    (RT_OFFSETOF(GSTCTLFSOBJINFO, cbObject) == RT_OFFSETOF(GSTCTLFSOBJINFO, cbObject));
-            AssertCompile    (RT_OFFSETOF(GSTCTLFSOBJINFO, Attr)     == RT_OFFSETOF(GSTCTLFSOBJINFO, Attr));
-            AssertCompileSize(RTFSOBJATTR, sizeof(GSTCTLFSOBJATTR));
-
             rc = RTPathQueryInfoEx(szPath, &objInfoRuntime, enmAttrRuntime, fFlagsRuntime);
+            if (RT_SUCCESS(rc))
+            {
+                const char *pszUser  = VGSvcIdCacheGetUidName(&pSession->UidCache, pObjInfo->Attr.u.Unix.uid, szPath, NULL /* pszRelativeTo */);
+                const char *pszGroup = VGSvcIdCacheGetGidName(&pSession->GidCache, pObjInfo->Attr.u.Unix.gid, szPath, NULL /* pszRelativeTo */);
+
+                int rc2 = VbglR3GuestCtrlFsObjCbQueryInfoEx(pHostCtx, rc, pObjInfo, pszUser, pszGroup);
+                if (RT_FAILURE(rc2))
+                {
+                    VGSvcError("Failed to reply to fsobjquerinfo request %Rrc, rc=%Rrc\n", rc, rc2);
+                    if (RT_SUCCESS(rc))
+                        rc = rc2;
+                }
+            }
         }
 
-        PGSTCTLFSOBJINFO pObjInfo = (PGSTCTLFSOBJINFO)&objInfoRuntime;
-
-        const char *pszUser  = VGSvcIdCacheGetUidName(&pSession->UidCache, pObjInfo->Attr.u.Unix.uid, szPath, NULL /* pszRelativeTo */);
-        const char *pszGroup = VGSvcIdCacheGetGidName(&pSession->GidCache, pObjInfo->Attr.u.Unix.gid, szPath, NULL /* pszRelativeTo */);
-
-        int rc2 = VbglR3GuestCtrlFsObjCbQueryInfoEx(pHostCtx, rc, pObjInfo, pszUser, pszGroup);
-        if (RT_FAILURE(rc2))
+        if (RT_FAILURE(rc))
         {
-            VGSvcError("Failed to reply to fsobjquerinfo request %Rrc, rc=%Rrc\n", rc, rc2);
-            if (RT_SUCCESS(rc))
-                rc = rc2;
+            VGSvcVerbose(1, "Querying information for '%s' failed, rc=%Rrc\n", szPath, rc);
+            /* ignore rc */ VbglR3GuestCtrlFsObjCbQueryInfo(pHostCtx, rc, pObjInfo);
         }
     }
     else
