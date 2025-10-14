@@ -2583,6 +2583,7 @@ RuntimeBldProg_SOURCES          = \
 	common/table/avlru64.cpp \
 	common/table/avlruintptr.cpp \
 	common/table/avlu32.cpp \
+	common/table/avlu64.cpp \
 	common/table/avluintptr.cpp \
 	common/time/time.cpp \
 	common/time/timeprog.cpp \
