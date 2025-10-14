@@ -27,51 +27,48 @@
 
 /* Qt includes: */
 #include <QDir>
-#include <QHeaderView>
 #include <QPainter>
 #include <QRegularExpression>
-#include <QTranslator>
 #include <QVBoxLayout>
 
 /* GUI includes: */
+#include "QIListWidget.h"
 #include "QIRichTextLabel.h"
-#include "QITreeWidget.h"
 #include "UILanguageSettingsEditor.h"
 #include "UITranslator.h"
 
 /* Other VBox includes: */
 #include <iprt/assert.h>
-#include <iprt/errcore.h>
 #include <iprt/path.h>
 
 
-/** QITreeWidgetItem subclass representing language tree-widget item. */
-class UILanguageItem : public QITreeWidgetItem
+/** QIListWidgetItem subclass representing language list-widget item. */
+class UILanguageItem : public QIListWidgetItem
 {
     Q_OBJECT;
 
 public:
 
-    /** Casts QTreeWidgetItem* to UILanguageItem* if possible. */
-    static UILanguageItem *toItem(QTreeWidgetItem *pItem);
-    /** Casts const QTreeWidgetItem* to const UILanguageItem* if possible. */
-    static const UILanguageItem *toItem(const QTreeWidgetItem *pItem);
+    /** Casts QListWidgetItem* to UILanguageItem* if possible. */
+    static UILanguageItem *toItem(QListWidgetItem *pItem);
+    /** Casts const QListWidgetItem* to const UILanguageItem* if possible. */
+    static const UILanguageItem *toItem(const QListWidgetItem *pItem);
 
-    /** Constructs language tree-widget item passing @a pParent to the base-class.
+    /** Constructs language list-widget item passing @a pParent to the base-class.
       * @param  translator  Brings the translator this item is related to.
       * @param  strId       Brings the language ID this item is related to.
       * @param  fBuiltIn    Brings whether the language this item related to is built in. */
-    UILanguageItem(QITreeWidget *pParent, const QTranslator &translator,
+    UILanguageItem(QIListWidget *pParent, const QTranslator &translator,
                    const QString &strId, bool fBuiltIn);
-    /** Constructs language tree-widget item passing @a pParent to the base-class.
+    /** Constructs language list-widget item passing @a pParent to the base-class.
       * @param  strId       Brings the language ID this item is related to.
       * @note   This is a constructor for an invalid language ID (i.e. when a
       *         language file is missing or corrupt). */
-    UILanguageItem(QITreeWidget *pParent, const QString &strId);
-    /** Constructs language tree-widget item passing @a pParent to the base-class.
+    UILanguageItem(QIListWidget *pParent, const QString &strId);
+    /** Constructs language list-widget item passing @a pParent to the base-class.
       * @note   This is a constructor for a default language ID
       *         (column 1 will be set to QString()). */
-    UILanguageItem(QITreeWidget *pParent);
+    UILanguageItem(QIListWidget *pParent);
 
     /** Returns the ID. */
     QString id() const { return m_strId; }
@@ -83,7 +80,7 @@ public:
     bool isBuiltIn() const { return m_fBuiltIn; }
 
     /** Returns whether this item is less than @a another one. */
-    bool operator<(const QTreeWidgetItem &another) const RT_OVERRIDE RT_FINAL;
+    bool operator<(const QListWidgetItem &another) const RT_OVERRIDE RT_FINAL;
 
 private:
 
@@ -108,14 +105,14 @@ private:
 *********************************************************************************************************************************/
 
 /* static */
-UILanguageItem *UILanguageItem::toItem(QTreeWidgetItem *pItem)
+UILanguageItem *UILanguageItem::toItem(QListWidgetItem *pItem)
 {
-    /* Make sure alive QITreeWidgetItem passed: */
+    /* Make sure alive QIListWidgetItem passed: */
     if (!pItem || pItem->type() != ItemType)
         return 0;
 
-    /* Acquire casted QITreeWidgetItem: */
-    QITreeWidgetItem *pIntermediateItem = static_cast<QITreeWidgetItem*>(pItem);
+    /* Acquire casted QIListWidgetItem: */
+    QIListWidgetItem *pIntermediateItem = static_cast<QIListWidgetItem*>(pItem);
     if (!pIntermediateItem)
         return 0;
 
@@ -124,14 +121,14 @@ UILanguageItem *UILanguageItem::toItem(QTreeWidgetItem *pItem)
 }
 
 /* static */
-const UILanguageItem *UILanguageItem::toItem(const QTreeWidgetItem *pItem)
+const UILanguageItem *UILanguageItem::toItem(const QListWidgetItem *pItem)
 {
-    /* Make sure alive QITreeWidgetItem passed: */
+    /* Make sure alive QIListWidgetItem passed: */
     if (!pItem || pItem->type() != ItemType)
         return 0;
 
-    /* Acquire casted QITreeWidgetItem: */
-    const QITreeWidgetItem *pIntermediateItem = static_cast<const QITreeWidgetItem*>(pItem);
+    /* Acquire casted QIListWidgetItem: */
+    const QIListWidgetItem *pIntermediateItem = static_cast<const QIListWidgetItem*>(pItem);
     if (!pIntermediateItem)
         return 0;
 
@@ -139,9 +136,9 @@ const UILanguageItem *UILanguageItem::toItem(const QTreeWidgetItem *pItem)
     return qobject_cast<const UILanguageItem*>(pIntermediateItem);
 }
 
-UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QTranslator &translator,
+UILanguageItem::UILanguageItem(QIListWidget *pParent, const QTranslator &translator,
                                const QString &strId, bool fBuiltIn)
-    : QITreeWidgetItem(pParent)
+    : QIListWidgetItem(pParent)
     , m_fBuiltIn(fBuiltIn)
 {
     /* Sanity check: */
@@ -181,7 +178,7 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QTranslator &transla
     }
 
     /* Init fields: */
-    setText(0, strItemName);
+    setText(strItemName);
     m_strId = strId;
     m_strLanguageName = strLanguageName;
     m_strTranslatorName = strTranslatorName;
@@ -189,48 +186,48 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QTranslator &transla
     /* Current language appears in bold: */
     if (id() == UITranslator::languageId())
     {
-        QFont fnt = font(0);
+        QFont fnt = font();
         fnt.setBold(true);
-        setFont(0, fnt);
+        setFont(fnt);
     }
 }
 
-UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QString &strId)
-    : QITreeWidgetItem(pParent)
+UILanguageItem::UILanguageItem(QIListWidget *pParent, const QString &strId)
+    : QIListWidgetItem(pParent)
     , m_fBuiltIn(false)
 {
     /* Sanity check: */
     Assert(!strId.isEmpty());
 
     /* Init fields: */
-    setText(0, QString("<%1>").arg(strId));
+    setText(QString("<%1>").arg(strId));
     m_strId = strId;
     m_strLanguageName = tr("<unavailable>", "Language");
     m_strTranslatorName = tr("<unknown>", "Author(s)");
 
     /* Invalid language appears in italic: */
-    QFont fnt = font(0);
+    QFont fnt = font();
     fnt.setItalic(true);
-    setFont(0, fnt);
+    setFont(fnt);
 }
 
-UILanguageItem::UILanguageItem(QITreeWidget *pParent)
-    : QITreeWidgetItem(pParent)
+UILanguageItem::UILanguageItem(QIListWidget *pParent)
+    : QIListWidgetItem(pParent)
     , m_fBuiltIn(false)
 {
     /* Init fields: */
-    setText(0, tr("Default", "Language"));
+    setText(tr("Default", "Language"));
 
     /* Default language item appears in italic: */
-    QFont fnt = font(0);
+    QFont fnt = font();
     fnt.setItalic(true);
-    setFont(0, fnt);
+    setFont(fnt);
 }
 
-bool UILanguageItem::operator<(const QTreeWidgetItem &another) const
+bool UILanguageItem::operator<(const QListWidgetItem &another) const
 {
     /* Cast another item to language one: */
-    const QTreeWidgetItem *pAnotherItem = &another;
+    const QListWidgetItem *pAnotherItem = &another;
     AssertPtrReturn(pAnotherItem, false);
     const UILanguageItem *pAnotherLanguageItem = toItem(pAnotherItem);
     AssertPtrReturn(pAnotherLanguageItem, false);
@@ -246,7 +243,7 @@ bool UILanguageItem::operator<(const QTreeWidgetItem &another) const
         return false;
 
     /* Call to base-class: */
-    return QITreeWidgetItem::operator<(another);
+    return QIListWidgetItem::operator<(another);
 }
 
 /* static */
@@ -268,7 +265,7 @@ QString UILanguageItem::tratra(const QTranslator &translator, const char *pConte
 UILanguageSettingsEditor::UILanguageSettingsEditor(QWidget *pParent /* = 0 */)
     : UIEditor(pParent, true /* show in basic mode? */)
     , m_fPolished(false)
-    , m_pTreeWidget(0)
+    , m_pListWidget(0)
     , m_pLabelInfo(0)
 {
     prepare();
@@ -277,31 +274,31 @@ UILanguageSettingsEditor::UILanguageSettingsEditor(QWidget *pParent /* = 0 */)
 void UILanguageSettingsEditor::setValue(const QString &strValue)
 {
     /* Update cached value and
-     * tree-widget if value has changed: */
+     * list-widget if value has changed: */
     if (m_strValue != strValue)
     {
         m_strValue = strValue;
-        if (m_pTreeWidget)
-            reloadLanguageTree();
+        if (m_pListWidget)
+            reloadLanguageList();
     }
 }
 
 QString UILanguageSettingsEditor::value() const
 {
-    UILanguageItem *pCurrentItem = m_pTreeWidget ? UILanguageItem::toItem(m_pTreeWidget->currentItem()) : 0;
+    UILanguageItem *pCurrentItem = m_pListWidget ? UILanguageItem::toItem(m_pListWidget->currentItem()) : 0;
     return pCurrentItem ? pCurrentItem->id() : m_strValue;
 }
 
 void UILanguageSettingsEditor::sltRetranslateUI()
 {
-    /* Translate tree-widget: */
-    if (m_pTreeWidget)
+    /* Translate list-widget: */
+    if (m_pListWidget)
     {
-        m_pTreeWidget->setWhatsThis(tr("Available user interface languages. The effective language is written "
+        m_pListWidget->setWhatsThis(tr("Available user interface languages. The effective language is written "
                                        "in bold. Select Default to reset to the system default language."));
 
-        /* Update tree-widget contents finally: */
-        reloadLanguageTree();
+        /* Update list-widget contents finally: */
+        reloadLanguageList();
     }
 }
 
@@ -325,12 +322,12 @@ void UILanguageSettingsEditor::polishEvent(QShowEvent * /* pEvent */)
         m_pLabelInfo->setMinimumTextWidth(m_pLabelInfo->width());
 }
 
-void UILanguageSettingsEditor::sltHandleItemPainting(QTreeWidgetItem *pItem, QPainter *pPainter)
+void UILanguageSettingsEditor::sltHandleItemPainting(QListWidgetItem *pItem, QPainter *pPainter)
 {
     /* Sanity check: */
     AssertPtrReturnVoid(pItem);
     AssertPtrReturnVoid(pPainter);
-    AssertPtrReturnVoid(m_pTreeWidget);
+    AssertPtrReturnVoid(m_pListWidget);
 
     /* Cast item to language one: */
     UILanguageItem *pLanguageItem = UILanguageItem::toItem(pItem);
@@ -339,15 +336,15 @@ void UILanguageSettingsEditor::sltHandleItemPainting(QTreeWidgetItem *pItem, QPa
     /* For built in language item: */
     if (pLanguageItem->isBuiltIn())
     {
-        /* We are drawing a separator line in the tree: */
-        const QRect rect = m_pTreeWidget->visualItemRect(pLanguageItem);
-        pPainter->setPen(m_pTreeWidget->palette().color(QPalette::Window));
+        /* We are drawing a separator line in the list: */
+        const QRect rect = m_pListWidget->visualItemRect(pLanguageItem);
+        pPainter->setPen(m_pListWidget->palette().color(QPalette::Window));
         pPainter->drawLine(rect.x(), rect.y() + rect.height() - 1,
                            rect.x() + rect.width(), rect.y() + rect.height() - 1);
     }
 }
 
-void UILanguageSettingsEditor::sltHandleCurrentItemChange(QTreeWidgetItem *pItem)
+void UILanguageSettingsEditor::sltHandleCurrentItemChange(QListWidgetItem *pItem)
 {
     /* Sanity check: */
     AssertPtrReturnVoid(m_pLabelInfo);
@@ -381,19 +378,10 @@ void UILanguageSettingsEditor::prepare()
     {
         pLayoutMain->setContentsMargins(0, 0, 0, 0);
 
-        /* Prepare tree-widget: */
-        m_pTreeWidget = new QITreeWidget(this);
-        if (m_pTreeWidget)
-        {
-            m_pTreeWidget->header()->hide();
-            m_pTreeWidget->setColumnCount(4);
-            m_pTreeWidget->hideColumn(1);
-            m_pTreeWidget->hideColumn(2);
-            m_pTreeWidget->hideColumn(3);
-            m_pTreeWidget->setRootIsDecorated(false);
-
-            pLayoutMain->addWidget(m_pTreeWidget);
-        }
+        /* Prepare list-widget: */
+        m_pListWidget = new QIListWidget(this);
+        if (m_pListWidget)
+            pLayoutMain->addWidget(m_pListWidget);
 
         /* Prepare info label: */
         m_pLabelInfo = new QIRichTextLabel(this);
@@ -407,25 +395,25 @@ void UILanguageSettingsEditor::prepare()
     }
 
     /* Prepare connections: */
-    if (m_pTreeWidget)
+    if (m_pListWidget)
     {
-        connect(m_pTreeWidget, &QITreeWidget::painted, this, &UILanguageSettingsEditor::sltHandleItemPainting);
-        connect(m_pTreeWidget, &QITreeWidget::currentItemChanged, this, &UILanguageSettingsEditor::sltHandleCurrentItemChange);
+        connect(m_pListWidget, &QIListWidget::painted, this, &UILanguageSettingsEditor::sltHandleItemPainting);
+        connect(m_pListWidget, &QIListWidget::currentItemChanged, this, &UILanguageSettingsEditor::sltHandleCurrentItemChange);
     }
 
     /* Apply language settings: */
     sltRetranslateUI();
 }
 
-void UILanguageSettingsEditor::reloadLanguageTree()
+void UILanguageSettingsEditor::reloadLanguageList()
 {
     /* Sanity check: */
-    AssertPtrReturnVoid(m_pTreeWidget);
+    AssertPtrReturnVoid(m_pListWidget);
 
-    /* Clear languages tree: */
-    m_pTreeWidget->clear();
+    /* Clear languages list: */
+    m_pListWidget->clear();
 
-    /* Load languages tree: */
+    /* Load languages list: */
     char szNlsPath[RTPATH_MAX];
     const int rc = RTPathAppPrivateNoArch(szNlsPath, sizeof(szNlsPath));
     AssertRC(rc);
@@ -437,9 +425,9 @@ void UILanguageSettingsEditor::reloadLanguageTree()
 
     QTranslator translator;
     /* Add the default language: */
-    new UILanguageItem(m_pTreeWidget);
+    new UILanguageItem(m_pListWidget);
     /* Add the built-in language: */
-    new UILanguageItem(m_pTreeWidget, translator, UITranslator::vboxBuiltInLanguageName(), true /* built-in */);
+    new UILanguageItem(m_pListWidget, translator, UITranslator::vboxBuiltInLanguageName(), true /* built-in */);
     /* Add all remaining languages: */
     foreach (const QString &strFileName, files)
     {
@@ -460,14 +448,14 @@ void UILanguageSettingsEditor::reloadLanguageTree()
             continue;
 
         /* Create corresponding language item: */
-        new UILanguageItem(m_pTreeWidget, translator, mt.captured(1), false /* built-in */);
+        new UILanguageItem(m_pListWidget, translator, mt.captured(1), false /* built-in */);
     }
 
     /* Search for a language to select: */
     UILanguageItem *pItem = 0;
-    for (int i = 0; i < m_pTreeWidget->childCount(); ++i)
+    for (int i = 0; i < m_pListWidget->childCount(); ++i)
     {
-        UILanguageItem *pLanguageItem = UILanguageItem::toItem(m_pTreeWidget->childItem(i));
+        UILanguageItem *pLanguageItem = UILanguageItem::toItem(m_pListWidget->childItem(i));
         AssertPtr(pLanguageItem);
         if (pLanguageItem && pLanguageItem->id() == m_strValue)
             pItem = pLanguageItem;
@@ -475,18 +463,15 @@ void UILanguageSettingsEditor::reloadLanguageTree()
 
     /* Add an pItem for an invalid language to represent it in the list: */
     if (!pItem)
-    {
-        pItem = new UILanguageItem(m_pTreeWidget, m_strValue);
-        m_pTreeWidget->resizeColumnToContents(0);
-    }
+        pItem = new UILanguageItem(m_pListWidget, m_strValue);
     AssertPtrReturnVoid(pItem);
 
-    /* Sort the tree and make current item visible: */
-    m_pTreeWidget->sortItems(0, Qt::AscendingOrder);
+    /* Sort the list and make current item visible: */
+    m_pListWidget->sortItems(Qt::AscendingOrder);
 
     /* Select the language item and make it visible: */
-    m_pTreeWidget->setCurrentItem(pItem);
-    m_pTreeWidget->scrollToItem(pItem);
+    m_pListWidget->setCurrentItem(pItem);
+    m_pListWidget->scrollToItem(pItem);
 }
 
 

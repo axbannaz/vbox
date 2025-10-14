@@ -35,9 +35,9 @@
 #include "UIEditor.h"
 
 /* Forward declartions: */
-class QTreeWidgetItem;
+class QListWidgetItem;
 class QIRichTextLabel;
-class QITreeWidget;
+class QIListWidget;
 
 /** UIEditor sub-class used as a language settings editor. */
 class SHARED_LIBRARY_STUFF UILanguageSettingsEditor : public UIEditor
@@ -67,10 +67,10 @@ private slots:
     virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
 
     /** Handles @a pItem painting with passed @a pPainter. */
-    void sltHandleItemPainting(QTreeWidgetItem *pItem, QPainter *pPainter);
+    void sltHandleItemPainting(QListWidgetItem *pItem, QPainter *pPainter);
 
     /** Handles current @a pItem change. */
-    void sltHandleCurrentItemChange(QTreeWidgetItem *pItem);
+    void sltHandleCurrentItemChange(QListWidgetItem *pItem);
 
 private:
 
@@ -78,7 +78,7 @@ private:
     void prepare();
 
     /** Reloads language list. */
-    void reloadLanguageTree();
+    void reloadLanguageList();
 
     /** Holds whether the page is polished. */
     bool  m_fPolished;
@@ -88,8 +88,8 @@ private:
 
     /** @name Widgets
      * @{ */
-        /** Holds the tree-widget instance. */
-        QITreeWidget     *m_pTreeWidget;
+        /** Holds the list-widget instance. */
+        QIListWidget     *m_pListWidget;
         /** Holds the info label instance. */
         QIRichTextLabel  *m_pLabelInfo;
     /** @} */
