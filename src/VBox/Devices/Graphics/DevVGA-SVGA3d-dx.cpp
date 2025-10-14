@@ -3215,6 +3215,9 @@ int vmsvga3dDXDefineStreamOutputWithMob(PVGASTATECC pThisCC, uint32_t idDXContex
     ASSERT_GUEST_RETURN(pDXContext->cot.paStreamOutput, VERR_INVALID_STATE);
     ASSERT_GUEST_RETURN(soid < pDXContext->cot.cStreamOutput, VERR_INVALID_PARAMETER);
     ASSERT_GUEST_RETURN(pCmd->numOutputStreamEntries < SVGA3D_MAX_STREAMOUT_DECLS, VERR_INVALID_PARAMETER);
+    ASSERT_GUEST_RETURN(pCmd->numOutputStreamStrides < SVGA3D_DX_MAX_SOTARGETS, VERR_INVALID_PARAMETER);
+    ASSERT_GUEST_RETURN(   pCmd->rasterizedStream < SVGA3D_DX_MAX_SOTARGETS
+                        || pCmd->rasterizedStream == SVGA3D_DX_SO_NO_RASTERIZED_STREAM, VERR_INVALID_PARAMETER);
     RT_UNTRUSTED_VALIDATED_FENCE();
 
     SVGACOTableDXStreamOutputEntry *pEntry = &pDXContext->cot.paStreamOutput[soid];
