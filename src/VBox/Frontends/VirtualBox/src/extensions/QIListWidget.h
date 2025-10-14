@@ -62,7 +62,7 @@ public:
     static QList<const QIListWidgetItem*> toList(const QList<const QListWidgetItem*> &initialList);
 
     /** Constructs item passing @a pListWidget into the base-class. */
-    QIListWidgetItem(QIListWidget *pListWidget);
+    QIListWidgetItem(QIListWidget *pListWidget = 0);
     /** Constructs item passing @a strText and @a pListWidget into the base-class. */
     QIListWidgetItem(const QString &strText, QIListWidget *pListWidget);
     /** Constructs item passing @a icon, @a strText and @a pListWidget into the base-class. */
