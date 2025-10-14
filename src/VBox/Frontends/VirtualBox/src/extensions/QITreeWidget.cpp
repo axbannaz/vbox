@@ -297,9 +297,6 @@ public:
             const int iColumnCount = tree()->columnCount();
             int iCurrentIndex = iColumnCount;
 
-            // Do some sanity check as well, enough?
-            AssertReturn(iIndex >= iColumnCount, 0);
-
             // Search for sibling with corresponding index:
             QTreeWidgetItem *pItem = tree()->topLevelItem(0);
             while (pItem && iCurrentIndex < iIndex)
