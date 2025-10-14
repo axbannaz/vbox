@@ -73,6 +73,12 @@ public:
       *         (column 1 will be set to QString()). */
     UILanguageItem(QITreeWidget *pParent);
 
+    /** Returns the ID. */
+    QString id() const { return m_strId; }
+    /** Returns the language name. */
+    QString languageName() const { return m_strLanguageName; }
+    /** Returns the translator name. */
+    QString translatorName() const { return m_strTranslatorName; }
     /** Returns whether this item is for built in language. */
     bool isBuiltIn() const { return m_fBuiltIn; }
 
@@ -86,6 +92,12 @@ private:
     static QString tratra(const QTranslator &translator, const char *pContext,
                           const char *pSourceText, const char *pComment);
 
+    /** Holds the ID. */
+    QString     m_strId;
+    /** Holds the language name. */
+    QString     m_strLanguageName;
+    /** Holds the translator name. */
+    QString     m_strTranslatorName;
     /** Holds whether this item is for built in language. */
     const bool  m_fBuiltIn;
 };
@@ -170,12 +182,12 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QTranslator &transla
 
     /* Init fields: */
     setText(0, strItemName);
-    setText(1, strId);
-    setText(2, strLanguageName);
-    setText(3, strTranslatorName);
+    m_strId = strId;
+    m_strLanguageName = strLanguageName;
+    m_strTranslatorName = strTranslatorName;
 
     /* Current language appears in bold: */
-    if (text(1) == UITranslator::languageId())
+    if (id() == UITranslator::languageId())
     {
         QFont fnt = font(0);
         fnt.setBold(true);
@@ -192,9 +204,9 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QString &strId)
 
     /* Init fields: */
     setText(0, QString("<%1>").arg(strId));
-    setText(1, strId);
-    setText(2, tr("<unavailable>", "Language"));
-    setText(3, tr("<unknown>", "Author(s)"));
+    m_strId = strId;
+    m_strLanguageName = tr("<unavailable>", "Language");
+    m_strTranslatorName = tr("<unknown>", "Author(s)");
 
     /* Invalid language appears in italic: */
     QFont fnt = font(0);
@@ -208,11 +220,6 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent)
 {
     /* Init fields: */
     setText(0, tr("Default", "Language"));
-    setText(1, QString());
-    /* Empty strings of some reasonable length to prevent the info part
-     * from being shrinked too much when the list wants to be wider */
-    setText(2, "                ");
-    setText(3, "                ");
 
     /* Default language item appears in italic: */
     QFont fnt = font(0);
@@ -229,9 +236,9 @@ bool UILanguageItem::operator<(const QTreeWidgetItem &another) const
     AssertPtrReturn(pAnotherLanguageItem, false);
 
     /* Compare id and built-in flag: */
-    if (text(1).isNull())
+    if (id().isNull())
         return true;
-    if (another.text(1).isNull())
+    if (pAnotherLanguageItem->id().isNull())
         return false;
     if (isBuiltIn())
         return true;
@@ -282,7 +289,7 @@ void UILanguageSettingsEditor::setValue(const QString &strValue)
 QString UILanguageSettingsEditor::value() const
 {
     UILanguageItem *pCurrentItem = m_pTreeWidget ? UILanguageItem::toItem(m_pTreeWidget->currentItem()) : 0;
-    return pCurrentItem ? pCurrentItem->text(1) : m_strValue;
+    return pCurrentItem ? pCurrentItem->id() : m_strValue;
 }
 
 void UILanguageSettingsEditor::sltRetranslateUI()
@@ -354,16 +361,16 @@ void UILanguageSettingsEditor::sltHandleCurrentItemChange(QTreeWidgetItem *pItem
     AssertPtrReturnVoid(pCurrentItem);
 
     /* Disable labels for the Default language item: */
-    const bool fEnabled = !pCurrentItem->text(1).isNull();
+    const bool fEnabled = !pCurrentItem->id().isNull();
     m_pLabelInfo->setEnabled(fEnabled);
     m_pLabelInfo->setText(QString("<table>"
                                   "<tr><td>%1&nbsp;</td><td>%2</td></tr>"
                                   "<tr><td>%3&nbsp;</td><td>%4</td></tr>"
                                   "</table>")
                                   .arg(tr("Language:"))
-                                  .arg(pCurrentItem->text(2))
+                                  .arg(pCurrentItem->languageName())
                                   .arg(tr("Author(s):"))
-                                  .arg(pCurrentItem->text(3)));
+                                  .arg(pCurrentItem->translatorName()));
 }
 
 void UILanguageSettingsEditor::prepare()
@@ -456,9 +463,15 @@ void UILanguageSettingsEditor::reloadLanguageTree()
         new UILanguageItem(m_pTreeWidget, translator, mt.captured(1), false /* built-in */);
     }
 
-    /* Search for necessary language: */
-    QList<QTreeWidgetItem*> itemsList = m_pTreeWidget->findItems(m_strValue, Qt::MatchExactly, 1);
-    QTreeWidgetItem *pItem = itemsList.isEmpty() ? 0 : itemsList.first();
+    /* Search for a language to select: */
+    UILanguageItem *pItem = 0;
+    for (int i = 0; i < m_pTreeWidget->childCount(); ++i)
+    {
+        UILanguageItem *pLanguageItem = UILanguageItem::toItem(m_pTreeWidget->childItem(i));
+        AssertPtr(pLanguageItem);
+        if (pLanguageItem && pLanguageItem->id() == m_strValue)
+            pItem = pLanguageItem;
+    }
 
     /* Add an pItem for an invalid language to represent it in the list: */
     if (!pItem)
