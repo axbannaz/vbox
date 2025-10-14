@@ -77,8 +77,8 @@ private:
     /** Prepares all. */
     void prepare();
 
-    /** Reloads language list, choosing item with @a strLanguageId as current. */
-    void reloadLanguageTree(const QString &strLanguageId);
+    /** Reloads language list. */
+    void reloadLanguageTree();
 
     /** Holds whether the page is polished. */
     bool  m_fPolished;
