@@ -3387,7 +3387,6 @@ class SessionWrapper(TdTaskBase):
                         sMacAddr     = None;
                     except:
                         reporter.log4Xcpt();
-                        pass;
             except:
                 reporter.errorXcpt();
                 return None;
