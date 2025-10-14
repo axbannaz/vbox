@@ -639,6 +639,7 @@ DECLINLINE(void) virtioCoreR3DescInfo(PCDBGFINFOHLP pHlp, PVIRTQ_DESC_T pDesc, u
 #ifdef VIRTIO_REL_INFO_DUMP
 DECLHIDDEN(void) virtioCoreR3DumpAvailRing(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHlp, PVIRTIOCORE pVirtio, PVIRTQUEUE pVirtq)
 {
+    AssertReturnVoid(pVirtq->uQueueSize <= VIRTQ_SIZE);
     uint16_t auTmp[VIRTQ_SIZE];
     virtioCoreGCPhysRead(pVirtio, pDevIns,
                          pVirtq->GCPhysVirtqAvail + RT_UOFFSETOF_DYN(VIRTQ_AVAIL_T, auRing[0]),
@@ -649,6 +650,7 @@ DECLHIDDEN(void) virtioCoreR3DumpAvailRing(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHl
 
 DECLHIDDEN(void) virtioCoreR3DumpUsedRing(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHlp, PVIRTIOCORE pVirtio, PVIRTQUEUE pVirtq)
 {
+    AssertReturnVoid(pVirtq->uQueueSize <= VIRTQ_SIZE);
     VIRTQ_USED_ELEM_T aTmp[VIRTQ_SIZE];
     virtioCoreGCPhysRead(pVirtio, pDevIns,
                          pVirtq->GCPhysVirtqUsed + RT_UOFFSETOF_DYN(VIRTQ_USED_T, aRing[0]),
@@ -799,6 +801,9 @@ DECLHIDDEN(void) virtioCoreR3VirtqInfo(PPDMDEVINS pDevIns, PCDBGFINFOHLP pHlp, P
     /* Avoid handling zero-sized queues, there is nothing to show anyway. */
     if (pVirtq->uQueueSize == 0)
         return;
+
+    /* Guest is not allowed to set too-large uQueueSize. */
+    AssertReturnVoid(pVirtq->uQueueSize <= VIRTQ_SIZE);
 
     pHlp->pfnPrintf(pHlp, "       desc table:\n");
     /*
@@ -2557,7 +2562,14 @@ static DECLCALLBACK(VBOXSTRICTRC) virtioMmioTransportWrite(PPDMDEVINS pDevIns, v
         {
             Assert(pVirtio->uVirtqSelect < RT_ELEMENTS(pVirtio->aVirtqueues));
             PVIRTQUEUE pVirtQueue = &pVirtio->aVirtqueues[pVirtio->uVirtqSelect];
-            pVirtQueue->uQueueSize = (uint16_t)u32Val;
+            if (RT_UNLIKELY(u32Val > VIRTQ_SIZE)) {
+                LogFunc(("... WARNING: Guest attempted to write too large virtq size (ignoring)\n"));
+            } else {
+                if (RT_UNLIKELY(!!pVirtQueue->uQueueSize != !!u32Val))
+                    LogFunc(("... WARNING: Guest attempted to switch virtq enabled/disabled state (ignoring)\n"));
+                else
+                    pVirtQueue->uQueueSize = (uint16_t)u32Val;
+            }
             break;
         }
         case VIRTIO_MMIO_REG_QUEUERDY_OFF:
