@@ -51,6 +51,7 @@
 #include <iprt/critsect.h>
 #include <iprt/ctype.h>
 #include <iprt/file.h>
+#include <iprt/latin1.h>
 #include <iprt/log.h>
 #include <iprt/mem.h>
 #include <iprt/poll.h>
@@ -180,6 +181,7 @@ DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMEST
  * @param   pFirstExtent    The first extent.  Typically, we won't need more
  *                          than this one.
  * @param   papExtents      Where to return an array of additional extents.
+ *                          Call RTFsUdfHlpFreeGatherExtents to free.
  */
 DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_t const *pbAllocDescs, uint32_t cbAllocDescs,
                                                uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
@@ -426,6 +428,17 @@ DECLHIDDEN(int) RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8_
                            cbAllocDescs, cbOneDesc, cbAllocDescs, pbAllocDescs));
     }
     return VINF_SUCCESS;
+}
+
+
+/**
+ * Frees the array of additional extents returned by
+ * RTFsUdfHlpGatherExtentsFromIcb.
+ */
+DECLHIDDEN(void) RTFsUdfHlpFreeGatherExtents(PRTFSISOEXTENT paExtents)
+{
+    if (paExtents)
+        RTMemFree(paExtents);
 }
 
 
@@ -1021,16 +1034,20 @@ DECLHIDDEN(int) RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVf
     /* never reached */
 }
 
-#if 0 /* maybe later */
 
 /**
- * Simple UDF read function.
+ * Generic UDF object read function.
  *
  * This deals with extent mappings as well as virtual partition related block
  * mapping and such.
  *
  * @returns VBox status code.
- * @param   pCore           The core object to read data from.
+ * @param   pVolInfo        The volume information (partition map ++).
+ * @param   hVfsBacking     The backing file/device/whatever.
+ * @param   cbObject        The actual size of the object being read.
+ * @param   cExtents        Number of allocation extents.  Must be at least 1.
+ * @param   pFirstExtent    Pointer to the first allocation extent.
+ * @param   paFurtherExtents Additional allocation extents.
  * @param   offRead         The offset to start reading at.
  * @param   pvBuf           The output buffer.
  * @param   cbToRead        The number of bytes to read.
@@ -1039,13 +1056,16 @@ DECLHIDDEN(int) RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVf
  *                          position.  Optional.  (Essentially same as pcbRead
  *                          except without the behavior change.)
  */
-static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pvBuf, size_t cbToRead,
-                                  size_t *pcbRead, size_t *poffPosMov)
+DECLHIDDEN(int) RTFsUdfHlpReadObject(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVfsBacking, uint64_t cbObject,
+                                     uint32_t cExtents, PCRTFSISOEXTENT pFirstExtent, PCRTFSISOEXTENT paFurtherExtents,
+                                     uint64_t offRead, void *pvBuf, size_t cbToRead, size_t *pcbRead, size_t *poffPosMov)
 {
+    Assert(cExtents > 0);
+
     /*
      * Check for EOF.
      */
-    if (offRead >= pCore->cbObject)
+    if (offRead >= cbObject)
     {
         if (poffPosMov)
             *poffPosMov = 0;
@@ -1057,8 +1077,8 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
         return VERR_EOF;
     }
     int rcRet = VINF_SUCCESS;
-    if (   cbToRead           > pCore->cbObject
-        || offRead + cbToRead > pCore->cbObject)
+    if (   cbToRead           > cbObject
+        || offRead + cbToRead > cbObject)
     {
         if (!pcbRead)
         {
@@ -1066,7 +1086,7 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
                 *poffPosMov = 0;
             return VERR_EOF;
         }
-        cbToRead = pCore->cbObject - offRead;
+        cbToRead = cbObject - offRead;
         rcRet = VINF_EOF;
     }
 
@@ -1083,15 +1103,15 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
          */
         uint64_t        offExtent  = 0;
         uint32_t        iExtent    = 0;
-        PCRTFSISOEXTENT pCurExtent = &pCore->FirstExtent;
+        PCRTFSISOEXTENT pCurExtent = pFirstExtent;
         if (offRead < pCurExtent->cbExtent)
         { /* likely */ }
         else
             do
             {
                 offExtent += pCurExtent->cbExtent;
-                pCurExtent = &pCore->paExtents[iExtent++];
-                if (iExtent >= pCore->cExtents)
+                pCurExtent = &paFurtherExtents[iExtent++];
+                if (iExtent >= cExtents)
                 {
                     memset(pvBuf, 0, cbToRead);
 
@@ -1107,7 +1127,6 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
         /*
          * Do the reading part.
          */
-        PRTFSISOVOL pVol = pCore->pVol;
         for (;;)
         {
             uint64_t offIntoExtent = offRead - offExtent;
@@ -1121,17 +1140,16 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
             {
                 int rc2;
                 if (pCurExtent->idxPart == UINT32_MAX)
-                    rc2 = RTVfsFileReadAt(pVol->hVfsBacking, pCurExtent->off + offIntoExtent, pvBuf, cbThisRead, NULL);
+                    rc2 = RTVfsFileReadAt(hVfsBacking, pCurExtent->off + offIntoExtent, pvBuf, cbThisRead, NULL);
                 else
                 {
-                    Assert(pVol->enmType == RTFSISOVOLTYPE_UDF);
-                    if (pCurExtent->idxPart < pVol->Udf.VolInfo.cPartitions)
+                    if (pCurExtent->idxPart < pVolInfo->cPartitions)
                     {
-                        PRTFSISOVOLUDFPMAP pPart = &pVol->Udf.VolInfo.paPartitions[pCurExtent->idxPart];
+                        PRTFSISOVOLUDFPMAP const pPart = &pVolInfo->paPartitions[pCurExtent->idxPart];
                         switch (pPart->bType)
                         {
-                            case RTFSISO_UDF_PMAP_T_PLAIN:
-                                rc2 = RTVfsFileReadAt(pVol->hVfsBacking, pPart->offByteLocation + pCurExtent->off + offIntoExtent,
+                            case RTFSUDF_PMAP_T_PLAIN:
+                                rc2 = RTVfsFileReadAt(hVfsBacking, pPart->offByteLocation + pCurExtent->off + offIntoExtent,
                                                       pvBuf, cbThisRead, NULL);
                                 break;
 
@@ -1144,7 +1162,7 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
                     else
                     {
                         Log(("ISO/UDF: Invalid partition index %#x (offset %#RX64), max partitions %#x; iExtent=%#x\n",
-                             pCurExtent->idxPart, pCurExtent->off + offIntoExtent, pVol->Udf.VolInfo.cPartitions, iExtent));
+                             pCurExtent->idxPart, pCurExtent->off + offIntoExtent, pVolInfo->cPartitions, iExtent));
                         rc2 = VERR_ISOFS_INVALID_PARTITION_INDEX;
                     }
                 }
@@ -1168,8 +1186,8 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
              * Advance to the next extent.
              */
             offExtent += pCurExtent->cbExtent;
-            pCurExtent = &pCore->paExtents[iExtent++];
-            if (iExtent >= pCore->cExtents)
+            pCurExtent = &paFurtherExtents[iExtent++];
+            if (iExtent >= cExtents)
             {
                 memset(pvBuf, 0, cbToRead);
                 cbActual += cbToRead;
@@ -1187,6 +1205,7 @@ static int rtFsIsoCore_ReadWorker(PRTFSISOCORE pCore, uint64_t offRead, void *pv
     return rcRet;
 }
 
+#if 0 /* maybe later */
 
 /**
  * Locates a directory entry in a directory.
@@ -1710,6 +1729,68 @@ DECLHIDDEN(int) RTFsUdfHlpDStringFieldToUtf8Buf(const char *pachSrc, size_t cbSr
     }
 
     *pcbRet = 0;
+    return VERR_ISOFS_BOGUS_UDF_DSTRING_FIELD;
+}
+
+
+/**
+ * Converts a dstring field value into a UTF-8 heap string.
+ *
+ * @returns IPRT status code.
+ * @retval  VERR_NO_STR_MEMORY
+ * @param   pachSrc             The source dstring field.
+ * @param   cbSrc               The size of the source field.
+ * @param   ppszDst             Where to return the pointer to the string on
+ *                              success.  Call RTStrFree when done with it.
+ */
+DECLHIDDEN(int) RTFsUdfHlpDStringFieldToUtf8(const char *pachSrc, size_t cbSrc, char **ppszDst)
+{
+    AssertReturn(cbSrc < 256, VERR_INTERNAL_ERROR_3);
+    AssertReturn(cbSrc > 2, VERR_INTERNAL_ERROR_2);
+    *ppszDst = NULL;
+
+    /*
+     * The last byte is supposed to contain the total encoded length.
+     */
+    size_t cbSrcEncoded = (uint8_t)pachSrc[cbSrc - 1];
+    AssertStmt(cbSrcEncoded < cbSrc, cbSrcEncoded = cbSrc - 1);
+
+    if (pachSrc[0] == 8)
+    {
+        /*
+         * Convert latin-1 to UTF-8.
+         */
+        AssertStmt(cbSrcEncoded > 0, cbSrcEncoded = 1);
+        return RTLatin1ToUtf8Ex(&pachSrc[1], cbSrcEncoded - 1, ppszDst, 0, NULL);
+    }
+
+    if (pachSrc[0] == 16)
+    {
+        /*
+         * Convert UTF-16 to UTF-8.
+         *
+         * Note! We don't honor the specs wrt single trailing byte here. We
+         *       expect all codepoints to be encoded as 2 or 4 bytes.
+         */
+        AssertStmt(cbSrcEncoded > 0, cbSrcEncoded = 1);
+        PCRTUTF16 pwszSrc = (PCRTUTF16)&pachSrc[1]; /* misaligned */
+        return RTUtf16BigToUtf8Ex(pwszSrc, (cbSrcEncoded - 1) / sizeof(RTUTF16), ppszDst, 0, NULL);
+    }
+
+    /*
+     * Empty string, probably...
+     */
+    if (cbSrcEncoded <= 1)
+    {
+        char *psz = RTStrAlloc(1);
+        if (psz)
+        {
+            *psz = '\0';
+            *ppszDst = psz;
+            return VINF_SUCCESS;
+        }
+        return VERR_NO_STR_MEMORY;
+    }
     return VERR_ISOFS_BOGUS_UDF_DSTRING_FIELD;
 }
 

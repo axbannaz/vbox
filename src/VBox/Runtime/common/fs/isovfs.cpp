@@ -3303,7 +3303,7 @@ static int rtFsIsoDir_ReadDirUdf(PRTFSISODIROBJ pThis, PRTFSISODIRSHRD pShared, 
     /*
      * Do the directory content.
      */
-    while (pThis->offDir + RT_UOFFSETOF(UDFFILEIDDESC, abImplementationUse) <= pShared->cbDir + 1)
+    while (pThis->offDir + RT_UOFFSETOF(UDFFILEIDDESC, abImplementationUse) <= pShared->cbDir + 1) /* see above for +1 expl. */
     {
         PCUDFFILEIDDESC pFid  = (PCUDFFILEIDDESC)&pShared->pbDir[pThis->offDir - 1];
         uint32_t const  cbFid = UDFFILEIDDESC_GET_SIZE(pFid);

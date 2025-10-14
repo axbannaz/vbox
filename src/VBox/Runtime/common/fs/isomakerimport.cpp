@@ -67,6 +67,13 @@
 /** Max directory depth. */
 #define RTFSISOMK_IMPORT_MAX_DEPTH  32
 
+/** Max UDF directory size. */
+#if ARCH_BITS >= 64
+# define RTFSISOMK_IMPORT_MAX_UDF_DIR_SIZE  _64M
+#else
+# define RTFSISOMK_IMPORT_MAX_UDF_DIR_SIZE  _16M
+#endif
+
 
 /*********************************************************************************************************************************
 *   Structures and Typedefs                                                                                                      *
@@ -76,9 +83,9 @@
  */
 typedef struct RTFSISOMKIMPBLOCK2FILE
 {
-    /** AVL tree node containing the first block number of the file.
-     * Block number is relative to the start of the import image.  */
-    AVLU32NODECORE          Core;
+    /** AVL tree node containing the offset of the first byte of the file,
+     *  relative to the start of the import image. */
+    AVLU64NODECORE          Core;
     /** The configuration index of the file. */
     uint32_t                idxObj;
     /** Namespaces the file has been seen in already (RTFSISOMAKER_NAMESPACE_XXX). */
@@ -138,7 +145,7 @@ typedef struct RTFSISOMKIMPORTER
     /** The root of the tree for converting data block numbers to files
      * (PRTFSISOMKIMPBLOCK2FILE).   This is essential when importing boot files and
      * the 2nd namespace (joliet, udf, hfs) so that we avoid duplicating data. */
-    AVLU32TREE              Block2FileRoot;
+    AVLU64TREE              Block2FileRoot;
 
     /** The block offset of the primary volume descriptor. */
     uint32_t                offPrimaryVolDesc;
@@ -173,6 +180,7 @@ typedef struct RTFSISOMKIMPORTER
     union
     {
         uint8_t                     ab[ISO9660_SECTOR_SIZE];
+        char                        ach[ISO9660_SECTOR_SIZE];
         uint64_t                    au64[ISO9660_SECTOR_SIZE];
         ISO9660VOLDESCHDR           VolDescHdr;
         ISO9660PRIMARYVOLDESC       PrimVolDesc;
@@ -373,7 +381,7 @@ static int rtFsIsoImpError(PRTFSISOMKIMPORTER pThis, int rc, const char *pszForm
  * @param   pNode               The node to destroy.
  * @param   pvUser              Ignored.
  */
-static DECLCALLBACK(int) rtFsIsoMakerImportDestroyData2File(PAVLU32NODECORE pNode, void *pvUser)
+static DECLCALLBACK(int) rtFsIsoMakerImportDestroyData2File(PAVLU64NODECORE pNode, void *pvUser)
 {
     PRTFSISOMKIMPBLOCK2FILE pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)pNode;
     if (pBlock2File)
@@ -560,7 +568,8 @@ static int rtFsIsoImportProcessIso9660AddAndNameFile(PRTFSISOMKIMPORTER pThis, P
     PRTFSISOMKIMPBLOCK2FILE pBlock2FilePrev = NULL;
     if (cbData > 0) /* no data tracking for zero byte files */
     {
-        pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU32Get(&pThis->Block2FileRoot, ISO9660_GET_ENDIAN(&pDirRec->offExtent));
+        pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU64Get(&pThis->Block2FileRoot,
+                                                           ISO9660_GET_ENDIAN(&pDirRec->offExtent) * (uint64_t)ISO9660_SECTOR_SIZE);
         if (pBlock2File)
         {
             if (!(pBlock2File->fNamespaces & fNamespace))
@@ -608,12 +617,12 @@ static int rtFsIsoImportProcessIso9660AddAndNameFile(PRTFSISOMKIMPORTER pThis, P
             AssertReturn(pBlock2File, rtFsIsoImpError(pThis, VERR_NO_MEMORY, "Could not allocate RTFSISOMKIMPBLOCK2FILE"));
 
             pBlock2File->idxObj      = idxObj;
-            pBlock2File->Core.Key    = ISO9660_GET_ENDIAN(&pDirRec->offExtent);
+            pBlock2File->Core.Key    = ISO9660_GET_ENDIAN(&pDirRec->offExtent) * (uint64_t)ISO9660_SECTOR_SIZE;
             pBlock2File->fNamespaces = fNamespace;
             pBlock2File->pNext       = NULL;
             if (!pBlock2FilePrev)
             {
-                bool fRc = RTAvlU32Insert(&pThis->Block2FileRoot, &pBlock2File->Core);
+                bool fRc = RTAvlU64Insert(&pThis->Block2FileRoot, &pBlock2File->Core);
                 Assert(fRc); RT_NOREF(fRc);
             }
             else
@@ -1679,7 +1688,7 @@ static int rtFsIsoImportProcessIso9660Tree(PRTFSISOMKIMPORTER pThis, uint32_t of
      */
     int          rc     = VINF_SUCCESS;
     uint8_t      cDepth = 0;
-    RTLISTANCHOR TodoList;
+    RTLISTANCHOR TodoList; /* RTFSISOMKIMPDIR */
     RTListInit(&TodoList);
     for (;;)
     {
@@ -2133,6 +2142,595 @@ static int rtFsIsoImportProcessSupplementaryDesc(PRTFSISOMKIMPORTER pThis, PISO9
 *   UDF                                                                                                                          *
 *********************************************************************************************************************************/
 
+/**
+ * UDF directory todo list entry.
+ */
+typedef struct RTFSISOMKIMPUDFDIR
+{
+    /** List stuff. */
+    RTLISTNODE              Entry;
+    /** The directory configuration index with hIsoMaker. */
+    uint32_t                idxObj;
+    /** The depth of this directory.  */
+    uint8_t                 cDepth;
+    /** The ICB allocation descriptor. */
+    UDFLONGAD               IcbAllocDesc;
+} RTFSISOMKIMPUDFDIR;
+/** Pointer to an UDF directory todo list entry. */
+typedef RTFSISOMKIMPUDFDIR *PRTFSISOMKIMPUDFDIR;
+
+typedef union RTFSISOMKIMPUDFFILENTRYPTRUNION
+{
+    void               *pv;
+    PCUDFFILEENTRY      pFileEntry;
+    PCUDFEXFILEENTRY    pExFileEntry;
+} RTFSISOMKIMPUDFFILENTRYPTRUNION;
+
+
+static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFFILEIDDESC pFid,
+                                                   RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr)
+{
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, cbData, UDFEXFILEENTRY, cbData);
+    pObjInfo->cbObject    = uPtr.pFileEntry->cbData;
+    pObjInfo->cbAllocated = pObjInfo->cbObject;
+
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, IcbTag,       UDFEXFILEENTRY, IcbTag);
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, fPermissions, UDFEXFILEENTRY, fPermissions);
+    int rc = RTFsUdfHlpIcbStuffToFileMode(uPtr.pFileEntry->IcbTag.fFlags, uPtr.pFileEntry->IcbTag.bFileType,
+                                          uPtr.pFileEntry->fPermissions, &pObjInfo->Attr.fMode);
+    AssertRCReturn(rc, rc);
+
+    if (uPtr.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
+    {
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pFileEntry->AccessTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pFileEntry->ModificationTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pFileEntry->ChangeTime);
+        RTTimeSpecSetNano(&pObjInfo->BirthTime, 0);
+    }
+    else
+    {
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pExFileEntry->AccessTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pExFileEntry->ModificationTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pExFileEntry->ChangeTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->BirthTime,        &uPtr.pExFileEntry->BirthTime);
+    }
+
+    pObjInfo->Attr.enmAdditional        = RTFSOBJATTRADD_UNIX;
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, gid,       UDFEXFILEENTRY, gid);
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, uid,       UDFEXFILEENTRY, uid);
+    pObjInfo->Attr.u.Unix.uid           = uPtr.pFileEntry->uid == UINT32_MAX ? NIL_RTUID : uPtr.pFileEntry->uid;
+    pObjInfo->Attr.u.Unix.gid           = uPtr.pFileEntry->gid == UINT32_MAX ? NIL_RTGID : uPtr.pExFileEntry->gid;
+    pObjInfo->Attr.u.Unix.cHardlinks    = 1;
+    pObjInfo->Attr.u.Unix.INodeIdDevice = 0;
+    pObjInfo->Attr.u.Unix.INodeId       = 0;
+    pObjInfo->Attr.u.Unix.fFlags        = 0;
+    pObjInfo->Attr.u.Unix.GenerationId  = pFid->uVersion;
+    pObjInfo->Attr.u.Unix.Device        = 0;
+
+    /** @todo extra more info from extattribs   */
+    return VINF_SUCCESS;
+}
+
+
+
+static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDDESC pFid, uint32_t idxParent,
+                                          const char *pszName, RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr,
+                                          uint64_t cbData, uint64_t offData)
+{
+    Assert(cbData == 0 ? offData == UINT64_MAX : offData < pThis->cbSrcFile);
+
+    /*
+     * Convert the FID and file entry data to object info.
+     */
+    RTFSOBJINFO ObjInfo;
+    int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid, uPtr);
+    if (RT_FAILURE(rc))
+        return rtFsIsoImpError(pThis, rc, "rtFsIsoImportUdfFileIdAndEntryToObjInfo failed for '%s': %Rrc", pszName, rc);
+
+    /*
+     * First we must make sure the common source file has been added.
+     */
+    if (pThis->idxSrcFile != UINT32_MAX)
+    { /* likely */ }
+    else
+    {
+        rc = RTFsIsoMakerAddCommonSourceFile(pThis->hIsoMaker, pThis->hSrcFile, &pThis->idxSrcFile);
+        if (RT_FAILURE(rc))
+            return rtFsIsoImpError(pThis, rc, "RTFsIsoMakerAddCommonSourceFile failed: %Rrc", rc);
+        Assert(pThis->idxSrcFile != UINT32_MAX);
+    }
+
+    /*
+     * Lookup the data block if the file has a non-zero length.   The aim is to
+     * find files across namespaces while bearing in mind that files in the same
+     * namespace may share data storage, i.e. what in a traditional unix file
+     * system would be called hardlinked.  Problem is that the core engine doesn't
+     * do hardlinking yet and assume each file has exactly one name per namespace.
+     */
+    uint32_t                idxObj          = UINT32_MAX;
+    PRTFSISOMKIMPBLOCK2FILE pBlock2File     = NULL;
+    PRTFSISOMKIMPBLOCK2FILE pBlock2FilePrev = NULL;
+    if (cbData > 0) /* no data tracking for zero byte files */
+    {
+        pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU64Get(&pThis->Block2FileRoot, offData);
+        if (pBlock2File)
+        {
+            if (!(pBlock2File->fNamespaces & RTFSISOMAKER_NAMESPACE_UDF))
+            {
+                pBlock2File->fNamespaces |= RTFSISOMAKER_NAMESPACE_UDF;
+                idxObj = pBlock2File->idxObj;
+            }
+            else
+            {
+                do
+                {
+                    pBlock2FilePrev = pBlock2File;
+                    pBlock2File = pBlock2File->pNext;
+                } while (pBlock2File && (pBlock2File->fNamespaces & RTFSISOMAKER_NAMESPACE_UDF));
+                if (pBlock2File)
+                {
+                    pBlock2File->fNamespaces |= RTFSISOMAKER_NAMESPACE_UDF;
+                    idxObj = pBlock2File->idxObj;
+                }
+            }
+        }
+    }
+
+    /*
+     * If the above lookup didn't succeed, add a new file with a lookup record.
+     */
+    if (idxObj == UINT32_MAX)
+    {
+        rc = RTFsIsoMakerAddUnnamedFileWithCommonSrc(pThis->hIsoMaker, pThis->idxSrcFile, offData, cbData, &ObjInfo, &idxObj);
+        if (RT_FAILURE(rc))
+            return rtFsIsoImpError(pThis, rc, "Error adding file '%s': %Rrc", pszName, rc);
+        Assert(idxObj != UINT32_MAX);
+
+        /* Update statistics. */
+        pThis->pResults->cAddedFiles++;
+        if (cbData > 0)
+        {
+            pThis->pResults->cbAddedDataBlocks += RT_ALIGN_64(cbData, pThis->Udf.VolInfo.cbBlock); /** @todo alignment? */
+
+            /* Lookup record. */
+            pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTMemAlloc(sizeof(*pBlock2File));
+            AssertReturn(pBlock2File, rtFsIsoImpError(pThis, VERR_NO_MEMORY, "Could not allocate RTFSISOMKIMPBLOCK2FILE"));
+
+            pBlock2File->idxObj      = idxObj;
+            pBlock2File->Core.Key    = offData;
+            pBlock2File->fNamespaces = RTFSISOMAKER_NAMESPACE_UDF;
+            pBlock2File->pNext       = NULL;
+            if (!pBlock2FilePrev)
+            {
+                bool fRc = RTAvlU64Insert(&pThis->Block2FileRoot, &pBlock2File->Core);
+                Assert(fRc); RT_NOREF(fRc);
+            }
+            else
+            {
+                pBlock2File->Core.pLeft  = NULL;
+                pBlock2File->Core.pRight = NULL;
+                pBlock2FilePrev->pNext = pBlock2File;
+            }
+        }
+    }
+
+    /*
+     * Enter the object into the namespace.
+     */
+    rc = RTFsIsoMakerObjSetNameAndParent(pThis->hIsoMaker, idxObj, idxParent, RTFSISOMAKER_NAMESPACE_UDF,
+                                         pszName, true /*fNoNormalize*/);
+    if (RT_SUCCESS(rc))
+    {
+        pThis->pResults->cAddedNames++;
+        /** @todo Apply attribute to the UDF namespace if we didn't add the file! */
+    }
+    else
+        return rtFsIsoImpError(pThis, rc, "Error naming file '%s': %Rrc", pszName, rc);
+    return VINF_SUCCESS;
+}
+
+
+
+
+static int rtFsIsoImportUdfAddAndNameDirectory(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDDESC pFid, uint32_t idxParent,
+                                               const char *pszName, uint8_t cDepth, PRTLISTANCHOR pTodoList)
+{
+    Assert(pFid->fFlags & UDF_FILE_FLAGS_PARENT);
+    uint32_t idxObj;
+    int rc = RTFsIsoMakerAddUnnamedDir(pThis->hIsoMaker, NULL, &idxObj);
+    if (RT_SUCCESS(rc))
+    {
+        Log3(("  --> added directory #%#x\n", idxObj));
+        pThis->pResults->cAddedDirs++;
+
+        /*
+         * Enter the object into the namespace.
+         */
+        rc = RTFsIsoMakerObjSetNameAndParent(pThis->hIsoMaker, idxObj, idxParent, RTFSISOMAKER_NAMESPACE_UDF,
+                                             pszName, true /*fNoNormalize*/);
+        if (RT_SUCCESS(rc))
+        {
+            pThis->pResults->cAddedNames++;
+
+            /*
+             * Push it onto the traversal stack.
+             */
+            PRTFSISOMKIMPUDFDIR pImpDir = (PRTFSISOMKIMPUDFDIR)RTMemAlloc(sizeof(*pImpDir));
+            if (pImpDir)
+            {
+                pImpDir->idxObj       = idxObj;
+                pImpDir->cDepth       = cDepth;
+                pImpDir->IcbAllocDesc = pFid->Icb;
+                RTListAppend(pTodoList, &pImpDir->Entry);
+            }
+            else
+                rc = rtFsIsoImpError(pThis, VERR_NO_MEMORY, "Could not allocate RTFSISOMKIMPUDFDIR");
+        }
+        else
+            rc = rtFsIsoImpError(pThis, rc, "Error naming UDF directory '%s': %Rrc", pszName, rc);
+    }
+    else
+        rc = rtFsIsoImpError(pThis, rc, "Error adding UDF directory '%s': %Rrc", pszName, rc);
+    return rc;
+}
+
+
+/** @callback_method_impl{FNFSUDFREADICBFILENTRY} */
+static DECLCALLBACK(int)
+rtFsIsoImportUdfFileEntryCallback(PCRTFSUDFVOLINFO pVolInfo, PCUDFFILEENTRY pFileEntry, uint16_t idxDefaultPart, void *pvUser)
+{
+    PRTFSISOMKIMPORTER const pThis = RT_FROM_MEMBER(pVolInfo, RTFSISOMKIMPORTER, Udf.VolInfo);
+    memcpy(pThis->abBuf, pFileEntry, pThis->Udf.VolInfo.cbBlock);
+    *(uint16_t *)pvUser = idxDefaultPart;
+    return VINF_SUCCESS;
+}
+
+
+/** @callback_method_impl{FNFSUDFREADICBEXFILENTRY} */
+static DECLCALLBACK(int)
+rtFsIsoImportUdfExFileEntryCallback(PCRTFSUDFVOLINFO pVolInfo, PCUDFEXFILEENTRY pFileEntry, uint16_t idxDefaultPart, void *pvUser)
+{
+    PRTFSISOMKIMPORTER const pThis = RT_FROM_MEMBER(pVolInfo, RTFSISOMKIMPORTER, Udf.VolInfo);
+    memcpy(pThis->abBuf, pFileEntry, pThis->Udf.VolInfo.cbBlock);
+    *(uint16_t *)pvUser = idxDefaultPart;
+    return VINF_SUCCESS;
+}
+
+
+static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t idxDir, UDFLONGAD const *pIcbAllocDesc,
+                                             uint8_t cDepth, PRTLISTANCHOR pTodoList)
+{
+    RT_NOREF(cDepth, pTodoList);
+
+    /* Preformat the error message to reduce code size. */
+    char szIcbErrLoc[80];
+    RTStrPrintf(szIcbErrLoc, sizeof(szIcbErrLoc), "p%u/%#RX64/%#RX32 LB %#x (idxDir=%#x)",
+                pIcbAllocDesc->Location.uPartitionNo, (uint64_t)pIcbAllocDesc->Location.off << pThis->Udf.VolInfo.cShiftBlock,
+                pIcbAllocDesc->Location.off, pIcbAllocDesc->cb, idxDir);
+
+    /*
+     * Read the directory ICB.
+     *
+     * On success we'll have the raw data in pThis->abBuf.  We let the helper function
+     * use the 2nd half of the buffer (already checked that we've got sufficent space).
+     */
+    Assert(sizeof(pThis->abBuf) >= pThis->Udf.VolInfo.cbBlock * 2); /* checked by caller and max block size limit */
+    RTFSISOMKIMPUDFFILENTRYPTRUNION u              = { &pThis->abBuf[0] };
+    uint8_t * const                 pbBlockBuf     = &pThis->abBuf[pThis->Udf.VolInfo.cbBlock];
+    uint16_t                        idxDefaultPart = 0;
+    uint32_t                        cProcessed     = 0;
+    uint32_t                        cIndirections  = 0;
+    int rc = RTFsUdfReadIcbRecursive(&pThis->Udf.VolInfo, pThis->hSrcFile, pbBlockBuf, 0 /*cNestings */,
+                                     rtFsIsoImportUdfFileEntryCallback, rtFsIsoImportUdfExFileEntryCallback, &idxDefaultPart,
+                                     &cProcessed, &cIndirections, *pIcbAllocDesc);
+    if (RT_FAILURE(rc))
+        return rtFsIsoImpError(pThis, rc, "Failed to read ICB at %s: %Rrc", szIcbErrLoc, rc);
+    if (cProcessed == 0)
+        return rtFsIsoImpError(pThis, VERR_ISOFS_NO_DIRECT_ICB_ENTRIES, "No direct ICB for chain at %s", szIcbErrLoc);
+
+    /* Make sure it's a directory. */
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, IcbTag, UDFEXFILEENTRY, IcbTag);
+    if (u.pFileEntry->IcbTag.bFileType != UDF_FILE_TYPE_DIRECTORY)
+        return rtFsIsoImpError(pThis, VERR_ISOFS_WRONG_FILE_TYPE, "ICB for chain at szIcbErrLoc is not a directory: %#x",
+                               szIcbErrLoc, u.pFileEntry->IcbTag.bFileType);
+
+    /* Check if it is empty (just on the offchance). */
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, cbData, UDFEXFILEENTRY, cbData);
+    uint64_t const  cbDirData    = u.pFileEntry->cbData;
+    if (!cbDirData)
+        return VINF_SUCCESS;
+    if (cbDirData < UDFFILEIDDESC_CALC_SIZE_EX(0, 0))
+        return rtFsIsoImpError(pThis, VERR_ISOFS_BOGUS_UDF_DIR_SIZE,
+                               "Bogus directory size for ICB at %s: %#RX64", szIcbErrLoc, cbDirData);
+    if (cbDirData >= RTFSISOMK_IMPORT_MAX_UDF_DIR_SIZE)
+        return rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_DIR_TOO_BIG,
+                               "Directory too large in ICB at %s: %#RX64", szIcbErrLoc, cbDirData);
+
+    uint64_t const  cbDirAligned = RT_ALIGN_64(cbDirData, pThis->Udf.VolInfo.cbBlock);
+
+    /* Read the allocation extensions. */
+    uint32_t        cExtents    = 0;
+    RTFSISOEXTENT   FirstExtent;
+    PRTFSISOEXTENT  paExtents   = NULL;
+    if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
+        rc = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
+                                            &u.pFileEntry->abExtAttribs[u.pFileEntry->cbExtAttribs],
+                                            u.pFileEntry->cbAllocDescs,
+                                            u.pFileEntry->IcbTag.fFlags,
+                                            idxDefaultPart,
+                                            RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + u.pFileEntry->cbExtAttribs,
+                                            cbDirData,
+                                            pThis->hSrcFile,
+                                            pbBlockBuf,
+                                            &cExtents, &FirstExtent, &paExtents);
+    else if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_EXTENDED_FILE_ENTRY)
+        rc = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
+                                            &u.pExFileEntry->abExtAttribs[u.pExFileEntry->cbExtAttribs],
+                                            u.pExFileEntry->cbAllocDescs,
+                                            u.pExFileEntry->IcbTag.fFlags,
+                                            idxDefaultPart,
+                                            RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs) + u.pExFileEntry->cbExtAttribs,
+                                            cbDirData,
+                                            pThis->hSrcFile,
+                                            pbBlockBuf,
+                                            &cExtents, &FirstExtent, &paExtents);
+    else
+        AssertFailedReturn(VERR_INTERNAL_ERROR_4);
+    if (RT_FAILURE(rc))
+        return rtFsIsoImpError(pThis, rc, "Failed to gather extents for directory ICB szIcbErrLoc: %Rrc", szIcbErrLoc, rc);
+    if (cExtents == 0)
+        return rtFsIsoImpError(pThis, VERR_ISOFS_NO_ADS_FOR_UDF_DIR, "No allocation descriptors for ICB at %s", szIcbErrLoc);
+
+    /*
+     * Read the directory data.
+     * Use heap if too big for what space its left in abBuf.
+     */
+    AssertCompile(sizeof(pThis->abBuf) >= _16K*3); /* cbMaxLogicalBlock */
+    uint8_t * const pbRestBuf   = &pThis->abBuf[pThis->Udf.VolInfo.cbBlock * 2];
+    size_t const    cbRestBuf   = sizeof(pThis->abBuf) - pThis->Udf.VolInfo.cbBlock * 2;
+
+    uint8_t * const pbDataBuf   = cbRestBuf >= cbDirAligned ? pbRestBuf : (uint8_t *)RTMemTmpAlloc(cbRestBuf);
+    AssertReturnStmt(pbDataBuf, RTFsUdfHlpFreeGatherExtents(paExtents), VERR_NO_TMP_MEMORY);
+
+    rc = RTFsUdfHlpReadObject(&pThis->Udf.VolInfo, pThis->hSrcFile, cbDirData, cExtents, &FirstExtent, paExtents, 0 /*offRead*/,
+                              pbDataBuf, (size_t)cbDirData, NULL, NULL);
+    RTFsUdfHlpFreeGatherExtents(paExtents);
+    paExtents = NULL;
+    if (RT_SUCCESS(rc))
+    {
+        /*
+         * Process the File ID entries we just loaded.
+         *
+         * We use the sector buffer for name conversion.  It's 2KiB and we need
+         * at most some 768 bytes.
+         */
+        uint32_t idxFid = 0;
+        uint32_t offDir = 0;
+        while (offDir + RT_UOFFSETOF(UDFFILEIDDESC, abImplementationUse) <= cbDirData)
+        {
+            PCUDFFILEIDDESC pFid  = (PCUDFFILEIDDESC)&pbDataBuf[offDir];
+            uint32_t const  cbFid = UDFFILEIDDESC_GET_SIZE(pFid);
+            if (offDir + cbFid <= cbDirData)
+            { /* likely */ }
+            else
+                break;
+
+            /* Skip parent, deleted stuff and metadata. */
+            if (pFid->fFlags & (UDF_FILE_FLAGS_PARENT | UDF_FILE_FLAGS_DELETED | UDF_FILE_FLAGS_METADATA))
+            {
+                Assert((pFid->fFlags & UDF_FILE_FLAGS_DIRECTORY) || !(pFid->fFlags & UDF_FILE_FLAGS_PARENT));
+                idxFid += 1;
+                offDir += cbFid;
+                continue;
+            }
+
+            /*
+             * Convert the name.
+             */
+            char          *pszName = pThis->uSectorBuf.ach;
+            uint8_t const *pbSrc   = &pFid->abImplementationUse[pFid->cbImplementationUse];
+            uint8_t const  cbSrc   = pFid->cbName;
+            int            rc2     = VERR_INVALID_NAME;
+            if (cbSrc > 1)
+            {
+                if (pbSrc[0] == 8)
+                {
+                    /* Latin-1 to UTF-8: */
+                    char *pszDst = pszName;
+                    for (uint32_t offSrc = 1; offSrc < cbSrc; offSrc++)
+                    {
+                        uint8_t uc = pbSrc[offSrc];
+                        if (uc < 128)
+                        {
+                            if (uc)
+                                *pszDst++ = (char)uc;
+                            else
+                                break;
+                        }
+                        else
+                        {
+                            *pszDst++ = (char)(0xc0 | (uc >> 6));
+                            *pszDst++ = (char)(0x80 | (uc & 0x3f));
+                        }
+                    }
+                    *pszDst = '\0';
+                    if (pszDst != pszName)
+                        rc2 = VINF_SUCCESS;
+                }
+                else if (pbSrc[0] == 16) /** @todo technically incorrect for incomplete UTF16 codepoint (lower byte reads as zero) */
+                    rc2 = RTUtf16BigToUtf8Ex((PCRTUTF16)&pbSrc[1], (cbSrc - 1) / sizeof(RTUTF16),
+                                             &pszName, sizeof(pThis->uSectorBuf.ach), NULL);
+            }
+            if (RT_FAILURE(rc2))
+            {
+                rtFsIsoImpError(pThis, rc2, "ISO/UDF: Malformed directory entry name at %#x: fFlags=%#x abName=%.*Rhxs\n",
+                                offDir, pFid->fFlags, cbSrc, pbSrc);
+                RTStrPrintf(pszName, sizeof(pThis->uSectorBuf.ach), "bad-name-%#x", offDir);
+                if (RT_SUCCESS(rc))
+                    rc = rc2;
+            }
+
+            /*
+             * If it's a directory, add just it to the todo list (ICB++ is handled later).
+             */
+            if (pFid->fFlags & UDF_FILE_FLAGS_DIRECTORY)
+                rc2 = rtFsIsoImportUdfAddAndNameDirectory(pThis, pFid, idxDir, pszName, cDepth + 1, pTodoList);
+            /*
+             * Otherwise read the ICB and allocation extent list.
+             */
+            else
+            {
+                RTStrPrintf(szIcbErrLoc, sizeof(szIcbErrLoc), "p%u/%#RX64/%#RX32 LB %#x (idxDir=%#x)",
+                            pFid->Icb.Location.uPartitionNo, (uint64_t)pFid->Icb.Location.off << pThis->Udf.VolInfo.cShiftBlock,
+                            pFid->Icb.Location.off, pFid->Icb.cb, idxDir);
+
+                idxDefaultPart = 0;
+                cProcessed     = 0;
+                cIndirections  = 0;
+                rc2 = RTFsUdfReadIcbRecursive(&pThis->Udf.VolInfo, pThis->hSrcFile, pbBlockBuf, 0 /*cNestings */,
+                                              rtFsIsoImportUdfFileEntryCallback, rtFsIsoImportUdfExFileEntryCallback,
+                                              &idxDefaultPart, &cProcessed, &cIndirections, pFid->Icb);
+                if (RT_SUCCESS(rc2) && cProcessed > 0)
+                {
+                    /* Only gather the extents if it's has a non-zero length. */
+                    AssertCompileMembersAtSameOffset(UDFFILEENTRY, cbData, UDFEXFILEENTRY, cbData);
+                    uint64_t const cbObject = u.pFileEntry->cbData;
+                    cExtents             = 0;
+                    paExtents            = NULL;
+                    FirstExtent.cbExtent = 0;
+                    FirstExtent.off      = UINT64_MAX;
+                    if (cbObject > 0)
+                    {
+                        if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
+                            rc2 = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
+                                                                 &u.pFileEntry->abExtAttribs[u.pFileEntry->cbExtAttribs],
+                                                                 u.pFileEntry->cbAllocDescs,
+                                                                 u.pFileEntry->IcbTag.fFlags,
+                                                                 idxDefaultPart,
+                                                                 RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + u.pFileEntry->cbExtAttribs,
+                                                                 cbObject,
+                                                                 pThis->hSrcFile,
+                                                                 pbBlockBuf,
+                                                                 &cExtents, &FirstExtent, &paExtents);
+                        else if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_EXTENDED_FILE_ENTRY)
+                            rc2 = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
+                                                                 &u.pExFileEntry->abExtAttribs[u.pExFileEntry->cbExtAttribs],
+                                                                 u.pExFileEntry->cbAllocDescs,
+                                                                 u.pExFileEntry->IcbTag.fFlags,
+                                                                 idxDefaultPart,
+                                                                 RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs) + u.pExFileEntry->cbExtAttribs,
+                                                                 cbObject,
+                                                                 pThis->hSrcFile,
+                                                                 pbBlockBuf,
+                                                                 &cExtents, &FirstExtent, &paExtents);
+                        else
+                            AssertFailedStmt(rc2 = VERR_INTERNAL_ERROR_4);
+                        if (RT_FAILURE(rc2))
+                            rtFsIsoImpError(pThis, rc2, "Failed to gather extents for ICB at %s (%s): %Rrc",
+                                            szIcbErrLoc, pszName, rc);
+                        else if (cExtents == 0)
+                            rc2 = rtFsIsoImpError(pThis, VERR_ISOFS_NO_ADS_FOR_UDF_OBJECT,
+                                                  "No allocation descriptors for ICB at %s (%s)", szIcbErrLoc, pszName);
+                        else if (cExtents != 1)
+                            rc2 = rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_DISCONTIGUOUS_ADS,
+                                                  "More than one allocation descriptors for ICB at %s (%s): %u",
+                                                  szIcbErrLoc, pszName, cExtents);
+                        else if (FirstExtent.off == UINT64_MAX)
+                            rc2 = rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_SPARSE_FILE,
+                                                  "ICB at %s (%s) describes an sparse empty file", szIcbErrLoc, pszName);
+                        else if (FirstExtent.cbExtent < cbObject)
+                            rc2 = rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_SPARSE_FILE,
+                                                  "ICB at %s (%s) describes an sparse file (tail): cbExtent=%#RX64 vs cbObject=%#RX64",
+                                                  szIcbErrLoc, pszName, FirstExtent.cbExtent, cbObject);
+                        else if (FirstExtent.idxPart != UINT32_MAX)
+                        {
+                            if (FirstExtent.idxPart >= pThis->Udf.VolInfo.cPartitions)
+                                rc2 = rtFsIsoImpError(pThis, VERR_ISOFS_INVALID_PARTITION_INDEX,
+                                                      "ICB at %s (%s) have an AD with a bogus partition index: #%x",
+                                                      szIcbErrLoc, pszName, FirstExtent.idxPart);
+                            else /** @todo check that the extent is within the partition boundraries. */
+                            {
+                                FirstExtent.off    += pThis->Udf.VolInfo.paPartitions[FirstExtent.idxPart].offByteLocation;
+                                FirstExtent.idxPart = UINT32_MAX;
+                            }
+                        }
+                    }
+
+                    /* If all is well, add and name the file and set all it's relevant properties. */
+                    if (RT_SUCCESS(rc2))
+                        rc2 = rtFsIsoImportUdfAddAndNameFile(pThis, pFid, idxDir, pszName, u, cbObject, FirstExtent.off);
+                    RTFsUdfHlpFreeGatherExtents(paExtents);
+                    paExtents = NULL;
+                }
+                else if (RT_FAILURE(rc2))
+                    rc2 = rtFsIsoImpError(pThis, rc2, "Failed to read ICB at %s (%s): %Rrc", szIcbErrLoc, pszName, rc2);
+                else
+                    rc2 = rtFsIsoImpError(pThis, VERR_ISOFS_NO_DIRECT_ICB_ENTRIES,
+                                          "No direct for ICB at %s (%s)", szIcbErrLoc, pszName);
+            }
+            if (RT_SUCCESS(rc))
+                rc = rc2;
+
+            /* advance */
+            idxFid += 1;
+            offDir += cbFid;
+        }
+    }
+    else
+        rc = rtFsIsoImpError(pThis, rc, "Failed to read directory data for ICB at %s: %Rrc", szIcbErrLoc, rc);
+    if (pbDataBuf != pbRestBuf)
+        RTMemTmpFree(pbDataBuf);
+    return rc;
+}
+
+
+static int rtFsIsoImportUdfProcessTree(PRTFSISOMKIMPORTER pThis, UDFLONGAD IceAllocDesc)
+{
+    AssertReturn(sizeof(pThis->abBuf) >= pThis->Udf.VolInfo.cbBlock * 4, VERR_INTERNAL_ERROR_3); /* max block size check */
+    AssertReturn(RT_IS_POWER_OF_TWO(pThis->Udf.VolInfo.cbBlock), VERR_INTERNAL_ERROR_4);
+
+    /*
+     * Make sure we've got a root in the namespace.
+     */
+    uint32_t idxDir = RTFsIsoMakerGetObjIdxForPath(pThis->hIsoMaker, RTFSISOMAKER_NAMESPACE_UDF, "/");
+    if (idxDir == UINT32_MAX)
+    {
+        idxDir = RTFSISOMAKER_CFG_IDX_ROOT;
+        int rc = RTFsIsoMakerObjSetPath(pThis->hIsoMaker, RTFSISOMAKER_CFG_IDX_ROOT, RTFSISOMAKER_NAMESPACE_UDF, "/");
+        if (RT_FAILURE(rc))
+            return rtFsIsoImpError(pThis, rc, "RTFsIsoMakerObjSetPath failed on UDF root dir: %Rrc", rc);
+    }
+    Assert(idxDir == RTFSISOMAKER_CFG_IDX_ROOT);
+
+    /*
+     * Directories.
+     */
+    int          rc     = VINF_SUCCESS;
+    uint8_t      cDepth = 0;
+    RTLISTANCHOR TodoList; /* RTFSISOMKIMPDIR */
+    RTListInit(&TodoList);
+    for (;;)
+    {
+
+        int rc2 = rtFsIsoImportUdfProcessTreeWorker(pThis, idxDir, &IceAllocDesc, cDepth, &TodoList);
+        if (RT_FAILURE(rc2) && RT_SUCCESS(rc))
+            rc = rc2;
+
+        /*
+         * Pop the next directory.
+         */
+        PRTFSISOMKIMPUDFDIR pNext = RTListRemoveLast(&TodoList, RTFSISOMKIMPUDFDIR, Entry);
+        if (!pNext)
+            break;
+        idxDir       = pNext->idxObj;
+        cDepth       = pNext->cDepth;
+        IceAllocDesc = pNext->IcbAllocDesc;
+        RTMemFree(pNext);
+    }
+
+    return rc;
+}
+
 
 static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
 {
@@ -2147,7 +2745,7 @@ static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
     Ctx.cbBacking           = pThis->cbSrcFile;
     Ctx.cBackingSectors     = pThis->cBlocksInSrcFile;
     Ctx.cbSector            = ISO9660_SECTOR_SIZE;
-    Ctx.cbMaxLogicalBlock   = _16K;
+    Ctx.cbMaxLogicalBlock   = _16K; AssertCompile(sizeof(pThis->abBuf) >= _16K * 4);
     Ctx.pbBuf               = pThis->abBuf;
     Ctx.cbBuf               = sizeof(pThis->abBuf);
     Ctx.pErrInfo            = pThis->pErrInfo;
@@ -2162,7 +2760,23 @@ static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
     {
         int rc = RTFsUdfHlpReadAndHandleUdfAvdp(&Ctx, aoffAvdps[i], &SeenSequences, &pThis->Udf.VolInfo);
         if (RT_SUCCESS(rc))
-            return rc;
+        {
+            if (!(pThis->fFlags & RTFSISOMK_IMPORT_F_NO_U_VOLUME_ID))
+            {
+                char *psz = NULL;
+                rc = RTFsUdfHlpDStringFieldToUtf8(pThis->Udf.VolInfo.achLogicalVolumeID,
+                                                  sizeof(pThis->Udf.VolInfo.achLogicalVolumeID), &psz);
+                AssertRCReturn(rc, rc);
+                rc = RTFsIsoMakerSetStringProp(pThis->hIsoMaker, RTFSISOMAKERSTRINGPROP_VOLUME_ID,
+                                               RTFSISOMAKER_NAMESPACE_UDF, psz);
+                RTStrFree(psz);
+                AssertRCReturn(rc, rc);
+            }
+
+            /** @todo import more stuff form the volume descriptors... */
+
+            return rtFsIsoImportUdfProcessTree(pThis, pThis->Udf.VolInfo.RootDirIcb);
+        }
         if (i == 0)
             rcRet = rc;
     }
@@ -2295,16 +2909,18 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
 
     int                     rc;
     uint32_t                idxImageObj;
-    PRTFSISOMKIMPBLOCK2FILE pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU32Get(&pThis->Block2FileRoot, offBootImage);
+    uint64_t                offByteBootImage = offBootImage * (uint64_t)ISO9660_SECTOR_SIZE;
+    PRTFSISOMKIMPBLOCK2FILE pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU64Get(&pThis->Block2FileRoot, offByteBootImage);
     if (pBlock2File)
         idxImageObj = pBlock2File->idxObj;
     else
     {
         if (cbDefaultSize == 0)
         {
-            pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU32GetBestFit(&pThis->Block2FileRoot, offBootImage, true /*fAbove*/);
+            pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU64GetBestFit(&pThis->Block2FileRoot, offByteBootImage, true /*fAbove*/);
             if (pBlock2File)
-                cbDefaultSize = RT_MIN(pBlock2File->Core.Key - offBootImage, UINT32_MAX / ISO9660_SECTOR_SIZE + 1)
+                cbDefaultSize = RT_MIN(pBlock2File->Core.Key / ISO9660_SECTOR_SIZE - offBootImage,
+                                       UINT32_MAX / ISO9660_SECTOR_SIZE + 1)
                               * ISO9660_SECTOR_SIZE;
             else if (offBootImage < pThis->cBlocksInSrcFile)
                 cbDefaultSize = RT_MIN(pThis->cBlocksInSrcFile - offBootImage, UINT32_MAX / ISO9660_SECTOR_SIZE + 1)
@@ -2504,7 +3120,8 @@ static int rtFsIsoImportProcessElToritoDesc(PRTFSISOMKIMPORTER pThis, PISO9660BO
      * Before we tell the ISO maker about the validation entry, we need to sort
      * out the file backing the boot catalog.  This isn't fatal if it fails.
      */
-    PRTFSISOMKIMPBLOCK2FILE pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU32Get(&pThis->Block2FileRoot, offBootCatalog);
+    PRTFSISOMKIMPBLOCK2FILE pBlock2File = (PRTFSISOMKIMPBLOCK2FILE)RTAvlU64Get(&pThis->Block2FileRoot,
+                                                                               offBootCatalog * (uint64_t)ISO9660_SECTOR_SIZE);
     if (pBlock2File)
     {
         rc = RTFsIsoMakerBootCatSetFile(pThis->hIsoMaker, pBlock2File->idxObj);
@@ -2738,6 +3355,7 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                      * Look for UDF descriptors, starting with "BEA01".
                      * With the exception of the completely unused "BOOT2" descriptor, these have no content.
                      */
+                    /** @todo this is wrong. We've got CD001/TERM here, not BEA01. */
                     if (   RT_SUCCESS(pThis->rc)
                         && !(pThis->fFlags & RTFSISOMK_IMPORT_F_NO_UDF)
                         &&    ISO9660VOLDESC_MAKE_U64_HDR_VALUE(pThis->uSectorBuf.au64[0])
@@ -2843,7 +3461,7 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
             /*
              * Destroy the state.
              */
-            RTAvlU32Destroy(&pThis->Block2FileRoot, rtFsIsoMakerImportDestroyData2File, NULL);
+            RTAvlU64Destroy(&pThis->Block2FileRoot, rtFsIsoMakerImportDestroyData2File, NULL);
             RTMemFree(pThis);
         }
         else

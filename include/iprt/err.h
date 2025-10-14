@@ -2555,6 +2555,13 @@
 /** A boot catalog entry in the import ISO sets the continuation flag when
  *  we reached the ned of the boot catalog secotr. */
 #define VERR_ISOMK_IMPORT_BOOT_CAT_ENTRY_CONTINUATION_EOS           (-25157)
+/** UDF directory too large for import. */
+#define VERR_ISOMK_IMPORT_UDF_DIR_TOO_BIG                           (-25158)
+/** UDF file cannot be import as it has discontiguous allocation descriptors
+ * or is a sparse file. */
+#define VERR_ISOMK_IMPORT_UDF_DISCONTIGUOUS_ADS                     (-25159)
+/** UDF file cannot be import sparse files at present. */
+#define VERR_ISOMK_IMPORT_UDF_SPARSE_FILE                           (-25160)
 /** @} */
 
 
@@ -2602,7 +2609,7 @@
 #define VERR_ISOFS_INCOMPLETE_PART_MAP_TABLE            (-25319)
 /** Unknown partition map entry type. */
 #define VERR_ISOFS_UNKNOWN_PART_MAP_ENTRY_TYPE          (-25320)
-/** Unkonwn paritition ID found in the partition map table. */
+/** Unknown paritition ID found in the partition map table. */
 #define VERR_ISOFS_UNKNOWN_PART_MAP_TYPE_ID             (-25321)
 /** Support for virtual partitions as not yet been implemented. */
 #define VERR_ISOFS_VPM_NOT_SUPPORTED                    (-25322)
@@ -2659,6 +2666,12 @@
 #define VERR_ISOFS_TOO_MANY_FILE_FRAGMENTS              (-25348)
 /** Bogus UDF dstring field value. */
 #define VERR_ISOFS_BOGUS_UDF_DSTRING_FIELD              (-25349)
+/** Bogus UDF directory size. */
+#define VERR_ISOFS_BOGUS_UDF_DIR_SIZE                   (-25350)
+/** No allocation descriptors for UDF directory. */
+#define VERR_ISOFS_NO_ADS_FOR_UDF_DIR                   (-25351)
+/** No allocation descriptors for non-zero sized UDF object. */
+#define VERR_ISOFS_NO_ADS_FOR_UDF_OBJECT                (-25352)
 
 /** Not implemented for UDF. */
 #define VERR_ISOFS_UDF_NOT_IMPLEMENTED                  (-25390)

@@ -296,6 +296,9 @@ DECLHIDDEN(void) RTFsUdfHlpLogDirContent(uint8_t const *pbDir, size_t cbDir);
 
 DECLHIDDEN(int)  RTFsUdfHlpVpRead(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVfsBacking,  uint32_t idxPart, uint32_t idxBlock,
                                   void *pvBuf, size_t cbToRead, uint64_t offByteAddend = 0);
+DECLHIDDEN(int)  RTFsUdfHlpReadObject(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVfsBacking, uint64_t cbObject,
+                                      uint32_t cExtents, PCRTFSISOEXTENT pFirstExtent, PCRTFSISOEXTENT paFurtherExtents,
+                                      uint64_t offRead, void *pvBuf, size_t cbToRead, size_t *pcbRead, size_t *poffPosMov);
 
 DECLHIDDEN(int)  RTFsUdfHlpValidateDescTag(PCUDFTAG pTag, uint16_t idTag, uint32_t offTag, PRTERRINFO pErrInfo);
 DECLHIDDEN(int)  RTFsUdfHlpValidateDescCrc(PCUDFTAG pTag, size_t cbDesc, PRTERRINFO pErrInfo);
@@ -342,7 +345,9 @@ DECLHIDDEN(int)  RTFsUdfHlpGatherExtentsFromIcb(PCRTFSUDFVOLINFO pVolInfo, uint8
                                                 uint32_t fIcbTagFlags, uint32_t idxDefaultPart, uint64_t offAllocDescs,
                                                 uint64_t cbMax, RTVFSFILE hVfsBacking, uint8_t *pbBuf,
                                                 uint32_t *pcExtents, PRTFSISOEXTENT pFirstExtent, PRTFSISOEXTENT *ppaExtents);
+DECLHIDDEN(void) RTFsUdfHlpFreeGatherExtents(PRTFSISOEXTENT paExtents);
 
+DECLHIDDEN(int)  RTFsUdfHlpDStringFieldToUtf8(const char *pachSrc, size_t cbSrc, char **ppszDst);
 DECLHIDDEN(int)  RTFsUdfHlpDStringFieldToUtf8Buf(const char *pachSrc, size_t cbSrc, void *pvDst, size_t cbDst, size_t *pcbRet);
 
 
