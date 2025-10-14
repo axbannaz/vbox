@@ -3374,6 +3374,20 @@ class SessionWrapper(TdTaskBase):
                     oIHostOnlyIf  = self.oVBox.host.findHostNetworkInterfaceByName(sHostOnlyNIC);
                     sHostOnlyNet  = oIHostOnlyIf.networkName;
                     oIDhcpServer  = self.oVBox.findDHCPServerByNetworkName(sHostOnlyNet);
+
+                    #
+                    # Check whether a fixed IP was set for the MAC address and use that one, otherwise
+                    # the DHCP server is used to query the guest IP address for the given MAC.
+                    #
+                    try:
+                        oIDhcpCfg    = oIDhcpServer.getConfig(vboxcon.DHCPConfigScope_MAC, sMacAddr, 0, False);
+                        oIDhcpCfg    = self.oVBoxMgr.queryInterface(oIDhcpCfg, 'IDHCPIndividualConfig');
+                        sIpAddr      = oIDhcpCfg.fixedAddress;
+                        oIDhcpServer = None;
+                        sMacAddr     = None;
+                    except:
+                        reporter.log4Xcpt();
+                        pass;
             except:
                 reporter.errorXcpt();
                 return None;

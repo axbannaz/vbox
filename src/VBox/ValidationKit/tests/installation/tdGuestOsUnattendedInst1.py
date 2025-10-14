@@ -333,6 +333,30 @@ class UnattendedVm(vboxtestvms.BaseTestVm):
             fRc =     oSession.setGuestPropertyValue('/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', '43200000') \
                   and fRc; # 12 hours
 
+        if fRc:
+            #
+            # Ensure the IP address doesn't change between guest reboots, as seen with the unattended Debian installer,
+            # by adding a fixed address for the MAC address.
+            #
+            try:
+                oNic              = oSession.o.machine.getNetworkAdapter(0);
+                enmAttachmentType = oNic.attachmentType;
+                if enmAttachmentType == vboxcon.NetworkAttachmentType_HostOnly:
+                    # Get the MAC address and find the DHCP server.
+                    sMacAddr      = oNic.MACAddress;
+                    sHostOnlyNIC  = oNic.hostOnlyInterface;
+                    oIHostOnlyIf  = oTestDrv.oVBox.host.findHostNetworkInterfaceByName(sHostOnlyNIC);
+                    sHostOnlyNet  = oIHostOnlyIf.networkName;
+                    oIDhcpServer  = oTestDrv.oVBox.findDHCPServerByNetworkName(sHostOnlyNet);
+
+                    sLowerIp = oIDhcpServer.lowerIP;
+                    oIDhcpCfg = oIDhcpServer.getConfig(vboxcon.DHCPConfigScope_MAC, sMacAddr, 0, True);
+                    oIDhcpCfg = oTestDrv.oVBoxMgr.queryInterface(oIDhcpCfg, 'IDHCPIndividualConfig');
+                    oIDhcpCfg.fixedAddress = sLowerIp;
+            except:
+                reporter.errorXcpt();
+                fRc = False;
+
         # Save the settings.
         fRc = fRc and oSession.saveSettings()
         fRc = oSession.close() and fRc;
