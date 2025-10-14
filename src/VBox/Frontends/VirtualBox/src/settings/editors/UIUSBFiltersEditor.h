@@ -37,10 +37,10 @@
 
 /* Forward declartions: */
 class QHBoxLayout;
-class QTreeWidgetItem;
+class QListWidgetItem;
 class QILabelSeparator;
+class QIListWidget;
 class QIToolBar;
-class QITreeWidget;
 class UIUSBMenu;
 
 /** USB Filter data. */
@@ -121,9 +121,9 @@ private slots:
     /** Handles translation event. */
     virtual void sltRetranslateUI() RT_OVERRIDE RT_FINAL;
     /** Handles @a pCurrentItem change. */
-    void sltHandleCurrentItemChange(QTreeWidgetItem *pCurrentItem);
+    void sltHandleCurrentItemChange(QListWidgetItem *pCurrentItem);
     /** Handles @a pItem double-click. */
-    void sltHandleDoubleClick(QTreeWidgetItem *pItem);
+    void sltHandleDoubleClick(QListWidgetItem *pItem);
     /** Handles context menu request for @a position. */
     void sltHandleContextMenuRequest(const QPoint &position);
 
@@ -142,8 +142,8 @@ private slots:
     /** Handles command to move chosen USB filter down. */
     void sltMoveFilterDown();
 
-    /** Handles USB filter tree activity state change for @a pChangedItem. */
-    void sltHandleActivityStateChange(QTreeWidgetItem *pChangedItem);
+    /** Handles USB filter list activity state change for @a pChangedItem. */
+    void sltHandleActivityStateChange(QListWidgetItem *pChangedItem);
 
 private:
 
@@ -151,8 +151,8 @@ private:
     void prepare();
     /** Prepares widgets. */
     void prepareWidgets();
-    /** Prepare tree-widget. */
-    void prepareTreeWidget();
+    /** Prepare list-widget. */
+    void prepareListWidget();
     /** Prepare tool-bar. */
     void prepareToolbar();
     /** Prepares connections. */
@@ -160,8 +160,8 @@ private:
 
     /** Creates USB filter item based on passed @a data. */
     void addUSBFilterItem(const UIDataUSBFilter &data, bool fChoose);
-    /** Reloads tree. */
-    void reloadTree();
+    /** Reloads list. */
+    void reloadList();
 
     /** Holds the value to be set. */
     QList<UIDataUSBFilter>  m_guiValue;
@@ -176,10 +176,10 @@ private:
      * @{ */
         /** Holds the widget separator instance. */
         QILabelSeparator *m_pLabelSeparator;
-        /** Holds the tree layout instance. */
-        QHBoxLayout      *m_pLayoutTree;
-        /** Holds the tree-widget instance. */
-        QITreeWidget     *m_pTreeWidget;
+        /** Holds the list layout instance. */
+        QHBoxLayout      *m_pLayoutList;
+        /** Holds the list-widget instance. */
+        QIListWidget     *m_pListWidget;
         /** Holds the toolbar instance. */
         QIToolBar        *m_pToolbar;
         /** Holds the 'new USB filter' action instance. */
