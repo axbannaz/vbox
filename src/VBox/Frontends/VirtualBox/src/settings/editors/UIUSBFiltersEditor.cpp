@@ -56,15 +56,15 @@
 #include <VBox/com/VirtualBox.h>
 
 
-/** USB Filter tree-widget item. */
-class USBFilterTreeWidgetItem : public QITreeWidgetItem, public UIDataUSBFilter
+/** USB Filter item. */
+class USBFilterItem : public QITreeWidgetItem, public UIDataUSBFilter
 {
     Q_OBJECT;
 
 public:
 
-    /** Constructs USB filter type (root) item. */
-    USBFilterTreeWidgetItem(QITreeWidget *pParent) : QITreeWidgetItem(pParent) {}
+    /** Constructs top-level USB filter item. */
+    USBFilterItem(QITreeWidget *pParent) : QITreeWidgetItem(pParent) {}
 
     /** Updates item fields. */
     void updateFields();
@@ -113,15 +113,15 @@ private:
 
 
 /*********************************************************************************************************************************
-*   Class USBFilterTreeWidgetItem implementation.                                                                                *
+*   Class USBFilterItem implementation.                                                                                          *
 *********************************************************************************************************************************/
 
-void USBFilterTreeWidgetItem::updateFields()
+void USBFilterItem::updateFields()
 {
     setText(0, m_strName);
 }
 
-QString USBFilterTreeWidgetItem::defaultText() const
+QString USBFilterItem::defaultText() const
 {
     return   checkState(0) == Qt::Checked
            ? UIUSBFiltersEditor::tr("%1, Active", "col.1 text, col.1 state").arg(text(0))
@@ -238,7 +238,8 @@ void UIUSBFiltersEditor::setValue(const QList<UIDataUSBFilter> &guiValue)
     if (m_guiValue != guiValue)
     {
         m_guiValue = guiValue;
-        reloadTree();
+        if (m_pTreeWidget)
+            reloadTree();
     }
 }
 
@@ -251,13 +252,14 @@ QList<UIDataUSBFilter> UIUSBFiltersEditor::value() const
     /* Prepare result: */
     QList<UIDataUSBFilter> result;
 
-    /* For each filter: */
+    /* Gather and cache new data: */
     QTreeWidgetItem *pMainRootItem = m_pTreeWidget->invisibleRootItem();
     for (int iFilterIndex = 0; iFilterIndex < pMainRootItem->childCount(); ++iFilterIndex)
     {
-        /* Gather and cache new data: */
-        const USBFilterTreeWidgetItem *pItem = static_cast<USBFilterTreeWidgetItem*>(pMainRootItem->child(iFilterIndex));
-        result << *pItem;
+        const USBFilterItem *pItem = static_cast<USBFilterItem*>(pMainRootItem->child(iFilterIndex));
+        AssertPtr(pItem);
+        if (pItem)
+            result << *pItem;
     }
 
     /* Return result: */
@@ -316,22 +318,44 @@ void UIUSBFiltersEditor::sltRetranslateUI()
 
 void UIUSBFiltersEditor::sltHandleCurrentItemChange(QTreeWidgetItem *pCurrentItem)
 {
-    if (pCurrentItem && !pCurrentItem->isSelected())
-        pCurrentItem->setSelected(true);
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+    AssertPtrReturnVoid(m_pActionEdit);
+    AssertPtrReturnVoid(m_pActionRemove);
+    AssertPtrReturnVoid(m_pActionMoveUp);
+    AssertPtrReturnVoid(m_pActionMoveDown);
+
+    /* Get current item index: */
+    const int iCurrentItemIndex = m_pTreeWidget->indexOfTopLevelItem(pCurrentItem);
+
+    /* Update actions availability: */
     m_pActionEdit->setEnabled(pCurrentItem);
     m_pActionRemove->setEnabled(pCurrentItem);
-    m_pActionMoveUp->setEnabled(pCurrentItem && m_pTreeWidget->itemAbove(pCurrentItem));
-    m_pActionMoveDown->setEnabled(pCurrentItem && m_pTreeWidget->itemBelow(pCurrentItem));
+    m_pActionMoveUp->setEnabled(pCurrentItem && iCurrentItemIndex > 0);
+    m_pActionMoveDown->setEnabled(pCurrentItem && iCurrentItemIndex < m_pTreeWidget->childCount() - 1);
 }
 
 void UIUSBFiltersEditor::sltHandleDoubleClick(QTreeWidgetItem *pItem)
 {
+    /* Sanity check: */
     AssertPtrReturnVoid(pItem);
+
+    /* Handle double-click as edit action trigger: */
     sltEditFilter();
 }
 
 void UIUSBFiltersEditor::sltHandleContextMenuRequest(const QPoint &position)
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+    AssertPtrReturnVoid(m_pActionEdit);
+    AssertPtrReturnVoid(m_pActionRemove);
+    AssertPtrReturnVoid(m_pActionMoveUp);
+    AssertPtrReturnVoid(m_pActionMoveDown);
+    AssertPtrReturnVoid(m_pActionNew);
+    AssertPtrReturnVoid(m_pActionAdd);
+
+    /* Populate & show context menu: */
     QMenu menu;
     QTreeWidgetItem *pItem = m_pTreeWidget->itemAt(position);
     if (m_pTreeWidget->isEnabled() && pItem && pItem->flags() & Qt::ItemIsSelectable)
@@ -353,13 +377,15 @@ void UIUSBFiltersEditor::sltHandleContextMenuRequest(const QPoint &position)
 
 void UIUSBFiltersEditor::sltCreateFilter()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Search for the max available filter index: */
     int iMaxFilterIndex = 0;
     const QRegularExpression re(QString("^") + m_strTrUSBFilterName.arg("([0-9]+)") + QString("$"));
-    QTreeWidgetItemIterator iterator(m_pTreeWidget);
-    while (*iterator)
+    for (int i = 0; i < m_pTreeWidget->topLevelItemCount(); ++i)
     {
-        const QString filterName = (*iterator)->text(0);
+        const QString filterName = m_pTreeWidget->topLevelItem(i)->text(0);
         const QRegularExpressionMatch mt = re.match(filterName);
         if (mt.hasMatch())
         {
@@ -367,7 +393,6 @@ void UIUSBFiltersEditor::sltCreateFilter()
             iMaxFilterIndex = iFoundIndex > iMaxFilterIndex
                             ? iFoundIndex : iMaxFilterIndex;
         }
-        ++iterator;
     }
 
     /* Prepare new data: */
@@ -384,14 +409,19 @@ void UIUSBFiltersEditor::sltCreateFilter()
 
 void UIUSBFiltersEditor::sltAddFilter()
 {
-    if (m_pMenuUSBDevices)
-        m_pMenuUSBDevices->exec(QCursor::pos());
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pMenuUSBDevices);
+
+    /* Show menu: */
+    m_pMenuUSBDevices->exec(QCursor::pos());
 }
 
 void UIUSBFiltersEditor::sltAddFilterConfirmed(QAction *pAction)
 {
-    if (!m_pMenuUSBDevices)
-        return;
+    /* Sanity check: */
+    AssertPtrReturnVoid(pAction);
+    AssertPtrReturnVoid(m_pMenuUSBDevices);
+
     /* Get USB device: */
     const CUSBDevice comUsb = m_pMenuUSBDevices->getUSB(pAction);
     if (comUsb.isNull())
@@ -423,8 +453,11 @@ void UIUSBFiltersEditor::sltAddFilterConfirmed(QAction *pAction)
 
 void UIUSBFiltersEditor::sltEditFilter()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Check current filter item: */
-    USBFilterTreeWidgetItem *pItem = static_cast<USBFilterTreeWidgetItem*>(m_pTreeWidget->currentItem());
+    USBFilterItem *pItem = static_cast<USBFilterItem*>(m_pTreeWidget->currentItem());
     AssertPtrReturnVoid(pItem);
 
     /* Configure USB filter details editor: */
@@ -461,6 +494,9 @@ void UIUSBFiltersEditor::sltEditFilter()
 
 void UIUSBFiltersEditor::sltRemoveFilter()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Check current USB filter item: */
     QTreeWidgetItem *pItem = m_pTreeWidget->currentItem();
     AssertPtrReturnVoid(pItem);
@@ -474,6 +510,9 @@ void UIUSBFiltersEditor::sltRemoveFilter()
 
 void UIUSBFiltersEditor::sltMoveFilterUp()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Check current USB filter item: */
     QTreeWidgetItem *pItem = m_pTreeWidget->currentItem();
     AssertPtrReturnVoid(pItem);
@@ -490,6 +529,9 @@ void UIUSBFiltersEditor::sltMoveFilterUp()
 
 void UIUSBFiltersEditor::sltMoveFilterDown()
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Check current USB filter item: */
     QTreeWidgetItem *pItem = m_pTreeWidget->currentItem();
     AssertPtrReturnVoid(pItem);
@@ -507,7 +549,7 @@ void UIUSBFiltersEditor::sltMoveFilterDown()
 void UIUSBFiltersEditor::sltHandleActivityStateChange(QTreeWidgetItem *pChangedItem)
 {
     /* Check changed USB filter item: */
-    USBFilterTreeWidgetItem *pItem = static_cast<USBFilterTreeWidgetItem*>(pChangedItem);
+    USBFilterItem *pItem = static_cast<USBFilterItem*>(pChangedItem);
     AssertPtrReturnVoid(pItem);
 
     /* Update corresponding item: */
@@ -658,8 +700,11 @@ void UIUSBFiltersEditor::prepareConnections()
 
 void UIUSBFiltersEditor::addUSBFilterItem(const UIDataUSBFilter &data, bool fChoose)
 {
+    /* Sanity check: */
+    AssertPtrReturnVoid(m_pTreeWidget);
+
     /* Create USB filter item: */
-    USBFilterTreeWidgetItem *pItem = new USBFilterTreeWidgetItem(m_pTreeWidget);
+    USBFilterItem *pItem = new USBFilterItem(m_pTreeWidget);
     if (pItem)
     {
         /* Configure item: */
@@ -689,8 +734,7 @@ void UIUSBFiltersEditor::addUSBFilterItem(const UIDataUSBFilter &data, bool fCho
 void UIUSBFiltersEditor::reloadTree()
 {
     /* Sanity check: */
-    if (!m_pTreeWidget)
-        return;
+    AssertPtrReturnVoid(m_pTreeWidget);
 
     /* Clear list initially: */
     m_pTreeWidget->clear();
