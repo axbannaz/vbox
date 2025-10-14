@@ -182,7 +182,7 @@ static int  supdrvLinuxLdrModuleNotifyCallback(struct notifier_block *pBlock,
  */
 static SUPDRVDEVEXT         g_DevExt;
 #ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
-static bool                 g_fUseKvmHwvirtApi;
+static bool                 g_fUsingKvmHwvirtApi;
 #endif
 
 /** Module parameter.
@@ -439,11 +439,6 @@ static int __init VBoxDrvLinuxInit(void)
                         int rc2 = register_module_notifier(&g_supdrvLinuxModuleNotifierBlock);
                         if (rc2)
                             printk(KERN_WARNING "vboxdrv: failed to register module notifier! rc2=%d\n", rc2);
-#endif
-#ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
-                        g_fUseKvmHwvirtApi = is_kvm_hwvirt_mod_likely_loaded();
-                        ASMCompilerBarrier();
-                        printk(KERN_INFO "vboxdrv: KVM is %s loaded\n", g_fUseKvmHwvirtApi ? "likely" : "not likely");
 #endif
                         printk(KERN_INFO "vboxdrv: TSC mode is %s, tentative frequency %llu Hz\n",
                                SUPGetGIPModeName(g_DevExt.pGip), g_DevExt.pGip->u64CpuHz);
@@ -1691,19 +1686,26 @@ int VBOXCALL supdrvOSEnableHwvirt(bool fEnable)
 #ifdef SUPDRV_LINUX_HAS_KVM_HWVIRT_API
     if (fEnable)
     {
-        if (g_fUseKvmHwvirtApi)
+        if (is_kvm_hwvirt_mod_likely_loaded())
         {
             /* kvm_enable_virtualization() is guarded by kvm_usage_count reference counter inside a mutex. */
             int const rc = kvm_enable_virtualization();
             if (!rc)
+            {
+                g_fUsingKvmHwvirtApi = true;
+                printk(KERN_INFO "vboxdrv: Using KVM hardware-virtualization API\n");
                 return VINF_SUCCESS;
+            }
             printk(KERN_ERR "vboxdrv: Failed to enable the KVM kernel API for acquiring VMX/SVM. rc=%d\n", rc);
         }
         return VERR_NOT_AVAILABLE;
     }
 
-    if (g_fUseKvmHwvirtApi)
+    if (g_fUsingKvmHwvirtApi)
+    {
         kvm_disable_virtualization();
+        g_fUsingKvmHwvirtApi = false;
+    }
     return VINF_SUCCESS;
 #endif
     return VERR_NOT_SUPPORTED;
