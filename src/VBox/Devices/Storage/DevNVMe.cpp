@@ -3479,27 +3479,24 @@ static void nvmeR3CmdNvmDump(PNVMEWRKTHRD pWrkThrd, PNVMECMDNVM pCmdNvm)
 static int nvmeR3PhysRead(PPDMDEVINS pDevIns, PNVME pThis, PNVMECC pThisCC,
                           RTGCPHYS GCPhysAddr, void *pv, size_t cb, uint32_t u32Type)
 {
-    int rc = VINF_SUCCESS;
-
     Assert(u32Type <= NVME_CMBSZ_SUPP_BIT_IDX_MAX); RT_NOREF(u32Type);
 
     if (   pThis->cbCtrlMemBuf > 0
         && pThis->GCPhysCtrlMemBuf != NIL_RTGCPHYS
         && GCPhysAddr >= pThis->GCPhysCtrlMemBuf
-        && GCPhysAddr + cb <= pThis->GCPhysCtrlMemBuf + pThis->cbCtrlMemBuf)
+        && GCPhysAddr < pThis->GCPhysCtrlMemBuf + pThis->cbCtrlMemBuf)
     {
-        uint32_t off = GCPhysAddr - pThis->GCPhysCtrlMemBuf;
-        memcpy(pv, (uint8_t *)pThisCC->pvCtrlMemBufR3 + off, cb);
-
-        STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatReadCtrlMemBuf, cb);
-    }
-    else
-    {
-        rc = PDMDevHlpPCIPhysRead(pDevIns, GCPhysAddr, pv, cb);
-        STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatReadGuestMem, cb);
+        uint32_t const off = GCPhysAddr - pThis->GCPhysCtrlMemBuf;
+        if (cb <= pThis->cbCtrlMemBuf - off)
+        {
+            memcpy(pv, (uint8_t *)pThisCC->pvCtrlMemBufR3 + off, cb);
+            STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatReadCtrlMemBuf, cb);
+            return VINF_SUCCESS;
+        }
     }
 
-    return rc;
+    STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatReadGuestMem, cb);
+    return PDMDevHlpPCIPhysRead(pDevIns, GCPhysAddr, pv, cb);
 }
 
 /**
@@ -3518,27 +3515,24 @@ static int nvmeR3PhysRead(PPDMDEVINS pDevIns, PNVME pThis, PNVMECC pThisCC,
 static int nvmeR3PhysWrite(PPDMDEVINS pDevIns, PNVME pThis, PNVMECC pThisCC,
                            RTGCPHYS GCPhysAddr, const void *pv, size_t cb, uint32_t u32Type)
 {
-    int rc = VINF_SUCCESS;
-
     Assert(u32Type <= NVME_CMBSZ_SUPP_BIT_IDX_MAX); RT_NOREF(u32Type);
 
     if (   pThis->cbCtrlMemBuf > 0
         && pThis->GCPhysCtrlMemBuf != NIL_RTGCPHYS
         && GCPhysAddr >= pThis->GCPhysCtrlMemBuf
-        && GCPhysAddr + cb <= pThis->GCPhysCtrlMemBuf + pThis->cbCtrlMemBuf)
+        && GCPhysAddr < pThis->GCPhysCtrlMemBuf + pThis->cbCtrlMemBuf)
     {
-        uint32_t off = GCPhysAddr - pThis->GCPhysCtrlMemBuf;
-        memcpy((uint8_t *)pThisCC->pvCtrlMemBufR3 + off, pv, cb);
-
-        STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatWrittenCtrlMemBuf, cb);
-    }
-    else
-    {
-        rc = PDMDevHlpPCIPhysWrite(pDevIns, GCPhysAddr, pv, cb);
-        STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatWrittenGuestMem, cb);
+        uint32_t const off = GCPhysAddr - pThis->GCPhysCtrlMemBuf;
+        if (cb <= pThis->cbCtrlMemBuf - off)
+        {
+            memcpy((uint8_t *)pThisCC->pvCtrlMemBufR3 + off, pv, cb);
+            STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatWrittenCtrlMemBuf, cb);
+            return VINF_SUCCESS;
+        }
     }
 
-    return rc;
+    STAM_COUNTER_ADD(&pThis->aStatMemXfer[u32Type].StatWrittenGuestMem, cb);
+    return PDMDevHlpPCIPhysWrite(pDevIns, GCPhysAddr, pv, cb);
 }
 
 /**
