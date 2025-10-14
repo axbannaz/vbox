@@ -929,11 +929,9 @@ static int vusbUrbSubmitCtrl(PVUSBURB pUrb)
                 vusbUrbCompletionRh(pUrb);
                 break;
             }
-            if (pPipe->pCtrl != pExtra)
-            {
-                pExtra = pPipe->pCtrl;
-                pSetup = pExtra->pMsg;
-            }
+
+            /* vusbMsgSetup() may have reallocated pMsg */
+            pSetup = pExtra->pMsg;
 
             /* pre-buffer our output if it's device-to-host */
             if (pSetup->bmRequestType & VUSB_DIR_TO_HOST)
