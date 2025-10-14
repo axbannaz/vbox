@@ -52,6 +52,11 @@ class UILanguageItem : public QITreeWidgetItem
 
 public:
 
+    /** Casts QTreeWidgetItem* to UILanguageItem* if possible. */
+    static UILanguageItem *toItem(QTreeWidgetItem *pItem);
+    /** Casts const QTreeWidgetItem* to const UILanguageItem* if possible. */
+    static const UILanguageItem *toItem(const QTreeWidgetItem *pItem);
+
     /** Constructs language tree-widget item passing @a pParent to the base-class.
       * @param  translator  Brings the translator this item is related to.
       * @param  strId       Brings the language ID this item is related to.
@@ -90,8 +95,40 @@ private:
 *   Class UILanguageItem implementation.                                                                                         *
 *********************************************************************************************************************************/
 
+/* static */
+UILanguageItem *UILanguageItem::toItem(QTreeWidgetItem *pItem)
+{
+    /* Make sure alive QITreeWidgetItem passed: */
+    if (!pItem || pItem->type() != ItemType)
+        return 0;
+
+    /* Acquire casted QITreeWidgetItem: */
+    QITreeWidgetItem *pIntermediateItem = static_cast<QITreeWidgetItem*>(pItem);
+    if (!pIntermediateItem)
+        return 0;
+
+    /* Return proper UILanguageItem: */
+    return qobject_cast<UILanguageItem*>(pIntermediateItem);
+}
+
+/* static */
+const UILanguageItem *UILanguageItem::toItem(const QTreeWidgetItem *pItem)
+{
+    /* Make sure alive QITreeWidgetItem passed: */
+    if (!pItem || pItem->type() != ItemType)
+        return 0;
+
+    /* Acquire casted QITreeWidgetItem: */
+    const QITreeWidgetItem *pIntermediateItem = static_cast<const QITreeWidgetItem*>(pItem);
+    if (!pIntermediateItem)
+        return 0;
+
+    /* Return proper UILanguageItem: */
+    return qobject_cast<const UILanguageItem*>(pIntermediateItem);
+}
+
 UILanguageItem::UILanguageItem(QITreeWidget *pParent, const QTranslator &translator,
-                               const QString &strId, bool fBuiltIn /* = false */)
+                               const QString &strId, bool fBuiltIn)
     : QITreeWidgetItem(pParent)
     , m_fBuiltIn(fBuiltIn)
 {
@@ -185,6 +222,12 @@ UILanguageItem::UILanguageItem(QITreeWidget *pParent)
 
 bool UILanguageItem::operator<(const QTreeWidgetItem &another) const
 {
+    /* Cast another item to language one: */
+    const QTreeWidgetItem *pAnotherItem = &another;
+    AssertPtrReturn(pAnotherItem, false);
+    const UILanguageItem *pAnotherLanguageItem = toItem(pAnotherItem);
+    AssertPtrReturn(pAnotherLanguageItem, false);
+
     /* Compare id and built-in flag: */
     if (text(1).isNull())
         return true;
@@ -192,7 +235,7 @@ bool UILanguageItem::operator<(const QTreeWidgetItem &another) const
         return false;
     if (isBuiltIn())
         return true;
-    if (another.type() == ItemType && ((UILanguageItem*)&another)->isBuiltIn())
+    if (pAnotherLanguageItem->isBuiltIn())
         return false;
 
     /* Call to base-class: */
@@ -238,7 +281,7 @@ void UILanguageSettingsEditor::setValue(const QString &strValue)
 
 QString UILanguageSettingsEditor::value() const
 {
-    QTreeWidgetItem *pCurrentItem = m_pTreeWidget ? m_pTreeWidget->currentItem() : 0;
+    UILanguageItem *pCurrentItem = m_pTreeWidget ? UILanguageItem::toItem(m_pTreeWidget->currentItem()) : 0;
     return pCurrentItem ? pCurrentItem->text(1) : m_strValue;
 }
 
@@ -282,12 +325,8 @@ void UILanguageSettingsEditor::sltHandleItemPainting(QTreeWidgetItem *pItem, QPa
     AssertPtrReturnVoid(pPainter);
     AssertPtrReturnVoid(m_pTreeWidget);
 
-    /* An item of required type: */
-    QITreeWidgetItem *pItemOfRequiredType = QITreeWidgetItem::toItem(pItem);
-    AssertPtrReturnVoid(pItemOfRequiredType);
-
-    /* A language item to be honest :) */
-    UILanguageItem *pLanguageItem = qobject_cast<UILanguageItem*>(pItemOfRequiredType);
+    /* Cast item to language one: */
+    UILanguageItem *pLanguageItem = UILanguageItem::toItem(pItem);
     AssertPtrReturnVoid(pLanguageItem);
 
     /* For built in language item: */
@@ -301,17 +340,21 @@ void UILanguageSettingsEditor::sltHandleItemPainting(QTreeWidgetItem *pItem, QPa
     }
 }
 
-void UILanguageSettingsEditor::sltHandleCurrentItemChange(QTreeWidgetItem *pCurrentItem)
+void UILanguageSettingsEditor::sltHandleCurrentItemChange(QTreeWidgetItem *pItem)
 {
     /* Sanity check: */
     AssertPtrReturnVoid(m_pLabelInfo);
 
     /* Make sure item chosen: */
-    if (!pCurrentItem)
+    if (!pItem)
         return;
 
+    /* Cast item to language one: */
+    UILanguageItem *pCurrentItem = UILanguageItem::toItem(pItem);
+    AssertPtrReturnVoid(pCurrentItem);
+
     /* Disable labels for the Default language item: */
-    const bool fEnabled = !pCurrentItem->text (1).isNull();
+    const bool fEnabled = !pCurrentItem->text(1).isNull();
     m_pLabelInfo->setEnabled(fEnabled);
     m_pLabelInfo->setText(QString("<table>"
                                   "<tr><td>%1&nbsp;</td><td>%2</td></tr>"

@@ -69,8 +69,8 @@ private slots:
     /** Handles @a pItem painting with passed @a pPainter. */
     void sltHandleItemPainting(QTreeWidgetItem *pItem, QPainter *pPainter);
 
-    /** Handles @a pCurrentItem change. */
-    void sltHandleCurrentItemChange(QTreeWidgetItem *pCurrentItem);
+    /** Handles current @a pItem change. */
+    void sltHandleCurrentItemChange(QTreeWidgetItem *pItem);
 
 private:
 
