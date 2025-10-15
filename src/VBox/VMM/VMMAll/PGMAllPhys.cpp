@@ -606,17 +606,6 @@ void pgmPhysInvalidRamRangeTlbs(PVMCC pVM)
 
 
 /**
- * Tests if a value of type RTGCPHYS is negative if the type had been signed
- * instead of unsigned.
- *
- * @returns @c true if negative, @c false if positive or zero.
- * @param   a_GCPhys        The value to test.
- * @todo    Move me to iprt/types.h.
- */
-#define RTGCPHYS_IS_NEGATIVE(a_GCPhys)  ((a_GCPhys) & ((RTGCPHYS)1 << (sizeof(RTGCPHYS)*8 - 1)))
-
-
-/**
  * Slow worker for pgmPhysGetRange.
  *
  * @copydoc pgmPhysGetRange
@@ -632,18 +621,7 @@ DECLHIDDEN(PPGMRAMRANGE) pgmPhysGetRangeSlow(PVMCC pVM, RTGCPHYS GCPhys)
     {
         uint32_t       idxLookup        = idxStart + (idxEnd - idxStart) / 2;
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-        RTGCPHYS const cbEntryMinus1    = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-            AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
-            PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-            Assert(pRamRange);
-            pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-            return pRamRange;
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys < GCPhysEntryFirst)
         {
             if (idxStart < idxLookup)
                 idxEnd = idxLookup;
@@ -652,6 +630,18 @@ DECLHIDDEN(PPGMRAMRANGE) pgmPhysGetRangeSlow(PVMCC pVM, RTGCPHYS GCPhys)
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
+                AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
+                PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                Assert(pRamRange);
+                pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+                return pRamRange;
+            }
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
@@ -679,18 +669,7 @@ DECLHIDDEN(PPGMRAMRANGE) pgmPhysGetRangeAtOrAboveSlow(PVMCC pVM, RTGCPHYS GCPhys
     {
         uint32_t       idxLookup        = idxStart + (idxEnd - idxStart) / 2;
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-        RTGCPHYS const cbEntryMinus1    = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-            AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
-            PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-            Assert(pRamRange);
-            pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-            return pRamRange;
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys < GCPhysEntryFirst)
         {
             idRamRangeLastLeft = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
             if (idxStart < idxLookup)
@@ -700,6 +679,18 @@ DECLHIDDEN(PPGMRAMRANGE) pgmPhysGetRangeAtOrAboveSlow(PVMCC pVM, RTGCPHYS GCPhys
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
+                AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
+                PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                Assert(pRamRange);
+                pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+                return pRamRange;
+            }
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
@@ -733,25 +724,7 @@ DECLHIDDEN(PPGMPAGE) pgmPhysGetPageSlow(PVMCC pVM, RTGCPHYS GCPhys)
     {
         uint32_t       idxLookup        = idxStart + (idxEnd - idxStart) / 2;
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-        RTGCPHYS const cbEntryMinus1    = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-            AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
-            PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-            AssertReturn(pRamRange, NULL);
-            pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-
-            /* Get the page. */
-            Assert(off < pRamRange->cb);
-            RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
-#ifdef IN_RING0
-            AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], NULL);
-#endif
-            return &pRamRange->aPages[idxPage];
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys < GCPhysEntryFirst)
         {
             if (idxStart < idxLookup)
                 idxEnd = idxLookup;
@@ -760,6 +733,25 @@ DECLHIDDEN(PPGMPAGE) pgmPhysGetPageSlow(PVMCC pVM, RTGCPHYS GCPhys)
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
+                AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), NULL);
+                PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                AssertReturn(pRamRange, NULL);
+                pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+
+                /* Get the page. */
+                Assert(off < pRamRange->cb);
+                RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
+#ifdef IN_RING0
+                AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], NULL);
+#endif
+                return &pRamRange->aPages[idxPage];
+            }
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
@@ -786,26 +778,7 @@ DECLHIDDEN(int) pgmPhysGetPageExSlow(PVMCC pVM, RTGCPHYS GCPhys, PPPGMPAGE ppPag
     {
         uint32_t       idxLookup        = idxStart + (idxEnd - idxStart) / 2;
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-        RTGCPHYS const cbEntryMinus1    = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-            AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-            PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-            AssertReturn(pRamRange, VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-            pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-
-            /* Get the page. */
-            Assert(off < pRamRange->cb);
-            RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
-#ifdef IN_RING0
-            AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-#endif
-            *ppPage = &pRamRange->aPages[idxPage];
-            return VINF_SUCCESS;
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys < GCPhysEntryFirst)
         {
             if (idxStart < idxLookup)
                 idxEnd = idxLookup;
@@ -814,6 +787,26 @@ DECLHIDDEN(int) pgmPhysGetPageExSlow(PVMCC pVM, RTGCPHYS GCPhys, PPPGMPAGE ppPag
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
+                AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+                PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                AssertReturn(pRamRange, VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+                pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+
+                /* Get the page. */
+                Assert(off < pRamRange->cb);
+                RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
+#ifdef IN_RING0
+                AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+#endif
+                *ppPage = &pRamRange->aPages[idxPage];
+                return VINF_SUCCESS;
+            }
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
@@ -842,27 +835,7 @@ DECLHIDDEN(int) pgmPhysGetPageAndRangeExSlow(PVMCC pVM, RTGCPHYS GCPhys, PPPGMPA
     {
         uint32_t       idxLookup        = idxStart + (idxEnd - idxStart) / 2;
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-        RTGCPHYS const cbEntryMinus1    = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
-            AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-            PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-            AssertReturn(pRamRange, VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-            pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-
-            /* Get the page. */
-            Assert(off < pRamRange->cb);
-            RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
-#ifdef IN_RING0
-            AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], VERR_PGM_PHYS_RAM_LOOKUP_IPE);
-#endif
-            *ppRam  = pRamRange;
-            *ppPage = &pRamRange->aPages[idxPage];
-            return VINF_SUCCESS;
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys < GCPhysEntryFirst)
         {
             if (idxStart < idxLookup)
                 idxEnd = idxLookup;
@@ -871,6 +844,27 @@ DECLHIDDEN(int) pgmPhysGetPageAndRangeExSlow(PVMCC pVM, RTGCPHYS GCPhys, PPPGMPA
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = pVM->pgm.s.aRamRangeLookup[idxLookup].GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                uint32_t const     idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(pVM->pgm.s.aRamRangeLookup[idxLookup]);
+                AssertReturn(idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges), VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+                PPGMRAMRANGE const pRamRange  = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                AssertReturn(pRamRange, VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+                pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+
+                /* Get the page. */
+                Assert(off < pRamRange->cb);
+                RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
+#ifdef IN_RING0
+                AssertReturn(idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange], VERR_PGM_PHYS_RAM_LOOKUP_IPE);
+#endif
+                *ppRam  = pRamRange;
+                *ppPage = &pRamRange->aPages[idxPage];
+                return VINF_SUCCESS;
+            }
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
@@ -919,41 +913,7 @@ DECLHIDDEN(int) pgmPhysGetPageAndRangeExSlowLockless(PVMCC pVM, PVMCPUCC pVCpu, 
 
         /* Check how GCPhys relates to the entry: */
         RTGCPHYS const GCPhysEntryFirst = PGMRAMRANGELOOKUPENTRY_GET_FIRST(Entry);
-        RTGCPHYS const cbEntryMinus1    = Entry.GCPhysLast - GCPhysEntryFirst;
-        RTGCPHYS const off              = GCPhys - GCPhysEntryFirst;
-        if (off <= cbEntryMinus1)
-        {
-            /* We seem to have a match. If, however, anything doesn't match up
-               bail and redo owning the lock. No asserting here as we may be
-               racing removal/insertion. */
-            if (!RTGCPHYS_IS_NEGATIVE(off))
-            {
-                uint32_t const idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(Entry);
-                if (idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges))
-                {
-                    PPGMRAMRANGE const pRamRange = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
-                    if (pRamRange)
-                    {
-                        if (   pRamRange->GCPhys == GCPhysEntryFirst
-                            && pRamRange->cb     == cbEntryMinus1 + 1U)
-                        {
-                            RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
-#ifdef IN_RING0
-                            if (idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange])
-#endif
-                            {
-                                pVCpu->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
-                                *ppRam  = pRamRange;
-                                *ppPage = &pRamRange->aPages[idxPage];
-                                return VINF_SUCCESS;
-                            }
-                        }
-                    }
-                }
-            }
-            break;
-        }
-        if (RTGCPHYS_IS_NEGATIVE(off))
+        if (GCPhys - GCPhysEntryFirst)
         {
             if (idxStart < idxLookup)
                 idxEnd = idxLookup;
@@ -962,6 +922,42 @@ DECLHIDDEN(int) pgmPhysGetPageAndRangeExSlowLockless(PVMCC pVM, PVMCPUCC pVCpu, 
         }
         else
         {
+            RTGCPHYS const off           = GCPhys - GCPhysEntryFirst;
+            RTGCPHYS const cbEntryMinus1 = Entry.GCPhysLast - GCPhysEntryFirst;
+            if (off <= cbEntryMinus1)
+            {
+                /* We seem to have a match. If, however, anything doesn't match up
+                   bail and redo owning the lock. No asserting here as we may be
+                   racing removal/insertion. */
+                if (off < RTGCPHYS_MAX / 2)
+                {
+                    uint32_t const idRamRange = PGMRAMRANGELOOKUPENTRY_GET_ID(Entry);
+                    if (idRamRange < RT_ELEMENTS(pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges))
+                    {
+                        PPGMRAMRANGE const pRamRange = pVM->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRanges[idRamRange];
+                        if (pRamRange)
+                        {
+                            if (   pRamRange->GCPhys == GCPhysEntryFirst
+                                && pRamRange->cb     == cbEntryMinus1 + 1U)
+                            {
+                                RTGCPHYS const idxPage = off >> GUEST_PAGE_SHIFT;
+#ifdef IN_RING0
+                                if (idxPage < pVM->pgmr0.s.acRamRangePages[idRamRange])
+#endif
+                                {
+                                    pVCpu->CTX_EXPR(pgm, pgmr0, pgm).s.apRamRangesTlb[PGM_RAMRANGE_TLB_IDX(GCPhys)] = pRamRange;
+                                    *ppRam  = pRamRange;
+                                    *ppPage = &pRamRange->aPages[idxPage];
+                                    return VINF_SUCCESS;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+            }
+
+
             idxLookup += 1;
             if (idxLookup < idxEnd)
                 idxStart = idxLookup;
