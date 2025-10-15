@@ -336,6 +336,9 @@ static const char *vmR3GetHaltMethodName(VMHALTMETHOD enmMethod)
         case VMHALTMETHOD_1:            return "method1";
         //case VMHALTMETHOD_2:            return "method2";
         case VMHALTMETHOD_GLOBAL_1:     return "global1";
+#if defined(VBOX_VMM_TARGET_ARMV8) && defined(RT_OS_WINDOWS) && defined(RT_ARCH_ARM64)
+        case VMHALTMETHOD_NEM:          return "nem";
+#endif
         default:                        return "unknown";
     }
 }
