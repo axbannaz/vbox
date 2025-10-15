@@ -80,7 +80,33 @@ Rules for adding a changelog entry to make them look more uniform:
 
     <itemizedlist>
 
-      <listitem><para></para>
+      <listitem>
+        <para>GUI: Fixed VirtualBox VM Manager crash when host was resuming
+          from sleep (github:gh-121, github:gh-170)</para>
+      </listitem>
+
+      <listitem>
+        <para>GUI: Updated native language support for Traditional Chinese, Greek,
+          Swedish, Hungarian and Indonesian translations</para>
+      </listitem>
+
+      <listitem>
+        <para>NAT: Fixed issue when multiple port forwarding rules
+          affected NAT functionality (github:gh-232)</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux host and guest: Introduced initial support for kernel 6.18</para>
+      </listitem>
+
+      <listitem>
+        <para>Linux Guest Additions: Introduced additional fixes for RHEL 9.6
+          and 9.7 kernels (github:GH-12)</para>
+      </listitem>
+
+      <listitem>
+        <para>Windows Guest Additions: Introduced additional fixes for issue
+          when installation was failing in Windows XP SP2 guest (github:GH-142)</para>
       </listitem>
 
     </itemizedlist>
