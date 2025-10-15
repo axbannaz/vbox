@@ -1109,7 +1109,7 @@ static DECLCALLBACK(VBOXSTRICTRC) qemuFwCfgMmioRead(PPDMDEVINS pDevIns, void *pv
     {
         case QEU_FW_CFG_MMIO_OFF_DATA:
         {
-            if (   pThis->cbCfgItemLeft
+            if (   cb <= pThis->cbCfgItemLeft
                 && pThis->pCfgItem)
             {
                 uint32_t cbRead = 0;
