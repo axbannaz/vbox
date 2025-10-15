@@ -3392,11 +3392,12 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                                         }
                                         if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_TERM_))
                                             break;
+                                        LogRel(("RTFsIsoMakerImport: Warning! Unexpected VRS entry: %.7Rhxs!\n",
+                                                &pThis->uSectorBuf));
+                                        AssertFailed();
+                                        if (u64Hdr != 0)
+                                            continue;
                                     }
-                                    LogRel(("RTFsIsoMakerImport: Warning! Unexpected VRS entry: %.7Rhxs!\n", &pThis->uSectorBuf));
-                                    AssertFailed();
-                                    if (u64Hdr != 0)
-                                        continue;
                                 }
                                 else
                                     rtFsIsoImpError(pThis, rc, "Error reading the volume descriptor #%u at %#RX32: %Rrc",
