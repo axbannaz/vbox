@@ -332,8 +332,8 @@ int UIDesktopWidgetWatchdog::screenNumber(const QPoint &point)
 
 QRect UIDesktopWidgetWatchdog::screenGeometry(QScreen *pScreen) const
 {
-    /* Just return screen geometry: */
-    return pScreen->geometry();
+    /* Return screen geometry or some default for the case if screen is Null: */
+    return pScreen ? pScreen->geometry() : QRect(0, 0, 1024, 768);
 }
 
 QRect UIDesktopWidgetWatchdog::screenGeometry(int iHostScreenIndex /* = -1 */) const
@@ -383,8 +383,8 @@ QRect UIDesktopWidgetWatchdog::availableGeometry(QScreen *pScreen) const
     return availableGeometry.isValid() ? availableGeometry : screenGeometry(pScreen);
 # endif /* !VBOX_GUI_WITH_CUSTOMIZATIONS1 */
 #else /* !VBOX_WS_NIX */
-    /* Just return screen available-geometry: */
-    return pScreen->availableGeometry();
+    /* Return screen available-geometry or some default for the case if screen is Null: */
+    return pScreen ? pScreen->availableGeometry() : QRect(0, 0, 1024, 768);
 #endif /* !VBOX_WS_NIX */
 }
 
@@ -824,10 +824,13 @@ void UIDesktopWidgetWatchdog::sltHostScreenAdded(QScreen *pHostScreen)
 //    printf("UIDesktopWidgetWatchdog::sltHostScreenAdded(%d)\n", screenCount());
 
     /* Listen for screen signals: */
-    connect(pHostScreen, &QScreen::geometryChanged,
-            this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
-    connect(pHostScreen, &QScreen::availableGeometryChanged,
-            this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+    if (pHostScreen)
+    {
+        connect(pHostScreen, &QScreen::geometryChanged,
+                this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
+        connect(pHostScreen, &QScreen::availableGeometryChanged,
+                this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+    }
 
 #if defined(VBOX_WS_NIX) && !defined(VBOX_GUI_WITH_CUSTOMIZATIONS1)
     /* Update host-screen configuration: */
@@ -843,10 +846,13 @@ void UIDesktopWidgetWatchdog::sltHostScreenRemoved(QScreen *pHostScreen)
 //    printf("UIDesktopWidgetWatchdog::sltHostScreenRemoved(%d)\n", screenCount());
 
     /* Forget about screen signals: */
-    disconnect(pHostScreen, &QScreen::geometryChanged,
-               this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
-    disconnect(pHostScreen, &QScreen::availableGeometryChanged,
-               this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+    if (pHostScreen)
+    {
+        disconnect(pHostScreen, &QScreen::geometryChanged,
+                   this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
+        disconnect(pHostScreen, &QScreen::availableGeometryChanged,
+                   this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+    }
 
 #if defined(VBOX_WS_NIX) && !defined(VBOX_GUI_WITH_CUSTOMIZATIONS1)
     /* Update host-screen configuration: */
@@ -935,10 +941,13 @@ void UIDesktopWidgetWatchdog::prepare()
             this, &UIDesktopWidgetWatchdog::sltHostScreenRemoved);
     foreach (QScreen *pHostScreen, qApp->screens())
     {
-        connect(pHostScreen, &QScreen::geometryChanged,
-                this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
-        connect(pHostScreen, &QScreen::availableGeometryChanged,
-                this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+        if (pHostScreen)
+        {
+            connect(pHostScreen, &QScreen::geometryChanged,
+                    this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
+            connect(pHostScreen, &QScreen::availableGeometryChanged,
+                    this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+        }
     }
 
 #if defined(VBOX_WS_NIX) && !defined(VBOX_GUI_WITH_CUSTOMIZATIONS1)
@@ -961,10 +970,13 @@ void UIDesktopWidgetWatchdog::cleanup()
                this, &UIDesktopWidgetWatchdog::sltHostScreenRemoved);
     foreach (QScreen *pHostScreen, qApp->screens())
     {
-        disconnect(pHostScreen, &QScreen::geometryChanged,
-                   this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
-        disconnect(pHostScreen, &QScreen::availableGeometryChanged,
-                   this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+        if (pHostScreen)
+        {
+            disconnect(pHostScreen, &QScreen::geometryChanged,
+                       this, &UIDesktopWidgetWatchdog::sltHandleHostScreenResized);
+            disconnect(pHostScreen, &QScreen::availableGeometryChanged,
+                       this, &UIDesktopWidgetWatchdog::sltHandleHostScreenWorkAreaResized);
+        }
     }
 
 #if defined(VBOX_WS_NIX) && !defined(VBOX_GUI_WITH_CUSTOMIZATIONS1)
