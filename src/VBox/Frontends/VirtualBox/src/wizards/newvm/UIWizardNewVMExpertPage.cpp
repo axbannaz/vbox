@@ -511,7 +511,7 @@ void UIWizardNewVMExpertPage::markWidgets() const
     if (pWizard && pWizard->installGuestAdditions() && m_pGAInstallationISOContainer)
         m_pGAInstallationISOContainer->mark();
     if (isUnattendedEnabled())
-        m_pAdditionalOptionsContainer->mark(pWizard->isProductKeyRequired());
+        m_pAdditionalOptionsContainer->mark();
 }
 
 QWidget *UIWizardNewVMExpertPage::createUnattendedWidgets()
@@ -646,7 +646,6 @@ bool UIWizardNewVMExpertPage::isComplete() const
                                              UIWizardNewVM::tr("Invalid host name or domain name"));
                 fIsComplete = false;
             }
-            if (pWizard->isProductKeyRequired())
             {
                 if (!m_pAdditionalOptionsContainer->hasProductKeyAcceptableInput())
                 {

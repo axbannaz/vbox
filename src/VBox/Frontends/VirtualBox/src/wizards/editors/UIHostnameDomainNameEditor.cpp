@@ -47,6 +47,58 @@
 #include "iprt/assert.h"
 
 
+/*********************************************************************************************************************************
+*   UIProductKeyLineEdit definition.                                                                                             *
+*********************************************************************************************************************************/
+
+class UIProductKeyLineEdit : public QILineEdit
+{
+    Q_OBJECT;
+public:
+    UIProductKeyLineEdit(QWidget *pParent = 0);
+    QString productKey() const;
+    bool isValid() const;
+private:
+    static const QString strInputMask;
+};
+
+const QString UIProductKeyLineEdit::strInputMask(">NNNNN-NNNNN-NNNNN-NNNNN-NNNNN;_");
+
+
+/*********************************************************************************************************************************
+*   UIProductKeyLineEdit implementation.                                                                                         *
+*********************************************************************************************************************************/
+
+UIProductKeyLineEdit::UIProductKeyLineEdit(QWidget *pParent /* = 0 */)
+    : QILineEdit(pParent)
+{
+    setInputMask(">NNNNN-NNNNN-NNNNN-NNNNN-NNNNN;_");
+    setMinimumWidthByText("NNNNN-NNNNN-NNNNN-NNNNN-NNNNN");
+}
+
+bool UIProductKeyLineEdit::isValid() const
+{
+    /* Accept if the line edit is empty after removing separators of the input mask, assuming '-': */
+    if (text().remove('-').isEmpty())
+        return true;
+    return hasAcceptableInput();
+}
+
+QString UIProductKeyLineEdit::productKey() const
+{
+    /* Return an empty string if text() consists of only separators: */
+    if (text().remove('-').isEmpty())
+        return QString();
+    if (!isValid())
+        return QString();
+    return text();
+}
+
+
+/*********************************************************************************************************************************
+*   UIHostnameDomainNameEditor implementation.                                                                                   *
+*********************************************************************************************************************************/
+
 UIHostnameDomainNameEditor::UIHostnameDomainNameEditor(QWidget *pParent /*  = 0 */)
     : QWidget(pParent)
     , m_pHostnameLineEdit(0)
@@ -74,7 +126,7 @@ bool UIHostnameDomainNameEditor::hostDomainNameComplete() const
         m_pDomainNameLineEdit && m_pDomainNameLineEdit->hasAcceptableInput();
 }
 
-void UIHostnameDomainNameEditor::mark(bool fProductKeyRequired)
+void UIHostnameDomainNameEditor::mark()
 {
     if (m_pHostnameLineEdit)
         m_pHostnameLineEdit->mark(!m_pHostnameLineEdit->hasAcceptableInput(),
@@ -87,7 +139,7 @@ void UIHostnameDomainNameEditor::mark(bool fProductKeyRequired)
                                        "Allowed characters are alphanumerics, \"-\" and \".\""),
                                     tr("Domain name is valid"));
     if (m_pProductKeyLineEdit)
-        m_pProductKeyLineEdit->mark(fProductKeyRequired && !m_pProductKeyLineEdit->hasAcceptableInput(),
+        m_pProductKeyLineEdit->mark(!m_pProductKeyLineEdit->isValid(),
                                     tr("Selected OS requires a valid product key"),
                                     tr("Product key is valid"));
 }
@@ -140,7 +192,14 @@ void UIHostnameDomainNameEditor::sltRetranslateUI()
     }
 }
 
-void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, QILineEdit *&pLineEdit, QGridLayout *pLayout)
+void UIHostnameDomainNameEditor::sltProductKeyChanged(const QString &strKey)
+{
+    Q_UNUSED(strKey);
+    emit sigProductKeyChanged(m_pProductKeyLineEdit->productKey());
+}
+
+template<typename T>
+void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, T *&pLineEdit, QGridLayout *pLayout)
 {
     AssertReturnVoid(pLayout);
     if (pLabel || pLineEdit)
@@ -151,7 +210,7 @@ void UIHostnameDomainNameEditor::addLineEdit(int &iRow, QLabel *&pLabel, QILineE
     pLabel->setAlignment(Qt::AlignRight);
     pLayout->addWidget(pLabel, iRow, 0, 1, 1);
 
-    pLineEdit = new QILineEdit;
+    pLineEdit = new T;
     AssertReturnVoid(pLineEdit);
     pLineEdit->setMarkable(true);
 
@@ -173,12 +232,6 @@ void UIHostnameDomainNameEditor::prepare()
     addLineEdit(iRow, m_pHostnameLabel, m_pHostnameLineEdit, m_pMainLayout);
     addLineEdit(iRow, m_pDomainNameLabel, m_pDomainNameLineEdit, m_pMainLayout);
 
-    if (m_pProductKeyLineEdit)
-    {
-        m_pProductKeyLineEdit->setInputMask(">NNNNN-NNNNN-NNNNN-NNNNN-NNNNN;#");
-        m_pProductKeyLineEdit->setMinimumWidthByText("NNNNN-NNNNN-NNNNN-NNNNN-NNNNN");
-    }
-
     /* Host name and domain should be strings of minimum length of 2 and composed of alpha numerics, '-', and '.'
      * Exclude strings with . at the end: */
     m_pHostnameLineEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9-.]{2,}[$a-zA-Z0-9-]"), this));
@@ -189,7 +242,7 @@ void UIHostnameDomainNameEditor::prepare()
     connect(m_pDomainNameLineEdit, &QILineEdit::textChanged,
             this, &UIHostnameDomainNameEditor::sltDomainChanged);
     connect(m_pProductKeyLineEdit, &QILineEdit::textChanged,
-            this, &UIHostnameDomainNameEditor::sigProductKeyChanged);
+            this, &UIHostnameDomainNameEditor::sltProductKeyChanged);
 
     sltRetranslateUI();
     connect(&translationEventListener(), &UITranslationEventListener::sigRetranslateUI,
@@ -234,7 +287,7 @@ void UIHostnameDomainNameEditor::disableEnableProductKeyWidgets(bool fEnabled)
 
 bool UIHostnameDomainNameEditor::hasProductKeyAcceptableInput() const
 {
-    if (m_pProductKeyLineEdit)
-        return m_pProductKeyLineEdit->hasAcceptableInput();
-    return false;
+    return m_pProductKeyLineEdit->isValid();
 }
+
+#include "UIHostnameDomainNameEditor.moc"

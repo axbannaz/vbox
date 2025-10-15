@@ -139,7 +139,7 @@ public:
         void setDomainName(const QString &strDomain);
         QString hostnameDomainName() const;
         bool hostDomainNameComplete() const;
-        void mark(bool fProductKeyRequired);
+        void mark();
         void disableEnableProductKeyWidgets(bool fEnabled);
         QString productKey() const;
         bool hasProductKeyAcceptableInput() const;

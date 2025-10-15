@@ -40,7 +40,7 @@ class QCheckBox;
 class QGridLayout;
 class QLabel;
 class QILineEdit;
-class UIPasswordLineEdit;
+class UIProductKeyLineEdit;
 
 class UIHostnameDomainNameEditor : public QWidget
 {
@@ -66,7 +66,7 @@ public:
     QString hostnameDomainName() const;
 
     bool hostDomainNameComplete() const;
-    void mark(bool fProductKeyRequired);
+    void mark();
 
     void disableEnableProductKeyWidgets(bool fEnabled);
     bool hasProductKeyAcceptableInput() const;
@@ -76,15 +76,17 @@ private slots:
     void sltHostnameChanged();
     void sltDomainChanged();
     void sltRetranslateUI();
+    void sltProductKeyChanged(const QString &strKey);
 
 private:
 
     void prepare();
-    void addLineEdit(int &iRow, QLabel *&pLabel, QILineEdit *&pLineEdit, QGridLayout *pLayout);
+    template<typename T>
+    void addLineEdit(int &iRow, QLabel *&pLabel, T *&pLineEdit, QGridLayout *pLayout);
 
     QILineEdit *m_pHostnameLineEdit;
     QILineEdit *m_pDomainNameLineEdit;
-    QILineEdit *m_pProductKeyLineEdit;
+    UIProductKeyLineEdit *m_pProductKeyLineEdit;
 
     QLabel *m_pHostnameLabel;
     QLabel *m_pDomainNameLabel;

@@ -300,10 +300,10 @@ bool UIAdditionalUnattendedOptions::hostDomainNameComplete() const
 }
 
 
-void UIAdditionalUnattendedOptions::mark(bool fProductKeyRequired)
+void UIAdditionalUnattendedOptions::mark()
 {
     if (m_pHostnameDomainNameEditor)
-        m_pHostnameDomainNameEditor->mark(fProductKeyRequired);
+        m_pHostnameDomainNameEditor->mark();
 }
 
 void UIAdditionalUnattendedOptions::disableEnableProductKeyWidgets(bool fEnabled)
