@@ -57,7 +57,7 @@ Function ${un}Common_DetectEnvironment
   ${EndIf}
 
   ; Init global variables that depends on the Windows version.
-  ${If} ${AtLeastWinVista}
+  ${If} ${AtLeastWin2003}
     StrCpy $g_strEarlyNTDrvInfix ""
   ${Else}
     StrCpy $g_strEarlyNTDrvInfix "EarlyNT"
