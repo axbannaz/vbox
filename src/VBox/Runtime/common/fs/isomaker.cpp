@@ -6102,10 +6102,9 @@ static int rtFsIsoMakerFinalizeDirectoriesInUdfNamespace(PRTFSISOMAKERINT pThis,
         /* UDF only have the '..' directory, but we use cbDirRec00 for it. */
         Assert(pCurName->cbDirRec != 0);
         Assert(pParentName->cbDirRec != 0);
-        uint32_t offInDir = RT_ALIGN_32(pParentName->cbDirRec - (uint8_t)pParentName->cbNameInDirRec, 4);
-        Assert(offInDir <= UINT8_MAX);
-        pCurDir->cbDirRec00 = (uint8_t)offInDir;
         pCurDir->cbDirRec01 = 0;
+        uint32_t offInDir   = pCurDir->cbDirRec00 = RT_UOFFSETOF(UDFFILEIDDESC, abImplementationUse) + 2;
+        Assert(!(offInDir & 3));
 
         /* Finalize the directory entries. */
         uint32_t            cSubDirs    = 0;
@@ -8628,7 +8627,7 @@ static uint32_t rtFsIsoMakerOutFile_ReadUdfDirEntry(PRTFSISOMAKERINT pIsoMaker, 
     AssertCompile(RTFSISOMAKERNAME_UDF_8BIT_NAME_FLAG > UINT8_MAX);
     if (pChild->cbNameInDirRec & RTFSISOMAKERNAME_UDF_8BIT_NAME_FLAG)
     {
-        /* 8-bit name. Doing home cooked UTF-8 decoding here for speed+fun. */
+        /* 8-bit name. Doing home-cooked UTF-8 decoding here for speed+fun. */
         *puchName++ = 8;
         unsigned cchLeft = (uint8_t)pChild->cbNameInDirRec - 1;
         while (cchLeft-- > 0)
@@ -8722,7 +8721,10 @@ rtFsIsoMakerOutFile_ReadUdfDir(PRTFSISOMAKEROUTPUTFILE pThis, PRTFSISOMAKERINT p
         uint32_t cbCopied;
         if (   offInRange == 0
             && cbToRead   >= pDir->cbDirRec00)
+        {
             cbCopied = rtFsIsoMakerOutFile_ReadUdfDirEntry(pIsoMaker, pParentName, offLocation, pbBuf, true /*fDotDot*/);
+            Assert(cbCopied == pDir->cbDirRec00);
+        }
         else
             cbCopied = rtFsIsoMakerOutFile_ReadUdfDirEntryPartial(pIsoMaker, pParentName, offLocation, offInRange,
                                                                   pbBuf, cbToRead, true /*fDotDot*/);
