@@ -2335,7 +2335,7 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
 static int rtFsIsoImportUdfAddAndNameDirectory(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDDESC pFid, uint32_t idxParent,
                                                const char *pszName, uint8_t cDepth, PRTLISTANCHOR pTodoList)
 {
-    Assert(pFid->fFlags & UDF_FILE_FLAGS_PARENT);
+    Assert(pFid->fFlags & UDF_FILE_FLAGS_DIRECTORY);
     uint32_t idxObj;
     int rc = RTFsIsoMakerAddUnnamedDir(pThis->hIsoMaker, NULL, &idxObj);
     if (RT_SUCCESS(rc))
@@ -3355,12 +3355,11 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                      * Look for UDF descriptors, starting with "BEA01".
                      * With the exception of the completely unused "BOOT2" descriptor, these have no content.
                      */
-                    /** @todo this is wrong. We've got CD001/TERM here, not BEA01. */
                     if (   RT_SUCCESS(pThis->rc)
                         && !(pThis->fFlags & RTFSISOMK_IMPORT_F_NO_UDF)
-                        &&    ISO9660VOLDESC_MAKE_U64_HDR_VALUE(pThis->uSectorBuf.au64[0])
-                           == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_BEGIN_))
+                        && iVolDesc < 29)
                     {
+                        bool fSeenBea01 = false;
                         for (;;)
                         {
                             iVolDesc++;
@@ -3371,18 +3370,29 @@ RTDECL(int) RTFsIsoMakerImport(RTFSISOMAKER hIsoMaker, RTVFSFILE hIsoFile, uint3
                                 if (RT_SUCCESS(rc))
                                 {
                                     uint64_t const u64Hdr = ISO9660VOLDESC_MAKE_U64_HDR_VALUE(pThis->uSectorBuf.au64[0]);
-                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_02_))
+                                    if (!fSeenBea01)
                                     {
-                                        pThis->Udf.uLevel = 2;
-                                        continue;
+                                        if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_BEGIN_))
+                                        {
+                                            fSeenBea01 = true;
+                                            continue;
+                                        }
                                     }
-                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_03_))
+                                    else
                                     {
-                                        pThis->Udf.uLevel = 3;
-                                        continue;
+                                        if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_02_))
+                                        {
+                                            pThis->Udf.uLevel = 2;
+                                            continue;
+                                        }
+                                        if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_NSR_03_))
+                                        {
+                                            pThis->Udf.uLevel = 3;
+                                            continue;
+                                        }
+                                        if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_TERM_))
+                                            break;
                                     }
-                                    if (u64Hdr == UDF_EXT_VOL_DESC_MAKE_U64_CONST(UDF_EXT_VOL_DESC_STD_ID_TERM_))
-                                        break;
                                     LogRel(("RTFsIsoMakerImport: Warning! Unexpected VRS entry: %.7Rhxs!\n", &pThis->uSectorBuf));
                                     AssertFailed();
                                     if (u64Hdr != 0)
