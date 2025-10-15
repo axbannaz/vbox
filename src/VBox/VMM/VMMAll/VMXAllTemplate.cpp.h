@@ -5610,7 +5610,7 @@ static uint32_t vmxHCCheckGuestState(PVMCPUCC pVCpu, PCVMXVMCSINFO pVmcsInfo)
                                   || (pCtx->ss.Attr.n.u1Granularity), VMX_IGS_SS_ATTR_G_INVALID);
             }
 
-            /* DS, ES, FS, GS - only check for usable selectors, see vmxHCExportGuestSReg(). */
+            /* DS, ES, FS, GS - only check for usable selectors, see vmxHCExportGuestSegReg(). */
             if (!(pCtx->ds.Attr.u & X86DESCATTR_UNUSABLE))
             {
                 HMVMX_CHECK_BREAK(pCtx->ds.Attr.n.u4Type & X86_SEL_TYPE_ACCESSED, VMX_IGS_DS_ATTR_A_INVALID);
