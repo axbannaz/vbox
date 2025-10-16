@@ -57,7 +57,7 @@ class UIProductKeyLineEdit : public QILineEdit
 public:
     UIProductKeyLineEdit(QWidget *pParent = 0);
     QString productKey() const;
-    bool isValid() const;
+    bool isValid(bool fRequired) const;
 private:
     static const QString strInputMask;
 };
@@ -76,11 +76,14 @@ UIProductKeyLineEdit::UIProductKeyLineEdit(QWidget *pParent /* = 0 */)
     setMinimumWidthByText("NNNNN-NNNNN-NNNNN-NNNNN-NNNNN");
 }
 
-bool UIProductKeyLineEdit::isValid() const
+bool UIProductKeyLineEdit::isValid(bool fRequired) const
 {
-    /* Accept if the line edit is empty after removing separators of the input mask, assuming '-': */
-    if (text().remove('-').isEmpty())
-        return true;
+    if (!fRequired)
+    {
+        /* Accept if the line edit is empty after removing separators of the input mask, assuming '-': */
+        if (text().remove('-').isEmpty())
+            return true;
+    }
     return hasAcceptableInput();
 }
 
@@ -89,7 +92,7 @@ QString UIProductKeyLineEdit::productKey() const
     /* Return an empty string if text() consists of only separators: */
     if (text().remove('-').isEmpty())
         return QString();
-    if (!isValid())
+    if (!hasAcceptableInput())
         return QString();
     return text();
 }
@@ -139,7 +142,7 @@ void UIHostnameDomainNameEditor::mark(bool fProductKeyRequired)
                                        "Allowed characters are alphanumerics, \"-\" and \".\""),
                                     tr("Domain name is valid"));
     if (m_pProductKeyLineEdit)
-        m_pProductKeyLineEdit->mark((fProductKeyRequired && m_pProductKeyLineEdit->productKey().isEmpty()) || !m_pProductKeyLineEdit->isValid(),
+        m_pProductKeyLineEdit->mark(!m_pProductKeyLineEdit->isValid(fProductKeyRequired),
                                     tr("Selected OS requires a valid product key"),
                                     tr("Product key is valid"));
 }
@@ -285,9 +288,9 @@ void UIHostnameDomainNameEditor::disableEnableProductKeyWidgets(bool fEnabled)
         m_pProductKeyLineEdit->setEnabled(fEnabled);
 }
 
-bool UIHostnameDomainNameEditor::hasProductKeyAcceptableInput() const
+bool UIHostnameDomainNameEditor::isProductKeyValid(bool fProductKeyRequired) const
 {
-    return m_pProductKeyLineEdit->isValid();
+    return m_pProductKeyLineEdit->isValid(fProductKeyRequired);
 }
 
 QString UIHostnameDomainNameEditor::productKey() const

@@ -647,7 +647,7 @@ bool UIWizardNewVMExpertPage::isComplete() const
             }
             if (pWizard->isProductKeyRequired())
             {
-                if (!m_pAdditionalOptionsContainer->hasProductKeyAcceptableInput() || m_pAdditionalOptionsContainer->productKey().isEmpty())
+                if (!m_pAdditionalOptionsContainer->isProductKeyValid(pWizard->isProductKeyRequired()))
                 {
                     m_pToolBox->setPageTitleIcon(ExpertToolboxItems_Unattended,
                                                  UIIconPool::iconSet(":/status_error_16px.png"),

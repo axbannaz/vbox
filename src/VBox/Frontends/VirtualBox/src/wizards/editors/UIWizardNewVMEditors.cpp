@@ -312,10 +312,10 @@ void UIAdditionalUnattendedOptions::disableEnableProductKeyWidgets(bool fEnabled
         m_pHostnameDomainNameEditor->disableEnableProductKeyWidgets(fEnabled);
 }
 
-bool UIAdditionalUnattendedOptions::hasProductKeyAcceptableInput() const
+bool UIAdditionalUnattendedOptions::isProductKeyValid(bool fProductKeyRequired) const
 {
     if (m_pHostnameDomainNameEditor)
-       return m_pHostnameDomainNameEditor->hasProductKeyAcceptableInput();
+       return m_pHostnameDomainNameEditor->isProductKeyValid(fProductKeyRequired);
     return false;
 }
 

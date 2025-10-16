@@ -142,7 +142,7 @@ public:
         void mark(bool fProductKeyRequired);
         void disableEnableProductKeyWidgets(bool fEnabled);
         QString productKey() const;
-        bool hasProductKeyAcceptableInput() const;
+        bool isProductKeyValid(bool fProductKeyRequired) const;
     /** @} */
 
 private slots:

@@ -69,7 +69,7 @@ public:
     void mark(bool fProductKeyRequired);
 
     void disableEnableProductKeyWidgets(bool fEnabled);
-    bool hasProductKeyAcceptableInput() const;
+    bool isProductKeyValid(bool fProductKeyRequired) const;
 
     QString productKey() const;
 

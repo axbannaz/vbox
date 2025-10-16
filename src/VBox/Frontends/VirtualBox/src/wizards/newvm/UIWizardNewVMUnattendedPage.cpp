@@ -180,7 +180,7 @@ bool UIWizardNewVMUnattendedPage::isComplete() const
         return false;
     if (m_pAdditionalOptionsContainer && !m_pAdditionalOptionsContainer->hostDomainNameComplete())
         return false;
-    if (pWizard->isProductKeyRequired() && !m_pAdditionalOptionsContainer->hasProductKeyAcceptableInput())
+    if (!m_pAdditionalOptionsContainer->isProductKeyValid(pWizard->isProductKeyRequired()))
         return false;
     return true;
 }
