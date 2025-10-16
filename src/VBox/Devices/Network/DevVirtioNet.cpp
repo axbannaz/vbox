@@ -2891,10 +2891,14 @@ static int virtioNetR3TransmitPkts(PPDMDEVINS pDevIns, PVIRTIONET pThis, PVIRTIO
                     cbCopied = RT_MIN((uint64_t)cbRemain, srcSgLen - (srcSgCur - srcSgStart));
                     /*
                      * Guest sent a bogus S/G chain, there doesn't seem to be a way to report an error but
-                     * as this shouldn't happen anyway we just stop proccessing this chain.
+                     * as this shouldn't happen anyway we just skip this zero-length segment.
                      */
                     if (RT_UNLIKELY(!cbCopied))
-                        break;
+                    {
+                        virtioCoreGCPhysChainGetNextSeg(pSgPhysSend, &cbCopied);
+                        LogFunc((".... Skipped zero-length segment.\n"));
+                        continue;
+                    }
                     virtioCoreGCPhysRead(pVirtio, pDevIns,
                                          (RTGCPHYS)pSgPhysSend->GCPhysCur,
                                          ((uint8_t *)pSgBufToPdmLeafDevice->aSegs[0].pvSeg) + uOffset, cbCopied);
