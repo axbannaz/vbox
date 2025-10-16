@@ -294,6 +294,14 @@ testPgmPhysGetPageSlow(PVMCC pVM, RTGCPHYS GCPhys, PPPGMPAGE ppPage, PPGMRAMRANG
 }
 
 
+/** Wrap the PGMR3PhysRegisterRam call as passing 64-bit int values is
+ *  in theory problematic on 32-bit hosts (like we support those). */
+static DECLCALLBACK(int) AddTopRamRange(PVM pVM)
+{
+    return PGMR3PhysRegisterRam(pVM, RTGCPHYS_MAX - _64K + 1, _32K, "At the very top");
+}
+
+
 void testPGM(PVM pVM)
 {
     /*
@@ -312,9 +320,9 @@ void testPGM(PVM pVM)
     RTTestISub("pgmPhysGetPageAndRangeExSlowLockless (1st round)");
     testPhysGetPage<testPgmPhysGetPageAndRangeExSlowLockless, true>(pVM);
 
-    /**/
-    RTTESTI_CHECK_RC_OK(VMR3ReqCallWait(pVM, 0, (PFNRT)PGMR3PhysRegisterRam, 4,
-                                        pVM, RTGCPHYS_MAX - _64K + 1, _32K, "At the very top"));
+    /* Insert a RAM range near the top of the memory to make sure we test the
+       whole guest physical address range. */
+    RTTESTI_CHECK_RC_OK(VMR3ReqCallWait(pVM, 0, (PFNRT)AddTopRamRange, 1, pVM));
 
     RTTestISub("pgmPhysGetRangeSlow (2nd round)");
     testPhysGetRange<pgmPhysGetRangeSlow, false>(pVM);
