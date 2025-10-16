@@ -300,10 +300,10 @@ bool UIAdditionalUnattendedOptions::hostDomainNameComplete() const
 }
 
 
-void UIAdditionalUnattendedOptions::mark()
+void UIAdditionalUnattendedOptions::mark(bool fProductKeyRequired)
 {
     if (m_pHostnameDomainNameEditor)
-        m_pHostnameDomainNameEditor->mark();
+        m_pHostnameDomainNameEditor->mark(fProductKeyRequired);
 }
 
 void UIAdditionalUnattendedOptions::disableEnableProductKeyWidgets(bool fEnabled)
@@ -317,6 +317,13 @@ bool UIAdditionalUnattendedOptions::hasProductKeyAcceptableInput() const
     if (m_pHostnameDomainNameEditor)
        return m_pHostnameDomainNameEditor->hasProductKeyAcceptableInput();
     return false;
+}
+
+QString UIAdditionalUnattendedOptions::productKey() const
+{
+    if (m_pHostnameDomainNameEditor)
+        return m_pHostnameDomainNameEditor->productKey();
+    return QString();
 }
 
 /*********************************************************************************************************************************

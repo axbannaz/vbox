@@ -254,7 +254,7 @@ void UIWizardNewVMUnattendedPage::markWidgets() const
     if (pWizard && pWizard->installGuestAdditions() && m_pGAInstallationISOContainer)
         m_pGAInstallationISOContainer->mark();
     if (m_pAdditionalOptionsContainer)
-        m_pAdditionalOptionsContainer->mark();
+        m_pAdditionalOptionsContainer->mark(pWizard->isProductKeyRequired());
 }
 
 void UIWizardNewVMUnattendedPage::sltSelectedWindowsImageChanged(ulong uImageIndex)

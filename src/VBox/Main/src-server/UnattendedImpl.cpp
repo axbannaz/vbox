@@ -497,8 +497,10 @@ HRESULT Unattended::detectIsoOS()
             return E_OUTOFMEMORY;
         }
     }
-    // if (mStrDetectedOSTypeId.startsWithI("windows11"))
-    //     mfProductKeyRequired = true;
+
+    if (mEnmOsType >= VBOXOSTYPE_Win9x && mEnmOsType <= VBOXOSTYPE_Win2k8_x64)
+         mfProductKeyRequired = true;
+
     /* Check if detected OS type is supported (covers platform architecture). */
     bool fSupported = false;
     for (size_t i = 0; i < mSupportedGuestOSTypes.size() && !fSupported; ++i)
