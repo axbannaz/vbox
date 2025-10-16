@@ -2118,9 +2118,6 @@ ifdef VBOX_WITH_STATIC_ARM64_PAGE_SHIFT
 endif
 
 # Don't flood CDEFS, old MASMs doesn't like too many defines.
-ifdef VBOX_WITH_DEBUGGER
- CDEFS += VBOX_WITH_DEBUGGER
-endif
 ifdef VBOX_WITH_HARDENING
  CDEFS += VBOX_WITH_HARDENING
 endif

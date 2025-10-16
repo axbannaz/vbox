@@ -43,7 +43,7 @@ endif # VBOX_WITH_DEBUGGER
 # Debugger library - linked into VBoxVMM.
 #
 Debugger_TEMPLATE  = VBoxR3Dll
-Debugger_DEFS      = IN_VMM_R3 IN_DBG_R3 IN_DIS
+Debugger_DEFS      = IN_VMM_R3 IN_DBG_R3 IN_DIS VBOX_WITH_DEBUGGER
 ifneq ($(KBUILD_TYPE),release)
  Debugger_DEFS    += VBOX_WITH_DEBUGGER_TCP_BY_DEFAULT
 endif
@@ -76,7 +76,7 @@ ifdef VBOX_WITH_VIRT_ARMV8
   LIBRARIES += Debugger-armv8
  endif
  Debugger-armv8_TEMPLATE  = VBoxR3Dll
- Debugger-armv8_DEFS      = VBOX_VMM_TARGET_ARMV8 IN_VMM_R3 IN_DBG_R3 IN_DIS
+ Debugger-armv8_DEFS      = VBOX_VMM_TARGET_ARMV8 IN_VMM_R3 IN_DBG_R3 IN_DIS VBOX_WITH_DEBUGGER
  ifneq ($(KBUILD_TYPE),release)
   Debugger-armv8_DEFS    += VBOX_WITH_DEBUGGER_TCP_BY_DEFAULT
  endif
