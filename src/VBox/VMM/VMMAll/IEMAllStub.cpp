@@ -149,6 +149,14 @@ IEMInjectTrap(PVMCPUCC pVCpu, uint8_t u8TrapNo, TRPMEVENT enmType, uint16_t uErr
     return VERR_NOT_IMPLEMENTED;
 }
 
+VMM_INT_DECL(IEMXCPTRAISE) IEMEvaluateRecursiveXcpt(PVMCPUCC pVCpu, uint32_t fPrevFlags, uint8_t uPrevVector, uint32_t fCurFlags,
+                                                    uint8_t uCurVector, PIEMXCPTRAISEINFO pXcptRaiseInfo)
+{
+    AssertReleaseFailed();
+    RT_NOREF(pVCpu, fPrevFlags, uPrevVector, fCurFlags, uCurVector, pXcptRaiseInfo);
+    return IEMXCPTRAISE_INVALID;
+}
+
 
 VMM_INT_DECL(void) IEMTlbInvalidatePage(PVMCPUCC pVCpu, RTGCPTR GCPtr)
 {
@@ -161,6 +169,144 @@ VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedCpuid(PVMCPUCC pVCpu, uint8_t cbInstr)
 {
     AssertReleaseFailed();
     RT_NOREF(pVCpu, cbInstr);
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedClts(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedInvlpg(PVMCPUCC pVCpu,  uint8_t cbInstr, RTGCPTR GCPtrPage)
+{
+    RT_NOREF(pVCpu, cbInstr, GCPtrPage);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedLmsw(PVMCPUCC pVCpu, uint8_t cbInstr, uint16_t uValue, RTGCPTR GCPtrEffDst)
+{
+    RT_NOREF(pVCpu, cbInstr, uValue, GCPtrEffDst);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMonitor(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMwait(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMovCRxWrite(PVMCPUCC pVCpu, uint8_t cbInstr, uint8_t iCrReg, uint8_t iGReg)
+{
+    RT_NOREF(pVCpu, cbInstr, iCrReg, iGReg);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMovCRxRead(PVMCPUCC pVCpu, uint8_t cbInstr, uint8_t iGReg, uint8_t iCrReg)
+{
+    RT_NOREF(pVCpu, cbInstr, iGReg, iCrReg);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMovDRxWrite(PVMCPUCC pVCpu, uint8_t cbInstr, uint8_t iDrReg, uint8_t iGReg)
+{
+    RT_NOREF(pVCpu, cbInstr, iDrReg, iGReg);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedMovDRxRead(PVMCPUCC pVCpu, uint8_t cbInstr, uint8_t iGReg, uint8_t iDrReg)
+{
+    RT_NOREF(pVCpu, cbInstr, iGReg, iDrReg);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedRdpmc(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedRdtsc(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedRdtscp(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedRdmsr(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedWrmsr(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecDecodedXsetbv(PVMCPUCC pVCpu, uint8_t cbInstr)
+{
+    RT_NOREF(pVCpu, cbInstr);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecStringIoWrite(PVMCPUCC pVCpu, uint8_t cbValue, IEMMODE enmAddrMode,
+                                                 bool fRepPrefix, uint8_t cbInstr, uint8_t iEffSeg, bool fIoChecked)
+{
+    RT_NOREF(pVCpu, cbValue, enmAddrMode, fRepPrefix, cbInstr, iEffSeg, fIoChecked);
+    AssertReleaseFailed();
+    return VERR_NOT_IMPLEMENTED;
+}
+
+
+VMM_INT_DECL(VBOXSTRICTRC)  IEMExecStringIoRead(PVMCPUCC pVCpu, uint8_t cbValue, IEMMODE enmAddrMode,
+                                                bool fRepPrefix, uint8_t cbInstr, bool fIoChecked)
+{
+    RT_NOREF(pVCpu, cbValue, enmAddrMode, fRepPrefix, cbInstr, fIoChecked);
+    AssertReleaseFailed();
     return VERR_NOT_IMPLEMENTED;
 }
 
