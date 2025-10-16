@@ -1061,6 +1061,7 @@ tstVMMUnitTests-1_LIBS      := \
 	$(PATH_STAGE_LIB)/VMMStatic$(VBOX_SUFF_LIB) \
 	$(PATH_STAGE_LIB)/DisasmR3$(VBOX_SUFF_LIB) \
 	$(LIB_RUNTIME)
+tstVMMUnitTests-1_LDFLAGS.darwin.arm64 := -framework Hypervisor
 
 
 
