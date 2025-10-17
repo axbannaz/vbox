@@ -479,6 +479,12 @@ class Session(TdTaskBase):
         self.resetTaskLocked();
         self.unlockTask();
 
+        #
+        # Make sure we don't try to max things like False, True, etc. because someone screwed
+        # up the argument order in the wrapper functions.
+        #
+        assert(isinstance(cMsTimeout, int));
+
         self.cMsTimeout     = max(cMsTimeout, 500);
         self.fErr           = not fIgnoreErrors;
         self.fnTask         = fnTask;
@@ -1765,9 +1771,9 @@ class Session(TdTaskBase):
         return self.startTask(cMsTimeout, fIgnoreErrors, "cpfile",
                               self.taskCopyFile, (sSrcFile, sDstFile, fMode, fFallbackOkay));
 
-    def syncCopyFile(self, sSrcFile, sDstFile, fMode = 0, cMsTimeout = 30000, fIgnoreErrors = False):
+    def syncCopyFile(self, sSrcFile, sDstFile, fMode = 0, fFallbackOkay = True, cMsTimeout = 30000, fIgnoreErrors = False):
         """Synchronous version."""
-        return self.asyncToSync(self.asyncCopyFile, sSrcFile, sDstFile, fMode, cMsTimeout, fIgnoreErrors);
+        return self.asyncToSync(self.asyncCopyFile, sSrcFile, sDstFile, fMode, fFallbackOkay, cMsTimeout, fIgnoreErrors);
 
     def asyncUploadFile(self, sLocalFile, sRemoteFile,
                         fMode = 0, fFallbackOkay = True, cMsTimeout = 30000, fIgnoreErrors = False):
