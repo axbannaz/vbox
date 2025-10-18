@@ -483,7 +483,7 @@ class Session(TdTaskBase):
         # Make sure we don't try to max things like False, True, etc. because someone screwed
         # up the argument order in the wrapper functions.
         #
-        assert(isinstance(cMsTimeout, int));
+        assert(isinstance(cMsTimeout, int) or isinstance(cMsTimeout, float));
 
         self.cMsTimeout     = max(cMsTimeout, 500);
         self.fErr           = not fIgnoreErrors;
