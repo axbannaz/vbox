@@ -61,6 +61,34 @@
 using namespace std;
 
 
+/**
+ * Helper for checking if a file exists.
+ * @todo promote to IPRT?
+ */
+static bool hlpVfsFileExists(RTVFS hVfs, const char *pszPath)
+{
+    RTFSOBJINFO ObjInfo;
+    int vrc = RTVfsQueryPathInfo(hVfs, pszPath, &ObjInfo, RTFSOBJATTRADD_NOTHING, RTPATH_F_FOLLOW_LINK);
+    return RT_SUCCESS(vrc) && RTFS_IS_FILE(ObjInfo.Attr.fMode);
+}
+
+
+/**
+ * Helper for getting the size of a file (not directory, symlinks are followed).
+ *
+ * @returns File size in bytes on success.
+ * @retval  UINT64_MAX if it does not exist, isn't a regular file or an error
+ *          occurred.
+ */
+static uint64_t hlpVfsGetFileSize(RTVFS hVfs, const char *pszPath)
+{
+    RTFSOBJINFO ObjInfo;
+    int vrc = RTVfsQueryPathInfo(hVfs, pszPath, &ObjInfo, RTFSOBJATTRADD_NOTHING, RTPATH_F_FOLLOW_LINK);
+    return RT_SUCCESS(vrc) && RTFS_IS_FILE(ObjInfo.Attr.fMode) ? ObjInfo.cbObject : UINT64_MAX;
+}
+
+
+
 /* static */ UnattendedInstaller *
 UnattendedInstaller::createInstance(VBOXOSTYPE enmDetectedOSType, const Utf8Str &strDetectedOSType,
                                     const Utf8Str &strDetectedOSVersion, const Utf8Str &strDetectedOSFlavor,
@@ -901,6 +929,85 @@ HRESULT UnattendedInstaller::loadAndParseFileFromIso(RTVFS hVfsOrgIso, const cha
 
 
 
+
+/*********************************************************************************************************************************
+*   Implementation of UnattendedWindowsXmlInstaller methods                                                                      *
+*********************************************************************************************************************************/
+
+HRESULT UnattendedWindowsXmlInstaller::addFilesToAuxVisoVectors(RTCList<RTCString> &rVecArgs, RTCList<RTCString> &rVecFiles,
+                                                                RTVFS hVfsOrgIso, bool fOverwrite)
+{
+    /*
+     * VISO bits and filenames.
+     */
+    bool const fFoundEfiSysNoPrompt = hlpVfsFileExists(hVfsOrgIso, "efi/microsoft/boot/efisys_noprompt.bin"); /* EFI boot image. */
+    uint64_t const cbEtFsBootCom    = hlpVfsGetFileSize(hVfsOrgIso, "boot/etfsboot.com");                     /* BIOS boot sectors. */
+    bool const fRedoEltorito        = fFoundEfiSysNoPrompt && cbEtFsBootCom < _1M && cbEtFsBootCom >= 512;
+
+    try
+    {
+        rVecArgs.append() = "--udf";
+
+        /* Remaster ISO. */
+        rVecArgs.append() = "--no-file-mode";
+        rVecArgs.append() = "--no-dir-mode";
+
+        if (fRedoEltorito)
+            rVecArgs.append() = "--import-iso-skip-eltorito";
+        else
+            rVecArgs.append() = "--import-iso";
+        rVecArgs.append(mpParent->i_getIsoPath());
+
+        rVecArgs.append() = "--file-mode=0444";
+        rVecArgs.append() = "--dir-mode=0555";
+
+        /*
+         * Windows 7+: Use the non-promting boot images, which require us to redo the El Torito boot setup.
+         */
+        if (fRedoEltorito)
+        {
+            rVecArgs.append() = "--name-setup=udf";
+
+            rVecArgs.append() = "/efi/microsoft/boot/cdboot.efi=:must-remove:";
+            rVecArgs.append() = "--rename";
+            rVecArgs.append() = "/efi/microsoft/boot/cdboot_noprompt.efi";
+            rVecArgs.append() = "/efi/microsoft/boot/cdboot.efi";
+
+            rVecArgs.append() = "--name-setup=iso"; /* just for the catalog file */
+            rVecArgs.append() = "--eltorito-platform-id=x86";
+            rVecArgs.append() = "--boot-catalog=/vbox-bootcatalog.bin";
+
+            rVecArgs.append() = "--eltorito-new-entry";
+            rVecArgs.append() = "--eltorito-boot=/boot/etfsboot.com";
+            rVecArgs.append() = "--no-emulation-boot";
+            rVecArgs.append().printf("--boot-load-size=%u", RT_MAX(RT_MIN(cbEtFsBootCom / 512, 64), 8));
+
+            rVecArgs.append() = "--eltorito-platform-id=efi";
+            rVecArgs.append() = "--eltorito-new-entry";
+            rVecArgs.append() = "--eltorito-boot=/efi/microsoft/boot/efisys_noprompt.bin";
+            rVecArgs.append() = "--no-emulation-boot";
+            rVecArgs.append() = "--boot-load-seg=0";
+            rVecArgs.append() = "--boot-load-size=0";
+
+            rVecArgs.append() = "--name-setup=udf"; /* for the installation answer file, scripts and whatnot. */
+        }
+        else
+            LogRel(("UnattendedWindowsXmlInstaller: Unable to remaster the image for non-prompting boot: fFoundEfiSysNoPrompt=%d cbEtFsBootCom=%#RX64 iso=%s\n",
+                    fFoundEfiSysNoPrompt, cbEtFsBootCom, mpParent->i_getIsoPath().c_str()));
+    }
+    catch (std::bad_alloc &)
+    {
+        return E_OUTOFMEMORY;
+    }
+
+    /*
+     * Call parent to add the preseed file from mAlg.
+     */
+    return UnattendedInstaller::addFilesToAuxVisoVectors(rVecArgs, rVecFiles, hVfsOrgIso, fOverwrite);
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 /*
 *
@@ -1118,17 +1225,6 @@ HRESULT UnattendedLinuxInstaller::editGrubCfg(GeneralTextScript *pEditor)
 */
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/**
- * Helper for checking if a file exists.
- * @todo promote to IPRT?
- */
-static bool hlpVfsFileExists(RTVFS hVfs, const char *pszPath)
-{
-    RTFSOBJINFO ObjInfo;
-    int vrc = RTVfsQueryPathInfo(hVfs, pszPath, &ObjInfo, RTFSOBJATTRADD_NOTHING, RTPATH_F_FOLLOW_LINK);
-    return RT_SUCCESS(vrc) && RTFS_IS_FILE(ObjInfo.Attr.fMode);
-}
-
 HRESULT UnattendedDebianInstaller::addFilesToAuxVisoVectors(RTCList<RTCString> &rVecArgs, RTCList<RTCString> &rVecFiles,
                                                             RTVFS hVfsOrgIso, bool fOverwrite)
 {
@@ -1239,7 +1335,7 @@ HRESULT UnattendedDebianInstaller::addFilesToAuxVisoVectors(RTCList<RTCString> &
     /*
      * Edit the menu config file.
      * Some distros (Linux Mint) has only isolinux.cfg. No menu.cfg or txt.cfg.
-    */
+     */
     if (RTStrICmp(pszMenuConfigFilename, "/isolinux/isolinux.cfg") != 0)
     {
         GeneralTextScript Editor(mpParent);
