@@ -441,6 +441,7 @@ uint16_t cdrom_boot(void)
         return 7;
 
     /// @todo Define a struct for the Boot Catalog, the hardcoded offsets are so dumb...
+    /// bird 2025-10-17: ISO9660ELTORITOVALIDATIONENTRY in iprt/formats/iso9660.h
 
     /* Check if the Boot Catalog looks valid. */
     if (buffer[0x00] != 0x01)
