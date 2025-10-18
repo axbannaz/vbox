@@ -2494,7 +2494,7 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
     uint8_t * const pbRestBuf   = &pThis->abBuf[pThis->Udf.VolInfo.cbBlock * 2];
     size_t const    cbRestBuf   = sizeof(pThis->abBuf) - pThis->Udf.VolInfo.cbBlock * 2;
 
-    uint8_t * const pbDataBuf   = cbRestBuf >= cbDirAligned ? pbRestBuf : (uint8_t *)RTMemTmpAlloc(cbRestBuf);
+    uint8_t * const pbDataBuf   = cbRestBuf >= cbDirAligned ? pbRestBuf : (uint8_t *)RTMemTmpAllocZ(cbDirAligned);
     AssertReturnStmt(pbDataBuf, RTFsUdfHlpFreeGatherExtents(paExtents), VERR_NO_TMP_MEMORY);
 
     rc = RTFsUdfHlpReadObject(&pThis->Udf.VolInfo, pThis->hSrcFile, cbDirData, cExtents, &FirstExtent, paExtents, 0 /*offRead*/,
