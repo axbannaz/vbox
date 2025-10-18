@@ -84,7 +84,7 @@ static uint64_t hlpVfsGetFileSize(RTVFS hVfs, const char *pszPath)
 {
     RTFSOBJINFO ObjInfo;
     int vrc = RTVfsQueryPathInfo(hVfs, pszPath, &ObjInfo, RTFSOBJATTRADD_NOTHING, RTPATH_F_FOLLOW_LINK);
-    return RT_SUCCESS(vrc) && RTFS_IS_FILE(ObjInfo.Attr.fMode) ? ObjInfo.cbObject : UINT64_MAX;
+    return RT_SUCCESS(vrc) && RTFS_IS_FILE(ObjInfo.Attr.fMode) ? (uint64_t)ObjInfo.cbObject : UINT64_MAX;
 }
 
 
