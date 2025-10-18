@@ -753,8 +753,8 @@ typedef ISO9660ELTORITOVALIDATIONENTRY const *PCISO9660ELTORITOVALIDATIONENTRY;
 /**
  * El Torito boot catalog: Section header entry.
  *
- * A non-final section header entry is followed by
- * ISO9660ELTORITOSECTIONHEADER::cEntries ISO9660ELTORITOSECTIONTENTRY instances.
+ * A section header entry is followed by ISO9660ELTORITOSECTIONHEADER::cEntries
+ * of ISO9660ELTORITOSECTIONENTRY instances.
  */
 typedef struct ISO9660ELTORITOSECTIONHEADER
 {

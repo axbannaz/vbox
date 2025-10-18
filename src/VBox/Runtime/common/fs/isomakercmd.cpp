@@ -117,11 +117,14 @@ typedef enum RTFSISOMAKERCMDOPT
     RTFSISOMAKERCMD_OPT_NO_JOLIET,
 
     RTFSISOMAKERCMD_OPT_IMPORT_ISO,
+    RTFSISOMAKERCMD_OPT_IMPORT_ISO_SKIP_ELTORITO,
     RTFSISOMAKERCMD_OPT_PUSH_ISO,
     RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_JOLIET,
     RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_ROCK,
     RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_ROCK_NO_JOLIET,
     RTFSISOMAKERCMD_OPT_POP,
+
+    RTFSISOMAKERCMD_OPT_RENAME,
 
     RTFSISOMAKERCMD_OPT_ELTORITO_NEW_ENTRY,
     RTFSISOMAKERCMD_OPT_ELTORITO_ADD_IMAGE,
@@ -476,11 +479,14 @@ static const RTGETOPTDEF g_aRtFsIsoMakerOptions[] =
     { "--name-setup",                   RTFSISOMAKERCMD_OPT_NAME_SETUP,                     RTGETOPT_REQ_STRING  },
     { "--name-setup-from-import",       RTFSISOMAKERCMD_OPT_NAME_SETUP_FROM_IMPORT,         RTGETOPT_REQ_NOTHING },
     { "--import-iso",                   RTFSISOMAKERCMD_OPT_IMPORT_ISO,                     RTGETOPT_REQ_STRING  },
+    { "--import-iso-skip-eltorito",     RTFSISOMAKERCMD_OPT_IMPORT_ISO_SKIP_ELTORITO,       RTGETOPT_REQ_STRING  },
     { "--push-iso",                     RTFSISOMAKERCMD_OPT_PUSH_ISO,                       RTGETOPT_REQ_STRING  },
     { "--push-iso-no-joliet",           RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_JOLIET,             RTGETOPT_REQ_STRING  },
     { "--push-iso-no-rock",             RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_ROCK,               RTGETOPT_REQ_STRING  },
     { "--push-iso-no-rock-no-joliet",   RTFSISOMAKERCMD_OPT_PUSH_ISO_NO_ROCK_NO_JOLIET,     RTGETOPT_REQ_STRING  },
     { "--pop",                          RTFSISOMAKERCMD_OPT_POP,                            RTGETOPT_REQ_NOTHING },
+
+    { "--rename",                       RTFSISOMAKERCMD_OPT_RENAME,                         RTGETOPT_REQ_STRING  },
 
     { "--rock-ridge",                   RTFSISOMAKERCMD_OPT_ROCK_RIDGE,                     RTGETOPT_REQ_NOTHING },
     { "--limited-rock-ridge",           RTFSISOMAKERCMD_OPT_LIMITED_ROCK_RIDGE,             RTGETOPT_REQ_NOTHING },
@@ -2100,6 +2106,63 @@ static int rtFsIsoMakerCmdStatAndAddFile(PRTFSISOMAKERCMDOPTS pOpts, const char 
 
 
 /**
+ * Renames a file (, directory, symlink, whatever) on the ISO.
+ *
+ * @note    Does not support rock ridge or the name entry file.
+ *
+ * @returns IPRT status code.
+ * @param   pOpts               The ISO maker command instance.
+ * @param   pszFromSpec         The ISO path specifier.
+ * @param   pszToSpec           The ISO path specifier.
+ */
+static int rtFsIsoMakerCmdOptRename(PRTFSISOMAKERCMDOPTS pOpts, const char *pszFromSpec, const char *pszToSpec)
+{
+    /*
+     * Parse the name specs.
+     */
+    RTFSISOMKCMDPARSEDNAMES FromParsed;
+    int rc = rtFsIsoMakerCmdParseNameSpec(pOpts, pszFromSpec, false /*fWithSrc*/, &FromParsed);
+    if (RT_FAILURE(rc))
+        return rc;
+
+    RTFSISOMKCMDPARSEDNAMES ToParsed;
+    rc = rtFsIsoMakerCmdParseNameSpec(pOpts, pszToSpec, false /*fWithSrc*/, &ToParsed);
+    if (RT_FAILURE(rc))
+        return rc;
+
+    /* Check that they specify the exact same names + namespaces combos. */
+    bool fSame = FromParsed.cNames == ToParsed.cNames;
+    if (fSame)
+        for (uint32_t i = 0; i < ToParsed.cNames; i++)
+            if (   FromParsed.aNames[i].fNameSpecifiers != ToParsed.aNames[i].fNameSpecifiers
+                || (FromParsed.aNames[i].cchPath == 0)  != (ToParsed.aNames[i].cchPath == 0) )
+            {
+                fSame = false;
+                break;
+            }
+    if (!fSame)
+        return rtFsIsoMakerCmdErrorRc(pOpts, VERR_INVALID_PARAMETER,
+                                      "The source and destination specs for --rename must include the exact same namespaces!");
+
+    /*
+     * Do the renaming.
+     */
+    for (uint32_t i = 0; i < ToParsed.cNames; i++)
+        if (   FromParsed.aNames[i].cchPath > 0
+            && (FromParsed.aNames[i].fNameSpecifiers & RTFSISOMAKERCMDNAME_MAJOR_MASK))
+        {
+            rc = RTFsIsoMakerRename(pOpts->hIsoMaker, FromParsed.aNames[i].fNameSpecifiers & RTFSISOMAKERCMDNAME_MAJOR_MASK,
+                                    FromParsed.aNames[i].szPath, ToParsed.aNames[i].szPath);
+            if (RT_FAILURE(rc))
+                return rtFsIsoMakerCmdErrorRc(pOpts, rc, "Failed to rename '%s' to '%s' (fNamespace=%#x): %Rrc",
+                                              FromParsed.aNames[i].szPath, ToParsed.aNames[i].szPath,
+                                              FromParsed.aNames[i].fNameSpecifiers & RTFSISOMAKERCMDNAME_MAJOR_MASK, rc);
+        }
+    return VINF_SUCCESS;
+}
+
+
+/**
  * Processes a non-option argument.
  *
  * @returns IPRT status code.
@@ -2298,8 +2361,9 @@ static int rtFsIsoMakerCmdOptPop(PRTFSISOMAKERCMDOPTS pOpts)
  * @returns IPRT status code
  * @param   pOpts               The ISO maker command instance.
  * @param   pszIsoSpec          The ISO path specifier.
+ * @param   fFlags              RTFSISOMK_IMPORT_F_XXX.
  */
-static int rtFsIsoMakerCmdOptImportIso(PRTFSISOMAKERCMDOPTS pOpts, const char *pszIsoSpec)
+static int rtFsIsoMakerCmdOptImportIso(PRTFSISOMAKERCMDOPTS pOpts, const char *pszIsoSpec, uint32_t fFlags)
 {
     /*
      * Open the input file.
@@ -2326,7 +2390,7 @@ static int rtFsIsoMakerCmdOptImportIso(PRTFSISOMAKERCMDOPTS pOpts, const char *p
     }
 
     RTFSISOMAKERIMPORTRESULTS   Results;
-    rc = RTFsIsoMakerImport(pOpts->hIsoMaker, hIsoFile, 0 /*fFlags*/, &Results, RTErrInfoInitStatic(&ErrInfo));
+    rc = RTFsIsoMakerImport(pOpts->hIsoMaker, hIsoFile, fFlags, &Results, RTErrInfoInitStatic(&ErrInfo));
 
     RTVfsFileRelease(hIsoFile);
 
@@ -2911,7 +2975,8 @@ static int rtFsIsoMakerCmdOptEltoritoCommitBootCatalog(PRTFSISOMAKERCMDOPTS pOpt
                 Assert(idxBootCat > 1);
                 rc = RTFsIsoMakerBootCatSetSectionHeaderEntry(pOpts->hIsoMaker, idxBootCat, cEntries,
                                                               pBootCatEntry->u.SectionHeader.idPlatform,
-                                                              pBootCatEntry->u.SectionHeader.pszString);
+                                                              pBootCatEntry->u.SectionHeader.pszString,
+                                                              idxBootCat + cEntries >= pOpts->cBootCatEntries /*fFinalEntry*/);
                 if (RT_FAILURE(rc))
                     return rtFsIsoMakerCmdErrorRc(pOpts, rc,
                                                   "RTFsIsoMakerBootCatSetSectionHeaderEntry failed on entry #%u: %Rrc",
@@ -3138,6 +3203,43 @@ static int rtFsIsoMakerCmdOptChangeOwnerGroup(PRTFSISOMAKERCMDOPTS pOpts, const 
 
 
 /**
+ * Removes comment lines from @a pszContent.
+ *
+ * Comment lines starts with '#' and may have blanks in front of them.
+ */
+static void rtFsIsoMakerCmdRemoveArgumentFileComments(char *pszContent)
+{
+    char *psz = pszContent;
+    char *pszHash;
+    while ((pszHash = strchr(psz, '#')) != NULL)
+    {
+        char *pszStart = pszHash;
+        while ((uintptr_t)pszStart > (uintptr_t)pszContent && RT_C_IS_SPACE(pszStart[-1]))
+            pszStart--;
+        if (pszStart == pszContent || pszHash[-1] == '\n' || pszHash[-1] == '\r')
+        {
+            char ch;
+            do
+                ch = *++pszHash;
+            while (ch != '\0' && ch != '\n' && ch != '\r');
+            if (ch != '\0')
+            {
+                pszHash++;
+                if (ch == '\n' && pszHash[1] == '\r')
+                    pszHash++;
+                /** @todo Should check if the next line is also a comment line now,
+                 *        to reduce the number of memmoves... */
+            }
+            memmove(pszStart, pszHash, strlen(pszHash) + 1);
+            psz = pszStart;
+        }
+        else
+            psz = pszHash + 1;
+    }
+}
+
+
+/**
  * Loads an argument file (e.g. a .iso-file) and parses it.
  *
  * @returns IPRT status code.
@@ -3180,6 +3282,7 @@ static int rtFsIsoMakerCmdParseArgumentFile(PRTFSISOMAKERCMDOPTS pOpts, const ch
                                                  RTSTR_VALIDATE_ENCODING_EXACT_LENGTH | RTSTR_VALIDATE_ENCODING_ZERO_TERMINATED);
                     if (RT_SUCCESS(rc))
                     {
+                        rtFsIsoMakerCmdRemoveArgumentFileComments(pszContent);
                         uint32_t fGetOpt = strstr(pszContent, "--iprt-iso-maker-file-marker-ms") == NULL
                                          ? RTGETOPTARGV_CNV_QUOTE_BOURNE_SH : RTGETOPTARGV_CNV_QUOTE_MS_CRT;
                         fGetOpt |= RTGETOPTARGV_CNV_MODIFY_INPUT;
@@ -3242,6 +3345,7 @@ static int rtFsIsoMakerCmdParse(PRTFSISOMAKERCMDOPTS pOpts, unsigned cArgs, char
      * Parse parameters.  Parameters are position dependent.
      */
     RTGETOPTUNION ValueUnion;
+    RTGETOPTUNION ValueUnion2;
     while (   RT_SUCCESS(rc)
            && (rc = RTGetOpt(&GetState, &ValueUnion)) != 0)
     {
@@ -3300,7 +3404,11 @@ static int rtFsIsoMakerCmdParse(PRTFSISOMAKERCMDOPTS pOpts, unsigned cArgs, char
                 break;
 
             case RTFSISOMAKERCMD_OPT_IMPORT_ISO:
-                rc = rtFsIsoMakerCmdOptImportIso(pOpts, ValueUnion.psz);
+                rc = rtFsIsoMakerCmdOptImportIso(pOpts, ValueUnion.psz, 0 /*fFlags*/);
+                break;
+
+            case RTFSISOMAKERCMD_OPT_IMPORT_ISO_SKIP_ELTORITO:
+                rc = rtFsIsoMakerCmdOptImportIso(pOpts, ValueUnion.psz, RTFSISOMK_IMPORT_F_NO_BOOT);
                 break;
 
 
@@ -3342,6 +3450,20 @@ static int rtFsIsoMakerCmdParse(PRTFSISOMAKERCMDOPTS pOpts, unsigned cArgs, char
             case RTFSISOMAKERCMD_OPT_NO_UDF:
                 rc = rtFsIsoMakerCmdOptEnableUdf(pOpts, false);
                 break;
+
+
+            /*
+             * File manipulation.
+             */
+            case RTFSISOMAKERCMD_OPT_RENAME:
+            {
+                rc = RTGetOptFetchValue(&GetState, &ValueUnion2, RTGETOPT_REQ_STRING);
+                if (RT_SUCCESS(rc))
+                    rc = rtFsIsoMakerCmdOptRename(pOpts, ValueUnion.psz, ValueUnion2.psz);
+                else
+                    rc = rtFsIsoMakerCmdErrorRc(pOpts, rc, "--rename takes two string values");
+                break;
+            }
 
 
             /*

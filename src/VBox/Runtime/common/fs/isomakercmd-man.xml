@@ -219,6 +219,11 @@
             namespaces.</para></listitem>
         </varlistentry>
 
+        <varlistentry>
+          <term><option>--import-iso-skip-eltorito=<replaceable>iso-file</replaceable></option></term>
+          <listitem><para>Same as <option>--import-iso</option>, but skips the El Torito boot info.</para></listitem>
+        </varlistentry>
+
       </variablelist>
     </refsect2>
 

@@ -251,8 +251,7 @@ typedef struct RTFSISOMAKERNAME
     PRTFSISOMAKERNAME       pParent;
 
     /** Pointer to the directory information if this is a directory, NULL if not a
-     * directory. This is allocated together with this structure, so it doesn't need
-     * freeing. */
+     * directory. */
     PRTFSISOMAKERNAMEDIR    pDir;
 
     /** The name specified when creating this namespace node.  Helps navigating
@@ -1161,6 +1160,8 @@ DECLINLINE(void) rtFsIsoMakerDestroyName(PRTFSISOMAKERNAME pName)
         Assert(pDir->cChildren == 0);
         RTMemFree(pDir->papChildren);
         pDir->papChildren = NULL;
+        RTMemFree(pDir);
+        pName->pDir = NULL;
     }
     RTMemFree(pName);
 }
@@ -1892,12 +1893,13 @@ DECLINLINE(int) rtFsIsoMakerCompareIso9660Names(const char *pszName1, const char
  *
  * @returns Index of the given name.
  * @param   pNamespace          The namspace.
- * @param   pParent             The parent namespace node.
+ * @param   pDir                The parent directory.
  * @param   pszName             The name.
  */
-static uint32_t rtFsIsoMakerFindInsertIndex(PRTFSISOMAKERNAMESPACE pNamespace, PRTFSISOMAKERNAME pParent, const char *pszName)
+static uint32_t
+rtFsIsoMakerFindInsertIndex(PRTFSISOMAKERNAMESPACE pNamespace, PRTFSISOMAKERNAMEDIR pDir, const char *pszName)
 {
-    uint32_t idxRet = pParent->pDir->cChildren;
+    uint32_t idxRet = pDir->cChildren;
     if (idxRet > 0)
     {
         /*
@@ -1907,7 +1909,7 @@ static uint32_t rtFsIsoMakerFindInsertIndex(PRTFSISOMAKERNAMESPACE pNamespace, P
          */
         uint32_t            idxStart = 0;
         uint32_t            idxEnd   = idxRet;
-        PPRTFSISOMAKERNAME  papChildren = pParent->pDir->papChildren;
+        PPRTFSISOMAKERNAME  papChildren = pDir->papChildren;
         switch (pNamespace->fNamespace)
         {
             case RTFSISOMAKER_NAMESPACE_ISO_9660:
@@ -2156,8 +2158,8 @@ static size_t rtFsIsoMakerCopyIso9660Name(char *pszDst, size_t cchDstMax, const 
  *                          not counting the terminator).
  * @param   pcbInDirRec     Where to return the name size in the directory record.
  */
-static int rtFsIsoMakerNormalizeNameForPrimaryIso9660(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAME pParent,
-                                                      const char *pchSrc, size_t cchSrc, bool fNoNormalize, bool fIsDir,
+static int rtFsIsoMakerNormalizeNameForPrimaryIso9660(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAME pParent, const char *pchSrc,
+                                                      size_t cchSrc, bool fNoNormalize, bool fIsDir,
                                                       char *pszDst, size_t cbDst, size_t *pcchDst, size_t *pcbInDirRec)
 {
     AssertReturn(cbDst > ISO9660_MAX_NAME_LEN + 2, VERR_ISOMK_IPE_BUFFER_SIZE);
@@ -2407,43 +2409,6 @@ static int rtFsIsoMakerNormalizeNameForUdf(PRTFSISOMAKERNAME pParent, const char
      */
     if (!rtFsIsoMakerFindObjInDir(pParent, pszDstStart, *pcchDst))
         return VINF_SUCCESS;
-
-#if 0 /** @todo this is too tedious for now! */
-    /*
-     * Mangle the name till we've got a unique one.
-     */
-    size_t const cchMaxBasename = (uIsoLevel >= 2 ? ISO9660_MAX_NAME_LEN : 8) - (cchDst - offDstDot);
-    size_t       cchInserted = 0;
-    for (uint32_t i = 0; i < _32K; i++)
-    {
-        /* Add a numberic infix. */
-        char szOrd[64];
-        size_t cchOrd = RTStrFormatU32(szOrd, sizeof(szOrd), i + 1, 10, -1, -1, 0 /*fFlags*/);
-        Assert((ssize_t)cchOrd > 0);
-
-        /* Do we need to shuffle the suffix? */
-        if (cchOrd > cchInserted)
-        {
-            if (offDstDot < cchMaxBasename)
-            {
-                memmove(&pszDst[offDstDot + 1], &pszDst[offDstDot], cchDst + 1 - offDstDot);
-                cchDst++;
-                offDstDot++;
-            }
-            cchInserted = cchOrd;
-        }
-
-        /* Insert the new infix and try again. */
-        memcpy(&pszDst[offDstDot - cchOrd], szOrd, cchOrd);
-        if (!rtFsIsoMakerFindObjInDir(pParent, pszDst, cchDst))
-        {
-            *pcchDst     = cchDst;
-            *pcbInDirRec = cchDst;
-            return VINF_SUCCESS;
-        }
-    }
-#endif
-    AssertFailed();
     return VERR_DUPLICATE;
 }
 
@@ -2478,6 +2443,10 @@ static int rtFsIsoMakerNormalizeNameForNamespace(PRTFSISOMAKERINT pThis, PRTFSIS
          * Check that the object doesn't already exist.
          */
         AssertReturn(!rtFsIsoMakerFindEntryInDirBySpec(pParent, pchSrc, cchSrc), VERR_ALREADY_EXISTS);
+
+        /*
+         * Do namespace specific normalization.
+         */
         switch (pNamespace->fNamespace)
         {
             /*
@@ -2584,6 +2553,73 @@ static int rtFsIsoMakerAddTransTblFileToNewDir(PRTFSISOMAKERINT pThis, PRTFSISOM
 
 
 /**
+ * Helper for ensuring sufficent space for adding another entry in a directory.
+ */
+static int rtFsIsoMakerDirEnsureSpaceForAnotherEntry(PRTFSISOMAKERNAMEDIR pDir)
+{
+    AssertReturn(pDir, VERR_ISOMK_IPE_NAMESPACE_1);
+    uint32_t cChildren = pDir->cChildren;
+    if (cChildren & 31)
+    { /* likely */ }
+    else
+    {
+        AssertReturn(cChildren < RTFSISOMAKER_MAX_OBJECTS_PER_DIR, VERR_TOO_MUCH_DATA);
+        void *pvNew = RTMemRealloc(pDir->papChildren, (cChildren + 32) * sizeof(pDir->papChildren[0]));
+        AssertReturn(pvNew, VERR_NO_MEMORY);
+        pDir->papChildren = (PPRTFSISOMAKERNAME)pvNew;
+    }
+    return VINF_SUCCESS;
+}
+
+
+/**
+ * Inserts @a pName into @a pDir.
+ *
+ * Caller must call rtFsIsoMakerDirEnsureSpaceForAnotherEntry() before this
+ * function!
+ */
+static void rtFsIsoMakerDirInsertChild(PRTFSISOMAKERNAMESPACE pNamespace, PRTFSISOMAKERNAMEDIR pDir, PRTFSISOMAKERNAME pName)
+{
+    uint32_t const idxName   = rtFsIsoMakerFindInsertIndex(pNamespace, pDir, pName->szName);
+    uint32_t const cChildren = pDir->cChildren;
+    if (idxName < cChildren)
+        memmove(&pDir->papChildren[idxName + 1], &pDir->papChildren[idxName],
+                (cChildren - idxName) * sizeof(pDir->papChildren[0]));
+    pDir->papChildren[idxName] = pName;
+    pDir->cChildren = cChildren + 1;
+    pNamespace->cNames++;
+}
+
+
+/**
+ * Removes a child from the directory.
+ *
+ * @returns pName on success, NULL on failure.
+ * @param   pNamespace  The namespace.
+ * @param   pDir        The directory.
+ * @param   pName       The name to remove.
+ */
+static PRTFSISOMAKERNAME
+rtFsIsoMakerDirRemoveChild(PRTFSISOMAKERNAMESPACE pNamespace, PRTFSISOMAKERNAMEDIR pDir, PRTFSISOMAKERNAME pName)
+{
+    uint32_t iChild = pDir->cChildren;
+    while (iChild-- > 0)
+        if (pDir->papChildren[iChild] == pName)
+        {
+            uint32_t cToMove = pDir->cChildren - iChild - 1;
+            if (cToMove > 0)
+                memmove(&pDir->papChildren[iChild], &pDir->papChildren[iChild + 1], cToMove * sizeof(pDir->papChildren[0]));
+            pDir->cChildren--;
+            pNamespace->cNames--;
+            pName->pParent = NULL;
+            return pName;
+        }
+
+    return NULL;
+}
+
+
+/**
  * Sets the name of an object in a namespace.
  *
  * If the object is already named in the name space, it will first be removed
@@ -2644,17 +2680,9 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
      */
     if (pParent)
     {
-        AssertReturn(pParent->pDir, VERR_ISOMK_IPE_NAMESPACE_1);
-        uint32_t cChildren = pParent->pDir->cChildren;
-        if (cChildren & 31)
-        { /* likely */ }
-        else
-        {
-            AssertReturn(cChildren < RTFSISOMAKER_MAX_OBJECTS_PER_DIR, VERR_TOO_MUCH_DATA);
-            void *pvNew = RTMemRealloc(pParent->pDir->papChildren, (cChildren + 32) * sizeof(pParent->pDir->papChildren[0]));
-            AssertReturn(pvNew, VERR_NO_MEMORY);
-            pParent->pDir->papChildren = (PPRTFSISOMAKERNAME)pvNew;
-        }
+        int rc = rtFsIsoMakerDirEnsureSpaceForAnotherEntry(pParent->pDir);
+        if (RT_FAILURE(rc))
+            return rc;
     }
     else
         AssertReturn(pNamespace->pRoot == NULL, VERR_ISOMK_IPE_NAMESPACE_2);
@@ -2672,13 +2700,12 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
     {
         Assert(cbNameInDirRec > 0);
 
-        size_t cbName = sizeof(RTFSISOMAKERNAME)
-                      + cchName + 1
-                      + cchSpec + 1;
-        if (pObj->enmType == RTFSISOMAKEROBJTYPE_DIR)
-            cbName = RT_ALIGN_Z(cbName, 8) + sizeof(RTFSISOMAKERNAMEDIR);
-        PRTFSISOMAKERNAME pName = (PRTFSISOMAKERNAME)RTMemAllocZ(cbName);
-        if (pName)
+        PRTFSISOMAKERNAME    const pName = (PRTFSISOMAKERNAME)RTMemAllocZ(RT_UOFFSETOF(RTFSISOMAKERNAME, szName)
+                                                                          + cchName + 1 + cchSpec + 1);
+        PRTFSISOMAKERNAMEDIR const pDir  = pObj->enmType != RTFSISOMAKEROBJTYPE_DIR ? NULL
+                                         : (PRTFSISOMAKERNAMEDIR)RTMemAllocZ(sizeof(*pDir));
+        if (   pName != NULL
+            && (pObj->enmType != RTFSISOMAKEROBJTYPE_DIR || pDir != NULL))
         {
             pName->pObj                 = pObj;
             pName->pParent              = pParent;
@@ -2719,13 +2746,9 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
             memcpy(pName->szName, szName, cchName);
             pName->szName[cchName] = '\0';
 
-            if (pObj->enmType != RTFSISOMAKEROBJTYPE_DIR)
-                pName->pDir             = NULL;
-            else
+            pName->pDir                 = pDir;
+            if (pObj->enmType == RTFSISOMAKEROBJTYPE_DIR)
             {
-                size_t offDir = RT_UOFFSETOF(RTFSISOMAKERNAME, szName) + cchName + 1 + cchSpec + 1;
-                offDir = RT_ALIGN_Z(offDir, 8);
-                PRTFSISOMAKERNAMEDIR pDir = (PRTFSISOMAKERNAMEDIR)((uintptr_t)pName + offDir);
                 pDir->RangeNode.Core.Key     = UINT64_MAX;
                 pDir->RangeNode.Core.KeyLast = UINT64_MAX;
                 pDir->cbDir                  = 0;
@@ -2738,7 +2761,6 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
                 pDir->cbDirRec00             = 0;
                 pDir->cbDirRec01             = 0;
                 RTListInit(&pDir->FinalizedEntry);
-                pName->pDir = pDir;
 
                 /* Create the TRANS.TBL file object and enter it into this directory as the first entry. */
                 if (pNamespace->pszTransTbl)
@@ -2747,6 +2769,7 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
                     if (RT_FAILURE(rc))
                     {
                         RTMemFree(pName);
+                        RTMemFree(pDir);
                         return rc;
                     }
                 }
@@ -2756,19 +2779,13 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
              * Do the linking and stats.  We practice insertion sorting.
              */
             if (pParent)
-            {
-                uint32_t idxName   = rtFsIsoMakerFindInsertIndex(pNamespace, pParent, pName->szName);
-                uint32_t cChildren = pParent->pDir->cChildren;
-                if (idxName < cChildren)
-                    memmove(&pParent->pDir->papChildren[idxName + 1], &pParent->pDir->papChildren[idxName],
-                            (cChildren - idxName) * sizeof(pParent->pDir->papChildren[0]));
-                pParent->pDir->papChildren[idxName] = pName;
-                pParent->pDir->cChildren++;
-            }
+                rtFsIsoMakerDirInsertChild(pNamespace, pParent->pDir, pName);
             else
+            {
                 pNamespace->pRoot = pName;
+                pNamespace->cNames++;
+            }
             *rtFsIsoMakerObjGetNameForNamespace(pObj, pNamespace) = pName;
-            pNamespace->cNames++;
 
             /*
              * Done.
@@ -2777,6 +2794,7 @@ static int rtFsIsoMakerObjSetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPACE
                 *ppNewName = pName;
             return VINF_SUCCESS;
         }
+        rc = VERR_NO_MEMORY;
     }
     return rc;
 }
@@ -3009,7 +3027,7 @@ static int rtFsIsoMakerObjUnsetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPA
      * If this is a directory, we're in for some real fun here as we need to
      * unset the names of all the children too.
      */
-    PRTFSISOMAKERNAMEDIR pDir = pName->pDir;
+    PRTFSISOMAKERNAMEDIR const pDir = pName->pDir;
     if (pDir)
     {
         uint32_t iChild = pDir->cChildren;
@@ -3025,29 +3043,19 @@ static int rtFsIsoMakerObjUnsetName(PRTFSISOMAKERINT pThis, PRTFSISOMAKERNAMESPA
     /*
      * Unlink the pName from the parent.
      */
-    pDir = pName->pParent->pDir;
-    uint32_t iChild = pDir->cChildren;
-    while (iChild-- > 0)
-        if (pDir->papChildren[iChild] == pName)
-        {
-            uint32_t cToMove = pDir->cChildren - iChild - 1;
-            if (cToMove > 0)
-                memmove(&pDir->papChildren[iChild], &pDir->papChildren[iChild + 1], cToMove * sizeof(pDir->papChildren[0]));
-            pDir->cChildren--;
-            pNamespace->cNames--;
+    if (rtFsIsoMakerDirRemoveChild(pNamespace, pName->pParent->pDir, pName))
+    {
+        /*
+         * NULL the name member in the object and free the structure.
+         */
+        *ppName = NULL;
+        RTMemFree(pName);
 
-            /*
-             * NULL the name member in the object and free the structure.
-             */
-            *ppName = NULL;
-            RTMemFree(pName);
-
-            return VINF_SUCCESS;
-        }
+        return VINF_SUCCESS;
+    }
 
     /* Not found. This can't happen. */
-    AssertFailed();
-    return VERR_ISOMK_IPE_NAMESPACE_6;
+    AssertFailedReturn(VERR_ISOMK_IPE_NAMESPACE_6);
 }
 
 
@@ -3360,7 +3368,7 @@ RTDECL(int) RTFsIsoMakerObjSetNameAndParent(RTFSISOMAKER hIsoMaker, uint32_t idx
 /**
  * Changes the rock ridge name for the object in the selected namespaces.
  *
- * The object must already be enetered into the namespaces by
+ * The object must already be entered into the namespaces by
  * RTFsIsoMakerObjSetNameAndParent, RTFsIsoMakerObjSetPath or similar.
  *
  * @returns IPRT status code.
@@ -3620,7 +3628,6 @@ static int rtFsIsoMakerAddUnnamedDirWorker(PRTFSISOMAKERINT pThis, PCRTFSOBJINFO
     }
     RTMemFree(pDir);
     return rc;
-
 }
 
 
@@ -4326,6 +4333,201 @@ RTDECL(int) RTFsIsoMakerSetPathGroupId(RTFSISOMAKER hIsoMaker, const char *pszPa
 }
 
 
+/**
+ * Rename an object in one or more namespaces.
+ *
+ * The object must already be entered into the namespaces by
+ * RTFsIsoMakerObjSetNameAndParent, RTFsIsoMakerObjSetPath or similar.
+ *
+ * @returns IPRT status code.
+ * @param   hIsoMaker           The ISO maker handle.
+ * @param   fNamespaces         The namespaces to apply the path to
+ *                              (RTFSISOMAKER_NAMESPACE_XXX).
+ * @param   pszFrom             The name of the object to be renamed.
+ * @param   pszTo               The new name of the object.
+ */
+RTDECL(int) RTFsIsoMakerRename(RTFSISOMAKER hIsoMaker, uint32_t fNamespaces, const char *pszFrom, const char *pszTo)
+{
+    /*
+     * Validate the input.
+     */
+    PRTFSISOMAKERINT pThis = hIsoMaker;
+    RTFSISOMAKER_ASSERT_VALID_HANDLE_RET(pThis);
+    AssertReturn(!pThis->fFinalized, VERR_WRONG_ORDER);
+    AssertReturn(pszFrom[0] != '\0', VERR_INVALID_NAME);
+    AssertReturn(pszTo[0] != '\0', VERR_INVALID_NAME);
+
+    /*
+     * Isolate the target filename from the target directory.
+     */
+    const char * const pszToName     = RTPathFilename(pszTo);
+    const char * const pszToNameReal = pszToName ? pszToName : RTPathFilename(pszFrom);
+    AssertReturn(pszToNameReal && *pszToNameReal, VERR_INVALID_NAME);
+    size_t const       cchToNameReal = strlen(pszToNameReal);
+    AssertReturn(cchToNameReal > 2 || (strcmp(pszToNameReal, ".") != 0 && strcmp(pszToNameReal, "..") != 0), VERR_INVALID_NAME);
+
+    size_t             cchToParent   = !pszToName ? strlen(pszTo) : (size_t)(pszToName - pszTo);
+    while (cchToParent > 0 && RTPATH_IS_SLASH(pszTo[cchToParent - 1]))
+        cchToParent--;
+    char szToParent[RTPATH_MAX];
+    if (cchToParent >= sizeof(szToParent))
+        return VERR_FILENAME_TOO_LONG;
+    if (cchToParent)
+        memcpy(szToParent, pszTo, cchToParent);
+    else
+        szToParent[cchToParent++] = '/';
+    szToParent[cchToParent] = '\0';
+
+    /*
+     * Lookup the from name & parent directory as well as the target directories in each namespace.
+     */
+    struct
+    {
+        PRTFSISOMAKERNAME    pFromName;
+        PRTFSISOMAKERNAMEDIR pToDir;
+        PRTFSISOMAKERNAME    pNewName;
+        size_t               cchName;
+        size_t               cbNameInDirRec;
+        char                 szName[RTFSISOMAKER_MAX_NAME_BUF];
+    }           aData[RT_ELEMENTS(g_aRTFsIsoNamespaces)];
+    uint32_t    cFound = 0;
+
+    for (uint32_t i = 0; i < RT_ELEMENTS(g_aRTFsIsoNamespaces); i++)
+    {
+        aData[i].pFromName      = NULL;
+        aData[i].pToDir         = NULL;
+        aData[i].pNewName       = NULL;
+        aData[i].cchName        = 0;
+        aData[i].cbNameInDirRec = 0;
+        aData[i].szName[0]      = '\0';
+
+        if (fNamespaces & g_aRTFsIsoNamespaces[i].fNamespace)
+        {
+            PRTFSISOMAKERNAMESPACE pNamespace = (PRTFSISOMAKERNAMESPACE)((uintptr_t)pThis + g_aRTFsIsoNamespaces[i].offNamespace);
+            if (pNamespace->pRoot)
+            {
+                /* The source. */
+                PRTFSISOMAKERNAME pFromName;
+                int rc = rtFsIsoMakerWalkPathBySpec(pNamespace, pszFrom, &pFromName);
+                if (RT_FAILURE(rc))
+                    return rc;
+                aData[i].pFromName = pFromName;
+                AssertReturn(pFromName != pNamespace->pRoot, VERR_INVALID_PARAMETER);
+
+                /* The target parent. */
+                PRTFSISOMAKERNAME pToParentName;
+                rc = rtFsIsoMakerWalkPathBySpec(pNamespace, szToParent, &pToParentName);
+                if (RT_FAILURE(rc))
+                    return rc;
+                aData[i].pToDir = pToParentName->pDir;
+                if (!pToParentName->pDir)
+                    return VERR_NOT_A_DIRECTORY;
+
+                /* If pszFrom names a directory, make sure pszTo is _not_ a subdirectory under it. */
+                if (pFromName->pDir)
+                    for (PRTFSISOMAKERNAME pToAncestorName = pToParentName;
+                         pToAncestorName;
+                         pToAncestorName = pToAncestorName->pParent)
+                        AssertReturn(pToAncestorName != pFromName, VERR_ACCESS_DENIED);
+
+                /* Normalize the name. This also checks for duplicates. */
+                rc = rtFsIsoMakerNormalizeNameForNamespace(pThis, pNamespace, pToParentName, pszToNameReal, cchToNameReal,
+                                                           false /*fNoNormalize*/, pFromName->pDir != NULL,
+                                                           aData[i].szName, sizeof(aData[i].szName),
+                                                           &aData[i].cchName, &aData[i].cbNameInDirRec);
+                if (RT_FAILURE(rc))
+                    return rc;
+
+                cFound++;
+            }
+        }
+    }
+    if (!cFound)
+        return VERR_NOT_FOUND;
+
+    /*
+     * Allocate necessary memory and prep new name nodes.
+     */
+    int rc = VINF_SUCCESS;
+    for (uint32_t i = 0; i < RT_ELEMENTS(aData); i++)
+    {
+        PRTFSISOMAKERNAME const pFromName = aData[i].pFromName;
+        if (pFromName)
+        {
+            rc = rtFsIsoMakerDirEnsureSpaceForAnotherEntry(pFromName->pParent->pDir);
+            AssertRCBreak(rc);
+
+            size_t const cbNewName = RT_UOFFSETOF(RTFSISOMAKERNAME, szName) + aData[i].cchName + 1 + cchToNameReal + 1;
+            PRTFSISOMAKERNAME const pNewName = (PRTFSISOMAKERNAME)RTMemAllocZ(cbNewName);
+            AssertBreakStmt(pNewName, rc = VERR_NO_MEMORY);
+            aData[i].pNewName = pNewName;
+
+            memcpy(pNewName, pFromName, RT_UOFFSETOF(RTFSISOMAKERNAME, szName));
+            pNewName->cbNameInDirRec = (uint16_t)aData[i].cbNameInDirRec;
+            pNewName->cchName        = (uint16_t)aData[i].cchName;
+            memcpy(pNewName->szName, aData[i].szName, aData[i].cchName);
+            pNewName->szName[aData[i].cchName] = '\0';
+            pNewName->pszSpecNm = (char *)memcpy(&pNewName->szName[aData[i].cchName + 1], pszToNameReal, cchToNameReal + 1);
+        }
+    }
+
+    /*
+     * Do the actual renaming.
+     */
+    if (RT_SUCCESS(rc))
+        for (uint32_t i = 0; i < RT_ELEMENTS(aData); i++)
+        {
+            PRTFSISOMAKERNAME const pFromName = aData[i].pFromName;
+            if (pFromName)
+            {
+                PRTFSISOMAKERNAMESPACE const pNamespace = (PRTFSISOMAKERNAMESPACE)(  (uintptr_t)pThis
+                                                                                   + g_aRTFsIsoNamespaces[i].offNamespace);
+
+                /*
+                 * Remove the it from the old directory.
+                 */
+                if (rtFsIsoMakerDirRemoveChild(pNamespace, pFromName->pParent->pDir, pFromName))
+                {
+                    pFromName->pParent = NULL;
+                    RTMemFree(pFromName);
+
+                    /*
+                     * Insert it into the new directory (space check above).
+                     */
+                    PRTFSISOMAKERNAME const pNewName = aData[i].pNewName;
+                    aData[i].pNewName = NULL;
+                    rtFsIsoMakerDirInsertChild(pNamespace, aData[i].pToDir, pNewName);
+
+                    /*
+                     * Correct name pointers.
+                     */
+                    PPRTFSISOMAKERNAME const ppObjName = (PPRTFSISOMAKERNAME)(  (uintptr_t)pNewName->pObj
+                                                                              + g_aRTFsIsoNamespaces[i].offName);
+                    AssertStmt(*ppObjName == pFromName, VERR_ISOMK_IPE_NAMESPACE_6);
+                    *ppObjName = pNewName;
+
+                    PRTFSISOMAKERNAMEDIR const pDir = pNewName->pDir;
+                    if (pDir)
+                    {
+                        pDir->pName = pNewName;
+                        uint32_t iChild = pDir->cChildren;
+                        while (iChild-- > 0)
+                            pDir->papChildren[iChild]->pParent = pNewName;
+                    }
+                }
+                else
+                    AssertFailedStmt(VERR_ISOMK_IPE_NAMESPACE_6);
+            }
+        }
+
+    /* Cleanup in case of failure. */
+    if (RT_FAILURE(rc))
+        for (uint32_t i = 0; i < RT_ELEMENTS(aData); i++)
+            RTMemFree(aData[i].pNewName);
+    return rc;
+}
+
+
 
 
 
@@ -4727,7 +4929,7 @@ RTDECL(int) RTFsIsoMakerBootCatSetSectionEntry(RTFSISOMAKER hIsoMaker, uint32_t 
 
 
 /**
- * Set the validation entry of the boot catalog (this is the first entry).
+ * Set up a section header entry of the boot catalog.
  *
  * @returns IPRT status code.
  * @param   hIsoMaker           The ISO maker handle.
@@ -4736,9 +4938,10 @@ RTDECL(int) RTFsIsoMakerBootCatSetSectionEntry(RTFSISOMAKER hIsoMaker, uint32_t 
  * @param   idPlatform          The platform ID
  *                              (ISO9660_ELTORITO_PLATFORM_ID_XXX).
  * @param   pszString           Section identifier or something.  Optional.
+ * @param   fFinalEntry         Set if this is the final entry.
  */
 RTDECL(int) RTFsIsoMakerBootCatSetSectionHeaderEntry(RTFSISOMAKER hIsoMaker, uint32_t idxBootCat, uint32_t cEntries,
-                                                     uint8_t idPlatform, const char *pszString)
+                                                     uint8_t idPlatform, const char *pszString, bool fFinalEntry)
 {
     /*
      * Validate input.
@@ -4767,7 +4970,8 @@ RTDECL(int) RTFsIsoMakerBootCatSetSectionHeaderEntry(RTFSISOMAKER hIsoMaker, uin
          * Construct the entry data.
          */
         ISO9660ELTORITOSECTIONHEADER Entry;
-        Entry.bHeaderId   = ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER;
+        Entry.bHeaderId   = fFinalEntry ? ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER
+                          : ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER;
         Entry.bPlatformId = idPlatform;
         Entry.cEntries    = RT_H2LE_U16(cEntries);
         RT_ZERO(Entry.achSectionId);
@@ -4791,7 +4995,7 @@ RTDECL(int) RTFsIsoMakerBootCatSetSectionHeaderEntry(RTFSISOMAKER hIsoMaker, uin
                 pThis->aBootCatEntries[idxBootCat].pBootFile = NULL;
             }
 
-            pThis->aBootCatEntries[idxBootCat].bType    = ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER;
+            pThis->aBootCatEntries[idxBootCat].bType    = Entry.bHeaderId;
             pThis->aBootCatEntries[idxBootCat].cEntries = cEntries + 1;
         }
     }
@@ -5508,21 +5712,27 @@ static int rtFsIsoMakerFinalizeBootStuffPart1(PRTFSISOMAKERINT pThis)
     AssertReturn(pThis->aBootCatEntries[1].pBootFile != NULL, VERR_ISOMK_BOOT_CAT_NO_DEFAULT_ENTRY);
 
     /* Check any sections following the default one. */
-    uint32_t cEntries = 2;
+    uint32_t iLastSecHdr = UINT32_MAX;
+    uint32_t cEntries    = 2;
     while (   cEntries < RT_ELEMENTS(pThis->aBootCatEntries) - 1U
            && pThis->aBootCatEntries[cEntries].cEntries > 0)
     {
-        AssertReturn(pThis->aBootCatEntries[cEntries].bType == ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER,
+        AssertReturn(   pThis->aBootCatEntries[cEntries].bType == ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER
+                     || pThis->aBootCatEntries[cEntries].bType == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER,
                      VERR_ISOMK_BOOT_CAT_EXPECTED_SECTION_HEADER);
         for (uint32_t i = 1; i < pThis->aBootCatEntries[cEntries].cEntries; i++)
-            AssertReturn(pThis->aBootCatEntries[cEntries].pBootFile != NULL,
-                         pThis->aBootCatEntries[cEntries].cEntries == 0
+            AssertReturn(pThis->aBootCatEntries[cEntries + i].pBootFile != NULL,
+                         pThis->aBootCatEntries[cEntries + i].cEntries == 0
                          ? VERR_ISOMK_BOOT_CAT_EMPTY_ENTRY : VERR_ISOMK_BOOT_CAT_INVALID_SECTION_SIZE);
-        cEntries += pThis->aBootCatEntries[cEntries].cEntries;
+        iLastSecHdr = cEntries;
+        cEntries   += pThis->aBootCatEntries[cEntries].cEntries;
     }
 
-    /* Save for size setting. */
-    uint32_t const cEntriesInFile = cEntries + 1;
+    /* Calc number of entries in the file. */
+    uint32_t const cEntriesInFile = cEntries
+                                  + (   iLastSecHdr == UINT32_MAX
+                                     ||    pThis->aBootCatEntries[iLastSecHdr].bType
+                                        != ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER);
 
     /* Check that the remaining entries are empty. */
     while (cEntries < RT_ELEMENTS(pThis->aBootCatEntries))
@@ -5600,16 +5810,30 @@ static int rtFsIsoMakerFinalizeBootStuffPart2(PRTFSISOMAKERINT pThis)
         }
 
     /*
-     * Write end section.
+     * Write end section if necessary.
      */
-    ISO9660ELTORITOSECTIONHEADER Entry;
-    Entry.bHeaderId   = ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER;
-    Entry.bPlatformId = ISO9660_ELTORITO_PLATFORM_ID_X86;
-    Entry.cEntries    = 0;
-    RT_ZERO(Entry.achSectionId);
-    int rc = RTVfsFileWriteAt(pThis->pBootCatFile->u.hVfsFile, cEntries * ISO9660_ELTORITO_ENTRY_SIZE,
-                              &Entry, sizeof(Entry), NULL /*pcbWritten*/);
-    AssertRCReturn(rc, rc);
+    uint32_t iLastSecHdr = UINT32_MAX;
+    cEntries    = 2;
+    while (   cEntries < RT_ELEMENTS(pThis->aBootCatEntries) - 1U
+           && pThis->aBootCatEntries[cEntries].cEntries > 0)
+    {
+        Assert(   pThis->aBootCatEntries[cEntries].bType == ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER
+               || pThis->aBootCatEntries[cEntries].bType == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER);
+        iLastSecHdr = cEntries;
+        cEntries   += pThis->aBootCatEntries[cEntries].cEntries;
+    }
+    if (   iLastSecHdr == UINT32_MAX
+        || pThis->aBootCatEntries[iLastSecHdr].bType != ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER)
+    {
+        ISO9660ELTORITOSECTIONHEADER Entry;
+        Entry.bHeaderId   = ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER;
+        Entry.bPlatformId = ISO9660_ELTORITO_PLATFORM_ID_X86;
+        Entry.cEntries    = 0;
+        RT_ZERO(Entry.achSectionId);
+        int rc = RTVfsFileWriteAt(pThis->pBootCatFile->u.hVfsFile, cEntries * ISO9660_ELTORITO_ENTRY_SIZE,
+                                  &Entry, sizeof(Entry), NULL /*pcbWritten*/);
+        AssertRCReturn(rc, rc);
+    }
 
     return VINF_SUCCESS;
 }

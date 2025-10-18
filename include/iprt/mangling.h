@@ -1163,6 +1163,7 @@
 # define RTFsIsoMakerGetIso9660Level                    RT_MANGLER(RTFsIsoMakerGetIso9660Level)
 # define RTFsIsoMakerGetRockRidgeLevel                  RT_MANGLER(RTFsIsoMakerGetRockRidgeLevel)
 # define RTFsIsoMakerGetJolietRockRidgeLevel            RT_MANGLER(RTFsIsoMakerGetJolietRockRidgeLevel)
+# define RTFsIsoMakerRename                             RT_MANGLER(RTFsIsoMakerRename)
 # define RTFsIsoMakerSetImagePadding                    RT_MANGLER(RTFsIsoMakerSetImagePadding)
 # define RTFsIsoMakerSetIso9660Level                    RT_MANGLER(RTFsIsoMakerSetIso9660Level)
 # define RTFsIsoMakerSetJolietUcs2Level                 RT_MANGLER(RTFsIsoMakerSetJolietUcs2Level)
