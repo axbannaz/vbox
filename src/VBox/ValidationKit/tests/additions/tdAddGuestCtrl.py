@@ -1729,7 +1729,7 @@ class SubTstDrvAddGuestCtrl(base.SubTestDriverBase):
                 return reporter.error('Failed to create directory "%s"!' % (sDir,));
 
         # Query the TestExecService (TXS) version first to find out on what we run.
-        fGotTxsVer = self.oTstDrv.txsVer(oSession, oTxsSession, 30 * 100, fIgnoreErrors = True);
+        fGotTxsVer = self.oTstDrv.txsVer(oSession, oTxsSession, 30000, fIgnoreErrors = True);
 
         # Whether to enable verbose logging for VBoxService.
         fEnableVerboseLogging = False;
