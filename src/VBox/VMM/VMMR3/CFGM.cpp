@@ -1093,6 +1093,52 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
 
 
+#ifdef VBOX_VMM_TARGET_ARMV8
+    /** @todo This config doesn't work, it is just to satisfy the tstVMMUnitTest-1 testcase. */
+    /*
+     * CPUM.
+     */
+    PCFGMNODE pCpum;
+    rc = CFGMR3InsertNode(pRoot, "CPUM", &pCpum);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pCpum, "GicArchRev",            3);
+    UPDATERC();
+
+    /*
+     * NEM.
+     */
+    PCFGMNODE pNem;
+    rc = CFGMR3InsertNode(pRoot, "NEM", &pNem);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pNem, "VTimerInterrupt",        0xb);
+    UPDATERC();
+
+    /*
+     * MM.
+     */
+    PCFGMNODE pMm;
+    rc = CFGMR3InsertNode(pRoot, "MM", &pMm);
+    UPDATERC();
+    PCFGMNODE pMemRegions;
+    rc = CFGMR3InsertNode(pMm,   "MemRegions", &pMemRegions);
+    UPDATERC();
+    PCFGMNODE pMemReg;
+    rc = CFGMR3InsertNode(pMemRegions, "Base", &pMemReg);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pMemReg,  "GCPhysStart",          0);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pMemReg,  "Size",        128U * _1M);
+    UPDATERC();
+
+    rc = CFGMR3InsertNode(pMemRegions, "High", &pMemReg);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pMemReg,  "GCPhysStart",        _4G);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pMemReg,  "Size",        128U * _1M);
+    UPDATERC();
+#endif
+
+
     /*
      * PDM.
      */
@@ -1117,6 +1163,7 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     pDevices = NULL;
     rc = CFGMR3InsertNode(pRoot, "Devices", &pDevices);
     UPDATERC();
+
     /* device */
     PCFGMNODE pDev = NULL;
     PCFGMNODE pInst = NULL;
@@ -1126,6 +1173,7 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     PCFGMNODE pLunL1 = NULL;
 #endif
 
+#ifndef VBOX_VMM_TARGET_ARMV8
     /*
      * PC Arch.
      */
@@ -1187,7 +1235,7 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
     rc = CFGMR3InsertNode(pInst,    "Config", &pCfg);
     UPDATERC();
-#if 0
+# if 0
     rc = CFGMR3InsertNode(pInst,    "LUN#0", &pLunL0);
     UPDATERC();
     rc = CFGMR3InsertString(pLunL0, "Driver",               "KeyboardQueue");
@@ -1202,8 +1250,8 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
     rc = CFGMR3InsertNode(pLunL1,   "Config", &pCfg);
     UPDATERC();
-#endif
-#if 0
+# endif
+# if 0
     rc = CFGMR3InsertNode(pInst,    "LUN#1", &pLunL0);
     UPDATERC();
     rc = CFGMR3InsertString(pLunL0, "Driver",               "MouseQueue");
@@ -1218,7 +1266,7 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
     rc = CFGMR3InsertNode(pLunL1,   "Config", &pCfg);
     UPDATERC();
-#endif
+# endif
 
     /*
      * i8254 Programmable Interval Timer And Dummy Speaker
@@ -1227,10 +1275,10 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
     rc = CFGMR3InsertNode(pDev,     "0", &pInst);
     UPDATERC();
-#ifdef DEBUG
+# ifdef DEBUG
     rc = CFGMR3InsertInteger(pInst, "Trusted",              1);         /* boolean */
     UPDATERC();
-#endif
+# endif
     rc = CFGMR3InsertNode(pInst,    "Config", &pCfg);
     UPDATERC();
 
@@ -1280,12 +1328,12 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     rc = CFGMR3InsertString(pCfg,   "LogoFile",             "");
     UPDATERC();
 
-#if 0
+# if 0
     rc = CFGMR3InsertNode(pInst,    "LUN#0", &pLunL0);
     UPDATERC();
     rc = CFGMR3InsertString(pLunL0, "Driver",               "MainDisplay");
     UPDATERC();
-#endif
+# endif
 
     /*
      * IDE controller.
@@ -1310,6 +1358,26 @@ VMMR3DECL(int) CFGMR3ConstructDefaultTree(PVM pVM)
     UPDATERC();
     rc = CFGMR3InsertInteger(pInst, "Trusted",              1); /* boolean */
     UPDATERC();
+#else
+
+    /*
+     * GIC.
+     */
+    rc = CFGMR3InsertNode(pDevices, "gic", &pDev);
+    UPDATERC();
+    rc = CFGMR3InsertNode(pDev,     "0", &pInst);
+    UPDATERC();
+    rc = CFGMR3InsertNode(pInst,    "Config", &pCfg);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pInst, "Trusted",              1); /* boolean */
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pCfg,  "ArchRev",              3);
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pCfg,  "DistributorMmioBase",  UINT32_C(0xf0000000));
+    UPDATERC();
+    rc = CFGMR3InsertInteger(pCfg,  "RedistributorMmioBase",  UINT32_C(0xe0000000));
+    UPDATERC();
+#endif /* !VBOX_VMM_TARGET_ARMV8 */
 
 
     /*
