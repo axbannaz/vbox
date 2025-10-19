@@ -55,6 +55,8 @@
 # include <iprt/formats/pecoff.h> /* this is incomaptible with windows.h, thus: */
 extern "C" DECLIMPORT(uint8_t) __cdecl RtlAddFunctionTable(void *pvFunctionTable, uint32_t cEntries, uintptr_t uBaseAddress);
 extern "C" DECLIMPORT(uint8_t) __cdecl RtlDelFunctionTable(void *pvFunctionTable);
+extern "C" DECLIMPORT(void *)  __cdecl GetCurrentProcess();
+extern "C" DECLIMPORT(uint8_t) __cdecl FlushInstructionCache(void *hProcess, const void *lpBaseAddress, size_t dwSize);
 #else
 # include <iprt/formats/dwarf.h>
 # if defined(RT_OS_DARWIN)
@@ -1189,6 +1191,17 @@ DECLHIDDEN(void) iemExecMemAllocatorReadyForUse(PVMCPUCC pVCpu, void *pv, size_t
 
     asm volatile ("dsb ish\n\t isb\n\t" : : : "memory");
 
+#elif defined(RT_OS_WINDOWS) && defined(RT_ARCH_ARM64)
+    RT_NOREF(pVCpu);
+    /*
+     * We don't have access to "ic ivau" on Windows/ARM as SCTLR_EL1.UCI is probably 0
+     * trapping the instruction to EL1, and Windows responds with an illegal instruction
+     * exception.
+     * However there is the FlushInstructionCache() API which does exactly what we want
+     * (though it might be more expensive, still better than crashing in the middle of
+     * a TB).
+     */
+    FlushInstructionCache(GetCurrentProcess(), pv, cb);
 #else
     RT_NOREF(pVCpu, pv, cb);
 #endif
