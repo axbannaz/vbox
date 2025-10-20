@@ -168,8 +168,9 @@ DECLHIDDEN(void) RTFsUdfHlpTimestamp2TimeSpec(PRTTIMESPEC pTimeSpec, PCUDFTIMEST
  * @param   cbAllocDescs    The size of the allocation descriptor data.
  * @param   fIcbTagFlags    The ICB tag flags.
  * @param   idxDefaultPart  The default data partition.
- * @param   offAllocDescs   The disk byte offset corresponding to @a pbAllocDesc
- *                          in case it's used as data storage (type 3).
+ * @param   offAllocDescs   The default partition byte offset corresponding to
+ *                          @a pbAllocDesc in case it's used as data storage
+ *                          (type 3).
  * @param   cbMax           Maximum number of bytes we care to gather allocation
  *                          descriptors for.
  * @param   hVfsBacking     The backing file/device/whatever in case it's a a
@@ -734,7 +735,11 @@ static void rtFsUdfHlpLogIcbExFileEntry(PCUDFEXFILEENTRY pFileEntry, uint32_t cb
         uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, cbBlock - RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs));
         if (cbExtAttribs > 0)
             rtFsUdfHlpLogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
-        if (pFileEntry->cbAllocDescs > 0)
+        if ((pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK) == UDF_ICB_FLAGS_AD_TYPE_EMBEDDED)
+            Log2(("ISO/UDF:   %-32s @ICB offset %#x LB %#x/%#x%s\n",
+                  "EmbeddedAD:", RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs) + cbExtAttribs, pFileEntry->cbAllocDescs,
+                  pFileEntry->cbData, pFileEntry->cbAllocDescs == pFileEntry->cbData ? "" : " - cbAllocDescs != cbData !!"));
+        else if (pFileEntry->cbAllocDescs > 0)
             switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
             {
                 case UDF_ICB_FLAGS_AD_TYPE_SHORT:
@@ -810,7 +815,11 @@ static void rtFsUdfHlpLogIcbFileEntry(PCUDFFILEENTRY pFileEntry, uint32_t cbBloc
         uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs, cbBlock - RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs));
         if (cbExtAttribs > 0)
             rtFsUdfHlpLogExtAttribs(pFileEntry->abExtAttribs, cbExtAttribs);
-        if (pFileEntry->cbAllocDescs > 0)
+        if ((pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK) == UDF_ICB_FLAGS_AD_TYPE_EMBEDDED)
+            Log2(("ISO/UDF:   %-32s @ICB offset %#x LB %#x/%#x%s\n",
+                  "EmbeddedAD:", RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + cbExtAttribs, pFileEntry->cbAllocDescs,
+                  pFileEntry->cbData, pFileEntry->cbAllocDescs == pFileEntry->cbData ? "" : " - cbAllocDescs != cbData !!"));
+        else if (pFileEntry->cbAllocDescs > 0)
             switch (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK)
             {
                 case UDF_ICB_FLAGS_AD_TYPE_SHORT:
@@ -930,7 +939,8 @@ DECLHIDDEN(int) RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVf
                 if (   (uint64_t)RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs + pFileEntry->cbAllocDescs
                        <= pVolInfo->cbBlock
                     && (pFileEntry->cbExtAttribs & 3) == 0
-                    && (pFileEntry->cbAllocDescs & 3) == 0)
+                    && (   (pFileEntry->cbAllocDescs & 3) == 0
+                        || (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK) == UDF_ICB_FLAGS_AD_TYPE_EMBEDDED))
 
                 {
                     if (   pFileEntry->uRecordFormat
@@ -961,7 +971,8 @@ DECLHIDDEN(int) RTFsUdfReadIcbRecursive(PCRTFSUDFVOLINFO pVolInfo, RTVFSFILE hVf
                 if (   (uint64_t)RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + pFileEntry->cbExtAttribs + pFileEntry->cbAllocDescs
                        <= pVolInfo->cbBlock
                     && (pFileEntry->cbExtAttribs & 3) == 0
-                    && (pFileEntry->cbAllocDescs & 3) == 0)
+                    && (   (pFileEntry->cbAllocDescs & 3) == 0
+                        || (pFileEntry->IcbTag.fFlags & UDF_ICB_FLAGS_AD_TYPE_MASK) == UDF_ICB_FLAGS_AD_TYPE_EMBEDDED))
 
                 {
                     if (   pFileEntry->uRecordFormat

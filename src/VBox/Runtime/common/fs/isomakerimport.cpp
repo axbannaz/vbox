@@ -2477,16 +2477,17 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
     uint64_t const  cbDirAligned = RT_ALIGN_64(cbDirData, pThis->Udf.VolInfo.cbBlock);
 
     /* Read the allocation extensions. */
-    uint32_t        cExtents    = 0;
+    uint64_t        offIcbInPart = (uint64_t)u.pFileEntry->Tag.offTag << pThis->Udf.VolInfo.cShiftBlock; /* safe */
+    uint32_t        cExtents     = 0;
     RTFSISOEXTENT   FirstExtent;
-    PRTFSISOEXTENT  paExtents   = NULL;
+    PRTFSISOEXTENT  paExtents    = NULL;
     if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
         rc = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
                                             &u.pFileEntry->abExtAttribs[u.pFileEntry->cbExtAttribs],
                                             u.pFileEntry->cbAllocDescs,
                                             u.pFileEntry->IcbTag.fFlags,
                                             idxDefaultPart,
-                                            RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + u.pFileEntry->cbExtAttribs,
+                                            offIcbInPart + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + u.pFileEntry->cbExtAttribs,
                                             cbDirData,
                                             pThis->hSrcFile,
                                             pbBlockBuf,
@@ -2497,7 +2498,9 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
                                             u.pExFileEntry->cbAllocDescs,
                                             u.pExFileEntry->IcbTag.fFlags,
                                             idxDefaultPart,
-                                            RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs) + u.pExFileEntry->cbExtAttribs,
+                                              offIcbInPart
+                                            + RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs)
+                                            + u.pExFileEntry->cbExtAttribs,
                                             cbDirData,
                                             pThis->hSrcFile,
                                             pbBlockBuf,
@@ -2634,13 +2637,16 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
                     FirstExtent.off      = UINT64_MAX;
                     if (cbObject > 0)
                     {
+                        offIcbInPart = (uint64_t)u.pFileEntry->Tag.offTag << pThis->Udf.VolInfo.cShiftBlock; /* safe */
                         if (u.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
                             rc2 = RTFsUdfHlpGatherExtentsFromIcb(&pThis->Udf.VolInfo,
                                                                  &u.pFileEntry->abExtAttribs[u.pFileEntry->cbExtAttribs],
                                                                  u.pFileEntry->cbAllocDescs,
                                                                  u.pFileEntry->IcbTag.fFlags,
                                                                  idxDefaultPart,
-                                                                 RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs) + u.pFileEntry->cbExtAttribs,
+                                                                   offIcbInPart
+                                                                 + RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs)
+                                                                 + u.pFileEntry->cbExtAttribs,
                                                                  cbObject,
                                                                  pThis->hSrcFile,
                                                                  pbBlockBuf,
@@ -2651,7 +2657,9 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
                                                                  u.pExFileEntry->cbAllocDescs,
                                                                  u.pExFileEntry->IcbTag.fFlags,
                                                                  idxDefaultPart,
-                                                                 RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs) + u.pExFileEntry->cbExtAttribs,
+                                                                   offIcbInPart
+                                                                 + RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs)
+                                                                 + u.pExFileEntry->cbExtAttribs,
                                                                  cbObject,
                                                                  pThis->hSrcFile,
                                                                  pbBlockBuf,
