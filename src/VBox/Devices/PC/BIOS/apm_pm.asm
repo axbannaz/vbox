@@ -43,6 +43,11 @@ public		apm_pm16_entry
 ;
 SET_DEFAULT_CPU_286
 
+hlt_string	db	'Prochalt'
+sby_string	db	'Standby'
+sus_string	db	'Suspend'
+off_string	db	'Shutdown'
+
 
 ; APM function dispatch table
 apm_disp:
@@ -60,6 +65,26 @@ apm_disp:
 		dw	offset apmf_engage	; 0Fh
 		dw	offset apmf_get_caps	; 10h
 apm_disp_end:
+
+;
+; Output a string to BIOS control port.
+; Input:     AX = Offset of string
+; 	     CX = String length
+;
+; Destroys:  CX
+;
+apm_out_str_pm	proc	near
+		push	si
+		push	dx
+
+		mov	dx, 40Fh
+		mov	si, ax
+		rep outsb
+
+		pop	dx
+		pop	si
+		ret
+apm_out_str_pm	endp
 
 ;
 ; APM worker routine. Function code in AL; it is assumed that AL >= 4.
@@ -89,22 +114,13 @@ if 1
 		; Port I/O based HLT equivalent using a custom BIOS I/O port.
 		; Works in situations where HLT can't be used, such as Windows 3.1
 		; in Standard mode or DR-DOS 5.0/6.0 EMM386.SYS.
-		push	si
 		push	cx
-		push	dx
-
-		mov	dx, 40Fh
-		mov	si, offset hlt_string
-		mov	cx,8
-		rep outsb
-
-		pop	dx
+		mov	cx, 8
+		mov	ax, offset hlt_string
+		call	apm_out_str_pm
 		pop	cx
-		pop	si
 
 		jmp	apmw_success
-
-hlt_string	db	'Prochalt'
 
 else
                 ;
@@ -126,16 +142,52 @@ apmf_busy:				; function 06h
 ;		jmp	apmw_success
 
 apmf_set_state:				; function 07h
-;		jmp	apmw_success
+		push	cx
 
-apmf_enable:				; function 08h
+		cmp	cx, 1		; Standby?
+		jne	@f
+
+		mov	cx, 7
+		mov	ax, offset sby_string
+		call	apm_out_str_pm
+		jmp	sst_ok
+@@:
+		cmp	cx, 2		; Suspend?
+		jne	@f
+
+		mov	cx, 7
+		mov	ax, offset sus_string
+		call	apm_out_str_pm
+		jmp	sst_ok
+
+@@:
+		cmp	cx, 3		; Shutdown?
+		jne	sst_badarg
+
+		mov	cx, 8
+		mov	ax, offset off_string
+		call	apm_out_str_pm
+
+sst_ok:
+		pop	cx
 		jmp	apmw_success
 
-apmf_restore:				; function 09h
+sst_badarg:
+		pop	cx
+		jmp	apmw_failure
+
+apmf_enable:				; function 08h
 ;		jmp	apmw_success
 
+apmf_restore:				; function 09h
+		jmp	apmw_success
+
 apmf_get_status:			; function 0Ah
-		jmp	apmw_bad_func
+		; Fake semi-reasonable values
+		mov	bx, 001FFh    	; AC line power, battery unknown
+		mov	cx, 080FFh    	; No battery
+		mov	dx, 0FFFFh    	; No idea about remaining battery life
+		jmp	apmw_success
 
 apmf_get_event:				; function 0Bh
 		mov	ah, 80h
