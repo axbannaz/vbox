@@ -61,6 +61,9 @@ public:
 
     /** Returns the parent table-widget. */
     QITableWidget *parentTable() const;
+
+    /** Returns default text. */
+    virtual QString defaultText() const;
 };
 
 /** QTableWidget subclass extending standard functionality. */

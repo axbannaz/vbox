@@ -302,6 +302,12 @@ QITableWidget *QITableWidgetItem::parentTable() const
     return tableWidget() ? qobject_cast<QITableWidget*>(tableWidget()) : 0;
 }
 
+QString QITableWidgetItem::defaultText() const
+{
+    /* Return item text as default: */
+    return text();
+}
+
 
 /*********************************************************************************************************************************
 *   Class QITableWidget implementation.                                                                                          *
