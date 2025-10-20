@@ -142,30 +142,25 @@ public:
         AssertPtrReturn(item()->tableWidget(), QAccessible::State());
 
         /* Compose the state: */
-        QAccessible::State state;
-        state.focusable = true;
-        state.selectable = true;
-
-        /* Compose the state of current item: */
-        if (   item()
-            && item() == QITableWidgetItem::toItem(item()->tableWidget()->currentItem()))
-        {
-            state.active = true;
-            state.focused = true;
-            state.selected = true;
-        }
-
-        /* Compose the state of checked item: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        myState.selectable = true;
+        if (   item()->tableWidget()->hasFocus()
+            && QITableWidgetItem::toItem(item()->tableWidget()->currentItem()) == item())
+            myState.focused = true;
+        if (   item()->tableWidget()->hasFocus()
+            && QITableWidgetItem::toItem(item()->tableWidget()->currentItem()) == item())
+            myState.selected = true;
         if (   item()
             && item()->checkState() != Qt::Unchecked)
         {
-            state.checked = true;
+            myState.checked = true;
             if (item()->checkState() == Qt::PartiallyChecked)
-                state.checkStateMixed = true;
+                myState.checkStateMixed = true;
         }
 
         /* Return the state: */
-        return state;
+        return myState;
     }
 
     /** Returns a text for the passed @a enmTextRole. */
@@ -256,6 +251,22 @@ public:
 
         /* -1 by default: */
         return -1;
+    }
+
+    /** Returns the state. */
+    virtual QAccessible::State state() const RT_OVERRIDE
+    {
+        /* Sanity check: */
+        AssertPtrReturn(table(), QAccessible::State());
+
+        /* Compose the state: */
+        QAccessible::State myState;
+        myState.focusable = true;
+        if (table()->hasFocus())
+            myState.focused = true;
+
+        /* Return the state: */
+        return myState;
     }
 
     /** Returns a text for the passed @a enmTextRole. */
