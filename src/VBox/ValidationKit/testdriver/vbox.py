@@ -3895,9 +3895,9 @@ class TestDriver(base.TestDriver):                                              
                     #                  each having an individual raw-mode status. Not relevant right now because
                     #                  there is no raw-mode at all currently.
                     oPlatformProperties = self.oVBox.getPlatformProperties(self.oVBox.host.architecture);
-                    fVBox = oPlatformProperties.rawModeSupported;
+                    fVBox = bool(oPlatformProperties.rawModeSupported);
                 else:
-                    fVBox = self.oVBox.systemProperties.rawModeSupported;
+                    fVBox = bool(self.oVBox.systemProperties.rawModeSupported);
             except:
                 if not fQuiet:
                     reporter.logXcpt();
