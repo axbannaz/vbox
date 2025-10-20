@@ -125,8 +125,11 @@ public:
     }
 
     /** Returns the index of the passed @a pChild. */
-    virtual int indexOfChild(const QAccessibleInterface*) const RT_OVERRIDE
+    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
+
         /* -1 in any case: */
         return -1;
     }
