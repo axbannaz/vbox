@@ -1539,6 +1539,7 @@ static int rtFsIsoFile_NewUdf(PRTFSISOVOL pThis, PRTFSISODIRSHRD pParentDir, PCU
                 pNewFile->pShared = pShared;
                 return VINF_SUCCESS;
             }
+            rc = VERR_NOT_A_FILE;
         }
         /*
          * Create a shared object for this alleged file.
@@ -1561,6 +1562,7 @@ static int rtFsIsoFile_NewUdf(PRTFSISOVOL pThis, PRTFSISODIRSHRD pParentDir, PCU
                         pNewFile->pShared = pShared;
                         return VINF_SUCCESS;
                     }
+                    rc = VERR_NOT_A_FILE;
                     rtFsIsoCore_Destroy(&pShared->Core);
                 }
                 RTMemFree(pShared);

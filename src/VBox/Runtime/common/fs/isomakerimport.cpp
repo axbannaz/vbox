@@ -482,7 +482,7 @@ static int rtFsIsoImportProcessIso9660AddAndNameDirectory(PRTFSISOMKIMPORTER pTh
     int rc = RTFsIsoMakerAddUnnamedDir(pThis->hIsoMaker, pObjInfo, &idxObj);
     if (RT_SUCCESS(rc))
     {
-        Log3(("  --> added directory #%#x (%s %s%s)\n",
+        Log3(("  --> added directory #%#x (%s%s%s)\n",
               idxObj, pszName, pszRockName && *pszRockName ? " rock:" : "", pszRockName ? pszRockName : ""));
         pThis->pResults->cAddedDirs++;
 
