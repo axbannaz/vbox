@@ -62,24 +62,31 @@ public:
     /** Returns the role. */
     virtual QAccessible::Role role() const RT_OVERRIDE
     {
+        /* ListItem in any case: */
         return QAccessible::ListItem;
     }
 
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), 0);
 
-        /* Return the parent: */
-        return QAccessible::queryAccessibleInterface(item()->parentTable());
+        /* Return parent-table interface if any: */
+        if (QITableWidget *pParentTable = item()->parentTable())
+            return QAccessible::queryAccessibleInterface(pParentTable);
+
+        /* Null by default: */
+        return 0;
     }
 
     /** Returns the rect. */
     virtual QRect rect() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QRect());
+        AssertPtrReturn(item()->parentTable(), QRect());
+        AssertPtrReturn(item()->parentTable()->viewport(), QRect());
 
         /* Compose common region: */
         QRegion region;
@@ -99,28 +106,40 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
+        /* Sanity check: */
+        AssertPtrReturn(item(), 0);
+
+        /* Zero in any case: */
         return 0;
     }
 
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        Q_UNUSED(iIndex);
+        /* Sanity check: */
+        AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(item(), 0);
+
+        /* Null in any case: */
         return 0;
     }
 
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
-        Q_UNUSED(pChild);
+        /* Sanity check: */
+        AssertPtrReturn(pChild, -1);
+
+        /* -1 in any case: */
         return -1;
     }
 
     /** Returns the state. */
     virtual QAccessible::State state() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
+        /* Sanity check: */
         AssertPtrReturn(item(), QAccessible::State());
+        AssertPtrReturn(item()->tableWidget(), QAccessible::State());
 
         /* Compose the state: */
         QAccessible::State state;
@@ -198,7 +217,7 @@ public:
     /** Returns the number of children. */
     virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure table still alive: */
+        /* Sanity check: */
         AssertPtrReturn(table(), 0);
 
         /* Return the number of children: */
@@ -211,10 +230,9 @@ public:
     /** Returns the child with the passed @a iIndex. */
     virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        /* Make sure table still alive: */
-        AssertPtrReturn(table(), 0);
-        /* Make sure index is valid: */
+        /* Sanity check: */
         AssertReturn(iIndex >= 0 && iIndex < childCount(), 0);
+        AssertPtrReturn(table(), 0);
 
         /* Return the child with the passed iIndex: */
         // Since Qt6 both horizontal and vertical table headers
@@ -228,10 +246,13 @@ public:
     /** Returns the index of the passed @a pChild. */
     virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
     {
+        /* Sanity check: */
+        AssertReturn(pChild, -1);
+
         /* Search for corresponding child: */
-        for (int iIndex = 0; iIndex < childCount(); ++iIndex)
-            if (child(iIndex) == pChild)
-                return iIndex;
+        for (int i = 0; i < childCount(); ++i)
+            if (child(i) == pChild)
+                return i;
 
         /* -1 by default: */
         return -1;
@@ -240,7 +261,7 @@ public:
     /** Returns a text for the passed @a enmTextRole. */
     virtual QString text(QAccessible::Text) const RT_OVERRIDE
     {
-        /* Make sure table still alive: */
+        /* Sanity check: */
         AssertPtrReturn(table(), QString());
 
         /* Gather suitable text: */
