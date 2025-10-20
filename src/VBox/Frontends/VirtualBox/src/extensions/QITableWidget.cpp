@@ -38,7 +38,8 @@
 
 
 /** QAccessibleObject extension used as an accessibility interface for QITableWidgetItem. */
-class QIAccessibilityInterfaceForQITableWidgetItem : public QAccessibleObject
+class QIAccessibilityInterfaceForQITableWidgetItem
+    : public QAccessibleObject
 {
 public:
 
@@ -58,6 +59,12 @@ public:
         : QAccessibleObject(pObject)
     {}
 
+    /** Returns the role. */
+    virtual QAccessible::Role role() const RT_OVERRIDE
+    {
+        return QAccessible::ListItem;
+    }
+
     /** Returns the parent. */
     virtual QAccessibleInterface *parent() const RT_OVERRIDE
     {
@@ -66,26 +73,6 @@ public:
 
         /* Return the parent: */
         return QAccessible::queryAccessibleInterface(item()->parentTable());
-    }
-
-    /** Returns the number of children. */
-    virtual int childCount() const RT_OVERRIDE
-    {
-        return 0;
-    }
-
-    /** Returns the child with the passed @a iIndex. */
-    virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
-    {
-        Q_UNUSED(iIndex);
-        return 0;
-    }
-
-    /** Returns the index of the passed @a pChild. */
-    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
-    {
-        Q_UNUSED(pChild);
-        return -1;
     }
 
     /** Returns the rect. */
@@ -109,27 +96,24 @@ public:
         return region.boundingRect();
     }
 
-    /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
+    /** Returns the number of children. */
+    virtual int childCount() const RT_OVERRIDE
     {
-        /* Make sure item still alive: */
-        AssertPtrReturn(item(), QString());
-
-        /* Return a text for the passed enmTextRole: */
-        switch (enmTextRole)
-        {
-            case QAccessible::Name: return item()->text();
-            default: break;
-        }
-
-        /* Null-string by default: */
-        return QString();
+        return 0;
     }
 
-    /** Returns the role. */
-    virtual QAccessible::Role role() const RT_OVERRIDE
+    /** Returns the child with the passed @a iIndex. */
+    virtual QAccessibleInterface *child(int iIndex) const RT_OVERRIDE
     {
-        return QAccessible::ListItem;
+        Q_UNUSED(iIndex);
+        return 0;
+    }
+
+    /** Returns the index of the passed @a pChild. */
+    virtual int indexOfChild(const QAccessibleInterface *pChild) const RT_OVERRIDE
+    {
+        Q_UNUSED(pChild);
+        return -1;
     }
 
     /** Returns the state. */
@@ -165,6 +149,23 @@ public:
         return state;
     }
 
+    /** Returns a text for the passed @a enmTextRole. */
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
+    {
+        /* Make sure item still alive: */
+        AssertPtrReturn(item(), QString());
+
+        /* Return a text for the passed enmTextRole: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name: return item()->text();
+            default: break;
+        }
+
+        /* Null-string by default: */
+        return QString();
+    }
+
 private:
 
     /** Returns corresponding QITableWidgetItem. */
@@ -173,7 +174,8 @@ private:
 
 
 /** QAccessibleWidget extension used as an accessibility interface for QITableWidget. */
-class QIAccessibilityInterfaceForQITableWidget : public QAccessibleWidget
+class QIAccessibilityInterfaceForQITableWidget
+    : public QAccessibleWidget
 {
 public:
 
