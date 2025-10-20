@@ -2210,6 +2210,7 @@ static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFF
     pObjInfo->Attr.u.Unix.Device        = 0;
 
     /** @todo extra more info from extattribs   */
+
     return VINF_SUCCESS;
 }
 
@@ -2228,6 +2229,13 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
     int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid, uPtr);
     if (RT_FAILURE(rc))
         return rtFsIsoImpError(pThis, rc, "rtFsIsoImportUdfFileIdAndEntryToObjInfo failed for '%s': %Rrc", pszName, rc);
+
+    /** @todo we don't currently support symbolic links, sockets, fifos or devices */
+    AssertCompileMembersAtSameOffset(UDFFILEENTRY, IcbTag,       UDFEXFILEENTRY, IcbTag);
+    if (   uPtr.pFileEntry->IcbTag.bFileType != UDF_FILE_TYPE_REGULAR_FILE
+        && uPtr.pFileEntry->IcbTag.bFileType != UDF_FILE_TYPE_REAL_TIME_FILE)
+        return rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_UNSUPPORTED_FILE_TYPE,
+                               "Unsupported file type for '%s': %#x", pszName, uPtr.pFileEntry->IcbTag.bFileType);
 
     /*
      * First we must make sure the common source file has been added.
@@ -2328,6 +2336,18 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
     {
         pThis->pResults->cAddedNames++;
         /** @todo Apply attribute to the UDF namespace if we didn't add the file! */
+
+        /*
+         * Error out on files with alternative streams.
+         */
+        if (   uPtr.pExFileEntry->StreamDirIcb.cb                    >= sizeof(UDFTAG)
+            && uPtr.pExFileEntry->StreamDirIcb.Location.uPartitionNo <  pThis->Udf.VolInfo.cPartitions
+            && uPtr.pExFileEntry->Tag.idTag                          == UDF_TAG_ID_EXTENDED_FILE_ENTRY)
+            return rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_UDF_FILE_WITH_STREAM_DIR,
+                                   "Stream directory ICB for '%s': cb=%#x uType=%u uPart=%#x off=%#x",
+                                   pszName, uPtr.pExFileEntry->StreamDirIcb.cb, uPtr.pExFileEntry->StreamDirIcb.uType,
+                                   uPtr.pExFileEntry->StreamDirIcb.Location.uPartitionNo,
+                                   uPtr.pExFileEntry->StreamDirIcb.Location.off);
     }
     else
         return rtFsIsoImpError(pThis, rc, "Error naming file '%s': %Rrc", pszName, rc);
@@ -2402,6 +2422,9 @@ rtFsIsoImportUdfExFileEntryCallback(PCRTFSUDFVOLINFO pVolInfo, PCUDFEXFILEENTRY 
 }
 
 
+/**
+ * Worker the imports a directory and its content.
+ */
 static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t idxDir, UDFLONGAD const *pIcbAllocDesc,
                                              uint8_t cDepth, PRTLISTANCHOR pTodoList)
 {
@@ -2485,6 +2508,11 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
         return rtFsIsoImpError(pThis, rc, "Failed to gather extents for directory ICB szIcbErrLoc: %Rrc", szIcbErrLoc, rc);
     if (cExtents == 0)
         return rtFsIsoImpError(pThis, VERR_ISOFS_NO_ADS_FOR_UDF_DIR, "No allocation descriptors for ICB at %s", szIcbErrLoc);
+
+    /*
+     * Set the directory attributes.
+     */
+    /** @todo dir attribs   */
 
     /*
      * Read the directory data.
@@ -2689,6 +2717,13 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
 }
 
 
+/**
+ * Processes the UDF directory tree.
+ *
+ * This doesn't recurse, instead it keeps a todo-list of directory ICBs which is
+ * processed one by one by rtFsIsoImportUdfProcessTreeWorker(), adding any
+ * sub-dirs to the todo-list.
+ */
 static int rtFsIsoImportUdfProcessTree(PRTFSISOMKIMPORTER pThis, UDFLONGAD IceAllocDesc)
 {
     AssertReturn(sizeof(pThis->abBuf) >= pThis->Udf.VolInfo.cbBlock * 4, VERR_INTERNAL_ERROR_3); /* max block size check */
@@ -2712,7 +2747,7 @@ static int rtFsIsoImportUdfProcessTree(PRTFSISOMKIMPORTER pThis, UDFLONGAD IceAl
      */
     int          rc     = VINF_SUCCESS;
     uint8_t      cDepth = 0;
-    RTLISTANCHOR TodoList; /* RTFSISOMKIMPDIR */
+    RTLISTANCHOR TodoList; /* RTFSISOMKIMPUDFDIR */
     RTListInit(&TodoList);
     for (;;)
     {
@@ -2737,6 +2772,9 @@ static int rtFsIsoImportUdfProcessTree(PRTFSISOMKIMPORTER pThis, UDFLONGAD IceAl
 }
 
 
+/**
+ * Function that does the UDF importing after a VRS was found.
+ */
 static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
 {
     /*
@@ -2778,7 +2816,7 @@ static int rtFsIsoImportUdf(PRTFSISOMKIMPORTER pThis)
                 AssertRCReturn(rc, rc);
             }
 
-            /** @todo import more stuff form the volume descriptors... */
+            /** @todo import more stuff from the volume descriptors... */
 
             return rtFsIsoImportUdfProcessTree(pThis, pThis->Udf.VolInfo.RootDirIcb);
         }

@@ -2562,6 +2562,10 @@
 #define VERR_ISOMK_IMPORT_UDF_DISCONTIGUOUS_ADS                     (-25159)
 /** UDF file cannot be import sparse files at present. */
 #define VERR_ISOMK_IMPORT_UDF_SPARSE_FILE                           (-25160)
+/** Only regular files supported by the UDF importer. */
+#define VERR_ISOMK_IMPORT_UDF_UNSUPPORTED_FILE_TYPE                 (-25161)
+/** UDF file cannot be imported because it has a stream directory. */
+#define VERR_ISOMK_IMPORT_UDF_FILE_WITH_STREAM_DIR                  (-25162)
 /** @} */
 
 
