@@ -684,7 +684,7 @@ static void rtFsIsoImportProcessIso9660TreeWorkerParseRockRidge(PRTFSISOMKIMPORT
          */
         PCISO9660SUSPUNION pUnion = (PCISO9660SUSPUNION)pbSys;
         if (   pUnion->Hdr.cbEntry > cbSys
-            && pUnion->Hdr.cbEntry < sizeof(pUnion->Hdr))
+            || pUnion->Hdr.cbEntry < sizeof(pUnion->Hdr))
         {
             LogRel(("rtFsIsoImportProcessIso9660TreeWorkerParseRockRidge: cbEntry=%#x cbSys=%#x (%#x %#x)\n",
                     pUnion->Hdr.cbEntry, cbSys, pUnion->Hdr.bSig1, pUnion->Hdr.bSig2));
