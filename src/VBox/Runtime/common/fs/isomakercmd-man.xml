@@ -156,6 +156,12 @@
         </varlistentry>
 
         <varlistentry>
+          <term><option>--dry-run</option></term>
+          <listitem><para>Do not write anything, just test the argument and image setup.
+            This option is not supported in VISO mode.</para></listitem>
+        </varlistentry>
+
+        <varlistentry>
           <term><option>--name-setup=<replaceable>spec</replaceable></option></term>
           <listitem><para>Configures active namespaces and how file specifications are to be
               interpreted.  The specification is a comma separated list.  Each element in the list is

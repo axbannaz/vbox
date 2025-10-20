@@ -105,6 +105,7 @@ typedef enum RTFSISOMAKERCMDOPT
     RTFSISOMAKERCMD_OPT_FIRST = 1000,
 
     RTFSISOMAKERCMD_OPT_IPRT_ISO_MAKER_FILE_MARKER,
+    RTFSISOMAKERCMD_OPT_DRY_RUN,
     RTFSISOMAKERCMD_OPT_OUTPUT_BUFFER_SIZE,
     RTFSISOMAKERCMD_OPT_RANDOM_OUTPUT_BUFFER_SIZE,
     RTFSISOMAKERCMD_OPT_RANDOM_ORDER_VERIFICATION,
@@ -345,6 +346,8 @@ typedef struct RTFSISOMAKERCMDOPTS
     /** The output file.
      * This is NULL when fVirtualImageMaker is set. */
     const char         *pszOutFile;
+    /** Set if we're not writing out the image, just testing the setup. */
+    bool                fDryRun;
     /** Special buffer size to use for testing the ISO maker code reading. */
     uint32_t            cbOutputReadBuffer;
     /** Use random output read buffer size.  cbOutputReadBuffer works as maximum
@@ -476,6 +479,7 @@ static const RTGETOPTDEF g_aRtFsIsoMakerOptions[] =
     /*
      * Unique IPRT ISO maker options.
      */
+    { "--dry-run",                      RTFSISOMAKERCMD_OPT_DRY_RUN,                        RTGETOPT_REQ_NOTHING },
     { "--name-setup",                   RTFSISOMAKERCMD_OPT_NAME_SETUP,                     RTGETOPT_REQ_STRING  },
     { "--name-setup-from-import",       RTFSISOMAKERCMD_OPT_NAME_SETUP_FROM_IMPORT,         RTGETOPT_REQ_NOTHING },
     { "--import-iso",                   RTFSISOMAKERCMD_OPT_IMPORT_ISO,                     RTGETOPT_REQ_STRING  },
@@ -1128,55 +1132,57 @@ static int rtFsIsoMakerCmdWriteImage(PRTFSISOMAKERCMDOPTS pOpts, RTVFSFILE hVfsS
     if (RT_SUCCESS(rc))
     {
         rtFsIsoMakerPrintf(pOpts, "Image size: %'RU64 (%#RX64) bytes\n", cbImage, cbImage);
-
-        uint32_t cbBuf = pOpts->cbOutputReadBuffer == 0 ? _1M : pOpts->cbOutputReadBuffer;
-        void    *pvBuf = RTMemTmpAlloc(cbBuf);
-        if (pvBuf)
+        if (!pOpts->fDryRun)
         {
-            /*
-             * Open the output file.
-             */
-            RTVFSFILE       hVfsDstFile;
-            uint32_t        offError;
-            RTERRINFOSTATIC ErrInfo;
-            rc = RTVfsChainOpenFile(pOpts->pszOutFile,
-                                    RTFILE_O_READWRITE | RTFILE_O_CREATE_REPLACE | RTFILE_O_DENY_WRITE
-                                    | (0664 << RTFILE_O_CREATE_MODE_SHIFT),
-                                    &hVfsDstFile, &offError, RTErrInfoInitStatic(&ErrInfo));
-            if (RT_SUCCESS(rc))
+            uint32_t cbBuf = pOpts->cbOutputReadBuffer == 0 ? _1M : pOpts->cbOutputReadBuffer;
+            void    *pvBuf = RTMemTmpAlloc(cbBuf);
+            if (pvBuf)
             {
                 /*
-                 * Apply the desired writing method.
+                 * Open the output file.
                  */
-                if (!pOpts->fRandomOutputReadBufferSize)
-                    rc = rtFsIsoMakerCmdWriteImageRandomBufferSize(pOpts, hVfsSrcFile, hVfsDstFile, cbImage, &pvBuf);
-                else
-                    rc = rtFsIsoMakerCmdWriteImageSimple(pOpts, hVfsSrcFile, hVfsDstFile, cbImage, pvBuf, cbBuf);
-                RTMemTmpFree(pvBuf);
-
-                if (RT_SUCCESS(rc) && pOpts->cbRandomOrderVerifciationBlock > 0)
-                    rc = rtFsIsoMakerCmdVerifyImageInRandomOrder(pOpts, hVfsSrcFile, hVfsDstFile, cbImage);
-
-                /*
-                 * Flush the output file before releasing it.
-                 */
+                RTVFSFILE       hVfsDstFile;
+                uint32_t        offError;
+                RTERRINFOSTATIC ErrInfo;
+                rc = RTVfsChainOpenFile(pOpts->pszOutFile,
+                                        RTFILE_O_READWRITE | RTFILE_O_CREATE_REPLACE | RTFILE_O_DENY_WRITE
+                                        | (0664 << RTFILE_O_CREATE_MODE_SHIFT),
+                                        &hVfsDstFile, &offError, RTErrInfoInitStatic(&ErrInfo));
                 if (RT_SUCCESS(rc))
                 {
-                    rc = RTVfsFileFlush(hVfsDstFile);
-                    if (RT_FAILURE(rc))
-                        rc = rtFsIsoMakerCmdErrorRc(pOpts, rc, "RTVfsFileFlush failed on '%s': %Rrc", pOpts->pszOutFile, rc);
-                }
+                    /*
+                     * Apply the desired writing method.
+                     */
+                    if (!pOpts->fRandomOutputReadBufferSize)
+                        rc = rtFsIsoMakerCmdWriteImageRandomBufferSize(pOpts, hVfsSrcFile, hVfsDstFile, cbImage, &pvBuf);
+                    else
+                        rc = rtFsIsoMakerCmdWriteImageSimple(pOpts, hVfsSrcFile, hVfsDstFile, cbImage, pvBuf, cbBuf);
+                    RTMemTmpFree(pvBuf);
 
-                RTVfsFileRelease(hVfsDstFile);
+                    if (RT_SUCCESS(rc) && pOpts->cbRandomOrderVerifciationBlock > 0)
+                        rc = rtFsIsoMakerCmdVerifyImageInRandomOrder(pOpts, hVfsSrcFile, hVfsDstFile, cbImage);
+
+                    /*
+                     * Flush the output file before releasing it.
+                     */
+                    if (RT_SUCCESS(rc))
+                    {
+                        rc = RTVfsFileFlush(hVfsDstFile);
+                        if (RT_FAILURE(rc))
+                            rc = rtFsIsoMakerCmdErrorRc(pOpts, rc, "RTVfsFileFlush failed on '%s': %Rrc", pOpts->pszOutFile, rc);
+                    }
+
+                    RTVfsFileRelease(hVfsDstFile);
+                }
+                else
+                {
+                    RTMemTmpFree(pvBuf);
+                    rc = rtFsIsoMakerCmdChainError(pOpts, "RTVfsChainOpenFile", pOpts->pszOutFile, rc, offError, &ErrInfo.Core);
+                }
             }
             else
-            {
-                RTMemTmpFree(pvBuf);
-                rc = rtFsIsoMakerCmdChainError(pOpts, "RTVfsChainOpenFile", pOpts->pszOutFile, rc, offError, &ErrInfo.Core);
-            }
+                rc = rtFsIsoMakerCmdErrorRc(pOpts, VERR_NO_TMP_MEMORY, "RTMemTmpAlloc(%zu) failed", cbBuf);
         }
-        else
-            rc = rtFsIsoMakerCmdErrorRc(pOpts, VERR_NO_TMP_MEMORY, "RTMemTmpAlloc(%zu) failed", cbBuf);
     }
     else
         rc = rtFsIsoMakerCmdErrorRc(pOpts, rc, "RTVfsFileQuerySize failed: %Rrc", rc);
@@ -3374,6 +3380,12 @@ static int rtFsIsoMakerCmdParse(PRTFSISOMAKERCMDOPTS pOpts, unsigned cArgs, char
                 pOpts->pszOutFile = ValueUnion.psz;
                 break;
 
+            case RTFSISOMAKERCMD_OPT_DRY_RUN:
+                if (pOpts->fVirtualImageMaker)
+                    return rtFsIsoMakerCmdSyntaxError(pOpts, "The --dry-run option is not allowed");
+                pOpts->fDryRun = true;
+                break;
+
             case RTFSISOMAKERCMD_OPT_NAME_SETUP:
                 rc = rtFsIsoMakerCmdOptNameSetup(pOpts, ValueUnion.psz);
                 break;
@@ -3774,7 +3786,7 @@ RTDECL(int) RTFsIsoMakerCmdEx(unsigned cArgs, char **papszArgs, RTVFSDIR hVfsCwd
         {
             if (!Opts.cItemsAdded)
                 rc = rtFsIsoMakerCmdErrorRc(&Opts, VERR_NO_DATA, "Cowardly refuses to create empty ISO image");
-            else if (!Opts.pszOutFile && !Opts.fVirtualImageMaker)
+            else if (!Opts.pszOutFile && !Opts.fVirtualImageMaker && !Opts.fDryRun)
                 rc = rtFsIsoMakerCmdErrorRc(&Opts, VERR_INVALID_PARAMETER, "No output file specified (--output <file>)");
 
             /*
