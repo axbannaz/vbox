@@ -3843,6 +3843,7 @@ RTDECL(int) RTFsIsoMakerAddUnnamedFileWithVfsFile(RTFSISOMAKER hIsoMaker, RTVFSF
  * @param   hIsoMaker           The ISO maker handle.
  * @param   idxCommonSrc        The common source file index.
  * @param   offData             The offset of the data in the source file.
+ *                              Ignored if @a cbData is zero.
  * @param   cbData              The file size.
  * @param   pObjInfo            Pointer to file info.  Optional.
  * @param   pidxObj             Where to return the configuration index of the
@@ -3861,9 +3862,12 @@ RTDECL(int) RTFsIsoMakerAddUnnamedFileWithCommonSrc(RTFSISOMAKER hIsoMaker, uint
     *pidxObj = UINT32_MAX;
     AssertReturn(!pThis->fFinalized, VERR_WRONG_ORDER);
     AssertReturn(idxCommonSrc < pThis->cCommonSources, VERR_INVALID_PARAMETER);
-    AssertReturn(offData < (uint64_t)RTFOFF_MAX, VERR_OUT_OF_RANGE);
     AssertReturn(cbData < (uint64_t)RTFOFF_MAX, VERR_OUT_OF_RANGE);
-    AssertReturn(offData + cbData < (uint64_t)RTFOFF_MAX, VERR_OUT_OF_RANGE);
+    if (cbData)
+    {
+        AssertReturn(offData < (uint64_t)RTFOFF_MAX, VERR_OUT_OF_RANGE);
+        AssertReturn(offData + cbData < (uint64_t)RTFOFF_MAX, VERR_OUT_OF_RANGE);
+    }
     RTFSOBJINFO ObjInfo;
     if (!pObjInfo)
     {
@@ -3901,7 +3905,7 @@ RTDECL(int) RTFsIsoMakerAddUnnamedFileWithCommonSrc(RTFSISOMAKER hIsoMaker, uint
     {
         pFile->enmSrcType       = RTFSISOMAKERSRCTYPE_COMMON;
         pFile->u.Common.idxSrc  = idxCommonSrc;
-        pFile->u.Common.offData = offData;
+        pFile->u.Common.offData = cbData ? offData : UINT64_MAX;
 
         *pidxObj = pFile->Core.idxObj;
     }
