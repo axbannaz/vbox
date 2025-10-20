@@ -2867,16 +2867,17 @@ static int rtFsIsoImportProcessElToritoImage(PRTFSISOMKIMPORTER pThis, uint32_t 
  *
  * @returns IPRT status code (ignored).
  * @param   pThis           The ISO importer instance.
- * @param   iEntry          The boot catalog entry number. This is 1 for
+ * @param   iSrcEntry       The source boot catalog entry number. This is 1 for
  *                          the default entry, and 3+ for section entries.
  * @param   cMaxEntries     Maximum number of entries.
  * @param   pEntry          The entry to process.
+ * @param   iDstEntry       The destination boot catalog entry number.
  * @param   cLocations      Number of entries in @a paoffLocations.
  * @param   paoffLocations  Array of boot image locations.
  * @param   pcSkip          Where to return the number of extension entries to skip.
  */
-static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, uint32_t iEntry, uint32_t cMaxEntries,
-                                                    PCISO9660ELTORITOSECTIONENTRY pEntry,
+static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, uint32_t iSrcEntry, uint32_t cMaxEntries,
+                                                    PCISO9660ELTORITOSECTIONENTRY pEntry, uint32_t iDstEntry,
                                                     uint32_t cLocations, uint32_t const *paoffLocations, uint32_t *pcSkip)
 {
     *pcSkip = 0;
@@ -2926,7 +2927,7 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
                                    "Boot catalog entry #%#x has an invalid boot media type: %#x", bMediaType);
     }
 
-    if (iEntry == 1)
+    if (iSrcEntry == 1)
     {
         if (bMediaType & ISO9660_ELTORITO_BOOT_MEDIA_F_MASK)
         {
@@ -3019,7 +3020,7 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
                                                      cbDefaultSize, NULL, &idxImageObj);
         if (RT_FAILURE(rc))
             return rtFsIsoImpError(pThis, rc, "RTFsIsoMakerAddUnnamedFileWithCommonSrc failed on boot entry #%#x: %Rrc",
-                                   iEntry, rc);
+                                   iSrcEntry, rc);
         Log3(("rtFsIsoImportProcessElToritoSectionEntry: offByteBootImage=%#RX64 -> new file #%#x cb=%#RX32\n",
               offByteBootImage, idxImageObj, cbDefaultSize));
     }
@@ -3036,9 +3037,9 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
         cbSelCrit = sizeof(pEntry->abSelectionCriteria);
 
         if (   (bMediaType & ISO9660_ELTORITO_BOOT_MEDIA_F_CONTINUATION)
-            && iEntry + 1 < cMaxEntries)
+            && iSrcEntry + 1 < cMaxEntries)
         {
-            uint32_t                         iExtEntry = iEntry + 1;
+            uint32_t                         iExtEntry = iSrcEntry + 1;
             PCISO9660ELTORITOSECTIONENTRYEXT pExtEntry = (PCISO9660ELTORITOSECTIONENTRYEXT)pEntry;
             for (;;)
             {
@@ -3069,7 +3070,7 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
                     break;
                 }
             }
-            Assert(*pcSkip = iExtEntry - iEntry);
+            Assert(*pcSkip = iExtEntry - iSrcEntry);
         }
         else if (bMediaType & ISO9660_ELTORITO_BOOT_MEDIA_F_CONTINUATION)
             rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_BOOT_CAT_ENTRY_CONTINUATION_EOS,
@@ -3077,15 +3078,15 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
     }
     else if (bMediaType & ISO9660_ELTORITO_BOOT_MEDIA_F_CONTINUATION)
         rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_BOOT_CAT_ENTRY_CONTINUATION_WITH_NONE,
-                        "Boot catalog entry #%#x uses the continuation flag with selection criteria NONE", iEntry);
+                        "Boot catalog entry #%#x uses the continuation flag with selection criteria NONE", iSrcEntry);
 
     /*
      * Add the entry.
      */
-    Log3(("rtFsIsoImportProcessElToritoSectionEntry: iEntry=%u idxImageObj=%#x bMediaType=%#x bSystemType=%#x fBootable=%u uLoadSeg=%#x cEmulatedSectorsToLoad=%#x bSelectionCriteriaType=%#x cbSelCrit=%#x\n",
-          iEntry, idxImageObj, bMediaType, pEntry->bSystemType, pEntry->bBootIndicator == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE,
+    Log3(("rtFsIsoImportProcessElToritoSectionEntry: iEntry=%u->%u idxImageObj=%#x bMediaType=%#x bSystemType=%#x fBootable=%u uLoadSeg=%#x cEmulatedSectorsToLoad=%#x bSelectionCriteriaType=%#x cbSelCrit=%#x\n",
+          iSrcEntry, iDstEntry, idxImageObj, bMediaType, pEntry->bSystemType, pEntry->bBootIndicator == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE,
           pEntry->uLoadSeg, pEntry->cEmulatedSectorsToLoad, pEntry->bSelectionCriteriaType, cbSelCrit));
-    rc = RTFsIsoMakerBootCatSetSectionEntry(pThis->hIsoMaker, iEntry, idxImageObj, bMediaType, pEntry->bSystemType,
+    rc = RTFsIsoMakerBootCatSetSectionEntry(pThis->hIsoMaker, iDstEntry, idxImageObj, bMediaType, pEntry->bSystemType,
                                             pEntry->bBootIndicator == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE,
                                             pEntry->uLoadSeg, pEntry->cEmulatedSectorsToLoad,
                                             pEntry->bSelectionCriteriaType, pbSelCrit, cbSelCrit);
@@ -3095,7 +3096,8 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
         rc = rtFsIsoImportProcessElToritoImage(pThis, idxImageObj, offBootImage);
     }
     else
-        rtFsIsoImpError(pThis, rc, "RTFsIsoMakerBootCatSetSectionEntry failed for entry #%#x: %Rrc", iEntry, rc);
+        rtFsIsoImpError(pThis, rc, "RTFsIsoMakerBootCatSetSectionEntry failed for entry #%#x(->%#x): %Rrc",
+                        iSrcEntry, iDstEntry, rc);
     return rc;
 }
 
@@ -3105,11 +3107,12 @@ static int rtFsIsoImportProcessElToritoSectionEntry(PRTFSISOMKIMPORTER pThis, ui
  *
  * @returns IPRT status code (ignored).
  * @param   pThis       The ISO importer instance.
- * @param   iEntry      The boot catalog entry number.
+ * @param   iSrcEntry   The source boot catalog entry number.
  * @param   pEntry      The entry to process.
+ * @param   iDstEntry   The destination boot catalog entry number.
  */
-static int rtFsIsoImportProcessElToritoSectionHeader(PRTFSISOMKIMPORTER pThis, uint32_t iEntry,
-                                                     PCISO9660ELTORITOSECTIONHEADER pEntry, char pszId[32])
+static int rtFsIsoImportProcessElToritoSectionHeader(PRTFSISOMKIMPORTER pThis, uint32_t iSrcEntry,
+                                                     PCISO9660ELTORITOSECTIONHEADER pEntry, char pszId[32], uint32_t iDstEntry)
 {
     Assert(   pEntry->bHeaderId == ISO9660_ELTORITO_HEADER_ID_SECTION_HEADER
            || pEntry->bHeaderId == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER);
@@ -3122,18 +3125,18 @@ static int rtFsIsoImportProcessElToritoSectionHeader(PRTFSISOMKIMPORTER pThis, u
         RT_BZERO(pszId, 32);
         RTLatin1ToUtf8Ex(pEntry->achSectionId, sizeof(pEntry->achSectionId), &pszId, 31, NULL);
     }
-    Log3(("rtFsIsoImportProcessElToritoSectionHeader: iEntry=%u cEntries=%u bPlatformId=%#x pszId=%s\n",
-          iEntry, RT_LE2H_U16(pEntry->cEntries), pEntry->bPlatformId, pszId ? pszId : ""));
+    Log3(("rtFsIsoImportProcessElToritoSectionHeader: iEntry=%u->%u cEntries=%u bPlatformId=%#x pszId=%s\n",
+          iSrcEntry, iDstEntry, RT_LE2H_U16(pEntry->cEntries), pEntry->bPlatformId, pszId ? pszId : ""));
 
-    int rc = RTFsIsoMakerBootCatSetSectionHeaderEntry(pThis->hIsoMaker, iEntry, RT_LE2H_U16(pEntry->cEntries),
+    int rc = RTFsIsoMakerBootCatSetSectionHeaderEntry(pThis->hIsoMaker, iDstEntry, RT_LE2H_U16(pEntry->cEntries),
                                                       pEntry->bPlatformId, pszId,
                                                       pEntry->bHeaderId == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER);
     if (RT_SUCCESS(rc))
         pThis->pResults->cBootCatEntries++;
     else
         rtFsIsoImpError(pThis, rc,
-                        "RTFsIsoMakerBootCatSetSectionHeaderEntry failed for entry #%#x (bPlatformId=%#x cEntries=%#x): %Rrc",
-                        iEntry, RT_LE2H_U16(pEntry->cEntries), pEntry->bPlatformId, rc);
+                        "RTFsIsoMakerBootCatSetSectionHeaderEntry failed for entry #%#x(->%#x) (bPlatformId=%#x cEntries=%#x): %Rrc",
+                        iSrcEntry, iDstEntry, RT_LE2H_U16(pEntry->cEntries), pEntry->bPlatformId, rc);
     return rc;
 }
 
@@ -3273,34 +3276,56 @@ static int rtFsIsoImportProcessElToritoDesc(PRTFSISOMKIMPORTER pThis, PISO9660BO
     /*
      * Process the default entry and any subsequent entries.
      */
-    bool           fSeenFinal    = false;
+    bool           fSeenFinal  = false;
     cSectionsLeft = UINT32_MAX;
-    for (uint32_t iEntry = 1; iEntry < cMaxEntries; iEntry++)
+    for (uint32_t iSrcEntry = 1, iDstEntry = 1; iSrcEntry < cMaxEntries; iSrcEntry++, iDstEntry++)
     {
-        uint8_t const *pbEntry  = &pThis->abBuf[iEntry * ISO9660_ELTORITO_ENTRY_SIZE];
+        uint8_t const *pbEntry  = &pThis->abBuf[iSrcEntry * ISO9660_ELTORITO_ENTRY_SIZE];
         uint8_t const  idHeader = *pbEntry;
 
         /* KLUDGE ALERT! Older ISO images, like RHEL5-Server-20070208.0-x86_64-DVD.iso lacks
                          terminator entry. So, quietly stop with an entry that's all zeros. */
         if (   idHeader == ISO9660_ELTORITO_BOOT_INDICATOR_NOT_BOOTABLE /* 0x00 */
-            && iEntry != 1 /* default */
+            && iSrcEntry != 1 /* default */
             && ASMMemIsZero(pbEntry, ISO9660_ELTORITO_ENTRY_SIZE))
         {
-            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iEntry=%u zero entry!\n", pbEntry - &pThis->abBuf[0], iEntry));
+            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iSrcEntry=%u zero entry!\n", pbEntry - &pThis->abBuf[0], iSrcEntry));
             return rc;
         }
 
-        if (   iEntry == 1 /* default*/
+        if (   iSrcEntry == 1 /* default*/
             || idHeader == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE
             || idHeader == ISO9660_ELTORITO_BOOT_INDICATOR_NOT_BOOTABLE)
         {
-            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iEntry=%u idHeader=%#x%s\n", pbEntry - &pThis->abBuf[0], iEntry, idHeader,
+            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iSrcEntry=%u idHeader=%#x%s\n", pbEntry - &pThis->abBuf[0], iSrcEntry, idHeader,
                   idHeader == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE ? " bootable"
                   : idHeader == ISO9660_ELTORITO_BOOT_INDICATOR_NOT_BOOTABLE ? " not-bootable" : ""));
+
+            /* KLUDGE ALRET! Do we need to add a section header first? (simplified) */
+            if (iSrcEntry == 2)
+            {
+                Assert(iSrcEntry == iDstEntry);
+                uint32_t cSecEntries = 1;
+                bool     fFinal   = false;
+                for (uint32_t iNextEntry = iSrcEntry + 1; iNextEntry < cMaxEntries; iNextEntry++)
+                    if (pbEntry[iNextEntry * ISO9660_ELTORITO_ENTRY_SIZE] == ISO9660_ELTORITO_BOOT_INDICATOR_BOOTABLE)
+                        cSecEntries++;
+                    else
+                    {
+                        fFinal = ASMMemIsZero(&pbEntry[iNextEntry * ISO9660_ELTORITO_ENTRY_SIZE], ISO9660_ELTORITO_ENTRY_SIZE);
+                        break;
+                    }
+                RTFsIsoMakerBootCatSetSectionHeaderEntry(pThis->hIsoMaker, iSrcEntry, cSecEntries, pValEntry->bPlatformId,
+                                                         pszId, fFinal);
+                iDstEntry++;
+            }
+
+            /* Now process the entry. */
             uint32_t cSkip = 0;
-            rtFsIsoImportProcessElToritoSectionEntry(pThis, iEntry, cMaxEntries, (PCISO9660ELTORITOSECTIONENTRY)pbEntry,
-                                                     cLocations, aoffLocations, &cSkip);
-            iEntry += cSkip;
+            rtFsIsoImportProcessElToritoSectionEntry(pThis, iSrcEntry, cMaxEntries, (PCISO9660ELTORITOSECTIONENTRY)pbEntry,
+                                                     iDstEntry, cLocations, aoffLocations, &cSkip);
+            iSrcEntry += cSkip;
+            iDstEntry += cSkip;
             cSectionsLeft -= 1;
             if (!cSectionsLeft)
                 break;
@@ -3309,10 +3334,10 @@ static int rtFsIsoImportProcessElToritoDesc(PRTFSISOMKIMPORTER pThis, PISO9660BO
                  || idHeader == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER)
         {
             PCISO9660ELTORITOSECTIONHEADER pSecHdr = (PCISO9660ELTORITOSECTIONHEADER)pbEntry;
-            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iEntry=%u idHeader=%#x section header cSections=%u%s\n",
-                  pbEntry - &pThis->abBuf[0], iEntry, idHeader, RT_LE2H_U16(pSecHdr->cEntries),
+            Log3(("rtFsIsoImportProcessElToritoDesc: %p: iSrcEntry=%u idHeader=%#x section header cSections=%u%s\n",
+                  pbEntry - &pThis->abBuf[0], iSrcEntry, idHeader, RT_LE2H_U16(pSecHdr->cEntries),
                   idHeader == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER ? " (final)" : ""));
-            rtFsIsoImportProcessElToritoSectionHeader(pThis, iEntry, pSecHdr, szId);
+            rtFsIsoImportProcessElToritoSectionHeader(pThis, iSrcEntry, pSecHdr, szId, iDstEntry);
             if (idHeader == ISO9660_ELTORITO_HEADER_ID_FINAL_SECTION_HEADER)
             {
                 fSeenFinal    = true;
@@ -3322,7 +3347,7 @@ static int rtFsIsoImportProcessElToritoDesc(PRTFSISOMKIMPORTER pThis, PISO9660BO
         else
         {
             rtFsIsoImpError(pThis, VERR_ISOMK_IMPORT_BOOT_CAT_UNKNOWN_HEADER_ID,
-                            "Unknown boot catalog header ID for entry #%#x: %#x", iEntry, idHeader);
+                            "Unknown boot catalog header ID for entry #%#x: %#x", iSrcEntry, idHeader);
             cSectionsLeft -= 1;
             if (!cSectionsLeft)
                 break;
