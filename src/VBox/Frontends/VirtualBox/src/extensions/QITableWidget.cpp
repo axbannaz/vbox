@@ -172,7 +172,7 @@ public:
         /* Return a text for the passed enmTextRole: */
         switch (enmTextRole)
         {
-            case QAccessible::Name: return item()->text();
+            case QAccessible::Name: return item()->defaultText();
             default: break;
         }
 
@@ -270,16 +270,28 @@ public:
     }
 
     /** Returns a text for the passed @a enmTextRole. */
-    virtual QString text(QAccessible::Text) const RT_OVERRIDE
+    virtual QString text(QAccessible::Text enmTextRole) const RT_OVERRIDE
     {
-        /* Sanity check: */
-        AssertPtrReturn(table(), QString());
+        /* Text for known roles: */
+        switch (enmTextRole)
+        {
+            case QAccessible::Name:
+            {
+                /* Sanity check: */
+                AssertPtrReturn(table(), QString());
 
-        /* Gather suitable text: */
-        QString strText = table()->toolTip();
-        if (strText.isEmpty())
-            strText = table()->whatsThis();
-        return strText;
+                /* Gather suitable text: */
+                QString strText = table()->toolTip();
+                if (strText.isEmpty())
+                    strText = table()->whatsThis();
+                return strText;
+            }
+            default:
+                break;
+        }
+
+        /* Null string by default: */
+        return QString();
     }
 
 private:
