@@ -2171,9 +2171,10 @@ typedef union RTFSISOMKIMPUDFFILENTRYPTRUNION
 
 
 /**
- * Helper for getting FS object info from the file ID and file entry structures.
+ * Helper for getting FS object info from the file ID version and file entry
+ * structures.
  */
-static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFFILEIDDESC pFid,
+static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, uint32_t uFidVersion,
                                                    RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr, uint32_t cbBlock)
 {
     AssertCompileMembersAtSameOffset(UDFFILEENTRY, cbData, UDFEXFILEENTRY, cbData);
@@ -2195,7 +2196,7 @@ static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFF
     pObjInfo->Attr.u.Unix.INodeIdDevice = 0;
     pObjInfo->Attr.u.Unix.INodeId       = 0;
     pObjInfo->Attr.u.Unix.fFlags        = 0;
-    pObjInfo->Attr.u.Unix.GenerationId  = pFid->uVersion;
+    pObjInfo->Attr.u.Unix.GenerationId  = uFidVersion;
     pObjInfo->Attr.u.Unix.Device        = 0;
 
     uint32_t cbExtAttribs;
@@ -2275,7 +2276,7 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
      * Convert the FID and file entry data to object info.
      */
     RTFSOBJINFO ObjInfo;
-    int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid, uPtr, pThis->Udf.VolInfo.cbBlock);
+    int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid->uVersion, uPtr, pThis->Udf.VolInfo.cbBlock);
     if (RT_FAILURE(rc))
         return rtFsIsoImpError(pThis, rc, "rtFsIsoImportUdfFileIdAndEntryToObjInfo failed for '%s': %Rrc", pszName, rc);
 
@@ -2567,7 +2568,15 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
     /*
      * Set the directory attributes.
      */
-    /** @todo dir attribs   */
+    RTFSOBJINFO ObjInfo;
+    rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, 0 /*uFidVersion*/, u, pThis->Udf.VolInfo.cbBlock);
+    if (RT_SUCCESS(rc))
+    {
+        rc = RTFsIsoMakerSetPathInfoById(pThis->hIsoMaker, idxDir, RTFSISOMAKER_NAMESPACE_UDF, &ObjInfo, 0, NULL);
+        AssertRC(rc);
+    }
+    else
+        rtFsIsoImpError(pThis, rc, "rtFsIsoImportUdfFileIdAndEntryToObjInfo failed for directory #%#x: %Rrc", idxDir, rc);
 
     /*
      * Read the directory data.

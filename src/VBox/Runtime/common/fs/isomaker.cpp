@@ -4163,6 +4163,158 @@ RTDECL(int) RTFsIsoMakerAddSymlink(RTFSISOMAKER hIsoMaker, const char *pszSymlin
  *
  */
 
+/**
+ * Worker for RTFsIsoMakerSetPathInfo and RTFsIsoMakerSetPathInfoById.
+ */
+static void rtFsIsoMakerSetPathInfoWorker(PRTFSISOMAKERNAME pName, PRTFSISOMAKEROBJ pObj, PCRTFSOBJINFO pObjInfo, uint32_t fFlags)
+{
+    RT_NOREF(fFlags);
+    pName->fMode = (pName->fMode         &  (RTFS_TYPE_MASK | RTFS_DOS_DIRECTORY))
+                 | (pObjInfo->Attr.fMode & ~(RTFS_TYPE_MASK | RTFS_DOS_DIRECTORY));
+
+    if (pObjInfo->Attr.enmAdditional == RTFSOBJATTRADD_UNIX)
+    {
+        if (pObjInfo->Attr.u.Unix.uid != NIL_RTUID)
+            pName->uid = pObjInfo->Attr.u.Unix.uid;
+        if (pObjInfo->Attr.u.Unix.gid != NIL_RTGID)
+            pName->gid = pObjInfo->Attr.u.Unix.gid;
+        if (pObjInfo->Attr.u.Unix.Device != 0 && ~(RTDEV)0)
+            pName->Device = pObjInfo->Attr.u.Unix.Device;
+    }
+
+    if (RTTimeSpecGetNano(&pObjInfo->BirthTime) != 0)
+        pObj->BirthTime        = pObjInfo->BirthTime;
+    if (RTTimeSpecGetNano(&pObjInfo->ChangeTime) != 0)
+        pObj->ChangeTime       = pObjInfo->ChangeTime;
+    if (RTTimeSpecGetNano(&pObjInfo->ModificationTime) != 0)
+        pObj->ModificationTime = pObjInfo->ModificationTime;
+    if (RTTimeSpecGetNano(&pObjInfo->AccessTime) != 0)
+        pObj->AccessedTime     = pObjInfo->AccessTime;
+}
+
+
+/**
+ * Modifies the object info for a given path in one or more namespaces.
+ *
+ * The timestamps are applied to the common object information.
+ *
+ * @returns IPRT status code.
+ * @retval  VWRN_NOT_FOUND if the path wasn't found in any of the specified
+ *          namespaces.
+ *
+ * @param   hIsoMaker           The ISO maker handler.
+ * @param   pszPath             The path which mode mask should be modified.
+ * @param   fNamespaces         The namespaces to set it in.
+ * @param   pObjInfo            The object info to set.  Several fields and
+ *                              sub-fields will be ignore, like cbObject and
+ *                              filte type.
+ * @param   fFlags              Reserved, MBZ.
+ * @param   pcHits              Where to return number of paths found. Optional.
+ * @sa      RTFsIsoMakerSetPathInfoById
+ */
+RTDECL(int) RTFsIsoMakerSetPathInfo(RTFSISOMAKER hIsoMaker, const char *pszPath, uint32_t fNamespaces,
+                                    PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
+{
+    /*
+     * Validate input.
+     */
+    PRTFSISOMAKERINT pThis = hIsoMaker;
+    RTFSISOMAKER_ASSERT_VALID_HANDLE_RET(pThis);
+    AssertPtrReturn(pszPath, VERR_INVALID_POINTER);
+    AssertReturn(RTPATH_IS_SLASH(*pszPath), VERR_INVALID_NAME);
+    AssertReturn(!(fNamespaces & ~RTFSISOMAKER_NAMESPACE_VALID_MASK), VERR_INVALID_FLAGS);
+    AssertPtrReturn(pObjInfo, VERR_INVALID_POINTER);
+    AssertReturn(pObjInfo->Attr.enmAdditional >= RTFSOBJATTRADD_NOTHING && pObjInfo->Attr.enmAdditional <= RTFSOBJATTRADD_LAST,
+                 VERR_INVALID_PARAMETER);
+    AssertReturn(!fFlags, VERR_INVALID_FLAGS);
+    AssertPtrNullReturn(pcHits, VERR_INVALID_POINTER);
+
+    /*
+     * Make the changes namespace by namespace.
+     */
+    uint32_t cHits = 0;
+    for (uint32_t i = 0; i < RT_ELEMENTS(g_aRTFsIsoNamespaces); i++)
+        if (fNamespaces & g_aRTFsIsoNamespaces[i].fNamespace)
+        {
+            PRTFSISOMAKERNAMESPACE pNamespace = (PRTFSISOMAKERNAMESPACE)((uintptr_t)pThis + g_aRTFsIsoNamespaces[i].offNamespace);
+            if (pNamespace->uLevel > 0)
+            {
+                PRTFSISOMAKERNAME pName;
+                int rc = rtFsIsoMakerWalkPathBySpec(pNamespace, pszPath, &pName);
+                if (RT_SUCCESS(rc))
+                {
+                    rtFsIsoMakerSetPathInfoWorker(pName, pName->pObj, pObjInfo, fFlags);
+                    cHits++;
+                }
+            }
+        }
+
+   if (pcHits)
+       *pcHits = cHits;
+   if (cHits > 0)
+       return VINF_SUCCESS;
+   return VWRN_NOT_FOUND;
+}
+
+
+/**
+ * Modifies the object info for a object in one or more namespaces.
+ *
+ * The timestamps are applied to the common object information.
+ *
+ * @returns IPRT status code.
+ * @retval  VWRN_NOT_FOUND if the path wasn't found in any of the specified
+ *          namespaces.
+ *
+ * @param   hIsoMaker           The ISO maker handler.
+ * @param   pszPath             The path which mode mask should be modified.
+ * @param   fNamespaces         The namespaces to set it in.
+ * @param   pObjInfo            The object info to set.  Several fields and
+ *                              sub-fields will be ignore, like cbObject and
+ *                              filte type.
+ * @param   fFlags              Reserved, MBZ.
+ * @param   pcHits              Where to return number of paths found. Optional.
+ * @sa      RTFsIsoMakerSetPathInfo
+ */
+RTDECL(int) RTFsIsoMakerSetPathInfoById(RTFSISOMAKER hIsoMaker, uint32_t idxObj, uint32_t fNamespaces,
+                                        PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
+{
+    /*
+     * Validate input.
+     */
+    PRTFSISOMAKERINT pThis = hIsoMaker;
+    RTFSISOMAKER_ASSERT_VALID_HANDLE_RET(pThis);
+    AssertReturn(!(fNamespaces & ~RTFSISOMAKER_NAMESPACE_VALID_MASK), VERR_INVALID_FLAGS);
+    AssertPtrReturn(pObjInfo, VERR_INVALID_POINTER);
+    AssertReturn(pObjInfo->Attr.enmAdditional >= RTFSOBJATTRADD_NOTHING && pObjInfo->Attr.enmAdditional <= RTFSOBJATTRADD_LAST,
+                 VERR_INVALID_PARAMETER);
+    AssertReturn(!fFlags, VERR_INVALID_FLAGS);
+    AssertPtrNullReturn(pcHits, VERR_INVALID_POINTER);
+    PRTFSISOMAKEROBJ const pObj = rtFsIsoMakerIndexToObj(pThis, idxObj);
+    AssertReturn(pObj, VERR_OUT_OF_RANGE);
+
+    /*
+     * Make the changes namespace by namespace.
+     */
+    uint32_t cHits = 0;
+    for (uint32_t i = 0; i < RT_ELEMENTS(g_aRTFsIsoNamespaces); i++)
+        if (fNamespaces & g_aRTFsIsoNamespaces[i].fNamespace)
+        {
+            PRTFSISOMAKERNAME const pName = *(PPRTFSISOMAKERNAME)((uintptr_t)pObj + g_aRTFsIsoNamespaces[i].offName);
+            if (pName)
+            {
+                rtFsIsoMakerSetPathInfoWorker(pName, pObj, pObjInfo, fFlags);
+                cHits++;
+            }
+        }
+
+   if (pcHits)
+       *pcHits = cHits;
+   if (cHits > 0)
+       return VINF_SUCCESS;
+   return VWRN_NOT_FOUND;
+}
+
 
 /**
  * Modifies the mode mask for a given path in one or more namespaces.
