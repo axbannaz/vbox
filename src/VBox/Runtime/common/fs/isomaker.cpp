@@ -4199,7 +4199,7 @@ static void rtFsIsoMakerSetPathInfoWorker(PRTFSISOMAKERNAME pName, PRTFSISOMAKER
  * The timestamps are applied to the common object information.
  *
  * @returns IPRT status code.
- * @retval  VWRN_NOT_FOUND if the path wasn't found in any of the specified
+ * @retval  VWRN_NOT_FOUND if the object wasn't found in any of the specified
  *          namespaces.
  *
  * @param   hIsoMaker           The ISO maker handler.
@@ -4210,7 +4210,7 @@ static void rtFsIsoMakerSetPathInfoWorker(PRTFSISOMAKERNAME pName, PRTFSISOMAKER
  *                              filte type.
  * @param   fFlags              Reserved, MBZ.
  * @param   pcHits              Where to return number of paths found. Optional.
- * @sa      RTFsIsoMakerSetPathInfoById
+ * @sa      RTFsIsoMakerSetPathInfoByObj, RTFsIsoMakerSetPathInfoByParentObj
  */
 RTDECL(int) RTFsIsoMakerSetPathInfo(RTFSISOMAKER hIsoMaker, const char *pszPath, uint32_t fNamespaces,
                                     PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
@@ -4267,17 +4267,18 @@ RTDECL(int) RTFsIsoMakerSetPathInfo(RTFSISOMAKER hIsoMaker, const char *pszPath,
  *          namespaces.
  *
  * @param   hIsoMaker           The ISO maker handler.
- * @param   pszPath             The path which mode mask should be modified.
+ * @param   idxObj              The object configuration index of the object to
+ *                              set info for.
  * @param   fNamespaces         The namespaces to set it in.
  * @param   pObjInfo            The object info to set.  Several fields and
  *                              sub-fields will be ignore, like cbObject and
  *                              filte type.
  * @param   fFlags              Reserved, MBZ.
  * @param   pcHits              Where to return number of paths found. Optional.
- * @sa      RTFsIsoMakerSetPathInfo
+ * @sa      RTFsIsoMakerSetPathInfo, RTFsIsoMakerSetPathInfoByParentObj
  */
-RTDECL(int) RTFsIsoMakerSetPathInfoById(RTFSISOMAKER hIsoMaker, uint32_t idxObj, uint32_t fNamespaces,
-                                        PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
+RTDECL(int) RTFsIsoMakerSetPathInfoByObj(RTFSISOMAKER hIsoMaker, uint32_t idxObj, uint32_t fNamespaces,
+                                         PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
 {
     /*
      * Validate input.
@@ -4305,6 +4306,79 @@ RTDECL(int) RTFsIsoMakerSetPathInfoById(RTFSISOMAKER hIsoMaker, uint32_t idxObj,
             {
                 rtFsIsoMakerSetPathInfoWorker(pName, pObj, pObjInfo, fFlags);
                 cHits++;
+            }
+        }
+
+   if (pcHits)
+       *pcHits = cHits;
+   if (cHits > 0)
+       return VINF_SUCCESS;
+   return VWRN_NOT_FOUND;
+}
+
+
+/**
+ * Modifies the object info for a directory child object in one
+ * or more namespaces.
+ *
+ * The timestamps are applied to the common object information.
+ *
+ * @returns IPRT status code.
+ * @retval  VWRN_NOT_FOUND if the name wasn't found in any of the specified
+ *          namespaces.
+ *
+ * @param   hIsoMaker           The ISO maker handler.
+ * @param   idxParentObj        The object configuration index of the object to
+ *                              set info for.
+ * @param   pszName             The name of the child to be modified.
+ * @param   fNamespaces         The namespaces to set it in.
+ * @param   pObjInfo            The object info to set.  Several fields and
+ *                              sub-fields will be ignore, like cbObject and
+ *                              filte type.
+ * @param   fFlags              Reserved, MBZ.
+ * @param   pcHits              Where to return number of paths found. Optional.
+ * @sa      RTFsIsoMakerSetPathInfo, RTFsIsoMakerSetPathInfoByObj
+ */
+RTDECL(int) RTFsIsoMakerSetPathInfoByParentObj(RTFSISOMAKER hIsoMaker, uint32_t idxParentObj, const char *pszName,
+                                               uint32_t fNamespaces, PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits)
+{
+    /*
+     * Validate input.
+     */
+    PRTFSISOMAKERINT pThis = hIsoMaker;
+    RTFSISOMAKER_ASSERT_VALID_HANDLE_RET(pThis);
+    AssertReturn(!(fNamespaces & ~RTFSISOMAKER_NAMESPACE_VALID_MASK), VERR_INVALID_FLAGS);
+    AssertPtrReturn(pObjInfo, VERR_INVALID_POINTER);
+    AssertReturn(pObjInfo->Attr.enmAdditional >= RTFSOBJATTRADD_NOTHING && pObjInfo->Attr.enmAdditional <= RTFSOBJATTRADD_LAST,
+                 VERR_INVALID_PARAMETER);
+    AssertReturn(!fFlags, VERR_INVALID_FLAGS);
+    AssertPtrNullReturn(pcHits, VERR_INVALID_POINTER);
+    PRTFSISOMAKEROBJ const pParentObj = rtFsIsoMakerIndexToObj(pThis, idxParentObj);
+    AssertReturn(pParentObj, VERR_OUT_OF_RANGE);
+    AssertReturn(pParentObj->enmType == RTFSISOMAKEROBJTYPE_DIR, VERR_NOT_A_DIRECTORY);
+    AssertPtrReturn(pszName, VERR_INVALID_POINTER);
+    size_t cchName = strlen(pszName);
+    AssertReturn(cchName > 0, VERR_INVALID_NAME);
+    AssertReturn(memchr(pszName, '/', cchName) == NULL, VERR_INVALID_NAME);
+
+    /*
+     * Make the changes namespace by namespace.
+     */
+    uint32_t cHits = 0;
+    for (uint32_t i = 0; i < RT_ELEMENTS(g_aRTFsIsoNamespaces); i++)
+        if (fNamespaces & g_aRTFsIsoNamespaces[i].fNamespace)
+        {
+            PRTFSISOMAKERNAMESPACE const pNamespace  = (PRTFSISOMAKERNAMESPACE)(  (uintptr_t)pThis
+                                                                                + g_aRTFsIsoNamespaces[i].offNamespace);
+            PRTFSISOMAKERNAME const      pParentName = *rtFsIsoMakerObjGetNameForNamespace(pParentObj, pNamespace);
+            if (pParentName)
+            {
+                PRTFSISOMAKERNAME const  pName       = rtFsIsoMakerFindEntryInDirBySpec(pParentName, pszName, cchName);
+                if (pName)
+                {
+                    rtFsIsoMakerSetPathInfoWorker(pName, pName->pObj, pObjInfo, fFlags);
+                    cHits++;
+                }
             }
         }
 

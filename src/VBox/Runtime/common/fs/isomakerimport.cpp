@@ -2339,7 +2339,8 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
     /*
      * If the above lookup didn't succeed, add a new file with a lookup record.
      */
-    if (idxObj == UINT32_MAX)
+    const bool fNewFile = idxObj == UINT32_MAX;
+    if (fNewFile)
     {
         rc = RTFsIsoMakerAddUnnamedFileWithCommonSrc(pThis->hIsoMaker, pThis->idxSrcFile, offData, cbData, &ObjInfo, &idxObj);
         if (RT_FAILURE(rc))
@@ -2385,7 +2386,13 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
     if (RT_SUCCESS(rc))
     {
         pThis->pResults->cAddedNames++;
-        /** @todo Apply attribute to the UDF namespace if we didn't add the file! */
+
+        if (!fNewFile)
+        {
+            rc = RTFsIsoMakerSetPathInfoByParentObj(pThis->hIsoMaker, idxParent, pszName,
+                                                    RTFSISOMAKER_NAMESPACE_UDF, &ObjInfo, 0, NULL);
+            AssertRC(rc);
+        }
 
         /*
          * Error out on files with alternative streams.
@@ -2572,7 +2579,7 @@ static int rtFsIsoImportUdfProcessTreeWorker(PRTFSISOMKIMPORTER pThis, uint32_t 
     rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, 0 /*uFidVersion*/, u, pThis->Udf.VolInfo.cbBlock);
     if (RT_SUCCESS(rc))
     {
-        rc = RTFsIsoMakerSetPathInfoById(pThis->hIsoMaker, idxDir, RTFSISOMAKER_NAMESPACE_UDF, &ObjInfo, 0, NULL);
+        rc = RTFsIsoMakerSetPathInfoByObj(pThis->hIsoMaker, idxDir, RTFSISOMAKER_NAMESPACE_UDF, &ObjInfo, 0, NULL);
         AssertRC(rc);
     }
     else

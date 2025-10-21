@@ -578,7 +578,7 @@ RTDECL(int) RTFsIsoMakerAddSymlink(RTFSISOMAKER hIsoMaker, const char *pszSymlin
  * The timestamps are applied to the common object information.
  *
  * @returns IPRT status code.
- * @retval  VWRN_NOT_FOUND if the path wasn't found in any of the specified
+ * @retval  VWRN_NOT_FOUND if the object wasn't found in any of the specified
  *          namespaces.
  *
  * @param   hIsoMaker           The ISO maker handler.
@@ -589,7 +589,7 @@ RTDECL(int) RTFsIsoMakerAddSymlink(RTFSISOMAKER hIsoMaker, const char *pszSymlin
  *                              filte type.
  * @param   fFlags              Reserved, MBZ.
  * @param   pcHits              Where to return number of paths found. Optional.
- * @sa      RTFsIsoMakerSetPathInfoById
+ * @sa      RTFsIsoMakerSetPathInfoByObj, RTFsIsoMakerSetPathInfoByParentObj
  */
 RTDECL(int) RTFsIsoMakerSetPathInfo(RTFSISOMAKER hIsoMaker, const char *pszPath, uint32_t fNamespaces,
                                     PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits);
@@ -604,17 +604,43 @@ RTDECL(int) RTFsIsoMakerSetPathInfo(RTFSISOMAKER hIsoMaker, const char *pszPath,
  *          namespaces.
  *
  * @param   hIsoMaker           The ISO maker handler.
- * @param   pszPath             The path which mode mask should be modified.
+ * @param   idxObj              The object configuration index of the object to
+ *                              set info for.
  * @param   fNamespaces         The namespaces to set it in.
  * @param   pObjInfo            The object info to set.  Several fields and
  *                              sub-fields will be ignore, like cbObject and
  *                              filte type.
  * @param   fFlags              Reserved, MBZ.
  * @param   pcHits              Where to return number of paths found. Optional.
- * @sa      RTFsIsoMakerSetPathInfo
+ * @sa      RTFsIsoMakerSetPathInfo, RTFsIsoMakerSetPathInfoByParentObj
  */
-RTDECL(int) RTFsIsoMakerSetPathInfoById(RTFSISOMAKER hIsoMaker, uint32_t idxObj, uint32_t fNamespaces,
-                                        PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits);
+RTDECL(int) RTFsIsoMakerSetPathInfoByObj(RTFSISOMAKER hIsoMaker, uint32_t idxObj, uint32_t fNamespaces,
+                                         PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits);
+
+/**
+ * Modifies the object info for a directory child object in one
+ * or more namespaces.
+ *
+ * The timestamps are applied to the common object information.
+ *
+ * @returns IPRT status code.
+ * @retval  VWRN_NOT_FOUND if the name wasn't found in any of the specified
+ *          namespaces.
+ *
+ * @param   hIsoMaker           The ISO maker handler.
+ * @param   idxParentObj        The object configuration index of the object to
+ *                              set info for.
+ * @param   pszChild            The name of the child to be modified.
+ * @param   fNamespaces         The namespaces to set it in.
+ * @param   pObjInfo            The object info to set.  Several fields and
+ *                              sub-fields will be ignore, like cbObject and
+ *                              filte type.
+ * @param   fFlags              Reserved, MBZ.
+ * @param   pcHits              Where to return number of paths found. Optional.
+ * @sa      RTFsIsoMakerSetPathInfo, RTFsIsoMakerSetPathInfoByObj
+ */
+RTDECL(int) RTFsIsoMakerSetPathInfoByParentObj(RTFSISOMAKER hIsoMaker, uint32_t idxParentObj, const char *pszChild,
+                                               uint32_t fNamespaces, PCRTFSOBJINFO pObjInfo, uint32_t fFlags, uint32_t *pcHits);
 
 /**
  * Modifies the mode mask for a given path in one or more namespaces.
