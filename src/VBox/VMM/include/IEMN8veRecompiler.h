@@ -3051,7 +3051,6 @@ iemNativeRegClearGstRegShadowingOne(PIEMRECOMPILERSTATE pReNative, uint8_t idxHs
 }
 
 
-#if 0 /* unused */
 /**
  * Clear any guest register shadow claim for @a enmGstReg.
  */
@@ -3065,7 +3064,6 @@ iemNativeRegClearGstRegShadowingByGstReg(PIEMRECOMPILERSTATE pReNative, IEMNATIV
         iemNativeRegClearGstRegShadowingOne(pReNative, pReNative->Core.aidxGstRegShadows[enmGstReg], enmGstReg, off);
     }
 }
-#endif
 
 
 /**

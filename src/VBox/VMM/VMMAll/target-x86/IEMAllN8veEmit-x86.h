@@ -566,6 +566,11 @@ static uint32_t iemNativeDoPostponedEFlagsInternal(PIEMRECOMPILERSTATE pReNative
                          & IEMNATIVE_HST_GREG_MASK;
     }
 
+#if defined(IEMNATIVE_WITH_DELAYED_REGISTER_WRITEBACK)
+    /* EFlags must not be dirty or we risk getting out of sync if the value is loaded from CPUM below. */
+    Assert(!(pReNative->Core.bmGstRegShadowDirty & RT_BIT_64(kIemNativeGstReg_EFlags)));
+#endif
+
     /* Use existing EFLAGS shadow if available. For the TLB-miss code path we
        need to weed out volatile registers here, as they will no longer be valid. */
     uint8_t idxRegTmp;
@@ -574,15 +579,35 @@ static uint32_t iemNativeDoPostponedEFlagsInternal(PIEMRECOMPILERSTATE pReNative
         && (!a_fTlbMiss || !(RT_BIT_32(idxRegEfl) & IEMNATIVE_CALL_VOLATILE_GREG_MASK)))
     {
         Assert(idxRegEfl < IEMNATIVE_HST_GREG_COUNT);
-        Assert(!(a_bmInputRegs & RT_BIT_32(idxRegEfl)));
-        if RT_CONSTEXPR_IF(!a_fTlbMiss) Assert(bmAvailableRegs & RT_BIT_32(idxRegEfl));
-        bmAvailableRegs &= ~RT_BIT_32(idxRegEfl);
+        if (!(a_bmInputRegs & RT_BIT_32(idxRegEfl)))
+        {
+            if RT_CONSTEXPR_IF(!a_fTlbMiss) Assert(bmAvailableRegs & RT_BIT_32(idxRegEfl));
+            bmAvailableRegs &= ~RT_BIT_32(idxRegEfl);
 # ifdef VBOX_STRICT
-        off = iemNativeEmitGuestRegValueCheckEx(pReNative, pCodeBuf, off, idxRegEfl, kIemNativeGstReg_EFlags);
+            off = iemNativeEmitGuestRegValueCheckEx(pReNative, pCodeBuf, off, idxRegEfl, kIemNativeGstReg_EFlags);
 # endif
 
-        idxRegTmp = ASMBitFirstSetU32(bmAvailableRegs) - 1;
-        bmAvailableRegs &= ~RT_BIT_32(idxRegTmp);
+            idxRegTmp = ASMBitFirstSetU32(bmAvailableRegs) - 1;
+            bmAvailableRegs &= ~RT_BIT_32(idxRegTmp);
+        }
+        else
+        {
+            /* An input register overlaps with the EFlags register shadow copy, load from CPUM. */
+            idxRegTmp = ASMBitFirstSetU32(bmAvailableRegs) - 1; /* allocate the temp register first to prioritize EAX on x86. */
+            bmAvailableRegs &= ~RT_BIT_32(idxRegTmp);
+
+            uint32_t const idxRegEflNew = ASMBitFirstSetU32(bmAvailableRegs) - 1;
+            bmAvailableRegs &= ~RT_BIT_32(idxRegEflNew);
+
+#if 0 /** @todo r=aeichner Just loading the GPR from the existing copy doesn't work for some reason as it
+       *                   triggers consistency checks below in debug builds, needs investigation. */
+            off = iemNativeEmitLoadGprFromGprEx(pCodeBuf, off, idxRegEflNew, idxRegEfl);
+#else
+            off = iemNativeEmitLoadGprWithGstRegExT<kIemNativeGstReg_EFlags>(pCodeBuf, off, idxRegEflNew);
+#endif
+            iemNativeRegClearGstRegShadowingByGstReg(pReNative, kIemNativeGstReg_EFlags, off);
+            idxRegEfl = idxRegEflNew;
+        }
     }
     else
     {
@@ -590,7 +615,7 @@ static uint32_t iemNativeDoPostponedEFlagsInternal(PIEMRECOMPILERSTATE pReNative
         bmAvailableRegs &= ~RT_BIT_32(idxRegTmp);
 
         idxRegEfl = ASMBitFirstSetU32(bmAvailableRegs) - 1;
-        bmAvailableRegs &= ~RT_BIT_32(idxRegTmp);
+        bmAvailableRegs &= ~RT_BIT_32(idxRegEfl);
         off = iemNativeEmitLoadGprWithGstRegExT<kIemNativeGstReg_EFlags>(pCodeBuf, off, idxRegEfl);
     }
     Assert(bmAvailableRegs != 0);
