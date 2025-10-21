@@ -1245,6 +1245,8 @@ static RTEXITCODE rtCmdLsProcessDirectory(PRTCMDLSOPTS pOpts, RTVFSDIR hVfsDir, 
                 pszGroup = &GroupInfo.Attr.u.UnixGroup.szName[0];
         }
 
+        /** @todo symlinks   */
+
         RTEXITCODE rcExit2 = rtCmdLsAddOne(pCollection, pDirEntry->szName, &pDirEntry->Info, pszOwner, pszGroup, NULL);
         if (rcExit2 != RTEXITCODE_SUCCESS)
             rcExit = rcExit2;

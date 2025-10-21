@@ -2262,6 +2262,9 @@ static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFF
 
 
 
+/**
+ * Worker for rtFsIsoImportUdfProcessTreeWorker() that adds a file.
+ */
 static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDDESC pFid, uint32_t idxParent,
                                           const char *pszName, RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr,
                                           uint64_t cbData, uint64_t offData)
@@ -2401,8 +2404,11 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
 }
 
 
-
-
+/**
+ * Worker for rtFsIsoImportUdfProcessTreeWorker() that adds a directory.
+ *
+ * The directory is appended to the todo-list as well.
+ */
 static int rtFsIsoImportUdfAddAndNameDirectory(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDDESC pFid, uint32_t idxParent,
                                                const char *pszName, uint8_t cDepth, PRTLISTANCHOR pTodoList)
 {
