@@ -218,6 +218,7 @@ typedef struct VBOXDXQUERY
     uint32_t                    uQueryId;
     uint32_t                    offQuery;                   /* Offset of the query in the query allocation. */
     PVBOXDXKMRESOURCE           pCOAllocation;
+    uint32_t                    EndRenderCbSequence;
     uint64_t u64Value;
     /* Result for queries in SIGNALED state. */
 } VBOXDXQUERY, *PVBOXDXQUERY;
@@ -673,6 +674,8 @@ typedef struct VBOXDX_DEVICE
     UINT                      cbCommandReserved;             /* Size of the current command. */
     UINT                      cAllocations;                  /* Number of allocation in pAllocationList. */
     UINT                      cPatchLocations;               /* Number of patch locations. */
+
+    uint32_t                  RenderCbSequence;              /* Increases with each RenderCb call. */
 
     /* Handle tables for various objects. */
     RTHANDLETABLE hHTBlendState;

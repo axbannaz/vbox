@@ -572,6 +572,8 @@ static HRESULT vboxDXDeviceRender(PVBOXDX_DEVICE pDevice)
     pDevice->cAllocations    = 0;
     pDevice->cPatchLocations = 0;
 
+    ++pDevice->RenderCbSequence;
+
     return S_OK;
 }
 
@@ -2526,6 +2528,7 @@ void vboxDXCreateQuery(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, D3D10DDI_QUE
         pQuery->svga.flags |= SVGA3D_DXQUERY_FLAG_PREDICATEHINT;
     pQuery->enmQueryState = VBOXDXQUERYSTATE_CREATED;
     pQuery->u64Value = 0;
+    pQuery->EndRenderCbSequence = 0;
 
     int rc = RTHandleTableAlloc(pDevice->hHTQuery, pQuery, &pQuery->uQueryId);
     AssertRCReturnVoidStmt(rc, vboxDXDeviceSetError(pDevice, E_OUTOFMEMORY));
@@ -2612,6 +2615,7 @@ void vboxDXQueryEnd(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery)
           );
 
     pQuery->enmQueryState = VBOXDXQUERYSTATE_ISSUED;
+    pQuery->EndRenderCbSequence = pDevice->RenderCbSequence;
 
     if (pQuery->Query == D3D10DDI_QUERY_EVENT)
     {
@@ -2769,7 +2773,8 @@ static HRESULT vboxdxQueryGetDataInternal(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY p
 
 void vboxDXQueryGetData(PVBOXDX_DEVICE pDevice, PVBOXDXQUERY pQuery, VOID* pData, UINT DataSize, UINT Flags)
 {
-    if (!RT_BOOL(Flags & D3D10_DDI_GET_DATA_DO_NOT_FLUSH))
+    if (   !RT_BOOL(Flags & D3D10_DDI_GET_DATA_DO_NOT_FLUSH)
+        && pQuery->EndRenderCbSequence == pDevice->RenderCbSequence)
         vboxDXDeviceFlushCommands(pDevice);
 
     HRESULT hr = vboxdxQueryGetDataInternal(pDevice, pQuery, pData, DataSize);
@@ -4521,6 +4526,8 @@ static HRESULT vboxDXCreateKernelContextForDevice(PVBOXDX_DEVICE pDevice)
 
         pDevice->cbCommandBuffer   = 0;
         pDevice->cbCommandReserved = 0;
+
+        pDevice->RenderCbSequence = 0;
     }
     return hr;
 }
