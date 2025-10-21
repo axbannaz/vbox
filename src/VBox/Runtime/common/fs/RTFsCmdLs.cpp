@@ -1831,10 +1831,25 @@ RTR3DECL(RTEXITCODE) RTFsCmdLs(unsigned cArgs, char **papszArgs)
                 RTPrintf("Usage: to be written\n"
                          "Options dump:\n");
                 for (unsigned i = 0; i < RT_ELEMENTS(s_aOptions); i++)
-                    if (s_aOptions[i].iShort < 127 && s_aOptions[i].iShort >= 0x20)
-                        RTPrintf(" -%c,%s\n", s_aOptions[i].iShort, s_aOptions[i].pszLong);
+                {
+                    if (strcmp(s_aOptions[i].pszLong, "--time") == 0)
+                        RTPrintf(" %s <btime|birth|ctime|status|mtime|write|modify|atime|access|use>\n", s_aOptions[i].pszLong);
                     else
-                        RTPrintf(" %s\n", s_aOptions[i].pszLong);
+                    {
+                        if (s_aOptions[i].iShort < 127 && s_aOptions[i].iShort >= 0x20)
+                            RTPrintf(" -%c,%s", s_aOptions[i].iShort, s_aOptions[i].pszLong);
+                        else
+                            RTPrintf(" %s", s_aOptions[i].pszLong);
+                        if (s_aOptions[i].fFlags & RTGETOPT_REQ_UINT32)
+                            RTPrintf(" <u32>\n");
+                        else if (s_aOptions[i].fFlags & RTGETOPT_REQ_STRING)
+                            RTPrintf(" <string>\n");
+                        else if (s_aOptions[i].fFlags != RTGETOPT_REQ_NOTHING)
+                            RTPrintf(" <value>\n");
+                        else
+                            RTPrintf("\n");
+                    }
+                }
 #ifdef RT_OS_WINDOWS
                 const char *pszProgNm = RTPathFilename(papszArgs[0]);
                 RTPrintf("\n"

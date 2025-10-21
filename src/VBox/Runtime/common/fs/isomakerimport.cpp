@@ -2164,13 +2164,17 @@ typedef RTFSISOMKIMPUDFDIR *PRTFSISOMKIMPUDFDIR;
 typedef union RTFSISOMKIMPUDFFILENTRYPTRUNION
 {
     void               *pv;
+    uint8_t            *pb;
     PCUDFFILEENTRY      pFileEntry;
     PCUDFEXFILEENTRY    pExFileEntry;
 } RTFSISOMKIMPUDFFILENTRYPTRUNION;
 
 
+/**
+ * Helper for getting FS object info from the file ID and file entry structures.
+ */
 static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFFILEIDDESC pFid,
-                                                   RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr)
+                                                   RTFSISOMKIMPUDFFILENTRYPTRUNION uPtr, uint32_t cbBlock)
 {
     AssertCompileMembersAtSameOffset(UDFFILEENTRY, cbData, UDFEXFILEENTRY, cbData);
     pObjInfo->cbObject    = uPtr.pFileEntry->cbData;
@@ -2181,21 +2185,6 @@ static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFF
     int rc = RTFsUdfHlpIcbStuffToFileMode(uPtr.pFileEntry->IcbTag.fFlags, uPtr.pFileEntry->IcbTag.bFileType,
                                           uPtr.pFileEntry->fPermissions, &pObjInfo->Attr.fMode);
     AssertRCReturn(rc, rc);
-
-    if (uPtr.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
-    {
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pFileEntry->AccessTime);
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pFileEntry->ModificationTime);
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pFileEntry->ChangeTime);
-        RTTimeSpecSetNano(&pObjInfo->BirthTime, 0);
-    }
-    else
-    {
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pExFileEntry->AccessTime);
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pExFileEntry->ModificationTime);
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pExFileEntry->ChangeTime);
-        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->BirthTime,        &uPtr.pExFileEntry->BirthTime);
-    }
 
     pObjInfo->Attr.enmAdditional        = RTFSOBJATTRADD_UNIX;
     AssertCompileMembersAtSameOffset(UDFFILEENTRY, gid,       UDFEXFILEENTRY, gid);
@@ -2209,7 +2198,64 @@ static int rtFsIsoImportUdfFileIdAndEntryToObjInfo(PRTFSOBJINFO pObjInfo, PCUDFF
     pObjInfo->Attr.u.Unix.GenerationId  = pFid->uVersion;
     pObjInfo->Attr.u.Unix.Device        = 0;
 
-    /** @todo extra more info from extattribs   */
+    uint32_t cbExtAttribs;
+    uint32_t offExtAttribs;
+    if (uPtr.pFileEntry->Tag.idTag == UDF_TAG_ID_FILE_ENTRY)
+    {
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pFileEntry->AccessTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pFileEntry->ModificationTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pFileEntry->ChangeTime);
+        RTTimeSpecSetNano(&pObjInfo->BirthTime, 0);
+        cbExtAttribs  = uPtr.pFileEntry->cbExtAttribs;
+        offExtAttribs = RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs);
+    }
+    else
+    {
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->AccessTime,       &uPtr.pExFileEntry->AccessTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ModificationTime, &uPtr.pExFileEntry->ModificationTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->ChangeTime,       &uPtr.pExFileEntry->ChangeTime);
+        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->BirthTime,        &uPtr.pExFileEntry->BirthTime);
+        cbExtAttribs  = uPtr.pExFileEntry->cbExtAttribs;
+        offExtAttribs = RT_UOFFSETOF(UDFEXFILEENTRY, abExtAttribs);
+    }
+
+    /* Extended attributs. */
+    PCUDFEXTATTRIBHDRDESC const pHdr = (PCUDFEXTATTRIBHDRDESC)&uPtr.pb[offExtAttribs];
+    if (cbExtAttribs > sizeof(UDFEXTATTRIBHDRDESC) + RT_UOFFSETOF(UDFGEA, u))
+    {
+        cbExtAttribs = RT_MIN(cbExtAttribs, cbBlock - offExtAttribs);
+        rc = RTFsUdfHlpValidateDescTagAndCrc(&pHdr->Tag, cbExtAttribs, UDF_TAG_ID_EXTENDED_ATTRIB_HDR_DESC,
+                                             uPtr.pFileEntry->Tag.offTag, NULL);
+        if (RT_SUCCESS(rc))
+        {
+            /** @todo deal with multiple attributes (assuming that's possible)... */
+            PCUDFGEA const pGenEA = (PCUDFGEA)(pHdr + 1);
+            size_t const cbMaxEA  = cbExtAttribs - RT_UOFFSETOF(UDFGEA, u);
+            size_t const cbEA     = RT_MIN(RT_MAX(pGenEA->cbAttrib, RT_UOFFSETOF(UDFGEA, u)) - RT_UOFFSETOF(UDFGEA, u), cbMaxEA);
+            switch (pGenEA->uAttribType)
+            {
+                case UDFEADATAFILETIMES_ATTRIB_TYPE:
+                    if (   cbEA >= RT_UOFFSETOF(UDFEADATAFILETIMES, aTimestamps) + sizeof(UDFTIMESTAMP)
+                        && (pGenEA->u.FileTimes.fFlags & UDF_FILE_TIMES_EA_F_BIRTH)
+                        && pGenEA->u.FileTimes.cbTimestamps >= sizeof(UDFTIMESTAMP) )
+                        RTFsUdfHlpTimestamp2TimeSpec(&pObjInfo->BirthTime, &pGenEA->u.FileTimes.aTimestamps[0]);
+                    break;
+                case UDFEADATADEVICESPEC_ATTRIB_TYPE:
+                    if (cbEA >= RT_UOFFSETOF(UDFEADATADEVICESPEC, abImplementationUse))
+                    {
+                        if (   pGenEA->u.DeviceSpec.uMajorDeviceNo > UINT32_MAX
+                            || pGenEA->u.DeviceSpec.uMinorDeviceNo > UINT32_MAX)
+                            pObjInfo->Attr.u.Unix.Device = ~(RTDEV)0;
+                        else
+                            pObjInfo->Attr.u.Unix.Device = RTDEV_MAKE(pGenEA->u.DeviceSpec.uMajorDeviceNo,
+                                                                      pGenEA->u.DeviceSpec.uMinorDeviceNo);
+                    }
+                    break;
+            }
+        }
+        else
+            LogRelMax(45, ("rtFsIsoImportUdfFileIdAndEntryToObjInfo: Warning! Bad ExtAttrib tag/crc: %Rrc\n", rc));
+    }
 
     return VINF_SUCCESS;
 }
@@ -2226,7 +2272,7 @@ static int rtFsIsoImportUdfAddAndNameFile(PRTFSISOMKIMPORTER pThis, PCUDFFILEIDD
      * Convert the FID and file entry data to object info.
      */
     RTFSOBJINFO ObjInfo;
-    int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid, uPtr);
+    int rc = rtFsIsoImportUdfFileIdAndEntryToObjInfo(&ObjInfo, pFid, uPtr, pThis->Udf.VolInfo.cbBlock);
     if (RT_FAILURE(rc))
         return rtFsIsoImpError(pThis, rc, "rtFsIsoImportUdfFileIdAndEntryToObjInfo failed for '%s': %Rrc", pszName, rc);
 

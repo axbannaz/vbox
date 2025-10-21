@@ -47,7 +47,6 @@
 #include <iprt/asm-mem.h>
 #include <iprt/assert.h>
 #include <iprt/err.h>
-#include <iprt/crc.h>
 #include <iprt/critsect.h>
 #include <iprt/ctype.h>
 #include <iprt/file.h>
@@ -798,7 +797,34 @@ static DECLCALLBACK(int) rtFsIsoCore_InitFromUdfIcbFileEntry(PCRTFSUDFVOLINFO pV
         pCore->BirthTime = pCore->ChangeTime;
     if (RTTimeSpecCompare(&pCore->BirthTime, &pCore->AccessTime) > 0)
         pCore->BirthTime = pCore->AccessTime;
-    /** @todo look for the birth time in the extended attributes (FileTimes). */
+
+    /* Look for birth time in the extended attributs. */
+    PCUDFEXTATTRIBHDRDESC const pHdr = (PCUDFEXTATTRIBHDRDESC)pFileEntry->abExtAttribs;
+    if (pFileEntry->cbExtAttribs > sizeof(UDFEXTATTRIBHDRDESC) + RT_UOFFSETOF(UDFGEA, u))
+    {
+        uint32_t const cbExtAttribs = RT_MIN(pFileEntry->cbExtAttribs,
+                                             pVolInfo->cbBlock - RT_UOFFSETOF(UDFFILEENTRY, abExtAttribs));
+        int rc = RTFsUdfHlpValidateDescTagAndCrc(&pHdr->Tag, cbExtAttribs, UDF_TAG_ID_EXTENDED_ATTRIB_HDR_DESC,
+                                                 pFileEntry->Tag.offTag, NULL);
+        if (RT_SUCCESS(rc))
+        {
+            /** @todo deal with multiple attributes (assuming that's possible)... */
+            PCUDFGEA const pGenEA = (PCUDFGEA)(pHdr + 1);
+            size_t const cbMaxEA  = cbExtAttribs - RT_UOFFSETOF(UDFGEA, u);
+            size_t const cbEA     = RT_MIN(RT_MAX(pGenEA->cbAttrib, RT_UOFFSETOF(UDFGEA, u)) - RT_UOFFSETOF(UDFGEA, u), cbMaxEA);
+            switch (pGenEA->uAttribType)
+            {
+                case UDFEADATAFILETIMES_ATTRIB_TYPE:
+                    if (   cbEA >= RT_UOFFSETOF(UDFEADATAFILETIMES, aTimestamps) + sizeof(UDFTIMESTAMP)
+                        && (pGenEA->u.FileTimes.fFlags & UDF_FILE_TIMES_EA_F_BIRTH)
+                        && pGenEA->u.FileTimes.cbTimestamps >= sizeof(UDFTIMESTAMP) )
+                        RTFsUdfHlpTimestamp2TimeSpec(&pCore->BirthTime, &pGenEA->u.FileTimes.aTimestamps[0]);
+                    break;
+            }
+        }
+        else
+            LogRelMax(45, ("rtFsIsoCore_InitFromUdfIcbFileEntry: Warning! Bad ExtAttrib tag/crc: %Rrc\n", rc));
+    }
 
     /*
      * Convert the file mode.
