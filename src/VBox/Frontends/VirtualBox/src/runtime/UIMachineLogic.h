@@ -381,6 +381,8 @@ private:
     /** Resets the machine. If @p fShowConfirmation is true then a confirmation messag box is shown first. */
     void reset(bool fShowConfirmation);
 
+    void checkUnattendedLeftOvers();
+
     /* Private variables: */
     UIMachine *m_pMachine;
     UIKeyboardHandler *m_pKeyboardHandler;

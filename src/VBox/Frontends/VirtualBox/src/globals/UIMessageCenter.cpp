@@ -1432,6 +1432,20 @@ bool UIMessageCenter::confirmVisoDiscard(QWidget *pParent /* = 0*/) const
                           false /* ok button by default? */);
 }
 
+int UIMessageCenter::confirmUnattendedFilesRemoval(QWidget *pParent /*= 0 */) const
+{
+    QString strText("There are still files left over from unattended guest OS install in VM folder. Do you want to delete those?");
+    QString strOption("Don't ask again");
+
+    return messageWithOption(pParent, MessageType_Question,
+                             strText, strOption,
+                             false /* default option value */,
+                             AlertButton_Ok,
+                             AlertButton_Cancel | AlertButtonOption_Default | AlertButtonOption_Escape,
+                             0,
+                             tr("Delete"));
+}
+
 bool UIMessageCenter::confirmCloudNetworkRemoval(const QString &strName, QWidget *pParent /* = 0*/) const
 {
     return questionBinary(pParent, MessageType_Question,
