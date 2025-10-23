@@ -270,6 +270,18 @@ static const char *g_apszSupNtVpAllowedVmExes[] =
     "tstRTR0TimerDriver.exe",
     "tstSSM.exe",
     "tstInt.exe",
+#ifdef VBOX_WITH_MINIMAL_HARDENING /* (These testcases are disabled in regular hardened builds.) */
+    "tstContiguous.exe",
+    "tstGetPagingMode.exe",
+    "tstInit.exe",
+    "tstLow.exe",
+    "tstPage.exe",
+    "tstPin.exe",
+    "tstSupLoadModule.exe",
+    "tstSupSem.exe",
+    "tstSupSem-Zombie.exe",
+    "tstSupTscDelta.exe",
+#endif
 };
 
 /** Pointer to NtQueryVirtualMemory.  Initialized by SUPDrv-win.cpp in
