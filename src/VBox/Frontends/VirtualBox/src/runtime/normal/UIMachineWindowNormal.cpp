@@ -299,7 +299,11 @@ void UIMachineWindowNormal::loadSettings()
             m_pIndicatorsPool->setAutoUpdateIndicatorStates(statusBar()->isVisible() && uimachine()->isRunning());
     }
 
-#ifndef VBOX_GUI_WITH_CUSTOMIZATIONS1
+#ifdef VBOX_GUI_WITH_CUSTOMIZATIONS1
+    /* Just configure the window geometry for the 1st time,
+     * required to make Qt windows work on tiling window managers. */
+    UIDesktopWidgetWatchdog::setTopLevelGeometry(this, m_geometry);
+#else
     /* Load window geometry: */
     {
         /* Load extra-data: */
