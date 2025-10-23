@@ -379,8 +379,9 @@ void UIMachineWindowFullscreen::placeOnScreen()
 
     /* Map window onto required screen: */
     windowHandle()->setScreen(qApp->screens().at(iHostScreen));
-    /* Set appropriate window size: */
+    /* Set appropriate window position&size: */
     resize(workingArea.size());
+    move(workingArea.topLeft());
 
 #elif defined(VBOX_WS_NIX)
 
@@ -458,11 +459,17 @@ void UIMachineWindowFullscreen::showInNecessaryMode()
         if (fWasMinimized)
             setWindowState(Qt::WindowNoState);
 
+        /* Exit full-screen if necessary: */
+        if (isFullScreen())
+            showNormal();
+
         /* Make sure window have appropriate geometry: */
         placeOnScreen();
 
-        /* Show window: */
-        showFullScreen();
+        /* First of all show window in normal mode
+         * then request full-screen mode async way: */
+        showNormal();
+        QTimer::singleShot(0, this, SLOT(showFullScreen()));
 
         /* Restore minimized state if necessary: */
         if (m_fWasMinimized || fWasMinimized)
